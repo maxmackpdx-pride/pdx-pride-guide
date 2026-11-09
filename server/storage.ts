@@ -3489,6 +3489,194 @@ function insertEventDeletionRecords(
   }
 }
 
+export type EventChangeOperation = "create" | "update" | "hide";
+
+export interface EventMutationContext {
+  /** Identifiable writer: "admin:<username>", "trusted-sync", "poster-mirror", ... */
+  actor?: string;
+  /** Short human-readable note stored on the feed record. */
+  reason?: string;
+  /** Set false when the caller writes its own change-log row (event-research API). */
+  changeFeed?: boolean;
+}
+
+const EVENT_CHANGE_IGNORED_FIELDS = new Set(["updatedAt", "lastChangeAt"]);
+
+function eventChangeValuesEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  const left = a === undefined ? null : a;
+  const right = b === undefined ? null : b;
+  if (left === right) return true;
+  if (left == null || right == null) return false;
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+/**
+ * Insert one row into agent_event_change_log, the same table the deletion
+ * records and the QSearch mutation path write, and the one the admin changes
+ * feed (GET /api/admin/event-research/changes) reads. Failure semantics match
+ * the deletion tracking: the record is written after the mutation completes,
+ * and a recording failure is logged, never thrown — the feed is observability
+ * and must not be able to take a write down with it.
+ */
+export function recordEventChange(input: {
+  operation: EventChangeOperation | "delete";
+  eventId: number;
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
+  patch: Record<string, unknown>;
+  actor: string;
+  reason: string;
+}): boolean {
+  try {
+    ensureEventChangeLogTable();
+    sqlite.prepare(`
+      INSERT INTO agent_event_change_log (
+        rollback_token, operation, event_id, before_json, after_json,
+        patch_json, evidence_receipts_json, reason, actor, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, '[]', ?, ?, ?)
+    `).run(
+      randomUUID(),
+      input.operation,
+      input.eventId,
+      input.before ? JSON.stringify(input.before) : null,
+      // after_json is NOT NULL in the shared DDL; deletes and hides of a
+      // vanished row fall back to the before snapshot, as deletion records do.
+      JSON.stringify(input.after ?? input.before ?? {}),
+      JSON.stringify(input.patch),
+      input.reason,
+      input.actor,
+      new Date().toISOString(),
+    );
+    return true;
+  } catch (error) {
+    console.error(
+      `[event-change-feed] failed to record ${input.operation} for event ${input.eventId} (${input.actor}):`,
+      error,
+    );
+    return false;
+  }
+}
+
+/**
+ * Diff-based mutation recorder for the storage write paths. Snapshots the
+ * event row before and after a write and records only the fields that
+ * actually changed, so layered calls (an approval flow that also assigns a
+ * host, a no-op save) never produce duplicate or empty feed entries.
+ */
+export function recordEventMutation(input: {
+  operation?: EventChangeOperation;
+  eventId: number;
+  before: Record<string, unknown> | null | undefined;
+  after: Record<string, unknown> | null | undefined;
+  actor: string;
+  reason: string;
+}): boolean {
+  const { before, after } = input;
+  // A create/update that produced no row did not happen; deletion records
+  // are written by insertEventDeletionRecords, not here.
+  if (!after) return false;
+  const patch: Record<string, unknown> = {};
+  const beforeSnap: Record<string, unknown> = { id: before?.id ?? input.eventId };
+  const afterSnap: Record<string, unknown> = { id: after.id ?? input.eventId };
+  const keys = new Set<string>([
+    ...Object.keys(before ?? {}),
+    ...Object.keys(after),
+  ]);
+  for (const key of keys) {
+    if (EVENT_CHANGE_IGNORED_FIELDS.has(key)) continue;
+    const b = before?.[key];
+    const a = after[key];
+    if (eventChangeValuesEqual(b, a)) continue;
+    patch[key] = a === undefined ? null : a;
+    beforeSnap[key] = b === undefined ? null : b;
+    afterSnap[key] = a === undefined ? null : a;
+  }
+  if (before && !Object.keys(patch).length) return false;
+  const operation =
+    input.operation ??
+    (before &&
+    String(after.status ?? "").toUpperCase() === "HIDDEN" &&
+    String(before.status ?? "").toUpperCase() !== "HIDDEN"
+      ? "hide"
+      : before
+        ? "update"
+        : "create");
+  return recordEventChange({
+    operation,
+    eventId: input.eventId,
+    before: before ? beforeSnap : null,
+    after: afterSnap,
+    // A create has no field-level "before"; store the set fields as the patch,
+    // matching the shape recordEventResearchChange writes for creates.
+    patch: before ? patch : Object.fromEntries(Object.entries(afterSnap).filter(([key]) => key !== "id")),
+    actor: input.actor,
+    reason: input.reason,
+  });
+}
+
+function snapshotAllEventsForChangeDiff(): Map<number, string> {
+  // Drizzle rows, so snapshot keys stay camelCase like every other feed row.
+  const rows = db.select().from(events).all() as Array<Record<string, unknown>>;
+  const map = new Map<number, string>();
+  for (const row of rows) map.set(Number(row.id), JSON.stringify(row));
+  return map;
+}
+
+/**
+ * Boot-sequence coverage: seeders and one-shot migrations inside
+ * runBootMigrationsOnce write events with raw SQL, bypassing the storage
+ * funnel. Diffing the events table around each phase attributes whatever a
+ * phase actually created or edited. Deletes are skipped — hard deletes
+ * already write their own records via insertEventDeletionRecords.
+ */
+function recordEventChangesSinceSnapshot(
+  before: Map<number, string>,
+  phase: { actor: string; reason: string },
+) {
+  try {
+    const after = snapshotAllEventsForChangeDiff();
+    for (const [id, afterJson] of after) {
+      const beforeJson = before.get(id);
+      const afterRow = JSON.parse(afterJson) as Record<string, unknown>;
+      if (!beforeJson) {
+        recordEventMutation({
+          operation: "create",
+          eventId: id,
+          before: null,
+          after: afterRow,
+          actor: phase.actor,
+          reason: phase.reason,
+        });
+      } else if (beforeJson !== afterJson) {
+        recordEventMutation({
+          eventId: id,
+          before: JSON.parse(beforeJson) as Record<string, unknown>,
+          after: afterRow,
+          actor: phase.actor,
+          reason: phase.reason,
+        });
+      }
+    }
+  } catch (error) {
+    console.error(`[event-change-feed] boot diff failed for ${phase.actor}:`, error);
+  }
+}
+
+export function recordBootPhaseEventChanges(
+  phase: { actor: string; reason: string },
+  run: () => void,
+) {
+  let before: Map<number, string> | null = null;
+  try {
+    before = snapshotAllEventsForChangeDiff();
+  } catch (error) {
+    console.error(`[event-change-feed] boot snapshot failed for ${phase.actor}:`, error);
+  }
+  run();
+  if (before) recordEventChangesSinceSnapshot(before, phase);
+}
+
 type EventDeletionContext = { actor: string; reason: string };
 
 const UNLABELED_DELETION: EventDeletionContext = {
@@ -4004,7 +4192,19 @@ function seedHousingDemoPosts() {
 
 function runBootMigrationsOnce() {
   ensureBootMigrationsTable();
-  seedData();
+  recordBootPhaseEventChanges(
+    { actor: "boot-seed", reason: "Boot seed data (seedData)" },
+    () => seedData(),
+  );
+  // Everything between here and the dated seeders below is one-shot boot
+  // migrations writing events with raw SQL; diff the span so any of them that
+  // ever runs again is attributed instead of silent.
+  let bootMigrationSnapshot: Map<number, string> | null = null;
+  try {
+    bootMigrationSnapshot = snapshotAllEventsForChangeDiff();
+  } catch (error) {
+    console.error("[event-change-feed] boot migration snapshot failed:", error);
+  }
   migrateGuideAdminMessagesOnce();
   if (!hasBootMigration("seed_ads_v1")) {
     seedAdsIfNeeded(sqlite);
@@ -8323,18 +8523,43 @@ function runBootMigrationsOnce() {
     recordBootMigration("eagle_portland_instagram_2026_09_v1");
   }
 
+  if (bootMigrationSnapshot) {
+    recordEventChangesSinceSnapshot(bootMigrationSnapshot, {
+      actor: "boot-migration",
+      reason: "Boot migrations (runBootMigrationsOnce)",
+    });
+  }
+
   // Retired by Tucker: do not recreate the October 31 Pink Ponies listing.
-  seedApprovedEvents20260928(sqlite);
-  seedHawksThroughApril2027(sqlite);
-  seedHawksReviewedTimes20260928(sqlite);
-  seedDiscoveredQueerEvents20260928(sqlite);
-  seedPosterAudit20260928(sqlite);
+  recordBootPhaseEventChanges(
+    { actor: "seed:approved-events-20260928", reason: "Boot seeder: approved events 2026-09-28" },
+    () => seedApprovedEvents20260928(sqlite),
+  );
+  recordBootPhaseEventChanges(
+    { actor: "seed:hawks-through-april-2027", reason: "Boot seeder: Hawks through April 2027" },
+    () => seedHawksThroughApril2027(sqlite),
+  );
+  recordBootPhaseEventChanges(
+    { actor: "seed:hawks-reviewed-times-20260928", reason: "Boot seeder: Hawks reviewed times 2026-09-28 (incl. Locker Room special correction)" },
+    () => seedHawksReviewedTimes20260928(sqlite),
+  );
+  recordBootPhaseEventChanges(
+    { actor: "seed:discovered-queer-events-20260928", reason: "Boot seeder: discovered queer events 2026-09-28" },
+    () => seedDiscoveredQueerEvents20260928(sqlite),
+  );
+  recordBootPhaseEventChanges(
+    { actor: "seed:poster-audit-20260928", reason: "Boot seeder: poster audit 2026-09-28" },
+    () => seedPosterAudit20260928(sqlite),
+  );
   // Flyer rules (Oct 2026): generated day posters are retired. A stored stand-in path
   // means "no flyer", so clear it; cards draw the day motif instead. Real flyers untouched.
-  {
-    const cleared = sqlite.prepare("UPDATE events SET poster_image_url = NULL WHERE poster_image_url LIKE '/placeholders/event-%'").run().changes;
-    if (cleared) console.info(`[boot] retired day posters: cleared ${cleared} stand-in flyer paths`);
-  }
+  recordBootPhaseEventChanges(
+    { actor: "boot:retire-day-posters", reason: "Boot cleanup: cleared stand-in day-poster paths" },
+    () => {
+      const cleared = sqlite.prepare("UPDATE events SET poster_image_url = NULL WHERE poster_image_url LIKE '/placeholders/event-%'").run().changes;
+      if (cleared) console.info(`[boot] retired day posters: cleared ${cleared} stand-in flyer paths`);
+    },
+  );
 }
 
 function parseEnvAdminLists() {
@@ -9746,10 +9971,10 @@ export interface IStorage {
   countEventsBySource(source: string, status?: string): number;
   getEvent(id: number): Event | undefined;
   getPendingClaimEventIds(): number[];
-  createEvent(data: InsertEvent): Event;
-  updateEventStatus(id: number, status: string): void;
-  updateEvent(id: number, data: Partial<InsertEvent>, opts?: { source?: "sync" | "human" }): Event | undefined;
-  toggleClaimable(id: number, isClaimable: boolean): void;
+  createEvent(data: InsertEvent, opts?: EventMutationContext): Event;
+  updateEventStatus(id: number, status: string, opts?: EventMutationContext): void;
+  updateEvent(id: number, data: Partial<InsertEvent>, opts?: { source?: "sync" | "human" } & EventMutationContext): Event | undefined;
+  toggleClaimable(id: number, isClaimable: boolean, opts?: EventMutationContext): void;
   // Submissions
   getSubmissions(status?: string): Submission[];
   getSubmission(id: number): Submission | undefined;
@@ -10328,11 +10553,11 @@ export const storage: IStorage = {
       WHERE type = 'CLAIM' AND status = 'PENDING' AND event_id IS NOT NULL
     `).all().map((row: any) => Number(row.eventId));
   },
-  createEvent(data) {
+  createEvent(data, opts) {
     // Footgun guard: never inherit a silent LIVE default. Callers that want public
     // must pass status: "LIVE" explicitly (admin seed, approve flows, etc.).
     const now = new Date().toISOString();
-    return db
+    const created = db
       .insert(events)
       .values({
         ...data,
@@ -10342,14 +10567,40 @@ export const storage: IStorage = {
       })
       .returning()
       .get();
+    if (created && opts?.changeFeed !== false) {
+      recordEventMutation({
+        operation: "create",
+        eventId: created.id,
+        before: null,
+        after: created as Record<string, unknown>,
+        actor: opts?.actor ?? "storage",
+        reason: opts?.reason ?? "Event created via storage.createEvent",
+      });
+    }
+    return created;
   },
-  updateEventStatus(id, status) {
+  updateEventStatus(id, status, opts) {
+    const before = opts?.changeFeed === false
+      ? undefined
+      : (db.select().from(events).where(eq(events.id, id)).get() as Record<string, unknown> | undefined);
     db.update(events)
       .set({ status, updatedAt: new Date().toISOString() })
       .where(eq(events.id, id))
       .run();
+    if (before) {
+      recordEventMutation({
+        eventId: id,
+        before,
+        after: db.select().from(events).where(eq(events.id, id)).get() as Record<string, unknown> | undefined,
+        actor: opts?.actor ?? "storage",
+        reason: opts?.reason ?? `Event status set to ${status} via storage.updateEventStatus`,
+      });
+    }
   },
   updateEvent(id, data, opts) {
+    const feedBefore = opts?.changeFeed === false
+      ? undefined
+      : (db.select().from(events).where(eq(events.id, id)).get() as Record<string, unknown> | undefined);
     const { updatedAt: _ignore, createdAt: _c, ...rest } = data as Partial<InsertEvent> & {
       updatedAt?: string;
       createdAt?: string;
@@ -10399,10 +10650,32 @@ export const storage: IStorage = {
       .set({ ...patch, updatedAt: new Date().toISOString() } as any)
       .where(eq(events.id, id))
       .run();
-    return db.select().from(events).where(eq(events.id, id)).get();
+    const updated = db.select().from(events).where(eq(events.id, id)).get();
+    if (feedBefore && updated) {
+      recordEventMutation({
+        eventId: id,
+        before: feedBefore,
+        after: updated as Record<string, unknown>,
+        actor: opts?.actor ?? "storage",
+        reason: opts?.reason ?? "Event edited via storage.updateEvent",
+      });
+    }
+    return updated;
   },
-  toggleClaimable(id, isClaimable) {
+  toggleClaimable(id, isClaimable, opts) {
+    const before = opts?.changeFeed === false
+      ? undefined
+      : (db.select().from(events).where(eq(events.id, id)).get() as Record<string, unknown> | undefined);
     db.update(events).set({ isClaimable }).where(eq(events.id, id)).run();
+    if (before) {
+      recordEventMutation({
+        eventId: id,
+        before,
+        after: db.select().from(events).where(eq(events.id, id)).get() as Record<string, unknown> | undefined,
+        actor: opts?.actor ?? "storage",
+        reason: opts?.reason ?? `Event claimable ${isClaimable ? "enabled" : "disabled"} via storage.toggleClaimable`,
+      });
+    }
   },
   getSubmissions(status) {
     const rows = db.select().from(submissions).all();
@@ -11126,11 +11399,21 @@ export const storage: IStorage = {
       approvals: JSON.stringify([claimedByUsername]),
       adminNotes: `Auto-approved: @${claimedByUsername} is a verified promoter, no manual review required.`,
     }).where(eq(submissions.id, id)).run();
+    const claimBefore = db.select().from(events).where(eq(events.id, sub.eventId)).get() as Record<string, unknown> | undefined;
     db.update(events).set({
       isClaimable: false,
       claimedBy: claimedByUsername,
       adminNotes: null,
     }).where(eq(events.id, sub.eventId)).run();
+    if (claimBefore) {
+      recordEventMutation({
+        eventId: sub.eventId,
+        before: claimBefore,
+        after: db.select().from(events).where(eq(events.id, sub.eventId)).get() as Record<string, unknown> | undefined,
+        actor: "submission-auto-approve",
+        reason: "Claim auto-approved for a verified promoter",
+      });
+    }
     const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
     if (submitter) {
       if (submitter.promoterStatus !== "approved") {
@@ -11167,6 +11450,16 @@ export const storage: IStorage = {
       createdAt: nowIso,
       updatedAt: nowIso,
     }).returning().get();
+    if (created) {
+      recordEventMutation({
+        operation: "create",
+        eventId: created.id,
+        before: null,
+        after: created as Record<string, unknown>,
+        actor: "submission-auto-approve",
+        reason: "New-event submission auto-approved for a verified promoter",
+      });
+    }
     const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
     if (created && submitter) {
       if (submitter.promoterStatus === "pending") {
@@ -11195,12 +11488,22 @@ export const storage: IStorage = {
         // Standalone promoter application - approve user, no event created
         if (submitter) db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
       } else if (sub.type === "CLAIM" && sub.eventId) {
+        const claimBefore = db.select().from(events).where(eq(events.id, sub.eventId)).get() as Record<string, unknown> | undefined;
         db.update(events).set({
           isClaimable: false,
           claimedBy: submitter?.username || sub.submitterEmail,
           adminNotes: null,
           updatedAt: new Date().toISOString(),
         }).where(eq(events.id, sub.eventId)).run();
+        if (claimBefore) {
+          recordEventMutation({
+            eventId: sub.eventId,
+            before: claimBefore,
+            after: db.select().from(events).where(eq(events.id, sub.eventId)).get() as Record<string, unknown> | undefined,
+            actor: `admin:${adminName}`,
+            reason: "Claim submission approved",
+          });
+        }
         if (submitter) {
           db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
           storage.setPrimaryEventHost(sub.eventId, submitter.id, null);
@@ -11215,7 +11518,7 @@ export const storage: IStorage = {
         }, directoryRows);
         // Community tip - goes live as unclaimed (anyone can claim it later)
         const tipNow = new Date().toISOString();
-        db.insert(events).values({
+        const tipCreated = db.insert(events).values({
           title: sub.title, description: sub.description,
           venueName: sub.venueName, address: sub.address,
           neighborhood: sub.neighborhood, lat: coords.lat, lng: coords.lng,
@@ -11230,7 +11533,17 @@ export const storage: IStorage = {
           submittedBy: sub.submitterEmail, adminNotes: null,
           createdAt: tipNow,
           updatedAt: tipNow,
-        }).run();
+        }).returning().get();
+        if (tipCreated) {
+          recordEventMutation({
+            operation: "create",
+            eventId: tipCreated.id,
+            before: null,
+            after: tipCreated as Record<string, unknown>,
+            actor: `admin:${adminName}`,
+            reason: "Community tip (SUGGEST) submission approved",
+          });
+        }
       } else {
         const directoryRows = db.select().from(businesses).all().filter(b => b.active);
         const coords = mergeMapCoordinates({
@@ -11257,6 +11570,16 @@ export const storage: IStorage = {
           createdAt: newNow,
           updatedAt: newNow,
         }).returning().get();
+        if (created) {
+          recordEventMutation({
+            operation: "create",
+            eventId: created.id,
+            before: null,
+            after: created as Record<string, unknown>,
+            actor: `admin:${adminName}`,
+            reason: "New-event submission approved",
+          });
+        }
         if (submitter) {
           if (submitter.promoterStatus === "pending") {
             db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
@@ -11301,6 +11624,13 @@ export const storage: IStorage = {
       submittedBy: existing.submittedBy || sub.submitterEmail,
       adminNotes: existing.adminNotes,
     } as any).where(eq(events.id, eventId)).run();
+    recordEventMutation({
+      eventId,
+      before: existing as Record<string, unknown>,
+      after: db.select().from(events).where(eq(events.id, eventId)).get() as Record<string, unknown> | undefined,
+      actor: `admin:${adminName}`,
+      reason: "Submission merged into existing event",
+    });
 
     db.update(submissions).set({
       status: "APPROVED",
@@ -12251,7 +12581,17 @@ export const storage: IStorage = {
     if (!req) return;
     if (status === "APPROVED") {
       if (req.type === "REMOVE") {
+        const removeBefore = db.select().from(events).where(eq(events.id, req.eventId)).get() as Record<string, unknown> | undefined;
         db.update(events).set({ status: "REMOVED" }).where(eq(events.id, req.eventId)).run();
+        if (removeBefore) {
+          recordEventMutation({
+            eventId: req.eventId,
+            before: removeBefore,
+            after: db.select().from(events).where(eq(events.id, req.eventId)).get() as Record<string, unknown> | undefined,
+            actor: "moderation",
+            reason: "Removal request approved",
+          });
+        }
       }
       if (req.type === "TRANSFER") {
         const target = String(req.proof || "").split(", ")[0].trim();
@@ -12266,6 +12606,13 @@ export const storage: IStorage = {
           db.update(events).set({
             adminNotes: [evt.adminNotes, `FLAG: ${req.proof}`].filter(Boolean).join(" | ").slice(0, 500),
           }).where(eq(events.id, req.eventId)).run();
+          recordEventMutation({
+            eventId: req.eventId,
+            before: evt as Record<string, unknown>,
+            after: db.select().from(events).where(eq(events.id, req.eventId)).get() as Record<string, unknown> | undefined,
+            actor: "moderation",
+            reason: "Flag request approved: flag note appended",
+          });
         }
       }
       if (req.type === "CLAIM") {
@@ -12277,6 +12624,13 @@ export const storage: IStorage = {
             claimedBy: user.username || req.requesterEmail,
             adminNotes: null,
           }).where(eq(events.id, req.eventId)).run();
+          recordEventMutation({
+            eventId: req.eventId,
+            before: evt as Record<string, unknown>,
+            after: db.select().from(events).where(eq(events.id, req.eventId)).get() as Record<string, unknown> | undefined,
+            actor: "moderation",
+            reason: "Claim request approved",
+          });
           storage.setPrimaryEventHost(req.eventId, user.id, null);
           if (user.promoterStatus !== "approved") {
             db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, user.id)).run();
@@ -13128,7 +13482,17 @@ export const storage: IStorage = {
         createdAt: new Date().toISOString(),
       } as any).run();
     }
+    const hostBefore = db.select().from(events).where(eq(events.id, eventId)).get() as Record<string, unknown> | undefined;
     db.update(events).set({ claimedBy: user.username, isClaimable: false }).where(eq(events.id, eventId)).run();
+    if (hostBefore) {
+      recordEventMutation({
+        eventId,
+        before: hostBefore,
+        after: db.select().from(events).where(eq(events.id, eventId)).get() as Record<string, unknown> | undefined,
+        actor: "storage:setPrimaryEventHost",
+        reason: "Primary host assigned",
+      });
+    }
   },
   replaceEventPrimaryHost(eventId, newUserId) {
     sqlite.prepare(`DELETE FROM event_hosts WHERE event_id = ?`).run(eventId);
@@ -13136,8 +13500,18 @@ export const storage: IStorage = {
   },
   unassignEventHosts(eventId) {
     ensureEventHostsSchema();
+    const unassignBefore = db.select().from(events).where(eq(events.id, eventId)).get() as Record<string, unknown> | undefined;
     sqlite.prepare(`DELETE FROM event_hosts WHERE event_id = ?`).run(eventId);
     db.update(events).set({ claimedBy: null, isClaimable: true }).where(eq(events.id, eventId)).run();
+    if (unassignBefore) {
+      recordEventMutation({
+        eventId,
+        before: unassignBefore,
+        after: db.select().from(events).where(eq(events.id, eventId)).get() as Record<string, unknown> | undefined,
+        actor: "storage:unassignEventHosts",
+        reason: "Event hosts unassigned",
+      });
+    }
   },
   addEventCoHost(eventId, inviterUserId, username, email) {
     ensureEventHostsSchema();

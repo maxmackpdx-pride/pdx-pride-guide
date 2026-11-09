@@ -33,7 +33,11 @@ export async function fillEventMapCoordinates(eventId: number): Promise<void> {
     businesses,
   );
   if (!coords) return;
-  storage.updateEvent(eventId, { lat: coords.lat, lng: coords.lng }, { source: "sync" });
+  storage.updateEvent(eventId, { lat: coords.lat, lng: coords.lng }, {
+    source: "sync",
+    actor: "map-coordinate-sync",
+    reason: "Map coordinate backfill from the place directory",
+  });
 }
 
 export async function fillBusinessMapCoordinates(business: Business): Promise<void> {
