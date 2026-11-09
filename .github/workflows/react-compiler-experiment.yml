@@ -4,6 +4,18 @@ on:
   push:
     branches:
       - experiment/react19-card-render-boundaries
+  pull_request:
+    branches: [master]
+    paths:
+      - "client/src/components/cards/experimental/**"
+      - "script/react-compiler-smoke.mjs"
+      - "script/react-card-profile-browser.test.mjs"
+      - "script/fixtures/card-api-browser.tsx"
+      - "script/node-runtime.test.mjs"
+      - ".github/workflows/react-compiler-experiment.yml"
+      - "package.json"
+      - "package-lock.json"
+      - "vite.config.ts"
   workflow_dispatch:
 
 # Only the nonproduction experiment branch receives an automatically regenerated
@@ -12,7 +24,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: react-compiler-experiment
+  group: react-compiler-experiment-${{ github.event_name }}
   cancel-in-progress: true
 
 jobs:
@@ -33,6 +45,7 @@ jobs:
       - name: Resolve lockfile from official npm registry
         run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
       - name: Commit lockfile update to the experiment branch only
+        if: github.event_name == 'push'
         run: |
           if git diff --quiet -- package-lock.json; then
             echo "Lockfile is already synchronized"
