@@ -12,7 +12,8 @@ test('runtime pins stay consistent across development, CI and production',()=>{
  assert.equal(JSON.parse(read('package.json')).engines.node,`>=${version} <25`);
  assert.equal(JSON.parse(read('package-lock.json')).packages[''].engines.node,`>=${version} <25`);
  const pins=readdirSync(path.join(root,'.github/workflows')).filter(f=>f.endsWith('.yml')).flatMap(f=>[...read(`.github/workflows/${f}`).matchAll(/node-version:\s*"([^"]+)"/g)].map(m=>m[1]));
- // New workflows can add legitimate Node pins; validate every discovered pin, not a stale fixed count.\n assert.ok(pins.length>=8,`Expected at least eight workflow Node pins, found ${pins.length}`);assert.ok(pins.every(p=>p===version));
+ // New workflows can add legitimate Node pins; validate every discovered pin, not a stale fixed count.
+ assert.ok(pins.length>=8,`Expected at least eight workflow Node pins, found ${pins.length}`);assert.ok(pins.every(p=>p===version));
  assert.ok(read('script/install-node-runtime.sh').includes(`version=${version}`));
  const railway=JSON.parse(read('railway.json'));
  assert.equal(railway.build.builder,'NIXPACKS');
