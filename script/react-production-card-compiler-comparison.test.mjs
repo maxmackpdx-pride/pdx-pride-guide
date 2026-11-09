@@ -108,7 +108,7 @@ async function sample(browser,mode,t) {
         await page.locator('#qa-grid > *').first().waitFor({state:'visible',timeout:30000});
         const before=await page.locator('#qa-grid > *').evaluateAll(els=>els.map(el=>({
           category:(el.matches('[data-card-category]')?el:el.querySelector('[data-card-category]'))?.getAttribute('data-card-category'),size:(el.matches('[data-card-size]')?el:el.querySelector('[data-card-size]'))?.getAttribute('data-card-size'),
-          text:el.textContent?.replace(/\s+/g,' ').trim().slice(0,120),
+          text:el.textContent?.replace(/\s+/g,' ').trim(),
         })));
         assert.equal(before.length,6,'Expected six top-level production card slots');
         assert.ok(before.every(card=>card.category&&card.size),'Each card slot must contain an identifiable production card');
@@ -121,13 +121,19 @@ async function sample(browser,mode,t) {
         const after=await page.locator('#qa-grid > *').evaluateAll(els=>els.map(el=>({
           category:(el.matches('[data-card-category]')?el:el.querySelector('[data-card-category]'))?.getAttribute('data-card-category'),
           size:(el.matches('[data-card-size]')?el:el.querySelector('[data-card-size]'))?.getAttribute('data-card-size'),
-          text:el.textContent?.replace(/\s+/g,' ').trim().slice(0,120),
+          text:el.textContent?.replace(/\s+/g,' ').trim(),
         })));
         const commits=await page.evaluate(()=>window.__zayCardRenderProfile??[]);
         assert.ok(after.every(card=>card.category&&card.size),'Card identity and size must persist across parent updates');
         assert.deepEqual(after,before,compiled?'Compiler changed the card DOM':'Baseline changed the card DOM');
         assert.deepEqual(errors,[],'Uncaught browser errors');
-        assert.ok(commits.every(c=>Number.isFinite(c.actualDurationMs)&&c.actualDurationMs>=0),'Invalid React Profiler duration');
+        assert.ok(commits.length>=5,'Profiler must record every requested parent update');
+        for(let tick=1;tick<=5;tick++){
+          assert.ok(commits.some(commit=>commit.tick===tick&&commit.phase!=='mount'),
+            `Profiler missed requested parent update ${tick}`);
+        }
+        assert.ok(commits.every(c=>Number.isFinite(c.actualDurationMs)&&c.actualDurationMs>=0
+          &&Number.isFinite(c.baseDurationMs)&&c.baseDurationMs>=0),'Invalid React Profiler duration');
         results.push({
           family,mode:compiled?`compiler-${mode}`:'uncompiled',
           cards:before.length,parentUpdates:5,profilerCommits:commits.length,
@@ -144,9 +150,9 @@ async function sample(browser,mode,t) {
 test('matched real Eventz, Boardz and Placez cards render identically with Compiler enabled',{timeout:600000},async t=>{
   const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
   try{
-    // Reverse the execution order in the second pair to reduce browser warmup bias.
+    // Four balanced trials put each mode in every execution position once.
     const rounds=[];
-    for(const [round,mode] of [[1,'off'],[1,'annotation'],[1,'card-infer'],[1,'infer'],[2,'infer'],[2,'card-infer'],[2,'annotation'],[2,'off']]){
+    for(const [round,mode] of [[1,'off'],[1,'annotation'],[1,'card-infer'],[1,'infer'],[2,'infer'],[2,'card-infer'],[2,'annotation'],[2,'off'],[3,'annotation'],[3,'infer'],[3,'off'],[3,'card-infer'],[4,'card-infer'],[4,'off'],[4,'infer'],[4,'annotation']]){
       rounds.push({round,mode,results:await sample(browser,mode,t)});
     }
     const reference=rounds[0].results;
@@ -161,7 +167,7 @@ test('matched real Eventz, Boardz and Placez cards render identically with Compi
     }
     console.log('REACT_REAL_CARD_COMPILER_COMPARISON '+JSON.stringify({
       browser:browser.version(),rounds,
-      note:'Exploratory dev-server timings over five parent updates per trial. Two order-balanced trials for each mode. The annotation case matches experimental Vite, while card-infer limits infer to card API and dedicated Placez face. These measurements do not establish a production speedup.',
+      note:'Exploratory dev-server timings over five parent updates per trial. Four order-balanced trials for each mode; each requested update must have a Profiler callback. The annotation case matches experimental Vite, while card-infer limits infer to card API and dedicated Placez face. These measurements do not establish a production speedup.',
     }));
   }finally{await browser.close();}
 });
