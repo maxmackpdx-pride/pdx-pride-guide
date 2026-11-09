@@ -100,10 +100,12 @@ async function sample(browser,mode,t) {
           await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
         }
         const after=await page.locator('#qa-grid > *').evaluateAll(els=>els.map(el=>({
-          category:el.getAttribute('data-card-category'),size:el.getAttribute('data-card-size'),
+          category:(el.matches('[data-card-category]')?el:el.querySelector('[data-card-category]'))?.getAttribute('data-card-category'),
+          size:(el.matches('[data-card-size]')?el:el.querySelector('[data-card-size]'))?.getAttribute('data-card-size'),
           text:el.textContent?.replace(/\s+/g,' ').trim().slice(0,120),
         })));
         const commits=await page.evaluate(()=>window.__zayCardRenderProfile??[]);
+        assert.ok(after.every(card=>card.category&&card.size),'Card identity and size must persist across parent updates');
         assert.deepEqual(after,before,compiled?'Compiler changed the card DOM':'Baseline changed the card DOM');
         assert.deepEqual(errors,[],'Uncaught browser errors');
         assert.ok(commits.every(c=>Number.isFinite(c.actualDurationMs)&&c.actualDurationMs>=0),'Invalid React Profiler duration');
