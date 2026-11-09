@@ -54,6 +54,28 @@ test('changing account, suspension and deletion revoke stale user-bound consent'
   h.users.get(8)!.status='active';await accept(8);h.users.delete(8);assert.equal((await h.call(profiles)).status,403);assert.deepEqual(await (await h.call(consent)).json(),{signedIn:false,adultOptIn:false});
  }finally{await h.close();}
 });
+test('consent is bound to the server session, never query parameters or impersonation headers',async()=>{
+ const h=await setup();try{
+  await h.call('/_test/login',{method:'POST',body:{userId:7}});
+  const accepted=await h.call(consent,{method:'POST',body:{confirmed18:true},origin:'self'});
+  assert.equal(accepted.status,200);
+  assert.equal((await h.call(profiles)).status,200,'authorizing session retains access');
+  for(const path of [profiles,profiles+'?adultOptIn=true&signedIn=true',profiles+'?confirmed18=true']){
+   // A separate cookie-free client cannot borrow another user's consent, even
+   // when it supplies user/age headers and the same query flags as a UI might.
+   const response=await fetch(h.base+path,{headers:{'x-user-id':'7','x-adult-confirmed':'true','x-adult-opt-in':'true'}});
+   assert.equal(response.status,403,path+': independent session must be denied');
+   assert.equal(response.headers.get('cache-control'),'private, no-store');
+   assert.equal(response.headers.get('vary'),'Cookie');
+   assert.doesNotMatch(await response.text(),/profiles|mapDemos|albums|Alex Demo/);
+  }
+  const anonymousState=await fetch(h.base+consent);
+  assert.deepEqual(await anonymousState.json(),{signedIn:false,adultOptIn:false});
+  const crossSite=await h.call(consent,{method:'POST',body:{confirmed18:true},origin:'self',headers:{'Sec-Fetch-Site':'cross-site'}});
+  assert.equal(crossSite.status,403,'browser cross-site signals cannot approve consent');
+  assert.equal((await h.call(profiles)).status,200,'denied impersonation cannot revoke valid first-party consent');
+ }finally{await h.close();}
+});
 test('post-seed malformed/private content fails closed without exposing its payload',async()=>{
  const h=await setup();try{
   const row=h.db.prepare("SELECT payload FROM map_social_content WHERE mode='afterz'").get() as {payload:string};const value=JSON.parse(row.payload);value.content.gatherings[0].address='not allowed';h.db.prepare("UPDATE map_social_content SET payload=? WHERE mode='afterz'").run(JSON.stringify(value));
