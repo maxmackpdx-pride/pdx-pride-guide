@@ -85,6 +85,11 @@
   .eb-page--places .eb-lane:only-child { width:100%; }
   .eb-page--places .eb-lane:only-child .events-rail { grid-template-columns:repeat(auto-fill,var(--eb-card-width)); }
   .eb-page .eb-lane:not(.eb-lane--open) .events-rail__item:nth-child(n+5) { display: none; }
+  /* The shared 200px tall-card contract is !important. On narrow two-track
+     Placez browse layouts the closed face must fit its actual track width. */
+  .eb-page--places .eb-original-card .rg-directory-card[data-card-size="tall"] {
+    width: min(100%, var(--card-tall-width)) !important;
+  }
   .eb-page .events-rail-arrow { display: none; }
   .eb-mobile-filter-toggle { display: none; }
   .eb-grid { grid-template-columns: repeat(auto-fill, var(--eb-card-width)); }
