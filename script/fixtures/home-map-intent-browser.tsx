@@ -13,5 +13,5 @@ import '@/index.css';
 import '@/components/nav.css';
 import '@/components/ds/tokens/index.css';
 import '@/components/ds/styles.css';
-function Fixture(){const [location]=useLocation();return <><a href="/unrelated" id="unrelated">Unrelated</a>{location==='/map'?<h1 id="destination">Map route reached</h1>:<Home/>}<MobileBottomNav/></>;}
+function Fixture(){const [location]=useLocation();return <><a href="/unrelated" id="unrelated">Unrelated</a>{location.split('?')[0]==='/map'?<h1 id="destination">Map route reached</h1>:<Home/>}<MobileBottomNav/></>;}
 createRoot(document.getElementById('root')!).render(<QueryClientProvider client={queryClient}><AuthProvider><ThemeProvider><InboxSheetProvider><HubPanelProvider><Fixture/></HubPanelProvider></InboxSheetProvider></ThemeProvider></AuthProvider></QueryClientProvider>);

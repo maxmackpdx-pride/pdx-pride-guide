@@ -414,10 +414,15 @@ function qsearchOwnsCurrentLockedValue(
 ): boolean {
   ensureEventResearchChangeTable();
   const jsonPath = `$.${field}`;
+  // The change log is now the shared event change feed: every storage write
+  // path records there with its own actor. Ownership provenance for this gate
+  // is QSearch's own writes only (actor 'qsearch-3', the value
+  // recordEventResearchChange stamps), never another writer's rows.
   const row = sqlite.prepare(`
     SELECT after_json
     FROM agent_event_change_log
     WHERE event_id = ?
+      AND actor = 'qsearch-3'
       AND rolled_back_at IS NULL
       AND json_type(patch_json, ?) IS NOT NULL
     ORDER BY id DESC
@@ -542,7 +547,7 @@ export function applyEventResearchEventChange(
   }
   const before = { ...event };
   const response = sqlite.transaction(() => {
-    const after = storage.updateEvent(eventId, changed as any, { source: "human" }) as
+    const after = storage.updateEvent(eventId, changed as any, { source: "human", changeFeed: false }) as
       | Record<string, unknown>
       | undefined;
     if (!after) throw new Error("event update failed");
@@ -663,7 +668,7 @@ export function createEventFromResearch(input: EventResearchCreateInput) {
       source: "qsearch-3",
       isClaimable: false,
       lockedFields: JSON.stringify(lockedFields),
-    } as any) as Record<string, unknown>;
+    } as any, { changeFeed: false }) as Record<string, unknown>;
     const createdFields = Object.keys(event);
     const rollbackToken = recordEventResearchChange({
       operation: "create",
@@ -737,7 +742,7 @@ export function rollbackEventResearchChange(rollbackToken: string) {
     restored = storage.updateEvent(
       Number(row.event_id),
       { status: "HIDDEN" } as any,
-      { source: "sync" },
+      { source: "sync", changeFeed: false },
     ) as Record<string, unknown> | undefined;
   } else {
     const before = JSON.parse(String(row.before_json || "{}")) as Record<string, unknown>;
@@ -748,7 +753,7 @@ export function rollbackEventResearchChange(rollbackToken: string) {
     restored = storage.updateEvent(
       Number(row.event_id),
       restorePatch as any,
-      { source: "sync" },
+      { source: "sync", changeFeed: false },
     ) as Record<string, unknown> | undefined;
   }
   if (!restored) return eventResearchError(500, "rollback failed");

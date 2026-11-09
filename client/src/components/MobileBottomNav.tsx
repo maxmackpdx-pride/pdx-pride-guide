@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
 import { useHubPanel } from "@/context/HubPanelContext";
@@ -10,6 +10,7 @@ import {
 } from "@/lib/mobileNavDismiss";
 import { BOARDS_MENU, EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
 import { MobileDockShell } from "@/components/ui/mobile-dock-shell";
+import MobileWorldFan from "@/components/MobileWorldFan";
 import { CalendarDays, LayoutGrid, MapPin, LifeBuoy } from "lucide-react";
 
 function tabClass(
@@ -24,6 +25,8 @@ export default function MobileBottomNav() {
   const { open, closeSheet } = useInboxSheet();
   const { isOpen: hubOpen, closeHub } = useHubPanel();
   const overlayOpen = hubOpen || open;
+  const [fanOpen, setFanOpen] = useState(false);
+  const closeFan = useCallback(() => setFanOpen(false), []);
 
   const closeLocalSheets = useCallback((except?: MobileNavDismissDetail["except"]) => {
     if (except !== "hub-panel") closeHub();
@@ -33,11 +36,16 @@ export default function MobileBottomNav() {
   useEffect(() => {
     const onDismiss = (event: Event) => {
       const except = (event as CustomEvent<MobileNavDismissDetail>).detail?.except;
+      closeFan();
       closeLocalSheets(except);
     };
     window.addEventListener(MOBILE_NAV_DISMISS, onDismiss);
     return () => window.removeEventListener(MOBILE_NAV_DISMISS, onDismiss);
-  }, [closeLocalSheets]);
+  }, [closeLocalSheets, closeFan]);
+
+  useEffect(() => {
+    closeFan();
+  }, [location, closeFan]);
 
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
   const mapActive = navLinkActive(location, "/map") || navLinkActive(location, "/outzide");
@@ -52,6 +60,21 @@ export default function MobileBottomNav() {
   };
 
   const handleNavLink = () => {
+    dismissExcept();
+  };
+
+  const toggleWorldFan = (event: ReactMouseEvent<HTMLAnchorElement>) => {
+    // Pressing MAPZ no longer navigates directly: it fans the five map
+    // worlds out of the dock, and a world in the fan is the navigation.
+    // The href stays "/map" so map-intent warming, the dock's MAPZ tab
+    // styling and the no-JS fallback all keep working as before.
+    event.preventDefault();
+    if (!fanOpen) closeLocalSheets();
+    setFanOpen(!fanOpen);
+  };
+
+  const handleWorldNavigate = () => {
+    closeFan();
     dismissExcept();
   };
 
@@ -83,14 +106,17 @@ export default function MobileBottomNav() {
             <span className="znav-caption">Placez</span>
           </Link>
 
-          <Link
+          <a
             href="/map"
             className={tabClass(mapActive, "orange")}
             data-accent="orange"
             aria-current={mapActive ? "page" : undefined}
             aria-label="MAPZ"
             title="MAPZ"
-            onClick={handleNavLink}
+            aria-haspopup="true"
+            aria-expanded={fanOpen}
+            aria-controls="world-fan"
+            onClick={toggleWorldFan}
           >
             <span className="znav-icon-row">
               <svg width="28" height="32" style={{ width: 28, height: 32, flexShrink: 0 }} viewBox="0 0 36 42" fill="none" aria-hidden="true" focusable="false">
@@ -107,7 +133,7 @@ export default function MobileBottomNav() {
               </svg>
             </span>
             <span className="znav-caption">MAPZ</span>
-          </Link>
+          </a>
 
           <Link
             href="/boardz"
@@ -135,6 +161,7 @@ export default function MobileBottomNav() {
           </Link>
       </MobileDockShell>
 
+      <MobileWorldFan open={fanOpen} onClose={closeFan} onNavigate={handleWorldNavigate} />
     </>,
     document.body,
   );

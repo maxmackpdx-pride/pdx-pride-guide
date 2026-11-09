@@ -1159,6 +1159,12 @@ function getAdminActor(req: any): { id: number | null; username: string | null }
   return { id: getAdminActorUserId(req), username: null };
 }
 
+/** Actor string for the event change feed (agent_event_change_log). */
+function changeFeedActor(req: any): string {
+  const actor = getAdminActor(req);
+  return actor.username ? `admin:${actor.username}` : "admin";
+}
+
 function auditAdmin(
   req: any,
   action: string,
@@ -2653,7 +2659,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     );
     if (dateErr) return res.status(400).json({ error: dateErr });
     syncDayOfWeek(patch, evt);
-    const updated = storage.updateEvent(Number(req.params.id), patch);
+    const updated = storage.updateEvent(Number(req.params.id), patch, {
+      actor: isAdmin ? `admin:${user.username}` : `host:${user.username}`,
+      reason: isAdmin ? "Admin edit via event editor" : "Host edit via event editor",
+    });
     if (updated && (patch.address !== undefined || patch.venueName !== undefined)) {
       await fillEventMapCoordinates(updated.id);
     }
@@ -7216,7 +7225,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
     for (const id of Array.from(new Set(overrides))) {
       try {
-        storage.updateEventStatus(id, "HIDDEN");
+        storage.updateEventStatus(id, "HIDDEN", {
+          actor: changeFeedActor(req),
+          reason: "Ingest conflict resolution: override hides the existing event",
+        });
       } catch {
         /* ignore */
       }
@@ -7228,7 +7240,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
       try {
         const existing = storage.getEvent(op.eventId);
         if (!existing || !op.draft?.title || !op.draft?.dateStart) continue;
-        storage.updateEvent(op.eventId, mergeDraftIntoEvent(existing, op.draft), { source: "sync" });
+        storage.updateEvent(op.eventId, mergeDraftIntoEvent(existing, op.draft), {
+          source: "sync",
+          actor: changeFeedActor(req),
+          reason: "Ingest conflict resolution: draft merged into existing event",
+        });
         mergedCand.push({ candidateId: op.candidateId, eventId: op.eventId });
       } catch {
         /* ignore a single bad merge */
@@ -7245,7 +7261,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
           // Always on for admin approve - never re-create main-board twins
           skipDuplicates: req.body?.skipDuplicates !== false,
           existingEvents,
-          createEvent: (data) => storage.createEvent(data),
+          createEvent: (data) => storage.createEvent(data, {
+            actor: changeFeedActor(req),
+            reason: "Ingest commit from admin review resolution",
+          }),
         })
       : {
           ok: true as const,
@@ -7615,7 +7634,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
       status,
       skipDuplicates,
       existingEvents,
-      createEvent: (data) => storage.createEvent(data),
+      createEvent: (data) => storage.createEvent(data, {
+        actor: changeFeedActor(req),
+        reason: "Admin ingest commit (/api/admin/events/ingest/commit)",
+      }),
     });
     if (!result.ok) return res.status(400).json({ error: result.error });
 
@@ -7801,7 +7823,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     );
     if (dateErr) return res.status(400).json({ error: dateErr });
     syncDayOfWeek(patch, evt);
-    const updated = storage.updateEvent(Number(req.params.id), patch);
+    const updated = storage.updateEvent(Number(req.params.id), patch, {
+      actor: changeFeedActor(req),
+      reason: "Admin event edit (PUT /api/admin/events/:id)",
+    });
     if (updated && (patch.address !== undefined || patch.venueName !== undefined || patch.lat !== undefined || patch.lng !== undefined)) {
       await fillEventMapCoordinates(updated.id);
     }
@@ -7817,7 +7842,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (evt.status === "HIDDEN") {
       return res.json({ ok: true, id, status: "HIDDEN", alreadyHidden: true });
     }
-    storage.updateEventStatus(id, "HIDDEN");
+    storage.updateEventStatus(id, "HIDDEN", {
+      actor: changeFeedActor(req),
+      reason: "Admin event hide (DELETE /api/admin/events/:id)",
+    });
     res.json({ ok: true, id, status: "HIDDEN" });
   });
 
@@ -7825,7 +7853,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const { isClaimable } = req.body;
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt) return res.status(404).json({ error: "Not found" });
-    storage.toggleClaimable(Number(req.params.id), Boolean(isClaimable));
+    storage.toggleClaimable(Number(req.params.id), Boolean(isClaimable), {
+      actor: changeFeedActor(req),
+      reason: "Admin claimable toggle",
+    });
     res.json({ ok: true });
   });
 
@@ -8222,7 +8253,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
             events: storage.getEvents({}),
             pendingCandidates: [],
             updateEventPoster: (id, url) => {
-              storage.updateEvent(id, { posterImageUrl: url }, { source: "sync" });
+              storage.updateEvent(id, { posterImageUrl: url }, {
+                source: "sync",
+                actor: "poster-mirror",
+                reason: "Startup poster mirror backfill: remote flyer captured to a local /uploads/ path",
+              });
             },
             updateCandidatePoster: () => false,
           });

@@ -205,7 +205,7 @@ export type StorageLike = {
   updateEvent: (
     id: number,
     data: Partial<Event>,
-    opts?: { source?: "sync" | "human" },
+    opts?: { source?: "sync" | "human"; actor?: string; reason?: string },
   ) => Event | undefined;
 };
 
@@ -229,7 +229,11 @@ export function applyContaminationClearPatches(
     if (p.ticketUrl !== undefined) {
       data.ticketUrl = p.ticketUrl;
     }
-    storage.updateEvent(p.id, data, { source: "sync" });
+    storage.updateEvent(p.id, data, {
+      source: "sync",
+      actor: "cross-venue-contamination-repair",
+      reason: `Repair: cleared cross-venue contamination (${p.reason})`,
+    });
     cleared += 1;
     if (p.reason === "camp_foreign_eagle") camp += 1;
     if (p.reason === "sanctuary_gamebang_wrong_series") sanctuary += 1;
@@ -280,7 +284,11 @@ export async function reenrichSanctuaryContaminatedFlyers(
           storage.updateEvent(row.id, {
             posterImageUrl,
             adminNotes: applyAdminNote(row.adminNotes, note || NOTE_REENRICH),
-          }, { source: "sync" });
+          }, {
+            source: "sync",
+            actor: "cross-venue-contamination-repair",
+            reason: "Repair: re-enriched Sanctuary flyer from the ticket page",
+          });
           fixed += 1;
         } else {
           failed += 1;

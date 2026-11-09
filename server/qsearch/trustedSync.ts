@@ -300,7 +300,11 @@ function autoMergeExistingEvents(
         }
       }
       try {
-        storage.updateEvent(existing.id, mergeDraftIntoEvent(existing, draft), { source: "sync" });
+        storage.updateEvent(existing.id, mergeDraftIntoEvent(existing, draft), {
+          source: "sync",
+          actor: "trusted-sync",
+          reason: "Trusted venue sync update (duplicate draft merged into existing event)",
+        });
         usedIds.add(existing.id);
         updated.push({ id: existing.id, title: existing.title });
         continue;
@@ -573,6 +577,9 @@ async function publishDraftsLive(
             .filter(Boolean)
             .join(" · ")
             .slice(0, 1000),
+        }, {
+          actor: "trusted-sync",
+          reason: `Trusted venue sync create (${venue.sourceId})`,
         });
       },
     });

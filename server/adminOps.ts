@@ -293,13 +293,22 @@ export function executeBulkEvents(
         skipped.push({ id: row.id, reason: "Already REMOVED" });
         continue;
       }
-      storage.updateEventStatus(row.id, "HIDDEN");
+      storage.updateEventStatus(row.id, "HIDDEN", {
+        actor: `admin:${actor.username ?? "unknown"}`,
+        reason: "Admin bulk operation: hide",
+      });
       applied.push(row.id);
     } else if (act === "claimable_on") {
-      storage.toggleClaimable(row.id, true);
+      storage.toggleClaimable(row.id, true, {
+        actor: `admin:${actor.username ?? "unknown"}`,
+        reason: "Admin bulk operation: claimable on",
+      });
       applied.push(row.id);
     } else if (act === "claimable_off") {
-      storage.toggleClaimable(row.id, false);
+      storage.toggleClaimable(row.id, false, {
+        actor: `admin:${actor.username ?? "unknown"}`,
+        reason: "Admin bulk operation: claimable off",
+      });
       applied.push(row.id);
     }
   }
