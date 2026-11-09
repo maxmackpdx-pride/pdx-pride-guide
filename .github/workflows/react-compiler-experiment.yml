@@ -86,6 +86,8 @@ jobs:
         run: npx playwright install --with-deps chromium webkit
       - name: Check WebKit resource anchor early (strict geometry assertion)
         run: CARD_ROUTE_QA_BROWSER=webkit CARD_ROUTE_QA_FOCUS=grid-resources node --test --test-concurrency=1 script/card-route-browser.test.mjs
+      - name: Check WebKit Boardz grid independently (strict route and geometry assertions)
+        run: DEBUG=pw:browser CARD_ROUTE_QA_BROWSER=webkit CARD_ROUTE_QA_FOCUS=grid-boards node --test --test-concurrency=1 script/card-route-browser.test.mjs
       - name: Profile existing production card components (baseline)
         run: node --test --test-concurrency=1 script/react-card-profile-browser.test.mjs
       - name: Compare actual production card rendering with and without Compiler
