@@ -19,6 +19,35 @@ const OUTZIDE_GLYPHS: Record<OutzideGlobeGlyph, string> = {
   camp: '<path d="m2 19 7-15 7 15H2Z M7 19l2-6 2 6M7 3l4 4M18 17c-3-2-2-4 0-6 0 2 2 2 2 0 3 3 3 5 0 6M16 20l6 2M16 22l6-2"/>',
 };
 
+// The current kit waypoint set (the v1.0.3 Mapz port): the same shield
+// artwork the map ships (client/public/waypoints/wp-*.svg, copied byte-for-
+// byte from the kit), with each category's assigned colour as resolved by
+// the production adapters. Globe waypoint tiles for these categories now
+// render the kit shield itself — not a glyph extracted from the retired
+// living-map shells — and the tile's surface disc and beam take the
+// assigned colour. Outzide glyph tiles keep their generated artwork.
+const KIT_WAYPOINTS: Partial<Record<WaypointId, { file: string; color: string }>> = {
+  bar: { file: "wp-placez-bar", color: "#FF1FA0" },
+  venue: { file: "wp-placez-venue", color: "#7B00FF" },
+  cafe: { file: "wp-placez-cafe", color: "#FFDD00" },
+  shop: { file: "wp-placez-shop", color: "#00FFFF" },
+  adult: { file: "wp-placez-adult", color: "#FF0000" },
+};
+const kitFor = (id?: GlobeWaypointId) => id ? (KIT_WAYPOINTS as Partial<Record<string, { file: string; color: string }>>)[id] : undefined;
+/** Kit shield artwork aspect (viewBox 136 x 196.02), so tiles keep the
+ * shield's real proportions instead of the old tile's 56x66 box. */
+const KIT_TILE_ASPECT = 136 / 196.02;
+const generatedTileCache = new Map<string, string>();
+function generatedTile(id: GlobeWaypointId, color: string) {
+  const key = `${id}|${color}`;
+  let src = generatedTileCache.get(key);
+  if (!src) {
+    src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(globeWaypointSvg(id, color));
+    generatedTileCache.set(key, src);
+  }
+  return src;
+}
+
 function globeWaypointSvg(id: GlobeWaypointId, color: string) {
   const outzideId = id.startsWith("outzide-") ? id.slice(8) as OutzideGlobeGlyph : undefined;
   const marker = outzideId ? "" : waypointHtml({ id: id as WaypointId, color, size: 42 });
@@ -506,11 +535,9 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
           if(waypoint){
             const available=RANDOM_GLOBE_WAYPOINTS.filter(id=>!openLogoKeys.has(`glyph:${id}`));
             waypointLogo=available[Math.floor(Math.random()*available.length)]||RANDOM_GLOBE_WAYPOINTS[0];
-            const svg=globeWaypointSvg(waypointLogo,venue.color);
-            if(svg){
-              venue.waypointImage.onload=draw;
-              venue.waypointImage.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
-            }
+            const kit=kitFor(waypointLogo);
+            venue.waypointImage.onload=draw;
+            venue.waypointImage.src=kit?`/waypoints/${kit.file}.svg`:generatedTile(waypointLogo,venue.color);
           }
           states.set(venue.phase,{progress:initialReveal || still?1:0,openedAt:elapsed,closing:false,offsetX:0,offsetY:0,waypoint,waypointLogo});
           nextOpen.current=elapsed+250;
@@ -523,10 +550,11 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
       context.save();
       context.beginPath(); context.arc(cx,cy,radius,0,Math.PI*2); context.clip();
       for (const { anchor, color, phase } of visible) {
-        if (!states.get(phase)!.waypoint) continue;
+        const discState=states.get(phase)!;
+        if (!discState.waypoint) continue;
         const surfaceVisibility=smooth(anchor.z/.18);
         const tilt=Math.atan2(anchor.y-cy,anchor.x-cx)+Math.PI/2;
-        context.fillStyle=color;
+        context.fillStyle=kitFor(discState.waypointLogo)?.color??color;
         context.globalAlpha=surfaceVisibility*.16;
         context.beginPath(); context.ellipse(anchor.x,anchor.y,12*WAYPOINT_TILE_SCALE,12*WAYPOINT_TILE_SCALE*anchor.z,tilt,0,Math.PI*2); context.fill();
         context.globalAlpha=surfaceVisibility*.8;
@@ -543,7 +571,10 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
         const visibility=opening*smooth(anchor.z/.18);
         const fullSize = Math.min(width < 600 ? 86 : 144, radius * .52) * .8;
         const fullFit = Math.min(fullSize/image.width,fullSize*.65/image.height);
-        const fullW=state.waypoint?56*WAYPOINT_TILE_SCALE:image.width*fullFit, fullH=state.waypoint?66*WAYPOINT_TILE_SCALE:image.height*fullFit;
+        const kit=state.waypoint?kitFor(state.waypointLogo):undefined;
+        const tileH=66*WAYPOINT_TILE_SCALE;
+        const fullW=state.waypoint?tileH*(kit?KIT_TILE_ASPECT:56/66):image.width*fullFit, fullH=state.waypoint?tileH:image.height*fullFit;
+        const beamColor=state.waypoint?(kit?.color??color):color;
         const head = project(venue.point,1.06);
         // Side-facing anchors also use the pockets below the wordmark corners.
         // Protect the actual rotating words, leaving the empty ends of its row open.
@@ -573,16 +604,16 @@ export function PortlandMetroGlobe({ active, still, vinesEnabled = false, onOpen
         const y=anchor.y+(preferred.y+state.offsetY-anchor.y)*opening;
         const size=(state.waypoint?fullW:fullSize)*opening,w=fullW*opening,h=fullH*opening;
         beamFootprints.push({ax:anchor.x,ay:anchor.y,x,y,halfWidth:size*.38,strength:visibility,
-          rgb:[1,3,5].map(start=>parseInt(color.slice(start,start+2),16))});
+          rgb:[1,3,5].map(start=>parseInt(beamColor.slice(start,start+2),16))});
         renderedCount++;
         context.save();
         // Foreground text stays above the canvas; limited overlap remains natural.
         context.globalAlpha = visibility*.72;
         const beam = context.createLinearGradient(anchor.x,anchor.y,x,y);
-        beam.addColorStop(0,`${color}08`); beam.addColorStop(1,`${color}65`);
+        beam.addColorStop(0,`${beamColor}08`); beam.addColorStop(1,`${beamColor}65`);
         context.fillStyle = beam;
         context.beginPath(); context.moveTo(anchor.x,anchor.y); context.lineTo(x-size*.38,y); context.lineTo(x+size*.38,y); context.closePath(); context.fill();
-        context.strokeStyle=color; context.lineWidth=.6;
+        context.strokeStyle=beamColor; context.lineWidth=.6;
         context.beginPath(); context.moveTo(anchor.x,anchor.y); context.lineTo(x,y); context.stroke();
         context.globalAlpha = visibility;
         context.imageSmoothingEnabled=true; context.imageSmoothingQuality="high";
