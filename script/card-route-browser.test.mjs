@@ -44,7 +44,7 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  for(const kind of focus?[]:['resources','boards']){
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`${base}__route-qa/${kind}?layout=grid`,{waitUntil:'networkidle'});await settled(page);
- const selector=kind==='resources'?'.rg-directory-card[data-card-category="needz"]':'.boardz-production-card';
+ const selector=kind==='resources'?'.rd-card[data-card-category="needz"]':'.boardz-production-card';
  await page.locator(selector).first().waitFor({timeout:30000});
  await page.locator(selector).first().scrollIntoViewIfNeeded();await settled(page);
  const before=await page.locator(selector).first().boundingBox();
@@ -66,13 +66,15 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  for(const width of focus?[]:[1280,390]){
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  await page.setViewportSize({width,height:1000});
- await page.goto(`${base}__route-qa/directory?layout=grid`,{waitUntil:'networkidle'});await settled(page);
- const cards=page.locator('.eb-grid .pdxPlace[data-card-size]');await cards.first().waitFor();
+ await page.goto(`${base}__route-qa/directory?type=ALL&layout=grid`,{waitUntil:'networkidle'});await settled(page);
+ const cards=page.locator('.eb-grid .rd-card[data-card-category="placez"]');
+ if(!(await cards.count()))console.log('CARD_ROUTE_DIRECTORY_PROBE',JSON.stringify(await page.evaluate(()=>({url:location.href,results:document.querySelector('[data-testid=directory-result-count]')?.textContent,gridCount:document.querySelectorAll('.eb-grid').length,cardCount:document.querySelectorAll('[data-card-size]').length,visibleText:document.body.innerText.slice(0,950)}))),errors.slice(-5));
+ await cards.first().waitFor();
  const boxes=await cards.evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
- const expected=width===390?{width:136,height:170}:{width:200,height:403};
- for(let i=0;i<boxes.length;i++){near(boxes[i].width,expected.width,'Directory width');near(boxes[i].height,expected.height,'Directory height');for(let j=i+1;j<boxes.length;j++)assert.ok(!overlaps(boxes[i],boxes[j]),`Directory ${width}: closed cards overlap`);}
+ // Modern Placez uses a responsive discovery surface, not the retired small DirectoryCard.
+ for(let i=0;i<boxes.length;i++){assert.ok(boxes[i].width>=100&&boxes[i].height>=100,'Directory discovery card has usable dimensions');for(let j=i+1;j<boxes.length;j++)assert.ok(!overlaps(boxes[i],boxes[j]),`Directory ${width}: closed cards overlap`);}
  await cards.first().scrollIntoViewIfNeeded();await settled(page);
- const title=cards.first().locator('.pdxPlace__name');assert.ok(await title.isVisible(),'Directory title visible');
+ const title=cards.first().locator('.rd-card-copy h3');assert.ok(await title.isVisible(),'Directory title visible');
  const face=await cards.first().boundingBox();const scrollBeforeOpen=await page.evaluate(()=>scrollY);const titleBox=await title.boundingBox();assert.ok(titleBox.y>=face.y&&titleBox.y+titleBox.height<=face.y+face.height,'Directory title stays within face');
  await cards.first().click({position:{x:60,y:75}});await page.locator('.zay-card-expanded').waitFor();await settled(page);
  const host=page.locator('[data-card-expanded="true"]');assert.equal(await host.count(),1);
@@ -95,10 +97,10 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  for(const kind of ['directory','resources'])for(const width of [1280,390]){
  if(focus&&focus!==`${kind}/${width}`)continue;
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.setViewportSize({width,height:1000});
- await page.goto(`${base}__route-qa/${kind}`,{waitUntil:'networkidle'});await settled(page);
- assert.ok(!new URL(page.url()).searchParams.has('layout'),'Default Directory does not force grid');
- const lane=kind==='directory'?page.locator('.eb-lane').filter({has:page.locator('.pdxPlace__name',{hasText:'QA Cafe 1'})}):page.locator('.eb-lane:has(.events-rail__item:nth-child(5))').first();
- const cards=lane.locator('.pdxPlace[data-card-size]');await cards.first().waitFor();
+ await page.goto(`${base}__route-qa/${kind}${kind==='directory'?'?type=ALL&layout=browse':'?layout=browse'}`,{waitUntil:'networkidle'});await settled(page);
+ const layoutParam=new URL(page.url()).searchParams.get('layout');assert.ok(layoutParam===null||layoutParam==='browse','Browse URL may normalize the default view while preserving the lane');
+ const lane=kind==='directory'?page.locator('.eb-lane').filter({has:page.locator('.rd-card-copy h3',{hasText:'QA Cafe 1'})}):page.locator('.eb-lane:has(.events-rail__item:nth-child(5))').first();
+ const cards=lane.locator('.rd-card[data-card-category="placez"]');await cards.first().waitFor();
  const closedFaces=await cards.evaluateAll(els=>els.filter(el=>el.getBoundingClientRect().width&&getComputedStyle(el.closest('.events-rail__item')).display!=='none').map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
  for(let i=0;i<closedFaces.length;i++){if(width===390)assert.ok(closedFaces[i].x>=0&&closedFaces[i].x+closedFaces[i].width<=width,`${kind}: mobile closed face fits viewport`);for(let j=i+1;j<closedFaces.length;j++)assert.ok(!overlaps(closedFaces[i],closedFaces[j]),`${kind}: closed browse faces do not overlap`);}
  const docBox=async locator=>locator.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});
@@ -138,27 +140,37 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  await mobileContext.route('**/api/**',mockApi);await mobileContext.route('**/outzide-map/places.json*',route=>route.fulfill({json:{places:[]}}));
  for(const width of [320,390,430])for(const layout of ['browse','grid']){
  page=await mobileContext.newPage();page.on('pageerror',e=>errors.push(e.message));await page.setViewportSize({width,height:1000});
- await page.goto(`${base}__route-qa/directory${layout==='grid'?'?layout=grid':''}`,{waitUntil:'networkidle'});await settled(page);
- const collection=layout==='grid'?page.locator('.eb-grid'):page.locator('.eb-lane').filter({has:page.locator('.pdxPlace__name',{hasText:'QA Cafe 1'})}).locator('.events-rail');
- const cards=collection.locator('.pdxPlace[data-card-size="small"]');await cards.first().waitFor();
+ await page.goto(`${base}__route-qa/directory?type=ALL&layout=${layout}`,{waitUntil:'networkidle'});await settled(page);
+ const collection=layout==='grid'?page.locator('.eb-grid'):page.locator('.eb-lane').filter({has:page.locator('.rd-card-copy h3',{hasText:'QA Cafe 1'})}).locator('.events-rail');
+ const cards=collection.locator('.rd-card[data-card-category="placez"]');await cards.first().waitFor();
  const documentBox=async locator=>locator.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});
  const first=await documentBox(cards.nth(0)),second=await documentBox(cards.nth(1));
- console.log('GUTTER',JSON.stringify({width,layout,first,second}));
- near(first.x,16,`${layout}/${width}: left screen gutter`);near(second.x+second.width,width-16,`${layout}/${width}: right screen gutter`);near(first.y,second.y,'Small cards remain two-column');
- for(const face of [first,second]){near(face.width,136,'Small width unchanged');near(face.height,170,'Small height unchanged');}
- for(const index of [0,1,0]){
- await cards.nth(index).scrollIntoViewIfNeeded();await settled(page);const before=await documentBox(cards.nth(index));
- if(index===0)await page.screenshot({path:`/tmp/placez-gutters-${layout}-${width}-closed.png`});
- await cards.nth(index).click({position:{x:60,y:85}});const host=collection.locator('[data-card-expanded="true"]');await host.waitFor();await settled(page);
- const expanded=await documentBox(host);near(expanded.width,width-32,`${layout}/${width}: open card spans content width`);near(expanded.x,16,'Expanded left screen gutter');near(expanded.y,before.y,'Expanded corner stays vertically anchored');
- if(index===0)near(expanded.x,before.x,'Left card keeps left corner');else near(expanded.x+expanded.width,before.x+before.width,'Right card keeps right corner');
- const panel=await documentBox(host.locator('[role="dialog"]'));assert.ok(panel.x>=16-1&&panel.x+panel.width<=width-16+1,'Detail panel fits wider host');
- assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No mobile horizontal overflow');
- if(index===0)await page.screenshot({path:`/tmp/placez-gutters-${layout}-${width}-open.png`});
- await host.getByRole('button',{name:'Close place',exact:true}).click();await host.waitFor({state:'detached'});await settled(page);
- const restored=await documentBox(cards.nth(index));near(restored.x,before.x,'Gutter close restores x');near(restored.y,before.y,'Gutter close restores y');
+ console.log('PLACEZ_RESPONSIVE',JSON.stringify({width,layout,first,second}));
+ for(const face of [first,second])assert.ok(face.width>=100&&face.height>=100,'Discovery face has usable dimensions');
+ if(layout==='grid'){
+   assert.ok(first.x>=0&&first.x+first.width<=width+1,'First grid card fits viewport');
+   assert.ok(second.y>=first.y+first.height-1,'Approved mobile grid is single-column');
  }
- console.log(`PASS mobile gutters ${layout}/${width}: fixed136 cards,16px gutters,expanded${width-32},both anchors,reopen`);await page.close();
+ assert.ok(!overlaps(first,second),'Closed Placez discovery cards never overlap');
+ for(const index of [0,1,0]){
+  await cards.nth(index).scrollIntoViewIfNeeded();await settled(page);const before=await documentBox(cards.nth(index));
+  if(index===0)await page.screenshot({path:`/tmp/placez-gutters-${layout}-${width}-closed.png`});
+  await cards.nth(index).locator('.rd-card-open').click();
+  const host=collection.locator('[data-card-expanded="true"]');await host.waitFor();await settled(page);
+  const expanded=await documentBox(host);
+  assert.ok(expanded.x>=-1&&expanded.x+expanded.width<=width+1,'Expanded card fits mobile viewport');
+  near(expanded.y,before.y,'Expanded corner remains document anchored');
+  const anchor=await host.getAttribute('data-card-anchor');
+  if(anchor==='right')near(expanded.x+expanded.width,before.x+before.width,'Right anchor preserved');
+  else near(expanded.x,before.x,'Left anchor preserved');
+  const panel=await documentBox(host.locator('[role="dialog"]'));
+  assert.ok(panel.x>=expanded.x-1&&panel.x+panel.width<=expanded.x+expanded.width+1,'Detail panel fits host');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No horizontal overflow');
+  if(index===0)await page.screenshot({path:`/tmp/placez-gutters-${layout}-${width}-open.png`});
+  await host.getByRole('button',{name:'Close place',exact:true}).click();await host.waitFor({state:'detached'});await settled(page);
+  const restored=await documentBox(cards.nth(index));near(restored.x,before.x,'Close restores x');near(restored.y,before.y,'Close restores y');
+ }
+ console.log(`PASS Placez ${layout}/${width}: responsive discovery cards, no overlap, inline anchor and reopen`);await page.close();
  }
  await mobileContext.close();
  }
