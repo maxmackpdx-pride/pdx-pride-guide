@@ -82,7 +82,7 @@ test('all small card APIs and real Directory share centered heart controls witho
    await heart.click();await settled(page);
    assert.equal(await page.locator('.zay-card-expanded:visible').count(),0,`${family} heart does not open details`);
    if(countBefore!==null)assert.equal(await page.locator('#qa-saved-count').textContent(),'1',`${family} original save callback`);
-   else {assert.equal(writes.length,1,`${family} one original endpoint write`);assert.equal(writes[0].method,'POST');assert.equal(writes[0].p,'/api/hearts');if(family==='outz'||family==='needz')assert.equal(writes[0].body.kind,family==='outz'?'outz':'resource');}
+   else {assert.equal(writes.length,1,`${family} one original endpoint write`);assert.equal(writes[0].method,'POST');assert.equal(writes[0].p,family==='place'?'/api/directory/80000/follow':'/api/hearts');if(family==='outz'||family==='needz')assert.equal(writes[0].body.kind,family==='outz'?'outz':'resource');}
    assert.equal(await heart.getAttribute('aria-pressed'),'true',`${family} saved visual state`);
    const activeAppearance=await heart.evaluate(el=>({background:getComputedStyle(el).backgroundColor,color:getComputedStyle(el).color,fill:getComputedStyle(el.querySelector('svg')).fill}));if(activeReference)assert.deepEqual(activeAppearance,activeReference,`${family} same selected appearance`);else activeReference=activeAppearance;
    await heart.focus();await page.keyboard.press('Enter');await settled(page);
