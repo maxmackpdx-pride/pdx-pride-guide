@@ -60,8 +60,8 @@ async function sample(browser,compiled,t) {
         const page=await context.newPage(),errors=[];
         page.on('pageerror',error=>errors.push(String(error)));
         await page.goto(server.resolvedUrls.local[0]+'__real-card-compiler-profile?family='+family+'&size=small');
-        await page.locator('#qa-grid [data-card-size]').first().waitFor({state:'visible',timeout:30000});
-        const before=await page.locator('#qa-grid [data-card-size]').evaluateAll(els=>els.map(el=>({
+        await page.locator('#qa-grid > [data-card-size]').first().waitFor({state:'visible',timeout:30000});
+        const before=await page.locator('#qa-grid > [data-card-size]').evaluateAll(els=>els.map(el=>({
           category:el.getAttribute('data-card-category'),size:el.getAttribute('data-card-size'),
           text:el.textContent?.replace(/\s+/g,' ').trim().slice(0,120),
         })));
@@ -72,7 +72,7 @@ async function sample(browser,compiled,t) {
           await page.waitForFunction(n=>document.querySelector('[data-profile-tick]')?.textContent===String(n),tick,{timeout:15000});
           await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
         }
-        const after=await page.locator('#qa-grid [data-card-size]').evaluateAll(els=>els.map(el=>({
+        const after=await page.locator('#qa-grid > [data-card-size]').evaluateAll(els=>els.map(el=>({
           category:el.getAttribute('data-card-category'),size:el.getAttribute('data-card-size'),
           text:el.textContent?.replace(/\s+/g,' ').trim().slice(0,120),
         })));
