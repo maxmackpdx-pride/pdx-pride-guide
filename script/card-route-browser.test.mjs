@@ -67,14 +67,14 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  await page.setViewportSize({width,height:1000});
  await page.goto(`${base}__route-qa/directory?type=ALL&layout=grid`,{waitUntil:'networkidle'});await settled(page);
- const cards=page.locator('.eb-grid .pdxPlace[data-card-size]');
+ const cards=page.locator('.eb-grid .rd-card[data-card-category="placez"]');
  if(!(await cards.count()))console.log('CARD_ROUTE_DIRECTORY_PROBE',JSON.stringify(await page.evaluate(()=>({url:location.href,results:document.querySelector('[data-testid=directory-result-count]')?.textContent,gridCount:document.querySelectorAll('.eb-grid').length,cardCount:document.querySelectorAll('[data-card-size]').length,visibleText:document.body.innerText.slice(0,950)}))),errors.slice(-5));
  await cards.first().waitFor();
  const boxes=await cards.evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
- const expected=width===390?{width:136,height:170}:{width:200,height:403};
- for(let i=0;i<boxes.length;i++){near(boxes[i].width,expected.width,'Directory width');near(boxes[i].height,expected.height,'Directory height');for(let j=i+1;j<boxes.length;j++)assert.ok(!overlaps(boxes[i],boxes[j]),`Directory ${width}: closed cards overlap`);}
+ // Modern Placez uses a responsive discovery surface, not the retired small DirectoryCard.
+ for(let i=0;i<boxes.length;i++){assert.ok(boxes[i].width>=100&&boxes[i].height>=100,'Directory discovery card has usable dimensions');for(let j=i+1;j<boxes.length;j++)assert.ok(!overlaps(boxes[i],boxes[j]),`Directory ${width}: closed cards overlap`);}
  await cards.first().scrollIntoViewIfNeeded();await settled(page);
- const title=cards.first().locator('.pdxPlace__name');assert.ok(await title.isVisible(),'Directory title visible');
+ const title=cards.first().locator('.rd-card-copy h3');assert.ok(await title.isVisible(),'Directory title visible');
  const face=await cards.first().boundingBox();const scrollBeforeOpen=await page.evaluate(()=>scrollY);const titleBox=await title.boundingBox();assert.ok(titleBox.y>=face.y&&titleBox.y+titleBox.height<=face.y+face.height,'Directory title stays within face');
  await cards.first().click({position:{x:60,y:75}});await page.locator('.zay-card-expanded').waitFor();await settled(page);
  const host=page.locator('[data-card-expanded="true"]');assert.equal(await host.count(),1);
@@ -99,8 +99,8 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.setViewportSize({width,height:1000});
  await page.goto(`${base}__route-qa/${kind}${kind==='directory'?'?type=ALL&layout=browse':'?layout=browse'}`,{waitUntil:'networkidle'});await settled(page);
  assert.equal(new URL(page.url()).searchParams.get('layout'),'browse','Explicit browse layout is preserved');
- const lane=kind==='directory'?page.locator('.eb-lane').filter({has:page.locator('.pdxPlace__name',{hasText:'QA Cafe 1'})}):page.locator('.eb-lane:has(.events-rail__item:nth-child(5))').first();
- const cards=lane.locator('.pdxPlace[data-card-size]');await cards.first().waitFor();
+ const lane=kind==='directory'?page.locator('.eb-lane').filter({has:page.locator('.rd-card-copy h3',{hasText:'QA Cafe 1'})}):page.locator('.eb-lane:has(.events-rail__item:nth-child(5))').first();
+ const cards=lane.locator('.rd-card[data-card-category="placez"]');await cards.first().waitFor();
  const closedFaces=await cards.evaluateAll(els=>els.filter(el=>el.getBoundingClientRect().width&&getComputedStyle(el.closest('.events-rail__item')).display!=='none').map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
  for(let i=0;i<closedFaces.length;i++){if(width===390)assert.ok(closedFaces[i].x>=0&&closedFaces[i].x+closedFaces[i].width<=width,`${kind}: mobile closed face fits viewport`);for(let j=i+1;j<closedFaces.length;j++)assert.ok(!overlaps(closedFaces[i],closedFaces[j]),`${kind}: closed browse faces do not overlap`);}
  const docBox=async locator=>locator.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});
@@ -141,7 +141,7 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  for(const width of [320,390,430])for(const layout of ['browse','grid']){
  page=await mobileContext.newPage();page.on('pageerror',e=>errors.push(e.message));await page.setViewportSize({width,height:1000});
  await page.goto(`${base}__route-qa/directory?type=ALL&layout=${layout}`,{waitUntil:'networkidle'});await settled(page);
- const collection=layout==='grid'?page.locator('.eb-grid'):page.locator('.eb-lane').filter({has:page.locator('.pdxPlace__name',{hasText:'QA Cafe 1'})}).locator('.events-rail');
+ const collection=layout==='grid'?page.locator('.eb-grid'):page.locator('.eb-lane').filter({has:page.locator('.rd-card-copy h3',{hasText:'QA Cafe 1'})}).locator('.events-rail');
  const cards=collection.locator('.pdxPlace[data-card-size="small"]');await cards.first().waitFor();
  const documentBox=async locator=>locator.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});
  const first=await documentBox(cards.nth(0)),second=await documentBox(cards.nth(1));
