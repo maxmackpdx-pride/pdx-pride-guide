@@ -29,7 +29,7 @@ async function sample(browser,mode,t) {
     optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime']},
     plugins:[
       react(),
-      ...(compiled?[babel({presets:[reactCompilerPreset({compilationMode:mode})],filter:{id:{exclude:['**/script/fixtures/**']}}})]:[]),
+      ...(compiled?[babel({presets:[reactCompilerPreset({compilationMode:mode})],exclude:[/[\\/]node_modules[\\/]/,/\\0rolldown\\/runtime\\.js/,/[\\/]script[\\/]fixtures[\\/]/]})]:[]),
       {name:'real-card-profile-html',configureServer(vite){vite.middlewares.use(async(req,res,next)=>{
         if(!req.url?.startsWith('/__real-card-compiler-profile'))return next();
         const html=await vite.transformIndexHtml(req.url,
