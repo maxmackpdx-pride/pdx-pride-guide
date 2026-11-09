@@ -98,7 +98,7 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  if(focus&&focus!==`${kind}/${width}`)continue;
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.setViewportSize({width,height:1000});
  await page.goto(`${base}__route-qa/${kind}${kind==='directory'?'?type=ALL&layout=browse':'?layout=browse'}`,{waitUntil:'networkidle'});await settled(page);
- assert.equal(new URL(page.url()).searchParams.get('layout'),'browse','Explicit browse layout is preserved');
+ const layoutParam=new URL(page.url()).searchParams.get('layout');assert.ok(layoutParam===null||layoutParam==='browse','Browse URL may normalize the default view while preserving the lane');
  const lane=kind==='directory'?page.locator('.eb-lane').filter({has:page.locator('.rd-card-copy h3',{hasText:'QA Cafe 1'})}):page.locator('.eb-lane:has(.events-rail__item:nth-child(5))').first();
  const cards=lane.locator('.rd-card[data-card-category="placez"]');await cards.first().waitFor();
  const closedFaces=await cards.evaluateAll(els=>els.filter(el=>el.getBoundingClientRect().width&&getComputedStyle(el.closest('.events-rail__item')).display!=='none').map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
