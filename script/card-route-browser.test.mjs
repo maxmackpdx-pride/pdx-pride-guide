@@ -67,7 +67,9 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  await page.setViewportSize({width,height:1000});
  await page.goto(`${base}__route-qa/directory?type=ALL&layout=grid`,{waitUntil:'networkidle'});await settled(page);
- const cards=page.locator('.eb-grid .pdxPlace[data-card-size]');await cards.first().waitFor();
+ const cards=page.locator('.eb-grid .pdxPlace[data-card-size]');
+ if(!(await cards.count()))console.log('CARD_ROUTE_DIRECTORY_PROBE',JSON.stringify(await page.evaluate(()=>({url:location.href,results:document.querySelector('[data-testid=directory-result-count]')?.textContent,gridCount:document.querySelectorAll('.eb-grid').length,cardCount:document.querySelectorAll('[data-card-size]').length,visibleText:document.body.innerText.slice(0,950)}))),errors.slice(-5));
+ await cards.first().waitFor();
  const boxes=await cards.evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
  const expected=width===390?{width:136,height:170}:{width:200,height:403};
  for(let i=0;i<boxes.length;i++){near(boxes[i].width,expected.width,'Directory width');near(boxes[i].height,expected.height,'Directory height');for(let j=i+1;j<boxes.length;j++)assert.ok(!overlaps(boxes[i],boxes[j]),`Directory ${width}: closed cards overlap`);}
