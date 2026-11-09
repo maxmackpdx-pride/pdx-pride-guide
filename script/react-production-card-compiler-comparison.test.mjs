@@ -90,6 +90,7 @@ async function sample(browser,mode,t) {
         assert.deepEqual(compiledFaces,cardFaceModules,
           'Card-scoped infer must transform each real face renderer, not just the wrapper');
         const excluded=[
+          '/client/src/components/cards/ZaylistCard.tsx',
           '/client/src/components/cards/NeedzCard.tsx',
           '/client/src/components/cards/OutzCard.tsx',
           '/client/src/components/cards/CardAPI.tsx',

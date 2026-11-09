@@ -15,11 +15,12 @@ export const cardFaceModules = [
 ];
 
 // Identical to the allowlist measured in PR #69's four-trial Chromium fixture.
-// Only the four measured Eventz/Boardz/Placez card API entry components are in scope.
-// Never infer-compile shared CardAPI, NeedzCard, OutzCard, model/test helpers, or
-// consent/privacy controllers through a wildcard directory rule.
+// Compile only category-specific Eventz, Boardz and Placez card entries plus
+// enumerated faces. The shared ZaylistCard switch also renders Needz and
+// Outzide, so it must remain uncompiled alongside shared CardAPI, helpers,
+// consent/privacy controllers and other card-family renderers.
 export const cardSourcePatterns = [
-  /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/](?:EventCard|BoardCard|PlaceCard|ZaylistCard)\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/](?:EventCard|BoardCard|PlaceCard)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]discovery[\\/]PlaceDiscoveryCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]EventRailCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]EventFlyerArt\.tsx$/,
