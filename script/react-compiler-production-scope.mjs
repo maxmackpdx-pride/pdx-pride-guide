@@ -29,6 +29,13 @@ const outOfScope=[
  'components/discovery/EventzBrowse.tsx',
  'components/VenueFollowButton.tsx',
  'components/PlaceModal.tsx',
+ // Never let exact-card Compiler selection cross into Mapz or adult-access boundaries.
+ 'components/AdultContentGate.tsx',
+ 'components/AuthModal.tsx',
+ 'components/EventModal.tsx',
+ 'pages/UnifiedMap.tsx',
+ 'lib/pinnedMapModule.ts',
+ 'lib/mapBookmarks.ts',
  'context/AuthContext.tsx',
  'pages/Directory.tsx',
  'pages/Boards.tsx',
