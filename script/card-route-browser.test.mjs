@@ -175,12 +175,20 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  await mobileContext.close();
  }
  if(!focus){
- // Safety card uses the actual mobile page with its inserted card.
+ // Current Needz safety is a RoomDiscoveryCard in the grid, not the retired selector.
  page=await context.newPage();await page.setViewportSize({width:390,height:844});
  await page.goto(`${base}__route-qa/resources?layout=grid&cat=safety`,{waitUntil:'networkidle'});
- await page.locator('.needz-mobile-safety-card').first().click();await page.locator('.zay-card-expanded').waitFor({state:'visible'});
+ const safetyCard=page.locator('.eb-grid .rd-card[data-card-category="needz"]').filter({has:page.getByRole('heading',{name:'ARE YOU SAFE?',exact:true})});
+ await safetyCard.first().waitFor({state:'visible',timeout:30000});
+ assert.equal(await safetyCard.count(),1,'Exactly one Needz safety card in the grid');
+ await safetyCard.getByRole('button',{name:'View details for ARE YOU SAFE?',exact:true}).click();
+ const safetyDrawer=page.locator('.rg-safety-drawer[aria-label="Oregon urgent help"]');
+ await safetyDrawer.waitFor({state:'visible'});
+ assert.equal(await page.locator('.zay-card-expanded:visible').count(),1,'Safety expands through CardDetails');
  await page.keyboard.press('Escape');await settled(page);
+ await safetyDrawer.waitFor({state:'hidden'});
  assert.equal(await page.locator('.zay-card-expanded:visible').count(),0,'Safety Escape closes');
+ await page.close();
  }
  assert.deepEqual(errors,[]);
  }finally{await browser?.close();await server.close();}
