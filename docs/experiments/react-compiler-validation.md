@@ -1,5 +1,13 @@
 # React 19 Compiler: scoped-card evidence and release gates
 
+> **2026-11-09 release follow-through update:** [CI #42740632327](https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/runs/42740632327) and [independent QA #42740632631](https://github.com/maxmackpdx-pride/pdx-pride-guide/actions/runs/42740632631) passed at `cde93d3`. That CI included the real Eventz route, all four page trees, Chromium/WebKit card and motion checks, bundle and Mapz/platform tests, and four order-balanced production-optimized page-tree comparisons. These were **synthetic read-only API** tests with React 19 profiling instrumentation, not live Railway or physical Safari benchmarks.
+>
+> Production-optimized whole-page means (Profiler actualDuration sum for opening and closing one real card, four pairs): Eventz **32.875 ms off / 19.85 ms infer** (39.6% lower), Boardz **18.90 / 15.15 ms** (19.8% lower), Resources **23.65 / 24.875 ms** (5.2% higher), Placez directory **22.85 / 23.05 ms** (0.9% higher). The Eventz improvement repeated in all four trials. Boardz showed one slower trial; Resources/Placez were mixed. Fingerprints and card counts matched. Numbers include Profiler overhead and do not establish a live-user speedup.
+>
+> **Next candidate is narrower and unverified:** In commits following `cde93d3`, the Compiler allowlist was reduced to the Eventz and Boardz card components/faces. Placez, Resources/Needz, shared CardAPI, Mapz, modal/auth/consent layers remain uncompiled. Existing comparisons still test Placez as an excluded control; the exact new allowlist must pass fresh CI and measurements before any release assessment. **Do not reuse the results above as fresh evidence for the narrowed configuration.** PR #69 remains draft and unmerged until new checks, independent review, and privacy/API signoff. User requested waiving a physical iPhone test, but CI WebKit is not equivalent to a physical-device validation.
+
+---
+
 **Status as of 2026-11-09:** experimental only, PR [#69](https://github.com/maxmackpdx-pride/pdx-pride-guide/pull/69) remains **draft/unmerged**. No Railway deployment of the Compiler was requested or started. This is a dated, verifiable snapshot, not a permanent green-light.
 
 **Candidate commit tested:** `32d981e9c3f65eed70d73250e56ef201f11e3cad`.
