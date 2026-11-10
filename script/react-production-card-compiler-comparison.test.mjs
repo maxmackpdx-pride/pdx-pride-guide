@@ -18,8 +18,9 @@ import {cardFaceModules,cardSourcePatterns,cardCompilerExcludedPatterns} from '.
 const root=path.resolve(import.meta.dirname,'..');
 const fixture='script/fixtures/card-api-browser.tsx';
 
-// A bounded infer experiment including the actual dedicated card faces and
-// Boardz artwork renderers, not merely thin EventCard/BoardCard/PlaceCard wrappers.
+// A bounded infer experiment including the actual Eventz and Boardz card faces
+// and artwork renderers, not merely thin EventCard/BoardCard wrappers.
+// Placez remains in the visual and timing comparison as an excluded control.
 // Only these exact components are included, not page routes, auth, modal, Mapz,
 // or consent UI. The profiling parent remains deliberately uncompiled.
 // The fixture parent remains uncompiled so its updates cannot be memoized away.
@@ -80,8 +81,8 @@ async function sample(browser,mode,t) {
       console.log('COMPILER_PRODUCTION_CARD_MODULES '+JSON.stringify({mode,transformed,probes}));
       assert.ok(transformed.length>0,'Compiler did not transform any actual production card module');
       if(scoped){
-        assert.deepEqual(transformed,['EventCard','BoardCard','PlaceCard'],
-          'Card-scoped infer must transform all three real card components');
+        assert.deepEqual(transformed,['EventCard','BoardCard'],
+          'Card-scoped infer must transform Eventz and Boardz but leave unproven Placez outside scope');
         const compiledFaces=[];
         for(const face of cardFaceModules){
           const module=await server.transformRequest('/client/src/components/'+face+(face.startsWith('board/punk/')?'.jsx':'.tsx'));
@@ -90,6 +91,9 @@ async function sample(browser,mode,t) {
         assert.deepEqual(compiledFaces,cardFaceModules,
           'Card-scoped infer must transform each real face renderer, not just the wrapper');
         const excluded=[
+          '/client/src/components/cards/PlaceCard.tsx',
+          '/client/src/components/discovery/PlaceDiscoveryCard.tsx',
+          '/client/src/components/home/TodayLocationCard.tsx',
           '/client/src/components/cards/ZaylistCard.tsx',
           '/client/src/components/cards/NeedzCard.tsx',
           '/client/src/components/cards/OutzCard.tsx',
