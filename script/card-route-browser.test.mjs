@@ -70,12 +70,24 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  const businesses=Array.from({length:8},(_,i)=>({id:100+i,name:`QA Cafe ${i+1}`,type:'cafe',description:i%2?'A welcoming local cafe with a longer description and community gatherings throughout the week.':'A welcoming local cafe',address:'123 Main St',neighborhood:i%2?'Northwest Portland neighborhood':'Portland',website:null,instagram:null,donateUrl:null,hours:null,phone:null,queerOwned:true,queerFriendly:true,imageUrl:null,lat:null,lng:null,isNew:false}));
  businesses.push(...Array.from({length:4},(_,i)=>({...businesses[i],id:200+i,name:`QA Tavern ${i+1}`,type:'bar'})));
  await context.route('**/outzide-map/places.json*',route=>route.fulfill({json:{places:[]}}));
- const mockApi=route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/me')return route.fulfill({status:401,json:{}});if(p==='/api/directory')return route.fulfill({json:businesses});if(/^\/api\/directory\/\d+$/.test(p)){const business=businesses.find(item=>item.id===Number(p.split('/').pop()));return route.fulfill({status:business?200:404,json:business?{...business,description:`Fresh detail for ${business.name}`}:{error:'Not found'}});}if(p==='/api/housing')return route.fulfill({json:{posts:[]}});if(p.startsWith('/api/gifting'))return route.fulfill({json:p==='/api/gifting'?gifts:gifts[0]});return route.fulfill({json:[]});};
+ // Synthetic future events preserve the real Eventz card + modal flow without
+ // depending on today's date, production API data, or a mutable event calendar.
+ const events=Array.from({length:8},(_,i)=>({
+  id:300+i,title:`QA Event ${i+1}`,description:'Synthetic event for Compiler route profiling',
+  venueName:`QA Venue ${i+1}`,address:'123 Fictional Street',neighborhood:'Portland',
+  dateStart:`2099-07-${String(15+i).padStart(2,'0')}T20:00:00`,
+  dateEnd:`2099-07-${String(15+i).padStart(2,'0')}T23:00:00`,
+  dayOfWeek:['WED','THU','FRI','SAT','SUN','MON','TUE','WED'][i],
+  eventType:'NIGHTLIFE',admission:'FREE',ageRequirement:'21_PLUS',
+  posterUrl:null,imageUrl:null,ticketUrl:null,website:null,lat:null,lng:null,
+  status:'PUBLISHED',isFeatured:false,
+ }));
+ const mockApi=route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/me')return route.fulfill({status:401,json:{}});if(p==='/api/directory')return route.fulfill({json:businesses});if(p==='/api/events')return route.fulfill({json:events});if(/^\/api\/events\/\d+$/.test(p)){const event=events.find(item=>item.id===Number(p.split('/').pop()));return route.fulfill({status:event?200:404,json:event??{error:'Not found'}});}if(/^\/api\/directory\/\d+$/.test(p)){const business=businesses.find(item=>item.id===Number(p.split('/').pop()));return route.fulfill({status:business?200:404,json:business?{...business,description:`Fresh detail for ${business.name}`}:{error:'Not found'}});}if(p==='/api/housing')return route.fulfill({json:{posts:[]}});if(p.startsWith('/api/gifting'))return route.fulfill({json:p==='/api/gifting'?gifts:gifts[0]});return route.fulfill({json:[]});};
  await context.route('**/api/**',mockApi);
  let page;const errors=[];const focus=process.env.CARD_ROUTE_QA_FOCUS;
  // Isolated route probes distinguish cross-route WebKit renderer failures from card-specific regressions.
 
- // Whole-page profiling traverses the real Resources, Boards and Directory
+ // Whole-page profiling traverses the real Eventz, Resources, Boards and Directory
  // page components. Mocked read-only APIs prevent private or live data access.
  // It is a page-tree development-fixture comparison, NOT a production speedup.
  const pageProfiles=[];
@@ -85,11 +97,11 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
   const roundEnv=process.env.CARD_ROUTE_QA_PROFILE_ROUND;
   const rounds=roundEnv===undefined?[1,2,3,4]:[Number(roundEnv)];
   assert.ok(rounds.every(round=>Number.isInteger(round)&&round>=1&&round<=4),'Profile round must be 1, 2, 3, or 4');
-  for(const kind of ['resources','boards','directory']){
-   const selector=kind==='resources'?'.rd-card[data-card-category="needz"]':kind==='boards'?'.boardz-production-card':'.eb-grid .rd-card[data-card-category="placez"]';
+  for(const kind of ['events','resources','boards','directory']){
+   const selector=kind==='events'?'.events-poster-grid [data-card-category="eventz"]':kind==='resources'?'.rd-card[data-card-category="needz"]':kind==='boards'?'.boardz-production-card':'.eb-grid .rd-card[data-card-category="placez"]';
    for(const round of rounds){
     page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
-    const search=kind==='directory'?'?type=ALL&layout=grid':'?layout=grid';
+    const search=kind==='events'?'?window=ALL':kind==='directory'?'?type=ALL&layout=grid':'?layout=grid';
     await page.goto(base+'__route-qa/'+kind+search,{waitUntil:'networkidle'});
     await settled(page);
     const card=page.locator(selector).first();await card.waitFor({state:'visible',timeout:30000});
@@ -99,12 +111,14 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
     assert.ok(before.length>=1,kind+': expected production cards');
     const fingerprint=createHash('sha256').update(JSON.stringify(before)).digest('hex').slice(0,16);
     await page.evaluate(()=>{window.__zayWholePageProfiler=[];window.__zayWholePageProfilerEnabled=true;});
-    if(kind==='boards')await card.locator('.punk-open-target').click();
+    if(kind==='events')await card.locator('.tonight-card__open').click();
+    else if(kind==='boards')await card.locator('.punk-open-target').click();
     else await card.click({position:{x:kind==='resources'?80:60,y:kind==='resources'?90:75}});
-    await page.locator('.zay-card-expanded').waitFor({state:'visible',timeout:20000});
+    const expanded=page.locator(kind==='events'?'[data-testid="event-modal"]':'.zay-card-expanded');
+    await expanded.waitFor({state:'visible',timeout:20000});
     await settled(page);
     await page.keyboard.press('Escape');
-    await page.locator('.zay-card-expanded:visible').waitFor({state:'hidden',timeout:20000});
+    await expanded.waitFor({state:'hidden',timeout:20000});
     await settled(page);
     const samples=await page.evaluate(()=>{window.__zayWholePageProfilerEnabled=false;return window.__zayWholePageProfiler||[];});
     assert.deepEqual(await cardTexts(),before,kind+': open/close changed card text');
