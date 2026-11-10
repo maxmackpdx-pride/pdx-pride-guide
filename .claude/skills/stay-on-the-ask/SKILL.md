@@ -1,9 +1,12 @@
 ---
 name: stay-on-the-ask
-description: Answer a side comment without reopening the task. Use when the user adds context during CI, a deploy, or other in-flight work. Do not recheck CI, Railway, or git unless the new message asks for that.
+description: Cursor only. Answer a side comment without reopening the task. Use when the user adds context during CI, a deploy, or other in-flight work. Do not recheck CI, Railway, or git unless the new message asks for that.
 ---
 
 # Stay on the ask
+
+This skill's usage limits apply only to Cursor. Other agents follow their normal
+workflow and the shared rules in `AGENTS.md`.
 
 A side comment is an answer, not a new investigation.
 

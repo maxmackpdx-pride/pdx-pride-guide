@@ -12,6 +12,8 @@ repository-specific facts and safeguards.
 - A request to **push/ship/deploy/go live** authorizes the complete production pipeline;
   do not pause for a redundant second confirmation.
 - Keep unrelated user and agent work unstaged and untouched.
+- Merge only when required checks are green and Tucker already asked for the merge.
+  No force and no admin bypass.
 - For a task that includes **push/ship/deploy**, inspect the session's permitted
   write paths before implementation. Confirm there is an authorized way to advance
   `master` through terminal Git or the connected GitHub integration. If neither
@@ -108,7 +110,19 @@ A 1.5 GB replica-cap attempt did not stick; do not keep retrying caps that do no
 Current env controls are `FLYER_LLM_DISABLED=1`, `QSEARCH_SCRUB_LLM=0`, and
 `QSEARCH_SCRUB_FLYER_VISION=0`.
 
-## Usage
+## Credit awareness (all agents)
+
+Be conscious of credit and compute use. Before starting unusually credit-heavy work,
+tell Tucker what is likely to be expensive and why. Give a rough estimate when one is
+available, otherwise say the cost is uncertain, and offer a smaller approach when practical.
+This heads-up does not add a new approval gate to already-authorized work.
+
+## Cursor-only usage limits
+
+The four usage limits below apply only to Cursor. Other agents follow their normal
+workflows for authorized work, including follow-through, diagnosis, verification and
+progress updates. Shared scope, safety, shipping approvals and verification rules still
+apply to every agent. This does not change any platform's permissions.
 
 - CI or Railway wait: `.claude/skills/deploy-wait/SKILL.md`. One read at the decision point. No polling and no pending status pings.
 - After the asked result is reported: `.claude/skills/report-once/SKILL.md`. Stop. No second confirmation.
