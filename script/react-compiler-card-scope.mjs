@@ -15,7 +15,8 @@ export const cardFaceModules = [
   'board/punk/ZineCard',
 ];
 
-// Identical to the allowlist measured in PR #69's four-trial Chromium fixture.
+// The pre-narrowing candidate was measured in PR #69's four-trial Chromium
+// whole-page fixture. This restricted candidate requires a new CI comparison.
 // Compile only category-specific Eventz and Boardz card entries plus their
 // enumerated faces. Placez and Needz have not demonstrated consistent whole-
 // page benefit and remain uncompiled. The shared ZaylistCard switch also
