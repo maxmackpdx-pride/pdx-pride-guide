@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
-import {createServer} from 'node:http';
+import {createServer,request as httpRequest} from 'node:http';
 import express from 'express';
 import session from 'express-session';
 import {registerMapSocialRoutes} from './mapSocialRoutes';
@@ -20,7 +20,39 @@ async function setup(){
   const res=await fetch(base+path,{method:options.method??'GET',headers:{...(cookie?{Cookie:cookie}:{}),...(options.body===undefined?{}:{'Content-Type':'application/json'}),...(options.origin===undefined?{}:{Origin:options.origin==='self'?base:options.origin}),...options.headers},...(options.body===undefined?{}:{body:JSON.stringify(options.body)})});
   const set=res.headers.get('set-cookie');if(set)cookie=set.split(';')[0];return res;
  };
- return {app,db,users,call,base,sessions,close:async()=>{await new Promise<void>(r=>server.close(()=>r()));db.close();}};
+ // Node's fetch replaces a supplied Host with the URL authority. Use the
+ // native HTTP client for proxy tests so the TLS terminator's Host/proto pair
+ // genuinely reaches Express. Keep the same cookie session as ordinary calls.
+ const proxyCall=async(path:string,options:{method?:string;body?:any;origin?:string;headers?:Record<string,string>}={})=>{
+  const payload=options.body===undefined?undefined:JSON.stringify(options.body);
+  const headers={
+   ...(cookie?{Cookie:cookie}:{}),
+   ...(payload===undefined?{}:{'Content-Type':'application/json'}),
+   ...(options.origin===undefined?{}:{Origin:options.origin==='self'?base:options.origin}),
+   ...options.headers,
+  };
+  const res=await new Promise<Response>((resolve,reject)=>{
+   const request=httpRequest(base+path,{method:options.method??'GET',headers},incoming=>{
+    const chunks:Buffer[]=[];
+    incoming.on('data',chunk=>chunks.push(Buffer.from(chunk)));
+    incoming.on('error',reject);
+    incoming.on('end',()=>{
+     const responseHeaders=new Headers();
+     for(const [name,value] of Object.entries(incoming.headers)){
+      if(Array.isArray(value)){for(const item of value)responseHeaders.append(name,item);}
+      else if(value!==undefined)responseHeaders.set(name,value);
+     }
+     resolve(new Response(Buffer.concat(chunks).toString('utf8'),{status:incoming.statusCode??500,headers:responseHeaders}));
+    });
+   });
+   request.on('error',reject);
+   if(payload!==undefined)request.write(payload);
+   request.end();
+  });
+  const set=res.headers.get('set-cookie');if(set)cookie=set.split(';')[0];
+  return res;
+ };
+ return {app,db,users,call,proxyCall,base,sessions,close:async()=>{await new Promise<void>(r=>server.close(()=>r()));db.close();}};
 }
 const consent='/api/maps/v1/zaydark/consent',profiles='/api/maps/v1/social/zaydark';
 test('anonymous gate leaks no profiles and every status is no-store; public demo remains labeled',async()=>{
@@ -96,12 +128,12 @@ test('Railway-style trusted TLS proxy preserves same-origin adult consent checks
   h.app.set('trust proxy',1);
   await h.call('/_test/login',{method:'POST',body:{userId:7}});
   const proxied={Host:'www.zaylist.com','X-Forwarded-Proto':'https'};
-  const foreign=await h.call(consent,{method:'POST',body:{confirmed18:true},origin:'https://other.example',headers:proxied});
+  const foreign=await h.proxyCall(consent,{method:'POST',body:{confirmed18:true},origin:'https://other.example',headers:proxied});
   assert.equal(foreign.status,403,'foreign origin must not grant consent behind TLS proxy');
-  const wrongScheme=await h.call(consent,{method:'POST',body:{confirmed18:true},origin:'https://www.zaylist.com',headers:{...proxied,'X-Forwarded-Proto':'http'}});
+  const wrongScheme=await h.proxyCall(consent,{method:'POST',body:{confirmed18:true},origin:'https://www.zaylist.com',headers:{...proxied,'X-Forwarded-Proto':'http'}});
   assert.equal(wrongScheme.status,403,'scheme mismatch must not grant consent');
   assert.deepEqual(await (await h.call(consent)).json(),{signedIn:true,adultOptIn:false});
-  const accepted=await h.call(consent,{method:'POST',body:{confirmed18:true},origin:'https://www.zaylist.com',headers:proxied});
+  const accepted=await h.proxyCall(consent,{method:'POST',body:{confirmed18:true},origin:'https://www.zaylist.com',headers:proxied});
   assert.equal(accepted.status,200,'trusted forwarded HTTPS and canonical host should match');
   assert.deepEqual(await accepted.json(),{signedIn:true,adultOptIn:true});
   assert.equal((await h.call(profiles)).status,200,'grant must persist in the signed-in server session');
