@@ -97,13 +97,21 @@ jobs:
         run: node --test --test-concurrency=1 script/react-production-card-compiler-comparison.test.mjs
       - name: Compare production-optimized real cards with React profiling builds
         run: node --test --test-concurrency=1 script/react-production-like-card-profile-browser.test.mjs
-      - name: Profile actual Resources, Boards and Directory page trees in both modes
+      - name: Profile actual Resources, Boards and Directory page trees in balanced mode order
         run: |
           node --check script/card-route-browser.test.mjs
           node --check script/react-whole-page-profile-compare.mjs
-          CARD_ROUTE_QA_FOCUS=page-profile CARD_ROUTE_QA_PROFILE_OUTPUT=/tmp/zay-page-off.json node --test --test-concurrency=1 script/card-route-browser.test.mjs
-          CARD_ROUTE_QA_FOCUS=page-profile CARD_ROUTE_QA_COMPILER=1 CARD_ROUTE_QA_PROFILE_OUTPUT=/tmp/zay-page-infer.json node --test --test-concurrency=1 script/card-route-browser.test.mjs
-          node script/react-whole-page-profile-compare.mjs /tmp/zay-page-off.json /tmp/zay-page-infer.json
+          # Each round runs both Compiler modes, reversing which runs first on
+          # alternate rounds. Preserve every fingerprint/duration/commit assertion.
+          for round in 1 2 3 4; do
+            if [ $((round % 2)) -eq 1 ]; then order="off infer"; else order="infer off"; fi
+            for mode in $order; do
+              if [ "$mode" = "infer" ]; then compiler=1; else compiler=0; fi
+              echo "Page profile round $round mode $mode"
+              CARD_ROUTE_QA_FOCUS=page-profile CARD_ROUTE_QA_PROFILE_ROUND="$round" CARD_ROUTE_QA_COMPILER="$compiler" CARD_ROUTE_QA_PROFILE_OUTPUT="/tmp/zay-page-${mode}-${round}.json" node --test --test-concurrency=1 script/card-route-browser.test.mjs
+            done
+          done
+          node script/react-whole-page-profile-compare.mjs "/tmp/zay-page-off-1.json,/tmp/zay-page-off-2.json,/tmp/zay-page-off-3.json,/tmp/zay-page-off-4.json" "/tmp/zay-page-infer-1.json,/tmp/zay-page-infer-2.json,/tmp/zay-page-infer-3.json,/tmp/zay-page-infer-4.json"
       - name: Compare compiled and uncompiled experimental card renders
         run: node --test --test-concurrency=1 script/react-compiler-comparison-browser.test.mjs
       - name: Check card expansion and motion
