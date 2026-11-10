@@ -80,9 +80,14 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  // It is a page-tree development-fixture comparison, NOT a production speedup.
  const pageProfiles=[];
  if(focus==='page-profile'){
+  // A single-round mode lets CI interleave off/infer in balanced order while
+  // retaining the original four-round behavior for standalone invocations.
+  const roundEnv=process.env.CARD_ROUTE_QA_PROFILE_ROUND;
+  const rounds=roundEnv===undefined?[1,2,3,4]:[Number(roundEnv)];
+  assert.ok(rounds.every(round=>Number.isInteger(round)&&round>=1&&round<=4),'Profile round must be 1, 2, 3, or 4');
   for(const kind of ['resources','boards','directory']){
    const selector=kind==='resources'?'.rd-card[data-card-category="needz"]':kind==='boards'?'.boardz-production-card':'.eb-grid .rd-card[data-card-category="placez"]';
-   for(let round=1;round<=4;round++){
+   for(const round of rounds){
     page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
     const search=kind==='directory'?'?type=ALL&layout=grid':'?layout=grid';
     await page.goto(base+'__route-qa/'+kind+search,{waitUntil:'networkidle'});
