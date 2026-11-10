@@ -43,7 +43,9 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 50
+    # Full off/on real-card and four-route profiling plus both browser engines exceeds 50 min.
+    # Preserve all assertions and give the strict suite time to finish.
+    timeout-minutes: 80
     steps:
       - name: Checkout experiment branch
         uses: actions/checkout@v4
