@@ -17,5 +17,16 @@ function AdultGateFixture() {
   if(declined)return <p data-testid="adult-gate-declined">Entry declined</p>;
   return <AdultContentGate onDecline={()=>setDeclined(true)}><p data-testid="adult-chat-content">Synthetic gated chat content</p></AdultContentGate>;
 }
+// Test-only measurements around the actual production page tree. This fixture
+// intentionally uses synthetic API responses and is not a live-site benchmark.
+type RouteProfileCommit = {phase:string;actualDurationMs:number;baseDurationMs:number};
+declare global {
+  interface Window {
+    __zayWholePageProfiler?:RouteProfileCommit[];
+    __zayWholePageProfilerEnabled?:boolean;
+  }
+}
+window.__zayWholePageProfiler=[];
+window.__zayWholePageProfilerEnabled=false;
 const Page = location.pathname.includes('adult-gate') ? AdultGateFixture : location.pathname.includes('boards') ? Boards : location.pathname.includes('directory') ? Directory : Resources;
-createRoot(document.getElementById('root')!).render(<QueryClientProvider client={queryClient}><AuthProvider><ThemeProvider><Page/></ThemeProvider></AuthProvider></QueryClientProvider>);
+createRoot(document.getElementById('root')!).render(<QueryClientProvider client={queryClient}><AuthProvider><ThemeProvider><React.Profiler id="zay-whole-page" onRender={(_id,phase,actualDurationMs,baseDurationMs)=>{if(window.__zayWholePageProfilerEnabled)window.__zayWholePageProfiler?.push({phase,actualDurationMs,baseDurationMs});}}><Page/></React.Profiler></ThemeProvider></AuthProvider></QueryClientProvider>);
