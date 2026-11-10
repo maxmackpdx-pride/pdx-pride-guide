@@ -24,10 +24,12 @@ export default defineConfig(({ command }):UserConfig => {
  return ({
   plugins: [
     react(),
-    // Experimental production candidate: ONLY the card API and real card-face
-    // renderers measured in the balanced Chromium comparison. Keep pages, auth,
-    // consent, modal controllers, Mapz, and the profiling harness uncompiled.
-    // Release still requires independent browser, visual, and performance gates.
+    // Experimental release candidate: only Eventz/Boardz category card wrappers
+    // and their exact face renderers. The initial full card-only candidate showed
+    // inconsistent optimized whole-page results for Placez/Resources, so they
+    // remain uncompiled. Keep shared CardAPI, pages, auth, consent, modal
+    // controllers, Mapz and profiling harness uncompiled. Revalidate every
+    // revision against balanced Chromium/WebKit and release approval gates.
     babel({
       presets: [reactCompilerPreset({ compilationMode: "infer" })],
       include: cardSourcePatterns,
