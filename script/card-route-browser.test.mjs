@@ -6,7 +6,8 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {mkdir,mkdtemp,rm} from 'node:fs/promises';
+import {mkdir,mkdtemp,rm,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 import {tmpdir} from 'node:os';
 import {createServer} from 'vite';
 import react,{reactCompilerPreset} from '@vitejs/plugin-react';
@@ -73,6 +74,48 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  await context.route('**/api/**',mockApi);
  let page;const errors=[];const focus=process.env.CARD_ROUTE_QA_FOCUS;
  // Isolated route probes distinguish cross-route WebKit renderer failures from card-specific regressions.
+
+ // Whole-page profiling traverses the real Resources, Boards and Directory
+ // page components. Mocked read-only APIs prevent private or live data access.
+ // It is a page-tree development-fixture comparison, NOT a production speedup.
+ const pageProfiles=[];
+ if(focus==='page-profile'){
+  for(const kind of ['resources','boards','directory']){
+   const selector=kind==='resources'?'.rd-card[data-card-category="needz"]':kind==='boards'?'.boardz-production-card':'.eb-grid .rd-card[data-card-category="placez"]';
+   for(let round=1;round<=4;round++){
+    page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
+    const search=kind==='directory'?'?type=ALL&layout=grid':'?layout=grid';
+    await page.goto(base+'__route-qa/'+kind+search,{waitUntil:'networkidle'});
+    await settled(page);
+    const card=page.locator(selector).first();await card.waitFor({state:'visible',timeout:30000});
+    await card.scrollIntoViewIfNeeded();await settled(page);
+    const cardTexts=async()=>page.locator(selector).allTextContents().then(xs=>xs.map(x=>x.replace(/\s+/g,' ').trim()));
+    const before=await cardTexts();
+    assert.ok(before.length>=1,kind+': expected production cards');
+    const fingerprint=createHash('sha256').update(JSON.stringify(before)).digest('hex').slice(0,16);
+    await page.evaluate(()=>{window.__zayWholePageProfiler=[];window.__zayWholePageProfilerEnabled=true;});
+    if(kind==='boards')await card.locator('.punk-open-target').click();
+    else await card.click({position:{x:kind==='resources'?80:60,y:kind==='resources'?90:75}});
+    await page.locator('.zay-card-expanded').waitFor({state:'visible',timeout:20000});
+    await settled(page);
+    await page.keyboard.press('Escape');
+    await page.locator('.zay-card-expanded:visible').waitFor({state:'hidden',timeout:20000});
+    await settled(page);
+    const samples=await page.evaluate(()=>{window.__zayWholePageProfilerEnabled=false;return window.__zayWholePageProfiler||[];});
+    assert.deepEqual(await cardTexts(),before,kind+': open/close changed card text');
+    assert.ok(samples.length>=2,kind+' round '+round+': expected page Profiler callbacks for open and close');
+    assert.ok(samples.every(sample=>Number.isFinite(sample.actualDurationMs)&&sample.actualDurationMs>=0&&Number.isFinite(sample.baseDurationMs)&&sample.baseDurationMs>=0),kind+' round '+round+': invalid Profiler durations');
+    assert.ok(samples.every(sample=>sample.phase!=='mount'),kind+' round '+round+': measured navigation/mount rather than interactions');
+    const actualDurationMs=Number(samples.reduce((total,item)=>total+item.actualDurationMs,0).toFixed(3));
+    pageProfiles.push({kind,round,fingerprint,cards:before.length,commits:samples.length,actualDurationMs});
+    console.log('REACT_ROUTE_WHOLE_PAGE_PROFILE '+JSON.stringify({mode:process.env.CARD_ROUTE_QA_COMPILER==='1'?'card-infer':'off',kind,round,fingerprint,cards:before.length,commits:samples.length,actualDurationMs}));
+    await page.close();
+   }
+  }
+  assert.deepEqual(errors,[],'Actual page-tree profiling encountered browser errors');
+  const output=process.env.CARD_ROUTE_QA_PROFILE_OUTPUT;
+  if(output)await writeFile(output,JSON.stringify({mode:process.env.CARD_ROUTE_QA_COMPILER==='1'?'card-infer':'off',browser:browser.version(),records:pageProfiles},null,2)+'\n');
+ }
  for(const kind of focus==='grid-resources'?['resources']:focus==='grid-boards'?['boards']:focus?[]:['resources','boards']){
  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  page.on('crash',()=>console.error(`CARD_ROUTE_BROWSER_PAGE_CRASH ${browserEngine} ${kind}`));
