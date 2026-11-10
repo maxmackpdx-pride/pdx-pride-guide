@@ -62,7 +62,7 @@ test('all small card APIs and real Directory share centered heart controls witho
    if(process.env.CARD_HEART_CASE_FILTER&&!new RegExp(process.env.CARD_HEART_CASE_FILTER).test(family))continue;
    hearts=[];writes.length=0;
    await page.setViewportSize({width:family==='directory'?390:1280,height:1000});
-   await page.goto(family==='directory'?`${base}__route-qa/directory`:`${base}__card-qa?family=${family}&size=small`,{waitUntil:'networkidle'});
+   await page.goto(family==='directory'?`${base}__route-qa/directory?type=ALL&layout=grid`:`${base}__card-qa?family=${family}&size=small`,{waitUntil:'networkidle'});
    const card=page.locator(family==='directory'?'.eb-page [data-card-size="small"]':'#qa-grid [data-card-size="small"]').filter({has:page.locator('[data-card-heart="true"]')}).first();
    await card.waitFor();await card.scrollIntoViewIfNeeded();await settled(page);
    if(family!=='directory')await geometryReady(page);
@@ -82,7 +82,7 @@ test('all small card APIs and real Directory share centered heart controls witho
    await heart.click();await settled(page);
    assert.equal(await page.locator('.zay-card-expanded:visible').count(),0,`${family} heart does not open details`);
    if(countBefore!==null)assert.equal(await page.locator('#qa-saved-count').textContent(),'1',`${family} original save callback`);
-   else {assert.equal(writes.length,1,`${family} one original endpoint write`);assert.equal(writes[0].method,'POST');assert.equal(writes[0].p,family==='place'||family==='directory'?'/api/directory/80000/follow':'/api/hearts');if(family==='outz'||family==='needz')assert.equal(writes[0].body.kind,family==='outz'?'outz':'resource');}
+   else {assert.equal(writes.length,1,`${family} one original endpoint write`);assert.equal(writes[0].method,'POST');assert.equal(writes[0].p,family==='place'?'/api/directory/80000/follow':'/api/hearts');if(family==='outz'||family==='needz')assert.equal(writes[0].body.kind,family==='outz'?'outz':'resource');}
    assert.equal(await heart.getAttribute('aria-pressed'),'true',`${family} saved visual state`);
    const activeAppearance=await heart.evaluate(el=>({background:getComputedStyle(el).backgroundColor,color:getComputedStyle(el).color,fill:getComputedStyle(el.querySelector('svg')).fill}));if(activeReference)assert.deepEqual(activeAppearance,activeReference,`${family} same selected appearance`);else activeReference=activeAppearance;
    await heart.focus();await page.keyboard.press('Enter');await settled(page);
