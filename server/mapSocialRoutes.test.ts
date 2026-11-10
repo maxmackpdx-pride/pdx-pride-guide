@@ -20,7 +20,7 @@ async function setup(){
   const res=await fetch(base+path,{method:options.method??'GET',headers:{...(cookie?{Cookie:cookie}:{}),...(options.body===undefined?{}:{'Content-Type':'application/json'}),...(options.origin===undefined?{}:{Origin:options.origin==='self'?base:options.origin}),...options.headers},...(options.body===undefined?{}:{body:JSON.stringify(options.body)})});
   const set=res.headers.get('set-cookie');if(set)cookie=set.split(';')[0];return res;
  };
- return {db,users,call,base,sessions,close:async()=>{await new Promise<void>(r=>server.close(()=>r()));db.close();}};
+ return {app,db,users,call,base,sessions,close:async()=>{await new Promise<void>(r=>server.close(()=>r()));db.close();}};
 }
 const consent='/api/maps/v1/zaydark/consent',profiles='/api/maps/v1/social/zaydark';
 test('anonymous gate leaks no profiles and every status is no-store; public demo remains labeled',async()=>{
@@ -87,5 +87,23 @@ test('a mis-keyed ZayDark data row can never leak through the public Afterz endp
   const row=h.db.prepare("SELECT payload FROM map_social_content WHERE mode='zaydark'").get() as {payload:string};
   h.db.prepare("UPDATE map_social_content SET payload=? WHERE mode='afterz'").run(row.payload);
   const res=await h.call('/api/maps/v1/social/afterz');assert.equal(res.status,503);assert.doesNotMatch(await res.text(),/profiles|Alex Demo|albums/);
+ }finally{await h.close();}
+});
+
+
+test('Railway-style trusted TLS proxy preserves same-origin adult consent checks',async()=>{
+ const h=await setup();try{
+  h.app.set('trust proxy',1);
+  await h.call('/_test/login',{method:'POST',body:{userId:7}});
+  const proxied={Host:'www.zaylist.com','X-Forwarded-Proto':'https'};
+  const foreign=await h.call(consent,{method:'POST',body:{confirmed18:true},origin:'https://other.example',headers:proxied});
+  assert.equal(foreign.status,403,'foreign origin must not grant consent behind TLS proxy');
+  const wrongScheme=await h.call(consent,{method:'POST',body:{confirmed18:true},origin:'https://www.zaylist.com',headers:{...proxied,'X-Forwarded-Proto':'http'}});
+  assert.equal(wrongScheme.status,403,'scheme mismatch must not grant consent');
+  assert.deepEqual(await (await h.call(consent)).json(),{signedIn:true,adultOptIn:false});
+  const accepted=await h.call(consent,{method:'POST',body:{confirmed18:true},origin:'https://www.zaylist.com',headers:proxied});
+  assert.equal(accepted.status,200,'trusted forwarded HTTPS and canonical host should match');
+  assert.deepEqual(await accepted.json(),{signedIn:true,adultOptIn:true});
+  assert.equal((await h.call(profiles)).status,200,'grant must persist in the signed-in server session');
  }finally{await h.close();}
 });
