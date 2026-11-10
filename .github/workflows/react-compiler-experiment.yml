@@ -17,6 +17,8 @@ on:
       - "script/react-production-card-compiler-comparison.test.mjs"
       - "script/react-production-like-card-profile-browser.test.mjs"
       - "script/react-whole-page-profile-compare.mjs"
+      - "script/react-production-page-profile-browser.test.mjs"
+      - "script/fixtures/production-page-profiler.html"
       - "script/card-route-browser.test.mjs"
       - "script/fixtures/card-route-browser.tsx"
       - "script/fixtures/production-card-profiler.html"
@@ -70,7 +72,9 @@ jobs:
       - name: Install with frozen lockfile
         run: npm ci --include=dev
       - name: Syntax-check optimized profiling fixture
-        run: node --check script/react-production-like-card-profile-browser.test.mjs
+        run: |
+          node --check script/react-production-like-card-profile-browser.test.mjs
+          node --check script/react-production-page-profile-browser.test.mjs
       - name: Verify compiler is performing real transforms
         run: node script/react-compiler-smoke.mjs
       - name: Verify actual Vite app card-only Compiler scope
@@ -97,7 +101,7 @@ jobs:
         run: node --test --test-concurrency=1 script/react-production-card-compiler-comparison.test.mjs
       - name: Compare production-optimized real cards with React profiling builds
         run: node --test --test-concurrency=1 script/react-production-like-card-profile-browser.test.mjs
-      - name: Profile actual Resources, Boards and Directory page trees in balanced mode order
+      - name: Profile actual Eventz, Resources, Boards and Directory page trees in balanced mode order
         run: |
           node --check script/card-route-browser.test.mjs
           node --check script/react-whole-page-profile-compare.mjs
@@ -112,6 +116,8 @@ jobs:
             done
           done
           node script/react-whole-page-profile-compare.mjs "/tmp/zay-page-off-1.json,/tmp/zay-page-off-2.json,/tmp/zay-page-off-3.json,/tmp/zay-page-off-4.json" "/tmp/zay-page-infer-1.json,/tmp/zay-page-infer-2.json,/tmp/zay-page-infer-3.json,/tmp/zay-page-infer-4.json"
+      - name: Compare optimized Eventz, Resources, Boardz and Placez page trees with React 19 profiling renderer
+        run: node --test --test-concurrency=1 script/react-production-page-profile-browser.test.mjs
       - name: Compare compiled and uncompiled experimental card renders
         run: node --test --test-concurrency=1 script/react-compiler-comparison-browser.test.mjs
       - name: Check card expansion and motion
