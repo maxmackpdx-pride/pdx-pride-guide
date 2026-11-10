@@ -21,7 +21,7 @@ const loadMode=async(paths,expectedMode)=>{
 };
 const [off,infer]=await Promise.all([loadMode(offPaths,'off'),loadMode(inferPaths,'card-infer')]);
 assert.equal(infer.browser,off.browser,'Browser engine/version must match');
-const families=['resources','boards','directory'];
+const families=['events','resources','boards','directory'];
 const assertSample=(sample,kind,round)=>{
  assert.equal(sample.kind,kind);
  assert.equal(sample.round,round);
@@ -30,8 +30,8 @@ const assertSample=(sample,kind,round)=>{
  assert.ok(Number.isFinite(sample.actualDurationMs)&&sample.actualDurationMs>=0,'Invalid Profiler actualDuration');
  assert.match(sample.fingerprint,/^[a-f0-9]{16}$/,'Missing deterministic card fingerprint');
 };
-assert.equal(off.records.length,12);
-assert.equal(infer.records.length,12);
+assert.equal(off.records.length,16);
+assert.equal(infer.records.length,16);
 const comparisons=[];
 for(const kind of families){
  const pairs=[];
@@ -51,5 +51,5 @@ for(const kind of families){
 }
 console.log('REACT_ROUTE_WHOLE_PAGE_COMPARISON '+JSON.stringify({
  browser:off.browser,comparisons,
- limitations:'Uses actual Resources, Boards, Directory page trees and card open/close interactions with mocked read-only APIs and Vite development renderer; four trials per mode, with React Profiler overhead. CI alternates invocation order for single-round files; this is not a randomized or device-level trial. No production-optimized or live speedup established.',
+ limitations:'Uses actual Eventz, Resources, Boards, Directory page trees and card open/close interactions with mocked read-only APIs and Vite development renderer; four trials per mode, with React Profiler overhead. CI alternates invocation order for single-round files; this is not a randomized or device-level trial. No production-optimized or live speedup established.',
 }));
