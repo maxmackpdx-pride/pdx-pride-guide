@@ -29,5 +29,6 @@ declare global {
 }
 window.__zayWholePageProfiler=[];
 window.__zayWholePageProfilerEnabled=false;
-const Page = location.pathname.includes('adult-gate') ? AdultGateFixture : location.pathname.includes('boards') ? Boards : location.pathname.includes('directory') ? Directory : location.pathname.includes('events') ? Events : Resources;
+const qaRoute=new URLSearchParams(location.search).get('qaRoute') || location.pathname;
+const Page = qaRoute.includes('adult-gate') ? AdultGateFixture : qaRoute.includes('boards') ? Boards : qaRoute.includes('directory') ? Directory : qaRoute.includes('events') ? Events : Resources;
 createRoot(document.getElementById('root')!).render(<QueryClientProvider client={queryClient}><AuthProvider><ThemeProvider><React.Profiler id="zay-whole-page" onRender={(_id,phase,actualDurationMs,baseDurationMs)=>{if(window.__zayWholePageProfilerEnabled)window.__zayWholePageProfiler?.push({phase,actualDurationMs,baseDurationMs});}}><Page/></React.Profiler></ThemeProvider></AuthProvider></QueryClientProvider>);
