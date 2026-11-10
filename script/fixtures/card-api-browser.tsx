@@ -1,5 +1,5 @@
 /** Browser-only fixture importing production cards. No API writes are sent. */
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {QueryClientProvider} from '@tanstack/react-query';
 import {queryClient} from '@/lib/queryClient';
@@ -27,8 +27,11 @@ function Fixture(){
  const [selected,setSelected] = useState<any>(null);
  const [detail,setDetail] = useState<string|null>(null);
  const [saved,setSaved] = useState<number[]>([]);
+ const [profileTick,setProfileTick] = useState(0);
+ // Test-only profiling hook. No production card or DOM layout changes.
+ useEffect(()=>{const tick=()=>setProfileTick(t=>t+1);window.addEventListener('zaylist-card-profile-tick',tick);(window as any).__zayCardProfileListenerReady=true;return()=>{window.removeEventListener('zaylist-card-profile-tick',tick);delete (window as any).__zayCardProfileListenerReady;};},[]);
  const save=(id:number)=>setSaved(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);
- return <><h1>Production card layout regression</h1><div id="qa-grid" style={{display:layout.startsWith('flex')?'flex':'grid',flexWrap:'wrap',gridTemplateColumns:layout==='fluid'?`repeat(3,minmax(${width}px,1fr))`:`repeat(3, ${width}px)`,gap:24,alignItems:'start',justifyContent:'start',width:layout==='fluid'?1100:width*3+48,maxWidth:'100%',position:'relative','--qa-card-width':`${width}px`} as React.CSSProperties}>
+ return <><h1>Production card layout regression</h1><output hidden data-profile-tick>{profileTick}</output><React.Profiler id="production-card-grid" onRender={(_id,phase,actualDuration,baseDuration)=>{const measurements=((window as any).__zayCardRenderProfile??=[]);measurements.push({phase,actualDurationMs:actualDuration,baseDurationMs:baseDuration,tick:profileTick});}}><div id="qa-grid" style={{display:layout.startsWith('flex')?'flex':'grid',flexWrap:'wrap',gridTemplateColumns:layout==='fluid'?`repeat(3,minmax(${width}px,1fr))`:`repeat(3, ${width}px)`,gap:24,alignItems:'start',justifyContent:'start',width:layout==='fluid'?1100:width*3+48,maxWidth:'100%',position:'relative','--qa-card-width':`${width}px`} as React.CSSProperties}>
  {places.map((id,i)=>{
   const destination=destinationData.places.find((p:any)=>p.id===id);
   const item = {photo:destination?.photo,art:destination?.art,key:`outz:${id}`,name:destination?.name||`QA Destination ${i+1}`,room:family==='place'?'Placez':'OutZide',detail:destination?.region||'Portland region',href:`/outzide?place=${id}`,kind:destination?.kind||'beach',place:family==='place'?{id:80000+i,name:`QA Place ${i+1}`,type:'bar',description:'Browser regression fixture',neighborhood:'Portland',events:[],pastEvents:[],gigs:[]}:undefined} as any;
@@ -37,7 +40,7 @@ function Fixture(){
   if(family==='outz')return <ZaylistCard category="outzide" key={id} location={item} size={size as any}/>;
   if(family==='event')return <ZaylistCard category="eventz" key={id} size={size as any} listing={events[i]} rsvped={saved.includes(events[i].id)} onToggleRsvp={save} onOpen={setSelected}/>;
   return <ZaylistCard category="placez" key={id} size={size as any} place={item.place}/>;
- })}</div>{detail&&<CardDetails key={detail} onClose={()=>setDetail(null)}><section style={{minHeight:500,padding:20,boxSizing:'border-box'}}><button aria-label="Close fixture" onClick={()=>setDetail(null)}>Close</button><h2>{detail}</h2><p>Host-only detail fixture. Category internals are tested on their page routes.</p></section></CardDetails>}{selected&&<EventModal event={selected} onClose={()=>setSelected(null)}/>}<output id="qa-saved-count">{saved.length}</output></>;
+ })}</div></React.Profiler>{detail&&<CardDetails key={detail} onClose={()=>setDetail(null)}><section style={{minHeight:500,padding:20,boxSizing:'border-box'}}><button aria-label="Close fixture" onClick={()=>setDetail(null)}>Close</button><h2>{detail}</h2><p>Host-only detail fixture. Category internals are tested on their page routes.</p></section></CardDetails>}{selected&&<EventModal event={selected} onClose={()=>setSelected(null)}/>}<output id="qa-saved-count">{saved.length}</output></>;
 }
 const app = (<QueryClientProvider client={queryClient}><AuthProvider><ThemeProvider><Fixture/></ThemeProvider></AuthProvider></QueryClientProvider>);
 createRoot(document.getElementById('root')!).render(query.get('strict')==='1'?<React.StrictMode>{app}</React.StrictMode>:app);

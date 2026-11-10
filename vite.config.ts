@@ -1,9 +1,11 @@
 import { defineConfig, type UserConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
 import fs from "node:fs";
 import { createHash } from "node:crypto";
+import { cardSourcePatterns, cardCompilerExcludedPatterns } from "./script/react-compiler-card-scope.mjs";
 
 // Fingerprint the independent homepage flyover. The five-mode engine uses a separately pinned release.
 const flightSource = path.resolve(import.meta.dirname, "client/public/home-flight");
@@ -22,6 +24,17 @@ export default defineConfig(({ command }):UserConfig => {
  return ({
   plugins: [
     react(),
+    // Experimental release candidate: only Eventz/Boardz category card wrappers
+    // and their exact face renderers. The initial full card-only candidate showed
+    // inconsistent optimized whole-page results for Placez/Resources, so they
+    // remain uncompiled. Keep shared CardAPI, pages, auth, consent, modal
+    // controllers, Mapz and profiling harness uncompiled. Revalidate every
+    // revision against balanced Chromium/WebKit and release approval gates.
+    babel({
+      presets: [reactCompilerPreset({ compilationMode: "infer" })],
+      include: cardSourcePatterns,
+      exclude: cardCompilerExcludedPatterns,
+    }),
     {
       name: "version-home-flight-assets",
       apply: "build",

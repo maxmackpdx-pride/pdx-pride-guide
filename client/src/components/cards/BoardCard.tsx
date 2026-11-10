@@ -4,5 +4,6 @@ import BoardBrowseCard from '../board/BoardBrowseCard';
 /** Board category artwork and actions inside the shared tall/wide/small contract. */
 export type BoardCardProps = ComponentProps<typeof BoardBrowseCard>;
 export function BoardCard(props: BoardCardProps) {
+ "use memo";
   return <BoardBrowseCard {...props} />;
 }

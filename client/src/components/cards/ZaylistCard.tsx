@@ -14,6 +14,7 @@ export type ZaylistCardProps =
   | ({ category: 'needz' } & ComponentProps<typeof NeedzCard>);
 
 export function ZaylistCard(props: ZaylistCardProps) {
+ "use memo";
   switch (props.category) {
     case 'eventz': { const { category, ...card } = props; return <EventCard {...card} />; }
     case 'placez': { const { category, ...card } = props; return <PlaceCard {...card} />; }
