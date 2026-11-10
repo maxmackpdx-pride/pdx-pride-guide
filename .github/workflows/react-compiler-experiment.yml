@@ -16,6 +16,9 @@ on:
       - "script/react-compiler-comparison-browser.test.mjs"
       - "script/react-production-card-compiler-comparison.test.mjs"
       - "script/react-production-like-card-profile-browser.test.mjs"
+      - "script/react-whole-page-profile-compare.mjs"
+      - "script/card-route-browser.test.mjs"
+      - "script/fixtures/card-route-browser.tsx"
       - "script/fixtures/production-card-profiler.html"
       - "script/fixtures/react-compiler-card-benchmark.tsx"
       - "script/fixtures/card-api-browser.tsx"
@@ -94,6 +97,13 @@ jobs:
         run: node --test --test-concurrency=1 script/react-production-card-compiler-comparison.test.mjs
       - name: Compare production-optimized real cards with React profiling builds
         run: node --test --test-concurrency=1 script/react-production-like-card-profile-browser.test.mjs
+      - name: Profile actual Resources, Boards and Directory page trees in both modes
+        run: |
+          node --check script/card-route-browser.test.mjs
+          node --check script/react-whole-page-profile-compare.mjs
+          CARD_ROUTE_QA_FOCUS=page-profile CARD_ROUTE_QA_PROFILE_OUTPUT=/tmp/zay-page-off.json node --test --test-concurrency=1 script/card-route-browser.test.mjs
+          CARD_ROUTE_QA_FOCUS=page-profile CARD_ROUTE_QA_COMPILER=1 CARD_ROUTE_QA_PROFILE_OUTPUT=/tmp/zay-page-infer.json node --test --test-concurrency=1 script/card-route-browser.test.mjs
+          node script/react-whole-page-profile-compare.mjs /tmp/zay-page-off.json /tmp/zay-page-infer.json
       - name: Compare compiled and uncompiled experimental card renders
         run: node --test --test-concurrency=1 script/react-compiler-comparison-browser.test.mjs
       - name: Check card expansion and motion
