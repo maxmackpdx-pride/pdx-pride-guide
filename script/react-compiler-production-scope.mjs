@@ -14,11 +14,12 @@ const compilerMarker=/react(?:\/|_)compiler-runtime|useMemoCache|memo_cache_sent
 const inScope=[
  'components/cards/EventCard.tsx',
  'components/cards/BoardCard.tsx',
- 'components/cards/PlaceCard.tsx',
- 'components/discovery/PlaceDiscoveryCard.tsx',
  ...cardFaceModules.map(face=>'components/'+face+(face.startsWith('board/punk/')?'.jsx':'.tsx')),
 ];
 const outOfScope=[
+ 'components/cards/PlaceCard.tsx',
+ 'components/discovery/PlaceDiscoveryCard.tsx',
+ 'components/home/TodayLocationCard.tsx',
  'components/cards/ZaylistCard.tsx',
  'components/cards/NeedzCard.tsx',
  'components/cards/OutzCard.tsx',
@@ -68,7 +69,7 @@ try{
   }
  }
  console.log('REACT_COMPILER_PRODUCTION_SCOPE '+JSON.stringify({
-  mode:'card-only-infer',config:'vite.config.ts',
+  mode:'event-board-card-infer',config:'vite.config.ts',
   compiled:inspected.filter(item=>item.compiled).map(item=>item.url),
   excluded:inspected.filter(item=>!item.compiled).map(item=>item.url),
  }));
