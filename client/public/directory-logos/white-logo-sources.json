@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-13-white-vector-r8",
+  "version": "2026-11-11-pizzathief-r1",
   "treatment": "Predominantly white source-faithful vector artwork on transparency, with thin dark outlines and restrained gray detail where needed to preserve original internal separation. No bloom.",
   "entries": [
     {
@@ -1324,13 +1324,15 @@
       "name": "Pizza Thief",
       "normalized": "pizzathief",
       "asset": "/directory-logos/pizzathief-white.svg",
-      "kind": "official-raster-trace",
+      "kind": "retained-logo-trace",
       "sourcePage": "https://pizzathief.com/",
-      "sourceAsset": "https://pizzathief.com/wp-content/uploads/2024/11/PIZZA-THIEF-Nav-new.png",
-      "checked": "2026-10-13",
-      "ratio": 5.944375772558714,
+      "sourceAsset": null,
+      "checked": "2026-11-11",
+      "ratio": 1.601801726040933,
       "lines": null,
-      "reason": null
+      "reason": "Owner-supplied stacked wordmark and raccoon pizza-slice mark replace the earlier wide text-only mark.",
+      "sourceEvidence": "Owner-supplied IMG_1339.png, 2026-11-11",
+      "treatment": "Source-faithful cubic vector curves, pure white ink and transparent negative spaces, cleaned edges and subpixel speckles, 2.5% mark-width clearspace. No bloom or substituted lettering."
     },
     {
       "name": "Plus Psychiatry",

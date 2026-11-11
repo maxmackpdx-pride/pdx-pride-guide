@@ -1,5 +1,5 @@
 /** Reviewed white marks; provenance lives in /directory-logos/white-logo-sources.json. */
-export const WHITE_COMPANY_LOGO_VERSION = "2026-10-13-white-vector-r8";
+export const WHITE_COMPANY_LOGO_VERSION = "2026-11-11-pizzathief-r1";
 export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number; kind: "official-vector" | "official-raster-trace" | "retained-logo-trace" | "reference-restored-vector" | "text-fallback" }> = {
   "cockeyekink": {
     "asset": "/directory-logos/cockeyekink-white.svg",
@@ -533,8 +533,8 @@ export const WHITE_COMPANY_LOGOS: Record<string, { asset: string; ratio: number;
   },
   "pizzathief": {
     "asset": "/directory-logos/pizzathief-white.svg",
-    "ratio": 5.94438,
-    "kind": "official-raster-trace"
+    "ratio": 1.60180,
+    "kind": "retained-logo-trace"
   },
   "pluspsychiatry": {
     "asset": "/directory-logos/pluspsychiatry-white.svg",

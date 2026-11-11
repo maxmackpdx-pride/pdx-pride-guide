@@ -8,7 +8,14 @@ repository-specific facts and safeguards.
 
 - Implement exactly the requested change. Do not expand it into design-system work,
   Foundation governance, cleanup, refactoring, or deployment without Tucker's approval.
-- A request to **fix/change/build** authorizes local implementation, not a push.
+- A request to **fix/change/build** normally authorizes local implementation, not a push,
+  except for the explicit logo-replacement authorization below.
+- Owner direction, 11 November 2026: an explicit request to replace an existing logo
+  asset authorizes committing and pushing that named replacement and its necessary
+  resolver, provenance, and cache-version metadata through the normal `master`
+  production pipeline. Do not ask again merely because the request says "replace"
+  rather than "push". An explicit local-only or mockup-only restriction still controls.
+  This does not authorize unrelated changes or replacing other assets.
 - A request to **push/ship/deploy/go live** authorizes the complete production pipeline;
   do not pause for a redundant second confirmation.
 - Keep unrelated user and agent work unstaged and untouched.
