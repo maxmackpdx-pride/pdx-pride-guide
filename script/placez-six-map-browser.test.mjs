@@ -45,7 +45,15 @@ test('immutable map release uses shared read-only PlaceZ portals at phone and de
    await expanded.getByRole('button',{name:'Close Holocene',exact:true}).click();await closed.waitFor();await page.waitForTimeout(350);const after=await closed.boundingBox();near(after.width,before.width,'Reverse width');near(after.height,before.height,'Reverse height');assert.equal(new URL(page.url()).searchParams.get('item'),'venue-30');
    await closed.getByRole('button',{name:'View details for Holocene',exact:true}).click();await expanded.waitFor();await page.keyboard.press('Escape');await page.locator('.mapz-map-dialog').waitFor({state:'hidden'});assert.equal(new URL(page.url()).searchParams.get('item'),null);
    await page.locator('#reopen-map-place').click();await closed.waitFor();assert.equal(new URL(page.url()).searchParams.get('item'),'venue-30');
-   if(mode!=='normal')assert.equal(await page.locator('.mapz-map-object').evaluate(el=>getComputedStyle(el).transitionDuration),'0s');
+   if(mode!=='normal'){
+    // The site reduced-motion token uses 0.01ms !important; browsers may serialize it as 1e-05s.
+    const durations=await page.locator('.mapz-map-object').evaluate(el=>getComputedStyle(el).transitionDuration);
+    for(const duration of durations.split(',')){
+     const match=duration.trim().match(/^([\d.eE+-]+)(ms|s)$/);assert.ok(match,`Invalid transition duration: ${duration}`);
+     const milliseconds=Number(match[1])*(match[2]==='s'?1000:1);
+     assert.ok(Number.isFinite(milliseconds)&&milliseconds>=0&&milliseconds<=0.010001,`Reduced-motion transition should be immediate: ${duration}`);
+    }
+   }
    if(mode==='normal'){await page.evaluate(()=>document.documentElement.classList.add('calm-mode'));assert.equal(await page.locator('.mapz-map-object').evaluate(el=>getComputedStyle(el).transitionDuration),'0s','Same-tab Calm class disables map transitions');await page.evaluate(()=>document.documentElement.classList.remove('calm-mode'));}
    evidence.push({width,mode,closed:before,expanded:bounds,readOnly:true,mapsTools:true});
   }
