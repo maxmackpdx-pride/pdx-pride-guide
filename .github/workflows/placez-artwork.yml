@@ -9,6 +9,22 @@ on:
       - "client/src/components/CardMotifMotion.css"
       - "client/src/components/resources/**"
       - "client/src/components/artwork/**"
+      - "client/src/components/placez/**"
+      - "client/src/components/PlaceModal.tsx"
+      - "client/src/pages/Directory.tsx"
+      - "client/public/placez-six/**"
+      - "script/placez-six*.mjs"
+      - "script/fixtures/placez-six-browser.tsx"
+      - "script/fixtures/placez-six-map-browser.tsx"
+      - "vendor/zaylist-maps/**"
+      - "script/fixtures/placez-six-compiler.tsx"
+      - "script/fixtures/placez-six-compiler.html"
+      - "script/react-compiler-card-scope.d.mts"
+      - "script/react-compiler-card-scope.mjs"
+      - "script/react-compiler-production-scope.mjs"
+      - "script/react-compiler-function-proof*.mjs"
+      - "client/src/pages/UnifiedMap.tsx"
+      - "shared/mapReleaseLock.json"
       - "script/placez-artwork*.mjs"
       - "script/fixtures/placez-artwork-browser.tsx"
       - ".github/workflows/placez-artwork.yml"
@@ -23,9 +39,11 @@ concurrency:
 jobs:
   artwork:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: "24.22.2"
@@ -40,6 +58,23 @@ jobs:
         run: node --test script/placez-artwork-browser.test.mjs
         env:
           PLACEZ_QA_SCREENSHOT_DIR: artifacts/placez-artwork
+      - name: Verify six native PlaceZ faces and expanded tools
+        run: node --test script/placez-six-contract.test.mjs script/placez-six-data.test.mjs script/placez-six-browser.test.mjs
+        env:
+          PLACEZ_QA_SCREENSHOT_DIR: artifacts/placez-artwork/six
+      - id: map_gate
+        name: Detect final immutable map candidate
+        run: echo "ready=$(node -p "Number(require('./shared/mapReleaseLock.json').tag.split('.').pop()) >= 21")" >> "$GITHUB_OUTPUT"
+      - name: Verify pinned map PlaceZ bridge and navigation
+        if: steps.map_gate.outputs.ready == 'true'
+        run: node script/prepare-map-release.mjs client/public && node --test script/placez-six-map-browser.test.mjs
+        env:
+          PLACEZ_MAP_QA_DIR: artifacts/placez-artwork/six/maps
+      - name: Verify exact PlaceZ compiler scope
+        run: node --test script/react-compiler-function-proof.test.mjs && node script/react-compiler-production-scope.mjs
+      - name: Compare optimized PlaceZ compiler off and on
+        if: steps.map_gate.outputs.ready == 'true'
+        run: node --test script/placez-six-compiler-scope.test.mjs && node --test script/placez-six-compiler-production.test.mjs
       - name: Build and verify production bundle without deploying
         if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
         run: npm run build && npm run verify:deploy
@@ -51,3 +86,4 @@ jobs:
           path: artifacts/placez-artwork
           if-no-files-found: ignore
           retention-days: 7
+

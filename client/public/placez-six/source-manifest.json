@@ -1,0 +1,295 @@
+{
+  "note": "Approved originals preserved unchanged in the PlaceZ Six Venue Review Kit. Delivery derivatives resize/encode only; logos copied unchanged.",
+  "assets": [
+    {
+      "original": "Holocene-tall-glass.png",
+      "sha256": "c60f6fde4256e11feb0f4a3fa390a5e8e1c2eac02b814973a4fb52f58eb91138",
+      "bytes": 101996
+    },
+    {
+      "original": "Darcelle-XV-wide-background.png",
+      "sha256": "1370e7d6f236cc5cd26d74c43569e1a30d2a01684231a05602b892b98a7c9e4f",
+      "bytes": 2543925
+    },
+    {
+      "original": "Pizza-Thief-wide-glass.svg",
+      "sha256": "019d332eb3616bd21e5af1bc1b1e9d2addf69a3b20bda41263238079c4601074",
+      "bytes": 4240
+    },
+    {
+      "original": "Holocene-wide-glass.png",
+      "sha256": "f4c683b524055a2523e627cdf98b2452c46b54acb7f8349dc0d8cfeb33147161",
+      "bytes": 103135
+    },
+    {
+      "original": "Eagle-Portland-wide-logo.svg",
+      "sha256": "b1b39daa17c504af2852411c3bbb9ddd5e4185a09463ef4c3150ace86363b479",
+      "bytes": 107046
+    },
+    {
+      "original": "Eagle-Portland-wide-background.png",
+      "sha256": "f0061d2de5b733987cac34feb4b7b2e9ca5e22b688534120c599a9a591fac683",
+      "bytes": 2404309
+    },
+    {
+      "original": "Darcelle-XV-wide-fade-mask.svg",
+      "sha256": "4bd4adc473ff6e4affd1f3dbf9a6f228251a868e825cfbab0f6a0316ea7ca3ac",
+      "bytes": 413
+    },
+    {
+      "original": "Stag-PDX-small-glass.png",
+      "sha256": "a77daac8a8e35aaa579cad4a56b15c69e8f6647a4060cd8e4bedc0f4697a4b85",
+      "bytes": 53067
+    },
+    {
+      "original": "Stag-PDX-tall-glass.png",
+      "sha256": "f72eb30986151af4447fea9e110e79f5eaa09265ac80532c9b3d24bd6756159f",
+      "bytes": 99364
+    },
+    {
+      "original": "Holocene-square-glass.png",
+      "sha256": "f8ec79e2795fab690df70ae4b3722848604a19aab306cebad015f61aee6749f2",
+      "bytes": 73841
+    },
+    {
+      "original": "Stag-PDX-hero.png",
+      "sha256": "c197520fdcb5e130683315dbdce4d2dbb673cb21c58b8f0a621d508bf52b7264",
+      "bytes": 2122273
+    },
+    {
+      "original": "Pizza-Thief-tall-glass.svg",
+      "sha256": "843b061b001e935c5441b7b2db5dc67bff181b1337b343ced79fb563c557c540",
+      "bytes": 4187
+    },
+    {
+      "original": "Alberta-Rose-Theatre-wide-fade-mask.svg",
+      "sha256": "3a163249b05032982a0a344ac34bbd7dacc7e6970e3feab8c0fa4f9d8839076c",
+      "bytes": 413
+    },
+    {
+      "original": "Alberta-Rose-Theatre-hero.png",
+      "sha256": "427faf0737fe0138687c375b49d2438000a159244449f9ce69258e4ecc4ab6b0",
+      "bytes": 1914524
+    },
+    {
+      "original": "Alberta-Rose-Theatre-wide-background.png",
+      "sha256": "0d7ffab6c503ac2060a468c594ec62a061730dda961e315c5a105deeb7c55693",
+      "bytes": 2528517
+    },
+    {
+      "original": "Darcelle-XV-wide-logo.svg",
+      "sha256": "83af01ba7bdcfe96d352cc3d265fd3d33bbdcc01ca152948223550c10477e22a",
+      "bytes": 107335
+    },
+    {
+      "original": "Darcelle-XV-square-glass.png",
+      "sha256": "6678527b7b491defccd0cda2e93fd28718e9538b6cce82701e9fed2fb60f2ebd",
+      "bytes": 84793
+    },
+    {
+      "original": "Darcelle-XV-small-glass.png",
+      "sha256": "bb8d892b40bf7ed4d4b09d9acfc96ad4fb5379bb0cfe2467d9d1d8deee91b333",
+      "bytes": 65843
+    },
+    {
+      "original": "Pizza-Thief-small-glass.svg",
+      "sha256": "f5907d6940e6a82ab7ffb716302f1b30ba915eefe6848492edf8253c7a6cb208",
+      "bytes": 4314
+    },
+    {
+      "original": "Pizza-Thief-square-glass.svg",
+      "sha256": "04d8dcd504270b913ee57aa42246bba5dc71552fe5708dd91b5066c99bd1e0d7",
+      "bytes": 3908
+    },
+    {
+      "original": "Stag-PDX-wide-logo.svg",
+      "sha256": "24a049040dce80f25d90f23f9ad3fdc49a3f22611187a0f825a60de6254d686a",
+      "bytes": 50879
+    },
+    {
+      "original": "Eagle-Portland-wide-fade-mask.svg",
+      "sha256": "7b404187619b9fb52d8085fa0c728783d75e32d9b26aaa34edceaf9066e2e98e",
+      "bytes": 413
+    },
+    {
+      "original": "Eagle-Portland-hero.png",
+      "sha256": "28f411298b2dcdf591297a94ac2007e0a2e8c02b5d4bb075558d81c7de74d930",
+      "bytes": 1982696
+    },
+    {
+      "original": "Stag-PDX-wide-background.png",
+      "sha256": "b7eae2c512e70a539b20cae36d3ef13fcdf5e47f7d5412353dccab4d4c959e95",
+      "bytes": 2597159
+    },
+    {
+      "original": "Alberta-Rose-Theatre-wide-glass.png",
+      "sha256": "a8fce23d8e9f1cfffff4a0bb4952d0225a0bb8a4bb117560c0a754a75e54bd66",
+      "bytes": 119509
+    },
+    {
+      "original": "Stag-PDX-wide-glass.png",
+      "sha256": "19e92a70d4e39422fa09a497d9151d9b041346fa6cc7752f2e44d770efedc60e",
+      "bytes": 98101
+    },
+    {
+      "original": "Stag-PDX-wide-fade-mask.svg",
+      "sha256": "0398b0e7c082a56e7dd98142b299c8b44d5cc39552c281da774c2bf733436924",
+      "bytes": 413
+    },
+    {
+      "original": "Darcelle-XV-tall-glass.png",
+      "sha256": "8515af6e0d030451418c7d5bc377a9aa37e60d440464eae1ed5214142bb678a6",
+      "bytes": 110480
+    },
+    {
+      "original": "Pizza-Thief-hero.png",
+      "sha256": "6eae72906ac48d9f23957aa0951ffad386c7fd852e3ea8be32d94cbc3994d4b5",
+      "bytes": 2784975
+    },
+    {
+      "original": "Alberta-Rose-Theatre-wide-logo.svg",
+      "sha256": "8a70de12b8a0d80af77ca5cadde02ea6ae777bc0fcc18a507070ab5e5939fb0e",
+      "bytes": 135933
+    },
+    {
+      "original": "Alberta-Rose-Theatre-tall-glass.png",
+      "sha256": "c4f1a159a2600dea61d525e5a999901ed136e3106a88ce60a7548cbe6d474cb3",
+      "bytes": 114819
+    },
+    {
+      "original": "Stag-PDX-square-glass.png",
+      "sha256": "7b8018e58db656b875220fbd5dd1a59a9cd8637a5cb56630a76925286ed9f97f",
+      "bytes": 68075
+    },
+    {
+      "original": "Alberta-Rose-Theatre-small-glass.png",
+      "sha256": "592c38d695fbc2746e262e169646af34d4eeea6f4d62b2b031f297a6a85bc9cf",
+      "bytes": 64758
+    },
+    {
+      "original": "Holocene-hero.png",
+      "sha256": "776ae1601803835730743c16045375da39308caf485d6ab638dad53723de1e2f",
+      "bytes": 1977492
+    },
+    {
+      "original": "Holocene-small-glass.png",
+      "sha256": "7e392768c4bd2097d061f6db484716fd0d90f1186cf9012e9e5c20fa078d0528",
+      "bytes": 56070
+    },
+    {
+      "original": "Holocene-wide-background.png",
+      "sha256": "50efda3300e80809eef31afc856eabe544ff9431707f522c01646c3a79875004",
+      "bytes": 2675771
+    },
+    {
+      "original": "Pizza-Thief-logo.svg",
+      "sha256": "a7042e9607b30e685ca87a50128dbfb498ae59692e10e74267d7a408d49289c8",
+      "bytes": 23437
+    },
+    {
+      "original": "Eagle-Portland-square-glass.png",
+      "sha256": "348fd577ffb3a164115cbd3b686cc85064e580a4f592c87adda8bdaae9a067fc",
+      "bytes": 82724
+    },
+    {
+      "original": "Darcelle-XV-wide-glass.png",
+      "sha256": "5165a1b1a64ddc13168dc18f69e579d7cb69adda281e0c2070d7ae052acbdc50",
+      "bytes": 121921
+    },
+    {
+      "original": "Eagle-Portland-small-glass.png",
+      "sha256": "ed4abbf6b1789a7edb6f1564c25c6c71a23a83761c3222756b01e8a770283dd2",
+      "bytes": 64940
+    },
+    {
+      "original": "Darcelle-XV-hero.png",
+      "sha256": "a329015c4105963317bf06582e227c0fa5ae7a511701ab39bc37d321171225e0",
+      "bytes": 2177454
+    },
+    {
+      "original": "Eagle-Portland-wide-glass.png",
+      "sha256": "80f26adc0d7552de2cc8bc9b5261aed631554a1f7105498ece82853cda7ab8c4",
+      "bytes": 119225
+    },
+    {
+      "original": "Holocene-wide-fade-mask.svg",
+      "sha256": "c586c9a9cca85f5feb49230a273523602504e13bf787d68d19f0711bff624370",
+      "bytes": 411
+    },
+    {
+      "original": "Holocene-wide-logo.svg",
+      "sha256": "4c414565726ac69846becbac5fc2c07b8780da4aa7e8ac87508a319985ad2938",
+      "bytes": 23975
+    },
+    {
+      "original": "Alberta-Rose-Theatre-square-glass.png",
+      "sha256": "ef99185723a839597dd2f67d052d5a1523a60d6ee81da2efd44853f3c02b8fbc",
+      "bytes": 84118
+    },
+    {
+      "original": "Eagle-Portland-tall-glass.png",
+      "sha256": "291bec6ead89f89d4681eb818581c3b3299a7590d6c994de8acacb5753e1ea2d",
+      "bytes": 103373
+    },
+    {
+      "original": "Darcelle-XV-wide-header-cutout.svg",
+      "sha256": "ff09e5a9299400ff29f4602c1550494008e582a94b1121658b39192362ba2c97",
+      "bytes": 7727
+    },
+    {
+      "original": "Holocene-wide-header-cutout.svg",
+      "sha256": "f5cb007e6fb3c3bae85e103bbc81974af20683fc7578f680dfc454da1b30e8fa",
+      "bytes": 6641
+    },
+    {
+      "original": "Alberta-Rose-Theatre-wide-header-cutout.svg",
+      "sha256": "1f1a64fe37663ad7abe530ec8b7b7da9bf498520f3d24dd23b59734927891e21",
+      "bytes": 7994
+    },
+    {
+      "original": "Pizza-Thief-sidewalk-treatment.svg",
+      "sha256": "0e4acfdabdc4b8c2c7715109a3726a0d3e733226c1dc17fecad5ae7bef693441",
+      "bytes": 485915
+    },
+    {
+      "original": "Holocene-header-cutout.svg",
+      "sha256": "b74cd4fe27d22420b21195309adaef5983002464904facfaf599633f375865d3",
+      "bytes": 4851
+    },
+    {
+      "original": "Stag-PDX-wide-header-cutout.svg",
+      "sha256": "09f6877c1415519e519102ed6e0c4eb9cf8b3a94a7e8549af6e4be98f3750842",
+      "bytes": 8164
+    },
+    {
+      "original": "Pizza-Thief-header-cutout.svg",
+      "sha256": "e77a7708dd8f7818ed903237a7b516773ef96cccd0ed44c99cc6687ddd1d9a9b",
+      "bytes": 5782
+    },
+    {
+      "original": "Darcelle-XV-header-cutout.svg",
+      "sha256": "90d27a943df28177a3db5b23c42642a1cbf03b1580dedfb4a6c8de844fad2246",
+      "bytes": 5438
+    },
+    {
+      "original": "Alberta-Rose-Theatre-header-cutout.svg",
+      "sha256": "4591a8998e8744939a2b0e7e3122717025a64e5125a1dbde705a9728fd39c851",
+      "bytes": 5826
+    },
+    {
+      "original": "Eagle-Portland-wide-header-cutout.svg",
+      "sha256": "70140c62a28505f88443957e9633a6d56ae8c9dde01068720e4a951f819eb73e",
+      "bytes": 7869
+    },
+    {
+      "original": "Stag-PDX-header-cutout.svg",
+      "sha256": "64124cdf8f610b517e2c2a7c9cf1d71c465b7bd7135ac7d60091dc65c26ac299",
+      "bytes": 5913
+    },
+    {
+      "original": "Eagle-Portland-header-cutout.svg",
+      "sha256": "a2fa3363a357d5fc2b60eb2842785819d9b1b9d99c0d2e881e9a9a5d3b290db8",
+      "bytes": 5730
+    }
+  ]
+}

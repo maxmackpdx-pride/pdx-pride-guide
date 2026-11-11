@@ -1,3 +1,4 @@
+import {useMapPlacezRenderer} from '@/components/placez/MapPlacezBridge';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import type {Event} from '@shared/schema';
 import type {Business} from '@/pages/Directory';
@@ -22,6 +23,7 @@ function initialMode():Mode {
  * The component owns its styles/root and tears both down when leaving maps. */
 export default function UnifiedMap(){
  const node=useRef<HTMLDivElement>(null);
+ const {renderer:placezRenderer,portals:placezPortals}=useMapPlacezRenderer();
  const {user}=useAuth();const search=useSearch();
  const [attempt,setAttempt]=useState(0),[error,setError]=useState('');
  const [legacyDetail,setLegacyDetail]=useState<{kind:'event';record:Event}|{kind:'place';record:Business}|null>(null);
@@ -48,18 +50,20 @@ export default function UnifiedMap(){
    const shared=window.location.pathname.match(/^\/outzide\/share\/([^/]+)$/)?.[1];
    const bookmark=mapBookmark(params,initialMode());
    if(bookmark.mode!==initialMode()){const url=new URL(window.location.href);url.searchParams.set('mode',bookmark.mode);window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);}
-   const result=module.mount(node.current,{initialMode:bookmark.mode,selectedId:shared?decodeURIComponent(shared):bookmark.selectedId,loginHref:'/map?mode=zaydark&auth=login'});
+   const result=module.mount(node.current,{initialMode:bookmark.mode,selectedId:shared?decodeURIComponent(shared):bookmark.selectedId,loginHref:'/map?mode=zaydark&auth=login',placezRenderer});
    cleanup=()=>result.unmount();
    window.dispatchEvent(new CustomEvent('zaylist:map-ready',{detail:{map:'unified',release:release.tag}}));
   };
   void load().catch(reason=>{if(!disposed)setError(reason instanceof Error?reason.message:'Map could not load.');});
   return()=>{disposed=true;cleanup?.();releaseStyles?.();};
- },[attempt,user?.id]);
+ },[attempt,user?.id,placezRenderer]);
  return <section className="zaylist-unified-map" aria-label="Zaylist five-mode map" data-map-release={release.tag} data-map-commit={release.commit} style={{position:'fixed',inset:0,zIndex:45,background:'var(--z-black,#050506)'}}>
   <div ref={node} style={{width:'100%',height:'100%',position:'relative'}}/>
+  {placezPortals}
   {error&&<div role="alert" style={{position:'absolute',inset:0,display:'grid',placeContent:'center',padding:24,background:'var(--z-black,#050506)',color:'white',gap:16}}><h1>Map unavailable</h1><p>{error}</p><button type="button" onClick={()=>setAttempt(v=>v+1)}>Retry map</button><a href="/events">Browse events without the map</a><a href="/">Back to Zaylist</a></div>}
   {legacyError&&<div role="alert" style={{position:'absolute',top:80,left:16,right:16,padding:16,background:'var(--z-black)',color:'white',zIndex:300}}>{legacyError} <button onClick={closeLegacy}>Dismiss</button></div>}
   {legacyDetail&&<Suspense fallback={<p role="status">Loading bookmarked details…</p>}>{legacyDetail.kind==='event'?<EventModal event={legacyDetail.record} onClose={closeLegacy}/>:<PlaceModal place={legacyDetail.record} onClose={closeLegacy} onRequireAuth={()=>setAuthOpen(true)}/>}</Suspense>}
   {authOpen&&!user&&<AuthModal onClose={()=>{setAuthOpen(false);const url=new URL(window.location.href);url.searchParams.delete('auth');window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);}}/>}
  </section>;
 }
+

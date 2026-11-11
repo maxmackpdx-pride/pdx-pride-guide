@@ -20,7 +20,8 @@ const fixture='script/fixtures/card-api-browser.tsx';
 
 // A bounded infer experiment including the actual Eventz and Boardz card faces
 // and artwork renderers, not merely thin EventCard/BoardCard wrappers.
-// Placez remains in the visual and timing comparison as an excluded control.
+// Legacy Placez remains a regression control. The six-ID native rollout has its
+// own dedicated comparison and must not be inferred from these legacy IDs.
 // Only these exact components are included, not page routes, auth, modal, Mapz,
 // or consent UI. The profiling parent remains deliberately uncompiled.
 // The fixture parent remains uncompiled so its updates cannot be memoized away.
@@ -81,8 +82,8 @@ async function sample(browser,mode,t) {
       console.log('COMPILER_PRODUCTION_CARD_MODULES '+JSON.stringify({mode,transformed,probes}));
       assert.ok(transformed.length>0,'Compiler did not transform any actual production card module');
       if(scoped){
-        assert.deepEqual(transformed,['EventCard','BoardCard'],
-          'Card-scoped infer must transform Eventz and Boardz but leave unproven Placez outside scope');
+        assert.deepEqual(transformed,['EventCard','BoardCard','PlaceCard'],
+          'Card-scoped infer must transform the exact candidate category wrappers');
         const compiledFaces=[];
         for(const face of cardFaceModules){
           const module=await server.transformRequest('/client/src/components/'+face+(face.startsWith('board/punk/')?'.jsx':'.tsx'));
@@ -91,7 +92,6 @@ async function sample(browser,mode,t) {
         assert.deepEqual(compiledFaces,cardFaceModules,
           'Card-scoped infer must transform each real face renderer, not just the wrapper');
         const excluded=[
-          '/client/src/components/cards/PlaceCard.tsx',
           '/client/src/components/discovery/PlaceDiscoveryCard.tsx',
           '/client/src/components/home/TodayLocationCard.tsx',
           '/client/src/components/cards/ZaylistCard.tsx',
@@ -241,3 +241,4 @@ test('matched real Eventz, Boardz and Placez cards render identically with Compi
     }));
   }finally{await browser.close();}
 });
+

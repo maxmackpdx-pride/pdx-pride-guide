@@ -1,0 +1,22 @@
+/* The host remains responsible for slot geometry; decoration cannot alter footprints. */
+.placez-native-shell{overflow:visible!important;background:none!important;border:0!important;box-shadow:none!important}
+.placez-native-shell .pz-heart .card-heart-button{position:relative;inset:auto}
+html.calm-mode .pz-art__moving img,html[data-calm=true] .pz-art__moving img{animation:none!important;transform:none!important}
+/* Override the legacy small-card control's absolute corner, retaining its transport. */
+html .placez-native-shell .pz-card .pz-heart button[data-card-heart=true][aria-pressed].zheart-btn,
+html .pz-native-expanded .pz-heart button[data-card-heart=true][aria-pressed].zheart-btn{
+ position:relative!important;inset:auto!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;border:0!important;border-radius:0!important;background:none!important;color:var(--pz-accent)!important;box-shadow:none!important;transform:none!important;
+}
+html .placez-native-shell .pz-card .pz-heart button[data-card-heart=true]:before{width:32px!important;height:32px!important;inset:6px!important;border-radius:50%;border:1px solid var(--pz-accent);background:rgba(4,9,13,.55)}
+html .placez-native-shell .pz-card .pz-heart button[data-card-heart=true][aria-pressed=true]:before{background:color-mix(in srgb,var(--pz-accent) 20%,#04090d)}
+.placez-map-host{width:100%;min-width:0}
+.placez-map-host .pz-card--expanded{width:100%;max-width:620px;max-height:calc(100dvh - 24px)}
+.placez-map-host .pz-compose-icon,.placez-map-host .pz-compose-row{cursor:not-allowed}
+.placez-map-host .pz-heart button{opacity:.55}
+/* Host Calm changes are synchronous even across the isolated map React bundle. */
+html.calm-mode .mapz-map-dialog.is-host-placez,
+html[data-calm="true"] .mapz-map-dialog.is-host-placez,
+html.calm-mode .mapz-map-dialog.is-host-placez .mapz-map-object,
+html[data-calm="true"] .mapz-map-dialog.is-host-placez .mapz-map-object{transition:none!important}
+html.calm-mode .mapz-map-dialog.is-host-placez .host-placez-card,
+html[data-calm="true"] .mapz-map-dialog.is-host-placez .host-placez-card{animation:none!important}

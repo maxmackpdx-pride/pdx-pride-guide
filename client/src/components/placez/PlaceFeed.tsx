@@ -1,0 +1,17 @@
+export interface PlaceNewsItem {id:string;title:string;body?:string;publishedAt:string;href?:string;kind?:string;}
+export interface PlaceFeedData {venueId:number;checkedAt:string;status:'available'|'empty'|'unavailable';items:PlaceNewsItem[];message?:string;}
+export interface PlaceActivePost {id:string|number;title:string;body?:string;href?:string;}
+export interface PlacePostGroup {status:'ready'|'empty'|'unavailable';posts:PlaceActivePost[];}
+export interface PlaceActivePosts {venueId:number;checkedAt:string;gigz:PlacePostGroup;mizzed:PlacePostGroup;}
+function ActivePosts({data,venueId,now}:{data?:PlaceActivePosts;venueId:number;now:number}){
+ const checked=Date.parse(data?.checkedAt||''),valid=data?.venueId===venueId&&Number.isFinite(checked)&&checked<=now&&now-checked<=86400000;
+ return <section className="pz-active-posts" aria-label="Active posts at this place"><div className="pz-section-heading"><h3>Active at this place</h3></div>{(['gigz','mizzed'] as const).map(kind=>{const group=valid?data?.[kind]:undefined,known=group&&((group.status==='empty'&&group.posts.length===0)||(group.status==='ready'&&group.posts.length>0)),label=kind==='gigz'?'Gigz':'Mizzed Connections';return <div className={`pz-active-post-group pz-active-post-group--${kind}`} key={kind}><div className="pz-active-post-heading"><h4>{label}</h4><span>{known?String(group.posts.length).padStart(2,'0'):'—'}</span></div>{known&&group.posts.length?<ul>{group.posts.map(post=><li key={post.id}>{post.href?<a href={post.href} rel="noreferrer">{post.title}</a>:<strong>{post.title}</strong>}{post.body&&<p>{post.body}</p>}</li>)}</ul>:<p>{known?`No active ${label} listed.`:`Active ${label} are not available in this snapshot.`}</p>}</div>;})}</section>;
+}
+export default function PlaceFeed({data,venueId,previewNow,activePosts}:{data?:PlaceFeedData;venueId:number;previewNow?:number;activePosts?:PlaceActivePosts}) {
+  const now=previewNow??Date.now(),checked=Date.parse(data?.checkedAt||'');
+  const verified=data?.venueId===venueId&&Number.isFinite(checked)&&checked<=now&&now-checked<=86400000?data:undefined;
+  const items=verified?.status==='available'?verified.items.filter(item=>Number.isFinite(Date.parse(item.publishedAt))&&Date.parse(item.publishedAt)<=now).sort((a,b)=>Date.parse(b.publishedAt)-Date.parse(a.publishedAt)):[];
+  return <div className="pz-feed-page"><ActivePosts data={activePosts} venueId={venueId} now={now}/><section className="pz-place-feed"><div className="pz-section-heading"><h3>Place news</h3><span>This venue only</span></div>
+    {items.length?<ol className="pz-news-items">{items.map(item=><li key={item.id}><small>{item.kind||'Update'} · <time dateTime={item.publishedAt}>{new Intl.DateTimeFormat('en-US',{timeZone:'America/Los_Angeles',month:'short',day:'numeric',year:'numeric'}).format(Date.parse(item.publishedAt))}</time></small>{item.href?<a href={item.href} rel="noreferrer">{item.title}<span aria-hidden="true">↗</span></a>:<strong>{item.title}</strong>}{item.body&&<p>{item.body}</p>}</li>)}</ol>:<div className="pz-feed-empty"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="6" y="7" width="28" height="27" rx="3"/><path d="M11 13h18M11 19h8v8h-8zM23 19h6m-6 5h6m-6 5h6"/></svg><h4>{verified?.status==='empty'?'No place news yet':'Place news is not connected yet'}</h4><p>{verified?.message||'A public, venue-specific updates feed is not available in this snapshot.'}</p></div>}
+  </section></div>;
+}

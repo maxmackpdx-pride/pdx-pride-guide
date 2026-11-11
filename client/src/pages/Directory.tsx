@@ -1,3 +1,5 @@
+import NativePlacezFace from '@/components/placez/NativePlacezFace';
+import {hasPlacezArtwork} from '@/components/placez/nativeModel';
 import RoomDiscoveryCard from '@/components/discovery/RoomDiscoveryCard';
 import HeartButton from '@/components/HeartButton';
 import {ServiceNameMark} from '@/components/ServiceNameMark';
@@ -546,6 +548,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
 
   const renderBrowsePlace = (biz: Business) => <div key={biz.id} className="eb-original-card">
     {isSpaces ? <DirectoryCard size={compactCards ? "small" : "tall"} biz={biz} onClick={element=>openPlace(biz,element)} onRequireAuth={()=>setShowAuth(true)}/>
+      : hasPlacezArtwork(biz.id) ? <NativePlacezFace place={biz} size={compactCards?"small":"tall"} onOpen={element=>openPlace(biz,element)} onRequireAuth={()=>setShowAuth(true)}/>
       : <RoomDiscoveryCard room="placez" name={biz.name} category={TYPE_LABELS[biz.type] || biz.type} accent={TYPE_COLORS[biz.type] || 'var(--neon-cyan)'}
         logo={serviceArtwork(biz,resolveDirectoryLogo(biz.name,biz.imageUrl),true)} fallback={<ServiceNameMark source={biz} iconOnly/>}
         description={biz.description} tags={[TYPE_LABELS[biz.type] || biz.type,...(biz.queerOwned?['Queer owned']:[])]} meta={biz.neighborhood || biz.address}
@@ -859,3 +862,4 @@ function DirectoryCard({
 }) {
   return <PlaceDiscoveryCard size={size} place={biz} onOpen={element => onClick?.(element)} onRequireAuth={onRequireAuth} />;
 }
+
