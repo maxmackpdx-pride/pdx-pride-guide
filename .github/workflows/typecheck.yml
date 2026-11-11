@@ -3,6 +3,7 @@ name: Typecheck and CSS audit
 on:
   pull_request:
   push:
+    branches-ignore: [placez/six-browser-diagnostic]
 
 concurrency:
   group: typecheck-${{ github.workflow }}-${{ github.ref }}

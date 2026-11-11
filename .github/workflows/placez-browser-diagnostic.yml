@@ -1,0 +1,29 @@
+name: PlaceZ bounded browser diagnosis
+on:
+  push:
+    branches: [placez/six-browser-diagnostic]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.22.2"
+          cache: npm
+      - run: npm ci --include=dev
+      - run: npx playwright install --with-deps chromium
+      - name: Diagnose native browser with bounded process
+        run: timeout --signal=TERM --kill-after=30s 12m node --test script/placez-six-browser.test.mjs
+        env:
+          PLACEZ_QA_SCREENSHOT_DIR: artifacts/placez-diagnostic
+      - name: Preserve diagnostic checkpoints and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: placez-browser-diagnostic
+          path: artifacts/placez-diagnostic
+          retention-days: 7
