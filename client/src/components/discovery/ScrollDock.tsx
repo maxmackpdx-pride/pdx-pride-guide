@@ -64,7 +64,7 @@ export function ScrollDock({ top, label, searchLabel, onSearch, className = "", 
     const pressed = rail?.querySelector<HTMLElement>('[aria-pressed="true"]');
     if (rail && pressed) rail.scrollLeft = Math.max(0, pressed.offsetLeft - rail.clientWidth / 2 + pressed.offsetWidth / 2);
   }, []);
-  return <nav className={`zl-dock ${className}`.trim()} aria-label={label} style={{ "--zl-dock-top": `${top}px` } as CSSProperties}>
+  return <nav data-card-viewport-edge="top" className={`zl-dock ${className}`.trim()} aria-label={label} style={{ "--zl-dock-top": `${top}px` } as CSSProperties}>
     <div className="zl-dock__inner">
       {onSearch && <button type="button" className="zl-dock__search" aria-label={searchLabel || "Search"} onClick={onSearch}>
         <Search size={18} aria-hidden="true" />
@@ -81,3 +81,4 @@ export function DockChip({ label, count, color, pressed, onClick }: {
     <span>{label}</span>{count != null && <b aria-label={`${count} listings`}>{count}</b>}
   </button>;
 }
+

@@ -6,6 +6,8 @@ import {mkdir,mkdtemp,rm,readFile,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const near=(a,b,label)=>assert.ok(Math.abs(a-b)<1.1,`${label}: ${a} vs ${b}`);
+// Production's accessibility reset uses0.01ms to retain transition lifecycle events.
+const effectivelyStill=value=>value.split(',').every(part=>{const n=parseFloat(part);return Number.isFinite(n)&&n*(part.trim().endsWith('ms')?.001:1)<=.001;});
 const names={30:'Holocene',3:'Stag PDX',31:'Alberta Rose Theatre',5:'Eagle Portland',2:'Darcelle XV Showplace',23:'Pizza Thief'};
 const place=id=>({id,name:names[id],type:id===23?'restaurant':id===3||id===5?'bar':'venue',active:true,status:'OPEN',address:'Public fixture address',description:'Isolated browser fixture',neighborhood:'Portland',lat:45.52,lng:-122.67,locations:[{label:'Primary',address:'Public fixture address',lat:45.52,lng:-122.67}],isFollowing:false,upcomingEvents:[],pastEvents:[],gigs:[],spotted:[],promoters:[]});
 test('immutable map release uses shared read-only PlaceZ portals at phone and desktop sizes',{timeout:600000},async(t)=>{
@@ -47,14 +49,18 @@ test('immutable map release uses shared read-only PlaceZ portals at phone and de
    assert.ok(dismissBox.x+dismissBox.width<=heartBox.x||heartBox.x+heartBox.width<=dismissBox.x||dismissBox.y+dismissBox.height<=heartBox.y||heartBox.y+heartBox.height<=dismissBox.y,'Map dismiss and heart touch targets must not overlap');
    await page.locator('.mapz-map-object').evaluate(el=>{window.__mapPlacezTransitions=[];el.addEventListener('transitionrun',event=>window.__mapPlacezTransitions.push(event.propertyName));});await closed.getByRole('button',{name:'View details for Holocene',exact:true}).click();const expanded=page.locator('.host-placez-card .pz-card--expanded');await expanded.waitFor();await page.waitForTimeout(350);const bounds=await expanded.boundingBox();assert.ok(bounds.x>=0&&bounds.x+bounds.width<=width+1,'Expanded fits viewport');
    if(mode==='normal')assert.ok((await page.evaluate(()=>window.__mapPlacezTransitions)).includes('height'),'Persistent object visibly transitions height');
+   const artwork=await expanded.locator('.pz-art').boundingBox();assert.ok(artwork.height>=artwork.width*.5,'Map expanded retains full source artwork composition');
    assert.equal(await expanded.getByRole('tab',{name:'Info',exact:true}).getAttribute('aria-selected'),'true');assert.equal(await page.locator('.mapz-map-details').evaluate(el=>getComputedStyle(el).overflow),'visible','Outer wrapper preserves outward glow');assert.notEqual(await expanded.evaluate(el=>getComputedStyle(el).boxShadow),'none','Approved static glow is present');
    await expanded.getByRole('tab',{name:'Maps',exact:true}).click();await expanded.locator('.placez-map-tools').waitFor();await expanded.locator('.getting-there-card').waitFor();assert.ok(await expanded.getByRole('button',{name:'Show on map',exact:true}).count());
+   await page.waitForFunction(()=>{const v=document.querySelector('.host-placez-card .pz-card--expanded .pz-page-viewport');return v&&Math.abs(v.scrollLeft-3*v.clientWidth)<1;});
+   await page.waitForTimeout(120);
+   for(const selector of ['.pz-close','.pz-heart button'])assert.equal(await expanded.locator(selector).evaluate(el=>{const b=el.getBoundingClientRect(),hit=document.elementFromPoint(b.x+b.width/2,b.y+b.height/2);return !!hit&&(el===hit||el.contains(hit));}),true,`Map ${selector} clear of fixed dock`);
    await page.screenshot({path:path.join(shots,`${width}-${mode}-maps.png`),fullPage:true});
    await expanded.getByRole('button',{name:'Close Holocene',exact:true}).focus();await page.keyboard.press('Enter');await closed.waitFor();await page.waitForFunction(()=>document.activeElement?.getAttribute('aria-label')==='View details for Holocene');await page.waitForTimeout(350);const after=await closed.boundingBox();near(after.width,before.width,'Reverse width');near(after.height,before.height,'Reverse height');assert.equal(new URL(page.url()).searchParams.get('item'),'venue-30');
    await closed.getByRole('button',{name:'View details for Holocene',exact:true}).click();await expanded.waitFor();await page.keyboard.press('Escape');await page.locator('.mapz-map-dialog').waitFor({state:'hidden'});assert.equal(new URL(page.url()).searchParams.get('item'),null);
    await page.locator('#reopen-map-place').click();await closed.waitFor();assert.equal(new URL(page.url()).searchParams.get('item'),'venue-30');
-   if(mode!=='normal')assert.equal(await page.locator('.mapz-map-object').evaluate(el=>getComputedStyle(el).transitionDuration),'0s');
-   if(mode==='normal'){await page.evaluate(()=>document.documentElement.classList.add('calm-mode'));assert.equal(await page.locator('.mapz-map-object').evaluate(el=>getComputedStyle(el).transitionDuration),'0s','Same-tab Calm class disables map transitions');await page.evaluate(()=>document.documentElement.classList.remove('calm-mode'));}
+   if(mode!=='normal')assert.ok(effectivelyStill(await page.locator('.mapz-map-object').evaluate(el=>getComputedStyle(el).transitionDuration)),'Reduced/Calm transitions are at most1ms');
+   if(mode==='normal'){await page.evaluate(()=>document.documentElement.classList.add('calm-mode'));assert.ok(effectivelyStill(await page.locator('.mapz-map-object').evaluate(el=>getComputedStyle(el).transitionDuration)),'Same-tab Calm class disables perceptible map transitions');await page.evaluate(()=>document.documentElement.classList.remove('calm-mode'));}
    evidence.push({width,mode,closed:before,expanded:bounds,readOnly:true,mapsTools:true});
   }
   for(const id of Object.keys(names).map(Number)){await open(id,390,'reduced');assert.equal(await page.locator('.host-placez-card .pz-card').getAttribute('aria-label'),names[id]);}
