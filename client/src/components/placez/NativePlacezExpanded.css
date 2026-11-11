@@ -35,3 +35,10 @@
 
 html .pz-native-expanded .pz-heart button[data-card-heart=true]:before{width:32px!important;height:32px!important;inset:6px!important;border-radius:50%;border:1px solid var(--pz-accent);background:rgba(4,9,13,.55)}
 html .pz-native-expanded .pz-heart button[data-card-heart=true][aria-pressed=true]:before{background:color-mix(in srgb,var(--pz-accent) 20%,var(--pz-glass-ink))}
+/* Native disclosure semantics without depending on the retired modal shell class. */
+.pz-native-page .event-modal__disclosure{border-top:1px solid var(--pz-color-ffffff24)}
+.pz-native-page .event-modal__disclosure>summary{display:flex;align-items:center;gap:12px;min-height:44px;padding:12px 0;list-style:none;color:var(--pz-paper);font:600 14px/1.4 var(--font-body,Barlow,sans-serif);cursor:pointer}
+.pz-native-page .event-modal__disclosure>summary::-webkit-details-marker{display:none}
+.pz-native-page .event-modal__disclosure>summary>svg{width:22px;height:22px;flex:none}
+.pz-native-page .event-modal__disclosure>summary>svg:last-child{margin-left:auto}
+.pz-native-page .event-modal__disclosure[open]>summary>svg:last-child{transform:rotate(90deg)}

@@ -20,3 +20,6 @@ html.calm-mode .mapz-map-dialog.is-host-placez .mapz-map-object,
 html[data-calm="true"] .mapz-map-dialog.is-host-placez .mapz-map-object{transition:none!important}
 html.calm-mode .mapz-map-dialog.is-host-placez .host-placez-card,
 html[data-calm="true"] .mapz-map-dialog.is-host-placez .host-placez-card{animation:none!important}
+
+/* The card clips its own artwork/pages. The outer map slot must not clip its bloom. */
+html .mapz-map-dialog.is-host-placez .mapz-map-details{overflow:visible}
