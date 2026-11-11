@@ -31,7 +31,16 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
    await page.goto(`${server.resolvedUrls.local[0]}__placez-six?id=${id}&size=${size}`,{waitUntil:'networkidle'});
    const card=page.locator('.pz-card').first();await card.waitFor();await page.evaluate(()=>document.fonts.ready);assert.equal(await page.evaluate(async()=>{const faces=await document.fonts.load('800 24px "Barlow Condensed"');return faces.length>0&&faces.every(face=>face.status==='loaded');}),true,'Production display font loaded');
    await card.evaluate(async el=>Promise.all([...el.querySelectorAll('img')].map(img=>img.decode())));
-   const typography=await card.locator('.pz-title').evaluate(el=>({family:getComputedStyle(el).fontFamily,size:getComputedStyle(el).fontSize,weight:getComputedStyle(el).fontWeight}));assert.match(typography.family,/Barlow Condensed/i,'Approved condensed display typography');
+   // Holocene's compact artwork carries its readable name; do not require a duplicate title.
+   const title=card.locator('.pz-title');let typography=null;
+   if(id===30&&size!=='wide'){
+    assert.equal(await title.count(),0,'Holocene compact artwork supplies its name');
+    assert.equal(await card.getAttribute('aria-label'),'Holocene');
+    assert.equal(await card.locator('.pz-art__base').count(),1,'Holocene wordmark artwork is present');
+   }else{
+    typography=await title.evaluate(el=>({family:getComputedStyle(el).fontFamily,size:getComputedStyle(el).fontSize,weight:getComputedStyle(el).fontWeight}));
+    assert.match(typography.family,/Barlow Condensed/i,'Approved condensed display typography');
+   }
    const actual=await card.boundingBox(),expected={small:[136,170],tall:[200,403],wide:[360,216],square:[250,250]}[size];near(actual.width,expected[0],size+' width');near(actual.height,expected[1],size+' height');
    const heart=card.locator('.pz-heart button'),bounds=await heart.boundingBox();near(bounds.width,44,'target width');near(bounds.height,44,'target height');
    const ring=await heart.evaluate(el=>{const s=getComputedStyle(el,'::before');return {w:parseFloat(s.width),h:parseFloat(s.height),right:getComputedStyle(el.parentElement).right};});near(ring.w,32,'ring width');near(ring.h,32,'ring height');
