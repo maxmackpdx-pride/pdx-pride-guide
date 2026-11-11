@@ -29,8 +29,9 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(30000);
   for(const id of [30,3,31,5,2,23])for(const size of ['small','tall','wide','square']){
    await page.goto(`${server.resolvedUrls.local[0]}__placez-six?id=${id}&size=${size}`,{waitUntil:'networkidle'});
-   const card=page.locator('.pz-card').first();await card.waitFor();
+   const card=page.locator('.pz-card').first();await card.waitFor();await page.evaluate(()=>document.fonts.ready);assert.equal(await page.evaluate(async()=>{const faces=await document.fonts.load('800 24px "Barlow Condensed"');return faces.length>0&&faces.every(face=>face.status==='loaded');}),true,'Production display font loaded');
    await card.evaluate(async el=>Promise.all([...el.querySelectorAll('img')].map(img=>img.decode())));
+   const typography=await card.locator('.pz-title').evaluate(el=>({family:getComputedStyle(el).fontFamily,size:getComputedStyle(el).fontSize,weight:getComputedStyle(el).fontWeight}));assert.match(typography.family,/Barlow Condensed/i,'Approved condensed display typography');
    const actual=await card.boundingBox(),expected={small:[136,170],tall:[200,403],wide:[360,216],square:[250,250]}[size];near(actual.width,expected[0],size+' width');near(actual.height,expected[1],size+' height');
    const heart=card.locator('.pz-heart button'),bounds=await heart.boundingBox();near(bounds.width,44,'target width');near(bounds.height,44,'target height');
    const ring=await heart.evaluate(el=>{const s=getComputedStyle(el,'::before');return {w:parseFloat(s.width),h:parseFloat(s.height),right:getComputedStyle(el.parentElement).right};});near(ring.w,32,'ring width');near(ring.h,32,'ring height');
@@ -40,7 +41,7 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
    const maskUrl=mask.match(/url\(["']?(.*?)["']?\)/)?.[1];assert.ok(maskUrl);assert.equal((await page.request.get(maskUrl)).ok(),true,'mask asset loads');
    assert.equal(await card.locator('a[href^="https://www.zaylist.com"]').count(),0);
    if(size!=='square'){assert.equal(await card.locator('button[data-card-heart]').count(),1);await heart.click();await page.getByText('Authentication requested').waitFor();}
-   await page.screenshot({path:path.join(shots,`${id}-${size}.png`),fullPage:true});evidence.push({id,size,width:actual.width,height:actual.height,ringWidth:ring.w,rightInset:ringRight});
+   await page.screenshot({path:path.join(shots,`${id}-${size}.png`),fullPage:true});evidence.push({id,size,width:actual.width,height:actual.height,ringWidth:ring.w,rightInset:ringRight,typography});
    if(size==='wide'){
     await card.getByRole('button',{name:/Open Gigz/}).click();const expanded=page.locator('.pz-native-expanded');await expanded.waitFor();await expanded.getByRole('tab',{name:'Feed',exact:true}).waitFor();
     assert.equal(await expanded.getByRole('tab',{name:'Feed',exact:true}).getAttribute('aria-selected'),'true');
@@ -70,14 +71,18 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   }
   await page.emulateMedia({reducedMotion:'reduce'});
   for(const width of [320,390,1280]){
-   await page.setViewportSize({width,height:844});await page.goto(`${server.resolvedUrls.local[0]}__placez-six?id=23&size=tall`,{waitUntil:'networkidle'});await page.getByRole('button',{name:/View details for Pizza/}).click();const expanded=page.locator('.pz-native-expanded');await expanded.waitFor();const bounds=await expanded.boundingBox();assert.ok(bounds.width<=width,`Expanded fits ${width}`);assert.ok(bounds.width>200,`Expanded uses available width at ${width}`);
+   await page.setViewportSize({width,height:844});await page.goto(`${server.resolvedUrls.local[0]}__placez-six?id=23&size=tall`,{waitUntil:'networkidle'});await page.getByRole('button',{name:/View details for Pizza/}).click();const expanded=page.locator('.pz-native-expanded');await expanded.waitFor();const bounds=await expanded.boundingBox();assert.ok(bounds.width<=width,`Expanded fits ${width}`);assert.ok(bounds.width>200,`Expanded uses available width at ${width}`);if(width<768)assert.ok(bounds.height<=720,'Expanded respects native mobile safe viewport');
    await page.screenshot({path:path.join(shots,`expanded-${width}.png`),fullPage:true});await expanded.getByRole('button',{name:/Close /}).click();
   }
   await page.setViewportSize({width:1280,height:1000});await page.emulateMedia({reducedMotion:'no-preference'});await page.addInitScript(()=>localStorage.setItem('pdx-calm-mode','true'));await page.goto(`${server.resolvedUrls.local[0]}__placez-six?id=30&size=tall`,{waitUntil:'networkidle'});assert.equal(await page.locator('.pz-card').getAttribute('data-calm'),'true');assert.equal(await page.locator('.pz-art__moving img').evaluate(el=>getComputedStyle(el).animationName),'none');
+  for(const directoryWidth of [390,1280]){
+   await page.setViewportSize({width:directoryWidth,height:1000});
   await page.goto(`${server.resolvedUrls.local[0]}directory?layout=grid&type=ALL&q=Holocene`,{waitUntil:'networkidle'});
   const directoryFace=page.locator('.pz-card').filter({has:page.getByRole('button',{name:'View details for Holocene',exact:true})}).first();await directoryFace.waitFor();
   await directoryFace.getByRole('button',{name:'View details for Holocene',exact:true}).click();await page.locator('.pz-native-expanded').waitFor();assert.match(new URL(page.url()).pathname,/^\/directory\/30/);
+  const directoryExpanded=page.locator('.pz-native-expanded');const directoryBounds=await directoryExpanded.boundingBox();assert.ok(directoryBounds.width>200&&directoryBounds.width<=directoryWidth,'Directory uses expanded grid width');assert.ok(directoryBounds.height>=320&&directoryBounds.height<=(directoryWidth<768?720:960),'Directory respects expanded height');await page.screenshot({path:path.join(shots,`directory-holocene-expanded-${directoryWidth}.png`),fullPage:true});evidence.push({surface:'actual-directory',id:30,viewport:directoryWidth,expanded:directoryBounds});
   await page.getByRole('button',{name:'Close Holocene',exact:true}).click();await page.locator('.pz-native-expanded').waitFor({state:'hidden'});assert.equal(new URL(page.url()).pathname,'/directory');
+  }
   const authenticated=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'reduce',serviceWorkers:'block'});let followed=false;const followMethods=[];
   await authenticated.route('**/api/**',route=>{const request=route.request(),path=new URL(request.url()).pathname;if(path==='/api/directory/30/follow'&&['POST','DELETE'].includes(request.method())){followMethods.push(request.method());followed=request.method()==='POST';return route.fulfill({json:{isFollowing:followed,followerCount:followed?1:0}});}if(!['GET','HEAD'].includes(request.method()))return route.abort();if(path==='/api/auth/me')return route.fulfill({json:{id:900001,username:'placez_fixture',email:'fixture@example.invalid',displayName:'Fixture User',avatarChoice:0,bio:null,photoUrl:null,googleLinked:false,calmMode:false}});return route.fulfill({json:path==='/api/directory/30'?{...mockPlace(30),isFollowing:followed}:path==='/api/directory'?[{...mockPlace(30),isFollowing:followed}]:[]});});
   const authedPage=await authenticated.newPage();await authedPage.goto(`${server.resolvedUrls.local[0]}__placez-six?id=30&size=small`,{waitUntil:'networkidle'});await authedPage.locator('#auth-probe').getByText('authenticated',{exact:true}).waitFor();

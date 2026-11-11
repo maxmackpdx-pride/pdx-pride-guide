@@ -1,7 +1,7 @@
 /* Six approved PlaceZ faces only; the legacy modal remains untouched. */
 .placez-native-dialog{width:100%;min-width:0;outline:none}
 .placez-native-overlay{min-width:0}
-.pz-card.pz-native-expanded{width:100%;max-width:100%;height:min(960px,calc(100dvh - 24px));min-height:320px;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,0px)}
+.pz-card.pz-native-expanded{width:100%;max-width:100%;height:min(960px,var(--card-viewport-height,calc(100dvh - 24px)));min-height:320px;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,0px)}
 .pz-native-expanded .pz-art{height:180px}
 .pz-native-header{position:relative;z-index:2;flex:none;padding:188px 20px 8px;background:none}
 .pz-native-header h2{margin:0 0 5px;font:800 25px/1.05 var(--font-display,'Barlow Condensed',sans-serif);text-transform:uppercase;overflow-wrap:anywhere}

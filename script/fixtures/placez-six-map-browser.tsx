@@ -6,11 +6,12 @@ import {queryClient} from '@/lib/queryClient';
 import {AuthProvider} from '@/context/AuthContext';
 import {ThemeProvider} from '@/context/ThemeContext';
 import {useMapPlacezRenderer} from '@/components/placez/MapPlacezBridge';
-import '@/index.css';
+import './placez-production.css';
 import '@/components/ds/tokens/index.css';
 import '@/components/ds/styles.css';
 import '@/components/cards/CardAPI.css';
 import '@/components/cards/CategoryCardAPI.css';
+document.documentElement.dataset.zaylistCards='fluent2-m3';
 function Integration(){
  const node=useRef<HTMLDivElement>(null),{renderer,portals}=useMapPlacezRenderer();const [error,setError]=useState('');
  useEffect(()=>{let active=true,dispose:(()=>void)|undefined;

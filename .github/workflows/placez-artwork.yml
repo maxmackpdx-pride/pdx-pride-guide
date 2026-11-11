@@ -15,6 +15,7 @@ on:
       - "client/public/placez-six/**"
       - "script/placez-six*.mjs"
       - "script/fixtures/placez-six-browser.tsx"
+      - "script/fixtures/placez-production.css"
       - "script/fixtures/placez-six-map-browser.tsx"
       - "vendor/zaylist-maps/**"
       - "script/fixtures/placez-six-compiler.tsx"

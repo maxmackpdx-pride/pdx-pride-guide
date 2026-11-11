@@ -8,11 +8,12 @@ import {ThemeProvider} from '@/context/ThemeContext';
 import {PlaceCard} from '@/components/cards/PlaceCard';
 import type {Business} from '@/pages/Directory';
 import type {CardSize} from '@/components/cards/CardAPI';
-import '@/index.css';
+import './placez-production.css';
 import '@/components/ds/tokens/index.css';
 import '@/components/ds/styles.css';
 import '@/components/cards/CardAPI.css';
 import '@/components/cards/CategoryCardAPI.css';
+document.documentElement.dataset.zaylistCards='fluent2-m3';
 const names=['Holocene','Stag PDX','Alberta Rose Theatre','Eagle Portland','Darcelle XV','Pizza Thief'];
 const records=[30,3,31,5,2,23].map((id,index)=>({id,name:names[index],type:id===23?'restaurant':id===3||id===5?'bar':'venue',description:'Isolated compiler comparison',address:'Portland, Oregon',neighborhood:'Portland',phone:'503-555-0100',website:null,instagram:null,donateUrl:null,hours:'Fixture hours',queerOwned:false,queerFriendly:true,imageUrl:null,lat:45.52,lng:-122.67,isNew:false,isFollowing:false,upcomingEvents:[],pastEvents:[],gigs:[],spotted:[],promoters:[]} as Business));
 declare global {interface Window {__placezProfile:{phase:string;actualDurationMs:number;tick:number}[]}}
