@@ -52,6 +52,8 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
    if(size!=='square'){assert.equal(await card.locator('button[data-card-heart]').count(),1);await heart.click();await page.getByText('Authentication requested').waitFor();}
    await page.screenshot({path:path.join(shots,`${id}-${size}.png`),fullPage:true});evidence.push({id,size,width:actual.width,height:actual.height,ringWidth:ring.w,rightInset:ringRight,typography});
    if(size==='wide'){
+    // Fresh API data must become visible without waiting for the next minute tick.
+    await page.waitForFunction(()=>{const counts=[...document.querySelectorAll('.pz-activity-count strong')];return counts.length===2&&counts.every(count=>count.textContent==='00');});
     await card.getByRole('button',{name:/Open Gigz/}).click();const expanded=page.locator('.pz-native-expanded');await expanded.waitFor();await expanded.getByRole('tab',{name:'Feed',exact:true}).waitFor();
     assert.equal(await expanded.getByRole('tab',{name:'Feed',exact:true}).getAttribute('aria-selected'),'true');
     await expanded.getByRole('button',{name:/Close /}).click();await expanded.waitFor({state:'hidden'});

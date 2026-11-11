@@ -13,5 +13,9 @@ function subscribe(notify:()=>void){
  if(listeners.size===1){document.addEventListener('visibilitychange',tick);tick();}
  return()=>{listeners.delete(notify);if(!listeners.size){clearTimeout(timer);document.removeEventListener('visibilitychange',tick);}};
 }
+/** Bring the shared clock forward when a fresh query completes between minute ticks. */
+export function refreshPlacezClock(freshAt:number){
+ if(freshAt>now)tick();
+}
 /** Shared minute clock. Render reads a stable snapshot; hidden pages own no timer. */
 export function usePlacezClock(previewNow?:number){const current=useSyncExternalStore(subscribe,snapshot,serverSnapshot);return previewNow??current;}
