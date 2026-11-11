@@ -8,7 +8,7 @@ html .pz-native-expanded .pz-heart button[data-card-heart=true][aria-pressed].zh
  position:relative!important;inset:auto!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;border:0!important;border-radius:0!important;background:none!important;color:var(--pz-accent)!important;box-shadow:none!important;transform:none!important;
 }
 html .placez-native-shell .pz-card .pz-heart button[data-card-heart=true]:before{width:32px!important;height:32px!important;inset:6px!important;border-radius:50%;border:1px solid var(--pz-accent);background:rgba(4,9,13,.55)}
-html .placez-native-shell .pz-card .pz-heart button[data-card-heart=true][aria-pressed=true]:before{background:color-mix(in srgb,var(--pz-accent) 20%,#04090d)}
+html .placez-native-shell .pz-card .pz-heart button[data-card-heart=true][aria-pressed=true]:before{background:color-mix(in srgb,var(--pz-accent) 20%,var(--pz-glass-ink))}
 .placez-map-host{width:100%;min-width:0}
 .placez-map-host .pz-card--expanded{width:100%;max-width:620px;max-height:calc(100dvh - 24px)}
 .placez-map-host .pz-compose-icon,.placez-map-host .pz-compose-row{cursor:not-allowed}

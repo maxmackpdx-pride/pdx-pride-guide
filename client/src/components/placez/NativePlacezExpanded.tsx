@@ -33,7 +33,7 @@ export default function NativePlacezExpanded({place,contacts,info,feed,events,ma
   const live=useNativePlacezData(place);
   const nearby=useNearbyPlacezRestaurants(place);
   const model=nativePlacezModel(place);
-  return <article ref={artworkRef} className="pz-card pz-card--expanded pz-native-expanded" data-calm={calmMode?'true':'false'} data-motion="paused" style={{'--pz-accent':model.accent,'--c':model.accent,'--_c':model.accent,'--event-accent':model.accent,backgroundImage:model.glassUrl('expanded')?`url("${model.glassUrl('expanded')}")`:undefined} as CSSProperties}>
+  return <article ref={artworkRef} className="pdx-glass-rebind pz-card pz-card--expanded pz-native-expanded" data-calm={calmMode?'true':'false'} data-motion="paused" style={{'--pz-accent':model.accent,'--c':model.accent,'--_c':model.accent,'--event-accent':model.accent,backgroundImage:model.glassUrl('expanded')?`url("${model.glassUrl('expanded')}")`:undefined} as CSSProperties}>
     <Artwork model={model} wide={false}/>
     <button type="button" className="pz-close" aria-label={`Close ${place.name}`} onClick={onClose}><span aria-hidden="true">×</span></button>
     <button type="button" className="pz-share" aria-label={`Share ${place.name}`} onClick={onShare} disabled={sharing}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="5" r="3"/><circle cx="18" cy="19" r="3"/><path d="m9 10 6-4M9 14l6 4"/></svg></button>
