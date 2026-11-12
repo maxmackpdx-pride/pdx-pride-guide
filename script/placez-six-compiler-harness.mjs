@@ -55,7 +55,7 @@ async function prepare(mode,production){
   return {url:server.resolvedUrls.local[0]+'__six-compiler',scope,close:async()=>{await server.close();await rm(cacheDir,{recursive:true,force:true});}};
  }catch(error){if(server?.httpServer)await new Promise(resolve=>server.httpServer.close(resolve));else await server?.close();await rm(cacheDir,{recursive:true,force:true});throw error;}
 }
-async function sample(browser,mode,round,prepared){
+async function sample(browser,mode,round,prepared,evidenceDir){
  const {scope}=prepared;
   const results=[],visuals=[];
   for(const size of ['small','tall','wide']){
@@ -90,12 +90,42 @@ async function sample(browser,mode,round,prepared){
     for(let tick=1;tick<=10;tick++)assert.ok(parentCommits.some(c=>c.tick===tick&&c.phase!=='mount'),`Missing update ${tick}`);
     assert.deepEqual(await fingerprint(page),before,'Parent updates changed card output');
     await page.evaluate(()=>{window.__placezProfile=[];});
-    const interactionContent=[];
+    const interactionContent=[],interactionEvidence=[];
+    const evidencePath=path.join(evidenceDir,`round-${round}-${mode}-${size}.json`);
+    const persistInteractions=()=>writeFile(evidencePath,JSON.stringify({round,mode,size,detailReadiness,before,parentCommits,interactionContent,interactionEvidence},null,2));
+    await persistInteractions();
     for(let index=0;index<ids.length;index++){
      const slot=page.locator(`[data-fixture-id="${ids[index]}"]`),trigger=slot.getByRole('button',{name:`View details for ${names[index]}`,exact:true});
      for(let cycle=0;cycle<2;cycle++){
       await trigger.click();const expanded=page.locator('.pz-native-expanded:visible');await expanded.waitFor();
-      for(const tab of ['Feed','People','Maps','Info']){await expanded.getByRole('tab',{name:tab,exact:true}).click();await expanded.getByRole('tab',{name:tab,exact:true,selected:true}).waitFor();interactionContent.push({id:ids[index],cycle,tab,text:(await expanded.innerText()).replace(/\s+/g,' ').trim()});}
+      // Expanded mounts a separate list query; settled detail queries do not
+      // establish readiness for nearby restaurants in the expanded panels.
+      await page.waitForFunction(expected=>{const state=window.__placezNearbyReadiness?.();return state?.status==='success'&&state.fetchStatus==='idle'&&state.dataUpdatedAt>0&&JSON.stringify(state.ids)===JSON.stringify(expected);},ids);
+      for(const tab of ['Feed','People','Maps','Info']){
+       await expanded.getByRole('tab',{name:tab,exact:true}).click();
+       await expanded.getByRole('tab',{name:tab,exact:true,selected:true}).waitFor();
+       const settled=await expanded.evaluate((element,label)=>new Promise((resolve,reject)=>{
+        const start=performance.now();let previous='',stableSince=start;
+        const check=()=>{
+         const viewport=element.querySelector('.pz-page-viewport');
+         const tabs=[...element.querySelectorAll('[role=tab]')],index=tabs.findIndex(tab=>tab.getAttribute('aria-selected')==='true');
+         const text=element.innerText.replace(/\s+/g,' ').trim();
+         const state={text,selected:tabs[index]?.textContent,scrollLeft:viewport?.scrollLeft,width:viewport?.clientWidth,pageStatus:element.querySelector('.pz-page-status')?.textContent};
+         const valid=state.selected===label&&state.width>0&&Math.abs(state.scrollLeft-index*state.width)<=1;
+         const key=JSON.stringify(state),now=performance.now();
+         if(!valid||key!==previous){previous=key;stableSince=now;}
+         // Pager has a 90ms scroll-settle callback. Require stable text,
+         // selected tab and geometry across that callback, not aria alone.
+         if(valid&&now-stableSince>=150)return resolve(state);
+         if(now-start>5000)return reject(new Error('Expanded tab did not settle: '+JSON.stringify(state)));
+         requestAnimationFrame(check);
+        };check();
+       }),tab);
+       interactionContent.push({id:ids[index],cycle,tab,text:settled.text});
+       interactionEvidence.push({id:ids[index],cycle,tab,settled,nearby:await page.evaluate(()=>window.__placezNearbyReadiness())});
+       // Preserve raw strings before any later correctness assertion can fail.
+       await persistInteractions();
+      }
       if(cycle===0)visuals.push({size,state:`expanded-${ids[index]}`,...(await pixels(page,'.pz-native-expanded:visible'))});
       await expanded.getByRole('button',{name:`Close ${names[index]}`,exact:true}).click();await expanded.waitFor({state:'hidden'});
      }
@@ -104,7 +134,7 @@ async function sample(browser,mode,round,prepared){
     assert.ok(interactionCommits.length>0,'Interaction profiler must record commits');
     assert.deepEqual(await fingerprint(page),before,'Close/reopen changed closed card output');assert.deepEqual(errors,[]);assert.deepEqual(writes,[]);
     const sum=commits=>{assert.ok(commits.every(c=>Number.isFinite(c.actualDurationMs)&&c.actualDurationMs>=0));return commits.reduce((sum,c)=>sum+c.actualDurationMs,0);};
-    results.push({size,cohort:ids,detailReadiness,fixedWallClock:'2026-11-12T12:00:00.000Z',parentUpdates:10,cyclesPerCard:2,contentFingerprint:digest(before),interactionFingerprint:digest(interactionContent),parentActualDurationMs:sum(parentCommits),interactionActualDurationMs:sum(interactionCommits),parentCommits:parentCommits.length,interactionCommits:interactionCommits.length});
+    results.push({size,cohort:ids,detailReadiness,interactionContent,interactionEvidence,fixedWallClock:'2026-11-12T12:00:00.000Z',parentUpdates:10,cyclesPerCard:2,contentFingerprint:digest(before),interactionFingerprint:digest(interactionContent),parentActualDurationMs:sum(parentCommits),interactionActualDurationMs:sum(interactionCommits),parentCommits:parentCommits.length,interactionCommits:interactionCommits.length});
    }finally{await context.close();}
   }
   return {mode,round,scope,results,visuals};
@@ -112,15 +142,26 @@ async function sample(browser,mode,round,prepared){
 
 const median=values=>{const sorted=[...values].sort((a,b)=>a-b);return (sorted[1]+sorted[2])/2;};
 export async function runComparison({production=false}={}){
+ const output=process.env.PLACEZ_COMPILER_REPORT||`artifacts/placez-artwork/six/compiler-${production?'production':'development'}-comparison.json`;
+ const evidenceDir=output.replace(/\.json$/,'')+'-evidence';await mkdir(evidenceDir,{recursive:true});
  const browser=await chromium.launch({headless:true});const trials=[],prepared={};
  try{
   // Sequential builds, reused for all balanced trials. Do not compare build time.
   prepared.off=await prepare('off',production);prepared.on=await prepare('on',production);
-  for(let round=1;round<=4;round++)for(const mode of round%2?['off','on']:['on','off'])trials.push(await sample(browser,mode,round,prepared[mode]));
+  for(let round=1;round<=4;round++)for(const mode of round%2?['off','on']:['on','off']){trials.push(await sample(browser,mode,round,prepared[mode],evidenceDir));await writeFile(output,JSON.stringify({status:'pending-comparison',trials:trials.map(({visuals,...trial})=>trial)},null,2));}
   const visualComparisons=[];
   for(let round=1;round<=4;round++){
    const off=trials.find(t=>t.round===round&&t.mode==='off'),on=trials.find(t=>t.round===round&&t.mode==='on');
-   for(let i=0;i<off.results.length;i++){assert.equal(on.results[i].contentFingerprint,off.results[i].contentFingerprint);assert.equal(on.results[i].interactionFingerprint,off.results[i].interactionFingerprint);}
+   for(let i=0;i<off.results.length;i++){
+    const actual=on.results[i],expected=off.results[i];
+    assert.equal(actual.contentFingerprint,expected.contentFingerprint,`Closed content differs in round ${round} size ${actual.size}; raw trial report: ${output}`);
+    if(actual.interactionFingerprint!==expected.interactionFingerprint){
+     const differences=actual.interactionContent.flatMap((entry,index)=>JSON.stringify(entry)===JSON.stringify(expected.interactionContent[index])?[]:[{index,actual:entry,expected:expected.interactionContent[index]}]);
+     const mismatch={round,size:actual.size,differences};await writeFile(path.join(evidenceDir,`mismatch-${round}-${actual.size}.json`),JSON.stringify(mismatch,null,2));
+     console.error('PLACEZ_INTERACTION_MISMATCH '+JSON.stringify(mismatch));
+    }
+    assert.equal(actual.interactionFingerprint,expected.interactionFingerprint,`Expanded content differs in round ${round} size ${actual.size}; exact raw differences: ${evidenceDir}`);
+   }
    assert.equal(on.visuals.length,off.visuals.length);
    for(let i=0;i<off.visuals.length;i++){
     const a=off.visuals[i],b=on.visuals[i];assert.equal(a.state,b.state);assert.equal(a.size,b.size);assert.equal(a.info.width,b.info.width);assert.equal(a.info.height,b.info.height);assert.equal(a.data.length,b.data.length);
@@ -132,7 +173,7 @@ export async function runComparison({production=false}={}){
    const off=trials.filter(t=>t.mode==='off').map(t=>t.results.find(r=>r.size===size)[metric]),on=trials.filter(t=>t.mode==='on').map(t=>t.results.find(r=>r.size===size)[metric]);
    const pairedPercent=off.map((value,i)=>value?100*(on[i]-value)/value:null);return {size,metric,off,on,offMedian:median(off),onMedian:median(on),medianChangePercent:median(off)?100*(median(on)-median(off))/median(off):null,pairedPercent,regressedPairs:pairedPercent.filter(v=>v>0).length};
   }));
-  const report={build:production?'vite-production-optimized-react-dom/profiling':'vite-development',browser:browser.version(),trials:trials.map(({visuals,...trial})=>trial),summary,visualComparisons,note:(production?'Production-optimized isolated six-card fixture using react-dom/profiling, not the full route, physical device, or live traffic. Profiling instrumentation adds overhead. ':'Dev-server fixture. ')+'React Profiler actualDuration only; not end-to-end latency or production speedup. Verified six successful idle detail queries and committed counter values isolate settled-data work. Date wall-clock is fixed; timers and performance.now remain real. Initial loading and real-clock freshness are not measured. Four order-balanced pairs. Positive change means slower. Timing improvements are not asserted; all raw regressions are retained. Correctness and transform checks are gates. Production gating needs the actual app scope check, optimized whole-page runs, cross-browser functional QA and human review.'};
-  const output=process.env.PLACEZ_COMPILER_REPORT||`artifacts/placez-artwork/six/compiler-${production?'production':'development'}-comparison.json`;await mkdir(path.dirname(output),{recursive:true});await writeFile(output,JSON.stringify(report,null,2));console.log('PLACEZ_SIX_COMPILER_COMPARISON '+JSON.stringify(report));
+  const report={build:production?'vite-production-optimized-react-dom/profiling':'vite-development',browser:browser.version(),trials:trials.map(({visuals,...trial})=>trial),summary,visualComparisons,note:(production?'Production-optimized isolated six-card fixture using react-dom/profiling, not the full route, physical device, or live traffic. Profiling instrumentation adds overhead. ':'Dev-server fixture. ')+'React Profiler actualDuration only; not end-to-end latency or production speedup. Parent-update timing begins after six detail queries and closed counters settle. Interaction timing begins before the first expansion and includes expanded mounts, first nearby-query completion and its React updates, tab/scroll settlement updates, close and reopen. Nearby readiness and tab/text settlement are required before content capture, not before the interaction timing reset. React actualDuration excludes network waiting and idle settlement time; it is not elapsed interaction latency. Date wall-clock is fixed; timers and performance.now remain real. Initial closed-card loading and real-clock freshness are not measured. Four order-balanced pairs. Positive change means slower. Timing improvements are not asserted; all raw regressions are retained. Correctness and transform checks are gates. Production gating needs the actual app scope check, optimized whole-page runs, cross-browser functional QA and human review.'};
+  await mkdir(path.dirname(output),{recursive:true});await writeFile(output,JSON.stringify(report,null,2));console.log('PLACEZ_SIX_COMPILER_COMPARISON '+JSON.stringify(report));
  }finally{await browser.close();await prepared.off?.close();await prepared.on?.close();}
 }

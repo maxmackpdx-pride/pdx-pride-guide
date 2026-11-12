@@ -18,6 +18,8 @@ repository-specific facts and safeguards.
   This does not authorize unrelated changes or replacing other assets.
 - A request to **push/ship/deploy/go live** authorizes the complete production pipeline;
   do not pause for a redundant second confirmation.
+- Carry out authorized work without inventing additional review or approval gates.
+  Honor actual platform restrictions and report them clearly if they block progress.
 - Keep unrelated user and agent work unstaged and untouched.
 - Merge only when required checks are green and Tucker already asked for the merge.
   No force and no admin bypass.
