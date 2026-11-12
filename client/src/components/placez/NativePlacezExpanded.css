@@ -2,7 +2,7 @@
 .placez-native-dialog{width:100%;min-width:0;outline:none;container-type:inline-size}
 .placez-native-overlay{min-width:0}
 /* Keep a useful details viewport after fixed controls, even on short laptops.
-   The 360px budget includes header text, pager controls and footer, plus slack
+   The 240px budget includes header text, pager controls and footer, plus slack
    for wrapped titles. The header's own cap protects the body if text grows. */
 .pz-card.pz-native-expanded{
  --pz-expanded-photo-fraction:.542;
@@ -65,7 +65,7 @@ html .pz-native-expanded .pz-heart button[data-card-heart=true][aria-pressed=tru
 /* The browser top layer places approved expanded cards above site chrome. */
 .pz-native-viewport{
  position:fixed;inset:0;margin:auto;padding:0;border:0;background:transparent;color:inherit;
- width:min(620px,95vw);max-width:calc(100vw - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px) - 12px);
+ width:min(620px,90vw);max-width:calc(100vw - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px) - 12px);
  height:var(--placez-viewport-height,95dvh);max-height:none;overflow:visible;outline:none;
  --placez-viewport-height:min(95dvh,calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 12px));
 }
