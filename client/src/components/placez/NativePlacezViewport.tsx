@@ -46,15 +46,20 @@ export default function NativePlacezViewport({children,label,onClose,originRect}
     }
     };
     frame=requestAnimationFrame(show);
+    // Backdrop events can be retargeted outside React's portal delegation root.
+    // Capture the physical pointer boundary before that retargeting matters.
+    const dismissOutside=(event:PointerEvent)=>{
+      if(event.button!==0 || !element.open || !element.matches(':modal'))return;
+      const bounds=element.getBoundingClientRect();
+      if(event.clientX>=bounds.left && event.clientX<=bounds.right && event.clientY>=bounds.top && event.clientY<=bounds.bottom)return;
+      event.preventDefault();event.stopPropagation();requestClose();
+    };
+    document.addEventListener('pointerdown',dismissOutside,true);
     const preference=window.matchMedia('(prefers-reduced-motion: reduce)');
     const stop=()=>{if(!quiet())return;animation.current?.cancel();animation.current=null;element.dataset.placezMotion='quiet';if(closing.current)finish();};
     preference.addEventListener('change',stop);
     const observer=new MutationObserver(stop);observer.observe(document.documentElement,{attributes:true,attributeFilter:['class','data-calm']});
-    return()=>{cancelled=true;cancelAnimationFrame(frame);clearTimeout(timer.current);observer.disconnect();preference.removeEventListener('change',stop);animation.current?.cancel();animation.current=null;if(element.open)element.close();};
+    return()=>{cancelled=true;document.removeEventListener('pointerdown',dismissOutside,true);cancelAnimationFrame(frame);clearTimeout(timer.current);observer.disconnect();preference.removeEventListener('change',stop);animation.current?.cancel();animation.current=null;if(element.open)element.close();};
   },[]);
-  return <dialog ref={dialog} className="pz-native-viewport" aria-label={label} onCancel={event=>{event.preventDefault();requestClose();}} onClick={event=>{
-    if(event.target!==event.currentTarget)return;
-    const bounds=event.currentTarget.getBoundingClientRect();
-    if(event.clientX<bounds.left||event.clientX>bounds.right||event.clientY<bounds.top||event.clientY>bounds.bottom)requestClose();
-  }}>{children(requestClose)}</dialog>;
+  return <dialog ref={dialog} className="pz-native-viewport" aria-label={label} onCancel={event=>{event.preventDefault();requestClose();}}>{children(requestClose)}</dialog>;
 }
