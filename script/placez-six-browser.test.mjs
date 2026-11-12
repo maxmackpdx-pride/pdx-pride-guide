@@ -137,6 +137,21 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   near(reopenedOrigin.width,reopenedBounds.width,'Reopen refreshes resized source width');
   near(reopenedOrigin.height,reopenedBounds.height,'Reopen refreshes source height');
   await page.getByRole('button',{name:'Close Holocene',exact:true}).click();
+  await checkpoint('directory-history-and-auth');
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(`${server.resolvedUrls.local[0]}directory?layout=grid&q=Holocene`,{waitUntil:'networkidle'});
+  await page.getByRole('button',{name:'View details for Holocene',exact:true}).click();
+  await page.locator('dialog.pz-native-viewport').waitFor();
+  await page.goBack();await page.locator('dialog.pz-native-viewport').waitFor({state:'hidden'});
+  await page.goto(`${server.resolvedUrls.local[0]}directory/30/holocene?layout=grid&q=Holocene`,{waitUntil:'networkidle'});
+  await page.locator('dialog.pz-native-viewport').waitFor();
+  assert.equal(await page.locator('dialog.pz-native-viewport').evaluate(el=>el.matches(':modal')),true,'Direct URL opens top-layer details');
+  await page.locator('.pz-native-expanded .pz-heart button').click();
+  await page.locator('dialog.pz-native-viewport').waitFor({state:'hidden'});
+  const realAuth=page.getByRole('dialog',{name:'Join',exact:true});await realAuth.waitFor();
+  await page.getByRole('textbox',{name:'Email address',exact:true}).fill('fixture@example.invalid');
+  assert.equal(await page.getByRole('textbox',{name:'Email address',exact:true}).inputValue(),'fixture@example.invalid','Production auth portal accepts input');
+  await realAuth.getByRole('button',{name:'Close',exact:true}).click();await realAuth.waitFor({state:'hidden'});
   await checkpoint('expanded-guest-auth');
   for(const action of ['heart','claim']){
    await page.setViewportSize({width:390,height:844});
