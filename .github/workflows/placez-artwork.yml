@@ -60,7 +60,7 @@ jobs:
         env:
           PLACEZ_QA_SCREENSHOT_DIR: artifacts/placez-artwork
       - name: Verify six native PlaceZ faces and expanded tools
-        run: node --test script/placez-six-contract.test.mjs script/placez-six-data.test.mjs script/placez-six-browser.test.mjs
+        run: timeout --signal=TERM --kill-after=30s 12m node --test script/placez-six-contract.test.mjs script/placez-six-data.test.mjs script/placez-six-browser.test.mjs
         env:
           PLACEZ_QA_SCREENSHOT_DIR: artifacts/placez-artwork/six
       - id: map_gate
@@ -68,14 +68,14 @@ jobs:
         run: echo "ready=$(node -p "Number(require('./shared/mapReleaseLock.json').tag.split('.').pop()) >= 21")" >> "$GITHUB_OUTPUT"
       - name: Verify pinned map PlaceZ bridge and navigation
         if: steps.map_gate.outputs.ready == 'true'
-        run: node script/prepare-map-release.mjs client/public && node --test script/placez-six-map-browser.test.mjs
+        run: node script/prepare-map-release.mjs client/public && timeout --signal=TERM --kill-after=30s 12m node --test script/placez-six-map-browser.test.mjs
         env:
           PLACEZ_MAP_QA_DIR: artifacts/placez-artwork/six/maps
       - name: Verify exact PlaceZ compiler scope
         run: node --test script/react-compiler-function-proof.test.mjs && node script/react-compiler-production-scope.mjs
       - name: Compare optimized PlaceZ compiler off and on
         if: steps.map_gate.outputs.ready == 'true'
-        run: node --test script/placez-six-compiler-scope.test.mjs && node --test script/placez-six-compiler-production.test.mjs
+        run: node --test script/placez-six-compiler-scope.test.mjs && timeout --signal=TERM --kill-after=30s 22m node --test script/placez-six-compiler-production.test.mjs
       - name: Build and verify production bundle without deploying
         if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
         run: npm run build && npm run verify:deploy
