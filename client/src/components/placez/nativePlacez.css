@@ -61,3 +61,6 @@ html .mapz-map-dialog.is-host-placez .mapz-map-details{overflow:visible}
 .placez-map-host .pz-expanded-header{flex:0 1 auto;min-height:0;max-height:var(--placez-map-header-max);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
 .placez-map-host .pz-expanded-pager{min-height:calc(var(--placez-map-detail-min) + 96px)}
 .placez-map-host .pz-page-viewport{min-height:var(--placez-map-detail-min)}
+
+/* Keep the close glyph above its opaque ring background. */
+.pz-card .pz-close>span{position:relative;z-index:1;color:var(--pz-paper)}

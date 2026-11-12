@@ -31,3 +31,19 @@ test('shared clock rolls countdown from A to B without a data refetch',()=>{
  assert.equal(select(checked).nextEvent.title,'Event A');
  assert.equal(select(checked+60000).calendarFeed.checkedAt,new Date(checked).toISOString());
 });
+
+test('query completion refreshes the shared clock without waiting for its minute tick',async()=>{
+ const built=await build({stdin:{contents:"export * from './usePlacezClock';export {safeCount} from './activity';",resolveDir:path.join(root,'client/src/components/placez'),loader:'ts'},bundle:true,platform:'node',format:'esm',write:false,plugins:[{name:'clock-snapshot-probe',setup(b){b.onResolve({filter:/^react$/},()=>({path:'react',namespace:'probe'}));b.onLoad({filter:/.*/,namespace:'probe'},()=>({contents:'export function useSyncExternalStore(subscribe,snapshot){return snapshot();}'}));}}]});
+ const original=Date.now,initial=Date.parse('2030-11-11T20:00:00Z');let wall=initial;
+ try{
+  Date.now=()=>wall;
+  const clock=await import('data:text/javascript;base64,'+Buffer.from(built.outputFiles[0].text).toString('base64'));
+  wall+=5000;const checked=new Date(wall).toISOString();
+  assert.equal(clock.safeCount(0,checked,clock.usePlacezClock()),'—');
+  clock.refreshPlacezClock();
+  assert.equal(clock.usePlacezClock(),wall);
+  assert.equal(clock.safeCount(0,checked,clock.usePlacezClock()),'00');
+  assert.equal(clock.usePlacezClock(initial),initial,'Explicit preview remains frozen');
+  assert.equal(clock.safeCount(0,checked,clock.usePlacezClock(initial)),'—');
+ }finally{Date.now=original;}
+});

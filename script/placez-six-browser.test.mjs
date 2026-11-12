@@ -47,6 +47,7 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
    await checkpoint(`closed:${id}:${size}:screenshot`);
    await page.screenshot({path:path.join(shots,`${id}-${size}.png`),fullPage:true});evidence.push({id,size,width:actual.width,height:actual.height,ringWidth:ring.w,rightInset:ringRight,typography});
    if(size==='wide'){
+    assert.deepEqual(await card.locator('.pz-activity-count strong').allTextContents(),['00','00'],'Fresh empty API counts resolve without waiting a minute');
     await card.getByRole('button',{name:/Open Gigz/}).click();const expanded=page.locator('.pz-native-expanded');await expanded.waitFor();await expanded.getByRole('tab',{name:'Feed',exact:true}).waitFor();
     assert.equal(await expanded.getByRole('tab',{name:'Feed',exact:true}).getAttribute('aria-selected'),'true');
     await expanded.getByRole('button',{name:/Close /}).click();await expanded.waitFor({state:'hidden'});
@@ -95,6 +96,7 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   await directoryExpanded.evaluate(async el=>{await Promise.race([document.fonts.ready,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Directory fonts exceeded20s')),20000))]);const images=[...el.querySelectorAll('.pz-art img')];for(const img of images)img.loading='eager';await Promise.race([Promise.all(images.map(img=>img.decode())),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Approved artwork decode exceeded20s')),20000))]);await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
   await checkpoint(`directory:${directoryId}:${directoryWidth}:decoded`);
   for(const selector of (directoryWidth<768?['.pz-close','.pz-share','[role=tab][aria-selected=true]']:['.pz-close','.pz-share']))assert.equal(await directoryExpanded.locator(selector).evaluate(el=>{const b=el.getBoundingClientRect(),hit=document.elementFromPoint(b.x+b.width/2,b.y+b.height/2);return !!hit&&(el===hit||el.contains(hit));}),true,`Directory ${directoryId} ${selector} unobscured`);
+  assert.equal(await directoryExpanded.locator('.pz-close>span').evaluate(el=>getComputedStyle(el).zIndex),'1','Close glyph paints above opaque ring');
   const artBounds=await directoryExpanded.locator('.pz-art').boundingBox();
   if(directoryWidth>768)assert.ok(artBounds.height>=artBounds.width*.45,'Desktop header retains approved near-2:1 composition');
   await checkpoint(`directory:${directoryId}:${directoryWidth}:screenshot`);

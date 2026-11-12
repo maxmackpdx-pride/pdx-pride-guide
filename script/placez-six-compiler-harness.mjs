@@ -64,9 +64,25 @@ async function sample(browser,mode,round,prepared){
     const mockPlace=id=>({id,name:names[ids.indexOf(id)],type:id===23?'restaurant':id===3||id===5?'bar':'venue',description:'Isolated compiler comparison',address:'Portland, Oregon',neighborhood:'Portland',phone:'503-555-0100',website:null,instagram:null,donateUrl:null,hours:'Fixture hours',queerOwned:false,queerFriendly:true,imageUrl:null,lat:45.52,lng:-122.67,isNew:false,isFollowing:false,upcomingEvents:[],pastEvents:[],gigs:[],spotted:[],promoters:[]});
     await context.route('**/api/**',route=>{const req=route.request();if(!['GET','HEAD'].includes(req.method())){writes.push(req.method()+' '+req.url());return route.abort();}const pathname=new URL(req.url()).pathname;return route.fulfill(pathname==='/api/auth/me'?{status:401,json:{}}:pathname==='/api/directory'?{json:ids.map(mockPlace)}:/^\/api\/directory\/\d+$/.test(pathname)?{json:mockPlace(Number(pathname.split('/').pop()))}:{json:[]});});
     const page=await context.newPage();page.setDefaultTimeout(30000);page.on('pageerror',error=>errors.push(error.message));
+    // Controlled wall-clock only: real timers and performance.now are untouched.
+    await page.clock.setFixedTime(new Date('2026-11-12T12:00:00.000Z'));
     await page.goto(prepared.url+`?size=${size}`,{waitUntil:'networkidle'});
     assert.equal(await page.locator('#compiler-grid .pz-card:not(.pz-native-expanded)').count(),6,'The exact six-ID cohort must render native artwork, not legacy fallback faces');
     assert.deepEqual(await page.locator('[data-fixture-id]').evaluateAll(els=>els.map(el=>Number(el.getAttribute('data-fixture-id')))),ids);
+    // networkidle is not proof that query observers committed their ready data.
+    await page.waitForFunction(expected=>{
+     const states=window.__placezDetailReadiness?.();
+     return states?.length===expected.length&&states.every((state,index)=>state.id===expected[index]&&state.status==='success'&&state.fetchStatus==='idle'&&state.dataUpdatedAt>0&&state.dataId===state.id&&state.hasVerifiedEmptyCounts);
+    },ids);
+    // Allow React's observer notifications to commit, then assert visible source state.
+    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    if(size==='wide')await page.waitForFunction(()=>{
+     const counts=[...document.querySelectorAll('#compiler-grid .pz-card:not(.pz-native-expanded) .pz-activity-count strong')];
+     return counts.length===12&&counts.every(count=>count.textContent==='00');
+    });
+    const detailReadiness=await page.evaluate(()=>window.__placezDetailReadiness());
+    assert.deepEqual(detailReadiness.map(state=>state.id),ids,'All six detail sources must be observed');
+    assert.ok(detailReadiness.every(state=>state.status==='success'&&state.fetchStatus==='idle'&&state.dataUpdatedAt>0&&state.dataId===state.id&&state.hasVerifiedEmptyCounts),'Every detail source must be successfully settled before measurement');
     const before=await fingerprint(page);visuals.push({size,state:'closed',...(await pixels(page,'#compiler-grid'))});
     await page.evaluate(()=>{window.__placezProfile=[];});
     for(let tick=1;tick<=10;tick++){await page.locator('#profile-tick').click();await page.waitForFunction(n=>document.querySelector('#tick')?.textContent===String(n),tick);}
@@ -88,7 +104,7 @@ async function sample(browser,mode,round,prepared){
     assert.ok(interactionCommits.length>0,'Interaction profiler must record commits');
     assert.deepEqual(await fingerprint(page),before,'Close/reopen changed closed card output');assert.deepEqual(errors,[]);assert.deepEqual(writes,[]);
     const sum=commits=>{assert.ok(commits.every(c=>Number.isFinite(c.actualDurationMs)&&c.actualDurationMs>=0));return commits.reduce((sum,c)=>sum+c.actualDurationMs,0);};
-    results.push({size,cohort:ids,parentUpdates:10,cyclesPerCard:2,contentFingerprint:digest(before),interactionFingerprint:digest(interactionContent),parentActualDurationMs:sum(parentCommits),interactionActualDurationMs:sum(interactionCommits),parentCommits:parentCommits.length,interactionCommits:interactionCommits.length});
+    results.push({size,cohort:ids,detailReadiness,fixedWallClock:'2026-11-12T12:00:00.000Z',parentUpdates:10,cyclesPerCard:2,contentFingerprint:digest(before),interactionFingerprint:digest(interactionContent),parentActualDurationMs:sum(parentCommits),interactionActualDurationMs:sum(interactionCommits),parentCommits:parentCommits.length,interactionCommits:interactionCommits.length});
    }finally{await context.close();}
   }
   return {mode,round,scope,results,visuals};
@@ -116,7 +132,7 @@ export async function runComparison({production=false}={}){
    const off=trials.filter(t=>t.mode==='off').map(t=>t.results.find(r=>r.size===size)[metric]),on=trials.filter(t=>t.mode==='on').map(t=>t.results.find(r=>r.size===size)[metric]);
    const pairedPercent=off.map((value,i)=>value?100*(on[i]-value)/value:null);return {size,metric,off,on,offMedian:median(off),onMedian:median(on),medianChangePercent:median(off)?100*(median(on)-median(off))/median(off):null,pairedPercent,regressedPairs:pairedPercent.filter(v=>v>0).length};
   }));
-  const report={build:production?'vite-production-optimized-react-dom/profiling':'vite-development',browser:browser.version(),trials:trials.map(({visuals,...trial})=>trial),summary,visualComparisons,note:(production?'Production-optimized isolated six-card fixture using react-dom/profiling, not the full route, physical device, or live traffic. Profiling instrumentation adds overhead. ':'Dev-server fixture. ')+'React Profiler actualDuration only; not end-to-end latency or production speedup. Four order-balanced pairs. Positive change means slower. Timing improvements are not asserted; all raw regressions are retained. Correctness and transform checks are gates. Production gating needs the actual app scope check, optimized whole-page runs, cross-browser functional QA and human review.'};
+  const report={build:production?'vite-production-optimized-react-dom/profiling':'vite-development',browser:browser.version(),trials:trials.map(({visuals,...trial})=>trial),summary,visualComparisons,note:(production?'Production-optimized isolated six-card fixture using react-dom/profiling, not the full route, physical device, or live traffic. Profiling instrumentation adds overhead. ':'Dev-server fixture. ')+'React Profiler actualDuration only; not end-to-end latency or production speedup. Verified six successful idle detail queries and committed counter values isolate settled-data work. Date wall-clock is fixed; timers and performance.now remain real. Initial loading and real-clock freshness are not measured. Four order-balanced pairs. Positive change means slower. Timing improvements are not asserted; all raw regressions are retained. Correctness and transform checks are gates. Production gating needs the actual app scope check, optimized whole-page runs, cross-browser functional QA and human review.'};
   const output=process.env.PLACEZ_COMPILER_REPORT||`artifacts/placez-artwork/six/compiler-${production?'production':'development'}-comparison.json`;await mkdir(path.dirname(output),{recursive:true});await writeFile(output,JSON.stringify(report,null,2));console.log('PLACEZ_SIX_COMPILER_COMPARISON '+JSON.stringify(report));
  }finally{await browser.close();await prepared.off?.close();await prepared.on?.close();}
 }
