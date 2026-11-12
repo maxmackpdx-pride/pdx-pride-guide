@@ -1,3 +1,5 @@
+import NativePlacezFace from '@/components/placez/NativePlacezFace';
+import {hasPlacezArtwork} from '@/components/placez/nativeModel';
 import RoomDiscoveryCard from '@/components/discovery/RoomDiscoveryCard';
 import HeartButton from '@/components/HeartButton';
 import {ServiceNameMark} from '@/components/ServiceNameMark';
@@ -546,6 +548,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
 
   const renderBrowsePlace = (biz: Business) => <div key={biz.id} className="eb-original-card">
     {isSpaces ? <DirectoryCard size={compactCards ? "small" : "tall"} biz={biz} onClick={element=>openPlace(biz,element)} onRequireAuth={()=>setShowAuth(true)}/>
+      : hasPlacezArtwork(biz.id) ? <NativePlacezFace place={biz} size={compactCards?"small":"tall"} onOpen={element=>openPlace(biz,element)} onRequireAuth={()=>setShowAuth(true)}/>
       : <RoomDiscoveryCard room="placez" name={biz.name} category={TYPE_LABELS[biz.type] || biz.type} accent={TYPE_COLORS[biz.type] || 'var(--neon-cyan)'}
         logo={serviceArtwork(biz,resolveDirectoryLogo(biz.name,biz.imageUrl),true)} fallback={<ServiceNameMark source={biz} iconOnly/>}
         description={biz.description} tags={[TYPE_LABELS[biz.type] || biz.type,...(biz.queerOwned?['Queer owned']:[])]} meta={biz.neighborhood || biz.address}
@@ -592,7 +595,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         </BrowseHeader>
         <PlacezDiscoveryIntro region={discoveryRegion} quiet={Boolean(calmMode || reducedMotion)} onChoose={id=>{setActiveType(id==='adult'?'venue,shop':id);setActiveSubcategory(id==='adult'?'adult':'ALL');setActiveNeighborhood('ALL');setBrowseView('grid');setSearchQuery('');}} onRegion={setDiscoveryRegion} onSurprise={()=>{const candidates=filtered.length?filtered:visibleBusinesses;if(candidates.length)openPlace(candidates[Math.floor(Math.random()*candidates.length)]);}} onFeature={()=>{const museum=visibleBusinesses.find(biz=>/portland art museum/i.test(biz.name));if(museum)openPlace(museum);else{setActiveType('venue');setActiveSubcategory('ALL');setBrowseView('grid');requestAnimationFrame(()=>document.getElementById('placez-results')?.scrollIntoView({behavior:calmMode||reducedMotion?'instant':'smooth'}));}}} />
         <div className="eb-frame" id="placez-results">
-          <BrowseControls title="Placez" categories={[{id:"ALL",label:"All Placez",color:"var(--neon-cyan)",count:visibleBusinesses.length}, ...categoryBands.map(c => ({id:c.key,label:c.label,color:c.color,count:c.count}))]}
+          <BrowseControls reserveCardViewport={!!selectedPlace && hasPlacezArtwork(selectedPlace.id)} title="Placez" categories={[{id:"ALL",label:"All Placez",color:"var(--neon-cyan)",count:visibleBusinesses.length}, ...categoryBands.map(c => ({id:c.key,label:c.label,color:c.color,count:c.count}))]}
             selected={activeType.split(",")} onSelect={handleSelectCategory} query={searchQuery} onSearch={setSearchQuery} view={browseView} onView={setBrowseView}>
             <BrowseFilters title="Filter places" active={activeNeighborhood !== "ALL"}>
               <label>Neighborhood<select value={activeNeighborhood} onChange={e => setActiveNeighborhood(e.target.value)}>
@@ -859,3 +862,4 @@ function DirectoryCard({
 }) {
   return <PlaceDiscoveryCard size={size} place={biz} onOpen={element => onClick?.(element)} onRequireAuth={onRequireAuth} />;
 }
+

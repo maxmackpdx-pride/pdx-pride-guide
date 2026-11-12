@@ -1,0 +1,66 @@
+/* The host remains responsible for slot geometry; decoration cannot alter footprints. */
+.placez-native-shell{overflow:visible!important;background:none!important;border:0!important;box-shadow:none!important}
+.placez-native-shell .pz-heart .card-heart-button{position:relative;inset:auto}
+html.calm-mode .pz-art__moving img,html[data-calm=true] .pz-art__moving img{animation:none!important;transform:none!important}
+/* Override the legacy small-card control's absolute corner, retaining its transport. */
+html .placez-native-shell .pz-card .pz-heart button[data-card-heart=true][aria-pressed].zheart-btn,
+html .pz-native-expanded .pz-heart button[data-card-heart=true][aria-pressed].zheart-btn{
+ position:relative!important;inset:auto!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;border:0!important;border-radius:0!important;background:none!important;color:var(--pz-accent)!important;box-shadow:none!important;transform:none!important;
+}
+html .placez-native-shell .pz-card .pz-heart button[data-card-heart=true]:before{width:32px!important;height:32px!important;inset:6px!important;border-radius:50%;border:1px solid var(--pz-accent);background:rgba(4,9,13,.55)}
+html .placez-native-shell .pz-card .pz-heart button[data-card-heart=true][aria-pressed=true]:before{background:color-mix(in srgb,var(--pz-accent) 20%,var(--pz-glass-ink))}
+.placez-map-host{width:100%;min-width:0;container-type:inline-size}
+.placez-map-host .pz-card--expanded{
+ --pz-expanded-photo-fraction:.542;
+ --placez-map-card-height:min(960px,var(--placez-map-available-height,calc(100dvh - 24px)));
+ --placez-map-content-height:calc(var(--placez-map-card-height) - 2px);
+ --placez-map-detail-min:clamp(44px,calc(var(--placez-map-content-height) - 240px),120px);
+ --placez-map-header-max:max(0px,calc(var(--placez-map-content-height) - var(--placez-map-detail-min) - 162px));
+ --pz-expanded-art:min(calc(100cqw * var(--pz-expanded-photo-fraction)),max(0px,calc(var(--placez-map-header-max) - 32px)),max(48px,calc(var(--placez-map-content-height) - var(--placez-map-detail-min) - 360px)));
+ width:100%;max-width:620px;height:var(--placez-map-card-height);max-height:var(--placez-map-card-height)
+}
+.placez-map-host .pz-compose-icon,.placez-map-host .pz-compose-row{cursor:not-allowed}
+.placez-map-host .pz-heart button{opacity:.55}
+/* Host Calm changes are synchronous even across the isolated map React bundle. */
+html.calm-mode .mapz-map-dialog.is-host-placez,
+html[data-calm="true"] .mapz-map-dialog.is-host-placez,
+html.calm-mode .mapz-map-dialog.is-host-placez .mapz-map-object,
+html[data-calm="true"] .mapz-map-dialog.is-host-placez .mapz-map-object{transition:none!important}
+html.calm-mode .mapz-map-dialog.is-host-placez .host-placez-card,
+html[data-calm="true"] .mapz-map-dialog.is-host-placez .host-placez-card{animation:none!important}
+
+/* The card clips its own artwork/pages. The outer map slot must not clip its bloom. */
+html .mapz-map-dialog.is-host-placez .mapz-map-details{overflow:visible}
+
+/* The immutable map keeps its 82px mobile dock 8px above the safe edge.
+   Match its existing 104px drawer clearance, rather than hiding the dock or
+   raising a card above it. Keep the persistent object's height transition. */
+@media(max-width:959px){
+ html .mapz-map-dialog.is-host-placez{
+  --placez-map-dock-clearance:calc(104px + env(safe-area-inset-bottom,0px));
+  --placez-map-available-height:calc(100dvh - 24px - var(--placez-map-dock-clearance));
+  top:calc((100dvh - var(--placez-map-dock-clearance))/2);
+  max-height:var(--placez-map-available-height);
+ }
+ html .mapz-map-dialog.is-host-placez.is-expanded .mapz-map-object,
+ html .mapz-map-dialog.is-host-placez .placez-map-host .pz-card--expanded{
+  height:min(960px,var(--placez-map-available-height));
+  max-height:var(--placez-map-available-height);
+ }
+}
+
+/* The map portal uses QuickCard's expanded face, not the native detail header.
+   Its existing header reads this same responsive artwork height variable. */
+.placez-map-host .pz-card--expanded:has(>.pz-art[data-grounded=true]){--pz-expanded-photo-fraction:.563}
+.placez-map-host .pz-card--expanded .pz-art{height:var(--pz-expanded-art);width:min(100%,calc(var(--pz-expanded-art) / var(--pz-expanded-photo-fraction)));left:50%;right:auto;transform:translateX(-50%)}
+.placez-map-host .pz-card--expanded .pz-art>.pz-art__base,.placez-map-host .pz-card--expanded .pz-art>.pz-art__moving img,.placez-map-host .pz-card--expanded .pz-art>.pz-art__treatment{object-fit:contain}
+.placez-map-host .pz-card--expanded .pz-art[data-cutout=true]{mask-size:contain;-webkit-mask-size:contain}
+/* Reserve 120px for details where height allows; 96px covers both pager rows,
+   and 66px covers the follow footer. Short headers scroll instead of consuming
+   the pager. On tiny landscape screens the details floor reduces to 44px. */
+.placez-map-host .pz-expanded-header{flex:0 1 auto;min-height:0;max-height:var(--placez-map-header-max);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+.placez-map-host .pz-expanded-pager{min-height:calc(var(--placez-map-detail-min) + 96px)}
+.placez-map-host .pz-page-viewport{min-height:var(--placez-map-detail-min)}
+
+/* Keep the close glyph above its opaque ring background. */
+.pz-card .pz-close>span{position:relative;z-index:1;color:var(--pz-paper)}

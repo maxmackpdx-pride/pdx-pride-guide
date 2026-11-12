@@ -1,3 +1,5 @@
+import NativePlacezFace from '../placez/NativePlacezFace';
+import {hasPlacezArtwork} from '../placez/nativeModel';
 import type {CardSize} from "@/components/cards/CardAPI";
 import { ServiceNameMark } from "@/components/ServiceNameMark";
 import { serviceArtwork } from "@shared/serviceIdentity";
@@ -23,6 +25,7 @@ export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth, size 
   const label = directoryCardCategoryLabel(place);
   const serviceTags = place.type === 'service' ? directorySubcategories(place) : [];
   const open = (event: MouseEvent<HTMLElement>) => onOpen(event.currentTarget.closest<HTMLElement>('.pdxPlace') || event.currentTarget);
+  if(hasPlacezArtwork(place.id))return <NativePlacezFace place={place} size={size} onOpen={onOpen} onRequireAuth={onRequireAuth}/>;
   return <PlacezXerox accent={accent}><div className="placez-card-surface" style={{ '--placez-logo-ink-filter': `url(#${logoInkId})` } as CSSProperties}>
     <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: 'absolute' }}>
       <defs><filter id={logoInkId} colorInterpolationFilters="sRGB">
@@ -46,3 +49,4 @@ export default function PlaceDiscoveryCard({ place, onOpen, onRequireAuth, size 
     />
   </div></PlacezXerox>;
 }
+

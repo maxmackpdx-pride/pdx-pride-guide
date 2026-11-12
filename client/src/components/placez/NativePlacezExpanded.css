@@ -1,0 +1,62 @@
+/* Six approved PlaceZ faces only; the legacy modal remains untouched. */
+.placez-native-dialog{width:100%;min-width:0;outline:none;container-type:inline-size}
+.placez-native-overlay{min-width:0}
+/* Keep a useful details viewport after fixed controls, even on short laptops.
+   The 360px budget includes header text, pager controls and footer, plus slack
+   for wrapped titles. The header's own cap protects the body if text grows. */
+.pz-card.pz-native-expanded{
+ --pz-expanded-photo-fraction:.542;
+ --pz-native-card-height:max(320px,min(960px,var(--card-viewport-height,calc(100dvh - 24px))));
+ --pz-native-content-height:calc(var(--pz-native-card-height) - 2px - env(safe-area-inset-bottom,0px));
+ --pz-native-detail-min:clamp(44px,calc(var(--pz-native-content-height) - 240px),120px);
+ --pz-native-header-max:max(0px,calc(var(--pz-native-content-height) - var(--pz-native-detail-min) - 158px));
+ --pz-native-art-height:min(calc(100cqw * var(--pz-expanded-photo-fraction)),max(0px,calc(var(--pz-native-header-max) - 32px)),max(48px,calc(var(--pz-native-content-height) - var(--pz-native-detail-min) - 360px)));
+ width:100%;max-width:100%;height:var(--pz-native-card-height);min-height:320px;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,0px)
+}
+/* Preserve the approved photo/mask proportions: five plates are 720x390;
+   Pizza Thief is 720x405. Both artwork and header use the actual slot width. */
+.pz-native-expanded:has(>.pz-art[data-grounded=true]){--pz-expanded-photo-fraction:.563}
+/* Width follows the capped height, so photo, alpha mask and independent logo
+   stay together as one complete plate at every viewport size. */
+.pz-native-expanded .pz-art{height:var(--pz-native-art-height);width:min(100%,calc(var(--pz-native-art-height) / var(--pz-expanded-photo-fraction)));left:50%;right:auto;transform:translateX(-50%)}
+.pz-native-expanded .pz-art>.pz-art__base,.pz-native-expanded .pz-art>.pz-art__moving img,.pz-native-expanded .pz-art>.pz-art__treatment{object-fit:contain}
+.pz-native-expanded .pz-art[data-cutout=true]{mask-size:contain;-webkit-mask-size:contain}
+.pz-native-header{position:relative;z-index:2;flex:0 1 auto;min-height:0;max-height:var(--pz-native-header-max);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:calc(var(--pz-native-art-height) + 8px) 20px 8px;background:none}
+.pz-native-header h2{margin:0 0 5px;font:800 25px/1.05 var(--font-display,'Barlow Condensed',sans-serif);text-transform:uppercase;overflow-wrap:anywhere}
+.pz-native-header .pz-category{font-size:10px;padding:3px 6px}
+.pz-native-header .place-modal-panel__contacts{display:flex!important;position:static!important;padding:5px 0!important;margin:0!important;max-height:70px;overflow:auto}
+.pz-native-header .place-modal-panel__fact{font-size:13px;margin:0}
+.pz-native-compose{display:flex;justify-content:space-between;align-items:center;min-height:44px;color:var(--pz-accent);font:600 12px/1.2 var(--font-body,Barlow,sans-serif);text-decoration:none}
+.pz-native-expanded>.pz-expanded-pager{position:relative;z-index:2;flex:1;min-height:calc(var(--pz-native-detail-min) + 96px);height:auto;margin:0;display:flex;flex-direction:column}
+.pz-native-expanded .pz-page-tabs{flex:none;padding:0 8px}
+.pz-native-expanded .pz-page-tabs button{min-height:44px;font-size:10px;white-space:normal}
+.pz-native-expanded .pz-page-viewport{flex:1;min-height:var(--pz-native-detail-min);height:auto}
+.pz-native-expanded .pz-page-panel{height:100%;padding:0 16px 12px;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.pz-native-expanded .pz-page-controls{flex:none;min-height:44px;padding:0 12px}
+.pz-native-page{min-width:0;font:400 13px/1.5 var(--font-body,Barlow,sans-serif);color:var(--pz-color-d5e0e7)}
+.pz-native-page section{margin:0 0 20px}
+.pz-native-page h3{margin:14px 0 8px;font:700 18px/1.2 var(--font-display,'Barlow Condensed',sans-serif);color:var(--pz-paper)}
+.pz-native-page p{margin:6px 0 12px}
+.pz-native-page .place-modal-panel__details-room{padding:0!important}
+.pz-native-page .place-modal-panel__map{height:300px;min-height:200px;position:relative;overflow:hidden;border-radius:10px}
+.pz-native-page .place-modal-panel__map-label{position:absolute;bottom:0;left:0;right:0}
+.pz-native-page .place-modal-panel__quick-actions{display:flex!important;position:static!important;flex-wrap:wrap;padding:10px 0!important}
+.pz-native-page .place-modal-panel__quick-actions a{min-height:44px;display:inline-flex;align-items:center}
+.pz-native-page .place-upcoming__grid{grid-template-columns:repeat(auto-fit,minmax(125px,1fr))}
+.pz-native-page .place-modal-past__rail,.pz-native-page .place-gigs-rail{max-width:100%;overflow-x:auto}
+.pz-native-footer{position:relative;z-index:3;flex:none;display:flex;justify-content:flex-start;align-items:center;min-height:62px;padding:5px 70px 5px 20px;border-top:1px solid var(--pz-color-ffffff24);background:rgba(4,9,13,.55)}
+.pz-native-footer .eb-detail__primary-action{margin:0!important;padding:0!important;position:static!important}
+.pz-native-footer button{min-height:44px}
+.pz-native-credit{font-size:10px;color:var(--pz-color-a8b8c2)}.pz-native-credit a{color:inherit}
+@media(max-height:650px){.pz-native-header h2{font-size:20px}.pz-native-header .place-modal-panel__contacts{max-height:40px}}
+@media(max-width:360px){.pz-native-header{padding-left:14px;padding-right:14px}.pz-native-expanded .pz-page-panel{padding-left:10px;padding-right:10px}.pz-native-expanded .pz-page-tabs button{font-size:9px}}
+
+html .pz-native-expanded .pz-heart button[data-card-heart=true]:before{width:32px!important;height:32px!important;inset:6px!important;border-radius:50%;border:1px solid var(--pz-accent);background:rgba(4,9,13,.55)}
+html .pz-native-expanded .pz-heart button[data-card-heart=true][aria-pressed=true]:before{background:color-mix(in srgb,var(--pz-accent) 20%,var(--pz-glass-ink))}
+/* Native disclosure semantics without depending on the retired modal shell class. */
+.pz-native-page .event-modal__disclosure{border-top:1px solid var(--pz-color-ffffff24)}
+.pz-native-page .event-modal__disclosure>summary{display:flex;align-items:center;gap:12px;min-height:44px;padding:12px 0;list-style:none;color:var(--pz-paper);font:600 14px/1.4 var(--font-body,Barlow,sans-serif);cursor:pointer}
+.pz-native-page .event-modal__disclosure>summary::-webkit-details-marker{display:none}
+.pz-native-page .event-modal__disclosure>summary>svg{width:22px;height:22px;flex:none}
+.pz-native-page .event-modal__disclosure>summary>svg:last-child{margin-left:auto}
+.pz-native-page .event-modal__disclosure[open]>summary>svg:last-child{transform:rotate(90deg)}

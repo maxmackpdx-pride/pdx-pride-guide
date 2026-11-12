@@ -4,6 +4,7 @@
  * measured allowlist cannot drift from the proposed deployment configuration.
  * Scope tightened after four production-optimized whole-page trials on
  * cde93d3: Eventz/Boardz improved; Resources/Placez did not consistently improve.
+ * The new six-ID Placez presentation candidate is measured separately.
  * Do not broaden scope to routes, Mapz, auth, consent, or modal controllers.
  */
 export const cardFaceModules = [
@@ -15,14 +16,20 @@ export const cardFaceModules = [
   'board/punk/ZineCard',
 ];
 
-// The pre-narrowing candidate was measured in PR #69's four-trial Chromium
-// whole-page fixture. This restricted candidate requires a new CI comparison.
-// Compile only category-specific Eventz and Boardz card entries plus their
-// enumerated faces. Placez and Needz have not demonstrated consistent whole-
-// page benefit and remain uncompiled. The shared ZaylistCard switch also
-// renders Needz and Outzide; it stays uncompiled alongside CardAPI, helpers,
-// consent/privacy controllers and other card-family renderers.
+// Exact Placez presentation scope only. Legacy PlaceDiscoveryCard and
+// TodayLocationCard remain excluded, as do shared API, query adapters and
+// PlaceModal mutation controls. Inclusion is a candidate, not proof of speedup.
+export const placezCompilerModules = [
+  'cards/PlaceCard',
+  'placez/NativePlacezFace',
+  'placez/PlacezQuickCard',
+  'placez/NativePlacezExpanded',
+  'placez/ExpandedPager',
+];
+
 export const cardSourcePatterns = [
+  /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/]PlaceCard\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]placez[\\/](?:NativePlacezFace|PlacezQuickCard|NativePlacezExpanded|ExpandedPager)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/](?:EventCard|BoardCard)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]EventRailCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]EventFlyerArt\.tsx$/,
@@ -37,3 +44,4 @@ export const cardCompilerExcludedPatterns = [
   /\x00rolldown\/runtime\.js/,
   /[\\/]script[\\/]fixtures[\\/]/,
 ];
+

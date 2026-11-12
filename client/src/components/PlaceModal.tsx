@@ -1,3 +1,6 @@
+import {useNativePlacezData} from './placez/nativeData';
+import NativePlacezExpanded from "./placez/NativePlacezExpanded";
+import { hasPlacezArtwork } from "./placez/nativeModel";
 import { ServiceNameMark } from "./ServiceNameMark";
 import { directoryCardCategoryLabel } from '@shared/directorySubcategories';
 import { serviceArtwork } from "@shared/serviceIdentity";
@@ -219,7 +222,11 @@ function PlaceHours({ hours }: { hours: string }) {
 
 export default function PlaceModal({ documentMeta = true, ...props }: Parameters<typeof PlaceModalInner>[0] & { documentMeta?: boolean }) {
  const place = props.place;
- return <CardDetails key={place?.id} onClose={props.onClose} mobileViewport>{documentMeta && place ? <OpenCardMeta title={place.name} description={place.neighborhood || place.address || place.description || ""} /> : null}<PlaceModalInner {...props} onClose={() => closeOpenCard(props.onClose)} /></CardDetails>;
+ return <CardDetails key={place?.id} onClose={props.onClose} mobileViewport>{documentMeta && place ? <OpenCardMeta title={place.name} description={place.neighborhood || place.address || place.description || ""} /> : null}{place && hasPlacezArtwork(place.id) ? <NativePlaceModalInner {...props} place={place} onClose={() => closeOpenCard(props.onClose)}/> : <PlaceModalInner {...props} onClose={() => closeOpenCard(props.onClose)} />}</CardDetails>;
+}
+function NativePlaceModalInner(props: Parameters<typeof PlaceModalInner>[0] & {place:Business}) {
+ const live=useNativePlacezData(props.place);
+ return <PlaceModalInner {...props} place={live.place as Business}/>;
 }
 function PlaceModalInner({
   place,
@@ -461,58 +468,9 @@ function PlaceModalInner({
     .filter(Boolean)
     .join(" ");
 
-  // CardDetails owns the inline host; mobile content below the phone scrolls
-  // within the bounded card while its image and contact remain visible.
-  return (
-    <div
-      onClick={handleClose}
-      role="presentation"
-      className={`event-modal-overlay place-modal-overlay${open ? " place-modal-overlay--open" : ""}`}
-    >
-      <div
-        ref={panelRef}
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="false"
-        aria-label={place.name}
-        tabIndex={-1}
-        className={panelClass}
-        style={{
-          ["--c" as string]: accent,
-          ["--_c" as string]: accent,
-          ["--event-accent" as string]: accent,
-          ["--placez-logo-ink-filter" as string]: `url(#${logoInkId})`,
-          ...(useSpecialEdge ? { ["--_edge" as string]: edge } : {}),
-        }}
-      >
-        <svg width="0" height="0" aria-hidden="true" focusable="false" style={{position:'absolute'}}><defs><filter id={logoInkId} colorInterpolationFilters="sRGB"><feComponentTransfer><feFuncA type="linear" slope="4" intercept="-1.2" /></feComponentTransfer></filter></defs></svg>
-        <div className="event-modal__chrome">
-          <DetailActions label="place" onClose={handleClose} onShare={handleShare} sharing={sharing} />
-        </div>
-        <div className="place-modal-panel__inner event-modal__scroll">
-        <div className="place-modal-panel__layout">
-          <div className="place-modal-panel__body">
 
-          <div className="place-modal-panel__identity">
-          <div className="place-modal-panel__hero">
-            <div className="place-modal-panel__hero-rail" key={place.id} ref={heroRef}
-              aria-label="Place artwork and map" tabIndex={0}
-              onScroll={event => setHeroMapVisible(event.currentTarget.scrollLeft > event.currentTarget.clientWidth / 2)}
-              onKeyDown={event => { if(event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); heroRef.current?.scrollTo({left:event.key === "ArrowRight" ? heroRef.current.clientWidth : 0}); } }}>
-              <div className="place-modal-panel__hero-slide" aria-label="Place artwork">
-<div className="eb-detail__art">
-            <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif glass name={place.name} category={`place-${place.type}`} /></div>
-          {failedLogo !== place.name && serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl)) ? <img
-            key={`${place.id}:${place.name}:${place.imageUrl}`}
-            className="place-modal-panel__logo"
-            src={serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl))!}
-            alt={`${place.name} logo`}
-            onError={() => setFailedLogo(place.name)}
-          /> : <div className="place-modal-panel__logo"><ServiceNameMark source={place} /></div>}
-
-          </div>
-              </div>
-              <div className="place-modal-panel__hero-slide" aria-label="Place map">
+  // Native sections are shared by the six-artwork presentation and legacy venues.
+  const nativeMap = (
 <div ref={incidentalMap.ref} className="place-modal-panel__map" aria-label={`Map for ${place.name}`}>
             {incidentalMap.active && <Suspense fallback={<span role="status">Loading map…</span>}><DirectoryMap
               cameraMemory={incidentalMap.memory}
@@ -535,69 +493,18 @@ function PlaceModalInner({
               </span>
             </div>
           </div>
-              </div>
-            </div>
-            <div className="place-modal-panel__hero-switch" aria-label="Choose artwork or map">
-              <button type="button" aria-label="Show place artwork" aria-pressed={!heroMapVisible} onClick={() => { setHeroMapVisible(false); heroRef.current?.scrollTo({left:0}); }}><span aria-hidden="true" /></button>
-              <button type="button" aria-label="Show place map" aria-pressed={heroMapVisible} onClick={() => { setHeroMapVisible(true); if(heroRef.current) heroRef.current.scrollTo({left:heroRef.current.clientWidth}); }}><span aria-hidden="true" /></button>
-            </div>
-          </div>
-          <div className="place-modal-panel__identity-text">
-          <h2 className="event-modal__title">
-            {place.name}
-          </h2>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center", marginBottom: 10 }}>
-            {isGrandOpeningActive(place.grandOpeningDate) && (
-              <Badge color="yellow" glow size="sm" admission={undefined} day={undefined} category={undefined}>
-                Grand Opening
-              </Badge>
-            )}
-            <Badge
-              category={isNonprofit ? undefined : category}
-              color={isNonprofit ? "paper" : undefined}
-              size="md"
-              admission={undefined}
-              day={undefined}
-            >
-              {categoryLabel}
-            </Badge>
-          </div>
-
-          {isGrandOpeningActive(place.grandOpeningDate) && formatGrandOpeningDate(place.grandOpeningDate) && (
-            <div
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 900,
-                textTransform: "uppercase",
-                fontSize: "1.33rem", // ~30% smaller than 1.9rem
-                lineHeight: 1.1,
-                letterSpacing: "0.04em",
-                color: "var(--neon-yellow, #FFDD00)",
-                textShadow: "0 0 12px color-mix(in srgb, var(--neon-yellow, #FFDD00) 55%, transparent)",
-                margin: "0 0 14px",
-              }}
-            >
-              {formatGrandOpeningDate(place.grandOpeningDate)}
-            </div>
-          )}
-
-          </div>
-          </div>
-
-          {!editing && (multiLoc ? locations.some(loc => loc.phone) : displayed.phone) && (
+  );
+  const nativeContacts = (
+!editing && (multiLoc ? locations.some(loc => loc.phone) : displayed.phone) && (
             <div className="place-modal-panel__facts place-modal-panel__contacts" aria-label="Phone contacts">
               {multiLoc ? locations.filter(loc => loc.phone).map((loc, index) => (
                 <div key={index} className={`place-modal-panel__fact${index > 0 ? " place-modal-panel__fact--additional" : ""}`}><Icon d={PHONE} /><a href={telHref(loc.phone!)} title={`${loc.label}: ${loc.phone}`}><span className="place-modal-panel__phone-label">{loc.label}</span><span className="place-modal-panel__phone-number">{loc.phone}</span></a></div>
               )) : <div className="place-modal-panel__fact"><Icon d={PHONE} /><a href={telHref(displayed.phone!)}>{displayed.phone}</a></div>}
             </div>
-          )}
-
-          <div className="place-modal-panel__content-scroll" tabIndex={0} role="region" aria-label={`${place.name} details`}>
-          <p className="place-modal-panel__mobile-context">{categoryLabel}{isGrandOpeningActive(place.grandOpeningDate) && formatGrandOpeningDate(place.grandOpeningDate) ? ` · Grand opening ${formatGrandOpeningDate(place.grandOpeningDate)}` : ""}</p>
-          {!editing && multiLoc && <div className="place-modal-panel__mobile-extra-contacts">
-            {locations.filter(loc => loc.phone).slice(1).map((loc,index)=><div key={index} className="place-modal-panel__fact"><Icon d={PHONE}/><a href={telHref(loc.phone!)}>{loc.label}: {loc.phone}</a></div>)}
-          </div>}
-          <details className="event-modal__disclosure" open={editing || detailsOpen} onToggle={event => setDetailsOpen(event.currentTarget.open)}>
+          )
+  );
+  const nativeInfo = (
+<details className="event-modal__disclosure" open={editing || detailsOpen} onToggle={event => setDetailsOpen(event.currentTarget.open)}>
             <summary><Info aria-hidden="true" />Place details<ChevronRight aria-hidden="true" /></summary>
           <div className="place-modal-panel__details-room">
 
@@ -921,8 +828,9 @@ function PlaceModalInner({
           </div>
 
           </details>
-
-          <div className="eb-detail__primary-action">
+  );
+  const nativeFollow = (
+<div className="eb-detail__primary-action">
             <VenueFollowButton
               businessId={place.id}
               initialFollowing={Boolean(place.isFollowing)}
@@ -931,16 +839,18 @@ function PlaceModalInner({
               onRequireAuth={onRequireAuth}
             />
           </div>
-                  {!editing && !multiLoc && (address || displayed.phone) && (
+  );
+  const nativeDirections = (
+!editing && !multiLoc && (address || displayed.phone) && (
                     <div className="place-modal-panel__quick-actions">
                       <Link href={mapBrowseHref("places", place)}>View on Mapz</Link>
                       {address && <a href={placeAppleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer">Directions</a>}
                       {displayed.phone && <a href={telHref(displayed.phone)}>Call</a>}
                     </div>
-                  )}
-
-
-          <details className="event-modal__disclosure place-upcoming" open={eventsOpen} onToggle={event => setEventsOpen(event.currentTarget.open)}>
+                  )
+  );
+  const nativeUpcoming = (
+<details className="event-modal__disclosure place-upcoming" open={eventsOpen} onToggle={event => setEventsOpen(event.currentTarget.open)}>
             <summary><Icon d={CAL} />Upcoming events <span className="place-upcoming__count">{upcomingEvents.length}</span><ChevronRight aria-hidden="true" /></summary>
             {upcomingEvents.some(event => event.previewExample) && <p className="place-upcoming__note">Sample event cards for this preview.</p>}
             {upcomingEvents.length ? <div className="place-upcoming__grid" role="list" aria-label={`Upcoming events at ${place.name}`}>
@@ -959,32 +869,9 @@ function PlaceModalInner({
               </Link>)}
             </div> : <p className="place-upcoming__note">No upcoming events matched to this venue yet.</p>}
           </details>
-
-          <div className="place-modal-panel__community-room">
-            {promoters.length > 0 && (
-              <div className="place-modal-panel__promoters">
-                <span>Event promoters</span>
-                {promoters.map(p => <span key={p.id}>@{p.username}</span>)}
-              </div>
-            )}
-            <div className="place-modal-panel__tabs" role="tablist" aria-label="Place activity">
-              {tabs.map(t => (
-                <button
-                  key={t.key}
-                  type="button"
-                  role="tab"
-                  aria-selected={tab === t.key}
-                  onClick={() => setTab(t.key)}
-                  className={`place-modal-panel__tab${tab === t.key ? " active" : ""}`}
-                >
-                  {t.label}{t.count > 0 ? ` (${t.count})` : ""}
-                </button>
-              ))}
-            </div>
-
-            <div className="place-modal-panel__tab-panel" role="tabpanel">
-            {tab === "past" && (
-              pastEvents.length === 0 ? (
+  );
+  const nativePast = (
+pastEvents.length === 0 ? (
                 <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>
                   No past events matched to this venue yet.
                 </p>
@@ -1010,11 +897,9 @@ function PlaceModalInner({
                   </div>
                 </div>
               )
-            )}
-
-
-            {tab === "gigs" && (
-              gigs.length === 0 ? (
+  );
+  const nativeGigs = (
+gigs.length === 0 ? (
                 <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No gig postings at this venue yet.</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -1028,11 +913,9 @@ function PlaceModalInner({
                   </Link>
                 </div>
               )
-            )}
-            </div>
-          </div>
-
-          {!hideMissed && <section className="event-modal__mizzed-door" aria-label="Mizzed Connection" ref={mizzedRef}>
+  );
+  const nativeMizzed = (
+!hideMissed && <section className="event-modal__mizzed-door" aria-label="Mizzed Connection" ref={mizzedRef}>
             <button type="button" className="room-doorways__door pdx-glass-card pdx-glass-rebind"
               style={{ "--c": "var(--room-mizzed)", "--ink": "var(--room-mizzed)" } as React.CSSProperties}
               aria-expanded={missedOpen} onClick={() => {
@@ -1066,7 +949,171 @@ function PlaceModalInner({
             )}
             {missedOpen && <Link href={`/mizzed/new?place=${place.id}`} onClick={onClose} style={{ ...linkStyle, marginTop: 12 }}>Post a connection from this Placez card <ArrowRight size={14} aria-hidden="true" /></Link>}
 
-          </section>}
+          </section>
+  );
+
+  if (hasPlacezArtwork(place.id)) return (
+    <div onClick={handleClose} role="presentation" className={`event-modal-overlay place-modal-overlay placez-native-overlay${open ? " place-modal-overlay--open" : ""}`}>
+      <div ref={panelRef} onClick={event => event.stopPropagation()} role="dialog" aria-modal="false" aria-label={place.name} tabIndex={-1} className="placez-native-dialog">
+        <NativePlacezExpanded place={displayed} contacts={nativeContacts} info={nativeInfo}
+          feed={<><h3>GIGZ</h3>{place.gigs === undefined ? <p>Venue GIGZ have not loaded.</p> : nativeGigs}{place.spotted === undefined ? <p>Venue MIZZED CONNECTION posts have not loaded.</p> : nativeMizzed}</>}
+          events={place.upcomingEvents === undefined ? <p>Venue events have not loaded.</p> : nativeUpcoming}
+          maps={<>{nativeMap}{nativeDirections}</>}
+          people={<><section><h3>Owner</h3><p>Public owner profiles are unavailable.</p></section><section><h3>Staff</h3><p>Verified public staff profiles are unavailable.</p></section><section><h3>Promoters</h3>{place.promoters === undefined ? <p>Venue promoters have not loaded.</p> : promoters.length ? <ul>{promoters.map(promoter => <li key={promoter.id}>{promoter.displayName || promoter.username} <span>@{promoter.username}</span></li>)}</ul> : <p>No public promoters linked to this venue.</p>}</section><section><h3>Past talent</h3><p>Public event-to-talent profiles are unavailable.</p></section><section><h3>Past events</h3>{place.pastEvents === undefined ? <p>Past events have not loaded.</p> : nativePast}</section></>}
+          follow={<VenueFollowButton businessId={place.id} initialFollowing={Boolean(place.isFollowing)} variant="small-card" accent={accent} onRequireAuth={onRequireAuth}/>} onPageChange={page => setHeroMapVisible(page === 3)}
+          onClose={handleClose} onShare={handleShare} sharing={sharing} />
+      </div>
+    </div>
+  );
+
+  // CardDetails owns the inline host; mobile content below the phone scrolls
+  // within the bounded card while its image and contact remain visible.
+  return (
+    <div
+      onClick={handleClose}
+      role="presentation"
+      className={`event-modal-overlay place-modal-overlay${open ? " place-modal-overlay--open" : ""}`}
+    >
+      <div
+        ref={panelRef}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="false"
+        aria-label={place.name}
+        tabIndex={-1}
+        className={panelClass}
+        style={{
+          ["--c" as string]: accent,
+          ["--_c" as string]: accent,
+          ["--event-accent" as string]: accent,
+          ["--placez-logo-ink-filter" as string]: `url(#${logoInkId})`,
+          ...(useSpecialEdge ? { ["--_edge" as string]: edge } : {}),
+        }}
+      >
+        <svg width="0" height="0" aria-hidden="true" focusable="false" style={{position:'absolute'}}><defs><filter id={logoInkId} colorInterpolationFilters="sRGB"><feComponentTransfer><feFuncA type="linear" slope="4" intercept="-1.2" /></feComponentTransfer></filter></defs></svg>
+        <div className="event-modal__chrome">
+          <DetailActions label="place" onClose={handleClose} onShare={handleShare} sharing={sharing} />
+        </div>
+        <div className="place-modal-panel__inner event-modal__scroll">
+        <div className="place-modal-panel__layout">
+          <div className="place-modal-panel__body">
+
+          <div className="place-modal-panel__identity">
+          <div className="place-modal-panel__hero">
+            <div className="place-modal-panel__hero-rail" key={place.id} ref={heroRef}
+              aria-label="Place artwork and map" tabIndex={0}
+              onScroll={event => setHeroMapVisible(event.currentTarget.scrollLeft > event.currentTarget.clientWidth / 2)}
+              onKeyDown={event => { if(event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); heroRef.current?.scrollTo({left:event.key === "ArrowRight" ? heroRef.current.clientWidth : 0}); } }}>
+              <div className="place-modal-panel__hero-slide" aria-label="Place artwork">
+<div className="eb-detail__art">
+            <div className="placez-detail-motif" aria-hidden="true"><ResourceCardMotif glass name={place.name} category={`place-${place.type}`} /></div>
+          {failedLogo !== place.name && serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl)) ? <img
+            key={`${place.id}:${place.name}:${place.imageUrl}`}
+            className="place-modal-panel__logo"
+            src={serviceArtwork(place, resolveDirectoryLogo(place.name, place.imageUrl))!}
+            alt={`${place.name} logo`}
+            onError={() => setFailedLogo(place.name)}
+          /> : <div className="place-modal-panel__logo"><ServiceNameMark source={place} /></div>}
+
+          </div>
+              </div>
+              <div className="place-modal-panel__hero-slide" aria-label="Place map">
+{nativeMap}
+              </div>
+            </div>
+            <div className="place-modal-panel__hero-switch" aria-label="Choose artwork or map">
+              <button type="button" aria-label="Show place artwork" aria-pressed={!heroMapVisible} onClick={() => { setHeroMapVisible(false); heroRef.current?.scrollTo({left:0}); }}><span aria-hidden="true" /></button>
+              <button type="button" aria-label="Show place map" aria-pressed={heroMapVisible} onClick={() => { setHeroMapVisible(true); if(heroRef.current) heroRef.current.scrollTo({left:heroRef.current.clientWidth}); }}><span aria-hidden="true" /></button>
+            </div>
+          </div>
+          <div className="place-modal-panel__identity-text">
+          <h2 className="event-modal__title">
+            {place.name}
+          </h2>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center", marginBottom: 10 }}>
+            {isGrandOpeningActive(place.grandOpeningDate) && (
+              <Badge color="yellow" glow size="sm" admission={undefined} day={undefined} category={undefined}>
+                Grand Opening
+              </Badge>
+            )}
+            <Badge
+              category={isNonprofit ? undefined : category}
+              color={isNonprofit ? "paper" : undefined}
+              size="md"
+              admission={undefined}
+              day={undefined}
+            >
+              {categoryLabel}
+            </Badge>
+          </div>
+
+          {isGrandOpeningActive(place.grandOpeningDate) && formatGrandOpeningDate(place.grandOpeningDate) && (
+            <div
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 900,
+                textTransform: "uppercase",
+                fontSize: "1.33rem", // ~30% smaller than 1.9rem
+                lineHeight: 1.1,
+                letterSpacing: "0.04em",
+                color: "var(--neon-yellow, #FFDD00)",
+                textShadow: "0 0 12px color-mix(in srgb, var(--neon-yellow, #FFDD00) 55%, transparent)",
+                margin: "0 0 14px",
+              }}
+            >
+              {formatGrandOpeningDate(place.grandOpeningDate)}
+            </div>
+          )}
+
+          </div>
+          </div>
+
+          {nativeContacts}
+
+          <div className="place-modal-panel__content-scroll" tabIndex={0} role="region" aria-label={`${place.name} details`}>
+          <p className="place-modal-panel__mobile-context">{categoryLabel}{isGrandOpeningActive(place.grandOpeningDate) && formatGrandOpeningDate(place.grandOpeningDate) ? ` · Grand opening ${formatGrandOpeningDate(place.grandOpeningDate)}` : ""}</p>
+          {!editing && multiLoc && <div className="place-modal-panel__mobile-extra-contacts">
+            {locations.filter(loc => loc.phone).slice(1).map((loc,index)=><div key={index} className="place-modal-panel__fact"><Icon d={PHONE}/><a href={telHref(loc.phone!)}>{loc.label}: {loc.phone}</a></div>)}
+          </div>}
+          {nativeInfo}
+
+          {nativeFollow}
+                  {nativeDirections}
+
+
+          {nativeUpcoming}
+
+          <div className="place-modal-panel__community-room">
+            {promoters.length > 0 && (
+              <div className="place-modal-panel__promoters">
+                <span>Event promoters</span>
+                {promoters.map(p => <span key={p.id}>@{p.username}</span>)}
+              </div>
+            )}
+            <div className="place-modal-panel__tabs" role="tablist" aria-label="Place activity">
+              {tabs.map(t => (
+                <button
+                  key={t.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === t.key}
+                  onClick={() => setTab(t.key)}
+                  className={`place-modal-panel__tab${tab === t.key ? " active" : ""}`}
+                >
+                  {t.label}{t.count > 0 ? ` (${t.count})` : ""}
+                </button>
+              ))}
+            </div>
+
+            <div className="place-modal-panel__tab-panel" role="tabpanel">
+            {tab === "past" && nativePast}
+
+
+            {tab === "gigs" && nativeGigs}
+            </div>
+          </div>
+
+          {nativeMizzed}
 
 
           </div>{/* /.place-modal-panel__content-scroll */}
@@ -1096,3 +1143,4 @@ const linkStyle: React.CSSProperties = {
   color: "var(--c, var(--pink))",
   textDecoration: "none",
 };
+

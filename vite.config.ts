@@ -24,10 +24,9 @@ export default defineConfig(({ command }):UserConfig => {
  return ({
   plugins: [
     react(),
-    // Experimental release candidate: only Eventz/Boardz category card wrappers
-    // and their exact face renderers. The initial full card-only candidate showed
-    // inconsistent optimized whole-page results for Placez/Resources, so they
-    // remain uncompiled. Keep shared CardAPI, pages, auth, consent, modal
+    // Exact compiler scope: Eventz/Boardz and the reviewed six-PlaceZ presentation
+    // cohort. The shared scope also drives optimized off/on comparison builds.
+    // Keep Resources, shared CardAPI, pages, auth, consent, modal
     // controllers, Mapz and profiling harness uncompiled. Revalidate every
     // revision against balanced Chromium/WebKit and release approval gates.
     babel({
@@ -104,3 +103,4 @@ export default defineConfig(({ command }):UserConfig => {
   },
 });
 });
+

@@ -54,8 +54,8 @@ export function scrollToResults(selector: string, dockTop: number | null) {
   window.scrollTo({ top: Math.max(0, y), behavior: quiet ? "auto" : "smooth" });
 }
 
-export function ScrollDock({ top, label, searchLabel, onSearch, className = "", railClassName = "", children }: {
-  top: number; label: string; searchLabel?: string; onSearch?: () => void; className?: string; railClassName?: string; children: ReactNode;
+export function ScrollDock({ top, label, searchLabel, onSearch, className = "", railClassName = "", children, reserveCardViewport = false }: {
+  top: number; label: string; searchLabel?: string; onSearch?: () => void; className?: string; railClassName?: string; children: ReactNode; reserveCardViewport?: boolean;
 }) {
   const railRef = useRef<HTMLDivElement>(null);
   // Open with the selected chip in view, not always scrolled to the start.
@@ -64,7 +64,7 @@ export function ScrollDock({ top, label, searchLabel, onSearch, className = "", 
     const pressed = rail?.querySelector<HTMLElement>('[aria-pressed="true"]');
     if (rail && pressed) rail.scrollLeft = Math.max(0, pressed.offsetLeft - rail.clientWidth / 2 + pressed.offsetWidth / 2);
   }, []);
-  return <nav className={`zl-dock ${className}`.trim()} aria-label={label} style={{ "--zl-dock-top": `${top}px` } as CSSProperties}>
+  return <nav data-card-viewport-edge={reserveCardViewport ? "top" : undefined} className={`zl-dock ${className}`.trim()} aria-label={label} style={{ "--zl-dock-top": `${top}px` } as CSSProperties}>
     <div className="zl-dock__inner">
       {onSearch && <button type="button" className="zl-dock__search" aria-label={searchLabel || "Search"} onClick={onSearch}>
         <Search size={18} aria-hidden="true" />
@@ -81,3 +81,4 @@ export function DockChip({ label, count, color, pressed, onClick }: {
     <span>{label}</span>{count != null && <b aria-label={`${count} listings`}>{count}</b>}
   </button>;
 }
+

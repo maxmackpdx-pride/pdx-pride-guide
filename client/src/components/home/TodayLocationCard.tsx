@@ -1,3 +1,5 @@
+import NativePlacezFace from '../placez/NativePlacezFace';
+import {hasPlacezArtwork} from '../placez/nativeModel';
 import { CARD_SIZES, rememberCardOrigin, type CardSize } from "@/components/cards/CardAPI";
 import { CardMorph, OpenCardMeta, PausedCard } from "@/components/cards/react19Card";
 import { cardMorphName, openCardFromEvent, preloadCardImage } from "@/components/cards/react19CardModel";
@@ -44,7 +46,8 @@ export default function TodayLocationCard({ location, onRequireAuth, size = "tal
   else if (!isPlace) preloadCardImage(art, "low");
   else if (businessLogo) preloadCardImage(businessLogo, "auto");
   const label = isPlace ? DIRECTORY_TYPE_LABELS[kind] || "Placez" : OUTZ_LABELS[location.kind || ""] || "Destination";
-  const card = <CardMorph name={cardMorphName(["today", location.key, size])}><article data-card-size={size} data-card-category={location.room} onClickCapture={rememberCardOrigin} className={`tonight-card tonight-card--card today-location pdx-glass-card pdx-glass-rebind${isPlace ? "" : " outz-accent"}`} style={{ "--c": accent, "--dir-gm": 8 } as CSSProperties}>
+  const approvedPlace = isPlace && location.place && hasPlacezArtwork(location.place.id);
+  const card = approvedPlace ? <NativePlacezFace place={location.place!} size={size} onRequireAuth={onRequireAuth} onOpen={()=>setOpen(true)}/> : <CardMorph name={cardMorphName(["today", location.key, size])}><article data-card-size={size} data-card-category={location.room} onClickCapture={rememberCardOrigin} className={`tonight-card tonight-card--card today-location pdx-glass-card pdx-glass-rebind${isPlace ? "" : " outz-accent"}`} style={{ "--c": accent, "--dir-gm": 8 } as CSSProperties}>
     {isPlace && <ResourceCardMotif name={location.name} category={`place-${kind}`} />}
     {!isPlace && <span className="outz-accent__band" aria-hidden="true" />}
     <CardWaypoint kind={isPlace ? kind : location.kind || "trail"} outside={!isPlace} />
@@ -69,5 +72,6 @@ export default function TodayLocationCard({ location, onRequireAuth, size = "tal
       <button type="button" className="tonight-card__view" onClick={(event) => openCardFromEvent(event, () => setOpen(true))}>View details <ArrowUpRight size={17} aria-hidden="true" /></button>
     </footer>
   </article></CardMorph>;
-  return <>{isPlace ? <PlacezXerox>{card}</PlacezXerox> : <OutzXerox photo={Boolean(location.photo) && !blend} blend={blend}>{card}</OutzXerox>}{open && <OpenCardMeta title={location.name} description={location.detail} />}<PausedCard open={open}>{isPlace && location.place ? <PlaceModal documentMeta={false} place={location.place} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth || (() => {})} /> : <OutzCardModal documentMeta={false} location={location} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth} />}</PausedCard></>;
+  return <>{approvedPlace ? card : isPlace ? <PlacezXerox>{card}</PlacezXerox> : <OutzXerox photo={Boolean(location.photo) && !blend} blend={blend}>{card}</OutzXerox>}{open && <OpenCardMeta title={location.name} description={location.detail} />}<PausedCard open={open}>{isPlace && location.place ? <PlaceModal documentMeta={false} place={location.place} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth || (() => {})} /> : <OutzCardModal documentMeta={false} location={location} onClose={() => setOpen(false)} onRequireAuth={onRequireAuth} />}</PausedCard></>;
 }
+
