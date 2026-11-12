@@ -67,7 +67,7 @@ const Schedule = lazyWithReload(() => import("./pages/Schedule"));
 const Submit = lazyWithReload(() => import("./pages/Submit"));
 const Boards = lazyWithReload(() => import("./pages/Boards"));
 const About = lazyWithReload(() => import("./pages/About"));
-const Resources = lazyWithReload(() => import("./pages/Resources"));
+const Needz = lazyWithReload(() => import("./pages/Needz"));
 const Resume = lazyWithReload(() => import("./pages/Resume"));
 const Legal = lazyWithReload(() => import("./pages/Legal"));
 const Contact = lazyWithReload(() => import("./pages/Contact"));
@@ -212,7 +212,7 @@ function AppLayout() {
             </Route>
             <Route path="/resources">{() => <Redirect to={`/needz${window.location.search}${window.location.hash}`} replace />}</Route>
             <Route path="/rezources">{() => <Redirect to={`/needz${window.location.search}${window.location.hash}`} replace />}</Route>
-            <Route path="/needz" component={Resources} />
+            <Route path="/needz" component={Needz} />
             <Route path="/about" component={About} />
             <Route path="/aboutz" component={About} />
             <Route path="/resume" component={Resume} />

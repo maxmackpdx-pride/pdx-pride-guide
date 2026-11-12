@@ -6,3 +6,4 @@ export declare const cardSourcePatterns: RegExp[];
 export declare const cardCompilerExcludedPatterns: RegExp[];
 
 export declare const placezCompilerModules: string[];
+export declare const needzCompilerModules: string[];

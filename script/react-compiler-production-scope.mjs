@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import {assertCompiledFunction} from './react-compiler-function-proof.mjs';
 import path from 'node:path';
 import {createServer} from 'vite';
-import {cardFaceModules,cardSourcePatterns,placezCompilerModules} from './react-compiler-card-scope.mjs';
+import {cardFaceModules,cardSourcePatterns,needzCompilerModules,placezCompilerModules} from './react-compiler-card-scope.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
 const compilerMarker=/react(?:\/|_)compiler-runtime|useMemoCache|memo_cache_sentinel/;
@@ -16,13 +16,19 @@ const inScope=[
  'components/cards/EventCard.tsx',
  'components/cards/BoardCard.tsx',
  ...placezCompilerModules.map(module=>'components/'+module+'.tsx'),
+ // NEEDZ Decks is in Compiler scope (Nov 12 2026); every component must own a memo cache.
+ ...needzCompilerModules.map(module=>'components/'+module+'.tsx'),
  ...cardFaceModules.map(face=>'components/'+face+(face.startsWith('board/punk/')?'.jsx':'.tsx')),
 ];
 const outOfScope=[
  'components/discovery/PlaceDiscoveryCard.tsx',
  'components/home/TodayLocationCard.tsx',
  'components/cards/ZaylistCard.tsx',
+ // Legacy Resources ResourceCard adapter (Placez/CardAPI parity tests); the new NEEDZ face is components/needz.
  'components/cards/NeedzCard.tsx',
+ 'pages/Resources.tsx',
+ 'pages/Needz.tsx',
+ 'components/needz/needzDeckModel.ts',
  'components/cards/OutzCard.tsx',
  'components/cards/CardAPI.tsx',
  'components/cards/react19Card.tsx',
@@ -68,13 +74,13 @@ try{
    assert.ok(transformed?.code,`Vite did not transform ${url}`);
    const compiled=compilerMarker.test(transformed.code);
    assert.equal(compiled,expected,`Incorrect real-app React Compiler scope: ${url}`);
-   const target=placezCompilerModules.find(module=>file===`components/${module}.tsx`);
+   const target=[...placezCompilerModules,...needzCompilerModules].find(module=>file===`components/${module}.tsx`);
    const functionProof=target?assertCompiledFunction(transformed.code,target.split('/').pop(),expected):null;
    inspected.push({url,compiled,functionProof});
   }
  }
  console.log('REACT_COMPILER_PRODUCTION_SCOPE '+JSON.stringify({
-  mode:'event-board-placez-presentation-infer',config:'vite.config.ts',
+  mode:'event-board-placez-needz-presentation-infer',config:'vite.config.ts',
   functionProofs:inspected.filter(item=>item.functionProof).map(item=>item.functionProof),
   compiled:inspected.filter(item=>item.compiled).map(item=>item.url),
   excluded:inspected.filter(item=>!item.compiled).map(item=>item.url),

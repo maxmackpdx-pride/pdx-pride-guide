@@ -21,7 +21,7 @@ test('legacy URLs redirect without discarding deep-link queries and active art p
  for(const path of ['/resources','/rezources','/z/resources','/z/rezources'])assert.ok(server.includes(`"${path}": "/needz"`));
  assert.match(server,/if \(exact\) return res.redirect\(301, exact \+ qs\)/);
  const app=readFileSync('client/src/App.tsx','utf8');
- assert.match(app,/<Route path="\/needz" component=\{Resources\}/);
+ assert.match(app,/<Route path="\/needz" component=\{Needz\}/);
  assert.match(app,/\/needz\$\{window.location.search\}\$\{window.location.hash\}/);
  const svg=readFileSync('client/public/brand/family/needz.svg','utf8');
  assert.match(svg,/<title id="title">NEEDZ<\/title>/);assert.match(svg,/<image/);assert.match(svg,/data:image\/png;base64,/);

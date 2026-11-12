@@ -2283,7 +2283,7 @@ const RESOURCE_CATEGORY_SOURCE: ResourceCategory[] = [
       {
         "name": "Portland Gay Men's Chorus",
         "scope": "Portland",
-        "desc": "One of the oldest LGBTQ+ choruses in the country, singing for Portland since 1980 — concerts, community performances, and queer joy in four-part harmony.",
+        "desc": "One of the oldest LGBTQ+ choruses in the country, singing for Portland since 1980, with concerts, community performances, and queer joy in four-part harmony.",
         "logo": "/directory-logos/Portland_Gay_Mens_Chorus.png?v=2026-09-25-placez-white-marks",
         "url": "https://www.pdxgmc.org/",
         "cta": "Visit website",

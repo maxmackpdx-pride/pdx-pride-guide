@@ -27,7 +27,23 @@ export const placezCompilerModules = [
   'placez/ExpandedPager',
 ];
 
+// NEEDZ Decks (approved by Tucker, Nov 12 2026). New compiler-clean components only.
+// The legacy Resources page, its ResourceCard/NeedzCard adapter, ResourceCardMotif,
+// ResourceFilterButton and ds/PlaceCard stay uncompiled (known compiler bailouts).
+export const needzCompilerModules = [
+  'needz/NeedzRoom',
+  'needz/NeedzIntake',
+  'needz/NeedzDeck',
+  'needz/NeedzDeckCard',
+  'needz/NeedzCompactCard',
+  'needz/NeedzSaved',
+  'needz/NeedzTalkBar',
+  'needz/NeedzLogo',
+  'needz/NeedzTorn',
+];
+
 export const cardSourcePatterns = [
+  /[\\/]client[\\/]src[\\/]components[\\/]needz[\\/](?:NeedzRoom|NeedzIntake|NeedzDeck|NeedzDeckCard|NeedzCompactCard|NeedzSaved|NeedzTalkBar|NeedzLogo|NeedzTorn)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/]PlaceCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]placez[\\/](?:NativePlacezFace|PlacezQuickCard|NativePlacezExpanded|ExpandedPager)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/](?:EventCard|BoardCard)\.tsx$/,
