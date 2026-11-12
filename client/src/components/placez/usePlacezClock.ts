@@ -4,6 +4,9 @@ let timer:ReturnType<typeof setTimeout>|undefined;
 const listeners=new Set<()=>void>();
 const snapshot=()=>now;
 const serverSnapshot=()=>0;
+export function refreshPlacezClock(){
+ tick();
+}
 function tick(){
  clearTimeout(timer);now=Date.now();for(const notify of listeners)notify();
  if(listeners.size&&!document.hidden)timer=setTimeout(tick,60000-now%60000);

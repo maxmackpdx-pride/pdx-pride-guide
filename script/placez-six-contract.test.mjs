@@ -30,3 +30,10 @@ test('every approved venue has all responsive deliverables and preserved source 
  assert.ok(manifest.assets.some(x=>x.original==='Pizza-Thief-hero.png'));
  assert.match(read(base+'Pizza-Thief-CREDITS.txt'),/Another Believer/);
 });
+test('viewport reservation is opt-in for the approved six, preserving legacy cards',()=>{
+ const dock=read('client/src/components/discovery/ScrollDock.tsx');
+ assert.match(dock,/reserveCardViewport = false/);
+ assert.match(dock,/data-card-viewport-edge=\{reserveCardViewport \? "top" : undefined\}/);
+ assert.match(read('client/src/components/discovery/EventzBrowse.tsx'),/reserveCardViewport=\{reserveCardViewport\}/);
+ assert.match(read('client/src/pages/Directory.tsx'),/reserveCardViewport=\{!!selectedPlace && hasPlacezArtwork\(selectedPlace.id\)\}/);
+});

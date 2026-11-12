@@ -23,9 +23,9 @@ export function BrowseHeader({ title, logo, kicker, description, children }: {
   </header>;
 }
 
-export function BrowseControls({ title, categories, selected, onSelect, query, onSearch, view, onView, children, actions }: {
+export function BrowseControls({ title, categories, selected, onSelect, query, onSearch, view, onView, children, actions, reserveCardViewport = false }: {
   title: string; categories: BrowseCategory[]; selected: string[]; onSelect: (id: string) => void;
-  query: string; onSearch: (query: string) => void; view: BrowseView; onView: (view: BrowseView) => void; children?: ReactNode; actions?: ReactNode;
+  query: string; onSearch: (query: string) => void; view: BrowseView; onView: (view: BrowseView) => void; children?: ReactNode; actions?: ReactNode; reserveCardViewport?: boolean;
 }) {
   const controlsRef=useBrowseControlsOffset();
   const categoryRowRef=useRef<HTMLDivElement>(null);
@@ -50,7 +50,7 @@ export function BrowseControls({ title, categories, selected, onSelect, query, o
   }, [selectedKey, categoryKey]);
   const pick=(id: string) => { onSelect(id); onView("grid"); };
   return <div className="eb-controls" ref={controlsRef}>
-    {dockTop != null && (<ScrollDock top={dockTop} label={`${title} categories`} searchLabel={`Search ${title}`}
+    {dockTop != null && (<ScrollDock reserveCardViewport={reserveCardViewport} top={dockTop} label={`${title} categories`} searchLabel={`Search ${title}`}
       onSearch={() => focusPageSearch(".eb-controls .eb-search-row input", dockTop)}>
       {categories.map(category => <DockChip key={category.id} label={category.id === "ALL" ? "All" : category.label} count={category.count}
         color={category.color} pressed={selected.includes(category.id)} onClick={() => { pick(category.id); requestAnimationFrame(() => scrollToResults(".eb-result-head, .eb-body", dockTop)); }} />)}
@@ -107,3 +107,4 @@ export function BrowseLane({ title, color, count, children, onViewAll }: { title
     <EventsRail open={isMobile || open} label={title}>{Children.map(children, child => <div className="events-rail__item" role="listitem">{child}</div>)}</EventsRail>
   </section>;
 }
+
