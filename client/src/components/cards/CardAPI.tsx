@@ -37,7 +37,7 @@ export function CardShell({ size, category, children, className = '', ref, ...pr
 
 /** Details live in the clicked card's actual layout slot, never on document.body.
  * A direct URL with no source card renders at the caller's ordinary document position. */
-export function CardDetails({ children, onClose, mobileViewport = false }: { children: ReactNode; onClose?: () => void; mobileViewport?: boolean }) {
+export function CardDetails({ children, onClose, mobileViewport = false, reflowOnResize = true }: { children: ReactNode; onClose?: () => void; mobileViewport?: boolean; reflowOnResize?: boolean }) {
   const close = useRef(onClose); close.current=onClose;
   const identity=useRef(Symbol("card"));
   useLayoutEffect(()=>{
@@ -205,7 +205,9 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
     setHost(target);
     let observedWidth=parent.clientWidth;
     const resize=new ResizeObserver(()=>{const next=parent.clientWidth;if(Math.abs(next-observedWidth)>1){observedWidth=next;setLayoutRevision(v=>v+1);}});
-    resize.observe(parent);
+    // A browser top-layer dialog must not be detached during viewport resize.
+    // Its own CSS handles sizing; inline families still reflow their source slot.
+    if(reflowOnResize)resize.observe(parent);
     return () => {
       resize.disconnect();
       origin.element.dispatchEvent(new CustomEvent(CARD_SLOT_EVENT, { detail: "close" }));
@@ -232,7 +234,7 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
       if (originalStyle===null) item.removeAttribute('style'); else item.setAttribute('style',originalStyle);
       queueMicrotask(()=>{if (!target.isConnected && origin.trigger?.isConnected) origin.trigger.focus({preventScroll:true});});
     };
-  }, [origin,layoutRevision]);
+  }, [origin,layoutRevision,reflowOnResize]);
   useLayoutEffect(() => {
     const panel=(host || fallback.current)?.querySelector<HTMLElement>('[role="dialog"]');
     panel?.focus({preventScroll:true});

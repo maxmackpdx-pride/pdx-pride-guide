@@ -123,8 +123,10 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   await page.setViewportSize({width:390,height:844});
   await page.goto(`${server.resolvedUrls.local[0]}__placez-six?id=30&size=tall`,{waitUntil:'networkidle'});
   for(const dismissal of ['escape','backdrop']){
+   await checkpoint('dismissal:'+dismissal);
    const trigger=page.getByRole('button',{name:'View details for Holocene',exact:true});
    await trigger.click();await page.locator('dialog.pz-native-viewport').waitFor();
+   await page.waitForFunction(()=>document.querySelector('dialog.pz-native-viewport')?.matches(':modal')); 
    if(dismissal==='escape')await page.keyboard.press('Escape');else await page.mouse.click(1,1);
    await page.locator('dialog.pz-native-viewport').waitFor({state:'hidden'});
    assert.equal(await trigger.evaluate(el=>document.activeElement===el),true,'Dismissal restores source focus');
@@ -136,6 +138,9 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   const reopenedOrigin=JSON.parse(await page.locator('dialog.pz-native-viewport').getAttribute('data-placez-source-rect'));
   near(reopenedOrigin.width,reopenedBounds.width,'Reopen refreshes resized source width');
   near(reopenedOrigin.height,reopenedBounds.height,'Reopen refreshes source height');
+  await page.setViewportSize({width:390,height:844});
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  assert.equal(await page.locator('dialog.pz-native-viewport').evaluate(el=>el.matches(':modal')),true,'Resizing keeps dialog in browser top layer');
   await page.getByRole('button',{name:'Close Holocene',exact:true}).click();
   await checkpoint('directory-history-and-auth');
   await page.setViewportSize({width:390,height:844});

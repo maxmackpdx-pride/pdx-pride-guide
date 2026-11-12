@@ -222,7 +222,7 @@ function PlaceHours({ hours }: { hours: string }) {
 
 export default function PlaceModal({ documentMeta = true, ...props }: Parameters<typeof PlaceModalInner>[0] & { documentMeta?: boolean }) {
  const place = props.place;
- return <CardDetails key={place?.id} onClose={props.onClose} mobileViewport={!place || !hasPlacezArtwork(place.id)}>{documentMeta && place ? <OpenCardMeta title={place.name} description={place.neighborhood || place.address || place.description || ""} /> : null}{place && hasPlacezArtwork(place.id) ? <NativePlaceModalInner {...props} onImmediateClose={props.onClose} place={place} onClose={() => closeOpenCard(props.onClose)}/> : <PlaceModalInner {...props} onClose={() => closeOpenCard(props.onClose)} />}</CardDetails>;
+ return <CardDetails key={place?.id} onClose={props.onClose} mobileViewport={!place || !hasPlacezArtwork(place.id)} reflowOnResize={!place || !hasPlacezArtwork(place.id)}>{documentMeta && place ? <OpenCardMeta title={place.name} description={place.neighborhood || place.address || place.description || ""} /> : null}{place && hasPlacezArtwork(place.id) ? <NativePlaceModalInner {...props} onImmediateClose={props.onClose} place={place} onClose={() => closeOpenCard(props.onClose)}/> : <PlaceModalInner {...props} onClose={() => closeOpenCard(props.onClose)} />}</CardDetails>;
 }
 function NativePlaceModalInner(props: Parameters<typeof PlaceModalInner>[0] & {place:Business}) {
  const live=useNativePlacezData(props.place);
