@@ -12,7 +12,7 @@ const near=(a,b,label)=>assert.ok(Math.abs(a-b)<=1.1,`${label}: ${a} vs ${b}`);
 test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:600000},async()=>{
  const cacheDir=await mkdtemp(path.join(tmpdir(),'placez-six-'));
  const fixture='script/fixtures/placez-six-browser.tsx',shots=process.env.PLACEZ_QA_SCREENSHOT_DIR||'artifacts/placez-six';
- await mkdir(shots,{recursive:true});let server,browser;
+ await mkdir(shots,{recursive:true});let server,browser,page;
  const evidence=[];
  const checkpoint=async(stage)=>{console.log("PLACEZ_BROWSER_STAGE "+stage);await writeFile(path.join(shots,"progress.json"),JSON.stringify({stage,at:new Date().toISOString()},null,2));};
  try{
@@ -27,7 +27,7 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   await context.route('**/api/**',route=>{const req=route.request();if(!['GET','HEAD'].includes(req.method())){writes.push(req.method()+' '+req.url());return route.abort();}const path=new URL(req.url()).pathname;return route.fulfill(path==='/api/auth/me'?{status:401,json:{}}:path==='/api/directory'?{json:[30,3,31,5,2,23,903].map(mockPlace)}:/^\/api\/directory\/\d+$/.test(path)?{json:mockPlace(Number(path.split('/').pop()))}:{json:[]});});
   await context.route('**/outzide-map/places.json*',route=>route.fulfill({json:{places:[]}}));
   await context.addInitScript(()=>{window.__placezTransitions=[];window.__placezDialogMotion=[];const animate=Element.prototype.animate;Element.prototype.animate=function(frames,options){if(this.matches?.('dialog.pz-native-viewport'))window.__placezDialogMotion.push({frames,options});return animate.call(this,frames,options);};const original=document.startViewTransition?.bind(document);if(original)document.startViewTransition=(...args)=>{const transition=original(...args);transition.ready.then(()=>window.__placezTransitions.push(document.getAnimations().map(animation=>({name:animation.animationName||'',duration:animation.effect?.getComputedTiming().duration||0})))).catch(()=>{});return transition;};});
-  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(30000);
+  page=await context.newPage();page.on('pageerror',e=>{errors.push(e.message);console.log('PLACEZ_PAGE_ERROR '+e.message);});page.setDefaultTimeout(30000);
   for(const id of [30,3,31,5,2,23])for(const size of ['small','tall','wide','square']){
    await checkpoint(`closed:${id}:${size}:navigate`);
    await page.goto(`${server.resolvedUrls.local[0]}__placez-six?id=${id}&size=${size}`,{waitUntil:'networkidle'});
@@ -136,6 +136,6 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   const authedPage=await authenticated.newPage();await authedPage.goto(`${server.resolvedUrls.local[0]}__placez-six?id=30&size=small`,{waitUntil:'networkidle'});await authedPage.locator('#auth-probe').getByText('authenticated',{exact:true}).waitFor();
   await authedPage.getByRole('button',{name:'Follow directory listing',exact:true}).click();await authedPage.getByRole('button',{name:'Unfollow directory listing',exact:true}).waitFor();await authedPage.getByRole('button',{name:'Unfollow directory listing',exact:true}).click();await authedPage.getByRole('button',{name:'Follow directory listing',exact:true}).waitFor();assert.deepEqual(followMethods,['POST','DELETE']);await authenticated.close();
   assert.deepEqual(writes,[],'No writes from unauthenticated follow');assert.deepEqual(errors,[],'No browser runtime errors');await writeFile(path.join(shots,'metrics.json'),JSON.stringify(evidence,null,2));await context.close();
- }finally{await checkpoint('cleanup');await browser?.close();await server?.close();await rm(cacheDir,{recursive:true,force:true});}
+ }finally{if(page&&!page.isClosed()){await page.screenshot({path:path.join(shots,'last-browser-state.png'),fullPage:true}).catch(()=>{});console.log('PLACEZ_LAST_STATE '+JSON.stringify(await page.evaluate(()=>({dialogs:[...document.querySelectorAll('dialog')].map(el=>({html:el.outerHTML.slice(0,1500),connected:el.isConnected,modal:el.matches(':modal'),display:getComputedStyle(el).display})),active:document.activeElement?.outerHTML.slice(0,300)})).catch(()=>null)));}await checkpoint('cleanup');await browser?.close();await server?.close();await rm(cacheDir,{recursive:true,force:true});}
 });
 

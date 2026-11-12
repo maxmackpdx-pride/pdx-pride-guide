@@ -24,7 +24,14 @@ export default function NativePlacezViewport({children,label,onClose,originRect}
   };
   useLayoutEffect(()=>{
     const element=dialog.current;if(!element)return;
-    closing.current=false;element.showModal();
+    closing.current=false;
+    let frame=0,cancelled=false;
+    // Activity recreates effects before CardDetails has replaced its portal host.
+    // Wait until after the parent layout effects and never show a detached dialog.
+    const show=()=>{
+      if(cancelled)return;
+      if(!element.isConnected){frame=requestAnimationFrame(show);return;}
+      if(!element.open)element.showModal();
     const frames=originRect?cardEdgeFrames(originRect,element.getBoundingClientRect()):null;
     element.dataset.placezMotion=quiet()?'quiet':frames?'opening':'direct';
     if(frames&&!quiet()&&typeof element.animate==='function'){
@@ -33,11 +40,13 @@ export default function NativePlacezViewport({children,label,onClose,originRect}
         animation.current.onfinish=()=>{animation.current?.cancel();animation.current=null;element.dataset.placezMotion='open';};
       }catch{element.dataset.placezMotion='open';}
     }
+    };
+    frame=requestAnimationFrame(show);
     const preference=window.matchMedia('(prefers-reduced-motion: reduce)');
     const stop=()=>{if(!quiet())return;animation.current?.cancel();animation.current=null;element.dataset.placezMotion='quiet';if(closing.current)finish();};
     preference.addEventListener('change',stop);
     const observer=new MutationObserver(stop);observer.observe(document.documentElement,{attributes:true,attributeFilter:['class','data-calm']});
-    return()=>{clearTimeout(timer.current);observer.disconnect();preference.removeEventListener('change',stop);animation.current?.cancel();animation.current=null;if(element.open)element.close();};
+    return()=>{cancelled=true;cancelAnimationFrame(frame);clearTimeout(timer.current);observer.disconnect();preference.removeEventListener('change',stop);animation.current?.cancel();animation.current=null;if(element.open)element.close();};
   },[]);
   return <dialog ref={dialog} className="pz-native-viewport" aria-label={label} data-placez-source-rect={originRect?JSON.stringify(originRect):undefined} onCancel={event=>{event.preventDefault();requestClose();}} onClick={event=>{
     if(event.target!==event.currentTarget)return;
