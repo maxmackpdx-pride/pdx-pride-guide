@@ -26,7 +26,7 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   const mockPlace=id=>({id,name:names[id]||'Nearby test restaurant',type:id===23||id===903?'restaurant':'venue',description:'Isolated API fixture',address:'Portland',neighborhood:'Portland',phone:'503-555-0100',website:null,instagram:null,donateUrl:null,hours:'Hours supplied by venue',queerOwned:false,queerFriendly:true,imageUrl:null,lat:45.52,lng:-122.67,isNew:false,isFollowing:false,upcomingEvents:[{id:95001,title:'Fixture future event',dateStart:new Date(Date.now()+3600000).toISOString(),dateEnd:new Date(Date.now()+7200000).toISOString(),dayOfWeek:null}],pastEvents:[],gigs:[],spotted:[],promoters:[]});
   await context.route('**/api/**',route=>{const req=route.request();if(!['GET','HEAD'].includes(req.method())){writes.push(req.method()+' '+req.url());return route.abort();}const path=new URL(req.url()).pathname;return route.fulfill(path==='/api/auth/me'?{status:401,json:{}}:path==='/api/directory'?{json:[30,3,31,5,2,23,903].map(mockPlace)}:/^\/api\/directory\/\d+$/.test(path)?{json:mockPlace(Number(path.split('/').pop()))}:{json:[]});});
   await context.route('**/outzide-map/places.json*',route=>route.fulfill({json:{places:[]}}));
-  await context.addInitScript(()=>{window.__placezTransitions=[];const original=document.startViewTransition?.bind(document);if(original)document.startViewTransition=(...args)=>{const transition=original(...args);transition.ready.then(()=>window.__placezTransitions.push(document.getAnimations().map(animation=>({name:animation.animationName||'',duration:animation.effect?.getComputedTiming().duration||0})))).catch(()=>{});return transition;};});
+  await context.addInitScript(()=>{window.__placezTransitions=[];window.__placezDialogMotion=[];const animate=Element.prototype.animate;Element.prototype.animate=function(frames,options){if(this.matches?.('dialog.pz-native-viewport'))window.__placezDialogMotion.push({frames,options});return animate.call(this,frames,options);};const original=document.startViewTransition?.bind(document);if(original)document.startViewTransition=(...args)=>{const transition=original(...args);transition.ready.then(()=>window.__placezTransitions.push(document.getAnimations().map(animation=>({name:animation.animationName||'',duration:animation.effect?.getComputedTiming().duration||0})))).catch(()=>{});return transition;};});
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(30000);
   for(const id of [30,3,31,5,2,23])for(const size of ['small','tall','wide','square']){
    await checkpoint(`closed:${id}:${size}:navigate`);
@@ -67,6 +67,13 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
    const source=page.locator('[data-card-morph]').first(),before=await source.boundingBox();
    const trigger=page.getByRole('button',{name:'View details for Holocene',exact:true});await trigger.focus();await trigger.click();
    await page.locator('.pz-native-expanded').waitFor();await page.waitForFunction(()=>document.querySelector('[data-card-morph]')?.getAttribute('data-card-morph-phase')==='open');
+   const viewportDialog=page.locator('dialog.pz-native-viewport');
+   if(mode==='normal'){
+    await page.waitForFunction(()=>document.querySelector('dialog.pz-native-viewport')?.dataset.placezMotion==='open');
+    const captured=JSON.parse(await viewportDialog.getAttribute('data-placez-source-rect'));
+    near(captured.width,before.width,'native motion source width');near(captured.height,before.height,'native motion source height');
+    assert.ok(await page.evaluate(()=>window.__placezDialogMotion.some(a=>a.options.duration===280&&a.frames[0].scale!=='1 1')),'Dialog itself animates from source size');
+   }else assert.equal(await viewportDialog.getAttribute('data-placez-motion'),'quiet');
    await page.screenshot({path:path.join(shots,`motion-${mode}-${size}-expanded.png`),fullPage:true});
    if(mode==='normal')await page.waitForFunction(()=>window.__placezTransitions.some(group=>group.some(animation=>animation.duration>0&&animation.name.includes('view-transition'))));
    await page.getByRole('button',{name:'Close Holocene',exact:true}).click();await page.locator('.pz-native-expanded').waitFor({state:'hidden'});
