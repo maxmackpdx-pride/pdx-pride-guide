@@ -8,10 +8,19 @@ export { CARD_SIZES, type CardSize } from './cardLayout';
 
 type Origin = { element: HTMLElement; trigger: HTMLElement | null; at: number };
 let pendingOrigin: Origin | null = null;
+let lastOriginRect: {left:number;top:number;width:number;height:number;at:number;element:HTMLElement} | null = null;
+/** Snapshot before the source is hidden; refreshed for each click, including Activity reopens. */
+export function recentCardOriginRect(dialog:HTMLElement) {
+  const origin=lastOriginRect;
+  if(!origin || Date.now()-origin.at>=2000 || !origin.element.isConnected || !origin.element.closest('[data-card-expanded="true"]')?.contains(dialog))return null;
+  const {left,top,width,height}=origin;return {left,top,width,height};
+}
 /** Capture on the card root, before its category-specific open callback runs. */
 export function rememberCardOrigin(event: MouseEvent<HTMLElement>) {
   const target = event.target as HTMLElement;
   if (target.closest('.zay-card-expanded')) return;
+  const {left,top,width,height}=event.currentTarget.getBoundingClientRect();
+  lastOriginRect={left,top,width,height,at:Date.now(),element:event.currentTarget};
   pendingOrigin = { element: event.currentTarget, trigger: target.closest<HTMLElement>('button,a,[tabindex]'), at: Date.now() };
 }
 function consumeOrigin() {
@@ -294,3 +303,4 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
   const contents = <BoardCardInline.Provider value={true}><div className="zay-card-expanded">{children}</div></BoardCardInline.Provider>;
   return host ? createPortal(contents,host) : origin ? null : <div ref={fallback} className="zay-card-direct-details">{contents}</div>;
 }
+

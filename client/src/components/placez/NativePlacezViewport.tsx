@@ -1,4 +1,5 @@
 import {useLayoutEffect,useRef,type ReactNode} from 'react';
+import {recentCardOriginRect} from '@/components/cards/CardAPI';
 import {cardEdgeFrames} from '@/components/board/BoardCardContinuity';
 
 type Rect={left:number;top:number;width:number;height:number};
@@ -7,14 +8,15 @@ const quiet=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches||d
 /** Native top layer owns its motion: an in-flow ancestor cannot morph its bounds. */
 export default function NativePlacezViewport({children,label,onClose,originRect}:{children:(close:()=>void)=>ReactNode;label:string;onClose:()=>void;originRect?:Rect|null}){
   const dialog=useRef<HTMLDialogElement>(null),animation=useRef<Animation|null>(null),closing=useRef(false),timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);
+  const openingOrigin=useRef<Rect|null>(null);
   const latestClose=useRef(onClose);latestClose.current=onClose;
   const finish=()=>{clearTimeout(timer.current);animation.current?.cancel();animation.current=null;latestClose.current();};
   const requestClose=()=>{
     if(closing.current)return;closing.current=true;
     const element=dialog.current;
-    if(!element||quiet()||!originRect||typeof element.animate!=='function'){finish();return;}
+    if(!element||quiet()||!openingOrigin.current||typeof element.animate!=='function'){finish();return;}
     animation.current?.cancel();
-    const frames=cardEdgeFrames(originRect,element.getBoundingClientRect());
+    const frames=cardEdgeFrames(openingOrigin.current!,element.getBoundingClientRect());
     if(!frames){finish();return;}
     element.dataset.placezMotion='closing';
     try{
@@ -31,8 +33,10 @@ export default function NativePlacezViewport({children,label,onClose,originRect}
     const show=()=>{
       if(cancelled)return;
       if(!element.isConnected){frame=requestAnimationFrame(show);return;}
+      openingOrigin.current=recentCardOriginRect(element) || originRect || null;
+      element.dataset.placezSourceRect=JSON.stringify(openingOrigin.current);
       if(!element.open)element.showModal();
-    const frames=originRect?cardEdgeFrames(originRect,element.getBoundingClientRect()):null;
+    const frames=openingOrigin.current?cardEdgeFrames(openingOrigin.current!,element.getBoundingClientRect()):null;
     element.dataset.placezMotion=quiet()?'quiet':frames?'opening':'direct';
     if(frames&&!quiet()&&typeof element.animate==='function'){
       try{
@@ -48,7 +52,7 @@ export default function NativePlacezViewport({children,label,onClose,originRect}
     const observer=new MutationObserver(stop);observer.observe(document.documentElement,{attributes:true,attributeFilter:['class','data-calm']});
     return()=>{cancelled=true;cancelAnimationFrame(frame);clearTimeout(timer.current);observer.disconnect();preference.removeEventListener('change',stop);animation.current?.cancel();animation.current=null;if(element.open)element.close();};
   },[]);
-  return <dialog ref={dialog} className="pz-native-viewport" aria-label={label} data-placez-source-rect={originRect?JSON.stringify(originRect):undefined} onCancel={event=>{event.preventDefault();requestClose();}} onClick={event=>{
+  return <dialog ref={dialog} className="pz-native-viewport" aria-label={label} onCancel={event=>{event.preventDefault();requestClose();}} onClick={event=>{
     if(event.target!==event.currentTarget)return;
     const bounds=event.currentTarget.getBoundingClientRect();
     if(event.clientX<bounds.left||event.clientX>bounds.right||event.clientY<bounds.top||event.clientY>bounds.bottom)requestClose();

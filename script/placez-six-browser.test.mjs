@@ -119,6 +119,24 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
    await page.screenshot({path:path.join(shots,`directory-short-${width}x${height}.png`)});
    await expanded.getByRole('button',{name:'Close Alberta Rose Theatre',exact:true}).click();
   }
+  await checkpoint('expanded-dismissal-reopen');
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(`${server.resolvedUrls.local[0]}__placez-six?id=30&size=tall`,{waitUntil:'networkidle'});
+  for(const dismissal of ['escape','backdrop']){
+   const trigger=page.getByRole('button',{name:'View details for Holocene',exact:true});
+   await trigger.click();await page.locator('dialog.pz-native-viewport').waitFor();
+   if(dismissal==='escape')await page.keyboard.press('Escape');else await page.mouse.click(1,1);
+   await page.locator('dialog.pz-native-viewport').waitFor({state:'hidden'});
+   assert.equal(await trigger.evaluate(el=>document.activeElement===el),true,'Dismissal restores source focus');
+  }
+  await page.setViewportSize({width:680,height:700});
+  const reopenedTrigger=page.getByRole('button',{name:'View details for Holocene',exact:true});
+  const reopenedBounds=await page.locator('[data-card-category="placez"]').first().boundingBox();
+  await reopenedTrigger.click();await page.locator('dialog.pz-native-viewport').waitFor();
+  const reopenedOrigin=JSON.parse(await page.locator('dialog.pz-native-viewport').getAttribute('data-placez-source-rect'));
+  near(reopenedOrigin.width,reopenedBounds.width,'Reopen refreshes resized source width');
+  near(reopenedOrigin.height,reopenedBounds.height,'Reopen refreshes source height');
+  await page.getByRole('button',{name:'Close Holocene',exact:true}).click();
   await checkpoint('expanded-guest-auth');
   for(const action of ['heart','claim']){
    await page.setViewportSize({width:390,height:844});
@@ -129,6 +147,10 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
    else await expanded.getByRole('button',{name:/claim this business/i}).click();
    await page.getByText('Authentication requested').waitFor();
    await page.locator('dialog.pz-native-viewport').waitFor({state:'hidden'});
+   const authInput=page.getByRole('textbox',{name:'Authentication email'});
+   assert.equal(await authInput.evaluate(el=>document.activeElement===el),true,'Auth input receives focus after native dialog closes');
+   await page.keyboard.type('fixture@example.invalid');
+   assert.equal(await authInput.inputValue(),'fixture@example.invalid','Auth input accepts typing');
   }
   await checkpoint('authenticated-follow');
   const authenticated=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'reduce',serviceWorkers:'block'});let followed=false;const followMethods=[];

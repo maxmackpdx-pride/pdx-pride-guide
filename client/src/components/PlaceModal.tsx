@@ -15,6 +15,7 @@ import { ArrowUpRight } from "lucide-react";
 import { mapBrowseHref } from "@/lib/mapBrowseHref";
 import DetailActions from "./DetailActions";
 import type React from "react";
+import {flushSync} from "react-dom";
 import { lazy, Suspense, useEffect, useId, useRef, useState } from "react";
 import { CardDetails } from "./cards/CardAPI";
 import { OpenCardMeta } from "./cards/react19Card";
@@ -103,9 +104,7 @@ function toOwnerEditableFields(place: Business): OwnerEditableFields {
   };
 }
 
-/* Native Placez details stay inside the source card's in-flow slot. Mobile
-   layout pins the artwork and primary phone above its own content scroller;
-   desktop retains the existing detail composition and category tools. */
+/* Approved PlaceZ cards use a viewport dialog; legacy details keep their inline layout. */
 
 const DAY_COLOR: Record<string, string> = {
   MON: "var(--day-mon, #ff2d5e)",
@@ -223,15 +222,7 @@ function PlaceHours({ hours }: { hours: string }) {
 
 export default function PlaceModal({ documentMeta = true, ...props }: Parameters<typeof PlaceModalInner>[0] & { documentMeta?: boolean }) {
  const place = props.place;
- const [nativeOrigin] = useState(() => {
-   if(props.originRect)return props.originRect;
-   if(typeof document==="undefined")return null;
-   const source=document.querySelector<HTMLElement>('[data-card-morph-phase="open"][data-card-category="placez"]') || document.activeElement?.closest<HTMLElement>('[data-card-category="placez"]');
-   if(!source)return null;
-   const {left,top,width,height}=source.getBoundingClientRect();
-   return {left,top,width,height};
- });
- return <CardDetails key={place?.id} onClose={props.onClose} mobileViewport={!place || !hasPlacezArtwork(place.id)}>{documentMeta && place ? <OpenCardMeta title={place.name} description={place.neighborhood || place.address || place.description || ""} /> : null}{place && hasPlacezArtwork(place.id) ? <NativePlaceModalInner {...props} originRect={nativeOrigin} place={place} onClose={() => closeOpenCard(props.onClose)}/> : <PlaceModalInner {...props} onClose={() => closeOpenCard(props.onClose)} />}</CardDetails>;
+ return <CardDetails key={place?.id} onClose={props.onClose} mobileViewport={!place || !hasPlacezArtwork(place.id)}>{documentMeta && place ? <OpenCardMeta title={place.name} description={place.neighborhood || place.address || place.description || ""} /> : null}{place && hasPlacezArtwork(place.id) ? <NativePlaceModalInner {...props} onImmediateClose={props.onClose} place={place} onClose={() => closeOpenCard(props.onClose)}/> : <PlaceModalInner {...props} onClose={() => closeOpenCard(props.onClose)} />}</CardDetails>;
 }
 function NativePlaceModalInner(props: Parameters<typeof PlaceModalInner>[0] & {place:Business}) {
  const live=useNativePlacezData(props.place);
@@ -242,10 +233,12 @@ function PlaceModalInner({
   onClose,
   onRequireAuth,
   originRect,
+  onImmediateClose,
 }: {
   place: Business | null;
   onClose: () => void;
   onRequireAuth: () => void;
+  onImmediateClose?: () => void;
   /** Retained for callers; CardDetails owns source-card anchor geometry. */
   originRect?: PlaceModalOriginRect | null;
 }) {
@@ -276,8 +269,10 @@ function PlaceModalInner({
 
   const requireAuth = () => {
     // Release the native top layer before opening the existing auth portal.
-    if (place && hasPlacezArtwork(place.id)) onClose();
-    onRequireAuth();
+    if (place && hasPlacezArtwork(place.id) && onImmediateClose) {
+      flushSync(onImmediateClose);
+      requestAnimationFrame(onRequireAuth);
+    } else onRequireAuth();
   };
 
   // Fresh tab when opening a different place
@@ -977,7 +972,7 @@ gigs.length === 0 ? (
           maps={<>{nativeMap}{nativeDirections}</>}
           people={<><section><h3>Owner</h3><p>Public owner profiles are unavailable.</p></section><section><h3>Staff</h3><p>Verified public staff profiles are unavailable.</p></section><section><h3>Promoters</h3>{place.promoters === undefined ? <p>Venue promoters have not loaded.</p> : promoters.length ? <ul>{promoters.map(promoter => <li key={promoter.id}>{promoter.displayName || promoter.username} <span>@{promoter.username}</span></li>)}</ul> : <p>No public promoters linked to this venue.</p>}</section><section><h3>Past talent</h3><p>Public event-to-talent profiles are unavailable.</p></section><section><h3>Past events</h3>{place.pastEvents === undefined ? <p>Past events have not loaded.</p> : nativePast}</section></>}
           follow={<VenueFollowButton businessId={place.id} initialFollowing={Boolean(place.isFollowing)} variant="small-card" accent={accent} onRequireAuth={requireAuth}/>} onPageChange={page => setHeroMapVisible(page === 3)}
-          onClose={nativeClose} onShare={handleShare} sharing={sharing} />
+          onClose={nativeClose} onNavigate={onClose} onShare={handleShare} sharing={sharing} />
       </div>
     )}</NativePlacezViewport>
   );
