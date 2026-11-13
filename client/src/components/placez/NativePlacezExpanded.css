@@ -2,16 +2,16 @@
 .placez-native-dialog{width:100%;min-width:0;outline:none;container-type:inline-size}
 .placez-native-overlay{min-width:0}
 /* Keep a useful details viewport after fixed controls, even on short laptops.
-   The 360px budget includes header text, pager controls and footer, plus slack
+   The 240px budget includes header text, pager controls and footer, plus slack
    for wrapped titles. The header's own cap protects the body if text grows. */
 .pz-card.pz-native-expanded{
  --pz-expanded-photo-fraction:.542;
- --pz-native-card-height:max(320px,min(960px,var(--card-viewport-height,calc(100dvh - 24px))));
+ --pz-native-card-height:var(--placez-viewport-height,95dvh);
  --pz-native-content-height:calc(var(--pz-native-card-height) - 2px - env(safe-area-inset-bottom,0px));
- --pz-native-detail-min:clamp(44px,calc(var(--pz-native-content-height) - 240px),120px);
+ --pz-native-detail-min:clamp(80px,calc(var(--pz-native-content-height) * .34),360px);
  --pz-native-header-max:max(0px,calc(var(--pz-native-content-height) - var(--pz-native-detail-min) - 158px));
- --pz-native-art-height:min(calc(100cqw * var(--pz-expanded-photo-fraction)),max(0px,calc(var(--pz-native-header-max) - 32px)),max(48px,calc(var(--pz-native-content-height) - var(--pz-native-detail-min) - 360px)));
- width:100%;max-width:100%;height:var(--pz-native-card-height);min-height:320px;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,0px)
+ --pz-native-art-height:min(calc(100cqw * var(--pz-expanded-photo-fraction)),max(0px,calc(var(--pz-native-header-max) - 32px)),max(48px,calc(var(--pz-native-content-height) - var(--pz-native-detail-min) - 240px)));
+ width:100%;max-width:100%;height:var(--pz-native-card-height);min-height:0;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,0px)
 }
 /* Preserve the approved photo/mask proportions: five plates are 720x390;
    Pizza Thief is 720x405. Both artwork and header use the actual slot width. */
@@ -24,8 +24,8 @@
 .pz-native-header{position:relative;z-index:2;flex:0 1 auto;min-height:0;max-height:var(--pz-native-header-max);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:calc(var(--pz-native-art-height) + 8px) 20px 8px;background:none}
 .pz-native-header h2{margin:0 0 5px;font:800 25px/1.05 var(--font-display,'Barlow Condensed',sans-serif);text-transform:uppercase;overflow-wrap:anywhere}
 .pz-native-header .pz-category{font-size:10px;padding:3px 6px}
-.pz-native-header .place-modal-panel__contacts{display:flex!important;position:static!important;padding:5px 0!important;margin:0!important;max-height:70px;overflow:auto}
-.pz-native-header .place-modal-panel__fact{font-size:13px;margin:0}
+.pz-native-page .place-modal-panel__contacts{display:flex!important;position:static!important;padding:5px 0!important;margin:0!important;max-height:70px;overflow:auto}
+.pz-native-page .place-modal-panel__fact{font-size:13px;margin:0}
 .pz-native-compose{display:flex;justify-content:space-between;align-items:center;min-height:44px;color:var(--pz-accent);font:600 12px/1.2 var(--font-body,Barlow,sans-serif);text-decoration:none}
 .pz-native-expanded>.pz-expanded-pager{position:relative;z-index:2;flex:1;min-height:calc(var(--pz-native-detail-min) + 96px);height:auto;margin:0;display:flex;flex-direction:column}
 .pz-native-expanded .pz-page-tabs{flex:none;padding:0 8px}
@@ -48,7 +48,7 @@
 .pz-native-footer .eb-detail__primary-action{margin:0!important;padding:0!important;position:static!important}
 .pz-native-footer button{min-height:44px}
 .pz-native-credit{font-size:10px;color:var(--pz-color-a8b8c2)}.pz-native-credit a{color:inherit}
-@media(max-height:650px){.pz-native-header h2{font-size:20px}.pz-native-header .place-modal-panel__contacts{max-height:40px}}
+@media(max-height:650px){.pz-native-header h2{font-size:20px}.pz-native-page .place-modal-panel__contacts{max-height:40px}}
 @media(max-width:360px){.pz-native-header{padding-left:14px;padding-right:14px}.pz-native-expanded .pz-page-panel{padding-left:10px;padding-right:10px}.pz-native-expanded .pz-page-tabs button{font-size:9px}}
 
 html .pz-native-expanded .pz-heart button[data-card-heart=true]:before{width:32px!important;height:32px!important;inset:6px!important;border-radius:50%;border:1px solid var(--pz-accent);background:rgba(4,9,13,.55)}
@@ -60,3 +60,19 @@ html .pz-native-expanded .pz-heart button[data-card-heart=true][aria-pressed=tru
 .pz-native-page .event-modal__disclosure>summary>svg{width:22px;height:22px;flex:none}
 .pz-native-page .event-modal__disclosure>summary>svg:last-child{margin-left:auto}
 .pz-native-page .event-modal__disclosure[open]>summary>svg:last-child{transform:rotate(90deg)}
+
+
+/* The browser top layer places approved expanded cards above site chrome. */
+.pz-native-viewport{
+ position:fixed;inset:0;margin:auto;padding:0;border:0;background:transparent;color:inherit;
+ width:min(620px,90vw);max-width:calc(100vw - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px) - 12px);
+ height:var(--placez-viewport-height,95dvh);max-height:none;overflow:visible;outline:none;
+ --placez-viewport-height:min(95dvh,calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 12px));
+}
+.pz-native-viewport::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(5px)}
+.pz-native-viewport .placez-native-dialog{height:100%}
+html:has(.pz-native-viewport[open]),body:has(.pz-native-viewport[open]){overflow:hidden;overscroll-behavior:none}
+.pz-native-header{display:flex;align-items:center;gap:8px;flex-shrink:0;padding-bottom:10px}
+.pz-native-header h2{flex:1;min-width:0;margin:0}
+.pz-native-header .pz-category{flex:none}
+.pz-native-page .place-modal-panel__contacts{max-height:none;overflow:visible;flex-wrap:wrap}

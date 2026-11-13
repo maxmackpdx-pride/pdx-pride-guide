@@ -8,10 +8,19 @@ export { CARD_SIZES, type CardSize } from './cardLayout';
 
 type Origin = { element: HTMLElement; trigger: HTMLElement | null; at: number };
 let pendingOrigin: Origin | null = null;
+let lastOriginRect: {left:number;top:number;width:number;height:number;at:number;element:HTMLElement} | null = null;
+/** Snapshot before the source is hidden; refreshed for each click, including Activity reopens. */
+export function recentCardOriginRect(dialog:HTMLElement) {
+  const origin=lastOriginRect;
+  if(!origin || Date.now()-origin.at>=2000 || !origin.element.isConnected || !origin.element.closest('[data-card-expanded="true"]')?.contains(dialog))return null;
+  const {left,top,width,height}=origin;return {left,top,width,height};
+}
 /** Capture on the card root, before its category-specific open callback runs. */
 export function rememberCardOrigin(event: MouseEvent<HTMLElement>) {
   const target = event.target as HTMLElement;
   if (target.closest('.zay-card-expanded')) return;
+  const {left,top,width,height}=event.currentTarget.getBoundingClientRect();
+  lastOriginRect={left,top,width,height,at:Date.now(),element:event.currentTarget};
   pendingOrigin = { element: event.currentTarget, trigger: target.closest<HTMLElement>('button,a,[tabindex]'), at: Date.now() };
 }
 function consumeOrigin() {
@@ -28,7 +37,7 @@ export function CardShell({ size, category, children, className = '', ref, ...pr
 
 /** Details live in the clicked card's actual layout slot, never on document.body.
  * A direct URL with no source card renders at the caller's ordinary document position. */
-export function CardDetails({ children, onClose, mobileViewport = false }: { children: ReactNode; onClose?: () => void; mobileViewport?: boolean }) {
+export function CardDetails({ children, onClose, mobileViewport = false, reflowOnResize = true }: { children: ReactNode; onClose?: () => void; mobileViewport?: boolean; reflowOnResize?: boolean }) {
   const close = useRef(onClose); close.current=onClose;
   const identity=useRef(Symbol("card"));
   useLayoutEffect(()=>{
@@ -196,7 +205,9 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
     setHost(target);
     let observedWidth=parent.clientWidth;
     const resize=new ResizeObserver(()=>{const next=parent.clientWidth;if(Math.abs(next-observedWidth)>1){observedWidth=next;setLayoutRevision(v=>v+1);}});
-    resize.observe(parent);
+    // A browser top-layer dialog must not be detached during viewport resize.
+    // Its own CSS handles sizing; inline families still reflow their source slot.
+    if(reflowOnResize)resize.observe(parent);
     return () => {
       resize.disconnect();
       origin.element.dispatchEvent(new CustomEvent(CARD_SLOT_EVENT, { detail: "close" }));
@@ -223,7 +234,7 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
       if (originalStyle===null) item.removeAttribute('style'); else item.setAttribute('style',originalStyle);
       queueMicrotask(()=>{if (!target.isConnected && origin.trigger?.isConnected) origin.trigger.focus({preventScroll:true});});
     };
-  }, [origin,layoutRevision]);
+  }, [origin,layoutRevision,reflowOnResize]);
   useLayoutEffect(() => {
     const panel=(host || fallback.current)?.querySelector<HTMLElement>('[role="dialog"]');
     panel?.focus({preventScroll:true});
@@ -294,3 +305,4 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
   const contents = <BoardCardInline.Provider value={true}><div className="zay-card-expanded">{children}</div></BoardCardInline.Provider>;
   return host ? createPortal(contents,host) : origin ? null : <div ref={fallback} className="zay-card-direct-details">{contents}</div>;
 }
+

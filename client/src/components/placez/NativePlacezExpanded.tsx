@@ -15,10 +15,10 @@ import PlaceLocation from './PlaceLocation';
 type Props = {
   place:Business; contacts:ReactNode; info:ReactNode; feed:ReactNode; events:ReactNode;
   maps:ReactNode; people:ReactNode; follow:ReactNode;
-  onClose:()=>void; onShare:()=>void; sharing:boolean; onPageChange:(page:number)=>void;
+  onClose:()=>void; onNavigate:()=>void; onShare:()=>void; sharing:boolean; onPageChange:(page:number)=>void;
 };
 /** Presentation only: PlaceModal retains every operation and its permission checks. */
-export default function NativePlacezExpanded({place,contacts,info,feed,events,maps,people,follow,onClose,onShare,sharing,onPageChange}:Props){
+export default function NativePlacezExpanded({place,contacts,info,feed,events,maps,people,follow,onClose,onNavigate,onShare,sharing,onPageChange}:Props){
   const {calmMode}=useTheme();
   const artworkRef=useArtworkMotion(!calmMode);
   const [selection,setSelection]=useState(()=>selectedPlacezPage(place.id));
@@ -39,12 +39,10 @@ export default function NativePlacezExpanded({place,contacts,info,feed,events,ma
     <button type="button" className="pz-share" aria-label={`Share ${place.name}`} onClick={onShare} disabled={sharing}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="5" r="3"/><circle cx="18" cy="19" r="3"/><path d="m9 10 6-4M9 14l6 4"/></svg></button>
     <header className="pz-native-header">
       <h2>{place.name}</h2><span className="pz-category">{model.category}</span>
-      {contacts}
-      <Link className="pz-native-compose" href={model.composeHref} onClick={onClose}>Post a MIZZED CONNECTION <span aria-hidden="true">↗</span></Link>
     </header>
     <ExpandedPager motion={!calmMode} initialPage={selection.page} resetKey={selection.request} onPageChange={onPageChange} pages={[
       <div key="feed" className="pz-native-page">{feed}<section><h3>Venue news</h3><p>Public venue news is unavailable.</p></section></div>,
-      <div key="info" className="pz-native-page">{info}{place.id===23&&<p className="pz-native-credit">Artwork adapted from <a href="https://commons.wikimedia.org/wiki/File:Pizza_Thief,_Portland,_Oregon,_2022_-_6.jpg" target="_blank" rel="noopener noreferrer">Another Believer’s January 31, 2022 photograph</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Generated interpretation; signs and interior details were redrawn.</p>}</div>,
+      <div key="info" className="pz-native-page">{contacts}<Link className="pz-native-compose" href={model.composeHref} onClick={onNavigate}>Post a MIZZED CONNECTION <span aria-hidden="true">↗</span></Link>{info}{place.id===23&&<p className="pz-native-credit">Artwork adapted from <a href="https://commons.wikimedia.org/wiki/File:Pizza_Thief,_Portland,_Oregon,_2022_-_6.jpg" target="_blank" rel="noopener noreferrer">Another Believer’s January 31, 2022 photograph</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Generated interpretation; signs and interior details were redrawn.</p>}</div>,
       <div key="events" className="pz-native-page"><SevenDayEvents feed={live.calendarFeed} venueId={place.id}/>{events}<section><h3>Current and upcoming talent</h3><p>Public event-to-talent profiles are unavailable.</p></section><PlaceLocation mode="nearby" model={model} restaurants={nearby}/></div>,
       <div key="maps" className="pz-native-page">{maps}</div>,
       <div key="people" className="pz-native-page">{people}</div>
@@ -53,3 +51,4 @@ export default function NativePlacezExpanded({place,contacts,info,feed,events,ma
     <div className="pz-heart" data-corner-control="heart" onClick={event=>event.stopPropagation()}>{follow}</div>
   </article>;
 }
+
