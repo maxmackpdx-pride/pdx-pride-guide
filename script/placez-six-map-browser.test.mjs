@@ -8,8 +8,8 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const near=(a,b,label)=>assert.ok(Math.abs(a-b)<1.1,`${label}: ${a} vs ${b}`);
 // Production's accessibility reset uses0.01ms to retain transition lifecycle events.
 const effectivelyStill=value=>value.split(',').every(part=>{const n=parseFloat(part);return Number.isFinite(n)&&n*(part.trim().endsWith('ms')?.001:1)<=.001;});
-const names={30:'Holocene',3:'Stag PDX',31:'Alberta Rose Theatre',5:'Eagle Portland',2:'Darcelle XV Showplace',23:'Pizza Thief'};
-const place=id=>({id,name:names[id],type:id===23?'restaurant':id===3||id===5?'bar':'venue',active:true,status:'OPEN',address:'Public fixture address',description:'Isolated browser fixture',neighborhood:'Portland',lat:45.52,lng:-122.67,locations:[{label:'Primary',address:'Public fixture address',lat:45.52,lng:-122.67}],isFollowing:false,upcomingEvents:[],pastEvents:[],gigs:[],spotted:[],promoters:[]});
+const names={30:'Holocene',3:'Stag PDX',31:'Alberta Rose Theatre',5:'Eagle Portland',2:'Darcelle XV Showplace',23:'Pizza Thief',8:'Kann',9:'The Sports Bra'};
+const place=id=>({id,name:names[id],type:[23,8,9].includes(id)?'restaurant':id===3||id===5?'bar':'venue',active:true,status:'OPEN',address:'Public fixture address',description:'Isolated browser fixture',neighborhood:'Portland',lat:45.52,lng:-122.67,locations:[{label:'Primary',address:'Public fixture address',lat:45.52,lng:-122.67}],isFollowing:false,upcomingEvents:[],pastEvents:[],gigs:[],spotted:[],promoters:[]});
 test('immutable map release uses shared read-only PlaceZ portals at phone and desktop sizes',{timeout:600000},async(t)=>{
  const pin=JSON.parse(await readFile(path.join(root,'shared/mapReleaseLock.json'),'utf8'));
  const match=/^v(\d+)\.(\d+)\.(\d+)$/.exec(pin.tag||'');assert.ok(match,'Pinned map tag must be a stable semantic version');
@@ -67,3 +67,4 @@ test('immutable map release uses shared read-only PlaceZ portals at phone and de
   assert.deepEqual(writes,[],'Map presentation sent no mutation');assert.deepEqual(errors,[],'No runtime errors');await writeFile(path.join(shots,'metrics.json'),JSON.stringify(evidence,null,2));await context.close();
  }finally{await browser?.close();await server?.close();await rm(cacheDir,{recursive:true,force:true});}
 });
+

@@ -1,0 +1,101 @@
+{
+  "status": "review candidate, not deployed",
+  "sourceCredit": "Another Believer, CC BY-SA4.0; see ATTRIBUTION.md and native Info links",
+  "assets": [
+    {
+      "path": "kann-header-cutout.svg",
+      "bytes": 619,
+      "sha256": "dc1519e0fb53e1d0a8cf23db27792512c98c1f936ca53e28f6506a10ad61d221"
+    },
+    {
+      "path": "kann-hero-1200.webp",
+      "bytes": 395314,
+      "sha256": "fc01ab1a2278f8853b959d36078e7eadae126813fef067f9b160b0ca4efe4daf"
+    },
+    {
+      "path": "kann-hero-360.webp",
+      "bytes": 42066,
+      "sha256": "ef5e60f21fd9138f9d59c26eea88ca71b3ece202d36eb23142b333715c885eb8"
+    },
+    {
+      "path": "kann-hero-720.webp",
+      "bytes": 161342,
+      "sha256": "71d059e0a69a6407a4ef32286955e87e36a69c0c698e1688ad1e9191f698ec12"
+    },
+    {
+      "path": "kann-logo.svg",
+      "bytes": 18172,
+      "sha256": "dc86e7c768710a2b987923308232943c61bccf1e6621b7c95b6ed2be48811113"
+    },
+    {
+      "path": "kann-wide-header-cutout.svg",
+      "bytes": 619,
+      "sha256": "dc1519e0fb53e1d0a8cf23db27792512c98c1f936ca53e28f6506a10ad61d221"
+    },
+    {
+      "path": "restaurant-small-glass.svg",
+      "bytes": 4315,
+      "sha256": "ec4458b874d2526637c81fca4dbeda071da1fdea8cc08571af148f97d2c08971"
+    },
+    {
+      "path": "restaurant-square-glass.svg",
+      "bytes": 3909,
+      "sha256": "54e7d05ac475038ff965bbc2ac0951c9394d732eb7b405b1631ebee3b185900d"
+    },
+    {
+      "path": "restaurant-tall-glass.svg",
+      "bytes": 4188,
+      "sha256": "fcc331f7040a85d99b657a676f40211eafe9ab76dcb97c815d778fd74b603a52"
+    },
+    {
+      "path": "restaurant-wide-glass.svg",
+      "bytes": 4241,
+      "sha256": "95c7b58f4ea7920b40342a814698274963a8395b47f768c6cc22977353421a2d"
+    },
+    {
+      "path": "sports-bra-header-cutout.svg",
+      "bytes": 619,
+      "sha256": "dc1519e0fb53e1d0a8cf23db27792512c98c1f936ca53e28f6506a10ad61d221"
+    },
+    {
+      "path": "sports-bra-hero-1200.webp",
+      "bytes": 368140,
+      "sha256": "50c4c84c5502fc42fa4316a5e5c575e567d9c45e9fc1410a628219674c11a901"
+    },
+    {
+      "path": "sports-bra-hero-360.webp",
+      "bytes": 39996,
+      "sha256": "0777ebc55af32385a98869bab757823fd7dfc293886db5611665c5c774e65d9c"
+    },
+    {
+      "path": "sports-bra-hero-720.webp",
+      "bytes": 148044,
+      "sha256": "09b5b91444d726b6588a45c81ba1fa186ff765934359434bacd792042abb1a37"
+    },
+    {
+      "path": "sports-bra-logo.svg",
+      "bytes": 60648,
+      "sha256": "58a0d09cd8a32060b0100c30be3952e370c8f23d1d963d91611767c68bb2868d"
+    },
+    {
+      "path": "sports-bra-wide-header-cutout.svg",
+      "bytes": 619,
+      "sha256": "dc1519e0fb53e1d0a8cf23db27792512c98c1f936ca53e28f6506a10ad61d221"
+    }
+  ],
+  "sourceArtwork": [
+    {
+      "venue": "The Sports Bra",
+      "source": "The-Sports-Bra-rainbow-review.png",
+      "sha256": "8fd6fbf430b6c15938bd5a1ced67d2cd52f270ab38acfc768e0675ea72a6d3a9",
+      "captureDate": "2025-08-17"
+    },
+    {
+      "venue": "Kann",
+      "source": "Kann-2022-review-v3.png",
+      "sha256": "e95ad0b523e0c983afe992e60c95c97fe826dbba138d506df214eb4237fcf2dc",
+      "captureDate": "2022-08-27",
+      "caveat": "historical generated reconstruction; partly inferred outer/lower-right geometry"
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import PlacezArtworkCredit from './PlacezArtworkCredit';
 import {useEffect,useState,type CSSProperties,type ReactNode} from 'react';
 import {Link} from 'wouter';
 import {useTheme} from '@/context/ThemeContext';
@@ -44,7 +45,7 @@ export default function NativePlacezExpanded({place,contacts,info,feed,events,ma
     </header>
     <ExpandedPager motion={!calmMode} initialPage={selection.page} resetKey={selection.request} onPageChange={onPageChange} pages={[
       <div key="feed" className="pz-native-page">{feed}<section><h3>Venue news</h3><p>Public venue news is unavailable.</p></section></div>,
-      <div key="info" className="pz-native-page">{info}{place.id===23&&<p className="pz-native-credit">Artwork adapted from <a href="https://commons.wikimedia.org/wiki/File:Pizza_Thief,_Portland,_Oregon,_2022_-_6.jpg" target="_blank" rel="noopener noreferrer">Another Believer’s January 31, 2022 photograph</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Generated interpretation; signs and interior details were redrawn.</p>}</div>,
+      <div key="info" className="pz-native-page">{info}<PlacezArtworkCredit id={place.id}/>{place.id===23&&<p className="pz-native-credit">Artwork adapted from <a href="https://commons.wikimedia.org/wiki/File:Pizza_Thief,_Portland,_Oregon,_2022_-_6.jpg" target="_blank" rel="noopener noreferrer">Another Believer’s January 31, 2022 photograph</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Generated interpretation; signs and interior details were redrawn.</p>}</div>,
       <div key="events" className="pz-native-page"><SevenDayEvents feed={live.calendarFeed} venueId={place.id}/>{events}<section><h3>Current and upcoming talent</h3><p>Public event-to-talent profiles are unavailable.</p></section><PlaceLocation mode="nearby" model={model} restaurants={nearby}/></div>,
       <div key="maps" className="pz-native-page">{maps}</div>,
       <div key="people" className="pz-native-page">{people}</div>
@@ -53,3 +54,4 @@ export default function NativePlacezExpanded({place,contacts,info,feed,events,ma
     <div className="pz-heart" data-corner-control="heart" onClick={event=>event.stopPropagation()}>{follow}</div>
   </article>;
 }
+
