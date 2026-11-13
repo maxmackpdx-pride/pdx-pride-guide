@@ -37,3 +37,20 @@ test('viewport reservation is opt-in for the approved six, preserving legacy car
  assert.match(read('client/src/components/discovery/EventzBrowse.tsx'),/reserveCardViewport=\{reserveCardViewport\}/);
  assert.match(read('client/src/pages/Directory.tsx'),/reserveCardViewport=\{!!selectedPlace && hasPlacezArtwork\(selectedPlace.id\)\}/);
 });
+
+
+// New pair is additive; all original six checks above stay intact.
+test('new restaurant pair retains independent logos, masks, srcsets and native credits',()=>{
+ const base='client/public/placez-next/';
+ for(const slug of ['sports-bra','kann']){
+  for(const width of [360,720,1200])assert.ok(existsSync(new URL('../'+base+slug+`-hero-${width}.webp`,import.meta.url)));
+  for(const suffix of ['logo.svg','header-cutout.svg','wide-header-cutout.svg'])assert.ok(existsSync(new URL('../'+base+slug+'-'+suffix,import.meta.url)));
+ }
+ for(const size of ['small','square','tall','wide'])assert.ok(existsSync(new URL('../'+base+'restaurant-'+size+'-glass.svg',import.meta.url)));
+ const next=read('client/src/components/placez/nextPresentation.ts');
+ assert.match(next,/\[9,/);assert.match(next,/\[8,/);assert.match(next,/imageFit:'contain'/);assert.match(next,/logoUrl:/);
+ const presentation=read('client/src/components/placez/presentation.ts');assert.match(presentation,/existingPresentationFor\(assetBase\)/);assert.match(presentation,/nextPresentationFor\(\)/);
+ const expanded=read('client/src/components/placez/NativePlacezExpanded.tsx');assert.match(expanded,/<PlacezArtworkCredit id=\{place.id\}/);
+ const credits=read('client/src/components/placez/PlacezArtworkCredit.tsx');assert.match(credits,/CC BY-SA 4.0/);assert.match(credits,/Historical imagery/);assert.match(credits,/173093730/);assert.match(credits,/_090.jpg/);
+ const css=read('client/src/components/placez/PlacezQuickCard.css');assert.ok(css.includes('[data-fit=contain][data-cutout=true]{mask-image:none'));assert.ok(css.includes('mask-size:contain'));
+});

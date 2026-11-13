@@ -143,3 +143,7 @@
 /* Real torn contour is alpha-cut out. The card glass, not opaque photo black,
    is visible below it. Mask and photo share cover scale and crop position. */
 .pz-art[data-cutout=true]{mask-image:var(--pz-cutout-mask);mask-mode:alpha;mask-size:cover;mask-position:var(--pz-photo-position,50% 50%);mask-repeat:no-repeat;-webkit-mask-image:var(--pz-cutout-mask);-webkit-mask-size:cover;-webkit-mask-position:var(--pz-photo-position,50% 50%);-webkit-mask-repeat:no-repeat}
+/* Append to PlacezQuickCard.css; affects only new contain+cutout combinations.
+   Mask the photo planes, never clip independent exact project logo. */
+.pz-art[data-fit=contain][data-cutout=true]{mask-image:none;-webkit-mask-image:none}
+.pz-art[data-fit=contain][data-cutout=true]>.pz-art__base,.pz-art[data-fit=contain][data-cutout=true]>.pz-art__moving img{mask-image:var(--pz-cutout-mask);mask-size:contain;mask-position:var(--pz-photo-position,50% 0%);mask-repeat:no-repeat;-webkit-mask-image:var(--pz-cutout-mask);-webkit-mask-size:contain;-webkit-mask-position:var(--pz-photo-position,50% 0%);-webkit-mask-repeat:no-repeat}
