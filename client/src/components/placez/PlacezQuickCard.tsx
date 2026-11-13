@@ -1,3 +1,4 @@
+import PlacezArtworkCredit from './PlacezArtworkCredit';
 import {Link} from 'wouter';
 import {useId,useState,type CSSProperties,type ReactNode,type MouseEvent} from 'react';
 import type {PlaceCardModel,PreviewSize} from './placezAdapter';
@@ -37,6 +38,7 @@ export function Artwork({model:m,wide,sizes="(max-width: 640px) 100vw, 620px"}:{
 export default function PlacezQuickCard({model:m,size,onOpen,onClaim,onClose,onShare,heart,readOnly=false,mapsContent,motion=true,nextEvent,previewNow,activity,nearbyRestaurants,calendarFeed,people,talent,feed,activePosts,initialExpandedPage=1}:PlacezQuickCardProps){
  const ref=useArtworkMotion(motion),titleId=useId(),clock=usePlacezClock(previewNow);
  const [detailsOpen,setDetailsOpen]=useState(true);
+ const pairArtwork=m.id===8||m.id===9;
  const compact=size==='small',wide=size==='wide-map',expanded=size==='expanded';
  const hasNext=!compact&&!expanded&&Boolean(remainingToEvent(nextEvent,m.id,clock));
  const showStatus=Boolean(m.status.source&&(m.status.tone==='open'||m.status.tone==='closed'));
@@ -50,7 +52,7 @@ export default function PlacezQuickCard({model:m,size,onOpen,onClaim,onClose,onS
    {expanded&&onShare&&<button type="button" className="pz-share" aria-label={`Share ${m.name}`} onClick={onShare}><Icon kind="share"/></button>}
    {expanded?<><div className="pz-expanded-body">
        <header className="pz-expanded-header"><h2 className="pz-expanded-title" id={titleId}>{m.title||m.name}</h2><span className="pz-category">{m.category}</span>
-       <Link className="pz-compose-row" href={m.composeHref} aria-disabled={readOnly||undefined} tabIndex={readOnly?-1:undefined} onClick={event=>{if(readOnly)event.preventDefault();}}><span>Post a Mizzed Connection<small>At this place, anytime</small></span><span aria-hidden="true">↗</span></Link></header>
+       <Link className="pz-compose-row" href={m.composeHref} aria-disabled={readOnly||undefined} tabIndex={readOnly?-1:undefined} onClick={event=>{if(readOnly)event.preventDefault();}}><span>Post a Mizzed Connection<small>At this place, anytime</small></span>{pairArtwork?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg>:<span aria-hidden="true">↗</span>}</Link></header>
        <ExpandedPager motion={motion} initialPage={initialExpandedPage} pages={[<PlaceFeed key="feed" data={feed} activePosts={activePosts} venueId={m.id} previewNow={previewNow}/>,<div className="pz-info-page" key="info">
        <details className="pz-place-details" open={detailsOpen} onToggle={e=>setDetailsOpen(e.currentTarget.open)}>
          <summary><Icon kind="info"/><span>Place details</span><span className="pz-chevron" aria-hidden="true">⌄</span></summary>
@@ -61,16 +63,17 @@ export default function PlacezQuickCard({model:m,size,onOpen,onClaim,onClose,onS
            {m.description&&<p className="pz-description">{m.description}</p>}
          </div>
        </details>
+       <PlacezArtworkCredit id={m.id}/>
        {m.id===23&&<p className="pz-native-credit">Artwork adapted from <a href="https://commons.wikimedia.org/wiki/File:Pizza_Thief,_Portland,_Oregon,_2022_-_6.jpg">Another Believer’s January 31, 2022 photograph</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Generated interpretation; signs and interior details were redrawn.</p>}
-       {m.claimState==='unclaimed'&&onClaim&&<button type="button" className="pz-claim" onClick={event=>onClaim(root(event))}>Claim this business <span aria-hidden="true">↗</span></button>}
+       {m.claimState==='unclaimed'&&onClaim&&<button type="button" className="pz-claim" onClick={event=>onClaim(root(event))}>Claim this business {pairArtwork?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg>:<span aria-hidden="true">↗</span>}</button>}
        </div>,<div key="events" className="pz-events-page"><SevenDayEvents feed={calendarFeed} venueId={m.id} previewNow={previewNow}/><PlaceTalent show="active" data={talent} venueId={m.id} previewNow={previewNow}/><PlaceLocation mode="nearby" model={m} restaurants={nearbyRestaurants}/></div>,<div key="maps">{mapsContent||<PlaceLocation mode="map" model={m} restaurants={nearbyRestaurants}/>}</div>,<PlacePeople key="people" venueId={m.id} data={people} talent={talent} previewNow={previewNow}/>]}/>
-       <div className="pz-expanded-follow"><span>Save this place</span><span className="pz-heart-slot" aria-hidden="true"/></div>
+       <div className="pz-expanded-follow"><span>{pairArtwork?'Follow this place':'Save this place'}</span><span className="pz-heart-slot" aria-hidden="true"/></div>
      </div></>:<>
      {!compact&&<NextEventCountdown event={nextEvent} venueId={m.id} previewNow={previewNow} compact={size==='square'||wide}/>}
      <div className="pz-content"><div className="pz-identity">{wide&&<span className="pz-category">{m.category}</span>}{(m.title||wide)&&<p className="pz-title">{m.title||m.name}</p>}<p className="pz-descriptor">{compact?m.category:m.descriptor}</p></div>
        {!compact&&showStatus&&<span className={`pz-status pz-status--${m.status.tone}`} title={m.hours||undefined}>{m.status.label}</span>}
      </div>
-     <div className="pz-actions">{wide&&<div className="pz-activity-counters" aria-label="Place activity">{(['gigz','mizzed'] as const).map(board=><button type="button" key={board} className={`pz-activity-count pz-activity-count--${board}`} aria-label={`Open ${board==='gigz'?'Gigz':'Mizzed Connections'} in ${m.name} feed`} onClick={event=>{event.stopPropagation();onOpen(root(event),0);}}><strong>{activity?safeCount(board==='gigz'?activity.gigzCount:activity.mizzedConnectionsCount,activity.checkedAt,clock):'—'}</strong><span>{board==='gigz'?'Gigz':'Mizzed'}</span></button>)}</div>}{!compact&&<button type="button" className="pz-details" onClick={event=>{event.stopPropagation();onOpen(root(event));}}>View details <span aria-hidden="true">↗</span></button>}<span className="pz-heart-slot" aria-hidden="true"/></div>
+     <div className="pz-actions">{wide&&<div className="pz-activity-counters" aria-label="Place activity">{(['gigz','mizzed'] as const).map(board=><button type="button" key={board} className={`pz-activity-count pz-activity-count--${board}`} aria-label={`Open ${board==='gigz'?'Gigz':'Mizzed Connections'} in ${m.name} feed`} onClick={event=>{event.stopPropagation();onOpen(root(event),0);}}><strong>{activity?safeCount(board==='gigz'?activity.gigzCount:activity.mizzedConnectionsCount,activity.checkedAt,clock):'—'}</strong><span>{board==='gigz'?'Gigz':'Mizzed'}</span></button>)}</div>}{!compact&&<button type="button" className="pz-details" onClick={event=>{event.stopPropagation();onOpen(root(event));}}>View details {pairArtwork?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg>:<span aria-hidden="true">↗</span>}</button>}<span className="pz-heart-slot" aria-hidden="true"/></div>
    </>}
    <div className="pz-heart" data-corner-control="heart" onClick={event=>event.stopPropagation()}>{heart}</div>
  </article>;
