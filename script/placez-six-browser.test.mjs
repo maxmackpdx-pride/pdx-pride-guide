@@ -91,14 +91,32 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   await directoryFace.getByRole('button',{name:`View details for ${names[directoryId]}`,exact:true}).click();await page.locator('.pz-native-expanded').waitFor();assert.ok(new URL(page.url()).pathname.startsWith(`/directory/${directoryId}`));
   await checkpoint(`directory:${directoryId}:${directoryWidth}:opened`);
   const directoryExpanded=page.locator('.pz-native-expanded');
-  if([8,9].includes(directoryId)){await directoryExpanded.getByRole('tab',{name:'Info',exact:true}).click();await directoryExpanded.getByText(/Historical imagery, not verification/).waitFor();assert.ok(await directoryExpanded.locator('.pz-native-credit a[href*="creativecommons.org/licenses/by-sa/4.0"]').count()>0);}
   await page.waitForFunction(()=>document.querySelector('.pz-native-expanded')?.closest('[data-card-expanded=true]')?.querySelector('[data-card-morph]')?.getAttribute('data-card-morph-phase')==='open');
   await checkpoint(`directory:${directoryId}:${directoryWidth}:phase-open`);
   await page.waitForFunction(()=>!document.getAnimations().some(a=>a.animationName?.includes('view-transition')&&a.playState==='running'));
   await checkpoint(`directory:${directoryId}:${directoryWidth}:animations-settled`);
   await directoryExpanded.evaluate(async el=>{await Promise.race([document.fonts.ready,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Directory fonts exceeded20s')),20000))]);const images=[...el.querySelectorAll('.pz-art img')];for(const img of images)img.loading='eager';await Promise.race([Promise.all(images.map(img=>img.decode())),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Approved artwork decode exceeded20s')),20000))]);await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
   await checkpoint(`directory:${directoryId}:${directoryWidth}:decoded`);
-  for(const selector of (directoryWidth<768?['.pz-close','.pz-share','[role=tab][aria-selected=true]']:['.pz-close','.pz-share']))assert.equal(await directoryExpanded.locator(selector).evaluate(el=>{const b=el.getBoundingClientRect(),hit=document.elementFromPoint(b.x+b.width/2,b.y+b.height/2);return !!hit&&(el===hit||el.contains(hit));}),true,`Directory ${directoryId} ${selector} unobscured`);
+  if([8,9].includes(directoryId)){
+   // Info is the native default. Clicking it here can auto-scroll the grid during
+   // the opening transition and contaminate the untouched-open geometry check.
+   assert.equal(await directoryExpanded.getByRole('tab',{name:'Info',exact:true}).getAttribute('aria-selected'),'true','Native details opens on Info');
+   await directoryExpanded.getByText(/Historical imagery, not verification/).waitFor();
+   assert.ok(await directoryExpanded.locator('.pz-native-credit a[href*="creativecommons.org/licenses/by-sa/4.0"]').count()>0);
+  }
+  for(const selector of (directoryWidth<768?['.pz-close','.pz-share','[role=tab][aria-selected=true]']:['.pz-close','.pz-share'])){
+   const hitTest=await directoryExpanded.locator(selector).evaluate(el=>{
+    const b=el.getBoundingClientRect(),x=b.x+b.width/2,y=b.y+b.height/2,hit=document.elementFromPoint(x,y);
+    const describe=node=>node?{tag:node.tagName,class:node.className,id:node.id,rect:node.getBoundingClientRect().toJSON(),zIndex:getComputedStyle(node).zIndex,position:getComputedStyle(node).position}:null;
+    return {unobscured:!!hit&&(el===hit||el.contains(hit)),target:describe(el),hit:describe(hit),stack:document.elementsFromPoint(x,y).slice(0,8).map(describe),scroll:{x:scrollX,y:scrollY},viewport:{width:innerWidth,height:innerHeight},active:describe(document.activeElement)};
+   });
+   if(!hitTest.unobscured){
+    const label=`directory-${directoryId}-${directoryWidth}-${selector.replace(/[^a-z0-9]/gi,'-')}-occlusion`;
+    await writeFile(path.join(shots,label+'.json'),JSON.stringify(hitTest,null,2));
+    await page.screenshot({path:path.join(shots,label+'.png')});
+   }
+   assert.equal(hitTest.unobscured,true,`Directory ${directoryId} ${selector} unobscured`);
+  }
   assert.equal(await directoryExpanded.locator('.pz-close>span').evaluate(el=>getComputedStyle(el).zIndex),'1','Close glyph paints above opaque ring');
   const artBounds=await directoryExpanded.locator('.pz-art').boundingBox();
   if(directoryWidth>768)assert.ok(artBounds.height>=artBounds.width*.45,'Desktop header retains approved near-2:1 composition');
@@ -125,4 +143,5 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   assert.deepEqual(writes,[],'No writes from unauthenticated follow');assert.deepEqual(errors,[],'No browser runtime errors');await writeFile(path.join(shots,'metrics.json'),JSON.stringify(evidence,null,2));await context.close();
  }finally{await checkpoint('cleanup');await browser?.close();await server?.close();await rm(cacheDir,{recursive:true,force:true});}
 });
+
 
