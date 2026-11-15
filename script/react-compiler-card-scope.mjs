@@ -25,9 +25,13 @@ export const placezCompilerModules = [
   'placez/PlacezQuickCard',
   'placez/NativePlacezExpanded',
   'placez/ExpandedPager',
+  'scenez/SceneCardFace',
+  'outz/native/NativeOutzideFace',
 ];
 
 export const cardSourcePatterns = [
+  /[\\/]client[\\/]src[\\/]components[\\/]scenez[\\/]SceneCardFace\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]outz[\\/]native[\\/]NativeOutzideFace\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/]PlaceCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]placez[\\/](?:NativePlacezFace|PlacezQuickCard|NativePlacezExpanded|ExpandedPager)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/](?:EventCard|BoardCard)\.tsx$/,

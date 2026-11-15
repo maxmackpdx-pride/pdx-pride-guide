@@ -331,6 +331,24 @@ export function getOutzWallPosts(placeId: string, viewerUserId?: number) {
 
 /** The Outzide board: only Trip Buddy and Carpool wall posts, across every place. */
 export const OUTZ_BOARD_KINDS = ["HIKE_BUDDY", "CAMP_BUDDY", "LOOKING_FOR_COMPANY", "CARPOOL", "CARPOOL_OFFER", "CARPOOL_REQUEST", "MISSED_CONNECTION"];
+/** All active real post metadata; counters/read state must not depend on a paginated feed. */
+export function getActiveOutzBoardMetadata(viewerUserId?:number){
+ const rows=sqlite.prepare(`SELECT p.id,p.place_id placeId,p.user_id userId,p.post_kind postKind,p.created_at createdAt,u.username,u.display_name displayName FROM outz_wall_posts p JOIN users u ON u.id=p.user_id WHERE p.post_kind IN (${OUTZ_BOARD_KINDS.map(()=>'?').join(',')}) AND datetime(p.created_at)>=datetime('now','-30 days') AND (p.trip_date IS NULL OR p.trip_date>=?)`).all(...OUTZ_BOARD_KINDS,pacificTodayDate()) as Array<{id:number;placeId:string;userId:number;postKind:string;createdAt:string;username:string;displayName:string|null}>;
+ return rows.filter(r=>!isDemoAuthor(r)&&(viewerUserId==null||r.userId===viewerUserId||!storage.isMemberInteractionBlocked(viewerUserId,r.userId)));
+}
+/** Save authorization uses the full active visibility set, never the paginated feed. */
+export function canSaveOutzBoardPost(viewerUserId:number,postId:number){
+ return getActiveOutzBoardMetadata(viewerUserId).some(post=>post.id===postId);
+}
+export function getOutzBoardCounts(viewerUserId?:number){
+ const counts=new Map<string,{placeId:string;carpool:number;mizzed:number;buddy:number;total:number}>();
+ for(const p of getActiveOutzBoardMetadata(viewerUserId)){
+  const row=counts.get(p.placeId)||{placeId:p.placeId,carpool:0,mizzed:0,buddy:0,total:0};
+  if(p.postKind==='MISSED_CONNECTION')row.mizzed++;else if(p.postKind.startsWith('CARPOOL'))row.carpool++;else row.buddy++;
+  row.total++;counts.set(p.placeId,row);
+ }
+ return {items:[...counts.values()]};
+}
 export function getOutzBoardPosts(viewerUserId?: number, mineOnly = false) {
   const today = pacificTodayDate();
   const kinds = OUTZ_BOARD_KINDS.map(() => "?").join(",");

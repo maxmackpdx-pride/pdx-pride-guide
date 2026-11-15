@@ -1,0 +1,30 @@
+{
+  "source": "src/boardz-source/client/src/lib/motifRecipes.snapshot.ts",
+  "note": "Unchanged official Design API assets. No generation or reconstruction.",
+  "assets": [
+    {
+      "id": "boardz-st-johns-bridge",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/boardz-st-johns-bridge/file?v=9e7be5df1c43a60b",
+      "sha256": "9e7be5df1c43a60b059aaf9ce2490a38818d8368a9974e32cb1639bbdf7a715a",
+      "width": 768,
+      "height": 332,
+      "alpha": true,
+      "kind": "motif",
+      "room": "boardz",
+      "downloadSha256": "9e7be5df1c43a60b059aaf9ce2490a38818d8368a9974e32cb1639bbdf7a715a",
+      "matchesSnapshot": true
+    },
+    {
+      "id": "boardz-steel-bridge",
+      "url": "https://zaylist-foundation-library.maxmackpdx.workers.dev/api/design/v1/motifs/boardz-steel-bridge/file?v=49f113ceff34b632",
+      "sha256": "49f113ceff34b6326c6ad7a9b08bdbc4c1e270911faa7a93907d2a81dcb5560b",
+      "width": 768,
+      "height": 512,
+      "alpha": true,
+      "kind": "motif",
+      "room": "boardz",
+      "downloadSha256": "49f113ceff34b6326c6ad7a9b08bdbc4c1e270911faa7a93907d2a81dcb5560b",
+      "matchesSnapshot": true
+    }
+  ]
+}

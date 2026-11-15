@@ -39,7 +39,7 @@ export function registerBoardArchiveRoutes(app:Express,db:Database.Database,requ
  app.get("/api/board-collection",requireAuth,(req,res)=>{res.setHeader("Cache-Control","private, no-store");res.json(archive.memories(req.session.userId!));});
  const manual:RequestHandler=(req,res)=>{
   const board=String(req.params.board||"housing"),id=Number(req.params.postId||req.params.id);
-  if(!isSavedBoard(board)||!Number.isSafeInteger(id)||id<1)return res.status(400).json({error:"Choose a valid post."});
+  if(!isSavedBoard(board)||board === "outz"||!Number.isSafeInteger(id)||id<1)return res.status(400).json({error:"Choose a valid post."});
   try{archive.archive(board,id,req.session.userId!);res.json({ok:true});}
   catch(error){const message=error instanceof Error?error.message:"Could not archive this post.";res.status(/owner|not found|not your|not allowed/i.test(message)?404:400).json({error:message});}
  };

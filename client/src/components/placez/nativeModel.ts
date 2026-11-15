@@ -3,7 +3,8 @@ import {resolveBusinessLocations} from '@shared/businessLocations';
 import {placePath} from '@shared/placeSlug';
 import {adaptDirectoryRecord,type PlaceCardModel} from './placezAdapter';
 import {presentationFor} from './presentation';
-const artwork=presentationFor('/placez-six');
+import {recoveredPresentation} from './recoveredPresentation';
+const artwork={...presentationFor('/placez-six'),...recoveredPresentation};
 export type NativePlace = Pick<Business,'id'|'name'|'type'> & Partial<Business>;
 export const hasPlacezArtwork=(id:number)=>Object.prototype.hasOwnProperty.call(artwork,id);
 /** Only presentation is adapted. Callers retain the full Business for native tools. */

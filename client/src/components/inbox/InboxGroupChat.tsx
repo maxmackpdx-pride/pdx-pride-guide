@@ -1,3 +1,4 @@
+import CommunityInboxChat from './CommunityInboxChat';
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronLeft } from "lucide-react";
@@ -14,7 +15,7 @@ import { isValidBeachId, pacificTodayDate } from "@shared/riverBrats";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
 
 export type InboxGroupChatTarget = {
-  kind: "EVENT" | "BEACH" | "OUTZ";
+  kind: "EVENT" | "BEACH" | "OUTZ" | "COMMUNITY";
   id: number | string;
   title: string;
   state?: "BEFORE" | "OPEN" | "CLOSED";
@@ -63,7 +64,10 @@ type Props = {
  * Event / beach day-room chat rendered inside the floating inbox sheet
  * (same chrome as ThreadDetail - no full-page navigation, no off-screen drawer).
  */
-export default function InboxGroupChat({ target, onBack }: Props) {
+export default function InboxGroupChat(props: Props) {
+  return props.target.kind === 'COMMUNITY' ? <CommunityInboxChat slug={String(props.target.id)} onBack={props.onBack}/> : <TimedInboxGroupChat {...props}/>;
+}
+function TimedInboxGroupChat({ target, onBack }: Props) {
   const [body, setBody] = useState("");
   const [tick, setTick] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);

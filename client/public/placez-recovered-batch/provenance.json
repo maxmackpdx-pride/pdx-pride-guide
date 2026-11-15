@@ -1,0 +1,22 @@
+{
+  "venueId": 9,
+  "venue": "The Sports Bra",
+  "artwork": "The-Sports-Bra-rainbow-review.png",
+  "sha256": "8fd6fbf430b6c15938bd5a1ced67d2cd52f270ab38acfc768e0675ea72a6d3a9",
+  "sourcePhotographer": "Another Believer",
+  "sourcePeriod": "August 17, 2025",
+  "sourcePages": [
+    "https://commons.wikimedia.org/?curid=173093734",
+    "https://commons.wikimedia.org/?curid=173093730",
+    "https://commons.wikimedia.org/?curid=173324183",
+    "https://commons.wikimedia.org/?curid=173324184"
+  ],
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "modifications": "Generated illustrative reconstruction, orange/cyan blueprint collage and continuous rainbow street treatment. Signage and fixtures may be redrawn. Not a current documentary photograph.",
+  "recovery": "Exact original saved PNG; no regeneration or image modification during recovery.",
+  "knownLimits": [
+    "Opaque framed artwork; verified transparent torn-edge alpha mask was not saved in this checkpoint.",
+    "Format-specific restaurant glass SVGs are staging assets, not verified final artwork glass packs."
+  ]
+}

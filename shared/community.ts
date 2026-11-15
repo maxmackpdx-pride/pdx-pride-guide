@@ -23,6 +23,9 @@ export type CommunitySummary = {
   viewerFollowing: boolean;
   canManage: boolean;
   sourcePlaceId: number | null;
+  sceneCategory?: "club" | "party-collective" | "organization" | null;
+  nextEvent?: CommunityEvent | null;
+  chat?: {mode:'off'|'news'|'chat';canJoin:boolean;joined:boolean;muted:boolean;unreadCount:number;canPost:boolean};
   isClaimable: boolean;
   hasPendingClaim: boolean;
 };

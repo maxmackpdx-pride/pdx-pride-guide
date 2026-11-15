@@ -1,3 +1,4 @@
+import {registerCardNotificationRoutes} from './cardNotifications';
 import mapRelease from "../shared/mapReleaseLock.json";
 import {registerMapSocialRoutes} from "./mapSocialRoutes";
 import {registerFoodResources} from "./foodResources";
@@ -93,6 +94,7 @@ import { DIRECTORY_TYPES } from "@shared/directoryTheme";
 import { PRODUCT_EVENT_NAMES, recordPageView, recordProductEvent } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
 import { registerHousingRoutes } from "./housing/routes";
+import { getCommunityChatRoomsForUser } from './communityChat';
 import { registerCommunityRoutes, searchCommunities, linkQSearchCandidateEvent } from "./communities";
 import { registerPlatformV1 } from "./platformV1";
 import { getSystemDiagnosticsDigest, recordSystemDiagnostic } from "./systemDiagnostics";
@@ -223,6 +225,8 @@ import {
   upsertOutzCheckin,
   getOutzChatRoomsForUser,
   getOutzBoardPosts,
+  getOutzBoardCounts,
+  canSaveOutzBoardPost,
 } from "./outzSocial";
 import { isProfileAccentColor, isProfileBanner, normalizeProfileAccentColor } from "@shared/profileTheme";
 import {
@@ -1772,7 +1776,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.put('/api/boards/:board/posts/:id/save', requireAuth, (req,res)=>{
     const board=String(req.params.board), id=Number(req.params.id);
     if(!isSavedBoard(board) || !Number.isSafeInteger(id) || id<=0) return res.status(400).json({error:'Invalid post'});
-    if(!boardSaves.isPublic(board,id)) return res.status(404).json({error:'Post not found'});
+    // OutZide visibility is viewer-aware (blocks, expiry, seeded demo records).
+    const canSave = board === 'outz' ? canSaveOutzBoardPost(req.session.userId!,id) : boardSaves.isPublic(board,id);
+    if(!canSave) return res.status(404).json({error:'Post not found'});
     boardSaves.save(req.session.userId!,board,id);
     res.json({saved:true});
   });
@@ -1784,6 +1790,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   registerCommunityRoutes(app, requireAuth);
+  registerCardNotificationRoutes(app, requireAuth);
   registerPlatformV1(app, { requireAuth, readNotificationPrefs, updateNotificationPrefs });
 
   // ─── FILE UPLOADS ───────────────────────────────────────────────────────
@@ -2345,6 +2352,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   const outzBoardPayload = (userId: number | undefined, mineOnly: boolean) => getOutzBoardPosts(userId, mineOnly)
     .map(row => ({ ...row, placeName: outzMapCatalog.find(place => place.id === row.placeId)?.name ?? (row.placeId === "__openplans" ? "Open plans" : "Outzide") }));
   app.get("/api/outz/board", (req: any, res) => res.json(outzBoardPayload(req.session?.userId, false)));
+  app.get("/api/outz/board/counts", (req:any,res)=>{res.setHeader("Cache-Control","private, no-store");res.json(getOutzBoardCounts(req.session?.userId));});
   app.get("/api/outz/board/mine", requireAuth, (req, res) => res.json(outzBoardPayload(req.session.userId!, true)));
 
   app.post("/api/outz/wall", requireAuth, async (req, res) => {
@@ -5352,6 +5360,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const userId = req.session.userId!;
     const rooms = [
       ...storage.getMyGroupChats(userId),
+      ...getCommunityChatRoomsForUser(userId),
       ...getOutzChatRoomsForUser(userId, id => outzMapCatalog.find(place => place.id === id)?.name ?? null),
     ];
     rooms.sort((a, b) => String(a.closesAt).localeCompare(String(b.closesAt)));

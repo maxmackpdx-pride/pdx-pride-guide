@@ -276,3 +276,11 @@ export const OUTZ_SOURCES: OutzSource[] = [
     live: false,
   },
 ];
+
+/** The map catalog is the listing inventory; the conditions snapshot only enriches it. */
+export type OutzBrowseCatalogRow = {id:string;name:string;kind:string;detail?:string;officialUrl?:string|null;sourceName?:string;lat?:number;lng?:number};
+export function outzPlacesWithCatalog(snapshot:OutzSnapshot|undefined,catalog:OutzBrowseCatalogRow[]):OutzPlace[]{
+ const live=new Map((snapshot?outzPlacesFromSnapshot(snapshot):[]).map(p=>[p.id,p]));
+ const rows=catalog.map(p=>live.get(p.id)??({id:p.id,name:p.name,slug:outzPlaceSlug(p),kind:(p.kind==='beach'?'beach':p.kind==='stay'?'outdoor-stay':['camp','coastcamp','watercamp'].includes(p.kind)?'campground':'trailhead') as OutzPlaceKind,detail:p.detail||'',officialUrl:p.officialUrl||null,sourceName:p.sourceName||'Official destination catalog',sourceStatus:null}));
+ const catalogIds=new Set(catalog.map(p=>p.id));return [...rows,...[...live.values()].filter(p=>!catalogIds.has(p.id))];
+}

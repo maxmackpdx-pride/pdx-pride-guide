@@ -64,3 +64,6 @@ html .mapz-map-dialog.is-host-placez .mapz-map-details{overflow:visible}
 
 /* Keep the close glyph above its opaque ring background. */
 .pz-card .pz-close>span{position:relative;z-index:1;color:var(--pz-paper)}
+.placez-native-shell--square{width:250px!important;height:250px!important}
+.pz-details>span,.pz-claim>span,.pz-compose-row>span:last-child{font-family:Arial,sans-serif}
+.placez-native-shell{position:relative}.placez-card-notification{position:absolute;top:-9px;right:-7px;z-index:12;display:flex;align-items:center;gap:3px;min-height:25px;padding:3px 7px;border:1px solid var(--neon-cyan);border-radius:20px;background:var(--z-black);color:var(--neon-cyan);box-shadow:0 0 10px color-mix(in srgb,var(--neon-cyan) 35%,transparent);font:700 11px var(--font-body,sans-serif)}.card-board-read button{padding:8px 12px;border:1px solid currentColor;border-radius:12px;background:transparent;color:inherit;font:inherit;margin-bottom:12px}

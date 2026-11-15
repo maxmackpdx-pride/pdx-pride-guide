@@ -154,3 +154,5 @@ html.calm-mode .hub-panel {
   .hub-reader__post > span { display: none; }
   .hub-reader__tab { font-size: 14px; }
 }
+
+.hub-reader__card-update{display:flex;justify-content:space-between;gap:12px;width:100%;padding:10px 12px;border:1px solid currentColor;border-radius:10px;background:transparent;color:inherit;text-align:left;text-decoration:none;margin-bottom:8px;font:inherit}.hub-reader__card-update span:last-child{font-size:.8em;opacity:.8}.hub-reader__card-update:focus-visible{outline:2px solid currentColor;outline-offset:3px}

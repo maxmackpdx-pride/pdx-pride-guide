@@ -14,7 +14,7 @@ const { createOutzWallPost, createOutzWallComment, updateOutzWallPost, deleteOut
 after(() => { sqlite.close(); rmSync(directory, { recursive: true, force: true }); });
 
 const routes = new Map<string, Function[]>();
-const app: any = {};
+const app: any = { use() {} };
 for (const method of ["get", "post", "put", "patch", "delete"]) app[method] = (route: string, ...handlers: Function[]) => routes.set(`${method} ${route}`, handlers);
 registerCommunityRoutes(app, ((req: any, res: any, next: Function) => req.session.userId ? next() : res.status(401).json({ error: "Sign in" })) as any);
 function call(method: string, route: string, userId?: number, body: any = {}, params: any = {}) {

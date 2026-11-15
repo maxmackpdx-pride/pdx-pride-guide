@@ -1,0 +1,14 @@
+import type {CommunitySummary,CommunityDetail} from '@shared/community';
+export const sceneTypes=[['club','Clubs','#FFD700'],['party-collective','Party Collectives','#FF7B00'],['organization','Organizations','#ffffff']] as const;
+export function sceneCategory(c:CommunitySummary){return (c as CommunitySummary & {sceneCategory?:string}).sceneCategory||null;}
+export function sceneModel(c:CommunitySummary,detail?:CommunityDetail){
+ const key=sceneCategory(c);const known:Record<string,Record<string,string>>={
+ 'lesbian-culture-club':{id:'club',wordmark:'LESBIAN\nCULTURE\nCLUB'},
+ 'pride-northwest':{id:'org',customArt:'/scenez-native/pride-collage.png',logo:'/scenez-native/pride.png'},
+ 'bearracuda':{id:'party',customArt:'/scenez-native/party-collage.png',wordmark:'BEARRACUDA',color:'#ff7800'},
+ 'pink-ponies':{id:'pink-ponies',logo:'/scenez-native/pink-ponies.png',color:'#f15aa9'},
+ 'yes-coach-productions':{id:'yes-coach',logo:'/scenez-native/yes-coach.png',color:'#e62026'},
+ 'yes-coach':{id:'yes-coach',logo:'/scenez-native/yes-coach.png',color:'#e62026'},
+ };
+ return {id:c.slug,name:c.name,kind:key==='party-collective'?'Party Collective':key==='organization'?'Organization':key==='club'?'Club':'Scene',page:'scenez',color:sceneTypes.find(t=>t[0]===key)?.[2]||'#FFD700',wordmark:c.name.toUpperCase(),logo:c.imageUrl||undefined,short:c.neighborhood||'Community & connection',...known[c.slug],events:detail?.events.upcoming||(c.nextEvent?[c.nextEvent]:[])};
+}

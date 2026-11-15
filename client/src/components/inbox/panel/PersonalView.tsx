@@ -1,3 +1,4 @@
+import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -28,17 +29,20 @@ function tagFor(cat: string) {
 }
 
 export type GroupChatRow = {
-  kind: "EVENT" | "BEACH" | "OUTZ";
+  kind: "EVENT" | "BEACH" | "OUTZ" | "COMMUNITY";
   id: number | string;
   title: string;
   state: "BEFORE" | "OPEN";
   opensAt: string | null;
-  closesAt: string;
+  closesAt: string | null;
+  unreadCount?: number;
+  muted?: boolean;
   href: string;
   calendarDate?: string;
 };
 
 function groupSub(row: GroupChatRow, now: number): string {
+  if (row.kind === 'COMMUNITY') return `${row.muted ? 'Muted · ' : ''}${row.unreadCount || 0} unread`;
   if (row.state === "BEFORE" && row.opensAt) {
     const live = formatOpensIn(row.opensAt, now);
     if (live) return live;
@@ -47,7 +51,7 @@ function groupSub(row: GroupChatRow, now: number): string {
   }
   const left = formatClosesIn(row.closesAt, now);
   if (left && left !== "Chat closed") return `Open · ${left}`;
-  return `Open now · until ${new Date(row.closesAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+  return `Open now · until ${new Date(row.closesAt || 0).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
 }
 
 export default function PersonalView({
@@ -67,12 +71,14 @@ export default function PersonalView({
   onOpenThread: (id: string) => void;
   onOpenGroup?: (row: GroupChatRow) => void;
 }) {
+  const {user}=useAuth();
   const { threads } = useInboxThreads(null);
   const [now, setNow] = useState(() => Date.now());
 
   // Tick while any group chat is waiting to open so the countdown stays fun.
   const { data: groupChats = [] } = useQuery<GroupChatRow[]>({
-    queryKey: ["/api/chats/mine"],
+    queryKey: ["/api/chats/mine",user?.id],
+    enabled:!!user,
     queryFn: () => fetch("/api/chats/mine", { credentials: "include" }).then((r) => (r.ok ? r.json() : [])),
     refetchInterval: 30_000,
   });
@@ -120,7 +126,7 @@ export default function PersonalView({
             onClick={() => onOpenGroup?.(row)}
             {...openRow(() => onOpenGroup?.(row))}
           >
-            <span className="inbox-exp-group-avatar">{row.kind === "BEACH" ? "RB" : row.kind === "OUTZ" ? "OZ" : "GC"}</span>
+            <span className="inbox-exp-group-avatar">{row.kind === "BEACH" ? "RB" : row.kind === "OUTZ" ? "OZ" : row.kind === "COMMUNITY" ? "SZ" : "GC"}</span>
             <div className="inbox-exp-row__body">
               <div className="inbox-exp-row__top">
                 <div className="inbox-exp-row__id">

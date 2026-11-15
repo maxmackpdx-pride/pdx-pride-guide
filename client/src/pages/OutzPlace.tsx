@@ -27,7 +27,7 @@ import {
   formatRiverBratsWindow,
   pacificTodayDate,
 } from "@shared/riverBrats";
-import { outzPlaceFromSlug, type OutzSnapshot } from "@shared/outz";
+import { outzPlacesWithCatalog, type OutzBrowseCatalogRow, type OutzSnapshot } from "@shared/outz";
 import "./OutzPlace.css";
 
 type OutzPayload = { data: OutzSnapshot };
@@ -53,7 +53,7 @@ type RatingPayload = { count: number; average: number | null; mine: number | nul
 type WallPost = {
   id: number;
   updatedAt?: string | null;
-  postKind: "LOOKING_FOR_COMPANY" | "CARPOOL" | "TRIP_NOTE";
+  postKind: "LOOKING_FOR_COMPANY" | "CARPOOL" | "CARPOOL_OFFER" | "CARPOOL_REQUEST" | "MISSED_CONNECTION" | "TRIP_NOTE";
   body: string;
   tripDate: string | null;
   createdAt: string;
@@ -83,9 +83,9 @@ function formatChatClose(expiresAt: string | null) {
   return hours > 0 ? `Open for ${hours}h more` : "Open for less than an hour";
 }
 
-export default function OutzPlace() {
+export default function OutzPlace({placeSlug, embedded = false}: {placeSlug?: string; embedded?: boolean} = {}) {
   const [, params] = useRoute("/outzide/:placeSlug");
-  const slug = params?.placeSlug;
+  const slug = placeSlug ?? params?.placeSlug;
   const incidentalMap = useIncidentalMap(true, slug ?? "outz");
   const { user } = useAuth();
   const { toast } = useToast();
@@ -109,9 +109,10 @@ export default function OutzPlace() {
     queryKey: ["/api/outz"],
     queryFn: () => apiRequest("GET", "/api/outz").then(r => r.json()),
   });
-  const {data: photoCatalog} = useQuery<{places:{id:string;photo?:OutzPhotoData}[]}>({queryKey:['/outzide-map/places.json'],queryFn:()=>apiRequest('GET','/outzide-map/places.json?v=20261017-sculpted-v3').then(r=>r.json()),staleTime:3600_000});
+  const {data: photoCatalog} = useQuery<{places:(OutzBrowseCatalogRow&{photo?:OutzPhotoData})[]}>({queryKey:['/outzide-map/places.json'],queryFn:()=>apiRequest('GET','/outzide-map/places.json?v=20261017-sculpted-v3').then(r=>r.json()),staleTime:3600_000});
   const snapshot = snapshotQuery.data?.data;
-  const place = snapshot ? outzPlaceFromSlug(snapshot, slug) : null;
+  const place = outzPlacesWithCatalog(snapshot,photoCatalog?.places||[]).find(p=>p.slug===slug)??null;
+  const fullCatalogSite=photoCatalog?.places.find(p=>p.id===place?.id);
   const placeId = place?.id ?? null;
   const photo = photoCatalog?.places.find(row=>row.id===placeId)?.photo;
 
@@ -127,10 +128,10 @@ export default function OutzPlace() {
       ? [catalogSite.lat, catalogSite.lng]
       : stay?.lat != null && stay.lng != null
         ? [stay.lat, stay.lng]
-        : null;
+        : fullCatalogSite?.lat != null && fullCatalogSite.lng != null ? [fullCatalogSite.lat,fullCatalogSite.lng] : null;
   const meta = place ? OUTZ_KIND_META[place.kind] : null;
 
-  const checkinKey = ["/api/outz/checkins", placeId, date] as const;
+  const checkinKey = ["/api/outz/checkins", placeId, date,user?.id] as const;
   const checkinsQuery = useQuery<Checkin[]>({
     queryKey: checkinKey,
     queryFn: () => apiRequest("GET", `/api/outz/checkins?place=${encodeURIComponent(placeId!)}&date=${encodeURIComponent(date)}`).then(r => r.json()),
@@ -138,7 +139,7 @@ export default function OutzPlace() {
   });
   const checkins = Array.isArray(checkinsQuery.data) ? checkinsQuery.data : [];
   const mine = checkins.find(checkin => checkin.isMine);
-  const chatKey = ["/api/outz/chat", placeId] as const;
+  const chatKey = ["/api/outz/chat", placeId,user?.id] as const;
   const chatQuery = useQuery<ChatPayload>({
     queryKey: chatKey,
     queryFn: () => apiRequest("GET", `/api/outz/chat?place=${encodeURIComponent(placeId!)}`).then(r => r.json()),
@@ -146,19 +147,19 @@ export default function OutzPlace() {
     refetchInterval: query => query.state.data?.chatOpen ? 8_000 : false,
   });
   const chatOpenForMe = Boolean(chatQuery.data?.chatOpen);
-  const ratingKey = ["/api/outz/rating", placeId] as const;
+  const ratingKey = ["/api/outz/rating", placeId,user?.id] as const;
   const ratingQuery = useQuery<RatingPayload>({
     queryKey: ratingKey,
     queryFn: () => apiRequest("GET", `/api/outz/rating?place=${encodeURIComponent(placeId!)}`).then(r => r.json()),
     enabled: Boolean(placeId),
   });
-  const wallKey = ["/api/outz/wall", placeId] as const;
+  const wallKey = ["/api/outz/wall", placeId,user?.id] as const;
   const wallQuery = useQuery<WallPost[]>({
     queryKey: wallKey,
     queryFn: () => apiRequest("GET", `/api/outz/wall?place=${encodeURIComponent(placeId!)}`).then(r => r.json()),
     enabled: Boolean(placeId),
   });
-  const followKey = ["/api/outz/follow", placeId] as const;
+  const followKey = ["/api/outz/follow", placeId,user?.id] as const;
   const followQuery = useQuery<{ isFollowing: boolean }>({
     queryKey: followKey,
     queryFn: () => apiRequest("GET", `/api/outz/follow?place=${encodeURIComponent(placeId!)}`).then(r => r.json()),
@@ -168,6 +169,8 @@ export default function OutzPlace() {
     mutationFn: (next: boolean) => apiRequest(next ? "POST" : "DELETE", "/api/outz/follow", { placeId }).then(r => r.json() as Promise<{ isFollowing: boolean }>),
     onSuccess: data => {
       queryClient.setQueryData(followKey, data);
+      void queryClient.invalidateQueries({queryKey:["/api/hearts"]});
+      void queryClient.invalidateQueries({queryKey:["/api/card-notifications"]});
       queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] }); void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
       toast({ title: data.isFollowing ? "Following destination" : "Destination unfollowed", description: data.isFollowing ? "New wall posts will appear in your Hub." : undefined });
     },
@@ -217,25 +220,25 @@ export default function OutzPlace() {
     mutationFn: () => apiRequest("POST", "/api/outz/wall", { placeId, postKind, body: postBody, tripDate: date }).then(r => r.json()),
     onSuccess: () => {
       setPostBody("");
-      queryClient.invalidateQueries({ queryKey: wallKey });
+      queryClient.invalidateQueries({ queryKey: wallKey }); queryClient.invalidateQueries({ queryKey: ["/api/outz/board"] }); queryClient.invalidateQueries({queryKey:["/api/outz/board/counts"]}); queryClient.invalidateQueries({queryKey:["/api/card-notifications"]});
     },
     onError: () => toast({ title: "Couldn’t post to the wall", description: "Try again in a moment.", variant: "destructive" }),
   });
   const editWallPost = useMutation({
     mutationFn: ({ id, body }: { id: number; body: string }) => apiRequest("PATCH", `/api/outz/wall/${id}`, { body }),
-    onSuccess: () => { setEditingWallPost(null); queryClient.invalidateQueries({ queryKey: wallKey }); toast({ title: "Trip post updated" }); },
+    onSuccess: () => { setEditingWallPost(null); queryClient.invalidateQueries({ queryKey: wallKey }); queryClient.invalidateQueries({ queryKey: ["/api/outz/board"] }); queryClient.invalidateQueries({queryKey:["/api/outz/board/counts"]}); queryClient.invalidateQueries({queryKey:["/api/card-notifications"]}); toast({ title: "Trip post updated" }); },
     onError: err => toast({ title: "Couldn’t update post", description: parseApiError(err, "Try again in a moment."), variant: "destructive" }),
   });
   const removeWallPost = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/outz/wall/${id}`),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: wallKey }); toast({ title: "Trip post removed" }); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: wallKey }); queryClient.invalidateQueries({ queryKey: ["/api/outz/board"] }); queryClient.invalidateQueries({queryKey:["/api/outz/board/counts"]}); queryClient.invalidateQueries({queryKey:["/api/card-notifications"]}); toast({ title: "Trip post removed" }); },
     onError: err => toast({ title: "Couldn’t remove post", description: parseApiError(err, "Try again in a moment."), variant: "destructive" }),
   });
   const createComment = useMutation({
     mutationFn: ({ postId, body }: { postId: number; body: string }) => apiRequest("POST", `/api/outz/wall/${postId}/comments`, { body }).then(r => r.json()),
     onSuccess: (_result, variables) => {
       setCommentDrafts(current => ({ ...current, [variables.postId]: "" }));
-      queryClient.invalidateQueries({ queryKey: wallKey });
+      queryClient.invalidateQueries({ queryKey: wallKey }); queryClient.invalidateQueries({ queryKey: ["/api/outz/board"] }); queryClient.invalidateQueries({queryKey:["/api/outz/board/counts"]}); queryClient.invalidateQueries({queryKey:["/api/card-notifications"]});
     },
     onError: () => toast({ title: "Couldn’t post comment", description: "Try again in a moment.", variant: "destructive" }),
   });
@@ -243,14 +246,14 @@ export default function OutzPlace() {
   usePageSeo(
     place ? `${place.name} · Outzide | Zaylist` : "Outzide place | Zaylist",
     place ? `${place.detail} Check in and join the group chat for this Outzide destination.` : "Outzide destination check-in and group chat.",
-    { image: shareCardUrl("outzide"), imageAlt: "Outzide by Zaylist — explore the Northwest" },
+    { skip: embedded, image: shareCardUrl("outzide"), imageAlt: "Outzide by Zaylist — explore the Northwest" },
   );
 
   if (snapshotQuery.isError && !place) {
     return <PageRecovery section="Outzide" title="We couldn’t load this destination." description="The destination details aren’t loading right now. Try again, or explore the Northwest map." href="/outzide" label="Explore Outzide" missing={false} retry={() => { void snapshotQuery.refetch(); }} />;
   }
 
-  if (!snapshotQuery.isLoading && !place) {
+  if (!snapshotQuery.isLoading && photoCatalog && !place) {
     return <PageRecovery section="Outzide" title="This spot isn’t at this address." description="The destination link may have changed. Head back to the Northwest map to browse trails, beaches, and places to stay." href="/outzide" label="Explore Outzide" />;
   }
 
@@ -259,7 +262,7 @@ export default function OutzPlace() {
 
   return (
     <div
-      className="zine-page board-page outz-surface outz-place pdx-glass-rebind"
+      className={`zine-page board-page outz-surface outz-place pdx-glass-rebind${embedded ? " outz-place--embedded" : ""}`}
       style={meta ? ({ "--c": stayPresentation?.accent ?? meta.accent, "--outz-c": stayPresentation?.accent ?? meta.accent } as React.CSSProperties) : undefined}
     >
       <div className="outz-surface__terrain" aria-hidden="true" />
@@ -332,7 +335,7 @@ export default function OutzPlace() {
             : alert
             ? <div className="outz-place__alert outz-place__alert--bad"><strong><TriangleAlert size={16} aria-hidden="true" /> Alert:</strong><span>{alert.headline}</span></div>
             : destination
-              ? <div className="outz-place__alert outz-place__alert--good"><strong>No active NWS alert.</strong><span>Conditions change fast. Confirm on the official page before you drive.</span></div>
+              ? <div className="outz-place__alert outz-place__alert--warn"><strong>Check current alerts before travel.</strong><span>No alert is shown in this snapshot. That is not confirmation of safe access or current NWS status. Confirm with the official source.</span></div>
               : <div className="outz-place__alert outz-place__alert--warn"><strong>No live conditions for this listing.</strong><span>Confirm access, reservations, and closures on the official page before you drive.</span></div>}
 
           <p className="outz-place__official">
@@ -420,9 +423,9 @@ export default function OutzPlace() {
           <div>
             <div className="outz-wall-composer outz-panel pdx-glass-card pdx-glass-rebind">
               <div className="outz-pillrow outz-pillrow--display outz-pillrow--lime" role="group" aria-label="Post type">
-                {(["LOOKING_FOR_COMPANY", "CARPOOL", "TRIP_NOTE"] as const).map(kind => <button type="button" key={kind} className={postKind === kind ? "is-active" : ""} onClick={() => setPostKind(kind)}>{kind.replaceAll("_", " ")}</button>)}
+                {(["LOOKING_FOR_COMPANY", "CARPOOL_OFFER", "CARPOOL_REQUEST", "MISSED_CONNECTION", "TRIP_NOTE"] as const).map(kind => <button type="button" key={kind} className={postKind === kind ? "is-active" : ""} onClick={() => setPostKind(kind)}>{kind.replaceAll("_", " ")}</button>)}
               </div>
-              <label><span className="sr-only">Your destination post</span><textarea value={postBody} maxLength={500} placeholder={postKind === "CARPOOL" ? "Where are you leaving from, and when?" : postKind === "LOOKING_FOR_COMPANY" ? "What kind of company are you looking for?" : "Share a useful trip note."} onChange={event => setPostBody(event.target.value)} /></label>
+              <label><span className="sr-only">Your destination post</span><textarea value={postBody} maxLength={500} placeholder={postKind.startsWith("CARPOOL") ? "Where are you leaving from, and when?" : postKind === "LOOKING_FOR_COMPANY" ? "What kind of company are you looking for?" : "Share a useful trip note."} onChange={event => setPostBody(event.target.value)} /></label>
               <div className="outz-wall-composer__foot"><span>For {formatBeachCheckinDateLabel(date)}</span><Button variant="solid" accent="lime" size="sm" disabled={createWallPost.isPending || !postBody.trim()} onClick={() => user ? createWallPost.mutate() : setShowAuth(true)}>{createWallPost.isPending ? "POSTING" : "POST TO WALL"}</Button></div>
             </div>
             <div className="outz-wall-feed">

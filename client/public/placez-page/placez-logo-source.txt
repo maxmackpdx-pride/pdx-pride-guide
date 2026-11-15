@@ -1,0 +1,3 @@
+Exact existing PlaceZ full logo downloaded unchanged from https://www.zaylist.com/brand/family/our-placez.svg
+Source code references: client/src/lib/homeWorlds.ts and client/src/components/home/TodayLocationCard.tsx
+No generated or reconstructed mark.

@@ -76,6 +76,9 @@ const AccessSafety = lazyWithReload(() => import("./pages/AccessSafety"));
 const Admin = lazyWithReload(() => import("./pages/Admin"));
 const Dashboard = lazyWithReload(() => import("./pages/Dashboard"));
 const NotificationSettings = lazyWithReload(() => import("./pages/NotificationSettings"));
+const PlacezBrowse = lazyWithReload(() => import("./pages/PlacezBrowse"));
+const Scenez = lazyWithReload(() => import("./pages/Scenez"));
+const OutzidePlacesPage = lazyWithReload(() => import("./pages/OutzidePlacesPage"));
 const Directory = lazyWithReload(() => import("./pages/Directory"));
 const RoosterRock = lazyWithReload(() => import("./pages/RoosterRock"));
 const SauvieIsland = lazyWithReload(() => import("./pages/SauvieIsland"));
@@ -233,7 +236,8 @@ function AppLayout() {
             <Route path="/directory/new">{() => <MapWorldRedirect world="places" />}</Route>
             <Route path="/directory/:id/:slug?" component={Directory} />
 
-            <Route path="/directory" component={Directory} />
+            <Route path="/directory" component={PlacezBrowse} />
+            <Route path="/scenez" component={Scenez} />
             <Route path="/nude-beaches">
               {() => {
                 const tab = new URLSearchParams(window.location.search).get("tab");
@@ -245,7 +249,8 @@ function AppLayout() {
             <Route path="/outzide/share/:placeId" component={UnifiedMap} />
             <Route path="/outzide/rooster-rock" component={RoosterRock} />
             <Route path="/outzide/sauvie-island" component={SauvieIsland} />
-            <Route path="/outzide/:placeSlug" component={OutzPlace} />
+            <Route path="/outzide/places" component={OutzidePlacesPage} />
+            <Route path="/outzide/:placeSlug">{() => <OutzPlace />}</Route>
             <Route path="/next">
               {() => <Redirect to="/about" />}
             </Route>

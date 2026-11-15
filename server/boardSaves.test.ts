@@ -72,3 +72,17 @@ test("visibility follows publication, hidden state, and expiry without revealing
   assert.equal(isSavedBoard("housing"), true);
   db.close();
 });
+
+test("OutZide saves persist across readers, remain private, and can be removed", () => {
+ const {db,saves}=fixture();
+ db.exec("CREATE TABLE outz_wall_posts(id INTEGER, post_kind TEXT); INSERT INTO outz_wall_posts VALUES(5,'CARPOOL_OFFER'),(6,'TRIP_NOTE')");
+ assert.equal(isSavedBoard('outz'),true);
+ assert.equal(saves.isPublic('outz',5),true);
+ assert.equal(saves.isPublic('outz',6),false);
+ saves.save(1,'outz',5);saves.save(1,'outz',5);
+ assert.deepEqual(createBoardSaves(db).ids(1),['outz:5']);
+ assert.deepEqual(saves.ids(2),[]);
+ saves.remove(2,'outz',5);assert.deepEqual(saves.ids(1),['outz:5']);
+ saves.remove(1,'outz',5);assert.deepEqual(saves.ids(1),[]);
+ db.close();
+});

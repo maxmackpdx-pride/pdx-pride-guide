@@ -1,3 +1,4 @@
+import HubCardNotifications from './HubCardNotifications';
 import { Image, Pencil, RefreshCw, X } from "lucide-react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -123,6 +124,7 @@ export default function HubReader({ panelOpen = true, onClose, canPostToFeed }: 
       {demo && <p className="hub-reader__demo">Demo posts · Sign in to see your Hub.</p>}
       {!user && !demo && <div className="hub-reader__state"><h3>Your scene is here.</h3><p>Sign in to see the Hub, follow your people and places, and share an update.</p><button className="hub-reader__action pdx-glass-rebind" onClick={() => setShowAuth(true)}>Log in / Join</button></div>}
       {!!feed.data?.pages[0]?.unavailableSources?.length && <p className="hub-reader__demo" role="status">{feed.data.pages[0].unavailableSources.join(", ")} updates are temporarily unavailable. The rest of your Hub is here.</p>}
+      <HubCardNotifications enabled={panelOpen} onNavigate={onClose}/>
       {composing && <section className="hub-reader__composer" aria-label="Create a Hub post"><HubPost compact embedded initialType={composeType} onPosted={() => { setComposing(false); scrollRef.current?.scrollTo({ top: 0 }); }} onCancel={() => setComposing(false)} /></section>}
       {(authLoading || feed.isPending && (!!user || demo)) && <div className="hub-reader__state" role="status"><p>Loading your Hub…</p><div className="hub-reader__skeleton" /><div className="hub-reader__skeleton" /></div>}
       {feed.isError && !feed.data && <div className="hub-reader__state" role="alert"><h3>Hub didn’t load.</h3><p>Your place is saved. Try again in a moment.</p><button className="hub-reader__action pdx-glass-rebind" onClick={() => void feed.refetch()}>Try again</button></div>}

@@ -1,7 +1,7 @@
 import { isBoardArchived } from "./boardArchive";
 import type Database from "better-sqlite3";
 
-const boards = ["housing", "gigz", "giftz", "sellz", "mizzed"] as const;
+const boards = ["housing", "gigz", "giftz", "sellz", "mizzed", "outz"] as const;
 export type SavedBoard = (typeof boards)[number];
 export const isSavedBoard = (value: string): value is SavedBoard =>
   boards.includes(value as SavedBoard);
@@ -14,6 +14,7 @@ export function createBoardSaves(db: Database.Database) {
     PRIMARY KEY(user_id,board,post_id)
   )`);
   const visibleSql: Record<SavedBoard, string> = {
+    outz: "SELECT 1 FROM outz_wall_posts WHERE id = ? AND post_kind IN ('HIKE_BUDDY','CAMP_BUDDY','LOOKING_FOR_COMPANY','CARPOOL','CARPOOL_OFFER','CARPOOL_REQUEST','MISSED_CONNECTION')",
     housing:
       "SELECT 1 FROM housing_posts WHERE id = ? AND status IN ('ACTIVE','FILLED') AND hidden = 0 AND gone = 0",
     gigz: "SELECT 1 FROM gig_posts WHERE id = ? AND status = 'LIVE'",
