@@ -11,6 +11,7 @@
     "build": "tsx script/build.ts",
     "predeploy": "bash script/predeploy-check.sh",
     "verify:deploy": "node script/verify-deploy-bundle.mjs",
+    "test:community": "node --import tsx --test server/communityPrivacy.test.ts server/communityOutzPermissions.test.ts",
     "test:platform": "node --import tsx --test server/platformV1.test.ts server/platformV1Privacy.test.ts server/push/intent.test.ts",
     "ship": "npm run predeploy && npm run build && npm run verify:deploy",
     "start": "NODE_ENV=production node dist/index.cjs",
