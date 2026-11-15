@@ -8,7 +8,7 @@ import {
   dismissMobileNavOverlays,
   type MobileNavDismissDetail,
 } from "@/lib/mobileNavDismiss";
-import { BOARDS_MENU, EVENTS_NAV, navLinkActive } from "@/lib/siteNav";
+import { BOARDS_MENU, EVENTS_NAV, PLACES_NAV, navLinkActive } from "@/lib/siteNav";
 import { MobileDockShell } from "@/components/ui/mobile-dock-shell";
 import MobileWorldFan from "@/components/MobileWorldFan";
 import { CalendarDays, LayoutGrid, MapPin, LifeBuoy } from "lucide-react";
@@ -25,8 +25,8 @@ export default function MobileBottomNav() {
   const { open, closeSheet } = useInboxSheet();
   const { isOpen: hubOpen, closeHub } = useHubPanel();
   const overlayOpen = hubOpen || open;
-  const [fanOpen, setFanOpen] = useState(false);
-  const closeFan = useCallback(() => setFanOpen(false), []);
+  const [fanOpen, setFanOpen] = useState<"maps" | "places" | null>(null);
+  const closeFan = useCallback(() => setFanOpen(null), []);
 
   const closeLocalSheets = useCallback((except?: MobileNavDismissDetail["except"]) => {
     if (except !== "hub-panel") closeHub();
@@ -48,8 +48,8 @@ export default function MobileBottomNav() {
   }, [location, closeFan]);
 
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
-  const mapActive = navLinkActive(location, "/map") || navLinkActive(location, "/outzide");
-  const placesActive = navLinkActive(location, "/directory");
+  const mapActive = navLinkActive(location, "/map") || location === "/outzide";
+  const placesActive = PLACES_NAV.some(item => navLinkActive(location, item.href));
   const boardsActive = navLinkActive(location, "/boardz") || BOARDS_MENU.some(item => navLinkActive(location, item.href)) || navLinkActive(location, "/hausing");
   const resourcesActive = navLinkActive(location, "/needz");
   const activeIndex = resourcesActive ? 4 : placesActive ? 1 : mapActive ? 2 : boardsActive ? 3 : eventsActive ? 0 : -1;
@@ -69,8 +69,14 @@ export default function MobileBottomNav() {
     // The href stays "/map" so map-intent warming, the dock's MAPZ tab
     // styling and the no-JS fallback all keep working as before.
     event.preventDefault();
-    if (!fanOpen) closeLocalSheets();
-    setFanOpen(!fanOpen);
+    if (fanOpen !== "maps") dismissExcept();
+    setFanOpen(fanOpen === "maps" ? null : "maps");
+  };
+
+  const togglePlacesFan = (event: ReactMouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    if (fanOpen !== "places") dismissExcept();
+    setFanOpen(fanOpen === "places" ? null : "places");
   };
 
   const handleWorldNavigate = () => {
@@ -93,18 +99,21 @@ export default function MobileBottomNav() {
             <span className="znav-caption">Eventz</span>
           </Link>
 
-          <Link
+          <a
             href="/directory"
             className={tabClass(placesActive, "cyan")}
             data-accent="cyan"
             aria-label="Placez"
             title="Placez"
             aria-current={placesActive ? "page" : undefined}
-            onClick={handleNavLink}
+            aria-haspopup="true"
+            aria-expanded={fanOpen === "places"}
+            aria-controls="places-fan"
+            onClick={togglePlacesFan}
           >
             <span className="znav-icon-row"><MapPin size={20} strokeWidth={1.8} aria-hidden="true" /></span>
             <span className="znav-caption">Placez</span>
-          </Link>
+          </a>
 
           <a
             href="/map"
@@ -114,7 +123,7 @@ export default function MobileBottomNav() {
             aria-label="MAPZ"
             title="MAPZ"
             aria-haspopup="true"
-            aria-expanded={fanOpen}
+            aria-expanded={fanOpen === "maps"}
             aria-controls="world-fan"
             onClick={toggleWorldFan}
           >
@@ -161,7 +170,8 @@ export default function MobileBottomNav() {
           </Link>
       </MobileDockShell>
 
-      <MobileWorldFan open={fanOpen} onClose={closeFan} onNavigate={handleWorldNavigate} />
+      <MobileWorldFan open={fanOpen === "maps"} onClose={closeFan} onNavigate={handleWorldNavigate} />
+      <MobileWorldFan kind="places" open={fanOpen === "places"} onClose={closeFan} onNavigate={handleWorldNavigate} />
     </>,
     document.body,
   );

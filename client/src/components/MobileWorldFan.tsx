@@ -1,13 +1,15 @@
 import { useEffect, useLayoutEffect, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
 import { Link } from "wouter";
-import { Home, Map, Moon, Mountain, Pin } from "lucide-react";
+import { Home, Map, Moon, Mountain, Pin, MapPin, UsersRound } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import "./MobileWorldFan.css";
+import { PLACES_NAV, mapWorldNeedsReload } from "@/lib/siteNav";
 
 export type WorldFanMode = "mapz" | "outzide" | "afterz" | "boardz" | "zaydark";
 
 type World = {
-  mode: WorldFanMode;
+  mode: string;
+  href?: string;
   label: string;
   descriptor: string;
   accent: string;
@@ -35,7 +37,16 @@ const WORLDS: World[] = [
   { mode: "afterz", label: "Afterz", descriptor: "A LIGHT LEFT ON", accent: "var(--yellow)", Icon: Home, x: "91%", y: 0, delay: 84 },
 ];
 
-export default function MobileWorldFan({ open, onClose, onNavigate }: {
+const PLACES: World[] = PLACES_NAV.map((item, index) => ({
+  mode: item.label, href: item.href, label: item.label,
+  descriptor: ["VENUES & BUSINESSES", "CLUBS · COLLECTIVES · ORGS", "GET OUTSIDE"][index],
+  accent: ["var(--neon-cyan)", "var(--neon-violet)", "var(--neon-orange)"][index],
+  Icon: [MapPin, UsersRound, Mountain][index],
+  x: ["20%", "50%", "80%"][index], y: index === 1 ? 54 : 12, delay: index === 1 ? 0 : 42,
+}));
+
+export default function MobileWorldFan({ open, onClose, onNavigate, kind = "maps" }: {
+  kind?: "maps" | "places";
   open: boolean;
   onClose: () => void;
   onNavigate: () => void;
@@ -44,6 +55,8 @@ export default function MobileWorldFan({ open, onClose, onNavigate }: {
   // tracks its real top edge (dock height and safe-area vary) instead of a
   // hardcoded guess; 102px matches the dock's standard 8px inset + 82px
   // height + a 12px gap until the first measurement lands.
+  const items = kind === "places" ? PLACES : WORLDS;
+  const fanId = kind === "places" ? "places-fan" : "world-fan";
   const [lift, setLift] = useState(102);
   useLayoutEffect(() => {
     if (!open) return;
@@ -73,7 +86,7 @@ export default function MobileWorldFan({ open, onClose, onNavigate }: {
   const handleNodeClick = (event: ReactMouseEvent<HTMLAnchorElement>) => {
     onNavigate();
     const path = window.location.pathname;
-    if (path === "/map" || path === "/outzide") {
+    if (mapWorldNeedsReload(path, event.currentTarget.getAttribute("href") || "")) {
       // The pinned map module reads ?mode= only when it mounts, and the host
       // does not remount it on a query change, so a world switch requested
       // while the map is already up has to load the deep link outright.
@@ -86,19 +99,19 @@ export default function MobileWorldFan({ open, onClose, onNavigate }: {
     <>
       <div className={`world-fan-scrim${open ? " is-open" : ""}`} aria-hidden="true" onClick={onClose} />
       <div
-        id="world-fan"
+        id={fanId}
         className={`world-fan${open ? " is-open" : ""}`}
         role="group"
-        aria-label="Choose a map world"
+        aria-label={kind === "places" ? "Choose PlaceZ, SceneZ or OutZide" : "Choose a map world"}
         aria-hidden={!open}
         style={{ "--wf-lift": `${lift}px` } as CSSProperties}
       >
-        {WORLDS.map((world) => {
+        {items.map((world) => {
           const Icon = world.Icon;
           return (
             <Link
               key={world.mode}
-              href={`/map?mode=${world.mode}`}
+              href={world.href || `/map?mode=${world.mode}`}
               className="wf-node"
               style={{
                 "--wf-x": world.x,

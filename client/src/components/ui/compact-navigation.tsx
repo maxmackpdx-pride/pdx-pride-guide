@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { motion, useReducedMotion } from "motion/react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Mail, Home, Info, CalendarDays, MapPin, Map, TreePine, Layers, House, LayoutGrid, PanelsTopLeft, ChevronDown, Menu, X, MessageCircle, LifeBuoy, type LucideIcon } from "lucide-react";
-import { PRIMARY_NAV, navLinkActive, type NavEntry } from "@/lib/siteNav";
+import { PRIMARY_NAV, navLinkActive, mapWorldNeedsReload, type NavEntry } from "@/lib/siteNav";
 import { MOBILE_NAV_DISMISS, dismissMobileNavOverlays } from "@/lib/mobileNavDismiss";
 import { ButtonGlassOptics } from "@/components/ui/button-glass-optics";
 import HubTriggerContent from "@/components/hub/HubTriggerContent";
@@ -35,6 +35,8 @@ function useQuietMotion() {
 }
 
 export function CompactNavigation({ location, onNavigate, entries = PRIMARY_NAV, textOnly = false }: { location: string; onNavigate: () => void; entries?: NavEntry[]; textOnly?: boolean }) {
+  const search = useSearch();
+  const activeLocation = `${location.split("?")[0]}${search ? `?${search}` : ""}`;
   const [focused, setFocused] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(null);
   const quiet = useQuietMotion();
@@ -48,9 +50,9 @@ export function CompactNavigation({ location, onNavigate, entries = PRIMARY_NAV,
     {entries.map(entry => {
       const key = entryKey(entry);
       const Icon = ICONS[entry.label];
-      const active = entryActive(entry, location);
+      const active = entryActive(entry, activeLocation);
       // A folder like Boards borrows the accent of the room you're in.
-      const accent = entry.type === "dropdown" ? entry.items.find(item => navLinkActive(location, item.href))?.accent ?? entry.accent : entry.accent;
+      const accent = entry.type === "dropdown" ? entry.items.find(item => navLinkActive(activeLocation, item.href))?.accent ?? entry.accent : entry.accent;
       const expanded = open === key || (focused ? focused === key : active);
       const content = textOnly ? <><ButtonGlassOptics /><span className="znav-caption">{entry.label}</span>{entry.type === "dropdown" && <ChevronDown className="znav-chevron" size={13} aria-hidden="true" />}</> : <><ButtonGlassOptics /><span className="znav-icon-row"><Icon size={20} strokeWidth={1.8} aria-hidden="true" />
         <motion.span initial={false} animate={{ width: expanded ? 66 : 0, opacity: expanded ? 1 : 0, marginLeft: expanded ? 7 : 0 }} transition={quiet ? { duration: 0 } : { width: { type: "spring", stiffness: 350, damping: 32 }, opacity: { duration: 0.19 }, marginLeft: { duration: 0.19 } }} className="znav-expanding-label">{entry.label}</motion.span>
@@ -63,7 +65,10 @@ export function CompactNavigation({ location, onNavigate, entries = PRIMARY_NAV,
             <DropdownMenu.Trigger className={className} data-accent={accent} aria-label={entry.label} onMouseEnter={() => setFocused(key)} onFocus={() => setFocused(key)} onBlur={() => setFocused(null)}>{content}</DropdownMenu.Trigger>
             <DropdownMenu.Portal><DropdownMenu.Content className="znav-dropdown pdx-liquid-overlay" aria-label={entry.label} sideOffset={10} align={entry.id === "boards" ? "end" : "start"} collisionPadding={12}>
               {entry.eyebrow && <DropdownMenu.Label className="znav-eyebrow">{entry.eyebrow}</DropdownMenu.Label>}
-              {entry.items.map(item => <DropdownMenu.Item asChild key={item.href}><Link href={item.href} className="znav-menu-link pdx-glass-rebind" data-accent={item.accent ?? entry.accent} aria-current={navLinkActive(location, item.href) ? "page" : undefined} onClick={onNavigate}>{item.label}</Link></DropdownMenu.Item>)}
+              {entry.items.map(item => <DropdownMenu.Item asChild key={item.href}><Link href={item.href} className="znav-menu-link pdx-glass-rebind" data-accent={item.accent ?? entry.accent} aria-current={navLinkActive(activeLocation, item.href) ? "page" : undefined} onClick={event => {
+                onNavigate(); setOpen(null);
+                if (mapWorldNeedsReload(location, item.href)) { event.preventDefault(); window.location.assign(item.href); }
+              }}>{item.label}</Link></DropdownMenu.Item>)}
             </DropdownMenu.Content></DropdownMenu.Portal>
           </DropdownMenu.Root>}
       </div>;

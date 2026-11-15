@@ -38,6 +38,27 @@ export const BOARD_NAV: NavLinkItem[] = [
 /** Every board room, including My Hoüz. */
 export const BOARDS_MENU: NavLinkItem[] = [...BOARD_NAV, { href: "/boardz?board=housing", label: "My Hoüz", accent: "hauz" }];
 
+/** Shared destinations for the dock fan, desktop dropdown and page switcher. */
+export const PLACES_NAV: NavLinkItem[] = [
+  { href: "/directory", label: "PlaceZ", accent: "cyan" },
+  { href: "/scenez", label: "SceneZ", accent: "violet" },
+  { href: "/outzide/places", label: "OutZide", accent: "orange" },
+];
+
+export const MAPS_NAV: NavLinkItem[] = [
+  { href: "/map?mode=mapz", label: "Mapz", accent: "magenta" },
+  { href: "/map?mode=outzide", label: "OutZide", accent: "orange" },
+  { href: "/map?mode=boardz", label: "Boardz", accent: "cyan" },
+  { href: "/map?mode=afterz", label: "Afterz", accent: "lime" },
+  { href: "/map?mode=zaydark", label: "ZayDark", accent: "violet" },
+];
+
+/** Only map routes need a remount for a world query change. Browse stays SPA. */
+export function mapWorldNeedsReload(currentPath: string, destination: string) {
+  const path = currentPath.split("?")[0].replace(/\/$/, "");
+  return (path === "/map" || path === "/outzide") && destination.startsWith("/map?mode=");
+}
+
 /**
  * Primary nav - labels match on-page titles where possible.
  *
@@ -47,8 +68,8 @@ export const BOARDS_MENU: NavLinkItem[] = [...BOARD_NAV, { href: "/boardz?board=
 export const PRIMARY_NAV: NavEntry[] = [
   { type: "link", href: "/", label: "Home", accent: "lime" },
   { type: "link", href: "/events", label: "Eventz", accent: "cyan" },
-  { type: "link", href: "/directory", label: "Placez", accent: "cyan" },
-  { type: "link", href: "/map", label: "Mapz", accent: "blue" },
+  { type: "dropdown", id: "places", label: "Placez", accent: "cyan", items: PLACES_NAV },
+  { type: "dropdown", id: "maps", label: "Mapz", accent: "blue", items: MAPS_NAV },
   { type: "link", href: "/boardz", label: "Boardz", accent: "magenta" },
   /* Nonprofits, hotlines, and LGBTQ+ groups (moved off Placez 2026-09-30). */
   { type: "link", href: "/needz", label: "NEEDZ", accent: "green" },
@@ -116,6 +137,13 @@ export const EVENTS_NAV: NavLinkItem[] = [
 ];
 
 export function navLinkActive(location: string, href: string) {
+  // Map worlds share a pathname, so match the requested mode, not every map item.
+  if (href.startsWith("/map?mode=")) {
+    const [path, query = ""] = location.split("?");
+    if (path !== "/map" && path !== "/outzide") return false;
+    const mode = new URLSearchParams(query).get("mode") || (path === "/outzide" ? "outzide" : "mapz");
+    return mode === new URLSearchParams(href.split("?")[1]).get("mode");
+  }
   // Home must not match every path (everything starts with "/").
   if (href === "/") {
     return location === "/" || location.startsWith("/?");
