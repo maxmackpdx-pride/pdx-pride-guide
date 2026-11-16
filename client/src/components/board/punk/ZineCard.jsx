@@ -156,9 +156,10 @@ function HouzTicket({r,small=false}){
   </div>;
 }
 
-function Heart({save,small=false}){
-  if(small)return <CardHeartButton active={Boolean(save?.saved)} disabled={save?.disabled} aria-label={save?.saved?"Unsave":"Save"} onClick={event=>{event.stopPropagation();save?.onSave?.();}}/>;
-  return <button type="button" className="zheart" disabled={save.disabled} aria-label={save.saved?'Unsave':'Save'} aria-pressed={save.saved} onClick={e=>{e.stopPropagation();save.onSave()}}>
+function Heart({save,small=false,title='post'}){
+  const saveLabel=`${save?.saved?'Unsave':'Save'} ${title}`;
+  if(small)return <CardHeartButton active={Boolean(save?.saved)} disabled={save?.disabled} aria-label={saveLabel} onClick={event=>{event.stopPropagation();save?.onSave?.();}}/>;
+  return <button type="button" className="zheart" disabled={save.disabled} aria-label={saveLabel} aria-pressed={save.saved} onClick={e=>{e.stopPropagation();save.onSave()}}>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z" fill={save.saved?'currentColor':'none'} stroke="currentColor" strokeWidth="2"/></svg>
   </button>;
 }
@@ -198,7 +199,7 @@ export function ZineSmallCard({r,save,calm=false,Photo}){
       {OUTZ_HERO[r.category]&&r.detail&&<span className="zine-area" title={r.detail}>{r.detail.toUpperCase()}</span>}
       <Headline text={r.title} className="zine-title"/>
       <span className="zine-tape">{SHORT_TYPE[r.intent]||r.kicker}</span>
-      <Heart save={save} small/>
+      <Heart save={save} small title={r.title}/>
     </div>
   </article>;
 }
@@ -248,7 +249,7 @@ export function ZineCard({r,save,calm=false,Photo}){
       {value&&<span className="zine-value" aria-label={value}><Ransom text={value} seed={2} faces={VALUE_MIX}/></span>}
       {r.category==='housing'&&<HouzTicket r={r}/>}
       <img className="zine-logo" src={'/boardz/punk/'+r.logo} alt={r.category==='mizzed'?'Mizzed Connection':r.category==='housing'?'My Hoüz':r.category}/>
-      <Heart save={save}/>
+      <Heart save={save} title={r.title}/>
     </div>
   </article>;
 }
