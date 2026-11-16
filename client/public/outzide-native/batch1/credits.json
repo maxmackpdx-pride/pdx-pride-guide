@@ -71,7 +71,7 @@
     "src": "/outzide-native/batch1/woods-screenprint-v2.png",
     "derivativeLicense": "CC BY-SA 4.0",
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and torn-paper edge. Historical view, not current conditions.",
-    "qa": "Independent source-composition/style and alpha-renderer checks passed; native-card crop QA pending",
+    "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed; generic water mesh suppressed for approved artwork",
     "sha256": "6b7a81ba514b0596a20a7dacab76f29e608b1d41e55213e1a0396e69853a83a7"
   },
   "fishing-or-vernonia-lake": {
