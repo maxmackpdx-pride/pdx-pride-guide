@@ -40,7 +40,7 @@ export default function NativePlacezExpanded({place,contacts,info,feed,events,ma
     <button type="button" className="pz-share" aria-label={`Share ${place.name}`} onClick={onShare} disabled={sharing}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="5" r="3"/><circle cx="18" cy="19" r="3"/><path d="m9 10 6-4M9 14l6 4"/></svg></button>
     <header className="pz-native-header">
       <h2>{place.name}</h2><span className="pz-category">{model.category}</span>
-      <Link className="pz-native-compose pz-compose-row" href={model.composeHref} onClick={onClose}><span>Post a Mizzed Connection<small>At this place, anytime</small></span><span aria-hidden="true">↗</span></Link>
+      <Link className="pz-native-compose pz-compose-row" href={model.composeHref} onClick={onClose}><span>Post a Mizzed Connection<small>At this place, anytime</small></span><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 18 18 6M6 6h12v12"/></svg></Link>
     </header>
     <ExpandedPager motion={!calmMode} initialPage={selection.page} resetKey={selection.request} onPageChange={onPageChange} pages={[
       <div key="feed" className="pz-native-page"><CardBoardReadButton kind="placez" id={place.id}/>{feed}<section><h3>Venue news</h3><p>Public venue news is unavailable.</p></section></div>,
