@@ -1,0 +1,32 @@
+{
+  "venueId": 162,
+  "venue": "Fruit",
+  "artwork": "Fruit-building.png",
+  "sha256": "e9e639bd1eec226048af610a783eb2d852005651ff13e0496f8d512ea214697f",
+  "recovery": "Exact saved generated PNG, no alteration.",
+  "qa": "Architecture sources match seven balcony panels, central wood divider, two garage-style glazed bays, outer doors, stairs and neighbors. Rainbow asphalt visible below curb; no people.",
+  "identityEvidence": [
+    {
+      "url": "https://www.beautyfruit.co/",
+      "fact": "Official business address4114 SE28thPlace Unit106."
+    },
+    {
+      "url": "https://www.portlandmaps.com/reports/index.cfm?action=building-unit&download=1&end_date=04%2F30%2F2014&page=1&search_field=&search_value=&sort_field=FOLDER_DESCRIPTION&sort_order=asc&start_date=04%2F01%2F2014",
+      "fact": "City record permit14-138986-000-00-CO identifies4114 SE28thPl as BUILDING3 OF3, Creston Lofts west building."
+    },
+    {
+      "url": "https://www.plandesignxplore.com/case-studies/2018/5/11/creston-lofts-2860-se-gladstone",
+      "fact": "Labels matching photo Building3\u2013South; site plan shows building3 frontage along28thPlace."
+    }
+  ],
+  "knownLimits": [
+    "Building identity linkage corroborated across business/city/architecture evidence, not visual proof of exact Unit106 entrance. Depict shared building, not exclusive Fruit storefront.",
+    "Historic architecture source period; not claimed current signage or documentary image.",
+    "Original generator input history not recovered; final card preview/mask separate."
+  ],
+  "liveDirectoryVerification": {
+    "method": "Release lead inspected production /api/directory in supported browser",
+    "result": "ID/name/service type/address match saved source identity",
+    "rolloutNote": "Live health was 3ee92b during 7a177dc rollout; records freshly retrieved."
+  }
+}

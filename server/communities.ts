@@ -1,3 +1,4 @@
+import { backfillSceneCategories } from './backfillSceneCategories';
 import {readBoardMotif} from './boardMotifs';
 import type { Express, RequestHandler } from "express";
 import { randomUUID } from "node:crypto";
@@ -48,6 +49,7 @@ export function ensureCommunityTables() {
   const owner = sqlite.prepare("INSERT OR IGNORE INTO community_memberships (community_id,user_id,role,status,rules_version,joined_at) VALUES (?,?,'owner','active','1',?)");
   const place = sqlite.prepare("INSERT OR IGNORE INTO community_relationships (community_id,target_type,target_id,relationship_type,created_at) VALUES (?,'place',?,'source',?)");
   sqlite.transaction(() => { for (const g of groups) { let slug=communitySlug(g.name), n=2; while(used.has(slug)) slug=`${communitySlug(g.name)}-${n++}`; const id=`com_${g.id}`, stamp=g.created_at||now(); const result=insert.run(id,slug,g.name,g.description||"",g.image_url||null,g.neighborhood||null,JSON.stringify(COMMUNITY_RULES),g.id,stamp,stamp); if(result.changes) used.add(slug); place.run(id,String(g.id),stamp); if(g.owner_id) owner.run(id,g.owner_id,stamp); } })();
+  backfillSceneCategories(sqlite);
   const candidateColumns=sqlite.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='qsearch_candidates'").get()
     ? (sqlite.prepare("PRAGMA table_info(qsearch_candidates)").all() as Array<{name:string}>).map(column=>column.name) : [];
   if(["brands_json","committed_event_id"].every(name=>candidateColumns.includes(name))){

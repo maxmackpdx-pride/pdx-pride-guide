@@ -28,3 +28,13 @@
 .scenez-native .pz-card--small.page-scenez .pz-descriptor{font-size:9px;line-height:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .scenez-native .pz-card--small.page-scenez .scene-logo,.scenez-native .pz-card--small.page-scenez .scene-wordmark{z-index:2;left:44px;right:8px;top:22px;width:84px;height:48px;bottom:auto;object-fit:contain}
 .scenez-native .pz-card--small.page-scenez .scene-wordmark{font-size:17px;overflow:hidden}
+
+/* Keep real upcoming-event data in its own lane on locked 360 x 216 wides. */
+.scenez-native .pz-card--wide-map[data-has-scene-event=true] .scene-logo,.scenez-native .pz-card--wide-map[data-has-scene-event=true] .scene-wordmark{top:24px;height:88px;bottom:auto}
+.scenez-native .pz-card--wide-map[data-has-scene-event=true] .pz-content{top:24px}
+.scenez-native .pz-card--wide-map[data-has-scene-event=true] .pz-title{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-height:42px}
+.scenez-native .pz-card--wide-map[data-has-scene-event=true] .pz-descriptor{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scenez-native .pz-card--wide-map[data-has-scene-event=true] .scene-next-event{bottom:68px;height:28px;padding:4px 7px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:6px}
+.scenez-native .pz-card--wide-map[data-has-scene-event=true] .scene-next-event strong{font-size:8px;line-height:12px}
+.scenez-native .pz-card--wide-map[data-has-scene-event=true] .scene-next-event span{min-width:0;font-size:10px;line-height:16px}
+.scenez-native .pz-card--wide-map[data-has-scene-event=true] .scene-next-event time{font-size:8px;line-height:12px}

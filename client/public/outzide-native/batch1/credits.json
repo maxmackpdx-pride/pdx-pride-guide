@@ -1,0 +1,44 @@
+{
+  "beacon-rock": {
+    "src": "/outzide-native/batch1/beacon-rock-screenprint-v2.png",
+    "author": "U.S. Geological Survey",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beacon_rock.jpg",
+    "license": "Public domain",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/File:Beacon_rock.jpg",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/category-color accents, terrain-conforming mesh, water contours where present, torn-paper edge. Not current conditions.",
+    "qa": "Independent source-composition/style comparison and alpha-renderer backgrounds passed",
+    "sha256": "ef1ae2a592b925b2d4a61a15b53bd5f3c372923b1daa55280f8d45fd64c30c54"
+  },
+  "forest-park": {
+    "src": "/outzide-native/batch1/forest-park-screenprint-v1.png",
+    "author": "EncMstr",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Forest_park_wildwood_trail_lazy_bend_P3861.jpeg",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/category-color accents, terrain-conforming mesh, water contours where present, torn-paper edge. Not current conditions.",
+    "qa": "Independent source-composition/style comparison and alpha-renderer backgrounds passed",
+    "sha256": "53b862655cc690b1858fba30ab110439705a43381fa1c30be0d7d3b65a14c878",
+    "derivativeLicense": "CC BY-SA 3.0"
+  },
+  "usfs-7682.004621": {
+    "src": "/outzide-native/batch1/tumalo-falls-screenprint-v1.png",
+    "author": "Gary Halvorson, Oregon State Archives",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tumalo_Falls_(Deschutes_County,_Oregon_scenic_images)_(desDB3253).jpg",
+    "license": "Attribution required; derivatives and commercial reuse allowed",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/File:Tumalo_Falls_(Deschutes_County,_Oregon_scenic_images)_(desDB3253).jpg",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/category-color accents, terrain-conforming mesh, water contours where present, torn-paper edge. Not current conditions.",
+    "qa": "Independent source-composition/style comparison and alpha-renderer backgrounds passed",
+    "sha256": "effd3ef2d3ba47c389cc6cc3d7519d5cfb5cba432a04b5d3facb5c2adb78e235"
+  },
+  "dayuse-wa-federation-forest-state-park": {
+    "src": "/outzide-native/batch1/federation-screenprint-v1.png",
+    "author": "Bryan Ochalla",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Federation_Forest_State_Park.jpg",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/category-color accents, terrain-conforming mesh, water contours where present, torn-paper edge. Not current conditions.",
+    "qa": "Independent source-composition/style comparison and alpha-renderer backgrounds passed",
+    "sha256": "e23d1eaee501fddd651642e93c53955330c216dab12ba1c9b0a186d8ebf2767f",
+    "derivativeLicense": "CC BY-SA 2.0"
+  }
+}

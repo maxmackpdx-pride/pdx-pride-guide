@@ -34,3 +34,12 @@
 .scenez-native .ns-heading>span,.scenez-native .ns-heading>button{flex:none;order:1}
 .scenez-native .ns-board-tabs button[aria-pressed=true]{border-color:var(--scene-lime);background:color-mix(in srgb,var(--scene-lime) 10%,var(--places-art-ink-070809))}
 @media(min-width:900px){.scenez-native .ns-reference-hero{height:500px}.scenez-native .ns-reference-hero .ns-logo{width:650px;margin-top:0}.scenez-native .ns-speaker{left:0;width:300px}.scenez-native .ns-flag-paper{width:330px;right:2%}.scenez-native .ns-record{width:460px;right:-10%;bottom:-68%}.scenez-native .ns-wave-paper{width:55%;height:22%}}
+/* Faithful photographic Xerox collage: replace lower-right record with pup-pride scrap.
+   Art has no words or controls; approved logo and selector are independent above it. */
+.scenez-native .ns-xerox-hero{height:auto;aspect-ratio:1;min-height:0;max-height:720px;border:0;display:block;background:var(--places-art-ink-070809)}
+.scenez-native .ns-xerox-hero .ns-collage{inset:0;display:flex;justify-content:center}
+.scenez-native .ns-xerox-art{display:block;height:100%;width:100%;object-fit:fill;max-width:900px}
+.scenez-native .ns-xerox-hero .ns-logo{position:absolute;top:35%;left:50%;transform:translateX(-50%);width:min(84%,690px);height:auto;margin:0}
+.scenez-native .ns-xerox-hero>.places-page-switch{position:absolute;top:62%;left:50%;transform:translateX(-50%);width:78%;max-width:570px}
+.scenez-native .ns-xerox-hero:after{display:none}
+@media(min-width:900px){.scenez-native .ns-xerox-hero{height:650px;aspect-ratio:auto}.scenez-native .ns-xerox-hero .ns-logo{top:34%;width:620px}.scenez-native .ns-xerox-hero>.places-page-switch{top:62%}}
