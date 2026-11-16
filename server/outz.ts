@@ -1,3 +1,4 @@
+import { correctOutzCatalogCoordinates } from "@shared/outzCoordinateCorrections";
 import { sqlite } from "./storage";
 import { activeOutzOfficialNotice, OUTZ_COMMUNITY_STAYS, OUTZ_SOURCES, type OutzAlert, type OutzCatalogPlace, type OutzDestination, type OutzOfficialNotice, type OutzSnapshot } from "@shared/outz";
 
@@ -35,6 +36,7 @@ function readCache(): OutzSnapshot | null {
       ...destination,
       officialNotice: activeOutzOfficialNotice(FEATURED.find(feature => feature.id === destination.id)?.officialNotice),
     }));
+    snapshot.catalog = (snapshot.catalog ?? []).map(correctOutzCatalogCoordinates);
     snapshot.communityStays = OUTZ_COMMUNITY_STAYS;
     snapshot.sources = OUTZ_SOURCES;
     return snapshot;
@@ -260,7 +262,7 @@ export async function refreshOutzSnapshot(): Promise<OutzSnapshot> {
         sourceStatus: stateStatuses.get(destination.name) ?? null,
       };
     }),
-    catalog,
+    catalog: catalog.map(correctOutzCatalogCoordinates),
     communityStays: OUTZ_COMMUNITY_STAYS,
     sources: OUTZ_SOURCES,
   };
