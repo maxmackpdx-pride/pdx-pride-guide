@@ -73,5 +73,16 @@
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and torn-paper edge. Historical view, not current conditions.",
     "qa": "Independent source-composition/style and alpha-renderer checks passed; native-card crop QA pending",
     "sha256": "6b7a81ba514b0596a20a7dacab76f29e608b1d41e55213e1a0396e69853a83a7"
+  },
+  "fishing-or-vernonia-lake": {
+    "src": "/outzide-native/batch1/vernonia-screenprint-v1.png",
+    "author": "Bcostley",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Old_Mill_Pond_and_Fuel_Building_in_Vernonia,_Oregon.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "derivativeLicense": "CC BY-SA 4.0",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water ripples and torn-paper edge. Historical view from 2015, not current conditions.",
+    "qa": "Independent source-composition/style, alpha-renderer contrast, all four native card size crops and expanded hero checks passed",
+    "sha256": "12ae9cf5cb146a422887102f34d9f84d7661e8297541181fca2330dde6c36f1e"
   }
 }
