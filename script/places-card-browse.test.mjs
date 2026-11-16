@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import Module from 'node:module';
+import {buildSync} from 'esbuild';
+import React from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+const source='client/src/components/places/CardBrowse.tsx';
+const output=buildSync({entryPoints:[source],bundle:true,write:false,platform:'node',format:'cjs',external:['react','react-dom'],loader:{'.css':'empty'},jsx:'automatic'}).outputFiles[0].text;
+const mod=new Module(path.resolve('card-browse-test.cjs'));mod.filename=path.resolve('card-browse-test.cjs');mod.paths=Module._nodeModulePaths(process.cwd());mod._compile(output,mod.filename);
+const {default:CardBrowse,browseLimit,CARD_BATCH_SIZE}=mod.exports;
+const render=n=>renderToStaticMarkup(React.createElement(CardBrowse,{items:Array.from({length:n},(_,id)=>({id})),scope:'all',label:'Places',renderCard:(p,size)=>React.createElement('article',{key:p.id,'data-id':p.id,'data-size':size},String(p.id))}));
+test('initial list renders exactly 10 small cards and an explicit Load more',()=>{const html=render(25);assert.equal((html.match(/<article/g)||[]).length,10);assert.equal((html.match(/data-size="small"/g)||[]).length,10);assert.match(html,/Load more/);assert.match(html,/15 remaining/);assert.match(html,/Wide cards/)});
+test('empty and terminal batches never show Load more',()=>{for(const n of [0,1,10])assert.doesNotMatch(render(n),/Load more/)});
+test('batches append ten, filter changes reset only the batch',()=>{assert.equal(CARD_BATCH_SIZE,10);let page={scope:'all',count:10};for(const n of [20,30]){page={scope:'all',count:browseLimit('all',page)+CARD_BATCH_SIZE};assert.equal(page.count,n)}assert.equal(browseLimit('coffee',page),10);assert.equal(browseLimit('all',page),30)});
+test('all three filtered browse lists use the same control',()=>{for(const page of ['PlacezBrowse','Scenez','OutzidePlacesPage']){const s=fs.readFileSync(`client/src/pages/${page}.tsx`,'utf8');assert.match(s,/<CardBrowse/);assert.match(s,/scope=\{JSON.stringify/);assert.match(s,/"use memo"/)} });
+test('exact native dimensions and two-column default are preserved',()=>{const slots=fs.readFileSync('client/src/components/places/LockedCardSlot.tsx','utf8');assert.match(slots,/small:\[136,170\]/);assert.match(slots,/wide:\[360,216\]/);const css=fs.readFileSync('client/src/components/places/CardBrowse.css','utf8');assert.match(css,/repeat\(2,minmax\(0,136px\)\)/);assert.match(css,/data-card-view=wide/);assert.doesNotMatch(css,/@media/)});
