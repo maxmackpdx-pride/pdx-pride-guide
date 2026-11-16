@@ -1,0 +1,18 @@
+{
+  "venueId": 15,
+  "venue": "Tin Shed Garden Cafe",
+  "artwork": "Tin-Shed-building.png",
+  "sha256": "f97ec84e9232c1a6a4b54b8ad87e8a7ad3b0727d217f69b9b45e3b1fa366ed8c",
+  "recovery": "Exact saved generated PNG copied without image alteration.",
+  "qa": "Source-facade reviewed against official-6754.jpg, official-6799.jpg and happycow-front.jpeg. Main facade, name sign, entrance and patio configuration supported. People removed; rainbow on asphalt below curb.",
+  "knownLimits": [
+    "Represents official-6754 patio configuration; source photos show different periods. Not a current documentary photograph.",
+    "Generation-input history is not independently recovered.",
+    "Source is opaque RGB; final card mask/transparent torn-edge composition not certified by this facade QA."
+  ],
+  "sourceReferences": [
+    "official-6754.jpg",
+    "official-6799.jpg",
+    "happycow-front.jpeg"
+  ]
+}
