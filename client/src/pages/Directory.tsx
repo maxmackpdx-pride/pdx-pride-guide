@@ -586,7 +586,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         <path className="placez-shader-contours__magenta" d="M1080 360 C795 165 670 225 470 375 S165 580 -80 370" />
         <path className="placez-shader-contours__yellow" d="M1080 420 C785 225 680 285 470 425 S165 635 -80 430" />
       </svg>}
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} defaultTab="register" />}
+      {showAuth && <AuthModal portalTargetSelector=".placez-fullscreen[open]" onClose={() => setShowAuth(false)} defaultTab="register" />}
       {!isSpaces ? <>
         <BrowseHeader title="Placez" logo="/brand/family/our-placez.svg" kicker="Local discovery / Oregon + Vancouver, WA"
           description="Good places. Real connection. A reason to get out.">

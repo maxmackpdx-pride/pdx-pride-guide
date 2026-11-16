@@ -18,6 +18,8 @@ import {
 interface AuthModalProps {
   onClose: (reason?: "success") => void;
   defaultTab?: "login" | "register";
+  /** Opt in when a native top-layer dialog owns the auth request. */
+  portalTargetSelector?: string;
 }
 
 /** The four seam colours, so the beams read as the site's rainbow rule. */
@@ -65,7 +67,8 @@ function Field({
   );
 }
 
-export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalProps) {
+export default function AuthModal({ onClose, defaultTab = "login", portalTargetSelector }: AuthModalProps) {
+  const [portalTarget] = useState(() => (portalTargetSelector ? document.querySelector(portalTargetSelector) : null) || document.body);
   const googleAuthUrl = window.location.pathname === "/map"
     ? `/api/auth/google?${new URLSearchParams({ returnTo: `${window.location.pathname}${window.location.search}` })}`
     : "/api/auth/google";
@@ -186,8 +189,8 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
 
   const submitLabel = (idle: string, busy: string) => (loading ? busy : idle);
 
-  // Always portal to body so login is never trapped inside event cards / modals
-  // that use transform, overflow, or stacking contexts (claim-this-event flow).
+  // Ordinary overlays portal to body. Native modal dialogs explicitly opt in
+  // to their top-layer host so auth is not rendered behind an inert backdrop.
   return createPortal(
     <div
       className="pdx-auth-scrim fixed inset-0 z-[100000] flex items-center justify-center overflow-y-auto bg-black/85 p-4 backdrop-blur-[6px]"
@@ -521,7 +524,7 @@ export default function AuthModal({ onClose, defaultTab = "login" }: AuthModalPr
         </div>
       </motion.div>
     </div>,
-    document.body,
+    portalTarget,
   );
 }
 
