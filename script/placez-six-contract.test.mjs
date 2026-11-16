@@ -4,7 +4,7 @@ import {readFileSync,existsSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('one internal six-ID registry without changing public PlaceCard or directory transport',()=>{
  const face=read('client/src/components/placez/NativePlacezFace.tsx');
- assert.match(face,/<CardShell category="placez" size=\{size\}/);
+ assert.match(face,/<CardShell category="placez" size=\{size==='square'\?'tall':size\}/);
  assert.match(face,/VenueFollowButton[^>]*businessId=\{place.id\}/);
  assert.match(face,/motion=\{!calmMode\}/);
  const model=read('client/src/components/placez/nativeModel.ts');

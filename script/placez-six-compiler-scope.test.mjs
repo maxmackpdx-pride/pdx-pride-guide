@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {cardSourcePatterns,cardCompilerExcludedPatterns,placezCompilerModules} from './react-compiler-card-scope.mjs';
 test('Placez compiler allowlist is exact across path conventions',()=>{
- const expected=['cards/PlaceCard','placez/NativePlacezFace','placez/PlacezQuickCard','placez/NativePlacezExpanded','placez/ExpandedPager'];
+ const expected=['cards/PlaceCard','placez/NativePlacezFace','placez/PlacezQuickCard','placez/NativePlacezExpanded','placez/ExpandedPager','scenez/SceneCardFace','outz/native/NativeOutzideFace'];
  assert.deepEqual(placezCompilerModules,expected);
  for(const module of expected)for(const separator of ['/','\\']){
   const file=('/repo/client/src/components/'+module+'.tsx').replaceAll('/',separator);
