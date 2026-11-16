@@ -69,3 +69,9 @@ html:has(.outz-native-dialog[open]){scrollbar-gutter:auto;overflow:hidden}.outz-
 .outz-native-page #outz-destination-results{scroll-margin-top:110px}
 @media(min-width:600px){.outz-native-page .places-page-switch--compact a{font-size:20px;padding:9px 4px}.outz-native-page .places-page-switch--compact svg{width:22px;height:22px}}
 
+
+/* Expanded follow reads 'Save this destination' (founder setup, Nov 16 2026): footer becomes a row, credit flexes, labeled save button at the right. */
+.outz-expanded-footer{display:flex;align-items:flex-start;gap:8px}
+.outz-expanded-footer .outz-native-credit{flex:1;padding-right:12px}
+.outz-expanded-save{display:flex;align-items:center;gap:9px;flex:none;min-height:44px;margin:6px 18px 0 0;padding:0;background:none;border:0;color:var(--oz-accent);font:700 13px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;cursor:pointer}
+.outz-expanded-save__heart{width:44px;height:44px;flex:none;display:grid;place-items:center;border:1px solid var(--oz-accent);border-radius:50%;background:var(--places-art-ink-080b0d);color:var(--oz-accent)}
