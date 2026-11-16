@@ -51,5 +51,16 @@
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours, torn-paper edge. Historical view, not current conditions.",
     "qa": "Independent source-composition/style and alpha-renderer contrast checks passed; native-card crop QA pending",
     "sha256": "f0cbbf29e812cafae9607dfe8ee094ecea2e45d8d5461ea8fad9edde140f15f7"
+  },
+  "dayuse-wa-peace-arch-historical-state-park": {
+    "src": "/outzide-native/batch1/peace-arch-screenprint-v1.png",
+    "author": "Kevin Kiefuik",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Peace_Arch_Monument_-_View_From_USA_Side.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "derivativeLicense": "CC BY-SA 4.0",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/day-use accents, terrain contours and torn-paper edge. Historic source view from USA side; authentic flagpole cables retained. Not current conditions.",
+    "qa": "Independent source-composition/style and alpha-renderer checks passed; native-card crop QA pending",
+    "sha256": "8abb68a5526fae2d621b3c398a21f53aeefa14f2a16ce27fbde7da552c1e1ee4"
   }
 }
