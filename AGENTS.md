@@ -223,3 +223,22 @@ bloom. Check `docs/LIVE_DESIGN_STANDARD.md` when the requested work touches thes
 - Pushed while Railway runs: **"On GitHub; deploy in progress."**
 - Railway `SUCCESS`: **"Production updated."**
 - Failed or crashed: report the failure and relevant logs; never call it shipped.
+
+## Signing your work (Tucker, Nov 15, 2026)
+
+Every commit is made under Tucker's authority and usually shows his name.
+That does not say which AI did the work, and Tucker needs to know.
+
+- End every commit message with the trailer: `Made-by: <your name>`
+  (Muse, Codex, ChatGPT, Cursor, or Grok — whichever you are).
+- No exceptions for small commits. An unsigned commit is an unfinished commit.
+- "Shipped" means live-verified, not pushed: a change is done only when the
+  live surface serves it (for the site, /api/health gitSha equals your commit).
+
+## Extras must be visible (Tucker, Nov 15, 2026)
+
+- Initiative is fine; silent bundling is not. An unrequested addition may
+  ride along only if it is labeled as your own addition, signed, and easy
+  to remove without touching the work that was asked for.
+- Anything structural or governing — a gate, a process, a rule, a
+  restriction — needs Tucker's explicit yes BEFORE it lands. No exceptions.

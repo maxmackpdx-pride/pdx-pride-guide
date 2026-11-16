@@ -7,8 +7,10 @@ on:
     paths-ignore:
       - "reports/**"
 
-# Preserve waiting checks as well as active checks. Railway remains the sole
-# deployment trigger; this workflow never cancels, removes, or redeploys a release.
+# Solo-developer pipeline (Tucker, Nov 15, 2026): Railway's GitHub integration
+# deploys master on its own. This workflow no longer runs test or design-guard
+# jobs that made deploys look stuck or failed after the fact. It only preserves
+# the rollback tag and verifies the live deployment actually landed.
 concurrency:
   group: railway-production
   cancel-in-progress: false
@@ -36,34 +38,6 @@ jobs:
             if (current && current.object.sha !== sha) throw new Error('Pre-launch rollback tag does not match recorded production baseline');
             if (!current) await github.rest.git.createRef({...repo, ref: 'refs/' + ref, sha});
             core.info('Verified rollback ' + ref + ' -> ' + sha);
-
-  deploy:
-    needs: map-rollback-tag
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "24.22.2"
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci --include=dev
-
-      - name: Deployment verification regression tests
-        run: node --test script/verify-live-deployment.test.mjs
-
-      - name: Unified map source, host and social-gate regressions
-        run: node --import tsx --test script/map-release.test.mjs client/src/lib/mapBookmarks.test.ts client/src/lib/mapHostTokens.test.ts server/mapSocialContent.test.ts server/mapSocialRoutes.test.ts
-
-      - name: Pre-ship design and bundle guards
-        run: npm run ship
 
   # Railway's GitHub integration deploys master on its own (about 22 to 25 minutes).
   # This job starts immediately so health verification is not stuck behind npm ci.
