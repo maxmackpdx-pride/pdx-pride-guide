@@ -50,7 +50,7 @@
 
 
 /* Mobile/desktop reference mashup: RGB must remain above the skyline art. */
-.pl-production{--pl-rgb:linear-gradient(90deg,var(--places-art-ink-ff0000) 0%,var(--neon-orange) 18%,var(--neon-yellow) 32%,var(--neon-green,#2bff00) 47%,var(--neon-cyan) 62%,var(--places-art-ink-1600ff) 80%,var(--places-art-ink-7b00ff) 100%)}
+.pl-production{--pl-rgb:linear-gradient(90deg,var(--places-art-ink-ff0000) 0%,var(--neon-orange) 18%,var(--neon-yellow) 32%,var(--neon-green) 47%,var(--neon-cyan) 62%,var(--places-art-ink-1600ff) 80%,var(--places-art-ink-7b00ff) 100%)}
 .pl-production .pl-brand{padding:8px 20% 0}
 .pl-production .pl-brand img{max-height:none;object-position:center}
 .pl-production .pl-city-mesh{height:68%;opacity:.8}
