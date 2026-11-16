@@ -18,6 +18,24 @@
   --ink-border-faint: #1a1a1a;
   --ink-border-strong: #333333;
 
+  /* ---- EVENTZ CARD NEUTRALS (exact values from the approved Placez-setup
+     event faces + expanded card; named in the places-art hex-suffix style) -- */
+  --evz-ink-0a0a0e:  #0A0A0E;  /* frame ink mixed into the card bloom border */
+  --evz-ink-0a0e12:  #0A0E12;  /* deep ink for chip/count borders + tag fill mix */
+  --evz-line-17171d: #17171D;  /* hairline row borders on the expanded card */
+  --evz-line-2c2c35: #2C2C35;  /* dashed claim border, quiet button borders */
+  --evz-dot-3a3a44:  #3A3A44;  /* pager dots (inactive) */
+  --evz-mist-f4f8fa: #F4F8FA;  /* brightest steel text (tag labels) */
+  --evz-mist-f2f5f7: #F2F5F7;  /* venue line on the expanded hero */
+  --evz-mist-e8f0f5: #E8F0F5;  /* when line on the expanded hero */
+  --evz-mist-cfd8de: #CFD8DE;  /* steel meta text */
+  --evz-mist-c5d2dc: #C5D2DC;  /* countdown unit labels */
+  --evz-mist-aeb8c3: #AEB8C3;  /* countdown time line */
+  --evz-mist-9aa7b0: #9AA7B0;  /* muted steel text (sub-lines, keys, notes) */
+  --evz-gray-d8d8e0: #D8D8E0;  /* info row values */
+  --evz-gray-c6c6cf: #C6C6CF;  /* body copy on the expanded card */
+  --evz-gray-8a8a94: #8A8A94;  /* tab labels, page counter */
+
   /* ---- NEON PALETTE (exact hexes) ------------------------ */
   --neon-yellow:  #D4FF00;  /* PRIMARY action (chartreuse) */
   --neon-cyan:    #00FFFF;  /* accent pop, THU, links */
