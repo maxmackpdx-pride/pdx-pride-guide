@@ -21,7 +21,7 @@ html:has(.outz-native-dialog[open]){scrollbar-gutter:auto;overflow:hidden}.outz-
 .outz-expanded-identity{padding:8px 22px 4px;flex:none}
 .outz-expanded-identity>small{text-transform:uppercase;letter-spacing:.12em;font:600 10px/1.2 'Barlow Condensed',sans-serif}
 .outz-expanded-identity h1{margin:5px 0;font:900 clamp(24px,5vw,36px)/1 'Barlow Condensed',sans-serif;text-transform:uppercase}
-.outz-expanded-identity p{margin:6px 0;color:var(--oz-category);border-left:3px solid var(--oz-category);padding-left:7px;font:800 12px/1.1 'Barlow Condensed',sans-serif;text-transform:uppercase}
+.outz-expanded-identity p{display:inline-flex;margin:6px 0;padding:5px 8px;border:1px solid color-mix(in srgb,var(--oz-category) 45%,transparent);border-radius:4px;background:color-mix(in srgb,var(--oz-category) 12%,var(--evz-ink-0a0e12));color:var(--evz-mist-f4f8fa);font:700 12px/1.1 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.07em}
 .outz-expanded-readings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:3px 22px 0;padding:8px 0;border-block:1px solid var(--places-art-ink-eee8d750);flex:none}
 .outz-expanded-readings>div{min-width:0;padding:0 9px;border-right:1px solid var(--places-art-ink-eee8d750)}
 .outz-expanded-readings>div:first-child{padding-left:0}.outz-expanded-readings>div:last-child{border:0}
