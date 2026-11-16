@@ -1,6 +1,6 @@
-.outz-native-page .outz-alphabet{margin:24px 0 14px;color:#f1e8d5}
+.outz-native-page .outz-alphabet{margin:24px 0 14px;color:var(--places-art-ink-eee8d7)}
 .outz-native-page .outz-alphabet>span{display:block;margin-bottom:9px;font:inherit;font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.8rem}
 .outz-native-page .outz-alphabet>div{display:flex;flex-wrap:wrap;gap:8px}
-.outz-native-page .outz-alphabet button{min-width:48px;min-height:42px;padding:8px 13px;border:1px solid #FF7B0066;border-radius:7px;background:#151515;color:inherit;font:inherit;font-weight:700;cursor:pointer}
-.outz-native-page .outz-alphabet button[aria-pressed=true]{background:#FF7B00;color:#111;border-color:#FF7B00;box-shadow:0 0 12px #FF7B0038}
-.outz-native-page .outz-alphabet button:focus-visible{outline:2px solid #f1e8d5;outline-offset:3px}
+.outz-native-page .outz-alphabet button{min-width:48px;min-height:42px;padding:8px 13px;border:1px solid color-mix(in srgb,var(--neon-orange) 40%,transparent);border-radius:7px;background:var(--places-art-ink-111111);color:inherit;font:inherit;font-weight:700;cursor:pointer}
+.outz-native-page .outz-alphabet button[aria-pressed=true]{background:var(--neon-orange);color:var(--places-art-ink-111111);border-color:var(--neon-orange);box-shadow:0 0 12px color-mix(in srgb,var(--neon-orange) 22%,transparent)}
+.outz-native-page .outz-alphabet button:focus-visible{outline:2px solid var(--places-art-ink-eee8d7);outline-offset:3px}
