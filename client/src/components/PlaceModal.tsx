@@ -7,7 +7,7 @@ import GigPreviewCard from "@/components/board/GigPreviewCard";
 import type { GigPost } from "@/pages/PrideWork";
 import { dayComplementToken } from "@/lib/dsColors";
 import { PLACE_ACCENTS } from './discovery/placeTokens';
-import { ResourceCardMotif } from './resources/ResourceCardMotif';
+import BoardPostFace from "@/components/board/BoardPostFace";
 import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import { mapBrowseHref } from "@/lib/mapBrowseHref";
@@ -254,8 +254,6 @@ function PlaceModalInner({
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [descriptionClipped, setDescriptionClipped] = useState(false);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
-  const mizzedRef = useRef<HTMLElement>(null);
-  const [missedOpen, setMissedOpen] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
   const [heroMapVisible, setHeroMapVisible] = useState(false);
   const incidentalMap = useIncidentalMap(heroMapVisible, place?.id ?? "place");
@@ -267,7 +265,6 @@ function PlaceModalInner({
   // Fresh tab when opening a different place
   useEffect(() => {
     setTab("past");
-    setMissedOpen(false);
     setHeroMapVisible(false);
     setEditing(false);
     setSavedOverrides(null);
@@ -914,49 +911,32 @@ gigs.length === 0 ? (
                 </div>
               )
   );
-  const nativeMizzed = (
-!hideMissed && <section className="event-modal__mizzed-door" aria-label="Mizzed Connection" ref={mizzedRef}>
-            <button type="button" className="room-doorways__door pdx-glass-card pdx-glass-rebind"
-              style={{ "--c": "var(--room-mizzed)", "--ink": "var(--room-mizzed)" } as React.CSSProperties}
-              aria-expanded={missedOpen} onClick={() => {
-                setMissedOpen(value => !value);
-                requestAnimationFrame(() => mizzedRef.current?.scrollIntoView({ behavior: "auto", block: "start" }));
-              }}>
-              <ResourceCardMotif name="MIZZED CONNECTION" category="mizzed" />
-              <span className="room-doorways__vignette" aria-hidden="true" />
-              <span className="room-doorways__glass" aria-hidden="true" />
-              <img className="room-doorways__logo" src="/brand/family/mizzed-connection.svg?v=20261013-texture" alt="Mizzed Connection" loading="lazy" decoding="async" />
-              <span className="room-doorways__line"><strong>That person you noticed</strong><br />Maybe they noticed you, too.</span>
-              <span className="room-doorways__go">Who caught your eye? <span aria-hidden="true">↗</span></span>
-            </button>
-            {missedOpen && (
-              spotted.length === 0 ? (
-                <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No MIZZED CONNECTION posts posted at this venue yet.</p>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {spotted.map(mc => (
-                    <div key={mc.id} style={{ padding: "8px 0 8px 12px", borderLeft: `3px solid ${accent}` }}>
-                      <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--text-hi)", marginBottom: 2 }}>
-                        {mc.body}
-                      </div>
-                    </div>
-                  ))}
-                  <Link href="/mizzed" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
-                    View MIZZED CONNECTION board <ArrowRight size={14} aria-hidden="true" />
-                  </Link>
-                </div>
-              )
-            )}
-            {missedOpen && <Link href={`/mizzed/new?place=${place.id}`} onClick={onClose} style={{ ...linkStyle, marginTop: 12 }}>Post a connection from this Placez card <ArrowRight size={14} aria-hidden="true" /></Link>}
-
-          </section>
+  const nativeMizzed = !hideMissed && (
+    <section aria-label={`Mizzed Connections at ${place.name}`}>
+      <h3>MIZZED CONNECTIONS</h3>
+      {place.spotted === undefined ? <p>Venue MIZZED CONNECTION posts have not loaded.</p> : spotted.length === 0 ? (
+        <p style={{ fontSize: "0.85rem", color: "var(--text-lo)" }}>No current Mizzed Connections at this venue yet.</p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="place-gigs-rail" aria-label={`Current Mizzed Connections at ${place.name}`}>
+            {spotted.map(mc => <BoardPostFace key={mc.id} category="mizzed"
+              // Directory responses contain only ACTIVE connections matched to this venue.
+              post={{...mc, status: "ACTIVE", placeName: place.name}}
+              onOpen={() => { onClose(); navigate(`/mizzed?post=${mc.id}`); }} />)}
+          </div>
+          <Link href="/mizzed" onClick={onClose} style={{ ...linkStyle, marginTop: 4 }}>
+            View MIZZED CONNECTIONS <ArrowRight size={14} aria-hidden="true" />
+          </Link>
+        </div>
+      )}
+    </section>
   );
 
   return (
     <div onClick={handleClose} role="presentation" className={`event-modal-overlay place-modal-overlay placez-native-overlay${open ? " place-modal-overlay--open" : ""}`}>
       <div ref={panelRef} onClick={event => event.stopPropagation()} role="dialog" aria-modal="false" aria-label={place.name} tabIndex={-1} className="placez-native-dialog">
         <NativePlacezExpanded place={displayed} contacts={nativeContacts} info={nativeInfo}
-          feed={<><h3>GIGZ</h3>{place.gigs === undefined ? <p>Venue GIGZ have not loaded.</p> : nativeGigs}{place.spotted === undefined ? <p>Venue MIZZED CONNECTION posts have not loaded.</p> : nativeMizzed}</>}
+          feed={<><h3>GIGZ</h3>{place.gigs === undefined ? <p>Venue GIGZ have not loaded.</p> : nativeGigs}{nativeMizzed}</>}
           events={place.upcomingEvents === undefined ? <p>Venue events have not loaded.</p> : nativeUpcoming}
           maps={<>{nativeMap}{nativeDirections}</>}
           people={<><section><h3>Owner</h3><p>Public owner profiles are unavailable.</p></section><section><h3>Staff</h3><p>Verified public staff profiles are unavailable.</p></section><section><h3>Promoters</h3>{place.promoters === undefined ? <p>Venue promoters have not loaded.</p> : promoters.length ? <ul>{promoters.map(promoter => <li key={promoter.id}>{promoter.displayName || promoter.username} <span>@{promoter.username}</span></li>)}</ul> : <p>No public promoters linked to this venue.</p>}</section><section><h3>Past talent</h3><p>Public event-to-talent profiles are unavailable.</p></section><section><h3>Past events</h3>{place.pastEvents === undefined ? <p>Past events have not loaded.</p> : nativePast}</section></>}
@@ -987,4 +967,5 @@ const linkStyle: React.CSSProperties = {
   color: "var(--c, var(--pink))",
   textDecoration: "none",
 };
+
 
