@@ -12,3 +12,29 @@
 /* A viewport modal must not inherit the document's reserved bilateral scrollbar gutter. */
 html:has(.outz-native-dialog[open]){scrollbar-gutter:auto;overflow:hidden}.outz-native-dialog{scrollbar-gutter:auto}
 .outz-native-dialog .outz-native-close{top:calc(12px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px))}.outz-native-dialog .oz-badge{top:calc(14px + env(safe-area-inset-top,0px));left:calc(14px + env(safe-area-inset-left,0px))}.outz-native-dialog .outz-native-credit{padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+
+/* Reference: Nov13 Topographic field-guide expanded card. Native data and
+   sections stay mounted; only the section viewport scrolls, not its controls. */
+.outz-native-dialog{overflow:hidden;box-sizing:border-box}
+.outz-native-expanded{height:100%;min-height:0;display:flex;flex-direction:column;background:var(--places-art-ink-080b0d) url('/outzide-native/paper.png') center/cover}
+.outz-native-expanded-hero{height:clamp(120px,27dvh,260px);min-height:0;flex:none;isolation:isolate}
+.outz-expanded-identity{padding:8px 22px 4px;flex:none}
+.outz-expanded-identity>small{text-transform:uppercase;letter-spacing:.12em;font:600 10px/1.2 'Barlow Condensed',sans-serif}
+.outz-expanded-identity h1{margin:5px 0;font:900 clamp(24px,5vw,36px)/1 'Barlow Condensed',sans-serif;text-transform:uppercase}
+.outz-expanded-identity p{margin:6px 0;color:var(--oz-category);border-left:3px solid var(--oz-category);padding-left:7px;font:800 12px/1.1 'Barlow Condensed',sans-serif;text-transform:uppercase}
+.outz-expanded-readings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:3px 22px 0;padding:8px 0;border-block:1px solid var(--places-art-ink-eee8d750);flex:none}
+.outz-expanded-readings>div{min-width:0;padding:0 9px;border-right:1px solid var(--places-art-ink-eee8d750)}
+.outz-expanded-readings>div:first-child{padding-left:0}.outz-expanded-readings>div:last-child{border:0}
+.outz-expanded-readings b{display:block;font:800 13px 'Barlow Condensed',sans-serif;text-transform:uppercase}.outz-expanded-readings span{display:block;font:400 11px/1.3 Barlow,sans-serif;overflow-wrap:anywhere;max-height:3.9em;overflow:auto}
+.outz-expanded-freshness{margin:5px 22px;font:italic 10px/1.3 Barlow,sans-serif;flex:none}
+.outz-native-expanded>.oz-expanded-counters{padding:4px 22px 8px;gap:8px;flex:none}
+.outz-native-expanded>.oz-tabs{position:relative;top:auto;flex:none;padding:4px 16px 8px;gap:5px}
+.outz-native-expanded .oz-tabs button{flex:1;min-width:0;padding:10px 4px;border:0;border-radius:0;background:transparent;font-style:italic}
+.outz-native-expanded .oz-tabs button[aria-pressed=true]{background:var(--neon-orange);color:var(--places-art-ink-080b0d);clip-path:polygon(0 7%,9% 2%,18% 7%,29% 0,39% 6%,52% 2%,64% 7%,77% 0,87% 6%,100% 2%,98% 92%,88% 98%,76% 94%,65% 100%,53% 94%,41% 99%,27% 94%,15% 100%,1% 94%)}
+.outz-native-sections{flex:1;min-height:100px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.outz-native-sections .outz-place__readings,.outz-native-sections .outz-place__follow{display:none}
+.outz-expanded-footer{position:relative;flex:none;min-height:52px;padding-bottom:env(safe-area-inset-bottom);border-top:1px solid var(--places-art-ink-eee8d750)}
+.outz-expanded-footer .outz-native-credit{margin:0;padding:12px 78px 12px 22px;font-size:10px;max-height:100px;overflow:auto}
+.outz-expanded-footer>.pz-heart{position:absolute;right:18px;top:4px;width:44px;height:44px;color:var(--oz-accent)}
+.outz-expanded-footer>.pz-heart button{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--oz-accent);border-radius:50%;background:var(--places-art-ink-080b0d);color:var(--oz-accent)}
+@media(max-height:600px){.outz-native-expanded-hero{height:100px}.outz-expanded-readings,.outz-expanded-freshness{display:none}.outz-expanded-identity{padding-block:3px}.outz-expanded-identity h1{font-size:24px}}
