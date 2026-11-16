@@ -176,7 +176,7 @@
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Metolius_River_near_Wizard_Falls.jpg#Licensing",
     "src": "/outzide-native/batch1/wizard-screenprint-v2.png",
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, rock and bank mesh, flowing water contours and transparent orange torn-paper edge. Historical view from June 2007, not current flow or conditions.",
-    "qa": "Independent source/style and raw alpha passed; native crop checks pending",
+    "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
     "sha256": "b292379d896bb64652d934e62a6714e2d6c1d02f0431d4e7ddbdf83ae19034ef"
   }
 }
