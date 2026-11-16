@@ -146,7 +146,7 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
     "src": "/outzide-native/batch1/lava-screenprint-v3.png",
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and transparent orange torn-paper edge. Historical view from 2011, not current snow or conditions.",
-    "qa": "Independent source/style and three-background alpha-renderer checks passed; native card crops pending",
+    "qa": "Independent source/style, three-background alpha-renderer, all four native card size crops and expanded hero checks passed",
     "sha256": "2cc11ef6e8eb1fdb7f456faf3351088f514605df650dbec2b6ed2a51f5cccfd7"
   }
 }
