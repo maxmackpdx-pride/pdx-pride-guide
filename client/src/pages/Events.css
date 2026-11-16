@@ -350,6 +350,13 @@ html body .events-page.board-page--makeover .events-card-feed :is(.pdxBoard,.pdx
 .event-rail-card--s .event-rail-card__save { top: 6px; right: 6px; width: 34px; height: 34px; }
 .event-rail-card__save[aria-pressed="true"] { background: var(--neon-magenta); border-color: var(--neon-magenta); color: var(--event-control-ink); }
 .event-rail-card__save:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 2px; }
+/* Share rides top-left on the square face (heart keeps top-right); the live
+   badge and the weekday code shift clear of it. */
+.event-rail-card .rail-card-share { top: 8px; left: 8px; right: auto; min-height: 28px; padding: 0 8px; gap: 5px; border-radius: 8px; font: 700 12px/1 var(--font-display); text-transform: uppercase; }
+.event-rail-card--s .rail-card-share { top: 6px; left: 6px; width: 34px; min-height: 34px; padding: 0; justify-content: center; gap: 0; border-radius: 50%; font-size: 0; }
+.event-rail-card:has(.rail-card-share) .tonight-card__live { left: 88px; }
+.event-rail-card:has(.rail-card-share) .day-motif-code { top: 46px; }
+.event-rail-card--s:has(.rail-card-share) .day-motif-code { top: 48px; }
 
 /* Rail swipe cues: edge fade + arrow where more cards wait, and a progress bar. */
 .events-page .events-rail-wrap { position: relative; }
@@ -378,8 +385,8 @@ html body .events-page.board-page--makeover .events-card-feed :is(.pdxBoard,.pdx
 
 /* Rail card stamps: weekday code on posterless art, hidden under a live badge. */
 .event-rail-card .day-motif-code { color: var(--event-control-ink); }
-.event-rail-card .event-fallback-logo { top:48px; bottom:72px; left:10px; right:10px; width:auto; height:auto; transform:none; background-position:center; background-size:contain; }
-.event-rail-card--s .event-fallback-logo { top:42px; bottom:58px; }
+.event-rail-card .event-fallback-logo { top:44%; bottom:auto; left:50%; right:auto; width:66%; height:38%; transform:translate(-50%,-50%); background-position:center; background-size:contain; }
+.event-rail-card--s .event-fallback-logo { top:43%; height:36%; }
 .event-rail-card--s .day-motif-code { font-size: 12px; left: 9px; top: 10px; }
 .event-rail-card__art:has(.tonight-card__live) .day-motif-code { display: none; }
 

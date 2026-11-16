@@ -4,6 +4,8 @@ import { dayAccentToken, dayComplementToken } from "@/lib/dsColors";
 import { listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import { eventTimeLabel } from "@/lib/eventDisplay";
 import { CardHeartButton } from "@/components/CardHeartButton";
+import RailShareButton from "@/components/home/RailShareButton";
+import { eventPath } from "@shared/eventSlug";
 import EventFlyerArt from "./EventFlyerArt";
 import { CardArtworkGlass } from '../CardArtworkGlass';
 import { LiveBadge, type TonightCardLive } from "@/components/home/TonightEventCard";
@@ -41,6 +43,7 @@ export default function EventRailCard({
           <span className="event-rail-card__shade"><span className="event-rail-card__title">{listing.title}</span><span className="event-rail-card__meta">{eventTimeLabel(listing.dateStart)} · {listing.venueName}</span></span>
         </span>
       </button>
+      <RailShareButton href={eventPath(listing.id, listing.title, listing.dayOfWeek)} title={listing.title} />
       <CardHeartButton active={saved}
         className="event-rail-card__save"
         aria-pressed={saved}

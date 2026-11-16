@@ -191,7 +191,10 @@ function eventInWindow(e: EventListing, window: string, windows: DateWindows): b
   if (window === "TONIGHT") {
     const start = parsePacificDateTime(e.dateStart);
     const end = parsePacificDateTime(e.dateEnd);
-    return start != null && start < windows.tonightEnd && (end != null && end > start ? end > windows.tonightStart : start >= windows.tonightStart);
+    if (start != null && start < windows.tonightEnd && (end != null && end > start ? end > windows.tonightStart : start >= windows.tonightStart)) return true;
+    // Daytime events that end before the 18:00 tonight window opens still
+    // belong on today's board; the bands sort them into On now / Today.
+    return pacificCalendarDate(e.dateStart) === windows.today;
   }
   const d = pacificCalendarDate(e.dateStart);
   if (!d) return false;

@@ -349,6 +349,16 @@ function PlaceModalInner({
       `${locations.length} locations`
     : [place.address, place.neighborhood].filter(Boolean).join(" · ") || undefined;
   const upcomingEvents = place.upcomingEvents ?? [];
+  // Founder rule: a card never shows events more than 7 days out. The full
+  // list still loads; only this card's Upcoming section is windowed.
+  const upcomingWithin7Days = upcomingEvents.filter(event => {
+    const startMs = Date.parse(event.dateStart);
+    if (!Number.isFinite(startMs)) return false;
+    const endRaw = (event as { dateEnd?: string | null }).dateEnd;
+    const endMs = endRaw ? Date.parse(endRaw) : NaN;
+    const lastMs = Number.isFinite(endMs) && endMs > startMs ? endMs : startMs;
+    return startMs <= Date.now() + 7 * 86400000 && lastMs >= Date.now() - 86400000;
+  });
   const pastEvents = place.pastEvents ?? [];
   const spotted = place.spotted ?? [];
   const gigs = place.gigs ?? [];
@@ -848,10 +858,10 @@ function PlaceModalInner({
   );
   const nativeUpcoming = (
 <details className="event-modal__disclosure place-upcoming" open={eventsOpen} onToggle={event => setEventsOpen(event.currentTarget.open)}>
-            <summary><Icon d={CAL} />Upcoming events <span className="place-upcoming__count">{upcomingEvents.length}</span><ChevronRight aria-hidden="true" /></summary>
-            {upcomingEvents.some(event => event.previewExample) && <p className="place-upcoming__note">Sample event cards for this preview.</p>}
-            {upcomingEvents.length ? <div className="place-upcoming__grid" role="list" aria-label={`Upcoming events at ${place.name}`}>
-              {upcomingEvents.map(event => <Link
+            <summary><Icon d={CAL} />Upcoming events <span className="place-upcoming__count">{upcomingWithin7Days.length}</span><ChevronRight aria-hidden="true" /></summary>
+            {upcomingWithin7Days.some(event => event.previewExample) && <p className="place-upcoming__note">Sample event cards for this preview.</p>}
+            {upcomingWithin7Days.length ? <div className="place-upcoming__grid" role="list" aria-label={`Upcoming events at ${place.name}`}>
+              {upcomingWithin7Days.map(event => <Link
                 key={event.listingInstanceKey ?? event.id}
                 href={eventPath(event.id, event.title, event.dayOfWeek)}
                 onClick={onClose}
@@ -864,7 +874,7 @@ function PlaceModalInner({
                 {event.previewExample && <span className="place-event-tile__example">Example</span>}
                 <span className="place-event-tile__shade"><strong>{event.title}</strong><small>{event.previewExample ? "Preview example" : formatDirectoryEventWhen(event)}</small></span>
               </Link>)}
-            </div> : <p className="place-upcoming__note">No upcoming events matched to this venue yet.</p>}
+            </div> : <p className="place-upcoming__note">{upcomingEvents.length ? "No events in the next 7 days." : "No upcoming events matched to this venue yet."}</p>}
           </details>
   );
   const nativePast = (
