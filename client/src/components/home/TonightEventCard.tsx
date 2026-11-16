@@ -67,8 +67,10 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
   const changedAt = listing.lastChangeAt ? Date.parse(listing.lastChangeAt) : NaN;
   const changeLabel = rsvped && listing.lastChangeLabel && Number.isFinite(changedAt) && Date.now() - changedAt < CHANGE_WINDOW_MS ? listing.lastChangeLabel : null;
   const poster = listingPosterUrl(listing);
+  // Flyer accent (QSearch flyer-accent system) drives the card's color when set; the day accent is the fallback.
+  const flyerAccent = (listing as { accentColor?: string | null }).accentColor || null;
   const age = listing.ageRequirement === "21_PLUS" ? "21+" : listing.ageRequirement === "18_PLUS" ? "18+" : "All ages";
-  return <CardMorph name={cardMorphName(["event", listing.id, layout])}><article data-card-size={layout === "row" ? "wide" : "tall"} data-card-category={"eventz"} onClickCapture={rememberCardOrigin} className={`tonight-card tonight-card--${layout} pdx-glass-card pdx-glass-rebind`} style={{ "--c": dayAccentToken(listingDay(listing)), "--card-secondary-override": dayComplementToken(listingDay(listing)), "--dir-gm": 8 } as CSSProperties}>
+  return <CardMorph name={cardMorphName(["event", listing.id, layout])}><article data-card-size={layout === "row" ? "wide" : "tall"} data-card-category={"eventz"} onClickCapture={rememberCardOrigin} className={`tonight-card tonight-card--${layout} pdx-glass-card pdx-glass-rebind`} style={{ "--c": flyerAccent ?? dayAccentToken(listingDay(listing)), "--card-secondary-override": dayComplementToken(listingDay(listing)), "--dir-gm": 8 } as CSSProperties}>
     {poster
       ? <DayMotif day={listingDay(listing)} placement="card" />
       : <DayMotif day={listingDay(listing)} placement="art" className="tonight-card__motif-fill" />}
