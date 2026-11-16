@@ -337,7 +337,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
                   {hosts.map((host) => {
                     const inner = (
                       <>
-                        <UserAvatar photoUrl={host.photoUrl} avatarChoice={host.avatarChoice} avatarRing={host.avatarRing} displayName={host.displayName} username={host.username} size={48} />
+                        <UserAvatar photoUrl={host.photoUrl} avatarChoice={host.avatarChoice} avatarRing={host.avatarRing} displayName={host.displayName} username={host.username ?? undefined} size={48} />
                         <span className="evz-x__person-meta">
                           <span className="evz-x__person-name">{host.displayName || host.username}</span>
                           {host.role === "PRIMARY" ? <span className="evz-x__person-role">Primary host</span> : null}
