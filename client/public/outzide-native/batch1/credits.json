@@ -93,6 +93,7 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and transparent torn-paper edge. Historical view from Peyton Bridge in 2008, not current conditions.",
     "qa": "Independent source/style, three-background alpha-renderer and all four native card crops plus expanded hero passed; landscape framing preserves reservoir banks",
-    "sha256": "8be0b5bd0736abcfdf483f0d25d5cfe9a1305dcd9c0b2b6174882c41ba31fd5b"
+    "sha256": "8be0b5bd0736abcfdf483f0d25d5cfe9a1305dcd9c0b2b6174882c41ba31fd5b",
+    "landscapePosition": "center top"
   }
 }

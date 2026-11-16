@@ -180,6 +180,6 @@
 /* Only qualified transparent artwork: restore opaque interior without filling torn alpha fringe. */
 .oz-topographic .oz-source-photo.oz-source-photo--approved-art,
 .outz-native-expanded-hero .oz-source-photo.oz-source-photo--approved-art {filter:var(--oz-alpha-filter)!important;}
-/* Portrait Lost Creek source: retain the distant reservoir banks in landscape crops. */
-.oz-wide-map .oz-source-photo[src$="/lost-creek-screenprint-v2.png"],
-.outz-native-expanded-hero .oz-source-photo[src$="/lost-creek-screenprint-v2.png"] {object-position:center top;}
+/* Optional artwork framing only affects landscape layouts; other crops keep their defaults. */
+.oz-topographic.oz-wide-map .oz-source-photo{object-position:var(--oz-landscape-position,35% 50%);}
+.outz-native-expanded-hero .oz-source-photo{object-position:var(--oz-landscape-position,50% 50%);}

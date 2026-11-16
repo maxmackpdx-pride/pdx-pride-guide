@@ -1,6 +1,6 @@
 import credits from '../../../../public/outzide-native/batch1/credits.json';
 
-export type OutzArtworkRecord = {src:string;author:string;sourceUrl:string;license:string;licenseUrl:string;changes:string;derivativeLicense?:string;qa:string;sha256:string};
+export type OutzArtworkRecord = {src:string;landscapePosition?:string;author:string;sourceUrl:string;license:string;licenseUrl:string;changes:string;derivativeLicense?:string;qa:string;sha256:string};
 export const approvedOutzArtwork = credits as Record<string,OutzArtworkRecord>;
 
 /** Source/derivative attribution travels with the artwork, never inferred from filename. */
