@@ -1,0 +1,67 @@
+{
+  "venue": "Taqueria Los Pu\u00f1ales",
+  "directoryId": 11,
+  "address": "3312 SE Belmont St, Portland",
+  "identitySources": [
+    "https://www.lospunales.com/",
+    "https://www.lospunales.com/about",
+    "https://www.portland.gov/transportation/permitting/business-support/news/2026/8/28/august-2026-newsletter-outdoor-dining"
+  ],
+  "identity": "Actual original directory restaurant, official city feature explicitly queer owned",
+  "palette": "restaurant --cat-food --neon-orange #FF7B00 plus cyan #00FFFF",
+  "sourcePeriod": "25 January 2025; August2026 city feature explicitly describes redesigned patio; generated historical appearance, not verified current patio",
+  "sources": [
+    {
+      "file": "046.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/c4/Portland%2C_Oregon_in_January_2025_-_046.jpg",
+      "author": "Another Believer",
+      "license": "CC BY-SA4.0",
+      "licenseURL": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "sha256": "ea2cc4309804b38e544476f8731ba57ebc50b415c30a199b70088b8e6a0556ff"
+    },
+    {
+      "file": "047.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/38/Portland%2C_Oregon_in_January_2025_-_047.jpg",
+      "author": "Another Believer",
+      "license": "CC BY-SA4.0",
+      "licenseURL": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "sha256": "f2d4479f824bf2fc00e216238ec4b20342a5fba3a8b1a2f78c18cc6e75fb2935"
+    },
+    {
+      "file": "048.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Portland%2C_Oregon_in_January_2025_-_048.jpg",
+      "author": "Another Believer",
+      "license": "CC BY-SA4.0",
+      "licenseURL": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "sha256": "f9cfd8db1b168a0cf09ec475063434677d7f7df30476151d93a45971b82ad587"
+    },
+    {
+      "file": "050.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/7f/Portland%2C_Oregon_in_January_2025_-_050.jpg",
+      "author": "Another Believer",
+      "license": "CC BY-SA4.0",
+      "licenseURL": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "sha256": "43f296284c3c75fe3a90dc4277635ff0f7dc225a4fea4a430ddea54bdec5fdc6"
+    }
+  ],
+  "candidate": "candidate-02-roof.png",
+  "status": "PASS independent image source QA, not deployed",
+  "reviewFocus": [
+    "Actual low floral tile storefront vs taller neighbors correctly identified",
+    "Assess unknown rooftop equipment and source window/door geometry",
+    "Period caveat required"
+  ],
+  "method": "imagegen all4 actual refs plus approved style contact sheet, no pixel compositing",
+  "independentFinding": "category_color_fix confirms tall invented vent removed; low silhouettes, floral fascia, wood patio, signs and neighbor geometry source-consistent. Preserve January2025 historical-reference caveat.",
+  "change": "Removed tall cylindrical vent/oversized boxes, low roof silhouettes retained. No restyling or intentional frontage change.",
+  "sha256": "ecd9fbdeff3d8d27064e76fada1c9175e5e4ed822335fa5dea7120997be8599d",
+  "artwork": "Los-Punales-building.png",
+  "license": "Source-derived artwork, CC BY-SA 4.0; AI-stylized and rectified, not a documentary photograph",
+  "liveRecordVerification": {
+    "method": "Release lead fresh production /api/directory read",
+    "id": 11,
+    "name": "Taqueria Los Pu\u00f1ales",
+    "type": "restaurant",
+    "address": "3312 SE Belmont St"
+  }
+}
