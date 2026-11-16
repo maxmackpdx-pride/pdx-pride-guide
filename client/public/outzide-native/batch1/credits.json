@@ -156,7 +156,7 @@
     "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
     "src": "/outzide-native/batch1/hoodoo-screenprint-v2.png",
     "changes": "AI-assisted Xerox screenprint adaptation: orange/purple accents, terrain-conforming mesh and transparent orange torn-paper edge. Historical winter view from January 2025, not current snow or conditions.",
-    "qa": "Independent source/style and raw alpha passed; actual native crops pending",
+    "qa": "HOLD: source/style and alpha pass, but native small/square/wide crops hide mountain identity under bottom content; requires asset reframing before release",
     "sha256": "56e776519011a398eaed3678f5d53c8364b88ce4d12f90ae734d69f057c21fad"
   }
 }
