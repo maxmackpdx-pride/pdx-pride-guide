@@ -1,3 +1,4 @@
+import {readFileSync} from "node:fs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -16,3 +17,8 @@ test('empty and terminal batches never show Load more',()=>{for(const n of [0,1,
 test('batches append ten, filter changes reset only the batch',()=>{assert.equal(CARD_BATCH_SIZE,10);let page={scope:'all',count:10};for(const n of [20,30]){page={scope:'all',count:browseLimit('all',page)+CARD_BATCH_SIZE};assert.equal(page.count,n)}assert.equal(browseLimit('coffee',page),10);assert.equal(browseLimit('all',page),30)});
 test('all three filtered browse lists use the same control',()=>{for(const page of ['PlacezBrowse','Scenez','OutzidePlacesPage']){const s=fs.readFileSync(`client/src/pages/${page}.tsx`,'utf8');assert.match(s,/<CardBrowse/);assert.match(s,/scope=\{JSON.stringify/);assert.match(s,/"use memo"/)} });
 test('exact native dimensions and two-column default are preserved',()=>{const slots=fs.readFileSync('client/src/components/places/LockedCardSlot.tsx','utf8');assert.match(slots,/small:\[136,170\]/);assert.match(slots,/wide:\[360,216\]/);const css=fs.readFileSync('client/src/components/places/CardBrowse.css','utf8');assert.match(css,/repeat\(2,minmax\(0,136px\)\)/);assert.match(css,/data-card-view=wide/);assert.doesNotMatch(css,/@media/)});
+test('native SceneZ compact counters do not rely on the missing demo wrapper',()=>{
+ const css=readFileSync(new URL('../client/src/components/scenez/nativeOverrides.css',import.meta.url),'utf8');
+ assert.match(css,/\.pz-card--small\.page-scenez \.pz-actions:has\(\.card-counter\)\{left:8px;right:46px/);
+ assert.match(css,/\.pz-card--small\.page-scenez \.pz-actions \.card-counter\{flex:1 1 0;min-width:0/);
+});
