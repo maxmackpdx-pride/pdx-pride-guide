@@ -24,6 +24,10 @@ for(const size of ['small','tall','square','wide-map','expanded'])for(const phot
  const face=size==='expanded'?createElement('article',{className:'pz-card pz-card--expanded'},createElement(Art,{c})):createElement(Closed,{c,size,open:()=>{},toggle:()=>{}});
  cases.push({id,size,photo,logo,html:renderToStaticMarkup(face)});
 }
+for(const hasEvent of [false,true]){
+ const c={id:'full-name-fixture',page:'scenez',name:'PDX PAH - Portland Pets & Handlers',kind:'Scene',short:'North Portland',color:'#ffffff',logo:'/directory-logos/pdxpahportlandpetsandhandlers-white.svg',events:hasEvent?[{title:'GAYMENIGHT',dateStart:'2026-11-17T12:00:00Z'}]:[]};
+ cases.push({id:`square-full-name-event${Number(hasEvent)}`,size:'square',photo:false,logo:true,html:renderToStaticMarkup(createElement(Closed,{c,size:'square',open:()=>{},toggle:()=>{}}))});
+}
 const fonts="@font-face{font-family:Barlow;src:url('/__fonts/barlow-latin-400-normal.woff2')}@font-face{font-family:'Barlow Condensed';font-weight:800;src:url('/__fonts/barlow-condensed-latin-800-normal.woff2')}";
 const html=`<!doctype html><link rel="stylesheet" href="/fixture.css"><style>${fonts}body{background:#101418;margin:24px}.case{margin:20px 0 40px;width:max-content}label{display:block;color:white;font:14px sans-serif;margin-bottom:10px}</style><main class="scenez-native">${cases.map(c=>`<section class="case" id="${c.id}"><label>${c.id} / test fixture</label>${c.html}</section>`).join('')}</main>`;
 await writeFile(path.join(out,'fixture.html'),html);
