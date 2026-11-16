@@ -160,7 +160,7 @@
 .oz-card.oz-square .oz-identity{bottom:74px;left:14px;right:14px}.oz-card.oz-square .oz-identity h3{font-size:27px;line-height:.95;margin:5px 0}.oz-card.oz-square .oz-identity small{font-size:8px}.oz-card.oz-square .oz-identity p{font-size:10px}.oz-card.oz-square .oz-details{background:var(--places-art-ink-090b0bc9)}
 .oz-card.oz-small .oz-identity{top:auto;bottom:47px;left:9px;right:8px}.oz-card.oz-small .oz-identity small{font-size:5.5px;letter-spacing:0}.oz-card.oz-small .oz-identity h3{font-size:17px;line-height:.96;margin:5px 0}.oz-card.oz-small .oz-identity p{font-size:7px;letter-spacing:0;padding-left:4px}
 .oz-card.oz-wide-map .oz-identity{top:24px;left:46%;right:31px}.oz-card.oz-wide-map .oz-identity h3{font-size:22px;line-height:.96}.oz-card.oz-wide-map .oz-identity small{font-size:7px;letter-spacing:.03em}.oz-card.oz-wide-map .oz-identity p{font-size:9px}
-.oz-counter--buddy{border-color:var(--oz-category)!important}.oz-counter--buddy small{color:var(--oz-category)}
+.oz-counter--buddy{border-color:var(--neon-green)!important}.oz-counter--buddy small{color:var(--neon-green)}
 .oz-card.oz-wide-map .oz-counter{flex-basis:43px;min-width:0}.oz-counter--buddy small{font-size:7px!important;white-space:nowrap}
 .oz-card.oz-wide-map .oz-details{padding:5px;font-size:11px!important;min-width:0}
 .oz-expanded-counters{display:flex;align-items:stretch;gap:8px;margin:12px 0 4px}.oz-expanded-counters .oz-counter{flex:1;padding:6px}.oz-expanded-counters .oz-demo-label{align-self:center;font:600 8px Barlow;color:var(--places-art-ink-a6a399)}
@@ -183,3 +183,8 @@
 /* Optional artwork framing only affects landscape layouts; other crops keep their defaults. */
 .oz-topographic.oz-wide-map .oz-source-photo{object-position:var(--oz-landscape-position,35% 50%);}
 .outz-native-expanded-hero .oz-source-photo{object-position:var(--oz-landscape-position,50% 50%);}
+
+/* Outzide setup alignment (founder rulings, Nov 16 2026): counter labels carry their intent color (Carpool orange; Mizzed magenta and Buddy Finder green ride their modifier rules above). */
+.oz-counter small{color:var(--oz-orange)}
+/* Tall: dark gradient over the bottom 25% of the image (founder ruling, Nov 16 2026). */
+.oz-card.oz-tall .oz-hero::before{content:'';position:absolute;left:0;right:0;bottom:0;height:25%;background:linear-gradient(180deg,rgba(3,5,7,0),rgba(3,5,7,.92));z-index:1;pointer-events:none}
