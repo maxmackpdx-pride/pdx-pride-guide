@@ -15,3 +15,11 @@
 .zay-card-expanded .pz-native-expanded .pz-page-panel[aria-hidden=true],.zay-card-expanded .scene-native-dialog .swipe-pages>section[data-active=false]{height:0;padding-block:0;overflow:hidden}
 .zay-card-expanded .outz-native-sections{flex:none;min-height:0;overflow:visible;overscroll-behavior:auto}
 .zay-card-expanded .outz-native-expanded-hero{height:clamp(160px,35vw,300px)}
+
+/* The destinations browse route shares a map-shell class, but its open cards
+   need document scroll clearance. Leave actual map canvases unchanged. */
+@media(max-width:959px){
+  body:has(.z-mobile-dock) .app-shell.app-shell--map-surface:has(.outz-native-page .zay-card-expanded)>main{
+    padding-bottom:calc(var(--site-mobile-nav-height,82px) + var(--site-mobile-nav-offset,8px) + env(safe-area-inset-bottom,0px) + 16px);
+  }
+}
