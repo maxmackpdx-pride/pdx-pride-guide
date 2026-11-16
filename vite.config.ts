@@ -26,13 +26,19 @@ export default defineConfig(({ command }):UserConfig => {
     react(),
     // Exact compiler scope: Eventz/Boardz and the reviewed six-PlaceZ presentation
     // cohort. The shared scope also drives optimized off/on comparison builds.
-    // Keep Resources, shared CardAPI, pages, auth, consent, modal
+    // Keep Resources, shared CardAPI, other pages, auth, consent, modal
     // controllers, Mapz and profiling harness uncompiled. Revalidate every
     // revision against balanced Chromium/WebKit and release approval gates.
     babel({
       presets: [reactCompilerPreset({ compilationMode: "infer" })],
       include: cardSourcePatterns,
       exclude: cardCompilerExcludedPatterns,
+    }),
+    // Only the three new landing-page functions opt in. Inline modal and
+    // mutation controllers stay outside compiler scope unless separately reviewed.
+    babel({
+      presets: [reactCompilerPreset({ compilationMode: "annotation" })],
+      include: /[\\/]client[\\/]src[\\/]pages[\\/](?:PlacezBrowse|Scenez|OutzidePlacesPage)\.tsx$/,
     }),
     {
       name: "version-home-flight-assets",

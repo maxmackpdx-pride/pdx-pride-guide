@@ -18,6 +18,7 @@ const group=(p:Business)=>p.type==='cafe'?'coffee':p.type==='restaurant'?'food':
 const DISCOVER_ORDER=[5,30,2,3,31,23,9];
 const adult=(p:Business)=>/\b(adult|21\+|strip|sex club)\b/i.test(`${p.description} ${p.name}`);
 export default function PlacezBrowse(){
+ "use memo";
  const rail=useRef<HTMLDivElement>(null);const [query,setQuery]=useState(''),[filter,setFilter]=useState(''),[stack,setStack]=useState(''),[tab,setTab]=useState('places'),[auth,setAuth]=useState(false),[active,setActive]=useState<Business|null>(null),[limit,setLimit]=useState(24);
  const result=useQuery<Business[]>({queryKey:['/api/directory'],queryFn:()=>apiRequest('GET','/api/directory').then(r=>r.json()),staleTime:60000,refetchOnMount:'always'});
  const detail=useQuery<Business>({queryKey:['/api/directory',active?.id],queryFn:()=>apiRequest('GET',`/api/directory/${active!.id}`).then(r=>r.json()),enabled:!!active,staleTime:30000});
