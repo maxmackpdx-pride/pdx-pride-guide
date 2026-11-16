@@ -81,3 +81,10 @@
  .pl-production .pl-search input{font-size:18px}
  .pl-production .pl-filters{margin-top:20px;gap:12px}
 }
+
+
+/* Selected direction 2: original zine artwork, centered composition. */
+.pl-production .pl-centered-hero{display:flex;flex-direction:column;max-width:1200px;padding:0;overflow:visible}
+.pl-production .pl-centered-hero__art{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:1672/941;object-fit:contain;position:relative;z-index:1}
+.pl-production .pl-centered-hero>.places-page-switch{margin:0 auto;padding:0 5% 0;position:relative;z-index:2}
+@media(max-width:600px){.pl-production .pl-centered-hero>.places-page-switch{margin:0 auto;padding:0 5%}.pl-production .pl-centered-hero__art{width:100%;height:auto;max-height:none;object-fit:contain}}
