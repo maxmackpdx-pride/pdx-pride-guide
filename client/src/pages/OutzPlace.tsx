@@ -1,8 +1,9 @@
+import {outzBoardIntent} from '@/lib/outzBoardPost';
 import {OutzPhoto,type OutzPhotoData} from '@/components/outz/OutzPhoto';
 import { ArrowUpRight } from "lucide-react";
 import { TriangleAlert } from "lucide-react";
 import PageRecovery from "@/components/PageRecovery";
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRoute } from "wouter";
 import { Bell, ExternalLink, Lock, MapPin, MessageCircle, Star, TentTree } from "lucide-react";
@@ -83,7 +84,7 @@ function formatChatClose(expiresAt: string | null) {
   return hours > 0 ? `Open for ${hours}h more` : "Open for less than an hour";
 }
 
-export default function OutzPlace({placeSlug, embedded = false}: {placeSlug?: string; embedded?: boolean} = {}) {
+export default function OutzPlace({placeSlug, embedded = false, boardIntent = null}: {placeSlug?: string; embedded?: boolean; boardIntent?: 'ride'|'missed'|'buddy'|null} = {}) {
   const [, params] = useRoute("/outzide/:placeSlug");
   const slug = placeSlug ?? params?.placeSlug;
   const incidentalMap = useIncidentalMap(true, slug ?? "outz");
@@ -100,6 +101,7 @@ export default function OutzPlace({placeSlug, embedded = false}: {placeSlug?: st
   const [message, setMessage] = useState("");
   const [postKind, setPostKind] = useState<WallPost["postKind"]>("LOOKING_FOR_COMPANY");
   const [postBody, setPostBody] = useState("");
+  useEffect(()=>{if(boardIntent)setPostKind(boardIntent==='ride'?'CARPOOL_REQUEST':boardIntent==='missed'?'MISSED_CONNECTION':'LOOKING_FOR_COMPANY');},[boardIntent]);
   const [editingWallPost, setEditingWallPost] = useState<number | null>(null);
   const [editWallBody, setEditWallBody] = useState("");
   const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>({});
@@ -159,6 +161,7 @@ export default function OutzPlace({placeSlug, embedded = false}: {placeSlug?: st
     queryFn: () => apiRequest("GET", `/api/outz/wall?place=${encodeURIComponent(placeId!)}`).then(r => r.json()),
     enabled: Boolean(placeId),
   });
+  const visibleWallPosts=(wallQuery.data||[]).filter(post=>!boardIntent||outzBoardIntent(post.postKind)===boardIntent);
   const followKey = ["/api/outz/follow", placeId,user?.id] as const;
   const followQuery = useQuery<{ isFollowing: boolean }>({
     queryKey: followKey,
@@ -423,13 +426,13 @@ export default function OutzPlace({placeSlug, embedded = false}: {placeSlug?: st
           <div>
             <div className="outz-wall-composer outz-panel pdx-glass-card pdx-glass-rebind">
               <div className="outz-pillrow outz-pillrow--display outz-pillrow--lime" role="group" aria-label="Post type">
-                {(["LOOKING_FOR_COMPANY", "CARPOOL_OFFER", "CARPOOL_REQUEST", "MISSED_CONNECTION", "TRIP_NOTE"] as const).map(kind => <button type="button" key={kind} className={postKind === kind ? "is-active" : ""} onClick={() => setPostKind(kind)}>{kind.replaceAll("_", " ")}</button>)}
+                {(["LOOKING_FOR_COMPANY", "CARPOOL_OFFER", "CARPOOL_REQUEST", "MISSED_CONNECTION", "TRIP_NOTE"] as const).filter(kind=>!boardIntent||outzBoardIntent(kind)===boardIntent).map(kind => <button type="button" key={kind} className={postKind === kind ? "is-active" : ""} onClick={() => setPostKind(kind)}>{kind.replaceAll("_", " ")}</button>)}
               </div>
-              <label><span className="sr-only">Your destination post</span><textarea value={postBody} maxLength={500} placeholder={postKind.startsWith("CARPOOL") ? "Where are you leaving from, and when?" : postKind === "LOOKING_FOR_COMPANY" ? "What kind of company are you looking for?" : "Share a useful trip note."} onChange={event => setPostBody(event.target.value)} /></label>
+              <label><span className="sr-only">Your destination post</span><textarea value={postBody} maxLength={500} placeholder={postKind.startsWith("CARPOOL") ? "Where are you leaving from, and when?" : postKind === "LOOKING_FOR_COMPANY" ? "What kind of company are you looking for?" : postKind === "MISSED_CONNECTION" ? "Where and when did you cross paths?" : "Share a useful trip note."} onChange={event => setPostBody(event.target.value)} /></label>
               <div className="outz-wall-composer__foot"><span>For {formatBeachCheckinDateLabel(date)}</span><Button variant="solid" accent="lime" size="sm" disabled={createWallPost.isPending || !postBody.trim()} onClick={() => user ? createWallPost.mutate() : setShowAuth(true)}>{createWallPost.isPending ? "POSTING" : "POST TO WALL"}</Button></div>
             </div>
             <div className="outz-wall-feed">
-              {wallQuery.data?.length ? wallQuery.data.map(post => <article className="outz-wall-post outz-panel pdx-glass-card pdx-glass-rebind" key={post.id}>
+              {visibleWallPosts.length ? visibleWallPosts.map(post => <article className="outz-wall-post outz-panel pdx-glass-card pdx-glass-rebind" key={post.id}>
                 <header><span>{post.postKind.replaceAll("_", " ")}</span><time dateTime={post.createdAt}>{post.tripDate ? formatBeachCheckinDateLabel(post.tripDate) : "Trip note"}</time></header>
                 {editingWallPost === post.id ? <form onSubmit={event => { event.preventDefault(); editWallPost.mutate({ id: post.id, body: editWallBody.trim() }); }}>
                   <label><span className="sr-only">Edit your trip post</span><textarea value={editWallBody} maxLength={500} onChange={event => setEditWallBody(event.target.value)} required/></label>
@@ -439,7 +442,7 @@ export default function OutzPlace({placeSlug, embedded = false}: {placeSlug?: st
                 {post.isMine ? <div className="outz-wall-post__actions"><Button size="sm" onClick={() => { setEditingWallPost(post.id); setEditWallBody(post.body); }}>EDIT</Button><Button size="sm" disabled={removeWallPost.isPending} onClick={() => removeWallPost.mutate(post.id)}>REMOVE</Button></div> : null}
                 {post.comments.length ? <div className="outz-wall-post__comments">{post.comments.map(comment => <p key={comment.id}><strong>{comment.isMine ? "You" : comment.displayName || comment.username || "Member"}</strong>{comment.body}</p>)}</div> : null}
                 <form onSubmit={event => { event.preventDefault(); const body = commentDrafts[post.id]?.trim(); if (body) user ? createComment.mutate({ postId: post.id, body }) : setShowAuth(true); }}><label><span className="sr-only">Reply to this post</span><input type="text" value={commentDrafts[post.id] || ""} maxLength={300} placeholder="Reply" onChange={event => setCommentDrafts(current => ({ ...current, [post.id]: event.target.value }))} /></label><Button type="submit" size="sm" disabled={createComment.isPending || !(commentDrafts[post.id] || "").trim()}>REPLY</Button></form>
-              </article>) : <div className="outz-wall-empty">No trip posts yet. Be the one who gets the plan moving.</div>}
+              </article>) : <div className="outz-wall-empty">{wallQuery.isPending?"Loading destination posts…":wallQuery.isError?"Destination posts could not load. Please try again.":boardIntent?"No posts in this category yet.":"No trip posts yet. Be the one who gets the plan moving."}</div>}
             </div>
           </div>
           <aside className="outz-rating outz-panel pdx-glass-card pdx-glass-rebind" aria-labelledby="outz-rating-heading">

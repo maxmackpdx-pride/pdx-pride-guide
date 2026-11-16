@@ -38,3 +38,4 @@ html:has(.outz-native-dialog[open]){scrollbar-gutter:auto;overflow:hidden}.outz-
 .outz-expanded-footer>.pz-heart{position:absolute;right:18px;top:4px;width:44px;height:44px;color:var(--oz-accent)}
 .outz-expanded-footer>.pz-heart button{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--oz-accent);border-radius:50%;background:var(--places-art-ink-080b0d);color:var(--oz-accent)}
 @media(max-height:600px){.outz-native-expanded-hero{height:100px}.outz-expanded-readings,.outz-expanded-freshness{display:none}.outz-expanded-identity{padding-block:3px}.outz-expanded-identity h1{font-size:24px}}
+.outz-wall-intents{display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px}.outz-wall-intents button{padding:8px 10px;border:1px solid var(--places-art-ink-eee8d750);background:transparent;color:inherit;border-radius:6px}.outz-wall-intents button[aria-pressed=true]{border-color:var(--neon-orange);color:var(--neon-orange)}
