@@ -317,13 +317,16 @@ export function attachSpottedAndGigsToBusinesses<T extends Business>(
     eventVenue?: string | null;
     eventAddress?: string | null;
     venueHint?: string | null;
+    isDemo?: boolean;
   }>,
   gigs: Array<{ id: number; title: string; postType: string; createdAt: string; location?: string | null; businessId?: number | null }>,
 ): Array<T & { spotted: DirectorySpottedSummary[]; gigs: DirectoryGigSummary[] }> {
   return businesses.map(business => {
     const spotted = missedConnections
       .filter(mc => {
-        // Prefer linked event venue; also try freeform hint (demo + around-town posts).
+        // PlaceZ's current connections must not present seeded demo posts as real people.
+        if (mc.isDemo === true) return false;
+        // Prefer linked event venue; also try freeform hints for around-town posts.
         if (venueTextMatchesBusiness(mc.eventVenue, business, mc.eventAddress)) return true;
         if (mc.venueHint && venueTextMatchesBusiness(mc.venueHint, business)) return true;
         return false;
