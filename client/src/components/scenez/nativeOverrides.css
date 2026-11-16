@@ -14,3 +14,8 @@
 .scenez-native .pz-card--small.page-scenez .pz-actions .card-counter{flex:1 1 0;min-width:0;height:32px;border-radius:5px}
 .scenez-native .pz-card--small.page-scenez .card-counter b{font-size:14px}
 .scenez-native .pz-card--small.page-scenez .card-counter span{font-size:6px}
+
+/* Owner correction: all small/square faces stay full bleed, with dark ink
+   rising from the bottom. No changes to locked sizes or card chrome. */
+.scenez-native .pz-card.pz-card--small .scene-art,.scenez-native .pz-card.pz-card--square .scene-art{inset:0;width:100%;height:100%}
+.scenez-native .pz-card.pz-card--small .scene-art:after,.scenez-native .pz-card.pz-card--square .scene-art:after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(0deg,var(--pz-ink) 0%,color-mix(in srgb,var(--pz-ink) 92%,transparent) 22%,color-mix(in srgb,var(--pz-ink) 65%,transparent) 45%,transparent 78%)}
