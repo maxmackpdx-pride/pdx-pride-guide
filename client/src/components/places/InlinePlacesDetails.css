@@ -1,0 +1,17 @@
+/* Native PlaceZ, SceneZ and OutZide details use EventZ's source-slot layout.
+   These rules apply only inside CardDetails, leaving closed artwork untouched. */
+.zay-card-expanded :is(.placez-native-dialog,.scene-native-dialog,.outz-native-dialog){position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:none!important;margin:0!important;overflow:visible!important;box-sizing:border-box;outline:none}
+.zay-card-expanded :is(.scene-native-dialog,.outz-native-dialog){border-radius:18px}
+.zay-card-expanded .scene-native-dialog{background:transparent}
+.zay-card-expanded :is(.pz-card.pz-native-expanded,.scene-native-dialog .pz-card--expanded,.outz-native-expanded){height:auto!important;min-height:0!important;max-height:none!important;border-radius:18px;overflow:hidden}
+.zay-card-expanded .pz-native-expanded{--pz-native-art-height:calc(100cqw * var(--pz-expanded-photo-fraction))}
+.zay-card-expanded .pz-native-expanded .pz-art{width:100%;left:0;transform:none}
+.zay-card-expanded .pz-native-header{flex:none;max-height:none;overflow:visible}
+.zay-card-expanded .pz-native-header .place-modal-panel__contacts{max-height:none;overflow:visible}
+.zay-card-expanded .pz-native-expanded>.pz-expanded-pager{flex:none;min-height:0}
+.zay-card-expanded :is(.pz-native-expanded .pz-page-viewport,.scene-native-dialog .swipe-pages){flex:none;align-items:flex-start;min-height:0;height:auto}
+.zay-card-expanded :is(.pz-native-expanded .pz-page-panel,.scene-native-dialog .swipe-pages>section){height:auto;max-height:none;overflow:visible;overscroll-behavior:auto;box-sizing:border-box}
+/* Inactive horizontal pages keep their width/snap target, not their height. */
+.zay-card-expanded .pz-native-expanded .pz-page-panel[aria-hidden=true],.zay-card-expanded .scene-native-dialog .swipe-pages>section[data-active=false]{height:0;padding-block:0;overflow:hidden}
+.zay-card-expanded .outz-native-sections{flex:none;min-height:0;overflow:visible;overscroll-behavior:auto}
+.zay-card-expanded .outz-native-expanded-hero{height:clamp(160px,35vw,300px)}
