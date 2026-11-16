@@ -148,5 +148,15 @@
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and transparent orange torn-paper edge. Historical view from 2011, not current snow or conditions.",
     "qa": "Independent source/style, three-background alpha-renderer, all four native card size crops and expanded hero checks passed",
     "sha256": "2cc11ef6e8eb1fdb7f456faf3351088f514605df650dbec2b6ed2a51f5cccfd7"
+  },
+  "winter-hoodoo": {
+    "author": "Bonnie Moreland",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hayrick_Butte_and_Hoodoo_ski_area,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+    "license": "Public Domain Mark 1.0 (author Flickr release, not CC0)",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+    "src": "/outzide-native/batch1/hoodoo-screenprint-v2.png",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/purple accents, terrain-conforming mesh and transparent orange torn-paper edge. Historical winter view from January 2025, not current snow or conditions.",
+    "qa": "Independent source/style and raw alpha passed; actual native crops pending",
+    "sha256": "56e776519011a398eaed3678f5d53c8364b88ce4d12f90ae734d69f057c21fad"
   }
 }
