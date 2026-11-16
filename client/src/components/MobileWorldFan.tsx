@@ -42,8 +42,8 @@ const PLACES: World[] = PLACES_NAV.map((item, index) => ({
   descriptor: ["VENUES & BUSINESSES", "CLUBS · COLLECTIVES · ORGS", "GET OUTSIDE"][index],
   accent: ["var(--neon-cyan)", "var(--neon-violet)", "var(--neon-orange)"][index],
   Icon: [MapPin, UsersRound, Mountain][index],
-  x: ["20%", "50%", "80%"][index], y: index === 1 ? 54 : 12, delay: index === 1 ? 0 : 42,
-}));
+  x: ["50%", "20%", "80%"][index], y: index === 0 ? 54 : 12, delay: index === 0 ? 0 : 42,
+})).sort((a, b) => parseFloat(a.x) - parseFloat(b.x));
 
 export default function MobileWorldFan({ open, onClose, onNavigate, kind = "maps" }: {
   kind?: "maps" | "places";
