@@ -7,6 +7,16 @@ const publicFile = new URL("../client/public/card-art/motif-recipes.json", impor
 const prefix = "// Checked snapshot of the published Foundation API. Refresh with npm exec tsx script/sync-motif-recipes.ts.\nexport default ";
 
 export async function syncMotifRecipes() {
+  const useCheckedSnapshot = async () => {
+    const saved = await readFile(file, "utf8");
+    if (!saved.startsWith(prefix)) throw new Error("Invalid checked motif snapshot prefix");
+    const recipes = parseMotifRecipes(JSON.parse(saved.slice(prefix.length).trim().replace(/;$/, "")));
+    await writeFile(publicFile, `${JSON.stringify(recipes, null, 2)}\n`);
+    return recipes.release;
+  };
+  // Explicit local-only build mode. Never attempts a network request; invalid
+  // checked input fails rather than quietly producing an unverified snapshot.
+  if (process.env.BUILD_OFFLINE === "1") return useCheckedSnapshot();
   try {
     const response = await fetch(MOTIF_RECIPES_URL, { signal: AbortSignal.timeout(10000) });
     if (!response.ok) throw new Error(`Foundation motif API returned ${response.status}`);
@@ -15,12 +25,9 @@ export async function syncMotifRecipes() {
     await writeFile(publicFile, `${JSON.stringify(recipes, null, 2)}\n`);
     return recipes.release;
   } catch (error) {
-    const saved = await readFile(file, "utf8");
-    if (!saved.startsWith(prefix)) throw error;
-    const recipes = parseMotifRecipes(JSON.parse(saved.slice(prefix.length).trim().replace(/;$/, "")));
-    await writeFile(publicFile, `${JSON.stringify(recipes, null, 2)}\n`);
-    console.warn("Foundation motif refresh unavailable; using checked snapshot", recipes.release);
-    return recipes.release;
+    const release = await useCheckedSnapshot();
+    console.warn("Foundation motif refresh unavailable; using checked snapshot", release);
+    return release;
   }
 }
 
