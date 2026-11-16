@@ -103,7 +103,7 @@
     "license": "CC BY-SA 3.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
     "changes": "AI-assisted Xerox screenprint adaptation: orange/category-color accents, terrain-conforming mesh, water contours and transparent torn-paper edge. Historical view from 2010, not current conditions.",
-    "qa": "Independent source/style and alpha-channel checks passed; native four-size crops and expanded renderer QA pending",
+    "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
     "sha256": "ab484c571e039dab3c08debf16e0b801157da005c24c9985b727fea8ed8bfe69",
     "derivativeLicense": "CC BY-SA 3.0"
   },
@@ -114,7 +114,7 @@
     "license": "CC BY 2.0",
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
     "changes": "AI-assisted Xerox screenprint adaptation: orange/category-color accents, terrain-conforming mesh, water contours and transparent torn-paper edge. Historical view from 2011, not current conditions.",
-    "qa": "Independent source/style and alpha-channel checks passed; native four-size crops and expanded renderer QA pending",
+    "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
     "sha256": "40590f3c1a500fed994a15bc6b2fc2fa99bd6d4e8f70723e48e9ca781cbe2a7a"
   }
 }
