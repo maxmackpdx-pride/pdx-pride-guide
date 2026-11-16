@@ -30,7 +30,7 @@ test('real Home cards and EventModal retain geometry/DPR delivery; failed varian
    const screenshot={scale:'css',width:screenshotInfo.width,height:screenshotInfo.height,bytes:screenshotBytes.length};
    const transfers=await page.evaluate(()=>performance.getEntriesByType('resource').filter(r=>r.initiatorType==='img').map(r=>({url:r.name,encodedBytes:r.encodedBodySize,transferBytes:r.transferSize})));
    const record={dpr,original,source,tall,wide,detail,transfers,errors,screenshot};results.push(record);assert.deepEqual(errors,[]);
-   if(original)baseline=record;else{for(const k of ['tall','wide','detail'])for(const d of ['width','height'])assert.ok(Math.abs(record[k][d]-baseline[k][d])<.2,`${k} ${d} changed`);assert.match(tall.currentSrc,/\/api\/poster-variants\/image\/.*-640\.webp$/);assert.match(wide.currentSrc,/\/api\/poster-variants\/image\/.*-640\.webp$/);assert.ok(detail.naturalWidth>0);assert.match(detail.currentSrc,new RegExp(`/api/poster-variants/image/.*-${dpr===1?640:1280}\\.webp$`));}
+   if(original)baseline=record;else{for(const k of ['tall','wide','detail'])for(const d of ['width','height'])assert.ok(Math.abs(record[k][d]-baseline[k][d])<.2,`${k} ${d} changed`);assert.match(tall.currentSrc,/\/api\/poster-variants\/image\/.*-640\.webp$/);assert.match(wide.currentSrc,new RegExp(`/api/poster-variants/image/.*-${dpr===1?640:1280}\\.webp$`));assert.ok(detail.naturalWidth>0);assert.match(detail.currentSrc,new RegExp(`/api/poster-variants/image/.*-${dpr===1?640:1280}\\.webp$`));}
    await context.close();
   }}
   for(const mode of ['delayed','error','timeout','unknown','offline']){

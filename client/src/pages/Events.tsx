@@ -36,7 +36,7 @@ import BoardFollowButton from "@/components/BoardFollowButton";
 import ScrollReveal from "@/components/ScrollReveal";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import EventTypeTag from "../components/EventTypeTag";
-import EventModal from "../components/EventModal";
+import EventzExpanded from "../components/events/EventzExpanded";
 import type { EventModalOriginRect } from "../components/EventModal";
 import Schedule from "@/pages/Schedule";
 import ScheduleCard from "@/components/ScheduleCard";
@@ -1171,11 +1171,12 @@ export default function Events() {
 
       {showSaveAuth && <AuthModal onClose={() => setShowSaveAuth(false)} />}
       {selectedEvent && (
-        <EventModal
+        <EventzExpanded
           event={selectedEvent}
           onClose={closeEvent}
           onEventUpdated={updated => setSelectedEvent(updated)}
           originRect={eventOriginRect}
+          onOpenEvent={listing => openEvent(listing)}
         />
       )}
 

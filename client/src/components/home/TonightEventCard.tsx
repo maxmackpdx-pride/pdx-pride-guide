@@ -7,15 +7,19 @@ import { dayAccentToken, dayComplementToken } from "@/lib/dsColors";
 import type { ScheduleEvent } from "@/lib/scheduleEvents";
 import type { EventListing } from "@shared/multiDayEvents";
 import { formatCardTime, formatGridCardWhen, listingDay, listingPosterUrl } from "@/lib/dsEvent";
+import { formatPacificDateTime } from "@/lib/countdown";
+import { parsePacificDateTime } from "@shared/missedConnections";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import "./TonightEventCard.css";
-import DayMotif, { motifDay } from "@/components/events/DayMotif";
+import "../events/EventzFaces.css";
 import EventFlyerArt from "@/components/events/EventFlyerArt";
-import EventFallbackLogo from "@/components/events/EventFallbackLogo";
 import RailShareButton from "./RailShareButton";
 import { eventPath } from "@shared/eventSlug";
 import ZLineIcon from "@/components/ZLineIcon";
 import { ChangeBadge } from "@/components/ds/ChangeBadge";
 import { CardArtworkGlass } from '../CardArtworkGlass';
+import { CardHeartButton } from "@/components/CardHeartButton";
 
 const CHANGE_WINDOW_MS = 14 * 86400000;
 
@@ -49,6 +53,53 @@ export function LiveBadge({ live }: { live: TonightCardLive }) {
   );
 }
 
+/**
+ * Tall-face countdown, styled after the Placez NextEventCountdown: an accent
+ * "Starts in" label, big tabular digits (days / hrs / min) and the date line.
+ * Renders nothing once the event has started (the live badge takes over).
+ */
+export function EventStartsIn({ listing }: { listing: EventListing }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 30000);
+    return () => window.clearInterval(id);
+  }, []);
+  const startMs = parsePacificDateTime(listing.dateStart);
+  if (startMs == null) return null;
+  const remaining = startMs - now;
+  if (remaining <= 0) return null;
+  const days = Math.floor(remaining / 86400000);
+  const hours = Math.floor((remaining % 86400000) / 3600000);
+  const minutes = Math.floor((remaining % 3600000) / 60000);
+  const units: Array<[number, string]> = [[days, "days"], [hours, "hrs"], [minutes, "min"]];
+  return (
+    <section className="evz-countdown" aria-label={`Starts in ${days} days, ${hours} hours, ${minutes} minutes`}>
+      <p className="evz-countdown__label">Starts in</p>
+      <div className="evz-countdown__digits" aria-hidden="true">
+        {units.map(([value, unit]) => (
+          <span key={unit}><strong>{pad2(value)}</strong><small>{unit}</small></span>
+        ))}
+      </div>
+      <time dateTime={listing.dateStart}>{formatPacificDateTime(listing.dateStart, { weekday: "short", month: "short", day: "numeric" })} · {formatCardTime(listing)}</time>
+    </section>
+  );
+}
+
+/** Wide face's only counter: Gigz at the event's venue, from the detail payload. Unknown reads as a dash until it lands. */
+function GigzCounter({ eventId }: { eventId: number }) {
+  const { data } = useQuery<{ gigs?: unknown[] }>({
+    queryKey: ["/api/events", eventId, "detail"],
+    queryFn: () => apiRequest("GET", `/api/events/${eventId}/detail`).then((r) => r.json()),
+    staleTime: 300_000,
+  });
+  const count = Array.isArray(data?.gigs) ? data.gigs.length : null;
+  return (
+    <span className="evz-count" aria-label={count == null ? "Gigz count loading" : `${count} Gigz at this venue`}>
+      <strong>{count == null ? "–" : pad2(count)}</strong><span>Gigz</span>
+    </span>
+  );
+}
+
 export type TonightEventCardProps = {
   event?: ScheduleEvent;
   listing: EventListing;
@@ -56,7 +107,7 @@ export type TonightEventCardProps = {
   onToggleRsvp: (eventId: number) => void;
   onOpen: (listing: EventListing) => void;
   liveState?: TonightCardLive | null;
-  /** "card" (default): the fixed-size big event card. "row": the list-view row. */
+  /** "card" (default): the fixed-size big event card. "row": the wide full-bleed card. */
   layout?: "card" | "row";
 };
 
@@ -69,29 +120,62 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
   const poster = listingPosterUrl(listing);
   // Flyer accent (QSearch flyer-accent system) drives the card's color when set; the day accent is the fallback.
   const flyerAccent = (listing as { accentColor?: string | null }).accentColor || null;
+  const accent = flyerAccent ?? dayAccentToken(listingDay(listing));
   const age = listing.ageRequirement === "21_PLUS" ? "21+" : listing.ageRequirement === "18_PLUS" ? "18+" : "All ages";
-  return <CardMorph name={cardMorphName(["event", listing.id, layout])}><article data-card-size={layout === "row" ? "wide" : "tall"} data-card-category={"eventz"} onClickCapture={rememberCardOrigin} className={`tonight-card tonight-card--${layout} pdx-glass-card pdx-glass-rebind`} style={{ "--c": flyerAccent ?? dayAccentToken(listingDay(listing)), "--card-secondary-override": dayComplementToken(listingDay(listing)), "--dir-gm": 8 } as CSSProperties}>
-    {poster
-      ? <DayMotif day={listingDay(listing)} placement="card" />
-      : <DayMotif day={listingDay(listing)} placement="art" className="tonight-card__motif-fill" />}
-    <CardArtworkGlass />
+  const toggleSave = (click: { stopPropagation: () => void }) => {
+    click.stopPropagation();
+    const next = !rsvped;
+    startTransition(() => { setSaved(next); });
+    onToggleRsvp(listing.id);
+  };
+  const open = (click: { currentTarget: EventTarget | null }) => openCardFromEvent(click, () => onOpen(listing));
+
+  if (layout === "row") {
+    return <CardMorph name={cardMorphName(["event", listing.id, layout])}><article data-card-size="wide" data-card-category={"eventz"} onClickCapture={rememberCardOrigin} className="evz-face evz-face--wide pdx-glass-rebind" style={{ "--c": accent, "--ac": accent, "--card-secondary-override": dayComplementToken(listingDay(listing)) } as CSSProperties}>
+      <button className="tonight-card__open evz-face__open" type="button" onClick={open} aria-label={`Open ${listing.title}`}>
+        <span className="tonight-card__art evz-wide__art">
+          <EventFlyerArt src={poster} day={listingDay(listing)} title={listing.title} venueName={listing.venueName} sizes="360px" />
+          <CardArtworkGlass />
+        </span>
+        <span className="evz-wide__scrim">
+          <span className="tonight-card__body evz-wide__id">
+            {changeLabel ? <ChangeBadge label={changeLabel} className="evz-wide__change" /> : null}
+            <h3 className="evz-wide__title">{listing.title}</h3>
+            <span className="evz-wide__meta">{event ? `${clock.format(event.startMs)} to ${clock.format(event.endMs)}` : formatGridCardWhen(listing)} · {listing.venueName}</span>
+          </span>
+          <GigzCounter eventId={listing.id} />
+        </span>
+      </button>
+      {liveState ? <LiveBadge live={liveState} /> : null}
+      <CardHeartButton active={saved}
+        className="evz-wide__save"
+        aria-pressed={saved}
+        aria-label={`${saved ? "Remove" : "Add"} ${listing.title} ${saved ? "from" : "to"} my schedule`}
+        onClick={toggleSave}
+      />
+    </article></CardMorph>;
+  }
+
+  return <CardMorph name={cardMorphName(["event", listing.id, layout])}><article data-card-size="tall" data-card-category={"eventz"} onClickCapture={rememberCardOrigin} className="evz-face evz-face--tall pdx-glass-rebind" style={{ "--c": accent, "--ac": accent, "--card-secondary-override": dayComplementToken(listingDay(listing)) } as CSSProperties}>
     <RailShareButton href={eventPath(listing.id, listing.title, listing.dayOfWeek)} title={listing.title} />
     {liveState ? <LiveBadge live={liveState} /> : null}
-    <div className="tonight-card__sheen pdx-glass-sheen--specular" aria-hidden="true" />
-    <button className="tonight-card__open" type="button" onClick={(click) => openCardFromEvent(click, () => onOpen(listing))} aria-label={`Open ${listing.title}`}>
-      <div className={`tonight-card__art tonight-card__art--flyer${poster ? "" : " tonight-card__art--motif"}`}>{poster ? <EventFlyerArt src={poster} day={listingDay(listing)} backdrop={false} sizes={layout === "row" ? "144px" : "200px"} /> : <><i className="day-motif-code">{motifDay(listingDay(listing))}</i><EventFallbackLogo title={listing.title} venueName={listing.venueName} /></>}</div>
-      <div className="tonight-card__body">
-        <p className="rail-card-room"><img className="rail-card-room__logo rail-card-room__logo--white" src="/brand/family/eventz.png" alt="Eventz" /></p>
-        {changeLabel ? <ChangeBadge label={changeLabel} className="tonight-card__change" /> : null}
-        <p className="tonight-card__time"><Clock3 size={15} aria-hidden="true" />{event ? `${clock.format(event.startMs)} to ${clock.format(event.endMs)}` : layout === "card" ? formatCardTime(listing) : formatGridCardWhen(listing)}</p>
+    <button className="tonight-card__open evz-face__open" type="button" onClick={open} aria-label={`Open ${listing.title}`}>
+      <span className="tonight-card__art evz-tall__art">
+        <EventFlyerArt src={poster} day={listingDay(listing)} title={listing.title} venueName={listing.venueName} sizes="200px" />
+        <CardArtworkGlass />
+        {liveState ? null : <EventStartsIn listing={listing} />}
+      </span>
+      <span className="tonight-card__body evz-tall__body">
+        {changeLabel ? <ChangeBadge label={changeLabel} className="evz-tall__change" /> : null}
         <h3 title={listing.title}>{listing.title}</h3>
-        <p className="tonight-card__venue"><MapPin size={16} aria-hidden="true" /><span>{listing.venueName}<small>{listing.neighborhood || "Portland"}</small></span></p>
-        <div className="tonight-card__tags"><span>{admission}</span><span>{age}</span></div>
-      </div>
+        <span className="evz-tall__venue"><MapPin size={15} aria-hidden="true" /><span>{listing.venueName}<small>{listing.neighborhood || "Portland"}</small></span></span>
+        <span className="evz-tall__time"><Clock3 size={14} aria-hidden="true" />{event ? `${clock.format(event.startMs)} to ${clock.format(event.endMs)}` : formatCardTime(listing)}</span>
+        <span className="evz-tall__tags"><span>{admission}</span><span>{age}</span></span>
+      </span>
     </button>
-    <footer className="tonight-card__footer">
-      <button type="button" className="tonight-card__save" aria-pressed={saved} aria-label={`${saved ? "Remove" : "Add"} ${listing.title} ${saved ? "from" : "to"} my schedule`} onClick={(click) => { click.stopPropagation(); const next = !rsvped; startTransition(() => { setSaved(next); }); onToggleRsvp(listing.id); }}><ZLineIcon name="favorite" size={18} filled={saved} />{saved ? "Saved" : "Save"}</button>
-      <button type="button" className="tonight-card__view" onClick={(click) => openCardFromEvent(click, () => onOpen(listing))} aria-label={`View ${listing.title}`}>View event <ArrowUpRight size={17} aria-hidden="true" /></button>
+    <footer className="evz-tall__actions">
+      <button type="button" className="evz-tall__details" onClick={open} aria-label={`View ${listing.title}`}>View event <ArrowUpRight size={16} aria-hidden="true" /></button>
+      <button type="button" className="evz-tall__heart" aria-pressed={saved} aria-label={`${saved ? "Remove" : "Add"} ${listing.title} ${saved ? "from" : "to"} my schedule`} onClick={toggleSave}><ZLineIcon name="favorite" size={18} filled={saved} /></button>
     </footer>
   </article></CardMorph>;
 }
