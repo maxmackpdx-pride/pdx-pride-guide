@@ -39,3 +39,32 @@ html:has(.outz-native-dialog[open]){scrollbar-gutter:auto;overflow:hidden}.outz-
 .outz-expanded-footer>.pz-heart button{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--oz-accent);border-radius:50%;background:var(--places-art-ink-080b0d);color:var(--oz-accent)}
 @media(max-height:600px){.outz-native-expanded-hero{height:100px}.outz-expanded-readings,.outz-expanded-freshness{display:none}.outz-expanded-identity{padding-block:3px}.outz-expanded-identity h1{font-size:24px}}
 .outz-wall-intents{display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px}.outz-wall-intents button{padding:8px 10px;border:1px solid var(--places-art-ink-eee8d750);background:transparent;color:inherit;border-radius:6px}.outz-wall-intents button[aria-pressed=true]{border-color:var(--neon-orange);color:var(--neon-orange)}
+
+/* Owner screenshot parity: compact selector overlaps the existing collage.
+   Scoped to OutZide; closed-card dimensions and other page switches are untouched. */
+.outz-native-page .ol-hero{position:relative;padding-top:8px}
+.outz-native-page .ol-full-logo{width:72%;margin-bottom:0}
+.outz-native-page .places-page-switch--compact{position:absolute;top:clamp(84px,24vw,190px);left:12%;width:76%;margin:0;z-index:3;padding:0}
+.outz-native-page .places-page-switch--compact>div{display:flex;padding:2px;border:1px solid var(--ol-paper);border-radius:28px;background:var(--places-art-ink-080b0d);box-shadow:0 0 6px color-mix(in srgb,var(--neon-orange) 25%,transparent)}
+.outz-native-page .places-page-switch--compact a{flex:1;min-width:0;padding:6px 3px;border-radius:22px;font:900 14px/1 'Barlow Condensed',sans-serif;text-transform:uppercase;color:var(--ol-paper)}
+.outz-native-page .places-page-switch--compact a>span:last-child{display:flex;gap:6px;align-items:center;justify-content:center;white-space:nowrap;position:relative}
+.outz-native-page .places-page-switch--compact svg{width:17px;height:17px;flex:none}
+.outz-native-page .places-page-switch--compact a.is-active{color:var(--neon-orange)}
+.outz-native-page .places-page-switch--compact .places-page-switch__active{border:1px solid var(--neon-orange);background:transparent;box-shadow:0 0 5px color-mix(in srgb,var(--neon-orange) 25%,transparent)}
+.outz-native-page .ol-landscape{margin-top:-4px;aspect-ratio:682/400;background-position:center 25.1%}
+.outz-native-page .ol-body{padding-top:12px}
+.outz-native-page .ol-search{padding:6px 7px 6px 14px;gap:12px;border-radius:17px;min-height:50px}
+.outz-native-page .ol-search>svg{width:24px;height:24px;flex:none}
+.outz-native-page .ol-search input{min-width:0;flex:1;font:900 clamp(12px,3.4vw,18px)/1 'Barlow Condensed',sans-serif;text-transform:uppercase}
+.outz-native-page .ol-search input::placeholder{color:var(--ol-paper);opacity:1}
+.outz-native-page .ol-search button{width:42px;height:38px;flex:none;display:grid;place-items:center;background:var(--neon-orange);color:var(--places-art-ink-080b0d);border:0;clip-path:polygon(7% 0,100% 2%,95% 100%,0 96%);cursor:pointer}
+.outz-native-page .ol-search button svg{width:24px;height:24px}
+.outz-native-page .ol-map-link{display:flex;justify-content:flex-end;align-items:center;gap:3px;margin:8px 0 18px;color:var(--neon-orange);font:800 12px/1.2 'Barlow Condensed',sans-serif;text-decoration:none}
+.outz-native-page .ol-map-link svg{width:10px;height:10px}
+.outz-native-page .ol-discover-heading{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:14px 0 4px}
+.outz-native-page .ol-discover-heading h2{margin:0;gap:12px;font-size:25px}
+.outz-native-page .ol-discover-heading h2:after{display:none}
+.outz-native-page .ol-discover-heading i{color:var(--neon-orange);font-size:30px;letter-spacing:3px}
+.outz-native-page .ol-discover-heading>span{color:var(--neon-orange);font:800 10px/1.2 'Barlow Condensed',sans-serif;letter-spacing:1.4px}
+.outz-native-page #outz-destination-results{scroll-margin-top:110px}
+@media(min-width:600px){.outz-native-page .places-page-switch--compact a{font-size:20px;padding:9px 4px}.outz-native-page .places-page-switch--compact svg{width:22px;height:22px}}
