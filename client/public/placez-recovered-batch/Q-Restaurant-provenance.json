@@ -1,0 +1,44 @@
+{
+  "venue": "Q Restaurant & Bar",
+  "directoryId": 60,
+  "address": "828 SW 2nd Avenue",
+  "official": "https://q-portland.com/contact-find-us/",
+  "eligibility": "Existing PlaceZ record; PDX Gay Pages LGBTQ-friendly directory. Do not assert queer ownership.",
+  "eligibilitySource": "https://pdxgaypages.com/portland-restaurants/",
+  "status": "source-style-targeted-repair-passed; native review pending",
+  "sources": [
+    {
+      "file": "official-entry.jpg",
+      "url": "https://q-portland.com/wp-content/uploads/2020/06/Q-Exterior-3.jpg",
+      "page": "https://q-portland.com/gallery/",
+      "date": "Upload pathJune2020;EXIFprocessingJune29 2020;capture not established",
+      "rights": "Official source, no open license established",
+      "coverage": "Two dark glass doors, two white Q RESTAURANT BAR decals, bronze tall handles, dark frame and reflective glass. Do not project new interiors."
+    },
+    {
+      "file": "listing-front.jpg",
+      "page": "https://beerfordriving.com/locations/OR/portland/q-restaurant/",
+      "date": "Unknown",
+      "rights": "Listing photo, creator/license unknown",
+      "coverage": "Full entrance bay with828 canopy, double door, brickpiers, hangingblackgoldQsign, right shrubplanter, left tallgreen planter, genuine chalkboard. Upper sharedbuilding visible but roof absent. NeighborFUELYOGA visible. Sidewalk only, no visible roadway.",
+      "url": "https://beerfordriving.com/magic/img/AcnlKN1pkQvLnPMa1qKXuDYGyRIPYvg1_K0IB18jAQH0cEFHR5ydmb_KRj2m979hba6IY2GMhw-fOic9uCpQuZRIc4sh4iM_QnMbdUDx6yARiwDyytdSKcKAEMPqUa8jZ5r1oRCoNapf3isVq5nG9DVGHgG2pKm8Rddo9lgM_G5-4c_L2XR6mqGtLKIN2pHPrCCEj_oSEiJhf_22xO4rJrvEvmKX7-YApSdIP32pCt0SteNXVPdIpEU_wTMUh5K9ik6E78g129IaINtdLDF5rOwfhZz_A4gdWk1dK22f0t18QZ9qFO9-iJaiINZKCawI0xxj-kiquEWFT6NgUlcehN5QDCmj78i4MOvQG36H5e-5qeNszlKfLnz7er93SUjXx6tk0zFaZ10TD9HA60nChTJwjg10RioNuFoiIPBFFfXoB0iK9ynu"
+    },
+    {
+      "file": "portrait-sign.jpg",
+      "page": "https://www.portraitmagazine.com/54-q-restaurant-and-bar",
+      "url": "https://www.portraitmagazine.com/pub/photo/54-q-restaurant-and-bar-004.jpg",
+      "status": "Local download is95byteerror text, NOTusable photo. Do not pass to generation."
+    }
+  ],
+  "missing": "A wider authentic fa\u00e7ade view for roof/street if required; existing two support honest shared-building storefront crop only. Finechalkboard lettering must remain unreadable rather than invented.",
+  "palette": {
+    "category": "restaurant",
+    "token": "--cat-food -> --neon-orange",
+    "primary": "#FF7B00",
+    "complement": "#00FFFF"
+  },
+  "artwork": "Q-Restaurant-building.png",
+  "artworkSha256": "8cf71b3ae42c8e283d2f233b6d09115f84f53dfd8230ec0ee6df408470acee07",
+  "adaptation": "AI-stylized undated shared-building frontage; perspective and upper pane reconstruction are not independently exact. Small chalkboard text indistinct. No claimed current documentary photograph.",
+  "rights": "No open license established for either reference. User authorized reference use; derivative does not establish a new source license."
+}
