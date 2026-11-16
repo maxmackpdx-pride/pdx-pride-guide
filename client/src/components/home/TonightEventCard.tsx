@@ -2,7 +2,7 @@ import { rememberCardOrigin } from "@/components/cards/CardAPI";
 import { CardMorph } from "@/components/cards/react19Card";
 import { cardMorphName, nextOptimisticFlag, openCardFromEvent } from "@/components/cards/react19CardModel";
 import { startTransition, useEffect, useOptimistic, useState, type CSSProperties } from "react";
-import { ArrowUpRight, Clock3, MapPin } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { dayAccentToken, dayComplementToken } from "@/lib/dsColors";
 import type { ScheduleEvent } from "@/lib/scheduleEvents";
 import type { EventListing } from "@shared/multiDayEvents";
@@ -113,7 +113,6 @@ export type TonightEventCardProps = {
 
 export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp, onOpen, liveState, layout = "card" }: TonightEventCardProps) {
   const [saved, setSaved] = useOptimistic(rsvped, nextOptimisticFlag);
-  const admission = listing.admission === "FREE" ? "Free" : listing.admission === "SUGGESTED_DONATION" ? "Suggested donation" : listing.admission === "DOOR_FEE" ? "Door fee" : "Ticketed";
   // Saved cards show what moved since you saved them (last two weeks).
   const changedAt = listing.lastChangeAt ? Date.parse(listing.lastChangeAt) : NaN;
   const changeLabel = rsvped && listing.lastChangeLabel && Number.isFinite(changedAt) && Date.now() - changedAt < CHANGE_WINDOW_MS ? listing.lastChangeLabel : null;
@@ -161,20 +160,18 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
     {liveState ? <LiveBadge live={liveState} /> : null}
     <button className="tonight-card__open evz-face__open" type="button" onClick={open} aria-label={`Open ${listing.title}`}>
       <span className="tonight-card__art evz-tall__art">
-        <EventFlyerArt src={poster} day={listingDay(listing)} title={listing.title} venueName={listing.venueName} sizes="200px" />
+        <EventFlyerArt src={poster} day={listingDay(listing)} title={listing.title} venueName={listing.venueName} sizes="200px" parallax />
         <CardArtworkGlass />
-        {liveState ? null : <EventStartsIn listing={listing} />}
-      </span>
-      <span className="tonight-card__body evz-tall__body">
-        {changeLabel ? <ChangeBadge label={changeLabel} className="evz-tall__change" /> : null}
-        <h3 title={listing.title}>{listing.title}</h3>
-        <span className="evz-tall__venue"><MapPin size={15} aria-hidden="true" /><span>{listing.venueName}<small>{listing.neighborhood || "Portland"}</small></span></span>
-        <span className="evz-tall__time"><Clock3 size={14} aria-hidden="true" />{event ? `${clock.format(event.startMs)} to ${clock.format(event.endMs)}` : formatCardTime(listing)}</span>
-        <span className="evz-tall__tags"><span>{admission}</span><span>{age}</span></span>
+        <span className="tonight-card__body evz-tall__body">
+          {changeLabel ? <ChangeBadge label={changeLabel} className="evz-tall__change" /> : null}
+          <h3 title={listing.title}>{listing.title}</h3>
+          <span className="evz-tall__meta">{listing.venueName} · {age}</span>
+          {liveState ? null : <EventStartsIn listing={listing} />}
+        </span>
       </span>
     </button>
     <footer className="evz-tall__actions">
-      <button type="button" className="evz-tall__details" onClick={open} aria-label={`View ${listing.title}`}>View event <ArrowUpRight size={16} aria-hidden="true" /></button>
+      <button type="button" className="evz-tall__details" onClick={open} aria-label={`View ${listing.title}`}>View details <ArrowUpRight size={16} aria-hidden="true" /></button>
       <button type="button" className="evz-tall__heart" aria-pressed={saved} aria-label={`${saved ? "Remove" : "Add"} ${listing.title} ${saved ? "from" : "to"} my schedule`} onClick={toggleSave}><ZLineIcon name="favorite" size={18} filled={saved} /></button>
     </footer>
   </article></CardMorph>;

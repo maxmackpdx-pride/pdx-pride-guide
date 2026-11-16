@@ -1,6 +1,7 @@
 import { rememberCardOrigin } from "@/components/cards/CardAPI";
-import type { CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Share2 } from "lucide-react";
+import { parsePacificDateTime } from "@shared/missedConnections";
 import { dayAccentToken, dayComplementToken } from "@/lib/dsColors";
 import { listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import { eventTimeLabel } from "@/lib/eventDisplay";
@@ -15,9 +16,37 @@ import type { EventListing } from "@shared/multiDayEvents";
 import "./EventSquareCard.css";
 
 /**
+ * Compact countdown for the Square face (v12): "STARTS IN" over the single
+ * largest unit (13 DAYS / 15 HRS / 45 MIN), bottom-right above the heart.
+ * Renders nothing once the event has started (the live badge takes over).
+ */
+function SquareStartsIn({ listing }: { listing: EventListing }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 30000);
+    return () => window.clearInterval(id);
+  }, []);
+  const startMs = parsePacificDateTime(listing.dateStart);
+  if (startMs == null) return null;
+  const remaining = startMs - now;
+  if (remaining <= 0) return null;
+  const days = Math.floor(remaining / 86400000);
+  const hours = Math.floor((remaining % 86400000) / 3600000);
+  const minutes = Math.floor((remaining % 3600000) / 60000);
+  const [value, unit] = days >= 1 ? [days, "days"] : hours >= 1 ? [hours, "hrs"] : [minutes, "min"];
+  return (
+    <span className="event-square-card__count" role="timer" aria-label={`Starts in ${days} days, ${hours} hours, ${minutes} minutes`}>
+      <span className="event-square-card__count-l">Starts in</span>
+      <span className="event-square-card__count-v">{value} {unit}</span>
+    </span>
+  );
+}
+
+/**
  * Square event face (250x250 in the five-format setup): the flyer is the whole
- * face, SHARE top-left, save heart top-right, title and "time · venue" on the
- * ink at the bottom. Edge bloom follows the flyer accent when one is set.
+ * face, SHARE top-left, title and "time · venue" on the ink at the bottom,
+ * the compact STARTS IN countdown and the save heart bottom-right. Edge bloom
+ * follows the flyer accent when one is set.
  * Made-by: Muse
  */
 export default function EventSquareCard({
@@ -40,11 +69,12 @@ export default function EventSquareCard({
     <article data-card-size="square" data-card-category={"eventz"} onClickCapture={rememberCardOrigin} className="event-square-card pdx-glass-rebind" style={{ "--c": flyerAccent ?? dayAccentToken(listingDay(listing)), "--card-secondary-override": dayComplementToken(listingDay(listing)) } as CSSProperties}>
       <button type="button" className="event-square-card__open" onClick={() => onOpen(listing)} aria-label={`Open ${listing.title}`}>
         <span className="event-square-card__art">
-          <EventFlyerArt src={poster} day={listingDay(listing)} showDay={false} title={listing.title} venueName={listing.venueName} />
+          <EventFlyerArt src={poster} day={listingDay(listing)} showDay={false} title={listing.title} venueName={listing.venueName} parallax />
           <CardArtworkGlass />
           <span className="event-square-card__shade"><span className="event-square-card__title">{listing.title}</span><span className="event-square-card__meta">{eventTimeLabel(listing.dateStart)} · {listing.venueName}</span></span>
         </span>
       </button>
+      {liveState ? null : <SquareStartsIn listing={listing} />}
       <button type="button" className="event-square-card__share" aria-label={`Share ${listing.title}`} onClick={async (e) => {
         e.stopPropagation();
         try {

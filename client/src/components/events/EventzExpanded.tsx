@@ -1,7 +1,7 @@
-import { useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight, Clock3, MapPin, Share2, X } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Clock3, MapPin, Share2, X } from "lucide-react";
 import type { Event } from "@shared/schema";
 import { EVENT_TALENT_ROLE_COLORS, EVENT_TALENT_ROLE_LABELS, type EventTalentRow } from "@shared/eventTalent";
 import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
@@ -16,7 +16,7 @@ import { useSavedEvents } from "@/hooks/useSavedEvents";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { dayAccentToken, dayComplementToken } from "@/lib/dsColors";
+import { dayAccentToken } from "@/lib/dsColors";
 import { formatCardTime, listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import { formatPacificDateTime } from "@/lib/countdown";
 import { eventTimeLabel } from "@/lib/eventDisplay";
@@ -29,9 +29,7 @@ import { useResponsivePoster } from "@/lib/useResponsivePoster";
 import { POSTER_DETAIL_SIZES, restoreOriginalPoster } from "@/lib/responsivePoster";
 import UserAvatar from "@/components/UserAvatar";
 import AuthModal from "@/components/AuthModal";
-import EventLocationMap from "@/components/EventLocationMap";
 import MissedConnectionsPanel from "@/components/MissedConnectionsPanel";
-import AttendanceCluster from "@/components/AttendanceCluster";
 import EventModal, { type EventModalOriginRect } from "@/components/EventModal";
 import ZLineIcon from "@/components/ZLineIcon";
 import "./EventzExpanded.css";
@@ -116,6 +114,56 @@ export default function EventzExpanded({ event, onClose, onEventUpdated, originR
   );
 }
 
+/**
+ * The Info page's STARTS IN panel (v12): accent label, big tabular digits,
+ * and the date line, in a bordered box. Renders nothing once the event has
+ * started.
+ */
+function StartsInBox({ event }: { event: Event }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 30000);
+    return () => window.clearInterval(id);
+  }, []);
+  const startMs = parsePacificDateTime(event.dateStart);
+  if (startMs == null || startMs - now <= 0) return null;
+  const remaining = startMs - now;
+  const days = Math.floor(remaining / 86400000);
+  const hours = Math.floor((remaining % 86400000) / 3600000);
+  const minutes = Math.floor((remaining % 3600000) / 60000);
+  const pad2 = (n: number) => String(n).padStart(2, "0");
+  const units: Array<[number, string]> = [[days, "days"], [hours, "hrs"], [minutes, "min"]];
+  return (
+    <div className="evz-x__starts" role="timer" aria-label={`Starts in ${days} days, ${hours} hours, ${minutes} minutes`}>
+      <p className="evz-x__starts-l">Starts in</p>
+      <div className="evz-x__starts-d" aria-hidden="true">
+        {units.map(([value, unit]) => (
+          <span key={unit}><strong>{pad2(value)}</strong><small>{unit}</small></span>
+        ))}
+      </div>
+      <p className="evz-x__starts-w">{formatPacificDateTime(event.dateStart, { weekday: "short", month: "short", day: "numeric" })} · {formatCardTime(event)}</p>
+    </div>
+  );
+}
+
+type PlaceUpcomingEvent = { id: number; title: string; dateStart: string; dateEnd?: string | null; dayOfWeek?: string | null; posterImageUrl?: string | null };
+type PlacePromoter = { name?: string | null; displayName?: string | null; username?: string | null };
+
+const pacificDayKeyFmt = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit", day: "2-digit" });
+function pacificDayKey(iso: string): string | null {
+  const ms = parsePacificDateTime(iso);
+  return ms == null ? null : pacificDayKeyFmt.format(new Date(ms));
+}
+function shiftDayKey(key: string, days: number): string {
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d) + days * 86400000).toISOString().slice(0, 10);
+}
+function dayKeyLabel(key: string): { dow: string; num: number } {
+  const [y, m, d] = key.split("-").map(Number);
+  const dow = new Intl.DateTimeFormat("en-US", { timeZone: "UTC", weekday: "short" }).format(new Date(Date.UTC(y, m - 1, d, 12)));
+  return { dow, num: d };
+}
+
 function primaryLinkFor(event: Event): { href: string; label: string } | null {
   const links = event as Event & { ticketUrl?: string | null; venueWebsite?: string | null; sourceUrl?: string | null; source?: string | null };
   const ticket = publicHttpUrl(links.ticketUrl);
@@ -141,6 +189,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
   const [showAuth, setShowAuth] = useState(false);
   const [page, setPage] = useState(0);
   const [mizzedOpen, setMizzedOpen] = useState(false);
+  const [venueDay, setVenueDay] = useState<string | null>(null);
   const pagesRef = useRef<HTMLDivElement>(null);
   const { dialogRef, requestClose } = useOpenCardClose(onClose);
 
@@ -158,6 +207,27 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
   const nearbyEvents: NearbyEvent[] = Array.isArray(detail?.nearby?.events) ? detail.nearby.events : [];
   const venue = detail?.venue ?? null;
 
+  // The venue's own payload feeds two v12 sections the event detail does not
+  // carry: "More at {venue}" (next-7-days strip on More + Nearby) and the
+  // Promoters block on People.
+  const { data: placeData } = useQuery<{ upcomingEvents?: PlaceUpcomingEvent[]; promoters?: PlacePromoter[] }>({
+    queryKey: ["/api/placez", venue?.id, "card-extras"],
+    queryFn: () => apiRequest("GET", `/api/placez/${venue!.id}`).then((r) => r.json()),
+    enabled: Boolean(venue?.id),
+    staleTime: 300_000,
+  });
+  const venueUpcoming: PlaceUpcomingEvent[] = Array.isArray(placeData?.upcomingEvents) ? placeData.upcomingEvents : [];
+  const promoters: PlacePromoter[] = Array.isArray(placeData?.promoters) ? placeData.promoters : [];
+  const eventDayKey = pacificDayKey(event.dateStart);
+  const stripDays = eventDayKey
+    ? Array.from({ length: 7 }, (_, i) => {
+        const key = shiftDayKey(eventDayKey, i);
+        const dayEvents = venueUpcoming.filter((e) => e.id !== event.id && pacificDayKey(e.dateStart) === key);
+        return { key, ...dayKeyLabel(key), events: dayEvents };
+      })
+    : [];
+  const selectedDay = stripDays.find((d) => d.key === (venueDay ?? eventDayKey)) ?? stripDays[0];
+
   const day = listingDay(event);
   const flyerAccent = (event as { accentColor?: string | null }).accentColor || null;
   const accent = flyerAccent ?? dayAccentToken(day);
@@ -174,9 +244,10 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
   const admission = event.admission === "FREE" ? "Free" : event.admission === "SUGGESTED_DONATION" ? "Suggested donation" : event.admission === "DOOR_FEE" ? "Door fee" : "Ticketed";
   const chips = [...getEventTypeTagsForEvent(event).slice(0, 3), age, ...(event.isSexPositive ? ["Sex-positive"] : [])];
   const whenLine = `${formatPacificDateTime(event.dateStart, { weekday: "long", month: "long", day: "numeric" })} · ${formatCardTime(event)}`;
-  const mapHref = event.lat != null && event.lng != null
-    ? `/map?layer=events&lat=${event.lat}&lng=${event.lng}&zoom=15`
-    : `/map?layer=events&q=${encodeURIComponent(event.title)}`;
+  const shortWhen = `${formatPacificDateTime(event.dateStart, { weekday: "short", month: "short", day: "numeric" })} · ${formatCardTime(event)}`;
+  const directionsDest = event.lat != null && event.lng != null ? `${event.lat},${event.lng}` : (event.address || `${event.venueName}, Portland, OR`);
+  const googleDirections = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsDest)}`;
+  const appleDirections = `https://maps.apple.com/?daddr=${encodeURIComponent(directionsDest)}`;
 
   const goTo = (index: number) => {
     const next = Math.max(0, Math.min(PAGES.length - 1, index));
@@ -212,9 +283,8 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
           <button type="button" className="evz-x__iconbtn" onClick={requestClose} aria-label={`Close ${event.title}`}><X size={19} aria-hidden="true" /></button>
         </div>
         <div className="evz-x__id">
-          <p className="evz-x__when"><CalendarDays size={13} aria-hidden="true" />{whenLine}</p>
           <h2 className="evz-x__title">{event.title}</h2>
-          <p className="evz-x__venue"><MapPin size={14} aria-hidden="true" />{event.venueName}{event.neighborhood ? <span> · {event.neighborhood}</span> : null}</p>
+          <p className="evz-x__venue"><MapPin size={14} aria-hidden="true" />{event.venueName}{event.neighborhood ? <span> · {event.neighborhood}</span> : null}<span> · {shortWhen}</span></p>
           <div className="evz-x__chips">{chips.map((chip) => <span key={chip} className="evz-x__chip">{chip}</span>)}</div>
         </div>
       </header>
@@ -224,13 +294,6 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
           <span className="evz-x__act-main">
             <span className="evz-x__act-t">{isPastEvent ? "I was there" : interested ? "You're interested" : "I'm interested"}</span>
             <span className="evz-x__act-s">{interested ? "You're on the list — tap to undo" : "Join the interested list for this event"}</span>
-          </span>
-          <span className="evz-x__act-ar" aria-hidden="true">›</span>
-        </button>
-        <button type="button" className="evz-x__act" aria-expanded={mizzedOpen} onClick={() => setMizzedOpen((open) => !open)}>
-          <span className="evz-x__act-main">
-            <span className="evz-x__act-t">Add a Mizzed Connection</span>
-            <span className="evz-x__act-s">{missedCount > 0 ? `${missedCount} posted for this event` : "Post during or after the event"}</span>
           </span>
           <span className="evz-x__act-ar" aria-hidden="true">›</span>
         </button>
@@ -257,9 +320,18 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
                 {gig.description ? <p className="evz-x__gig-desc">{gig.description}</p> : null}
               </article>
             ))}
+            <button type="button" className="evz-x__act evz-x__act--dash" aria-expanded={mizzedOpen} onClick={() => setMizzedOpen((open) => !open)}>
+              <span className="evz-x__act-main">
+                <span className="evz-x__act-t">Add a Mizzed Connection</span>
+                <span className="evz-x__act-s">{missedCount > 0 ? `${missedCount} posted for this event` : "Met someone at this event? Post it — during or after."}</span>
+              </span>
+              <span className="evz-x__act-ar" aria-hidden="true">+</span>
+            </button>
           </section>
 
           <section className="evz-x__page" aria-label="Info">
+            <div className="evz-x__sech"><span>Event details</span></div>
+            <StartsInBox event={event} />
             <div className="evz-x__kv"><Clock3 size={17} aria-hidden="true" /><span>{whenLine}</span></div>
             <div className="evz-x__kv"><MapPin size={17} aria-hidden="true" /><span>{event.venueName}{event.address ? <><br />{event.address}</> : null}</span></div>
             {event.description ? <p className="evz-x__desc">{event.description}</p> : null}
@@ -278,13 +350,49 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
           </section>
 
           <section className="evz-x__page" aria-label="Maps">
-            <div className="evz-x__sech"><span>{event.venueName}</span></div>
-            <p className="evz-x__addr">{event.address || venue?.address || "Portland, OR"}</p>
-            <EventLocationMap event={event} primary={accent} complementary={dayComplementToken(day)} scheduled={interested} schedulePending={rsvp.isRsvpPending(event.id)} onSchedule={() => rsvp.toggleRsvp(event.id)} />
-            <a className="evz-x__link" href={mapHref}>View on Mapz <ArrowUpRight size={16} aria-hidden="true" /></a>
+            <div className="evz-x__sech"><span>Map &amp; directions</span><span className="evz-x__sech-r">Location overview</span></div>
+            <div className="evz-x__mapbox" aria-hidden="true"><span className="evz-x__pin" /></div>
+            <div className="evz-x__kv"><MapPin size={17} aria-hidden="true" /><span>This event · {event.venueName}<br />{event.address || venue?.address || "Portland, OR"}<br /><span className="evz-x__note-inline">Real locations, no street tiles. Directions open in your chosen app.</span></span></div>
+            <div className="evz-x__dirrow">
+              <a className="evz-x__link" href={googleDirections} target="_blank" rel="noopener noreferrer">Directions · Google <ArrowUpRight size={16} aria-hidden="true" /></a>
+              <a className="evz-x__link" href={appleDirections} target="_blank" rel="noopener noreferrer">Directions · Apple <ArrowUpRight size={16} aria-hidden="true" /></a>
+            </div>
           </section>
 
           <section className="evz-x__page" aria-label="More + Nearby">
+            {venue && stripDays.some((d) => d.events.length > 0) ? (
+              <>
+                <div className="evz-x__sech"><span>More at {event.venueName}</span><span className="evz-x__sech-r">Next 7 days</span></div>
+                <div className="evz-x__days">
+                  {stripDays.map((d) => (
+                    <button key={d.key} type="button" className={selectedDay?.key === d.key ? "evz-x__day hot" : "evz-x__day"} onClick={() => setVenueDay(d.key)} aria-pressed={selectedDay?.key === d.key}>
+                      <span className="evz-x__day-d">{d.dow}</span>
+                      <span className="evz-x__day-n">{d.num}</span>
+                      <span className="evz-x__day-c">{d.events.length ? `${d.events.length} event${d.events.length === 1 ? "" : "s"}` : "—"}</span>
+                    </button>
+                  ))}
+                </div>
+                {selectedDay && selectedDay.events.length > 0 ? (
+                  <div className="evz-x__rail">
+                    {selectedDay.events.slice(0, 8).map((near) => (
+                      <button key={near.id} type="button" className="evz-x__railcard" style={{ "--ac": accent } as CSSProperties}
+                        onClick={() => setLocation(eventPath(near.id, near.title, near.dayOfWeek ?? undefined))}
+                        aria-label={`Open ${near.title}`}>
+                        {near.posterImageUrl
+                          ? <img src={near.posterImageUrl} alt="" loading="lazy" className="evz-x__railimg" />
+                          : <span className="evz-x__railfill" aria-hidden="true" />}
+                        <span className="evz-x__railscrim">
+                          <span className="evz-x__railtitle">{near.title}</span>
+                          <span className="evz-x__railmeta">{eventTimeLabel(near.dateStart)}</span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="evz-x__empty">No other events at {event.venueName} on this day.</p>
+                )}
+              </>
+            ) : null}
             <div className="evz-x__sech"><span>Restaurants close by</span></div>
             {!detail ? <p className="evz-x__empty">Loading nearby…</p> : restaurants.length === 0 ? (
               <p className="evz-x__empty">No restaurants mapped close by yet.</p>
@@ -303,7 +411,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
                 ))}
               </div>
             )}
-            <div className="evz-x__sech"><span>Same day, close by</span></div>
+            <div className="evz-x__sech"><span>Events same day · close by</span></div>
             {!detail ? <p className="evz-x__empty">Loading nearby events…</p> : nearbyEvents.length === 0 ? (
               <p className="evz-x__empty">No other events close by on this day.</p>
             ) : (
@@ -330,30 +438,45 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
           </section>
 
           <section className="evz-x__page" aria-label="People">
+            <div className="evz-x__sech"><span>{hosts.length === 1 ? "Host" : "Hosts"}</span></div>
             {hosts.length > 0 ? (
+              <div className="evz-x__people">
+                {hosts.map((host) => {
+                  const inner = (
+                    <>
+                      <UserAvatar photoUrl={host.photoUrl} avatarChoice={host.avatarChoice} avatarRing={host.avatarRing} displayName={host.displayName} username={host.username ?? undefined} size={48} />
+                      <span className="evz-x__person-meta">
+                        <span className="evz-x__person-name">{host.displayName || host.username}</span>
+                        {host.role === "PRIMARY" ? <span className="evz-x__person-role">Primary host</span> : null}
+                      </span>
+                    </>
+                  );
+                  return host.username
+                    ? <Link key={host.userId} href={`/u/${encodeURIComponent(host.username)}`} className="evz-x__person">{inner}</Link>
+                    : <div key={host.userId} className="evz-x__person">{inner}</div>;
+                })}
+              </div>
+            ) : (
               <>
-                <div className="evz-x__sech"><span>{hosts.length === 1 ? "Host" : "Hosts"}</span></div>
-                <div className="evz-x__people">
-                  {hosts.map((host) => {
-                    const inner = (
-                      <>
-                        <UserAvatar photoUrl={host.photoUrl} avatarChoice={host.avatarChoice} avatarRing={host.avatarRing} displayName={host.displayName} username={host.username ?? undefined} size={48} />
-                        <span className="evz-x__person-meta">
-                          <span className="evz-x__person-name">{host.displayName || host.username}</span>
-                          {host.role === "PRIMARY" ? <span className="evz-x__person-role">Primary host</span> : null}
-                        </span>
-                      </>
-                    );
-                    return host.username
-                      ? <Link key={host.userId} href={`/u/${encodeURIComponent(host.username)}`} className="evz-x__person">{inner}</Link>
-                      : <div key={host.userId} className="evz-x__person">{inner}</div>;
-                  })}
+                <div className="evz-x__claim">
+                  <p className="evz-x__claim-t">Unclaimed</p>
+                  <p className="evz-x__claim-s">Most events go unclaimed — no host has claimed this event yet.</p>
+                  {hasPendingClaim ? <p className="evz-x__claim-s">A claim is pending admin review.</p> : null}
                 </div>
+                {event.isClaimable && !hasPendingClaim ? (
+                  <button type="button" className="evz-x__act" onClick={() => { if (user) setLocation(`/submit/claim/${event.id}`); else setShowAuth(true); }}>
+                    <span className="evz-x__act-main">
+                      <span className="evz-x__act-t">Claim this event</span>
+                      <span className="evz-x__act-s">Are you the host? Claim it to manage this listing.</span>
+                    </span>
+                    <span className="evz-x__act-ar" aria-hidden="true">›</span>
+                  </button>
+                ) : null}
               </>
-            ) : null}
+            )}
             {talent.length > 0 ? (
               <>
-                <div className="evz-x__sech"><span>Talent</span></div>
+                <div className="evz-x__sech"><span>Talent · this edition</span></div>
                 <div className="evz-x__people">
                   {talent.map((row) => (
                     <div key={row.id} className="evz-x__person">
@@ -367,18 +490,20 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
                 </div>
               </>
             ) : null}
-            {hosts.length === 0 && talent.length === 0 ? (
-              <div className="evz-x__claim">
-                <p className="evz-x__claim-t">Unclaimed</p>
-                <p className="evz-x__claim-s">No organizer has claimed this event yet, and no talent is tagged.</p>
-                {event.isClaimable && !hasPendingClaim ? (
-                  <button type="button" className="evz-x__claimbtn" onClick={() => { if (user) setLocation(`/submit/claim/${event.id}`); else setShowAuth(true); }}>Claim this event</button>
-                ) : null}
-                {hasPendingClaim ? <p className="evz-x__claim-s">Claim pending admin review.</p> : null}
+            <div className="evz-x__sech"><span>Promoters</span></div>
+            {promoters.length > 0 ? (
+              <div className="evz-x__people">
+                {promoters.map((promoter, index) => (
+                  <div key={index} className="evz-x__person">
+                    <span className="evz-x__person-meta">
+                      <span className="evz-x__person-name">{promoter.displayName || promoter.name || promoter.username}</span>
+                    </span>
+                  </div>
+                ))}
               </div>
-            ) : null}
-            <div className="evz-x__sech"><span>{isPastEvent ? "Who was there" : "Going"}</span></div>
-            <AttendanceCluster eventId={event.id} embedded pastEvent={isPastEvent} />
+            ) : (
+              <p className="evz-x__empty-block">No promoters are connected yet.</p>
+            )}
           </section>
         </div>
 

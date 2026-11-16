@@ -28,8 +28,6 @@
   border: 1px solid color-mix(in srgb, var(--ac) 55%, transparent); background: rgba(4, 9, 13, .8); color: var(--text-hi); }
 .evz-x__iconbtn--sm { width: 34px; height: 34px; }
 .evz-x__id { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; padding: 0 16px 12px; }
-.evz-x__when { display: flex; align-items: center; gap: 6px; margin: 0; font: 600 11px/1.4 var(--font-mono, monospace); color: var(--evz-mist-e8f0f5); text-shadow: 0 1px 4px var(--z-black); }
-.evz-x__when svg { color: var(--ac); flex: none; }
 .evz-x__title { margin: 5px 0 0; font: 800 31px/1.0 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; overflow-wrap: anywhere; text-shadow: 0 2px 6px var(--z-black); }
 .evz-x__venue { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; font: 600 13.5px/1.35 var(--font-body, sans-serif); color: var(--evz-mist-f2f5f7); text-shadow: 0 1px 4px var(--z-black); }
 .evz-x__venue svg { color: var(--ac); flex: none; }
@@ -62,6 +60,8 @@
 .evz-x__sech { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 8px;
   font: 800 12.5px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .05em; }
 .evz-x__sech:not(:first-child) { margin-top: 16px; }
+.evz-x__sech-r { font: 600 9.5px/1 var(--font-body, sans-serif); color: var(--evz-gray-8a8a94); letter-spacing: .03em; text-transform: none; }
+.evz-x__act--dash { border-style: dashed; margin-top: 14px; }
 .evz-x__cnt { background: var(--ac); color: var(--z-black); border-radius: 5px; padding: 1px 7px; font-size: 11px; }
 .evz-x__empty { margin: 0; font: 400 12.5px/1.55 var(--font-body, sans-serif); color: var(--evz-mist-9aa7b0); }
 
@@ -74,6 +74,13 @@
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 
 /* Info */
+.evz-x__starts { border: 1px solid color-mix(in srgb, var(--ac) 45%, var(--evz-line-2c2c35)); border-radius: 9px; background: rgba(4, 9, 13, .6); padding: 12px 14px; margin-bottom: 6px; }
+.evz-x__starts-l { margin: 0; font: 700 10px/1.2 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .15em; text-transform: uppercase; color: var(--ac); }
+.evz-x__starts-d { display: flex; gap: 24px; align-items: baseline; margin-top: 6px; }
+.evz-x__starts-d span { display: inline-flex; align-items: baseline; gap: 3px; }
+.evz-x__starts-d strong { font: 700 27px/1 var(--font-display, "Barlow Condensed", sans-serif); font-variant-numeric: tabular-nums; color: var(--text-hi); }
+.evz-x__starts-d small { font: 600 9px/1 var(--font-body, sans-serif); letter-spacing: .08em; text-transform: uppercase; color: var(--evz-mist-c5d2dc); }
+.evz-x__starts-w { margin: 7px 0 0; font: 500 11px/1.4 var(--font-body, sans-serif); color: var(--evz-mist-aeb8c3); }
 .evz-x__kv { display: flex; gap: 9px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--evz-line-17171d);
   font: 400 12.5px/1.5 var(--font-body, sans-serif); color: var(--evz-gray-d8d8e0); }
 .evz-x__kv > svg { color: var(--ac); flex: none; margin-top: 1px; }
@@ -87,8 +94,26 @@
 .evz-x__managebtn { padding: 8px 11px; border: 1px solid var(--evz-line-2c2c35); border-radius: 8px; background: transparent; color: var(--evz-mist-cfd8de);
   font: 700 11px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .05em; }
 
-/* Maps */
+/* Maps — the v12 stylized box: real location, no street tiles. */
 .evz-x__addr { margin: 0 0 10px; font: 500 12px/1.5 var(--font-mono, monospace); color: var(--evz-mist-9aa7b0); }
+.evz-x__mapbox { position: relative; height: 120px; border: 1px solid var(--evz-line-2c2c35); border-radius: 10px; margin-bottom: 10px;
+  background: radial-gradient(circle at 42% 46%, color-mix(in srgb, var(--ac) 35%, transparent), transparent 34%), linear-gradient(150deg, var(--evz-ink-0a0e12), var(--ink-800)); }
+.evz-x__pin { position: absolute; left: 42%; top: 38%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 99px; background: var(--ac);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--ac) 25%, transparent); }
+.evz-x__note-inline { color: var(--evz-gray-8a8a94); font-size: 10.5px; }
+.evz-x__dirrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.evz-x__dirrow .evz-x__link { margin-top: 10px; }
+
+/* More at {venue} — the next-7-days strip */
+.evz-x__days { display: flex; gap: 6px; margin-bottom: 10px; }
+.evz-x__day { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px;
+  border: 1px solid var(--evz-line-2c2c35); border-radius: 8px; background: transparent; color: var(--text-hi); }
+.evz-x__day-d { font: 800 8.5px/1 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .1em; text-transform: uppercase; color: var(--evz-gray-8a8a94); }
+.evz-x__day-n { font: 800 14px/1.1 var(--font-display, "Barlow Condensed", sans-serif); }
+.evz-x__day-c { font: 500 8px/1 var(--font-body, sans-serif); color: var(--evz-gray-8a8a94); }
+.evz-x__day.hot { border-color: var(--ac); background: color-mix(in srgb, var(--ac) 10%, transparent); }
+.evz-x__empty-block { margin: 0; border: 1px dashed var(--evz-line-2c2c35); border-radius: 10px; padding: 11px 12px;
+  font: 400 12px/1.5 var(--font-body, sans-serif); color: var(--evz-mist-9aa7b0); }
 
 /* More + Nearby rails */
 .evz-x__rail { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: none; }

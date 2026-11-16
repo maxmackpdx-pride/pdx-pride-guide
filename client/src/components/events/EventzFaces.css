@@ -27,20 +27,28 @@
 .evz-face--tall .tonight-card__live--count b { font-size: 14.5px; }
 .evz-face--wide .tonight-card__live { top: 10px; left: 10px; min-height: 32px; padding: 0 10px; font-size: 13px; }
 
+/* ── Flyer parallax layer (the v12 study): the poster travels vertically on
+   scroll inside its frame; chrome never moves. The img overscans 10px top
+   and bottom so the travel never opens a gap. ─────────────────────────── */
+.evz-plx { position: absolute; inset: 0; display: block; will-change: transform; }
+.evz-plx__img { position: absolute; left: 0; top: -10px; display: block; width: 100%; height: calc(100% + 20px); object-fit: cover; object-position: top center; }
+
 /* ── Tall 200x403 ─────────────────────────────────────────────────────── */
 .evz-face--tall { width: var(--event-card-width, 200px); height: var(--event-card-height, 403px); max-width: 100%; flex: none; }
-.evz-tall__art { position: relative; display: block; width: 100%; height: 216px; flex: none; overflow: hidden; }
-.evz-face .evz-tall__art > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center;
-  mask-image: linear-gradient(to bottom, var(--z-oled) 74%, color-mix(in srgb, var(--z-oled) 22%, transparent) 88%, transparent 99%);
-  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 74%, color-mix(in srgb, var(--z-oled) 22%, transparent) 88%, transparent 99%); }
-/* The poster runs to just below the countdown, then gradients away into the
-   card body (the face background) across the bottom quarter of the art. */
-.evz-tall__art::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 25%; z-index: 2; pointer-events: none;
-  background: linear-gradient(to bottom, transparent, var(--ink-800)); }
+.evz-tall__art { position: relative; display: block; width: 100%; height: 302px; flex: none; overflow: hidden; }
+.evz-face .evz-tall__art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center;
+  mask-image: linear-gradient(to bottom, var(--z-oled) 74%, transparent 99%);
+  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 74%, transparent 99%); }
+.evz-face .evz-tall__art .evz-plx__img { height: calc(100% + 20px); }
+/* Scrim under the identity block: the poster fades into the card ink behind
+   the title, meta and countdown (v12 tallscrim). */
+.evz-tall__art::after { content: ""; position: absolute; left: 0; right: 0; top: 150px; height: 152px; z-index: 2; pointer-events: none;
+  background: linear-gradient(to top, rgba(3, 5, 7, .88) 30%, transparent); }
 .evz-tall__art .day-motif-code { position: absolute; top: 12px; left: 12px; z-index: 2; font-size: 16px; }
 .evz-tall__art:has(.tonight-card__live) .day-motif-code { top: 48px; }
 
 .evz-countdown { position: absolute; left: 12px; right: 12px; bottom: 8px; z-index: 3; }
+.evz-tall__body .evz-countdown { position: static; margin-top: 10px; }
 .evz-countdown__label { margin: 0; font: 700 10px/1.2 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .15em; text-transform: uppercase; color: var(--ac); text-shadow: 0 1px 4px var(--z-black); }
 .evz-countdown__digits { display: flex; gap: 16px; align-items: baseline; margin-top: 2px; }
 .evz-countdown__digits span { display: inline-flex; align-items: baseline; gap: 3px; }
@@ -48,17 +56,14 @@
 .evz-countdown__digits small { font: 600 9px/1 var(--font-body, sans-serif); letter-spacing: .08em; text-transform: uppercase; color: var(--evz-mist-c5d2dc); }
 .evz-countdown time { display: block; margin-top: 3px; font: 500 10px/1.3 var(--font-mono, monospace); color: var(--evz-mist-aeb8c3); text-shadow: 0 1px 4px var(--z-black); }
 
-.evz-tall__body { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 5px; flex: 1; width: 100%; padding: 10px 12px 0; box-sizing: border-box; }
-.evz-tall__body h3 { margin: 0; font: 800 23px/1.02 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; overflow-wrap: anywhere;
+/* The identity block rides over the poster's fade (v12 Tall): title, the
+   venue · age meta line, then the STARTS IN countdown — no solid body, no
+   tag chips on the face. */
+.evz-tall__body { position: absolute; top: 196px; left: 14px; right: 14px; z-index: 4; display: flex; flex-direction: column; gap: 0; width: auto; flex: none; padding: 0; box-sizing: border-box; }
+.evz-tall__body h3 { margin: 0; font: 800 19px/1.04 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; overflow-wrap: anywhere; text-shadow: 0 1px 3px var(--z-black);
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .evz-tall__change { align-self: flex-start; max-width: 100%; }
-.evz-tall__venue { display: flex; align-items: flex-start; gap: 6px; font: 600 13px/1.3 var(--font-body, sans-serif); color: var(--text-heading, var(--text-hi)); }
-.evz-tall__venue > svg { color: var(--ac); flex: none; margin-top: 1px; }
-.evz-tall__venue small { display: block; color: var(--text-lo); font-size: 11px; font-weight: 400; }
-.evz-tall__time { display: flex; align-items: center; gap: 6px; font: 600 11px/1.4 var(--font-mono, monospace); color: var(--text-hi); }
-.evz-tall__time > svg { color: var(--ac); flex: none; }
-.evz-tall__tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto; }
-.evz-tall__tags span { padding: 3px 6px; border: 1px solid color-mix(in srgb, var(--ac) 45%, transparent); border-radius: 4px; background: color-mix(in srgb, var(--ac) 12%, var(--evz-ink-0a0e12)); font: 700 10px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .07em; color: var(--evz-mist-f4f8fa); }
+.evz-tall__meta { display: block; margin-top: 3px; font: 600 11.5px/1.35 var(--font-body, sans-serif); color: var(--evz-mist-f2f5f7); text-shadow: 0 1px 3px var(--z-black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .evz-tall__actions { position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 10px 12px 12px; }
 .evz-tall__details { flex: 1; min-width: 0; height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
