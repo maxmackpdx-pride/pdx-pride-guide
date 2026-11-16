@@ -158,5 +158,15 @@
     "changes": "AI-assisted Xerox screenprint adaptation: orange/purple accents, terrain-conforming mesh and transparent orange torn-paper edge. Historical winter view from January 2025, not current snow or conditions.",
     "qa": "Independent source/style, three-background alpha-renderer, all four native card size crops and expanded hero checks passed; v4 preserves repaired mountain framing",
     "sha256": "74f4a7b614cd8be4c8111624718a5490f8dac4a18b197affe4df667a7e6533f7"
+  },
+  "fishing-or-dorman-pond": {
+    "author": "Gary Halvorson, Oregon State Archives",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dorman_Pond_-_DPLA_-_e8f620d2fbead4fa8e590c9f4289d9bd.jpg",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "src": "/outzide-native/batch1/dorman-screenprint-v1.png",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and transparent orange torn-paper edge. Historical view from July 2010, not current conditions.",
+    "qa": "Independent source/style and raw alpha passed; native crop checks pending",
+    "sha256": "9a7bd63b728963d0bfa3bbc6edd6c2690c8d9853aff49ed84e87e320d10f8945"
   }
 }
