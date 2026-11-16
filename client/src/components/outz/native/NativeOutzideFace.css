@@ -178,4 +178,5 @@
 .oz-notification span{font-size:16px}
 
 /* Only qualified transparent artwork: restore opaque interior without filling torn alpha fringe. */
-.oz-topographic .oz-source-photo.oz-source-photo--approved-art {filter:var(--oz-alpha-filter)!important;}
+.oz-topographic .oz-source-photo.oz-source-photo--approved-art,
+.outz-native-expanded-hero .oz-source-photo.oz-source-photo--approved-art {filter:var(--oz-alpha-filter)!important;}
