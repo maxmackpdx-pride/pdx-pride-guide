@@ -49,7 +49,7 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
     "derivativeLicense": "CC BY-SA 4.0",
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours, torn-paper edge. Historical view, not current conditions.",
-    "qa": "Independent source-composition/style and alpha-renderer contrast checks passed; native-card crop QA pending",
+    "qa": "Independent source-composition/style, alpha-renderer contrast, all four native card size crops and expanded hero checks passed",
     "sha256": "f0cbbf29e812cafae9607dfe8ee094ecea2e45d8d5461ea8fad9edde140f15f7"
   },
   "dayuse-wa-peace-arch-historical-state-park": {
@@ -60,7 +60,18 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
     "derivativeLicense": "CC BY-SA 4.0",
     "changes": "AI-assisted Xerox screenprint adaptation: orange/day-use accents, terrain contours and torn-paper edge. Historic source view from USA side; authentic flagpole cables retained. Not current conditions.",
-    "qa": "Independent source-composition/style and alpha-renderer checks passed; native-card crop QA pending",
+    "qa": "Independent source-composition/style, alpha-renderer contrast, all four native card size crops and expanded hero checks passed",
     "sha256": "8abb68a5526fae2d621b3c398a21f53aeefa14f2a16ce27fbde7da552c1e1ee4"
+  },
+  "fishing-or-lake-of-the-woods": {
+    "author": "Josiah Oliveria (Commons account Charlie Evans)",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lake_of_the_Woods.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "src": "/outzide-native/batch1/woods-screenprint-v2.png",
+    "derivativeLicense": "CC BY-SA 4.0",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and torn-paper edge. Historical view, not current conditions.",
+    "qa": "Independent source-composition/style and alpha-renderer checks passed; native-card crop QA pending",
+    "sha256": "6b7a81ba514b0596a20a7dacab76f29e608b1d41e55213e1a0396e69853a83a7"
   }
 }
