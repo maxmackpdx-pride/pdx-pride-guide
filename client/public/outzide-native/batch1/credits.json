@@ -197,7 +197,7 @@
     "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
     "src": "/outzide-native/batch1/winchester-screenprint-v2.png",
     "changes": "AI-assisted Xerox screenprint adaptation: orange/red accents, dune and grass mesh, water contours and transparent orange torn-paper edge. Historical view from January 2022, not current conditions or a riding route.",
-    "qa": "Independent source/style and raw alpha passed; actual card crop and renderer QA pending",
+    "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
     "sha256": "61926098a1545d5002a9cd14617a2a4598f433a39521502624a13c26c56953c3"
   }
 }
