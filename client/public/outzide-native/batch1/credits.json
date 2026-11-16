@@ -95,5 +95,16 @@
     "qa": "Independent source/style, three-background alpha-renderer and all four native card crops plus expanded hero passed; landscape framing preserves reservoir banks",
     "sha256": "8be0b5bd0736abcfdf483f0d25d5cfe9a1305dcd9c0b2b6174882c41ba31fd5b",
     "landscapePosition": "center top"
+  },
+  "dayuse-or-touvelle-state-recreation-site": {
+    "src": "/outzide-native/batch1/touvelle-screenprint-v1.png",
+    "author": "Finetooth",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rogue_River_at_Touvelle.jpg",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/category-color accents, terrain-conforming mesh, water contours and transparent torn-paper edge. Historical view from 2010, not current conditions.",
+    "qa": "Independent source/style and alpha-channel checks passed; native four-size crops and expanded renderer QA pending",
+    "sha256": "ab484c571e039dab3c08debf16e0b801157da005c24c9985b727fea8ed8bfe69",
+    "derivativeLicense": "CC BY-SA 3.0"
   }
 }
