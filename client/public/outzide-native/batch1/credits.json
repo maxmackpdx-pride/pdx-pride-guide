@@ -127,5 +127,16 @@
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and transparent torn-paper edge. Historical view from 2011, not current conditions.",
     "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
     "sha256": "ef2f597f9b0ead008490fb8989067aea6aaeb14195b4d0455c4ba11e0e411ac1"
+  },
+  "fishing-or-tenmile-lakes": {
+    "author": "Visitor7",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tenmile_Lake,_Oregon-1.jpg",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "src": "/outzide-native/batch1/tenmile-screenprint-v3.png",
+    "derivativeLicense": "CC BY-SA 3.0",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and transparent orange torn-paper edge. Historical view from 2013, not current conditions.",
+    "qa": "Independent source/style and alpha checks passed; native card crop QA pending",
+    "sha256": "77cdcc8f4f67f4f850f64adc8d87672b2e1a8be5c950e9d691209028c2b0cbd5"
   }
 }
