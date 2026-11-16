@@ -7814,7 +7814,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const allowed = [
       "title", "description", "venueName", "address", "neighborhood", "lat", "lng",
       "dateStart", "dateEnd", "dayOfWeek", "ageRequirement", "admission",
-      "ticketUrl", "posterImageUrl", "eventTypes", "status",
+      "ticketUrl", "posterImageUrl", "accentColor", "eventTypes", "status",
       "isPublic", "isHouseParty", "isSexPositive", "nudityOk", "isClaimable",
       "claimedBy", "source",
     ];

@@ -70,6 +70,11 @@ export type EventResearchCreateInput = {
   dryRun?: boolean;
 };
 
+const EVENT_ACCENT_TOKENS = new Set([
+  "#0066FF", "#00FFFF", "#FF1FA0", "#D4FF00", "#7B00FF",
+  "#FF7B00", "#FF0000", "#2BFF00", "#FFDD00", "#FF5F6D",
+]);
+
 const EVENT_RESEARCH_MUTABLE_FIELDS = new Set([
   "title",
   "description",
@@ -84,6 +89,7 @@ const EVENT_RESEARCH_MUTABLE_FIELDS = new Set([
   "admission",
   "ticketUrl",
   "posterImageUrl",
+  "accentColor",
   "eventTypes",
   "status",
   "isPublic",
@@ -254,6 +260,13 @@ function sanitizeEventResearchPatch(raw: unknown) {
         return eventResearchError(400, "status must be LIVE or HIDDEN");
       }
       patch[field] = String(value);
+      continue;
+    }
+    if (field === "accentColor") {
+      if (value != null && value !== "" && !EVENT_ACCENT_TOKENS.has(String(value))) {
+        return eventResearchError(400, "accentColor must be a Zaylist token color");
+      }
+      patch[field] = value === "" ? null : value;
       continue;
     }
     if (["ticketUrl", "posterImageUrl"].includes(field)) {

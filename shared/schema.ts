@@ -25,6 +25,7 @@ export const events = sqliteTable("events", {
   isSexPositive: integer("is_sex_positive", { mode: "boolean" }).notNull().default(false),
   nudityOk: integer("nudity_ok", { mode: "boolean" }).notNull().default(false),
   posterImageUrl: text("poster_image_url"),
+  accentColor: text("accent_color"), // hex from the fixed neon allowlist — the flyer majority color snapped to a token, set by QSearch; null = default accent
   /** Default HIDDEN so a forgotten status never silently publishes (ingest/admin set LIVE explicitly). */
   status: text("status").notNull().default("HIDDEN"),
   source: text("source").notNull().default("admin_seeded"),

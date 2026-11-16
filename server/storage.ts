@@ -167,6 +167,7 @@ sqlite.exec(`
     is_sex_positive INTEGER NOT NULL DEFAULT 0,
     nudity_ok INTEGER NOT NULL DEFAULT 0,
     poster_image_url TEXT,
+    accent_color TEXT,
     status TEXT NOT NULL DEFAULT 'HIDDEN',
     source TEXT NOT NULL DEFAULT 'admin_seeded',
     is_claimable INTEGER NOT NULL DEFAULT 0,
@@ -676,6 +677,7 @@ try {
 try { sqlite.exec(`ALTER TABLE events ADD COLUMN locked_fields TEXT NOT NULL DEFAULT '[]'`); } catch {}
 try { sqlite.exec(`ALTER TABLE events ADD COLUMN last_change_label TEXT`); } catch {}
 try { sqlite.exec(`ALTER TABLE events ADD COLUMN last_change_at TEXT`); } catch {}
+try { sqlite.exec(`ALTER TABLE events ADD COLUMN accent_color TEXT`); } catch {}
 
 // Add is_new, hours, phone, owner_id, grand_opening_date, status, closed_at columns to businesses if not present
 try { sqlite.exec(`ALTER TABLE businesses ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0`); } catch {}
