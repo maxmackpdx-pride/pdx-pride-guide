@@ -1,0 +1,41 @@
+{
+  "venueId": 62,
+  "correction": "CORRECTED after actual full-resolution inspection: both narrow vertical BOOKS strips are clearly present in backstory-front.jpg. They are NOT invented and must not be removed. Artwork follows the white-trim front source period; yellow-trim angled photo is a different period and must not be silently merged. Capture dates unknown. No generation performed.",
+  "sourcePage": "https://www.backstorybooksandyarn.com/gift-certificates",
+  "sourceImage": "https://images.squarespace-cdn.com/content/v1/5e8681ba6c6692546fbc0c8a/1586547363270-U7BO9ASEJSSI2135JA6J/IMG_2847.jpg",
+  "captureDate": "Unknown",
+  "credit": "Official venue site; photographer unidentified",
+  "rights": "No open license established; previous collector marked view-only. User later allowed available sources, does not erase rights.",
+  "frontageReview": "Two broad outer window bays each with photographed narrow BOOKS strip; central-left recessed doorway and steps; small two-pane window right of entry; triangular front roof and main BOOKS sign; large back house dormer/upper windows all supported. Existing rainbow stays on actual asphalt below sidewalk, front view and sky present. Dark window/books details redrawn, not pixel exact.",
+  "remaining": "White vs yellow trim source dates unresolved, do not advertise current exterior. Await independent QA before pass.",
+  "files": [
+    {
+      "path": "/workspace/scratch/65fcf33762da/recovered-27-buildings/backstory-building.png",
+      "sha256": "47fd99aa59e74fc3e76cb064be7fad09cc0cff49a0c7ad08d963891c7ab19988"
+    },
+    {
+      "path": "/workspace/scratch/65fcf33762da/recovered-27-sources/backstory-front.jpg",
+      "sha256": "67e3e4225664cc37f1a2c9be0de2b5f8638897e762ecfb76059eb759048a0ec9"
+    },
+    {
+      "path": "/workspace/scratch/65fcf33762da/recovered-27-sources/backstory-angle.jpg",
+      "sha256": "ad594946a7243c50a5ce170432a78920e8e12df0714b6c6483f41fe826f9dc78"
+    }
+  ],
+  "status": "Independent visual QA PASS relative to white-trim source; live mapping verification pending",
+  "reviewer": "category_color_fix",
+  "artwork": "Backstory-building.png",
+  "sha256": "47fd99aa59e74fc3e76cb064be7fad09cc0cff49a0c7ad08d963891c7ab19988",
+  "knownLimits": [
+    "Capture date unknown; white trim source period, not verified current paint. Do not merge yellow-trim angled photo period.",
+    "Actual original generator inputs not recovered; source-faithful visual QA does not establish generation input history.",
+    "Source rights not established as open license; credits retained."
+  ],
+  "liveRecord": {
+    "id": 62,
+    "name": "Backstory Books & Yarn",
+    "type": "shop",
+    "address": "3129 SE Hawthorne Blvd",
+    "verifiedBy": "release lead fresh production /api/directory response"
+  }
+}
