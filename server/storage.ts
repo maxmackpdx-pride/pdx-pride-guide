@@ -4815,6 +4815,22 @@ function runBootMigrationsOnce() {
       .run();
     recordBootMigration("crush_bar_closed_permanent_2025_01_01_v1");
   }
+  // Branch-specific official closure; never close/substitute the PSU location.
+  if (!hasBootMigration("bowery_oldtown_closed_2026_11_11_v1")) {
+    // BOWERY_CLOSURE_SQL_BEGIN
+    sqlite.exec(`
+-- Official https://www.bowerybagels.com/, reviewed 2026-11-16:
+-- Old Town last service November 10, closed as of November 11, 2026.
+-- PSU branch remains open. Preserve record, events, address and identity.
+UPDATE businesses
+SET status = 'CLOSED', closed_at = '2026-11-11', active = 0, ingest_events = 0
+WHERE id = 53 AND lower(trim(name)) = 'bowery bagels'
+  AND lower(trim(address)) IN ('310 nw broadway', '310 nw broadway, portland, or, 97209')
+  AND status = 'OPEN' AND active = 1 AND closed_at IS NULL;
+    `);
+    // BOWERY_CLOSURE_SQL_END
+    recordBootMigration("bowery_oldtown_closed_2026_11_11_v1");
+  }
   /**
    * Expand closed-venue directory seeds + soft-hide LIVE post-close events at blacklisted venues.
    * List lives in shared/closedVenues.ts (also used by QSearch relevance).
