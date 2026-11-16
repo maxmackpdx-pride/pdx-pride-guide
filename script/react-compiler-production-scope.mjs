@@ -1,7 +1,7 @@
 /**
  * Check transforms through the actual Vite app configuration, not only an
  * isolated benchmark. Nothing here imports live user data or writes to APIs.
- * The release candidate must never compile Mapz, route controllers, consent
+ * The release candidate must never compile Mapz, unrelated route controllers, consent
  * handling, or the uncompiled benchmark parent.
  */
 import assert from 'node:assert/strict';
@@ -18,6 +18,7 @@ const inScope=[
  ...placezCompilerModules.map(module=>'components/'+module+'.tsx'),
  ...cardFaceModules.map(face=>'components/'+face+(face.startsWith('board/punk/')?'.jsx':'.tsx')),
 ];
+const pageFunctions=['PlacezBrowse','Scenez','OutzidePlacesPage'];
 const outOfScope=[
  'components/discovery/PlaceDiscoveryCard.tsx',
  'components/home/TodayLocationCard.tsx',
@@ -69,12 +70,20 @@ try{
    const compiled=compilerMarker.test(transformed.code);
    assert.equal(compiled,expected,`Incorrect real-app React Compiler scope: ${url}`);
    const target=placezCompilerModules.find(module=>file===`components/${module}.tsx`);
-   const functionProof=target?assertCompiledFunction(transformed.code,target.split('/').pop(),expected):null;
+   const functionProof=target?assertCompiledFunction(transformed.code,({'scenez/SceneCardFace':'Closed','outz/native/NativeOutzideFace':'OutzClosed'}[target]||target.split('/').pop()),expected):null;
    inspected.push({url,compiled,functionProof});
   }
  }
+ for(const name of pageFunctions){
+  const url='/src/pages/'+name+'.tsx';
+  const transformed=await server.transformRequest(url);
+  assert.ok(transformed?.code);
+  const functionProof=assertCompiledFunction(transformed.code,name,true);
+  for(const excluded of (name==='Scenez'?['SceneExpanded','useScene']:name==='OutzidePlacesPage'?['Expanded']:[]))assertCompiledFunction(transformed.code,excluded,false);
+  inspected.push({url,compiled:true,functionProof});
+ }
  console.log('REACT_COMPILER_PRODUCTION_SCOPE '+JSON.stringify({
-  mode:'event-board-placez-presentation-infer',config:'vite.config.ts',
+  mode:'card-presentation-infer-three-pages-annotation',config:'vite.config.ts',
   functionProofs:inspected.filter(item=>item.functionProof).map(item=>item.functionProof),
   compiled:inspected.filter(item=>item.compiled).map(item=>item.url),
   excluded:inspected.filter(item=>!item.compiled).map(item=>item.url),
