@@ -360,7 +360,8 @@ function EventModalInner({
   const dayColor = dayTextToken(dayCode);
   // Border + glow accent: the day color, or a neutral neon for events with no
   // weekday (so they don't get a stark white frame).
-  const accentColor = dayAccentToken(dayCode);
+  // Flyer accent (QSearch flyer-accent system) wins when set; the day color is the fallback.
+  const accentColor = (event as { accentColor?: string | null }).accentColor || dayAccentToken(dayCode);
   const dayInk = dayInkToken(dayCode);
   const oppositeColor = dayComplementToken(dayCode);
   const eventWithLinks = event as EventWithLinks;
