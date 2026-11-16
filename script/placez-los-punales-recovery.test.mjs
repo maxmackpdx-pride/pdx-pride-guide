@@ -17,3 +17,7 @@ test('Los-Punales recovery is byte-verified and preserves previous artworks/fall
  assert.equal(nativePlacezModel({id:9999,name:'Unknown Venue',type:'shop',imageUrl:'/existing.png'}).imageUrl,'/existing.png');
  assert.equal(hasPlacezArtwork(118),false);
 });
+
+test("Los Puñales expanded card visibly credits source and historical appearance",()=>{const s=fs.readFileSync("client/src/components/placez/PlacezQuickCard.tsx","utf8");assert.match(s,/m.id===11&&<p className="pz-native-credit"/);assert.ok(s.includes("January 25, 2025 photographs"));assert.ok(s.includes("patio has since been redesigned"));assert.ok(s.includes("/placez-recovered-batch/Los-Punales-provenance.json"));});
+
+test("Full native expanded info also exposes Los Puñales credit",()=>{const s=fs.readFileSync("client/src/components/placez/NativePlacezExpanded.tsx","utf8");assert.ok(s.includes("{place.id===11&&"));assert.ok(s.includes("January 25, 2025 photographs"));assert.ok(s.includes("/placez-recovered-batch/Los-Punales-provenance.json"));});
