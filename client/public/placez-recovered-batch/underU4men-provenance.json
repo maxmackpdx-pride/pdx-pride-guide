@@ -1,0 +1,57 @@
+{
+  "venue": "underU4men",
+  "id": 50,
+  "directoryAddress": "1013 SW Morrison",
+  "identityEvidence": [
+    "https://underu4men.com/about/",
+    "https://underu4men.com/"
+  ],
+  "temporalCaution": "Official indexed home says3rd downtown storeopenedNovember2025; older flagshipclosingnotice stillindexed. Do not classifyclosed or use pre-move facade without validation. SeattleCommonsimagesnotPortland.",
+  "currentSources": [
+    {
+      "name": "Portland, Oregon, October 2026 - 133.jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Portland,_Oregon,_October_2026_-_133.jpg",
+      "author": "Another Believer",
+      "date": "2026-10-31",
+      "license": "CC BY-SA4.0",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f4/Portland%2C_Oregon%2C_October_2026_-_133.jpg"
+    },
+    {
+      "name": "Portland, Oregon, October 2026 - 134.jpg",
+      "page": "https://commons.wikimedia.org/wiki/File:Portland,_Oregon,_October_2026_-_134.jpg",
+      "author": "Another Believer",
+      "date": "2026-10-31",
+      "license": "CC BY-SA4.0",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/88/Portland%2C_Oregon%2C_October_2026_-_134.jpg"
+    }
+  ],
+  "downloads": "Two1920x2560 previews acquired and visually inspected; originals20sec timeout.",
+  "status": "Independent source-fidelity QA PASS, staged not deployed",
+  "visual134": "Actual black awning underU4men, glazed display with mannequins, left security gate, red brick sidewalk; October2026. Mannequins are source-backed not invented people. No road in close crop.",
+  "visual133": "Wide oblique exterior includes adjacent Mels frame shop/MFSgallery under shared black awning, current underU4men sign furtherleft. Preserve separate neighbor identities. No adequate front/road geometry yet.",
+  "sha256": {
+    "133-preview.jpg": "d02ba3df3b002536787df3c01c53a05b6960ae6d13490f3c4b200e0d661f2d98",
+    "134-preview.jpg": "8f292e737be52fcf11aa481b31b0dd7a3725d5be5baaa3d87aa32de9048a0b95",
+    "chamber-front.jpg": "39086ab65244ca18ee52703bb32b9357ce44f738c40a13303b8e29f309563a0a",
+    "candidate-01.png": "f4e91bb2e4aa1f3fc2f14cca2f8c10f7c5ef6d611ac8fcc36ff04942deb198a5"
+  },
+  "thirdSource": {
+    "file": "chamber-front.jpg",
+    "sourcePage": "https://business.portlandalliance.com/list/Details/underu4men-1716212",
+    "url": "https://res.cloudinary.com/micronetonline/image/upload/f_auto/c_crop,h_2250,w_2998,x_0,y_0/q_auto/v1773091063/tenants/7bf1ddf1-8f23-4d76-a4a9-d3f00c31009f/d187071741fa4ee788faebd22ee9215d/IMG-1795.jpg",
+    "caption": "New underU4men location, 1013SW Morrison",
+    "rights": "Source photograph via Portland Metro Chamber business listing; creator unspecified, no open license found; user explicitly permits restricted visual references, do not falsely label freely licensed",
+    "period": "Capturedateunknown; current postmove storefront and exactaddresscaption, indexed2026"
+  },
+  "palette": "shop --cat-shops=--amber #FFB23D, complementcyan #00FFFF",
+  "candidate": "candidate-01.png",
+  "generation": "imagegen used all3 actualsourcephotos +approvedstylecontactsheet; no pixel compositing. Upperstorefront cropped in real sharedbuilding instead of inventing roofline. Walkinghuman removed; source-backed mannequins retained.",
+  "independentReview": {
+    "reviewer": "category_color_fix",
+    "result": "PASS",
+    "details": "All three refs checked. Recessed 1013 entry, authentic display dividers/mannequins, signage and neighboring Mel\u2019s bay retained; shared upper brick building honestly cropped; rainbow on roadway beyond curb. No invented roof or passerby."
+  },
+  "artwork": "underU4men-building.png",
+  "artworkSha256": "f4e91bb2e4aa1f3fc2f14cca2f8c10f7c5ef6d611ac8fcc36ff04942deb198a5",
+  "rightsCaution": "Commons sources CC BY-SA 4.0; Chamber image has no established open license. Visual references explicitly authorized by owner. This is not a clearance or legal fair-use finding."
+}
