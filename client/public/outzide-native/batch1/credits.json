@@ -178,5 +178,16 @@
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, rock and bank mesh, flowing water contours and transparent orange torn-paper edge. Historical view from June 2007, not current flow or conditions.",
     "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
     "sha256": "b292379d896bb64652d934e62a6714e2d6c1d02f0431d4e7ddbdf83ae19034ef"
+  },
+  "fishing-wa-pine-lake": {
+    "author": "Steven Pavlov",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:2025-10-21,_Pine_Lake_Park_(Sammamish,_Washington),_075456.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "src": "/outzide-native/batch1/pine-screenprint-v1.png",
+    "derivativeLicense": "CC BY-SA 4.0",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, wooded-bank mesh, water contours and transparent orange torn-paper edge. Historical view from October 2025, not current conditions.",
+    "qa": "Independent source/style and raw alpha passed; native crop checks pending",
+    "sha256": "de625a75e8ce94a74ecd8f7b8c90e97259b3abac8d9fd922d197f29c59dd8255"
   }
 }
