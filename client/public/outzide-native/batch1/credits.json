@@ -116,5 +116,16 @@
     "changes": "AI-assisted Xerox screenprint adaptation: orange/category-color accents, terrain-conforming mesh, water contours and transparent torn-paper edge. Historical view from 2011, not current conditions.",
     "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
     "sha256": "40590f3c1a500fed994a15bc6b2fc2fa99bd6d4e8f70723e48e9ca781cbe2a7a"
+  },
+  "fishing-or-faraday-lake": {
+    "author": "Rick Swart / Oregon Department of Fish and Wildlife",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:0107_Faraday_Lake_Swart_ODFW_(7461971564).jpg",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "src": "/outzide-native/batch1/faraday-screenprint-v1.png",
+    "derivativeLicense": "CC BY-SA 2.0",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and transparent torn-paper edge. Historical view from 2011, not current conditions.",
+    "qa": "Independent source/style and alpha checks passed; native card crops pending",
+    "sha256": "ef2f597f9b0ead008490fb8989067aea6aaeb14195b4d0455c4ba11e0e411ac1"
   }
 }
