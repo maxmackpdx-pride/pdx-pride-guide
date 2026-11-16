@@ -166,7 +166,7 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
     "src": "/outzide-native/batch1/dorman-screenprint-v1.png",
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and transparent orange torn-paper edge. Historical view from July 2010, not current conditions.",
-    "qa": "Independent source/style and raw alpha passed; native crop checks pending",
+    "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
     "sha256": "9a7bd63b728963d0bfa3bbc6edd6c2690c8d9853aff49ed84e87e320d10f8945"
   }
 }
