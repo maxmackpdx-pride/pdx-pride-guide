@@ -3,6 +3,7 @@ import {readBoardMotif} from './boardMotifs';
 import type { Express, RequestHandler } from "express";
 import { randomUUID } from "node:crypto";
 import { sqlite, storage } from "./storage";
+import { getPlaceCore } from "./placesUmbrella";
 import { COMMUNITY_RULES, communitySlug, type CommunityRole } from "@shared/community";
 import { eventPath } from "@shared/eventSlug";
 import { placePath } from "@shared/placeSlug";
@@ -154,6 +155,7 @@ export function registerCommunityRoutes(app:Express,requireAuth:RequestHandler){
   });
   app.post("/api/communities",requireAuth,(req:any,res)=>{const owned=sqlite.prepare("SELECT COUNT(*) count FROM community_memberships WHERE user_id=? AND role='owner' AND joined_at>=datetime('now','-1 day')").get(req.session.userId) as any;if(Number(owned?.count||0)>=3)return res.status(429).json({error:"Community creation limit reached. Try again tomorrow."});const name=text(req.body?.name,100),description=text(req.body?.description,1200),slug=communitySlug(req.body?.slug||name);if(name.length<3||description.length<10)return res.status(400).json({error:"Name and a meaningful description are required"});if(RESERVED.has(slug)||bySlug(slug))return res.status(409).json({error:"That community address is reserved or already used"});if(!allowed({name,description},res))return;const visibility=VISIBILITY.has(req.body?.visibility)?req.body.visibility:"public",policy=POLICY.has(req.body?.membershipPolicy)?req.body.membershipPolicy:"open",id=`com_${randomUUID()}`,stamp=now();sqlite.transaction(()=>{sqlite.prepare("INSERT INTO communities (id,slug,name,description,image_url,neighborhood,visibility,membership_policy,rules,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)").run(id,slug,name,description,text(req.body?.imageUrl,500)||null,text(req.body?.neighborhood,100)||null,visibility,policy,JSON.stringify(COMMUNITY_RULES),stamp,stamp);sqlite.prepare("INSERT INTO community_memberships (community_id,user_id,role,status,rules_version,joined_at) VALUES (?,?,'owner','active','1',?)").run(id,req.session.userId,stamp);if(["club","party-collective","organization"].includes(req.body?.sceneCategory))sqlite.prepare("UPDATE communities SET scene_category=? WHERE id=?").run(req.body.sceneCategory,id);audit(id,req.session.userId,"community_created","community",id,{visibility,policy});})();res.status(201).json(detail(bySlug(slug),req.session.userId));});
   app.get("/api/communities/:slug",(req:any,res)=>{const row=bySlug(req.params.slug);if(!row||!readable(row,req.session?.userId))return res.status(404).json({error:"Community not found"});res.json(detail(row,req.session?.userId));});
+  app.get("/api/scenez/:slug",async(req:any,res)=>{const row=bySlug(req.params.slug);if(!row||!readable(row,req.session?.userId))return res.status(404).json({error:"Community not found"});res.json({place:await getPlaceCore("scenez",row.slug),community:detail(row,req.session.userId)});});
   app.post("/api/communities/:slug/claim",requireAuth,(req:any,res)=>{
     const row=bySlug(req.params.slug);
     if(!row||!readable(row,req.session.userId))return res.status(404).json({error:"Community not found"});

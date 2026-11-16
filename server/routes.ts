@@ -91,6 +91,7 @@ import { attachEventsToBusinessesAsync, attachPromotersToBusinesses, attachSpott
 import { resolveBusinessLocations } from "@shared/businessLocations";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { DIRECTORY_TYPES, isPlacezType } from "@shared/directoryTheme";
+import { getPlaceCore, listPlaceCores } from "./placesUmbrella";
 import { PRODUCT_EVENT_NAMES, recordPageView, recordProductEvent } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
 import { registerHousingRoutes } from "./housing/routes";
@@ -2141,15 +2142,23 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
   });
 
-  app.get("/api/outz/details", async (req, res) => {
+  app.get(["/api/outz/details", "/api/outzide/details"], async (req, res) => {
     try {
       const id = typeof req.query.place === "string" ? req.query.place : "";
       if (!id || id.length > 180) return res.status(400).json({ error: "Invalid destination" });
       const data = await getOutzDetails(id, (await getOutzSnapshot()).data);
       if (!data) return res.status(404).json({ error: "Unknown destination" });
       res.setHeader("Cache-Control", "no-store");
-      res.json(data);
+      res.json({ ...data, place: await getPlaceCore("outzide", id) });
     } catch { res.status(502).json({ error: "Spot details unavailable" }); }
+  });
+
+  // The places umbrella index: every place under one data layer,
+  // across the SceneZ, Placez, and Outzide families.
+  app.get("/api/places/umbrella", async (req, res) => {
+    try {
+      res.json(await listPlaceCores());
+    } catch { res.status(502).json({ error: "Places unavailable" }); }
   });
 
   app.get("/api/outz/feed", async (req: any, res) => {
@@ -3332,6 +3341,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     return {
       ...biz,
       family,
+      place: await getPlaceCore("placez", String(id)),
       locations: resolveBusinessLocations(biz),
       isOwner,
       canEditVenue: isOwner || (linkedIds?.has(biz.id) ?? false),
