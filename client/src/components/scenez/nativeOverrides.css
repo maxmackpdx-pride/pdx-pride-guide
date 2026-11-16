@@ -48,3 +48,7 @@
 .scenez-native .scene-art.has-image .scene-logo.scene-logo--photo{z-index:4;pointer-events:none}
 /* Full-bleed square photos must not move the mark into the identity lane. */
 .scenez-native .pz-card--square .scene-art.has-image .scene-logo.scene-logo--photo{top:20px;height:72px}
+
+/* No-photo SceneZ square marks use the same clear upper lane as photo marks.
+   Keep the identity scrim below the authentic logo, not over its white artwork. */
+.scenez-native .pz-card--square.page-scenez .scene-art:not(.has-image) .scene-logo{z-index:2;top:20px;height:72px}

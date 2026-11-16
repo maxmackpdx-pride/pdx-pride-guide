@@ -20,7 +20,7 @@ await writeFile(path.join(out,'fixture.css'),css.outputFiles[0].contents);
 const cases=[];
 for(const size of ['small','tall','square','wide-map','expanded'])for(const photo of [false,true])for(const logo of [false,true]){
  const id=`${size}-photo${Number(photo)}-logo${Number(logo)}`;
- const c={id:'fixture',page:'scenez',name:'Component test',kind:'Organization',short:'Fixture only',wordmark:'Fallback name',color:'#ffffff',image:photo?'/outzide-map/assets/photos/dayuse-or-smith-rock-state-park-640.webp':undefined,logo:logo?'/directory-logos/bearracuda-white.svg':undefined};
+ const c={id:'fixture',page:'scenez',name:'PDX PAH',kind:'Organization',short:'Fixture only',wordmark:'Fallback name',color:'#ffffff',image:photo?'/outzide-map/assets/photos/dayuse-or-smith-rock-state-park-640.webp':undefined,logo:logo?'/directory-logos/pdxpahportlandpetsandhandlers-white.svg':undefined};
  const face=size==='expanded'?createElement('article',{className:'pz-card pz-card--expanded'},createElement(Art,{c})):createElement(Closed,{c,size,open:()=>{},toggle:()=>{}});
  cases.push({id,size,photo,logo,html:renderToStaticMarkup(face)});
 }
@@ -36,9 +36,16 @@ try{
   const page=await browser.newPage({viewport:{width,height:1200},reducedMotion:'reduce'});await page.goto(`http://127.0.0.1:${server.address().port}/`);await page.evaluate(()=>document.fonts.ready);await page.locator('img').evaluateAll(es=>Promise.all(es.map(e=>e.decode())));
   for(const c of cases){
    const card=page.locator(`#${c.id} article`);await card.scrollIntoViewIfNeeded();
-   const result=await card.evaluate(e=>{const logo=e.querySelector('.scene-logo'),photo=e.querySelector('.landscape'),trace=e.querySelector('.traces');const z=x=>x?Number.parseInt(getComputedStyle(x).zIndex)||0:null;const identity=e.querySelector('.pz-content');const logoBottom=logo?.getBoundingClientRect().bottom,identityTop=identity?.getBoundingClientRect().top;return {logo:!!logo,photo:!!photo,wordmark:!!e.querySelector('.scene-wordmark'),logoZ:z(logo),photoZ:z(photo),traceZ:z(trace),logoBottom,identityTop,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}});
+   const result=await card.evaluate(e=>{const logo=e.querySelector('.scene-logo'),photo=e.querySelector('.landscape'),trace=e.querySelector('.traces');const z=x=>x?Number.parseInt(getComputedStyle(x).zIndex)||0:null;const identity=e.querySelector('.pz-content');const logoBottom=logo?.getBoundingClientRect().bottom,identityTop=identity?.getBoundingClientRect().top;return {logo:!!logo,photo:!!photo,wordmark:!!e.querySelector('.scene-wordmark'),logoZ:z(logo),photoZ:z(photo),traceZ:z(trace),logoBottom,identityTop,scrimZ:parseInt(getComputedStyle(e.querySelector('.scene-art'),'::after').zIndex)||0,logoOpacity:logo?getComputedStyle(logo).opacity:null,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}});
    assert.equal(result.logo,c.logo);assert.equal(result.photo,c.photo);assert.equal(result.wordmark,!c.photo&&!c.logo);
+   if(c.size==='square'&&c.logo){assert.ok(result.logoZ>result.scrimZ,'square logo stays above scrim');assert.equal(result.logoOpacity,'1');assert.ok(result.logoBottom<=result.identityTop,'square logo stays above identity');}
    if(c.photo&&c.logo){assert.ok(result.logoZ>result.photoZ&&result.logoZ>result.traceZ);if(c.size==='square')assert.ok(result.logoBottom<=result.identityTop,'square photo logo stays above identity');}
+   if(c.size==='square'&&c.logo&&!c.photo){
+    for(const family of ['placez','outzide']){
+     const otherZ=await card.evaluate((e,family)=>{e.classList.replace('page-scenez',`page-${family}`);const z=parseInt(getComputedStyle(e.querySelector('.scene-logo')).zIndex)||0;e.classList.replace(`page-${family}`,'page-scenez');return z},family);
+     assert.ok(otherZ<=result.scrimZ,`${family} keeps its existing logo layer`);
+    }
+   }
    await card.screenshot({path:path.join(out,`${width}-${c.id}.png`)});results.push({viewport:width,...c,html:undefined,...result});
   }
   await page.close();
