@@ -154,9 +154,9 @@
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hayrick_Butte_and_Hoodoo_ski_area,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
     "license": "Public Domain Mark 1.0 (author Flickr release, not CC0)",
     "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
-    "src": "/outzide-native/batch1/hoodoo-screenprint-v2.png",
+    "src": "/outzide-native/batch1/hoodoo-screenprint-v4.png",
     "changes": "AI-assisted Xerox screenprint adaptation: orange/purple accents, terrain-conforming mesh and transparent orange torn-paper edge. Historical winter view from January 2025, not current snow or conditions.",
-    "qa": "HOLD: source/style and alpha pass, but native small/square/wide crops hide mountain identity under bottom content; requires asset reframing before release",
-    "sha256": "56e776519011a398eaed3678f5d53c8364b88ce4d12f90ae734d69f057c21fad"
+    "qa": "Independent source/style, three-background alpha-renderer, all four native card size crops and expanded hero checks passed; v4 preserves repaired mountain framing",
+    "sha256": "74f4a7b614cd8be4c8111624718a5490f8dac4a18b197affe4df667a7e6533f7"
   }
 }
