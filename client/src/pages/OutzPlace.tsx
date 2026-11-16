@@ -1,3 +1,4 @@
+import {outzCategoryLabel} from '@shared/outzCategoryLabel';
 import {outzBoardIntent} from '@/lib/outzBoardPost';
 import {OutzPhoto,type OutzPhotoData} from '@/components/outz/OutzPhoto';
 import { ArrowUpRight } from "lucide-react";
@@ -317,7 +318,7 @@ export default function OutzPlace({placeSlug, embedded = false, boardIntent = nu
         <img className="outz-section__art outz-section__art--right" src={`${OUTZ_MOTIF}/topographic-canyon-pass.svg`} alt="" aria-hidden="true" />
         <div className={`outz-place__facts${stay ? " outz-place__facts--stay" : ""}`}>
           <div className="outz-place__tags">
-            {meta ? <Badge color={embedded ? "var(--oz-category)" : meta.color} variant="outline">{meta.label}</Badge> : null}
+            {meta ? <Badge color={embedded ? "var(--oz-category)" : meta.color} variant="outline">{outzCategoryLabel(fullCatalogSite?.kind,meta.label)}</Badge> : null}
             <Badge variant="paper">{place?.sourceName}</Badge>
             {placeId ? <button className="outz-place__follow" type="button" aria-pressed={!!followQuery.data?.isFollowing} disabled={updateFollow.isPending || (!!user && followQuery.isPending)} onClick={() => user ? updateFollow.mutate(!followQuery.data?.isFollowing) : setShowAuth(true)}><Bell size={16} aria-hidden="true" />{followQuery.data?.isFollowing ? "Following" : "Follow destination"}</button> : null}
           </div>
