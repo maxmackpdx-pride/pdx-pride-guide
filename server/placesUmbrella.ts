@@ -1,5 +1,6 @@
 import { sqlite, storage } from "./storage";
 import { getOutzSnapshot } from "./outz";
+import { BEACH_MAP_LOCATIONS } from "@shared/nudeBeaches";
 
 /**
  * The places umbrella: ONE data layer under the three place-card families.
@@ -59,6 +60,21 @@ function communityCore(row: any, businessesById: Map<number, any>): PlaceCore {
   };
 }
 
+/** The two map beaches live outside the snapshot (shared/nudeBeaches). */
+function beachCore(id: string, b: any): PlaceCore {
+  return {
+    family: "outzide",
+    ref: id,
+    name: b.label || id,
+    neighborhood: b.subtitle ?? null,
+    address: null,
+    lat: typeof b.lat === "number" ? b.lat : null,
+    lng: typeof b.lng === "number" ? b.lng : null,
+    imageUrl: null,
+    sourcePlaceId: null,
+  };
+}
+
 function outzPlaces(snapshot: any): any[] {
   return [
     ...(snapshot?.destinations || []),
@@ -101,6 +117,8 @@ export async function getPlaceCore(
     );
     return communityCore(row, businessesById);
   }
+  const beach = (BEACH_MAP_LOCATIONS as Record<string, any>)[ref];
+  if (beach) return beachCore(ref, beach);
   const snapshot = (await getOutzSnapshot()).data as any;
   const place = outzPlaces(snapshot).find((p: any) => p.id === ref);
   return place ? outzCore(place) : null;
@@ -121,6 +139,11 @@ export async function listPlaceCores(): Promise<PlaceCore[]> {
   for (const row of communities) cores.push(communityCore(row, businessesById));
   const snapshot = (await getOutzSnapshot()).data as any;
   const seen = new Set<string>();
+  for (const [id, b] of Object.entries(BEACH_MAP_LOCATIONS)) {
+    if (seen.has(id)) continue;
+    seen.add(id);
+    cores.push(beachCore(id, b as any));
+  }
   for (const place of outzPlaces(snapshot)) {
     if (!place?.id || seen.has(place.id)) continue;
     seen.add(place.id);
