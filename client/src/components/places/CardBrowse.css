@@ -1,0 +1,8 @@
+.places-card-browse{margin:20px 0;min-width:0}
+.places-card-view{display:flex;gap:8px;justify-content:center;margin-bottom:20px}
+.places-card-view button,.places-card-load-more{padding:10px 16px;color:inherit;background:var(--places-art-ink-111318);border:1px solid var(--places-art-ink-66676d);border-radius:10px;font:inherit;cursor:pointer}
+.places-card-view button[aria-pressed=true]{border-color:var(--neon-orange);box-shadow:0 0 8px color-mix(in srgb,var(--neon-orange) 25%,transparent)}
+.places-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,136px));gap:24px 16px;justify-content:center;align-items:start}
+.places-card-grid[data-card-view=wide]{grid-template-columns:minmax(0,360px)}
+.places-card-count{font-size:12px;text-align:center;opacity:.7;margin:20px 0 10px}
+.places-card-load-more{display:block;margin:0 auto}.places-card-load-more span{font-size:12px}
