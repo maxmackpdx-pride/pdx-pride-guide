@@ -90,7 +90,7 @@ import {
 import { attachEventsToBusinessesAsync, attachPromotersToBusinesses, attachSpottedAndGigsToBusinesses } from "./directoryEvents";
 import { resolveBusinessLocations } from "@shared/businessLocations";
 import { parsePacificDateTime } from "@shared/missedConnections";
-import { DIRECTORY_TYPES } from "@shared/directoryTheme";
+import { DIRECTORY_TYPES, isPlacezType } from "@shared/directoryTheme";
 import { PRODUCT_EVENT_NAMES, recordPageView, recordProductEvent } from "./analytics";
 import { registerAdRoutes } from "./adsRoutes";
 import { registerHousingRoutes } from "./housing/routes";
@@ -2462,6 +2462,88 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(publicEvent(listing, pendingClaimIds, venueWebsiteIndex()));
   });
 
+  // ─── EVENT DETAIL — one detailed payload for the expanded card ───
+  // Event + venue + hosts + talent + gigs + missed connections + nearby
+  // (restaurants and same-day events), composed server-side so the
+  // expanded card renders every page from a single response.
+  app.get("/api/events/:id/detail", (req: any, res) => {
+    const eventId = Number(req.params.id);
+    if (isTuckerHostedArchiveId(eventId)) {
+      return res.status(404).json({ error: "Not found" });
+    }
+    const evt = storage.getEvent(eventId);
+    if (!evt) return res.status(404).json({ error: "Not found" });
+    if (evt.status !== "LIVE" && !sessionIsAdmin(req)) {
+      return res.status(404).json({ error: "Not found" });
+    }
+    if (!sessionIsAdmin(req) && !isPublicEventVisibleUnderPrideCap(evt)) {
+      return res.status(404).json({ error: "Not found" });
+    }
+    const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
+    const websites = venueWebsiteIndex();
+    const expanded = expandMultiDayEvents([evt]);
+    const listing = expanded[0] || evt;
+    const event = publicEvent(listing, pendingClaimIds, websites);
+
+    const businesses = storage.getBusinesses() as any[];
+    const venue = businesses.find(
+      b => (b.name || "").trim().toLowerCase() === (evt.venueName || "").trim().toLowerCase(),
+    ) || null;
+    const slimPlace = (b: any, distanceMi?: number) => ({
+      id: b.id, name: b.name, type: b.type, neighborhood: b.neighborhood ?? null,
+      address: b.address ?? null, imageUrl: b.imageUrl ?? null,
+      lat: b.lat ?? null, lng: b.lng ?? null,
+      ...(distanceMi != null ? { distanceMi: Math.round(distanceMi * 10) / 10 } : {}),
+    });
+    const distMi = (aLat: number, aLng: number, bLat: number, bLng: number) => {
+      const R = 3958.8;
+      const dLat = (bLat - aLat) * Math.PI / 180;
+      const dLng = (bLng - aLng) * Math.PI / 180;
+      const s = Math.sin(dLat / 2) ** 2
+        + Math.cos(aLat * Math.PI / 180) * Math.cos(bLat * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+      return 2 * R * Math.asin(Math.sqrt(s));
+    };
+
+    const gigs = venue
+      ? (storage.getGigPosts("LIVE") as any[])
+          .filter(g => g.businessId === venue.id)
+          .slice(0, 20)
+          .map(g => ({ id: g.id, title: g.title, postType: g.postType, createdAt: g.createdAt, location: g.location ?? null, description: g.description ?? null, compensation: g.compensation ?? null, gigDate: g.gigDate ?? null, gigTime: g.gigTime ?? null }))
+      : [];
+
+    let nearbyRestaurants: any[] = [];
+    let nearbyEvents: any[] = [];
+    const lat = (listing as any).lat ?? evt.lat;
+    const lng = (listing as any).lng ?? evt.lng;
+    if (typeof lat === "number" && typeof lng === "number") {
+      nearbyRestaurants = businesses
+        .filter(b => ["restaurant", "cafe"].includes(b.type) && typeof b.lat === "number" && typeof b.lng === "number")
+        .map(b => ({ b, d: distMi(lat, lng, b.lat, b.lng) }))
+        .filter(x => x.d <= 1.5)
+        .sort((a, b) => a.d - b.d)
+        .slice(0, 8)
+        .map(x => slimPlace(x.b, x.d));
+      const day = String(evt.dateStart).slice(0, 10);
+      nearbyEvents = (storage.getEvents({ status: "LIVE" }) as any[])
+        .filter(e => e.id !== evt.id && String(e.dateStart).slice(0, 10) === day && typeof e.lat === "number" && typeof e.lng === "number")
+        .map(e => ({ e, d: distMi(lat, lng, e.lat, e.lng) }))
+        .filter(x => x.d <= 2)
+        .sort((a, b) => a.d - b.d)
+        .slice(0, 8)
+        .map(x => ({ ...publicEvent(x.e, pendingClaimIds, websites), distanceMi: Math.round(x.d * 10) / 10 }));
+    }
+
+    res.json({
+      event,
+      venue: venue ? slimPlace(venue) : null,
+      hosts: storage.getEventHosts(evt.id),
+      talent: storage.getEventTalent(evt.id, { includePending: false }),
+      gigs,
+      missedConnections: storage.getMissedConnectionsByEvent(evt.id, req.session?.userId),
+      nearby: { restaurants: nearbyRestaurants, events: nearbyEvents },
+    });
+  });
+
   // ─── SUBMISSIONS ─────────────────────────────────────────────────────────
   app.post("/api/submit", requireAuth, (req, res) => {
     try {
@@ -3220,6 +3302,75 @@ export function registerRoutes(httpServer: Server, app: Express) {
         isFollowing: followedIds?.has(biz.id) ?? false,
         followerCount: followerCounts.get(biz.id) ?? 0,
       });
+    } catch (error) { next(error); }
+  });
+
+  // ── FAMILY DETAIL APIS — one detailed payload per directory card family ──
+  // Placez (places), Needz (healthcare + nonprofit), Squadz (groups).
+  // Same composed shaping as /api/directory/:id, gated by family so each
+  // card type reads its own API. The blended endpoint stays for legacy clients.
+  async function directoryFamilyDetail(req: any, id: number, family: "placez" | "needz" | "squadz") {
+    const businesses = storage.getBusinesses({});
+    const liveEvents = storage.getEvents({ status: "LIVE" });
+    const withEvents = await attachEventsToBusinessesAsync(businesses, liveEvents);
+    const promoterMap = storage.getPromotersForBusinesses(businesses, liveEvents);
+    const withPromoters = attachPromotersToBusinesses(withEvents, pid => promoterMap.get(pid) ?? []);
+    const missedConnections = storage.getMissedConnections("ACTIVE");
+    const gigs = storage.getGigPosts("LIVE");
+    const withTabs = attachSpottedAndGigsToBusinesses(withPromoters, missedConnections, gigs);
+    const biz: any = withTabs.find(b => b.id === id);
+    if (!biz || biz.status === "CLOSED") return null;
+    const inFamily = family === "placez"
+      ? isPlacezType(biz.type)
+      : family === "needz"
+        ? ["healthcare", "nonprofit"].includes(biz.type)
+        : biz.type === "group";
+    if (!inFamily) return null;
+    const userId = req.session?.userId;
+    const linkedIds = userId
+      ? new Set(storage.getUserLinkedBusinesses(userId).map(b => b.id))
+      : null;
+    const followerCounts = storage.getBusinessFollowerCounts();
+    const followedIds = userId != null ? storage.getFollowedBusinessIds(userId) : null;
+    const isOwner = userId != null && biz.ownerId === userId;
+    return {
+      ...biz,
+      family,
+      locations: resolveBusinessLocations(biz),
+      isOwner,
+      canEditVenue: isOwner || (linkedIds?.has(biz.id) ?? false),
+      isFollowing: followedIds?.has(biz.id) ?? false,
+      followerCount: followerCounts.get(biz.id) ?? 0,
+    };
+  }
+
+  app.get("/api/placez/:id", async (req: any, res, next) => {
+    try {
+      const id = Number(req.params.id);
+      if (!Number.isInteger(id) || id <= 0) return res.status(404).json({ error: "Place not found" });
+      const payload = await directoryFamilyDetail(req, id, "placez");
+      if (!payload) return res.status(404).json({ error: "Place not found" });
+      res.json(payload);
+    } catch (error) { next(error); }
+  });
+
+  app.get("/api/needz/:id", async (req: any, res, next) => {
+    try {
+      const id = Number(req.params.id);
+      if (!Number.isInteger(id) || id <= 0) return res.status(404).json({ error: "Place not found" });
+      const payload = await directoryFamilyDetail(req, id, "needz");
+      if (!payload) return res.status(404).json({ error: "Place not found" });
+      res.json(payload);
+    } catch (error) { next(error); }
+  });
+
+  app.get("/api/squadz/:id", async (req: any, res, next) => {
+    try {
+      const id = Number(req.params.id);
+      if (!Number.isInteger(id) || id <= 0) return res.status(404).json({ error: "Place not found" });
+      const payload = await directoryFamilyDetail(req, id, "squadz");
+      if (!payload) return res.status(404).json({ error: "Place not found" });
+      res.json(payload);
     } catch (error) { next(error); }
   });
 
