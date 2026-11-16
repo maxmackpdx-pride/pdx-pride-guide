@@ -40,5 +40,16 @@
     "qa": "Independent source-composition/style comparison and alpha-renderer backgrounds passed",
     "sha256": "e23d1eaee501fddd651642e93c53955330c216dab12ba1c9b0a186d8ebf2767f",
     "derivativeLicense": "CC BY-SA 2.0"
+  },
+  "fishing-wa-riffe-lake": {
+    "src": "/outzide-native/batch1/riffe-screenprint-v2.png",
+    "author": "Christian Berkman",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Riffe_Lake_from_Dog_Mountain_Peak.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "derivativeLicense": "CC BY-SA 4.0",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours, torn-paper edge. Historical view, not current conditions.",
+    "qa": "Independent source-composition/style and alpha-renderer contrast checks passed; native-card crop QA pending",
+    "sha256": "f0cbbf29e812cafae9607dfe8ee094ecea2e45d8d5461ea8fad9edde140f15f7"
   }
 }
