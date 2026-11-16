@@ -148,5 +148,56 @@
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and transparent orange torn-paper edge. Historical view from 2011, not current snow or conditions.",
     "qa": "Independent source/style, three-background alpha-renderer, all four native card size crops and expanded hero checks passed",
     "sha256": "2cc11ef6e8eb1fdb7f456faf3351088f514605df650dbec2b6ed2a51f5cccfd7"
+  },
+  "winter-hoodoo": {
+    "author": "Bonnie Moreland",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hayrick_Butte_and_Hoodoo_ski_area,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+    "license": "Public Domain Mark 1.0 (author Flickr release, not CC0)",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+    "src": "/outzide-native/batch1/hoodoo-screenprint-v4.png",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/purple accents, terrain-conforming mesh and transparent orange torn-paper edge. Historical winter view from January 2025, not current snow or conditions.",
+    "qa": "Independent source/style, three-background alpha-renderer, all four native card size crops and expanded hero checks passed; v4 preserves repaired mountain framing",
+    "sha256": "74f4a7b614cd8be4c8111624718a5490f8dac4a18b197affe4df667a7e6533f7"
+  },
+  "fishing-or-dorman-pond": {
+    "author": "Gary Halvorson, Oregon State Archives",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dorman_Pond_-_DPLA_-_e8f620d2fbead4fa8e590c9f4289d9bd.jpg",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "src": "/outzide-native/batch1/dorman-screenprint-v1.png",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and transparent orange torn-paper edge. Historical view from July 2010, not current conditions.",
+    "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
+    "sha256": "9a7bd63b728963d0bfa3bbc6edd6c2690c8d9853aff49ed84e87e320d10f8945"
+  },
+  "fishing-or-metolius-river-wizard-falls": {
+    "author": "WorkinStiff at English Wikipedia",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Metolius_River_near_Wizard_Falls.jpg",
+    "license": "Public domain released by author worldwide",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/File:Metolius_River_near_Wizard_Falls.jpg#Licensing",
+    "src": "/outzide-native/batch1/wizard-screenprint-v2.png",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, rock and bank mesh, flowing water contours and transparent orange torn-paper edge. Historical view from June 2007, not current flow or conditions.",
+    "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
+    "sha256": "b292379d896bb64652d934e62a6714e2d6c1d02f0431d4e7ddbdf83ae19034ef"
+  },
+  "fishing-wa-pine-lake": {
+    "author": "Steven Pavlov",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:2025-10-21,_Pine_Lake_Park_(Sammamish,_Washington),_075456.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "src": "/outzide-native/batch1/pine-screenprint-v1.png",
+    "derivativeLicense": "CC BY-SA 4.0",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, wooded-bank mesh, water contours and transparent orange torn-paper edge. Historical view from October 2025, not current conditions.",
+    "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
+    "sha256": "de625a75e8ce94a74ecd8f7b8c90e97259b3abac8d9fd922d197f29c59dd8255"
+  },
+  "atv-or-winchester-bay": {
+    "author": "Bonnie Moreland",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Umpqua_Beach_and_dunes,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+    "license": "Public Domain Mark 1.0 (author Flickr release, not CC0)",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+    "src": "/outzide-native/batch1/winchester-screenprint-v2.png",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/red accents, dune and grass mesh, water contours and transparent orange torn-paper edge. Historical view from January 2022, not current conditions or a riding route.",
+    "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
+    "sha256": "61926098a1545d5002a9cd14617a2a4598f433a39521502624a13c26c56953c3"
   }
 }
