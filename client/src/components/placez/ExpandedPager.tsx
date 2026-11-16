@@ -1,6 +1,6 @@
 import {useEffect,useLayoutEffect,useId,useRef,useState,type KeyboardEvent,type ReactNode} from 'react';
 
-export const EXPANDED_PAGES=['Feed','Info','Events + nearby','Maps','People'] as const;
+export const EXPANDED_PAGES=['Feed','Info','Maps','Events + nearby','People'] as const;
 export function pageForKey(key:string,current:number,count=5){
   if(key==='ArrowRight')return Math.min(count-1,current+1);
   if(key==='ArrowLeft')return Math.max(0,current-1);

@@ -14,6 +14,7 @@ import {sceneTypes,sceneCategory,sceneModel} from '@/components/scenez/sceneMode
 import '@/components/scenez/scenezNative.css';
 import '@/components/scenez/nativeOverrides.css';
 import '@/components/scenez/sceneReference.css';
+import '@/components/scenez/sceneExpandedViewport.css';
 function useScene(slug:string){const {user}=useAuth();const url=`/api/communities/${encodeURIComponent(slug)}`;return useQuery<CommunityDetail>({queryKey:[url,user?.id],queryFn:()=>apiRequest('GET',url).then(r=>r.json()),staleTime:60000});}
 function SceneCard({community,size,onOpen,onFollow}:{community:CommunitySummary;size:'small'|'wide';onOpen:(slug:string,tab?:string)=>void;onFollow:(c:CommunitySummary)=>void}){
  const boardUpdate=useCardBoardUpdate('scenez',community.slug);const unread=(community.chat?.unreadCount||0)+(boardUpdate?.unreadCount||0);

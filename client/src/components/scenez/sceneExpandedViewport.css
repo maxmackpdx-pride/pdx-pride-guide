@@ -1,0 +1,5 @@
+/* Root's stable bilateral gutter otherwise offsets a viewport-width dialog,
+   clipping the close control and heart on mobile. Match OutZide's modal rule. */
+html:has(.scene-native-dialog[open]){scrollbar-gutter:auto;overflow:hidden}
+.scene-native-dialog{width:min(620px,100%);max-width:100%;scrollbar-gutter:auto;box-sizing:border-box}
+.scene-dialog-close{right:max(12px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top))}
