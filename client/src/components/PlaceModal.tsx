@@ -14,7 +14,6 @@ import { mapBrowseHref } from "@/lib/mapBrowseHref";
 import DetailActions from "./DetailActions";
 import type React from "react";
 import { lazy, Suspense, useEffect, useId, useRef, useState } from "react";
-import { CardDetails } from "./cards/CardAPI";
 import FullscreenPlacezDetails from "./placez/FullscreenPlacezDetails";
 import { OpenCardMeta } from "./cards/react19Card";
 import { closeOpenCard } from "./cards/react19CardModel";
@@ -223,7 +222,7 @@ function PlaceHours({ hours }: { hours: string }) {
 export default function PlaceModal({ documentMeta = true, ...props }: Parameters<typeof PlaceModalInner>[0] & { documentMeta?: boolean }) {
  const place = props.place;
  if (place) return <FullscreenPlacezDetails key={place.id} label={place.name} onClose={() => closeOpenCard(props.onClose)}>{documentMeta ? <OpenCardMeta title={place.name} description={place.neighborhood || place.address || place.description || ""} /> : null}<NativePlaceModalInner {...props} place={place} onClose={() => closeOpenCard(props.onClose)}/></FullscreenPlacezDetails>;
- return <CardDetails key={place?.id} onClose={props.onClose} mobileViewport>{documentMeta && place ? <OpenCardMeta title={place.name} description={place.neighborhood || place.address || place.description || ""} /> : null}<PlaceModalInner {...props} onClose={() => closeOpenCard(props.onClose)} /></CardDetails>;
+ return null;
 }
 function NativePlaceModalInner(props: Parameters<typeof PlaceModalInner>[0] & {place:Business}) {
  const live=useNativePlacezData(props.place);
