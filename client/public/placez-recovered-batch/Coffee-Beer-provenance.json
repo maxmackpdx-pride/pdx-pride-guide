@@ -1,0 +1,33 @@
+{
+  "venueId": 17,
+  "status": "Independent source/style PASS; native crop review pending",
+  "output": "repair-03.png",
+  "sha256": "ee6c48ba14a08609053c180dc31acdacd03167af11c8d8b48070012deb5645ad",
+  "method": "one imagegen targeted edit, no non-generative compositing",
+  "preserved": "wide-angle corner, red entrance4142, main signage, collage/mesh, rainbow asphalt",
+  "improved": "Unsupported neighbor and main-window interiors corrected; source-backed central doorway product stack preserved.",
+  "remaining": "No claim exact pixel or current scene; unknown left-window contents remain indistinct reflections.",
+  "inputs": [
+    {
+      "path": "coffee-beer-official.jpg",
+      "role": "official corner architectural reference",
+      "date": "unknown",
+      "rights": "official source, no open license asserted; user authorized Google/online reference use"
+    },
+    {
+      "path": "coffee-beer-2026-01.jpg",
+      "role": "left facade geometry corroboration, not instruction to merge later mural",
+      "source": "https://commons.wikimedia.org/wiki/File:Coffee_Beer,_Portland,_Oregon_(2026)_-_01.jpg",
+      "creator": "Another Believer",
+      "date": "2026-08-21",
+      "license": "CC BY-SA4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "changes": "Generative architecture adaptation; photo treatment; people/vehicles not retained. Derivative attribution and ShareAlike obligations preserved."
+    }
+  ],
+  "artwork": "Coffee-Beer-building.png",
+  "artworkSha256": "ee6c48ba14a08609053c180dc31acdacd03167af11c8d8b48070012deb5645ad",
+  "sourcePeriod": "Mixed-date stylized interpretation: undated older official main frontage and August21 2026 neighbor corroboration; not documentary current appearance",
+  "category": "cafe",
+  "primaryToken": "var(--cat-cafes)"
+}
