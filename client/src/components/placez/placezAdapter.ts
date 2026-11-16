@@ -1,3 +1,4 @@
+import {directoryTypeColor} from '@shared/directoryTheme';
 /** Current /api/directory contract, inspected 2026-11-10. No write calls in this adapter. */
 export interface DirectoryRecord {
   id: number; name: string; type: string; description?: string | null;
@@ -28,6 +29,16 @@ export interface PlaceCardModel {
   hours: string | null; description: string | null; address: string | null; phone: string | null; latitude: number | null; longitude: number | null; composeHref:string; claimState: 'unclaimed' | 'claimed' | 'unknown'; saved: boolean | null;
 }
 const LABELS: Record<string,string> = {bar:'Bar',venue:'Venue',restaurant:'Restaurant',cafe:'Cafe',shop:'Shop',service:'Service',hotel:'Hotel',nonprofit:'Nonprofit',healthcare:'Healthcare',realestate:'Real estate',group:'Community',campground:'Campground'};
+/** Consume the shipped category tokens, not the older directory hex palette.
+ * Editorial presentations keep their approved artwork-matched accents. */
+const CATEGORY_TOKENS: Record<string,string> = {
+  bar:'--cat-bars', restaurant:'--cat-food', cafe:'--cat-cafes',
+  venue:'--cat-venues', service:'--cat-services', shop:'--cat-shops', hotel:'--cat-hotels',
+};
+export function placezCategoryAccent(type:string):string {
+  const token=CATEGORY_TOKENS[type];
+  return token ? `var(${token})` : directoryTypeColor(type);
+}
 const clean = (value: unknown): string | null => typeof value === 'string' && value.trim() ? value.trim() : null;
 const slugify = (name: string) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80) || 'place';
 /** Reject stale, unbounded or future status evidence. OPEN is lifecycle, never live hours. */
@@ -46,7 +57,7 @@ export function adaptDirectoryRecord(record: DirectoryRecord, presentation?: Pla
   return {id:record.id,name:record.name,title:presentation?.logoIsName===true ? null : clean(presentation?.title) || record.name,category,descriptor:presentation?.descriptor || category,
     neighborhood:clean(record.neighborhood),href:`/directory/${record.id}/${slugify(record.name)}`,
     imageUrl:presentation?.heroUrl || clean(record.imageUrl),logoUrl:presentation?.logoUrl,imageFit:presentation?.imageFit,imagePosition:presentation?.imagePosition,treatmentUrl:presentation?.treatmentUrl,cutoutMaskUrl:presentation?.cutoutMaskUrl,wideCutoutMaskUrl:presentation?.wideCutoutMaskUrl,wideFadeMaskUrl:presentation?.wideFadeMaskUrl,wideImageUrl:presentation?.wideImageUrl,wideLogoUrl:presentation?.wideLogoUrl,glassUrl:presentation?.glassUrl || (()=>undefined),
-    accent:presentation?.accent || '#00e9ef',
+    accent:presentation?.accent || placezCategoryAccent(record.type),
     status,hours,description:clean(record.description),address:clean(record.address) || (record.locations?.length===1 ? clean(record.locations[0]?.address):null),phone:record.locations?.length===1 ? clean(record.locations[0]?.phone):null,latitude:record.locations?.length===1 && Number.isFinite(record.locations[0]?.lat)?record.locations[0].lat!:null,longitude:record.locations?.length===1 && Number.isFinite(record.locations[0]?.lng)?record.locations[0].lng!:null,composeHref:`/mizzed/new?place=${record.id}`,claimState:record.ownerId===null ? 'unclaimed' : Number.isSafeInteger(record.ownerId) && Number(record.ownerId)>0 ? 'claimed' : 'unknown',
     saved:typeof record.isFollowing==='boolean' ? record.isFollowing : null};
 }
