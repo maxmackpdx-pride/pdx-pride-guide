@@ -1,0 +1,51 @@
+{
+  "venue": "Mis Tacones",
+  "directoryId": 10,
+  "address": "1670 NE Killingsworth, Portland",
+  "identitySources": [
+    "https://mistaconespdx.com/",
+    "https://mistaconespdx.com/about-us"
+  ],
+  "eligibility": "Official site self identifies queer and Chicano owned",
+  "category": "restaurant",
+  "primaryToken": "--cat-food = --neon-orange #FF7B00",
+  "complement": "cyan #00FFFF",
+  "sourcePeriod": "20 April 2022; current address verified separately, no claim current facade unchanged",
+  "sources": [
+    {
+      "path": "source-1.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d3/Mis_Tacones%2C_Portland%2C_Oregon_%282022%29_-_1.jpg",
+      "author": "Another Believer",
+      "license": "CC BY-SA 4.0",
+      "sha256": "4bf56b565c71993c62cfc0062a4dff4858acfe653d3489f1c12e6bd948a7daed"
+    },
+    {
+      "path": "source-2.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/bf/Mis_Tacones%2C_Portland%2C_Oregon_%282022%29_-_2.jpg",
+      "author": "Another Believer",
+      "license": "CC BY-SA 4.0",
+      "sha256": "2d146ddd162e270492d7a872490c26cfd223d76ff40fcc5147e2abb5c0d25f8f"
+    },
+    {
+      "path": "source-3.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/65/Mis_Tacones%2C_Portland%2C_Oregon_%282022%29_-_3.jpg",
+      "author": "Another Believer",
+      "license": "CC BY-SA 4.0",
+      "sha256": "ba12392b70bdb29a2d7aae35e06c8ef42986ebbabc51e6bcacd922b79a9a8269"
+    },
+    {
+      "path": "source-4.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/90/Mis_Tacones%2C_Portland%2C_Oregon_%282022%29_-_4.jpg",
+      "author": "Another Believer",
+      "license": "CC BY-SA 4.0",
+      "sha256": "e82de18dfd7f30d615c3c54a6703249cedd7908f898f550f5725932f1d7198af"
+    }
+  ],
+  "candidate": "candidate-02-recess.png",
+  "status": "Independent source-fidelity QA PASS; native crop review pending, not deployed",
+  "issues": [],
+  "generation": "Targeted imagegen repair02 with authentic photos1/2/3; original four refs preserved. Central street-facing recess opaque horizontal cladding restored.",
+  "independentFinding": "category_color_fix checked all4 photos; opaque front plane source-backed, source3 narrow side-return glazing remains separate. Storefront/signs/ground entrance/asphalt rainbow retained. Not a geometry-perfect/current-facade claim.",
+  "artwork": "Mis-Tacones-building.png",
+  "artworkSha256": "dd716c493aed1110af4168355f3b93d83634458bf5cc56cda11f2075ad208aad"
+}
