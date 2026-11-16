@@ -1,0 +1,52 @@
+{
+  "venue": "Silverado",
+  "directory_id_expected": 7,
+  "address": "610 NW Couch St",
+  "candidate": "candidate-02-notices.png",
+  "status": "source_style_independently_passed_native_QA_pending",
+  "source_periods": [
+    {
+      "file": "source-2025-518.jpg",
+      "date": "2025-08-17",
+      "author": "Another Believer",
+      "license": "CC BY-SA 4.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Portland,_Oregon,_US_-_August_2025_-_518.jpg",
+      "use": "Main facade state"
+    },
+    {
+      "files": [
+        "source-2019-1.jpg",
+        "source-2019-3.jpg",
+        "source-2019-4.jpg"
+      ],
+      "date": "2019-01-19",
+      "author": "Another Believer",
+      "license": "CC BY-SA 4.0",
+      "use": "Same-location exterior geometry corroboration, not current state claim"
+    }
+  ],
+  "constraints": [
+    "Source crops shared multi-story building; roof unseen; do not fabricate roof or sky",
+    "Only brick sidewalk visible, no source-backed asphalt; no rainbow on brick invented",
+    "Source includes partially obscured lower entry; retain occlusion"
+  ],
+  "self_review": [
+    "Original candidate omitted two actual notices; repair02 restored them and passed two independent source reviewers.",
+    "Main facade and honest shared-building crop retained. Native crop/credits review pending."
+  ],
+  "publication": "Staged locally; not yet published",
+  "repair": "Restored source-backed NO MINORS and fence WARNING notices; no wider scene change requested",
+  "artwork": "Silverado-building.png",
+  "artworkSha256": "0174206c740e1757f0b3f5d163d4afe9b228efb558e9f979575a0ecbae6ac936",
+  "adaptation": "AI-stylized interpretation with Xerox edges and magenta/cyan wireframing; actual notices restored with indistinct fine print. 2025 main facade, 2019 corroboration. Historical appearance, not current documentary photograph.",
+  "license": "Adaptation CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "verifiedListing": {
+    "id": 7,
+    "name": "Silverado",
+    "type": "bar",
+    "address": "610 NW Couch St",
+    "status": "OPEN",
+    "verification": "Fresh production /api/directory read by release lead"
+  }
+}
