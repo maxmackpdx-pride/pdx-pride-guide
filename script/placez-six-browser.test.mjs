@@ -89,6 +89,19 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   await directoryFace.getByRole('button',{name:`View details for ${names[directoryId]}`,exact:true}).click();await page.locator('.pz-native-expanded').waitFor();assert.ok(new URL(page.url()).pathname.startsWith(`/directory/${directoryId}`));
   await checkpoint(`directory:${directoryId}:${directoryWidth}:opened`);
   const directoryExpanded=page.locator('.pz-native-expanded');
+  // PR75/76's approved contact placement, without replacing the recovered portal.
+  assert.equal(await directoryExpanded.locator('.pz-native-header .place-modal-panel__contacts').count(),0,'Contacts are not trapped in the fixed header');
+  await directoryExpanded.getByRole('tab',{name:'Info',exact:true}).click();
+  const contactPanel=directoryExpanded.getByRole('tabpanel',{name:'Info',exact:true});
+  await contactPanel.locator('a[href^="tel:"]').waitFor({state:'visible'});
+  const tabsBounds=await directoryExpanded.getByRole('tablist').boundingBox();
+  const phoneBounds=await contactPanel.locator('a[href^="tel:"]').first().boundingBox();
+  assert.ok(phoneBounds.y>=tabsBounds.y+tabsBounds.height-1,'Phone sits below tabs');
+  assert.equal(await contactPanel.locator('.pz-native-compose').count(),1,'Compose stays with scrolling Info content');
+  await directoryExpanded.getByRole('tab',{name:'Feed',exact:true}).click();
+  assert.equal(await contactPanel.getAttribute('inert'),'','Hidden Info cannot steal input');
+  await directoryExpanded.getByRole('tab',{name:'Info',exact:true}).click();
+
   await page.waitForFunction(()=>document.querySelector('.pz-native-expanded')?.closest('[data-card-expanded=true]')?.querySelector('[data-card-morph]')?.getAttribute('data-card-morph-phase')==='open');
   await checkpoint(`directory:${directoryId}:${directoryWidth}:phase-open`);
   await page.waitForFunction(()=>!document.getAnimations().some(a=>a.animationName?.includes('view-transition')&&a.playState==='running'));

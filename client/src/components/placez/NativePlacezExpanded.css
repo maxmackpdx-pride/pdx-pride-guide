@@ -24,8 +24,8 @@
 .pz-native-header{position:relative;z-index:2;flex:0 1 auto;min-height:0;max-height:var(--pz-native-header-max);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:calc(var(--pz-native-art-height) + 8px) 20px 8px;background:none}
 .pz-native-header h2{margin:0 0 5px;font:800 25px/1.05 var(--font-display,'Barlow Condensed',sans-serif);text-transform:uppercase;overflow-wrap:anywhere}
 .pz-native-header .pz-category{font-size:10px;padding:3px 6px}
-.pz-native-header .place-modal-panel__contacts{display:flex!important;position:static!important;padding:5px 0!important;margin:0!important;max-height:70px;overflow:auto}
-.pz-native-header .place-modal-panel__fact{font-size:13px;margin:0}
+.pz-native-page .place-modal-panel__contacts{display:flex!important;position:static!important;padding:5px 0!important;margin:0!important;flex-wrap:wrap;max-height:none;overflow:visible}
+.pz-native-page .place-modal-panel__fact{font-size:13px;margin:0}
 .pz-native-compose{display:flex;justify-content:space-between;align-items:center;min-height:44px;color:var(--pz-accent);font:600 12px/1.2 var(--font-body,Barlow,sans-serif);text-decoration:none}
 .pz-native-expanded>.pz-expanded-pager{position:relative;z-index:2;flex:1;min-height:calc(var(--pz-native-detail-min) + 96px);height:auto;margin:0;display:flex;flex-direction:column}
 .pz-native-expanded .pz-page-tabs{flex:none;padding:0 8px}
@@ -48,7 +48,7 @@
 .pz-native-footer .eb-detail__primary-action{margin:0!important;padding:0!important;position:static!important}
 .pz-native-footer button{min-height:44px}
 .pz-native-credit{font-size:10px;color:var(--pz-color-a8b8c2)}.pz-native-credit a{color:inherit}
-@media(max-height:650px){.pz-native-header h2{font-size:20px}.pz-native-header .place-modal-panel__contacts{max-height:40px}}
+@media(max-height:650px){.pz-native-header h2{font-size:20px}}
 @media(max-width:360px){.pz-native-header{padding-left:14px;padding-right:14px}.pz-native-expanded .pz-page-panel{padding-left:10px;padding-right:10px}.pz-native-expanded .pz-page-tabs button{font-size:9px}}
 
 html .pz-native-expanded .pz-heart button[data-card-heart=true]:before{width:32px!important;height:32px!important;inset:6px!important;border-radius:50%;border:1px solid var(--pz-accent);background:rgba(4,9,13,.55)}
