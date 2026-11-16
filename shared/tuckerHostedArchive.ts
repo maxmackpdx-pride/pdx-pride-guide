@@ -556,6 +556,7 @@ export function tuckerHostedArchiveAsEvent(row: TuckerHostedArchiveRow): Event {
     isSexPositive: row.isSexPositive,
     nudityOk: row.nudityOk,
     posterImageUrl: row.posterImageUrl,
+    accentColor: null,
     status: "HIDDEN",
     source: "profile_archive",
     isClaimable: false,
