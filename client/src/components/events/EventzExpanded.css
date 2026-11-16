@@ -1,0 +1,146 @@
+/* Eventz expanded card on the Placez setup. One card, five swipe pages,
+   flyer from the top, gradient starting 35% down the card, black action
+   cards, pager + save pinned at the bottom, bloom held at the raised level.
+   Made-by: Muse */
+.evz-x {
+  --ac: var(--c, #FF1FA0);
+  position: relative; display: flex; flex-direction: column;
+  width: 100%; height: min(768px, calc(100dvh - 16px));
+  background: #0B0B0B; color: var(--text-hi, #FFFFFF);
+  border: 1px solid color-mix(in srgb, var(--ac) 63%, #0A0A0E);
+  border-radius: 14px;
+  box-shadow: 0 0 0 2px #050506, 0 0 9px 1px color-mix(in srgb, var(--ac) 41%, transparent), 0 0 18px color-mix(in srgb, var(--ac) 18%, transparent);
+  overflow: hidden; isolation: isolate;
+}
+.evz-x button { font: inherit; cursor: pointer; }
+.evz-x button:focus-visible { outline: 2px solid var(--ac); outline-offset: -3px; }
+
+/* ── Hero: flyer full-size from the top ─────────────────────────────── */
+.evz-x__hero { position: relative; flex: none; height: 336px; overflow: hidden; }
+.evz-x__flyer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.evz-x__flyer--none { background: color-mix(in srgb, var(--ac) 14%, #0B0B0B); }
+/* The gradient starts 35% of the way down the card (768px reference height)
+   and reaches the card ink before the identity block ends. */
+.evz-x__grad { position: absolute; left: 0; right: 0; top: 0; height: 768px; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(11, 11, 11, 0) 35%, rgba(11, 11, 11, .45) 47%, rgba(11, 11, 11, .88) 56%, #0B0B0B 66%); }
+.evz-x__chrome { position: absolute; top: 10px; right: 10px; z-index: 5; display: flex; gap: 8px; }
+.evz-x__iconbtn { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--ac) 55%, transparent); background: rgba(4, 9, 13, .8); color: #FFFFFF; }
+.evz-x__iconbtn--sm { width: 34px; height: 34px; }
+.evz-x__id { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; padding: 0 16px 12px; }
+.evz-x__when { display: flex; align-items: center; gap: 6px; margin: 0; font: 600 11px/1.4 var(--font-mono, monospace); color: #E8F0F5; text-shadow: 0 1px 4px #050506; }
+.evz-x__when svg { color: var(--ac); flex: none; }
+.evz-x__title { margin: 5px 0 0; font: 800 31px/1.0 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; overflow-wrap: anywhere; text-shadow: 0 2px 6px #050506; }
+.evz-x__venue { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; font: 600 13.5px/1.35 var(--font-body, sans-serif); color: #F2F5F7; text-shadow: 0 1px 4px #050506; }
+.evz-x__venue svg { color: var(--ac); flex: none; }
+.evz-x__chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.evz-x__chip { padding: 3px 7px; border-radius: 5px; background: #E9E5DA; color: #0A0A0E;
+  font: 700 9.5px/1.25 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .08em; }
+
+/* ── Black action cards ─────────────────────────────────────────────── */
+.evz-x__actions { flex: none; padding: 12px 14px 0; display: flex; flex-direction: column; gap: 9px; }
+.evz-x__act { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%;
+  padding: 11px 13px; border: 1px solid color-mix(in srgb, var(--ac) 42%, #0A0E12); border-radius: 9px;
+  background: #000000; color: #FFFFFF; text-align: left; }
+.evz-x__act[aria-pressed="true"] { border-color: var(--ac); }
+.evz-x__act-main { display: flex; flex-direction: column; min-width: 0; }
+.evz-x__act-t { font: 700 15px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .04em; }
+.evz-x__act-s { margin-top: 1px; font: 400 11px/1.35 var(--font-body, sans-serif); color: #9AA7B0; }
+.evz-x__act-ar { color: var(--ac); font-size: 17px; flex: none; }
+
+/* ── Tabs + pages ───────────────────────────────────────────────────── */
+.evz-x__tabs { flex: none; display: flex; gap: 13px; margin: 13px 14px 0; padding-bottom: 7px;
+  border-bottom: 1px solid #1C1C22; white-space: nowrap; overflow-x: auto; scrollbar-width: none; }
+.evz-x__tabs::-webkit-scrollbar { display: none; }
+.evz-x__tabs button { padding: 0 0 7px; border: 0; background: transparent; color: #8A8A94;
+  font: 800 9.5px/1 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .09em; }
+.evz-x__tabs button.on { color: #FFFFFF; box-shadow: 0 2px 0 var(--ac); }
+.evz-x__pageswrap { position: relative; flex: 1; min-height: 0; }
+.evz-x__pages { display: flex; height: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.evz-x__pages::-webkit-scrollbar { display: none; }
+.evz-x__page { flex: 0 0 100%; width: 100%; height: 100%; overflow-y: auto; scroll-snap-align: start; padding: 13px 16px 16px; box-sizing: border-box; }
+.evz-x__sech { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 8px;
+  font: 800 12.5px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .05em; }
+.evz-x__sech:not(:first-child) { margin-top: 16px; }
+.evz-x__cnt { background: var(--ac); color: #050506; border-radius: 5px; padding: 1px 7px; font-size: 11px; }
+.evz-x__empty { margin: 0; font: 400 12.5px/1.55 var(--font-body, sans-serif); color: #9AA7B0; }
+
+/* Feed — Gigz */
+.evz-x__gig { padding: 10px 0; border-bottom: 1px solid #17171D; }
+.evz-x__gig-t { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font: 700 13.5px/1.3 var(--font-body, sans-serif); }
+.evz-x__gig-pay { flex: none; font: 700 10px/1 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .06em; color: var(--ac); }
+.evz-x__gig-meta { margin: 3px 0 0; font: 500 10.5px/1.4 var(--font-mono, monospace); color: #9AA7B0; text-transform: capitalize; }
+.evz-x__gig-desc { margin: 5px 0 0; font: 400 12px/1.5 var(--font-body, sans-serif); color: #C6C6CF;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+
+/* Info */
+.evz-x__kv { display: flex; gap: 9px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid #17171D;
+  font: 400 12.5px/1.5 var(--font-body, sans-serif); color: #D8D8E0; }
+.evz-x__kv > svg { color: var(--ac); flex: none; margin-top: 1px; }
+.evz-x__kv-k { flex: none; width: 84px; font: 700 10px/1.5 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .1em; color: #9AA7B0; }
+.evz-x__desc { margin: 0; padding: 11px 0 2px; font: 400 12.5px/1.6 var(--font-body, sans-serif); color: #C6C6CF; white-space: pre-wrap; }
+.evz-x__link { display: inline-flex; align-items: center; gap: 6px; margin-top: 13px; padding: 9px 12px;
+  border: 1px solid var(--ac); border-radius: 8px; background: rgba(4, 9, 13, .62); color: #FFFFFF; text-decoration: none;
+  font: 700 12.5px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .04em; }
+.evz-x__note { margin: 13px 0 0; font: 400 11.5px/1.55 var(--font-body, sans-serif); color: #9AA7B0; }
+.evz-x__manage { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.evz-x__managebtn { padding: 8px 11px; border: 1px solid #2C2C35; border-radius: 8px; background: transparent; color: #CFD8DE;
+  font: 700 11px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .05em; }
+
+/* Maps */
+.evz-x__addr { margin: 0 0 10px; font: 500 12px/1.5 var(--font-mono, monospace); color: #9AA7B0; }
+
+/* More + Nearby rails */
+.evz-x__rail { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: none; }
+.evz-x__rail::-webkit-scrollbar { display: none; }
+.evz-x__railcard { --ac: var(--c); position: relative; flex: none; width: 136px; height: 170px; padding: 0;
+  border: 1px solid color-mix(in srgb, var(--ac) 45%, #0A0A0E); border-radius: 12px; overflow: hidden;
+  background: #0B0B0B; color: #FFFFFF; text-align: left; text-decoration: none; display: block; }
+.evz-x__railimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.evz-x__railfill { position: absolute; inset: 0; background: color-mix(in srgb, var(--ac) 26%, #0B0B0B); }
+.evz-x__railscrim { position: absolute; left: 0; right: 0; bottom: 0; display: block; padding: 22px 8px 8px;
+  background: linear-gradient(180deg, transparent, rgba(3, 5, 7, .9) 55%); }
+.evz-x__railtitle { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+  font: 700 13px/1.1 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; }
+.evz-x__railmeta { display: block; margin-top: 2px; font: 500 9px/1.3 var(--font-mono, monospace); color: #CFD8DE;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* People */
+.evz-x__people { display: flex; flex-direction: column; }
+.evz-x__person { display: flex; align-items: center; gap: 11px; padding: 8px 0; border-bottom: 1px solid #17171D; color: inherit; text-decoration: none; }
+.evz-x__person-meta { display: flex; flex-direction: column; min-width: 0; }
+.evz-x__person-name { font: 600 13.5px/1.3 var(--font-body, sans-serif); }
+.evz-x__person-role { font: 600 10.5px/1.3 var(--font-mono, monospace); color: #9AA7B0; }
+.evz-x__claim { border: 1px dashed #2C2C35; border-radius: 10px; padding: 13px 14px; margin-bottom: 14px; }
+.evz-x__claim-t { margin: 0; font: 800 13px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .06em; color: var(--ac); }
+.evz-x__claim-s { margin: 5px 0 0; font: 400 12px/1.5 var(--font-body, sans-serif); color: #9AA7B0; }
+.evz-x__claimbtn { margin-top: 11px; padding: 9px 12px; border: 1px solid var(--ac); border-radius: 8px; background: #000000; color: #FFFFFF;
+  font: 700 12px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .05em; }
+
+/* Mizzed overlay (the add action, opened from its black card) */
+.evz-x__mizzed { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; background: #0B0B0B; }
+.evz-x__mizzed-head { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px;
+  border-bottom: 1px solid #1C1C22; font: 800 12.5px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .05em; }
+.evz-x__mizzed-body { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 14px 14px; }
+
+/* ── Pinned footer: pager + save ────────────────────────────────────── */
+.evz-x__foot { flex: none; border-top: 1px solid #1C1C22; padding: 9px 14px 11px; background: #0B0B0B; }
+.evz-x__pager { display: flex; align-items: center; justify-content: space-between; }
+.evz-x__arw { width: 34px; height: 30px; display: grid; place-items: center; border: 1px solid #2C2C35; border-radius: 8px; background: transparent; color: #CFD8DE; }
+.evz-x__arw:disabled { opacity: .35; cursor: default; }
+.evz-x__dots { display: flex; align-items: center; gap: 5px; }
+.evz-x__dots button { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 99px; background: #3A3A44; }
+.evz-x__dots button.on { background: var(--ac); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ac) 25%, transparent); }
+.evz-x__pg { margin-left: 8px; font: 600 9px/1 var(--font-mono, monospace); letter-spacing: .06em; color: #8A8A94; }
+.evz-x__save { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; }
+.evz-x__savet { padding: 4px 0; border: 0; background: transparent; color: #FFFFFF;
+  font: 700 13px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .08em; }
+.evz-x__heart { position: relative; width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: transparent; color: #FFFFFF; }
+.evz-x__heart::before { content: ""; position: absolute; inset: 6px; border: 1px solid var(--ac); border-radius: 50%; background: rgba(4, 9, 13, .55); }
+.evz-x__heart svg { position: relative; }
+.evz-x__heart[aria-pressed="true"] { color: var(--ac); }
+
+@media (max-width: 480px) {
+  .evz-x__hero { height: 300px; }
+  .evz-x__title { font-size: 27px; }
+}

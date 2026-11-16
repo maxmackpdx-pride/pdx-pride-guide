@@ -1,0 +1,93 @@
+/* Eventz faces on the Placez setup: production Placez bloom edge, flyer accent
+   (--ac, set inline from the event's flyer accentColor or the day accent),
+   Tall flyer-to-countdown gradient, Wide full bleed. Made-by: Muse */
+.evz-face {
+  --ac: var(--c, #FF1FA0);
+  position: relative; display: flex; flex-direction: column;
+  background: #0B0B0B; color: var(--text-hi, #FFFFFF);
+  border: 1px solid color-mix(in srgb, var(--ac) 55%, #0A0A0E);
+  border-radius: 16px;
+  box-shadow: 0 0 0 2px #050506, 0 0 7px 1px color-mix(in srgb, var(--ac) 36%, transparent), 0 0 14px color-mix(in srgb, var(--ac) 16%, transparent);
+  overflow: hidden; isolation: isolate;
+  transition: border-color .25s ease, box-shadow .25s ease;
+}
+.evz-face:hover, .evz-face:active, .evz-face[data-card-morph-phase="open"] {
+  border-color: color-mix(in srgb, var(--ac) 63%, #0A0A0E);
+  box-shadow: 0 0 0 2px #050506, 0 0 9px 1px color-mix(in srgb, var(--ac) 41%, transparent), 0 0 18px color-mix(in srgb, var(--ac) 18%, transparent);
+}
+.evz-face button { font: inherit; cursor: pointer; }
+.evz-face button:focus-visible { outline: 2px solid var(--ac); outline-offset: -4px; }
+.evz-face__open { display: flex; flex-direction: column; flex: 1; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; }
+
+/* Corner controls keep the production card scale on the fixed faces. */
+.evz-face .rail-card-share { font: 700 13px/1 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; }
+.evz-face--tall .rail-card-share { top: 9px; right: 9px; min-height: 28px; padding: 0 8px; gap: 5px; border-radius: 8px; }
+.evz-face--tall .tonight-card__live { top: 9px; left: 9px; min-height: 28px; padding: 0 8px; gap: 5px; font-size: 12.6px; }
+.evz-face--tall .tonight-card__live-label { font-size: 12.6px; }
+.evz-face--tall .tonight-card__live--count b { font-size: 14.5px; }
+.evz-face--wide .tonight-card__live { top: 10px; left: 10px; min-height: 32px; padding: 0 10px; font-size: 13px; }
+
+/* ── Tall 200x403 ─────────────────────────────────────────────────────── */
+.evz-face--tall { width: var(--event-card-width, 200px); height: var(--event-card-height, 403px); max-width: 100%; flex: none; }
+.evz-tall__art { position: relative; display: block; width: 100%; height: 216px; flex: none; overflow: hidden; }
+.evz-tall__art > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center;
+  mask-image: linear-gradient(to bottom, #000 56%, color-mix(in srgb, #000 22%, transparent) 82%, transparent 98%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 56%, color-mix(in srgb, #000 22%, transparent) 82%, transparent 98%); }
+.evz-tall__art .day-motif-code { position: absolute; top: 12px; left: 12px; z-index: 2; font-size: 16px; }
+.evz-tall__art:has(.tonight-card__live) .day-motif-code { top: 48px; }
+
+.evz-countdown { position: absolute; left: 12px; right: 12px; bottom: 8px; z-index: 3; }
+.evz-countdown__label { margin: 0; font: 700 10px/1.2 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .15em; text-transform: uppercase; color: var(--ac); text-shadow: 0 1px 4px #050506; }
+.evz-countdown__digits { display: flex; gap: 16px; align-items: baseline; margin-top: 2px; }
+.evz-countdown__digits span { display: inline-flex; align-items: baseline; gap: 3px; }
+.evz-countdown__digits strong { font: 700 22px/1 var(--font-display, "Barlow Condensed", sans-serif); font-variant-numeric: tabular-nums; color: #FFFFFF; text-shadow: 0 1px 5px #050506; }
+.evz-countdown__digits small { font: 600 9px/1 var(--font-body, sans-serif); letter-spacing: .08em; text-transform: uppercase; color: #C5D2DC; }
+.evz-countdown time { display: block; margin-top: 3px; font: 500 10px/1.3 var(--font-mono, monospace); color: #AEB8C3; text-shadow: 0 1px 4px #050506; }
+
+.evz-tall__body { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 5px; flex: 1; width: 100%; padding: 10px 12px 0; box-sizing: border-box; }
+.evz-tall__body h3 { margin: 0; font: 800 23px/1.02 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.evz-tall__change { align-self: flex-start; max-width: 100%; }
+.evz-tall__venue { display: flex; align-items: flex-start; gap: 6px; font: 600 13px/1.3 var(--font-body, sans-serif); color: var(--text-heading, #FFFFFF); }
+.evz-tall__venue > svg { color: var(--ac); flex: none; margin-top: 1px; }
+.evz-tall__venue small { display: block; color: var(--text-lo, #999999); font-size: 11px; font-weight: 400; }
+.evz-tall__time { display: flex; align-items: center; gap: 6px; font: 600 11px/1.4 var(--font-mono, monospace); color: var(--text-hi, #FFFFFF); }
+.evz-tall__time > svg { color: var(--ac); flex: none; }
+.evz-tall__tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto; }
+.evz-tall__tags span { padding: 3px 6px; border: 1px solid color-mix(in srgb, var(--ac) 45%, transparent); border-radius: 4px; background: color-mix(in srgb, var(--ac) 12%, #0A0E12); font: 700 10px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .07em; color: #F4F8FA; }
+
+.evz-tall__actions { position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 10px 12px 12px; }
+.evz-tall__details { flex: 1; min-width: 0; height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
+  border: 1px solid var(--ac); border-radius: 8px; background: rgba(4, 9, 13, .62); color: var(--text-hi, #FFFFFF);
+  font: 700 14px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .04em; }
+.evz-tall__heart { position: relative; width: 44px; height: 44px; flex: none; display: grid; place-items: center; border: 0; background: transparent; color: var(--text-hi, #FFFFFF); }
+.evz-tall__heart::before { content: ""; position: absolute; inset: 6px; border: 1px solid var(--ac); border-radius: 50%; background: rgba(4, 9, 13, .55); }
+.evz-tall__heart svg { position: relative; }
+.evz-tall__heart[aria-pressed="true"] { color: var(--ac); }
+
+/* ── Wide 360x216, full bleed ─────────────────────────────────────────── */
+.evz-face--wide { width: 100%; height: 216px; border-radius: 16px; }
+.evz-wide__art { position: absolute; inset: 0; display: block; }
+.evz-wide__art > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.evz-wide__art .day-motif-code { position: absolute; top: 12px; left: 12px; z-index: 2; font-size: 15px; }
+.evz-wide__scrim { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: flex; align-items: flex-end; gap: 10px;
+  padding: 34px 12px 11px; background: linear-gradient(180deg, transparent, rgba(3, 5, 7, .88) 55%); text-align: left; }
+.evz-wide__id { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.evz-wide__title { font: 800 21px/1.04 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; color: #FFFFFF;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.evz-wide__meta { font: 600 11px/1.35 var(--font-mono, monospace); color: #CFD8DE; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.evz-wide__change { align-self: flex-start; }
+.evz-wide__save { position: absolute; top: 6px; right: 6px; z-index: 5; }
+
+/* The counters Tucker liked: skewed dark box, number over tiny accent label. */
+.evz-count { --cc: var(--ac); height: 44px; min-width: 43px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  padding: 3px 7px; border: 1px solid color-mix(in srgb, var(--cc) 45%, #0A0E12); background: rgba(4, 9, 13, .8); border-radius: 8px; transform: skew(-3deg); }
+.evz-count strong { font: 700 19px/1 var(--font-display, "Barlow Condensed", sans-serif); color: #E9E5DA; font-variant-numeric: tabular-nums; }
+.evz-count span { font: 700 8px/1 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .1em; color: var(--cc); }
+
+/* Events surfaces: two-column mobile grids stretch the tall face to the cell,
+   the same contract the previous face had. */
+@media (max-width: 767px) {
+  .events-page .evz-face--tall { width: 100%; min-width: 0; height: 100%; }
+  .events-page .evz-face--tall .rail-card-share { top: 8px; right: 8px; width: 44px; min-height: 44px; padding: 0; justify-content: center; font-size: 0; gap: 0; }
+}

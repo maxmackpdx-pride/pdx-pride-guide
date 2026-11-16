@@ -17,7 +17,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import HomeDiscover from "./HomeDiscover";
 import TonightEventCard from "./TonightEventCard";
-import EventModal from "@/components/EventModal";
+import EventzExpanded from "@/components/events/EventzExpanded";
 import { OpenCardMeta, PausedCard } from "@/components/cards/react19Card";
 import AuthModal from "@/components/AuthModal";
 import { outzSharePath } from "@shared/outzShare";
@@ -131,7 +131,7 @@ export default function TonightPanel() {
       </div>
       {heldEvent && <>
         {selectedEvent && <OpenCardMeta title={selectedEvent.title} description={selectedEvent.venueName} />}
-        <PausedCard open={selectedEvent != null}><EventModal documentMeta={false} event={selectedEvent ?? heldEvent} onClose={() => setSelectedEvent(null)} onEventUpdated={(event) => { setSelectedEvent(event); setHeldEvent(event); }} /></PausedCard>
+        <PausedCard open={selectedEvent != null}><EventzExpanded documentMeta={false} event={selectedEvent ?? heldEvent} onClose={() => setSelectedEvent(null)} onEventUpdated={(event) => { setSelectedEvent(event); setHeldEvent(event); }} onOpenEvent={(listing) => { setHeldEvent(listing); setSelectedEvent(listing); }} /></PausedCard>
       </>}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </section>
