@@ -136,7 +136,7 @@
     "src": "/outzide-native/batch1/tenmile-screenprint-v3.png",
     "derivativeLicense": "CC BY-SA 3.0",
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and transparent orange torn-paper edge. Historical view from 2013, not current conditions.",
-    "qa": "Independent source/style and alpha checks passed; native card crop QA pending",
+    "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
     "sha256": "77cdcc8f4f67f4f850f64adc8d87672b2e1a8be5c950e9d691209028c2b0cbd5"
   }
 }
