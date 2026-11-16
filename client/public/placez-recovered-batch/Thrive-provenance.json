@@ -1,0 +1,24 @@
+{
+  "venueId": 150,
+  "venue": "Thrive Therapeutic Massage",
+  "artwork": "Thrive-building.png",
+  "sha256": "72e00e8e19fed47d9686182f1536dcc098cb9b1e06100aa84ada72a64ba9af9d",
+  "recovery": "Exact saved PNG, no image alteration.",
+  "qa": "Full-resolution docomomo-0 and docomomo-1 comparisons:19 solar-panel/window bays, white fin rhythm, blue supports, double entry and Skanner sign placement correspond. People absent; rainbow asphalt below curb.",
+  "sourceReferences": [
+    "docomomo-0.jpg",
+    "docomomo-1.jpg",
+    "https://www.docomomo-oregon.org/resources/the-skanner-news-building/",
+    "https://thrivetherapeuticmassage.com/what-to-expect/"
+  ],
+  "knownLimits": [
+    "Shared Skanner building exterior, not exclusive Thrive storefront; Thrive identifies Suite210 at415 N Killingsworth.",
+    "Source periods not established as latest documentary facade.",
+    "Original generator inputs not recovered; final card mask/preview requires separate verification."
+  ],
+  "liveDirectoryVerification": {
+    "method": "Release lead inspected production /api/directory in supported browser",
+    "result": "ID/name/service type/address match saved source identity",
+    "rolloutNote": "Live health was 3ee92b during 7a177dc rollout; records freshly retrieved."
+  }
+}

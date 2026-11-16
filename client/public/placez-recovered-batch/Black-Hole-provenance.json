@@ -1,0 +1,24 @@
+{
+  "venueId": 168,
+  "venue": "Black Hole Body Piercing & Tattoo",
+  "artwork": "Black-Hole-building.png",
+  "sha256": "a02d06a5c0b3cfa33feb01468ceae8016322777745a6a8617c9f25cdb6f21232",
+  "recovery": "Exact saved generated PNG copied without image alteration.",
+  "qa": "Compared full-resolution gallery-38.jpg, gallery-39.jpg and official Glisan exterior. Portland building at 2946 NE Glisan matches: paired doors, fascia, window graphics, roof/dormer, lattice, hedge, left brick neighbor. No people; rainbow asphalt below curb.",
+  "knownLimits": [
+    "Sources depict different signage periods; art follows gallery38 upper awning state. Not a current documentary photograph.",
+    "Original generation-input history not independently recovered.",
+    "Opaque source art is separate from final card transparency/mask and still needs card preview."
+  ],
+  "sourceReferences": [
+    "gallery-38.jpg",
+    "gallery-39.jpg",
+    "official-glisan.jpg",
+    "https://www.blackholebodypiercing.com/locations"
+  ],
+  "liveDirectoryVerification": {
+    "method": "Release lead inspected production /api/directory in supported browser",
+    "result": "ID/name/service type/address match saved source identity",
+    "rolloutNote": "Live health was 3ee92b during 7a177dc rollout; records freshly retrieved."
+  }
+}
