@@ -168,5 +168,15 @@
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and transparent orange torn-paper edge. Historical view from July 2010, not current conditions.",
     "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
     "sha256": "9a7bd63b728963d0bfa3bbc6edd6c2690c8d9853aff49ed84e87e320d10f8945"
+  },
+  "fishing-or-metolius-river-wizard-falls": {
+    "author": "WorkinStiff at English Wikipedia",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Metolius_River_near_Wizard_Falls.jpg",
+    "license": "Public domain released by author worldwide",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/File:Metolius_River_near_Wizard_Falls.jpg#Licensing",
+    "src": "/outzide-native/batch1/wizard-screenprint-v2.png",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, rock and bank mesh, flowing water contours and transparent orange torn-paper edge. Historical view from June 2007, not current flow or conditions.",
+    "qa": "Independent source/style and raw alpha passed; native crop checks pending",
+    "sha256": "b292379d896bb64652d934e62a6714e2d6c1d02f0431d4e7ddbdf83ae19034ef"
   }
 }
