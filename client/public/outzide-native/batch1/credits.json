@@ -187,7 +187,7 @@
     "src": "/outzide-native/batch1/pine-screenprint-v1.png",
     "derivativeLicense": "CC BY-SA 4.0",
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, wooded-bank mesh, water contours and transparent orange torn-paper edge. Historical view from October 2025, not current conditions.",
-    "qa": "Independent source/style and raw alpha passed; native crop checks pending",
+    "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
     "sha256": "de625a75e8ce94a74ecd8f7b8c90e97259b3abac8d9fd922d197f29c59dd8255"
   }
 }
