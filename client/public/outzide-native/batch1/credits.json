@@ -84,5 +84,15 @@
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water ripples and torn-paper edge. Historical view from 2015, not current conditions.",
     "qa": "Independent source-composition/style, alpha-renderer contrast, all four native card size crops and expanded hero checks passed",
     "sha256": "12ae9cf5cb146a422887102f34d9f84d7661e8297541181fca2330dde6c36f1e"
+  },
+  "fishing-or-lost-creek-reservoir": {
+    "src": "/outzide-native/batch1/lost-creek-screenprint-v2.png",
+    "author": "Gary Halvorson, Oregon State Archives",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lost_Creek_Reservoir,_Peyton_Bridge_-_DPLA_-_cf0d52b8c6ccf77bd90121b49e5553fd.jpg",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, terrain-conforming mesh, water contours and transparent torn-paper edge. Historical view from Peyton Bridge in 2008, not current conditions.",
+    "qa": "Independent source/style, three-background alpha-renderer and all four native card crops plus expanded hero passed; landscape framing preserves reservoir banks",
+    "sha256": "8be0b5bd0736abcfdf483f0d25d5cfe9a1305dcd9c0b2b6174882c41ba31fd5b"
   }
 }
