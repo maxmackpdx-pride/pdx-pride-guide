@@ -19,3 +19,12 @@
    rising from the bottom. No changes to locked sizes or card chrome. */
 .scenez-native .pz-card.pz-card--small .scene-art,.scenez-native .pz-card.pz-card--square .scene-art{inset:0;width:100%;height:100%}
 .scenez-native .pz-card.pz-card--small .scene-art:after,.scenez-native .pz-card.pz-card--square .scene-art:after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(0deg,var(--pz-ink) 0%,color-mix(in srgb,var(--pz-ink) 92%,transparent) 22%,color-mix(in srgb,var(--pz-ink) 65%,transparent) 45%,transparent 78%)}
+
+/* A fixed identity lane keeps long names below compose and above actions.
+   Full names remain on the accessible open control and expanded card. */
+.scenez-native .pz-card--small.page-scenez .pz-content{left:9px;right:9px;bottom:47px;gap:0}
+.scenez-native .pz-card--small.page-scenez .pz-identity{gap:3px;min-width:0}
+.scenez-native .pz-card--small.page-scenez .pz-title{margin:0;font-size:14px;line-height:16px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;max-height:32px;overflow:hidden;overflow-wrap:anywhere}
+.scenez-native .pz-card--small.page-scenez .pz-descriptor{font-size:9px;line-height:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scenez-native .pz-card--small.page-scenez .scene-logo,.scenez-native .pz-card--small.page-scenez .scene-wordmark{z-index:2;left:44px;right:8px;top:22px;width:84px;height:48px;bottom:auto;object-fit:contain}
+.scenez-native .pz-card--small.page-scenez .scene-wordmark{font-size:17px;overflow:hidden}
