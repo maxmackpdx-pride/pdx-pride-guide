@@ -1,11 +1,19 @@
 html:has(.placez-fullscreen[open]){scrollbar-gutter:auto;overflow:hidden}
-.placez-fullscreen{position:fixed;inset:0;margin:0 auto;padding:0;border:0;width:min(620px,100%);max-width:100%;height:100dvh;max-height:100dvh;overflow:hidden;background:var(--pz-glass-ink,var(--places-art-ink-04090d));color:white;scrollbar-gutter:auto}
+.placez-fullscreen{position:fixed;inset:3dvh 0;margin:0 auto;padding:0;border:0;width:min(620px,100%);max-width:100%;height:94dvh;max-height:94dvh;border-radius:14px;overflow:hidden;background:var(--pz-glass-ink,var(--places-art-ink-04090d));color:white;scrollbar-gutter:auto}
 .placez-fullscreen::backdrop{background:rgba(0,0,0,.8)}
 .placez-fullscreen .placez-native-overlay{position:relative!important;inset:auto!important;width:100%;height:100%;min-height:0;padding:0!important;background:transparent!important;display:block!important;overflow:hidden!important}
 .placez-fullscreen .placez-native-dialog{height:100%;width:100%;margin:0}
-.placez-fullscreen .pz-native-expanded{--pz-native-card-height:100dvh;--pz-native-art-height:calc(100cqw * var(--pz-expanded-photo-fraction));border-radius:0}
+.placez-fullscreen .pz-native-expanded{--pz-native-card-height:94dvh;--pz-native-art-height:calc(100cqw * var(--pz-expanded-photo-fraction));border-radius:14px}
 /* Keep the approved full-width image plate. Text scrolls independently instead
    of shrinking the entire photograph into a thumbnail to make room for it. */
 .placez-fullscreen .pz-native-expanded .pz-art{width:100%;left:0;transform:none}
 .placez-fullscreen .pz-native-header{flex-shrink:0;max-height:min(var(--pz-native-header-max),calc(var(--pz-native-art-height) + 160px))}
 @media(max-height:550px){.placez-fullscreen .pz-native-header{max-height:45dvh}}
+
+/* Expanded-only: the image and its torn alpha mask bleed to both card edges.
+   Keep logo layers separate, and preserve every closed-card size. */
+.placez-fullscreen .pz-native-expanded .pz-art>.pz-art__base,
+.placez-fullscreen .pz-native-expanded .pz-art>.pz-art__moving img,
+.placez-fullscreen .pz-native-expanded .pz-art>.pz-art__treatment{object-fit:cover}
+.placez-fullscreen .pz-native-expanded .pz-art[data-cutout=true]{mask-size:cover;-webkit-mask-size:cover}
+
