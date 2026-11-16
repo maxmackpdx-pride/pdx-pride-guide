@@ -133,14 +133,14 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
   if (layout === "row") {
     return <CardMorph name={cardMorphName(["event", listing.id, layout])}><article data-card-size="wide" data-card-category={"eventz"} onClickCapture={rememberCardOrigin} className="evz-face evz-face--wide pdx-glass-rebind" style={{ "--c": accent, "--ac": accent, "--card-secondary-override": dayComplementToken(listingDay(listing)) } as CSSProperties}>
       <button className="tonight-card__open evz-face__open" type="button" onClick={open} aria-label={`Open ${listing.title}`}>
-        <span className="evz-wide__art">
+        <span className="tonight-card__art evz-wide__art">
           <EventFlyerArt src={poster} day={listingDay(listing)} title={listing.title} venueName={listing.venueName} sizes="360px" />
           <CardArtworkGlass />
         </span>
         <span className="evz-wide__scrim">
-          <span className="evz-wide__id">
+          <span className="tonight-card__body evz-wide__id">
             {changeLabel ? <ChangeBadge label={changeLabel} className="evz-wide__change" /> : null}
-            <span className="evz-wide__title">{listing.title}</span>
+            <h3 className="evz-wide__title">{listing.title}</h3>
             <span className="evz-wide__meta">{event ? `${clock.format(event.startMs)} to ${clock.format(event.endMs)}` : formatGridCardWhen(listing)} · {listing.venueName}</span>
           </span>
           <GigzCounter eventId={listing.id} />
@@ -160,12 +160,12 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
     <RailShareButton href={eventPath(listing.id, listing.title, listing.dayOfWeek)} title={listing.title} />
     {liveState ? <LiveBadge live={liveState} /> : null}
     <button className="tonight-card__open evz-face__open" type="button" onClick={open} aria-label={`Open ${listing.title}`}>
-      <span className="evz-tall__art">
+      <span className="tonight-card__art evz-tall__art">
         <EventFlyerArt src={poster} day={listingDay(listing)} title={listing.title} venueName={listing.venueName} sizes="200px" />
         <CardArtworkGlass />
         {liveState ? null : <EventStartsIn listing={listing} />}
       </span>
-      <span className="evz-tall__body">
+      <span className="tonight-card__body evz-tall__body">
         {changeLabel ? <ChangeBadge label={changeLabel} className="evz-tall__change" /> : null}
         <h3 title={listing.title}>{listing.title}</h3>
         <span className="evz-tall__venue"><MapPin size={15} aria-hidden="true" /><span>{listing.venueName}<small>{listing.neighborhood || "Portland"}</small></span></span>

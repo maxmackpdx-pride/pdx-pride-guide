@@ -30,7 +30,7 @@
 /* ── Tall 200x403 ─────────────────────────────────────────────────────── */
 .evz-face--tall { width: var(--event-card-width, 200px); height: var(--event-card-height, 403px); max-width: 100%; flex: none; }
 .evz-tall__art { position: relative; display: block; width: 100%; height: 216px; flex: none; overflow: hidden; }
-.evz-tall__art > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center;
+.evz-face .evz-tall__art > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center;
   mask-image: linear-gradient(to bottom, #000 56%, color-mix(in srgb, #000 22%, transparent) 82%, transparent 98%);
   -webkit-mask-image: linear-gradient(to bottom, #000 56%, color-mix(in srgb, #000 22%, transparent) 82%, transparent 98%); }
 .evz-tall__art .day-motif-code { position: absolute; top: 12px; left: 12px; z-index: 2; font-size: 16px; }
@@ -68,12 +68,12 @@
 /* ── Wide 360x216, full bleed ─────────────────────────────────────────── */
 .evz-face--wide { width: 100%; height: 216px; border-radius: 16px; }
 .evz-wide__art { position: absolute; inset: 0; display: block; }
-.evz-wide__art > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.evz-face .evz-wide__art > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; mask-image: none; -webkit-mask-image: none; }
 .evz-wide__art .day-motif-code { position: absolute; top: 12px; left: 12px; z-index: 2; font-size: 15px; }
 .evz-wide__scrim { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: flex; align-items: flex-end; gap: 10px;
   padding: 34px 12px 11px; background: linear-gradient(180deg, transparent, rgba(3, 5, 7, .88) 55%); text-align: left; }
 .evz-wide__id { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.evz-wide__title { font: 800 21px/1.04 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; color: #FFFFFF;
+.evz-wide__id h3.evz-wide__title { margin: 0; font: 800 21px/1.04 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; color: #FFFFFF;
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .evz-wide__meta { font: 600 11px/1.35 var(--font-mono, monospace); color: #CFD8DE; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .evz-wide__change { align-self: flex-start; }
@@ -91,3 +91,10 @@
   .events-page .evz-face--tall { width: 100%; min-width: 0; height: 100%; }
   .events-page .evz-face--tall .rail-card-share { top: 8px; right: 8px; width: 44px; min-height: 44px; padding: 0; justify-content: center; font-size: 0; gap: 0; }
 }
+
+/* The faces carry the production tonight-card__art/__body hook classes for the
+   shared card test contracts; neutralize the legacy face rules that must not
+   leak into the Placez-setup geometry (the old body rose into the art fade,
+   and the old body padding belongs to the retired face). */
+.evz-face .tonight-card__art + .tonight-card__body { margin-top: 0; }
+.evz-face--wide .tonight-card__body { padding: 0; }
