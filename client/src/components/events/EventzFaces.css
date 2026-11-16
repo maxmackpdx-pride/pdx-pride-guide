@@ -59,7 +59,7 @@
 /* The identity block rides over the poster's fade (v12 Tall): title, the
    venue · age meta line, then the STARTS IN countdown — no solid body, no
    tag chips on the face. */
-.evz-tall__body { position: absolute; top: 196px; left: 14px; right: 14px; z-index: 4; display: flex; flex-direction: column; gap: 0; width: auto; flex: none; padding: 0; box-sizing: border-box; }
+.evz-tall__body { position: absolute; top: auto; bottom: 12px; left: 14px; right: 14px; z-index: 4; display: flex; flex-direction: column; gap: 0; width: auto; flex: none; padding: 0; box-sizing: border-box; }
 .evz-tall__body h3 { margin: 0; font: 800 19px/1.04 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; overflow-wrap: anywhere; text-shadow: 0 1px 3px var(--z-black);
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .evz-tall__change { align-self: flex-start; max-width: 100%; }
