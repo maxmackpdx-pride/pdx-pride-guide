@@ -189,5 +189,15 @@
     "changes": "AI-assisted Xerox screenprint adaptation: orange/cyan accents, wooded-bank mesh, water contours and transparent orange torn-paper edge. Historical view from October 2025, not current conditions.",
     "qa": "Independent source/style, all four native card size crops and expanded hero alpha-renderer checks passed",
     "sha256": "de625a75e8ce94a74ecd8f7b8c90e97259b3abac8d9fd922d197f29c59dd8255"
+  },
+  "atv-or-winchester-bay": {
+    "author": "Bonnie Moreland",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Umpqua_Beach_and_dunes,_Oregon_-_Flickr_-_Bonnie_Moreland_(free_images).jpg",
+    "license": "Public Domain Mark 1.0 (author Flickr release, not CC0)",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+    "src": "/outzide-native/batch1/winchester-screenprint-v2.png",
+    "changes": "AI-assisted Xerox screenprint adaptation: orange/red accents, dune and grass mesh, water contours and transparent orange torn-paper edge. Historical view from January 2022, not current conditions or a riding route.",
+    "qa": "Independent source/style and raw alpha passed; actual card crop and renderer QA pending",
+    "sha256": "61926098a1545d5002a9cd14617a2a4598f433a39521502624a13c26c56953c3"
   }
 }
