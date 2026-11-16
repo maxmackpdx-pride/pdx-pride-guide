@@ -38,3 +38,8 @@
 .scenez-native .pz-card--wide-map[data-has-scene-event=true] .scene-next-event strong{font-size:8px;line-height:12px}
 .scenez-native .pz-card--wide-map[data-has-scene-event=true] .scene-next-event span{min-width:0;font-size:10px;line-height:16px}
 .scenez-native .pz-card--wide-map[data-has-scene-event=true] .scene-next-event time{font-size:8px;line-height:12px}
+
+/* SceneZ alignment to the founder-approved unified card design: SceneZ faces
+   carry the production Placez bloom edge. The recovered native cascade
+   otherwise overrides it with a whitened border and a faint 8% glow. */
+.scenez-native .pz-card{border:1px solid color-mix(in srgb,var(--pz-accent) 55%,var(--pz-frame-ink));box-shadow:0 0 0 2px var(--pz-ink),0 0 7px 1px color-mix(in srgb,var(--pz-accent) 36%,transparent),0 0 14px color-mix(in srgb,var(--pz-accent) 16%,transparent)}
