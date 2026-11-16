@@ -19,11 +19,11 @@ export interface PlacePresentation {
   title?: string;
   /** Omit a duplicate title only for a simple, readable name wordmark. */
   logoIsName?: boolean;
-  accent: string; heroUrl: string; logoUrl?: string; imageFit?: 'cover'|'contain'; imagePosition?: string; treatmentUrl?: string; cutoutMaskUrl?: string; wideCutoutMaskUrl?: string; wideFadeMaskUrl?: string; wideImageUrl?: string; wideLogoUrl?: string; glassUrl: (size: PreviewSize) => string;
+  accent: string; heroUrl: string; logoUrl?: string; imageFit?: 'cover'|'contain'; imagePosition?: string; compactImageScale?: number; treatmentUrl?: string; cutoutMaskUrl?: string; wideCutoutMaskUrl?: string; wideFadeMaskUrl?: string; wideImageUrl?: string; wideLogoUrl?: string; glassUrl: (size: PreviewSize) => string;
 }
 export interface PlaceCardModel {
   id: number; name: string; title: string | null; category: string; descriptor: string; neighborhood: string | null;
-  href: string; imageUrl: string | null; logoUrl?: string; imageFit?: 'cover'|'contain'; imagePosition?: string; treatmentUrl?: string; cutoutMaskUrl?: string; wideCutoutMaskUrl?: string; wideFadeMaskUrl?: string; wideImageUrl?: string; wideLogoUrl?: string; glassUrl: (size: PreviewSize) => string | undefined;
+  href: string; imageUrl: string | null; logoUrl?: string; imageFit?: 'cover'|'contain'; imagePosition?: string; compactImageScale?: number; treatmentUrl?: string; cutoutMaskUrl?: string; wideCutoutMaskUrl?: string; wideFadeMaskUrl?: string; wideImageUrl?: string; wideLogoUrl?: string; glassUrl: (size: PreviewSize) => string | undefined;
   accent: string;
   status: { label: string; tone: 'neutral' | 'open' | 'closed'; source: string | null };
   hours: string | null; description: string | null; address: string | null; phone: string | null; latitude: number | null; longitude: number | null; composeHref:string; claimState: 'unclaimed' | 'claimed' | 'unknown'; saved: boolean | null;
@@ -56,7 +56,7 @@ export function adaptDirectoryRecord(record: DirectoryRecord, presentation?: Pla
   const status=lifecycleClosed ? {label:'Closed listing',tone:'closed' as const,source:null} : currentOpenStatus(liveStatus,now) || {label:hours?'Hours listed':'Hours unavailable',tone:'neutral' as const,source:null};
   return {id:record.id,name:record.name,title:presentation?.logoIsName===true ? null : clean(presentation?.title) || record.name,category,descriptor:presentation?.descriptor || category,
     neighborhood:clean(record.neighborhood),href:`/directory/${record.id}/${slugify(record.name)}`,
-    imageUrl:presentation?.heroUrl || clean(record.imageUrl),logoUrl:presentation?.logoUrl,imageFit:presentation?.imageFit,imagePosition:presentation?.imagePosition,treatmentUrl:presentation?.treatmentUrl,cutoutMaskUrl:presentation?.cutoutMaskUrl,wideCutoutMaskUrl:presentation?.wideCutoutMaskUrl,wideFadeMaskUrl:presentation?.wideFadeMaskUrl,wideImageUrl:presentation?.wideImageUrl,wideLogoUrl:presentation?.wideLogoUrl,glassUrl:presentation?.glassUrl || (()=>undefined),
+    imageUrl:presentation?.heroUrl || clean(record.imageUrl),logoUrl:presentation?.logoUrl,imageFit:presentation?.imageFit,imagePosition:presentation?.imagePosition,compactImageScale:presentation?.compactImageScale,treatmentUrl:presentation?.treatmentUrl,cutoutMaskUrl:presentation?.cutoutMaskUrl,wideCutoutMaskUrl:presentation?.wideCutoutMaskUrl,wideFadeMaskUrl:presentation?.wideFadeMaskUrl,wideImageUrl:presentation?.wideImageUrl,wideLogoUrl:presentation?.wideLogoUrl,glassUrl:presentation?.glassUrl || (()=>undefined),
     accent:presentation?.accent || placezCategoryAccent(record.type),
     status,hours,description:clean(record.description),address:clean(record.address) || (record.locations?.length===1 ? clean(record.locations[0]?.address):null),phone:record.locations?.length===1 ? clean(record.locations[0]?.phone):null,latitude:record.locations?.length===1 && Number.isFinite(record.locations[0]?.lat)?record.locations[0].lat!:null,longitude:record.locations?.length===1 && Number.isFinite(record.locations[0]?.lng)?record.locations[0].lng!:null,composeHref:`/mizzed/new?place=${record.id}`,claimState:record.ownerId===null ? 'unclaimed' : Number.isSafeInteger(record.ownerId) && Number(record.ownerId)>0 ? 'claimed' : 'unknown',
     saved:typeof record.isFollowing==='boolean' ? record.isFollowing : null};

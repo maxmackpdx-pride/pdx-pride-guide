@@ -19,3 +19,10 @@ test('Mis-Tacones recovery is byte-verified and preserves previous artworks/fall
 });
 
 test('Mis Tacones source attribution and rights are visible in both expanded cards',()=>{for(const file of ['PlacezQuickCard.tsx','NativePlacezExpanded.tsx']){const s=fs.readFileSync('client/src/components/placez/'+file,'utf8');assert.ok(s.includes('===10&&'));assert.ok(s.includes('April 20, 2022 photographs'));assert.ok(s.includes('current appearance may differ'));assert.ok(s.includes('/placez-recovered-batch/Mis-Tacones-provenance.json'));}});
+
+test('Mis compact focal crop is data-scoped and leaves other venues unchanged',()=>{
+ assert.equal(nativePlacezModel({id:10,name:'Mis Tacones',type:'restaurant'}).compactImageScale,2);
+ for(const id of [2,3,5,9,11,23,30,31,50])assert.equal(nativePlacezModel({id,name:'Other',type:'restaurant'}).compactImageScale,undefined);
+ const css=fs.readFileSync('client/src/components/placez/PlacezQuickCard.css','utf8');
+ assert.ok(css.includes('scale(var(--pz-compact-photo-scale,1))'));
+});

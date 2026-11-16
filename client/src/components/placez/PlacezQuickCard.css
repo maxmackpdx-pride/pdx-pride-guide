@@ -148,3 +148,8 @@
    Keep the locked outer dimensions and existing chrome/counter positions. */
 .pz-card.pz-card--small .pz-art,.pz-card.pz-card--square .pz-art{inset:0;width:100%;height:100%;mask-image:none;-webkit-mask-image:none}
 .pz-card.pz-card--small .pz-art:after,.pz-card.pz-card--square .pz-art:after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(0deg,var(--pz-ink) 0%,color-mix(in srgb,var(--pz-ink) 92%,transparent) 22%,color-mix(in srgb,var(--pz-ink) 65%,transparent) 45%,transparent 78%);mask-image:none;-webkit-mask-image:none}
+
+/* Data-scoped compact focal crop: never resize the card, chrome or gradient.
+   Bottom-origin zoom exposes a ground-floor tenant below a tall shared building. */
+.pz-card--small .pz-art>.pz-art__base,.pz-card--small .pz-art>.pz-art__moving,
+.pz-card--square .pz-art>.pz-art__base,.pz-card--square .pz-art>.pz-art__moving{transform:scale(var(--pz-compact-photo-scale,1));transform-origin:50% 100%}
