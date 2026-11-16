@@ -28,7 +28,7 @@ export function CardShell({ size, category, children, className = '', ref, ...pr
 
 /** Details live in the clicked card's actual layout slot, never on document.body.
  * A direct URL with no source card renders at the caller's ordinary document position. */
-export function CardDetails({ children, onClose, mobileViewport = false }: { children: ReactNode; onClose?: () => void; mobileViewport?: boolean }) {
+export function CardDetails({ children, onClose, mobileViewport = false, navigationWidth = false }: { children: ReactNode; onClose?: () => void; mobileViewport?: boolean; navigationWidth?: boolean }) {
   const close = useRef(onClose); close.current=onClose;
   const identity=useRef(Symbol("card"));
   useLayoutEffect(()=>{
@@ -108,8 +108,33 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
     item.style.setProperty('align-self','start','important');
     const nudgeY=sourceRect.top-layoutRect.top;
     if(Math.abs(nudgeY)>.1)item.style.setProperty('margin-top',`${(parseFloat(getComputedStyle(item).marginTop)||0)+nudgeY}px`,'important');
+    // Mobile follows the expanded navigation shell, never a collapsed dock bubble.
+    // Desktop stays centered and deliberately narrower than the navigation frame.
+    const viewportWidth=document.documentElement.clientWidth;
+    const mobile=viewportWidth<960;
+    const chrome=Array.from(document.querySelectorAll<HTMLElement>(mobile?'.site-header--glass,.z-mobile-dock:not([data-collapsed="true"])':'.site-header-inner'))
+      .map(el=>el.getBoundingClientRect()).filter(rect=>rect.width>200 && rect.height>0);
+    const reference=chrome.find(rect=>rect.width<viewportWidth) || chrome[0];
+    const navWidth=mobile?Math.min(reference?.width || 576,viewportWidth-16):Math.min(960,(reference?.width || viewportWidth-48)*.86);
+    const navLeft=reference?reference.left+(reference.width-navWidth)/2:(viewportWidth-navWidth)/2;
     const tracks = parentStyle.gridTemplateColumns.split(/\s+/).map(parseFloat).filter(Number.isFinite);
-    if (parentStyle.display.includes('grid') && tracks.length) {
+    if (navigationWidth && parentStyle.display.includes('grid') && tracks.length) {
+      convertedFlex=true; // Restore every measured sibling on close/resize.
+      parent.style.setProperty('justify-content','start','important');
+      const row=rowTops.indexOf(Math.round(layoutRect.top))+1;
+      const left=parentRect.left+parent.clientLeft+(parseFloat(parentStyle.paddingLeft)||0);
+      item.style.gridColumn='1 / -1';item.style.gridRow=String(row);
+      item.style.justifySelf='start';item.dataset.cardAnchor='left';
+      item.style.setProperty('width',`${navWidth}px`,'important');
+      item.style.setProperty('max-width','none','important');
+      item.style.setProperty('margin-left',`${navLeft-left}px`,'important');
+      parent.style.setProperty('overflow','visible','important');
+      for(const sibling of siblings){
+        if(sibling.element===item)continue;
+        const siblingRow=rowTops.indexOf(Math.round(sibling.rect.top))+1;
+        if(siblingRow>=row)sibling.element.style.gridRow=String(siblingRow+1);
+      }
+    } else if (parentStyle.display.includes('grid') && tracks.length) {
       let gap = parseFloat(parentStyle.columnGap) || 0;
       const padLeft=parseFloat(parentStyle.paddingLeft)||0,padRight=parseFloat(parentStyle.paddingRight)||0;
       const inner=parent.clientWidth-padLeft-padRight;
@@ -135,7 +160,7 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
       item.style.setProperty('max-width',`calc(100% - ${inset}px)`,'important');
       item.style.setProperty(plan.anchor==='right'?'margin-right':'margin-left',`${inset}px`,'important');
       item.style.justifySelf=plan.anchor==='right'?'end':'start';
-    } else if(parentStyle.display.includes('flex') && parentStyle.flexWrap !== 'nowrap') {
+    } else if(parentStyle.display.includes('flex') && (parentStyle.flexWrap !== 'nowrap' || navigationWidth)) {
       // Preserve the measured mixed-size pinboard, using real grid tracks while
       // open. Only colliding/later cards reflow; no fixed/absolute overlay exists.
       convertedFlex=true;
@@ -148,8 +173,8 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
       const rightmost=sameRow.length>1 && sameRow.every(({rect})=>rect.right<=layoutRect.right+2);
       const x=sourceRect.left-left;
       const right=sourceRect.right-left;
-      const width=Math.min(760,rightmost?right:inner-x);
-      const start=rightmost?right-width:x;
+      const width=navigationWidth?navWidth:Math.min(760,rightmost?right:inner-x);
+      const start=navigationWidth?navLeft-left:(rightmost?right-width:x);
       item.dataset.cardAnchor=rightmost?'right':'left';
       // A gap transition can override even inline !important during interpolation,
       // turning each 1px track into a 25px stride on repeated openings.
@@ -160,26 +185,28 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
       parent.style.setProperty('column-gap','0px','important');
       parent.style.setProperty('row-gap',`${rowGap}px`,'important');
       parent.style.setProperty('justify-content','start','important');
+      if(navigationWidth)parent.style.setProperty('overflow','visible','important');
       const sourceRow=rowTops.indexOf(Math.round(layoutRect.top))+1;
       const later:typeof siblings=[];
       const place=(element:HTMLElement,px:number,row:number,w:number)=>{
         element.style.gridColumn=`${Math.round(px)+1} / span ${Math.max(1,Math.ceil(w))}`;
         element.style.gridRow=String(row); element.style.justifySelf='start';
         element.style.setProperty('width',`${w}px`,'important');
-        element.style.setProperty('max-width','100%','important');
+        element.style.setProperty('max-width',navigationWidth && element===item?'none':'100%','important');
       };
       for(const sibling of siblings){
         if(sibling.element===item)continue;
         const row=rowTops.indexOf(Math.round(sibling.rect.top))+1;
         const sx=Math.max(0,Math.round(sibling.rect.left-left));
-        if(row<sourceRow || (row===sourceRow && (sx+sibling.rect.width<=start || sx>=start+width))) place(sibling.element,sx,row,sibling.rect.width);
+        if(row<sourceRow || (!navigationWidth && row===sourceRow && (sx+sibling.rect.width<=start || sx>=start+width))) place(sibling.element,sx,row,sibling.rect.width);
         else later.push(sibling);
       }
       const gridStart=Math.max(0,Math.round(start));
-      place(item,gridStart,sourceRow,width);
+      place(item,navigationWidth?0:gridStart,sourceRow,width);
+      if(navigationWidth)item.style.gridColumn='1 / -1';
       // Rotated closed artwork can extend outside the collection edge. Preserve
       // that visual corner with an in-flow margin rather than clamping it away.
-      item.style.setProperty('margin-left',`${start-gridStart}px`,'important');
+      item.style.setProperty('margin-left',`${navigationWidth?start:start-gridStart}px`,'important');
       let row=sourceRow+1,cursor=0;
       for(const sibling of later){
         const w=Math.min(inner,sibling.rect.width);
@@ -188,17 +215,21 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
       }
     } else {
       item.dataset.cardAnchor='left';
-      const width=Math.min(760,Math.max(sourceRect.width,parent.clientWidth));
+      const width=navigationWidth?navWidth:Math.min(760,Math.max(sourceRect.width,parent.clientWidth));
       item.style.setProperty('width',`${width}px`,'important');
       item.style.setProperty('flex',`0 0 ${width}px`,'important');
-      item.style.setProperty('max-width','100%','important');
+      item.style.setProperty('max-width',navigationWidth?'none':'100%','important');
+      if(navigationWidth)item.style.setProperty('margin-left',`${navLeft-layoutRect.left}px`,'important');
     }
     setHost(target);
     let observedWidth=parent.clientWidth;
     const resize=new ResizeObserver(()=>{const next=parent.clientWidth;if(Math.abs(next-observedWidth)>1){observedWidth=next;setLayoutRevision(v=>v+1);}});
     resize.observe(parent);
+    const relayout=()=>setLayoutRevision(v=>v+1);
+    if(navigationWidth)window.addEventListener('resize',relayout);
     return () => {
       resize.disconnect();
+      window.removeEventListener('resize',relayout);
       origin.element.dispatchEvent(new CustomEvent(CARD_SLOT_EVENT, { detail: "close" }));
       forgetActiveCard(origin.element);
       target.remove();
@@ -223,7 +254,7 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
       if (originalStyle===null) item.removeAttribute('style'); else item.setAttribute('style',originalStyle);
       queueMicrotask(()=>{if (!target.isConnected && origin.trigger?.isConnected) origin.trigger.focus({preventScroll:true});});
     };
-  }, [origin,layoutRevision]);
+  }, [origin,layoutRevision,navigationWidth]);
   useLayoutEffect(() => {
     const panel=(host || fallback.current)?.querySelector<HTMLElement>('[role="dialog"]');
     panel?.focus({preventScroll:true});
@@ -292,5 +323,6 @@ export function CardDetails({ children, onClose, mobileViewport = false }: { chi
     return()=>{cancelAnimationFrame(frame);chromeResize.disconnect();mutations.disconnect();window.removeEventListener('resize',update);viewport?.removeEventListener('resize',update);};
   },[host,mobileViewport,layoutRevision]);
   const contents = <BoardCardInline.Provider value={true}><div className="zay-card-expanded">{children}</div></BoardCardInline.Provider>;
-  return host ? createPortal(contents,host) : origin ? null : <div ref={fallback} className="zay-card-direct-details">{contents}</div>;
+  return host ? createPortal(contents,host) : origin ? null : <div ref={fallback} className={`zay-card-direct-details${navigationWidth?' zay-card-direct-details--navigation':''}`}>{contents}</div>;
 }
+

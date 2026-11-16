@@ -56,3 +56,8 @@
    viewport sizing. Inline cards must instead size to their actual layout slot. */
 .zay-card-expanded .event-modal.event-modal--approved.event-modal--reference{box-sizing:border-box;min-width:0!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:none!important;margin:0!important;translate:none!important;scale:none!important}
 .zay-card-expanded .event-modal-overlay:has(.event-modal--reference){position:relative!important;inset:auto!important;display:block!important;padding:0!important;margin:0!important;width:100%!important;max-width:100%!important;box-sizing:border-box;transform:none!important;translate:none!important}
+
+
+/* URL-opened details follow the same restrained navigation-width envelope. */
+.zay-card-direct-details--navigation{width:min(960px,86vw);max-width:none;position:relative;left:50%;transform:translateX(-50%);margin-inline:0}
+@media(max-width:959px){.zay-card-direct-details--navigation{width:min(576px,calc(100vw - 16px));margin-inline:0}}

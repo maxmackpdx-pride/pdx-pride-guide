@@ -207,7 +207,7 @@ export default function EventModal({
   documentMeta?: boolean;
 }) {
   if (!event || typeof event.id !== "number") return null;
-  return <CardDetails key={event.id} onClose={onClose}>{documentMeta ? <OpenCardMeta title={event.title} description={event.venueName || event.description} /> : null}<EventModalInner event={event} onClose={() => closeOpenCard(onClose)} onEventUpdated={onEventUpdated} originRect={originRect} initialSection={initialSection} /></CardDetails>;
+  return <CardDetails navigationWidth key={event.id} onClose={onClose}>{documentMeta ? <OpenCardMeta title={event.title} description={event.venueName || event.description} /> : null}<EventModalInner event={event} onClose={() => closeOpenCard(onClose)} onEventUpdated={onEventUpdated} originRect={originRect} initialSection={initialSection} /></CardDetails>;
 }
 
 function EventModalInner({
@@ -1399,3 +1399,4 @@ function EventModalInner({
     </div>
   );
 }
+
