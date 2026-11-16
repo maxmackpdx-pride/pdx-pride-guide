@@ -1,3 +1,4 @@
+import {resolveDirectoryLogo} from '@shared/directoryLogos';
 import type {CommunitySummary,CommunityDetail} from '@shared/community';
 export const sceneTypes=[['club','Clubs','#FFD700'],['party-collective','Party Collectives','#FF7B00'],['organization','Organizations','#ffffff']] as const;
 export function sceneCategory(c:CommunitySummary){return (c as CommunitySummary & {sceneCategory?:string}).sceneCategory||null;}
@@ -10,5 +11,5 @@ export function sceneModel(c:CommunitySummary,detail?:CommunityDetail){
  'yes-coach-productions':{id:'yes-coach',logo:'/scenez-native/yes-coach.png',color:'#e62026'},
  'yes-coach':{id:'yes-coach',logo:'/scenez-native/yes-coach.png',color:'#e62026'},
  };
- return {id:c.slug,name:c.name,kind:key==='party-collective'?'Party Collective':key==='organization'?'Organization':key==='club'?'Club':'Scene',page:'scenez',color:sceneTypes.find(t=>t[0]===key)?.[2]||'#FFD700',wordmark:c.name.toUpperCase(),logo:c.imageUrl||undefined,short:c.neighborhood||'Community & connection',...known[c.slug],events:detail?.events.upcoming||(c.nextEvent?[c.nextEvent]:[])};
+ return {id:c.slug,name:c.name,kind:key==='party-collective'?'Party Collective':key==='organization'?'Organization':key==='club'?'Club':'Scene',page:'scenez',color:sceneTypes.find(t=>t[0]===key)?.[2]||'#FFD700',wordmark:c.name.toUpperCase(),logo:c.imageUrl||resolveDirectoryLogo(c.name)||undefined,short:c.neighborhood||'Community & connection',...known[c.slug],events:detail?.events.upcoming||(c.nextEvent?[c.nextEvent]:[])};
 }

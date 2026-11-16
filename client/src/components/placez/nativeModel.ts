@@ -1,6 +1,7 @@
 import type {Business} from '@/pages/Directory';
 import {resolveBusinessLocations} from '@shared/businessLocations';
 import {placePath} from '@shared/placeSlug';
+import {resolveDirectoryLogo} from '@shared/directoryLogos';
 import {adaptDirectoryRecord,type PlaceCardModel} from './placezAdapter';
 import {presentationFor} from './presentation';
 import {recoveredPresentation} from './recoveredPresentation';
@@ -11,7 +12,11 @@ export const hasPlacezArtwork=(id:number)=>Object.prototype.hasOwnProperty.call(
 export function nativePlacezModel(place:NativePlace):PlaceCardModel {
  const locations=resolveBusinessLocations(place);
  const primary=locations.length===1?locations[0]:undefined;
- const model=adaptDirectoryRecord({...place,locations},artwork[place.id]);
+ const presentation=artwork[place.id];
+ const model=adaptDirectoryRecord({...place,locations},presentation);
+ // Approved treatments already embed their wordmark or provide an independent logo.
+ // Generic directory records must still use the same reviewed logo resolver as MapZ.
+ if(!presentation) model.logoUrl=resolveDirectoryLogo(place.name,place.imageUrl)||undefined;
  return {...model,href:placePath(place.id,place.name),phone:place.phone||primary?.phone||null,
   latitude:place.lat??primary?.lat??null,longitude:place.lng??primary?.lng??null};
 }
