@@ -21,9 +21,11 @@ type CatalogRow=OutzBrowseCatalogRow&{photo?:{src?:string;url?:string}};
 type DestinationCounts={placeId:string;carpool:number;mizzed:number;buddy:number;total:number};
 function entryFor(place:Place,photo:CatalogRow|undefined,counts:DestinationCounts|undefined):OutzEntry{
  const kind=photo?.kind&&COLORS[photo.kind]?photo.kind:({'camp-hike':'trail',campground:'camp',trailhead:'trail','outdoor-stay':'stay',beach:'beach'}[place.kind]||'dayuse');
+ // Preserve the approved v35 presentation of the two converted destinations.
+ // Catalog names/kinds remain the data source for every other destination.
  const silver=/silver.falls/i.test(place.name),rooster=/rooster.rock/i.test(place.name);
 
- return {id:'topographic',style:place.name,name:place.name,location:silver?'Silverton, Oregon':rooster?'Corbett, Oregon':place.sourceName,kind:place.kind.replaceAll('-',' '),image:silver?'/outzide-native/silver-falls-screenprint-v1.png':rooster?'/outzide-native/rooster-rock-screenprint-v1.png':photo?.photo?.src?(photo.photo.src.startsWith('/')?photo.photo.src:'/outzide-map/'+photo.photo.src):photo?.photo?.url||'',photoAlt:place.name,accent:'#FF7B00',categoryAccent:COLORS[kind],waypointKind:kind,postCounts:counts?{Carpool:counts.carpool,Mizzed:counts.mizzed,'Buddy Finder':counts.buddy}:undefined};
+ return {id:'topographic',style:place.name,name:silver?'Silver Falls State Park':rooster?'Rooster Rock State Park':place.name,location:silver?'Silverton, Oregon':rooster?'Corbett, Oregon':place.sourceName,kind:silver?'Camping · Hiking':rooster?'Beach · Day use':place.kind.replaceAll('-',' '),image:silver?'/outzide-native/silver-falls-screenprint-v1.png':rooster?'/outzide-native/rooster-rock-screenprint-v1.png':photo?.photo?.src?(photo.photo.src.startsWith('/')?photo.photo.src:'/outzide-map/'+photo.photo.src):photo?.photo?.url||'',photoAlt:place.name,accent:'#FF7B00',categoryAccent:silver?COLORS.camp:rooster?'#FF1FA0':COLORS[kind],waypointKind:silver?'camp':rooster?'beach':kind,postCounts:counts?{Carpool:counts.carpool,Mizzed:counts.mizzed,'Buddy Finder':counts.buddy}:undefined};
 }
 function Expanded({place,entry,initial,onClose,onMarkRead,followed,onFollow}:{place:Place;entry:OutzEntry;initial:string;onClose:()=>void;onMarkRead?:()=>void;followed:boolean;onFollow:()=>void}){
  const dialog=useRef<HTMLDialogElement>(null),touch=useRef<[number,number]|null>(null);const tabs=['Conditions','Your Trip','Wall'];const [tab,setTab]=useState(initial==='Mizzed'?'Wall':initial);
