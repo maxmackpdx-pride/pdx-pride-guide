@@ -176,3 +176,6 @@
 .oz-notify-wrap{position:relative;width:max-content;max-width:100%;isolation:isolate}
 .oz-notification{position:absolute;right:-8px;top:-10px;z-index:12;display:flex;align-items:center;gap:4px;min-width:32px;height:30px;border-radius:15px;border:1px solid var(--neon-orange);background:var(--places-art-ink-080b0d);color:var(--places-art-ink-f4ebd9);font:800 13px 'Barlow Condensed';box-shadow:0 0 8px var(--places-art-ink-ff7b0060);cursor:pointer}
 .oz-notification span{font-size:16px}
+
+/* Only qualified transparent artwork: restore opaque interior without filling torn alpha fringe. */
+.oz-topographic .oz-source-photo.oz-source-photo--approved-art {filter:var(--oz-alpha-filter)!important;}
