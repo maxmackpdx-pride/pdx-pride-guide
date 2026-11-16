@@ -3305,11 +3305,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
     } catch (error) { next(error); }
   });
 
-  // ── FAMILY DETAIL APIS — one detailed payload per directory card family ──
-  // Placez (places), Needz (healthcare + nonprofit), Squadz (groups).
-  // Same composed shaping as /api/directory/:id, gated by family so each
-  // card type reads its own API. The blended endpoint stays for legacy clients.
-  async function directoryFamilyDetail(req: any, id: number, family: "placez" | "needz" | "squadz") {
+  // ── PLACEZ DETAIL API — the Placez card family's detailed payload ──
+  // Same composed shaping as /api/directory/:id, gated to Placez types.
+  // (The other two Placez card families have their own detail APIs:
+  // SceneZ via the communities detail, Outzide via /api/outz/details.)
+  // The blended endpoint stays for legacy clients.
+  async function directoryFamilyDetail(req: any, id: number, family: "placez") {
     const businesses = storage.getBusinesses({});
     const liveEvents = storage.getEvents({ status: "LIVE" });
     const withEvents = await attachEventsToBusinessesAsync(businesses, liveEvents);
@@ -3320,12 +3321,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const withTabs = attachSpottedAndGigsToBusinesses(withPromoters, missedConnections, gigs);
     const biz: any = withTabs.find(b => b.id === id);
     if (!biz || biz.status === "CLOSED") return null;
-    const inFamily = family === "placez"
-      ? isPlacezType(biz.type)
-      : family === "needz"
-        ? ["healthcare", "nonprofit"].includes(biz.type)
-        : biz.type === "group";
-    if (!inFamily) return null;
+    if (!isPlacezType(biz.type)) return null;
     const userId = req.session?.userId;
     const linkedIds = userId
       ? new Set(storage.getUserLinkedBusinesses(userId).map(b => b.id))
@@ -3354,25 +3350,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     } catch (error) { next(error); }
   });
 
-  app.get("/api/needz/:id", async (req: any, res, next) => {
-    try {
-      const id = Number(req.params.id);
-      if (!Number.isInteger(id) || id <= 0) return res.status(404).json({ error: "Place not found" });
-      const payload = await directoryFamilyDetail(req, id, "needz");
-      if (!payload) return res.status(404).json({ error: "Place not found" });
-      res.json(payload);
-    } catch (error) { next(error); }
-  });
 
-  app.get("/api/squadz/:id", async (req: any, res, next) => {
-    try {
-      const id = Number(req.params.id);
-      if (!Number.isInteger(id) || id <= 0) return res.status(404).json({ error: "Place not found" });
-      const payload = await directoryFamilyDetail(req, id, "squadz");
-      if (!payload) return res.status(404).json({ error: "Place not found" });
-      res.json(payload);
-    } catch (error) { next(error); }
-  });
 
   // ── New-business submission (gig-flow "this address isn't in the system" branch) ──
   const businessSubmissionSchema = z.object({
