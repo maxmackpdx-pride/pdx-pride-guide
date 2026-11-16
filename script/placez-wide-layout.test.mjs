@@ -19,3 +19,9 @@ test('SceneZ retains its right-side information column',()=>{
  const info=declarations(scene,'.scenez-native .pz-card--wide-map .pz-content');assert.equal(info.left,'49%');assert.equal(info.right,'25px');
  const logo=declarations(scene,'.scenez-native .pz-card--wide-map .scene-logo,.scenez-native .pz-card--wide-map .scene-wordmark');assert.equal(logo.left,'5%');assert.equal(logo.width,'39%');
 });
+
+test('logo-only records do not render a duplicate centered fallback name',()=>{
+ const source=readFileSync('client/src/components/placez/PlacezQuickCard.tsx','utf8');
+ assert.ok(source.includes(':!m.logoUrl&&<span className="pz-name-fallback">{m.name}</span>'));
+ assert.ok(source.includes('{m.logoUrl&&<img className="pz-art__logo"'));
+});
