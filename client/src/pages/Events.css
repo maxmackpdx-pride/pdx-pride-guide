@@ -470,8 +470,7 @@ html.calm-mode .events-page > .events-day-dock { animation: none; }
 @media (min-width: 1100px) {
   /* Sit on the site frame: the same column and gutters as the header block above. */
   html body .events-page.board-page--makeover .board-active-feed__inner { width: min(100%, var(--zl-frame)); max-width: var(--zl-frame); margin-inline: auto; padding-inline: var(--zl-gutter); box-sizing: border-box; }
-  .events-page .board-active-feed__body { display: grid; grid-template-columns: 248px minmax(0, 1fr); column-gap: 32px; align-items: start; }
-  .events-page .board-active-feed__body > :not(.events-side) { grid-column: 2; }
+  .events-page .board-active-feed__body { display: block; }
   .events-page .events-side { grid-column: 1; grid-row: 1 / span 12; position: sticky; top: calc(var(--site-header-height, 96px) + 84px); display: flex; flex-direction: column; gap: 16px; }
   .events-page .events-side__panel { padding: 20px; box-sizing: border-box; border-radius: 16px; border: 1px solid var(--panel-border); background: var(--ink-800); display: flex; flex-direction: column; gap: 16px; }
   .events-page .events-side__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }

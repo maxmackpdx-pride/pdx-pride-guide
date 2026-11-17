@@ -650,6 +650,23 @@ export default function Events() {
     return scatterAffiliateCards(filtered, posterServeQuery.data?.ads ?? []);
   }, [filtered, posterServeReady, posterServeQuery.data?.ads]);
 
+  /* The board sections itself (Now / Later / Weekend / Plan Ahead), so in the
+     default view it receives the whole upcoming pool — the day window is the
+     sorter's job, applied when a specific day or window is picked. Search is
+     global over the board, as designed. Past view keeps the filtered pool. */
+  const boardEvents = useMemo(() => {
+    if (pastView) return filtered;
+    const globalScope = activeDay === DEFAULT_WINDOW || activeDay === "ALL" || searchQuery.trim() !== "";
+    if (!globalScope) return filtered;
+    return sortEvents(filterBoardEvents(events, "ALL", activeFilters, searchQuery, false, now), sortMode);
+  }, [pastView, activeDay, searchQuery, filtered, events, activeFilters, now, sortMode]);
+  const boardGridItems = useMemo(() => {
+    if (!posterServeReady) {
+      return boardEvents.map((event) => ({ kind: "event" as const, event }));
+    }
+    return scatterAffiliateCards(boardEvents, posterServeQuery.data?.ads ?? []);
+  }, [boardEvents, posterServeReady, posterServeQuery.data?.ads]);
+
   const visibleGridItems = useMemo(
     () => gridItems.slice(0, visibleItemCount),
     [gridItems, visibleItemCount],
@@ -764,7 +781,6 @@ export default function Events() {
             <BoardFollowButton board="eventz" />
           </div>
         </div>
-        <p className="events-top__lede">Portland queer nights, daytime hangs and community gatherings, all year. Save what you like and it lands in My Schedule.</p>
       </header>
 
 
@@ -835,7 +851,7 @@ export default function Events() {
           </ScrollReveal>
 
           <div className="eb-result-head events-result-head">
-            <p role="status" data-testid="events-result-count">{isLoading ? "Loading events…" : `${filtered.length} ${filtered.length === 1 ? "event" : "events"}`}</p>
+            <p role="status" data-testid="events-result-count">{isLoading ? "Loading events…" : `${boardEvents.length} ${boardEvents.length === 1 ? "event" : "events"}`}</p>
                 {(activeFilters.length > 0 || searchQuery.trim() || pastView || activeDay !== DEFAULT_WINDOW || sortMode !== "start_time") && (
                   <button
                     type="button"
@@ -853,61 +869,12 @@ export default function Events() {
                 )}
           </div>
           <div className="board-active-feed__body">
-            {/* Desktop only (CSS): filters, map and the promoter path stay in view beside the feed. */}
-            <aside className="events-side" aria-label="Filters">
-              <section className="events-side__panel pdx-glass-rebind" style={{ "--c": "var(--room-eventz)" } as React.CSSProperties}>
-                <div className="events-side__head">
-                  <h2 className="events-side__title">Filters</h2>
-                  {activeFilters.length > 0 && (
-                    <button type="button" className="events-side__clear" onClick={() => setActiveFilters([])}>Clear</button>
-                  )}
-                </div>
-                <div className="events-drawer__section">
-                  <span className="events-drawer__label">Type</span>
-                  <div className="events-drawer__chips" role="group" aria-label="Filter by type">
-                    {EVENT_TYPE_FILTERS.map(f => (
-                      <EventTypeTag
-                        key={f}
-                        label={f}
-                        interactive
-                        active={activeFilters.includes(f)}
-                        onClick={() => toggleFilter(f)}
-                        testId={`side-filter-type-${f.replace(/[+ ]/g, "-")}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div className="events-drawer__section">
-                  <label className="events-drawer__label" htmlFor="events-side-sort">Sort</label>
-                  <div className="board-select-wrap">
-                    <select id="events-side-sort" className="board-select events-sort__select" value={sortMode} onChange={e => setSortMode(e.target.value as SortMode)} data-testid="events-side-sort">
-                      {SORT_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
-                    <span className="board-select-caret" aria-hidden="true"><ChevronDown size={14} /></span>
-                  </div>
-                </div>
-              </section>
-              <section className="events-side__panel pdx-glass-rebind" style={{ "--c": "var(--room-eventz)" } as React.CSSProperties}>
-                <button type="button" className="events-tool-btn events-tool-btn--block" onClick={() => setMapOpen(true)} data-testid="events-side-map">
-                  <MapIcon size={18} aria-hidden="true" />Open the map
-                </button>
-              </section>
-              <section className="events-side__panel events-side__promoters pdx-glass-rebind" style={{ "--c": "var(--neon-lime)" } as React.CSSProperties}>
-                <div className="board-path-card__label">Promoters</div>
-                <h3>Not seeing your event?</h3>
-                <p>Submit a new listing or claim one that is already on Zaylist.</p>
-                <Link href="/submit">
-                  <Button as="span" variant="solid" accent="lime" arrow>Get started</Button>
-                </Link>
-              </section>
-            </aside>
+
         {isLoading ? (
           <EventsRailSkeleton />
         ) : isError ? (
           <BrowseStatus error title="Events couldn’t load" description="Your filters are still here. Try loading the events again." onAction={() => void refetch()} />
-        ) : filtered.length === 0 ? (
+        ) : boardEvents.length === 0 ? (
           <div className="browse-status" role="status">
             <p className="display section-heading">
               {poolEvents.length === 0
@@ -949,9 +916,9 @@ export default function Events() {
           </div>
         ) : (
           <FlyerBoard
-            events={filtered}
+            events={boardEvents}
             paginationKey={JSON.stringify([activeDay, activeFilters, searchQuery, sortMode])}
-            gridItems={gridItems}
+            gridItems={boardGridItems}
             pastEvents={pastEvents}
             pastView={pastView}
             onEnterPast={() => setPastView(true)}
@@ -963,16 +930,7 @@ export default function Events() {
           />
         )}
 
-        <ScrollReveal delay={60}>
-          <div className="events-submit-panel board-path-card board-path-card--host pdx-glass-rebind">
-            <div className="board-path-card__label">Promoters</div>
-            <h3>Not seeing your event?</h3>
-            <p>Submit a new listing or claim one that is already on Zaylist.</p>
-            <Link href="/submit">
-              <Button as="span" variant="solid" accent="lime" arrow>Get started</Button>
-            </Link>
-          </div>
-        </ScrollReveal>
+        
           </div>
         </div>
       </section>
@@ -983,7 +941,7 @@ export default function Events() {
         open={drawerOpen}
         onClose={closeDrawer}
         title="Filters"
-        meta={`${filtered.length} ${filtered.length === 1 ? "event" : "events"}`}
+        meta={`${boardEvents.length} ${boardEvents.length === 1 ? "event" : "events"}`}
         footer={(
           <Button type="button" variant="solid" accent="cyan" onClick={closeDrawer} style={{ width: "100%" }} data-testid="events-filters-apply">
             Show {filtered.length} {filtered.length === 1 ? "event" : "events"}

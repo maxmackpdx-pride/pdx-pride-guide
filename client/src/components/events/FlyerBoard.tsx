@@ -735,7 +735,7 @@ export default function FlyerBoard(props: FlyerBoardProps) {
       const en = endMs(e);
       if (s <= nowMs && en > nowMs) nowItems.push(e);
       else if (dateStr === today && s > nowMs) laterItems.push(e);
-      else if (dateStr !== today && weekendDates.has(dateStr)) weekendItems.push(e);
+      else if (dateStr !== today && weekendDates.has(dateStr)) { weekendItems.push(e); ahead.push(e); }
       else ahead.push(e);
     }
     // Preserve the page-selected order within each time section.
