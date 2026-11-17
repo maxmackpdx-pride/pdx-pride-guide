@@ -346,11 +346,6 @@ function PosterCell({
               <span className="fb-chip" style={{ "--chip": CARPOOL_COLOR } as CSSProperties}>
                 <b>–</b><i>CARPOOL</i>
               </span>
-            </div>
-            <div className="fb-actions">
-              <button type="button" className="fb-details" onClick={open}>
-                VIEW DETAILS
-              </button>
               <button
                 type="button"
                 className={`fb-heart${saved ? " fb-heart--on" : ""}`}
@@ -643,6 +638,52 @@ type FlowItem =
   | { kind: "blank" }
   | { kind: "ad"; item: GridItem };
 
+/** Posters swing with scroll velocity: faster scroll, bigger sway, springing back to rest. */
+function useScrollSway() {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const root = document.documentElement;
+    let cur = 0, tgt = 0, yCur = 0, yTgt = 0, lastY: number | null = null, lastT = 0, raf: number | null = null;
+    const loop = () => {
+      cur += (tgt - cur) * 0.14;
+      yCur += (yTgt - yCur) * 0.14;
+      if (performance.now() - lastT > 60) {
+        tgt *= 0.86; yTgt *= 0.86;
+        if (Math.abs(tgt) < 0.02) tgt = 0;
+        if (Math.abs(yTgt) < 0.2) yTgt = 0;
+      }
+      root.style.setProperty("--sway", `${cur.toFixed(2)}deg`);
+      root.style.setProperty("--sway-y", `${yCur.toFixed(1)}px`);
+      if (Math.abs(cur) > 0.01 || Math.abs(yCur) > 0.1 || tgt !== 0 || yTgt !== 0) {
+        raf = requestAnimationFrame(loop);
+      } else {
+        raf = null;
+        root.style.setProperty("--sway", "0deg");
+        root.style.setProperty("--sway-y", "0px");
+      }
+    };
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (lastY === null) { lastY = y; return; }
+      const v = y - lastY;
+      lastY = y;
+      if (v === 0) return;
+      lastT = performance.now();
+      tgt = Math.max(-4.5, Math.min(4.5, v * 0.05));
+      yTgt = Math.max(-6, Math.min(6, v * 0.07));
+      if (raf === null) raf = requestAnimationFrame(loop);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf !== null) cancelAnimationFrame(raf);
+      root.style.removeProperty("--sway");
+      root.style.removeProperty("--sway-y");
+    };
+  }, []);
+}
+
 export default function FlyerBoard(props: FlyerBoardProps) {
   const { events, gridItems, pastEvents, pastView, onEnterPast, onExitPast } = props;
   const [tick, setTick] = useState(() => Date.now());
@@ -657,6 +698,8 @@ export default function FlyerBoard(props: FlyerBoardProps) {
   useEffect(() => {
     setVisibleSlots(batch());
   }, [props.paginationKey, pastView]);
+
+  useScrollSway();
 
   const handlers: CellHandlers = {
     onOpen: props.onOpen,

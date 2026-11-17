@@ -91,7 +91,7 @@
 }
 .fb-poster {
   position: relative;
-  transform: rotate(var(--rot, 0deg));
+  transform: rotate(calc(var(--rot, 0deg) + var(--sway, 0deg))) translateY(var(--sway-y, 0px));
   border-radius: 16px;
   border: 1px solid color-mix(in srgb, var(--c) 55%, var(--ink-1000));
   box-shadow:
@@ -104,7 +104,7 @@
   outline-offset: 3px;
 }
 .fb-poster--tape {
-  transform: rotate(var(--rot, 0deg)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform: rotate(calc(var(--rot, 0deg) + var(--sway, 0deg))) translateY(var(--sway-y, 0px)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   transform-origin: 50% 0;
 }
 .fb-cell:hover {
@@ -126,10 +126,10 @@
 @keyframes fb-rock {
   0%,
   100% {
-    transform: rotate(var(--rot, 0deg)) rotate(-1.6deg);
+    transform: rotate(calc(var(--rot, 0deg) + var(--sway, 0deg))) translateY(var(--sway-y, 0px)) rotate(-1.6deg);
   }
   50% {
-    transform: rotate(var(--rot, 0deg)) rotate(1.6deg);
+    transform: rotate(calc(var(--rot, 0deg) + var(--sway, 0deg))) translateY(var(--sway-y, 0px)) rotate(1.6deg);
   }
 }
 .fb-art {
@@ -186,12 +186,12 @@
   font-family: "Barlow Condensed", sans-serif;
   font-weight: 700;
   font-size: 3.6cqw;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   color: var(--text-hi);
-  background: rgb(0 0 0 / 0.55);
+  background: rgb(0 0 0 / 0.85);
   border: 1px solid color-mix(in srgb, var(--text-hi) 35%, transparent);
-  border-radius: 999px;
-  padding: 1.4cqw 3cqw;
+  border-radius: 4px;
+  padding: 2cqw 4cqw;
   cursor: pointer;
 }
 .fb-price {
@@ -201,12 +201,12 @@
   z-index: 3;
   font-family: "Barlow Condensed", sans-serif;
   font-weight: 700;
-  font-size: 3.4cqw;
+  font-size: 3.6cqw;
   letter-spacing: 0.1em;
   color: var(--z-oled);
   background: var(--paper);
   border-radius: 4px;
-  padding: 1.2cqw 2.4cqw;
+  padding: 2cqw 4cqw;
 }
 .fb-pfoot {
   position: absolute;
@@ -214,10 +214,10 @@
   right: 0;
   bottom: 0;
   z-index: 2;
-  padding: 3cqw 3.4cqw 3.4cqw;
+  padding: 4cqw;
   display: flex;
   flex-direction: column;
-  gap: 1.6cqw;
+  gap: 2cqw;
 }
 .fb-title {
   font-family: "Barlow Condensed", sans-serif;
@@ -233,7 +233,7 @@
 }
 .fb-meta {
   margin: 0;
-  font-size: 3.5cqw;
+  font-size: 3.6cqw;
   font-weight: 600;
   color: color-mix(in srgb, var(--text-hi) 78%, transparent);
   white-space: nowrap;
@@ -243,16 +243,18 @@
 .fb-start {
   display: flex;
   align-items: flex-end;
-  gap: 3cqw;
+  justify-content: space-between;
+  gap: 4cqw;
   text-shadow: 0 1px 7px rgb(0 0 0 / 0.6), 0 0 2px rgb(0 0 0 / 0.5);
 }
 .fb-start__label,
 .fb-onnow {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 2.7cqw;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 3.6cqw;
+  line-height: 1;
   letter-spacing: 0.14em;
   color: var(--text-hi);
-  padding-bottom: 1cqw;
 }
 .fb-onnow {
   color: var(--neon-green);
@@ -260,7 +262,7 @@
 }
 .fb-start__digits {
   display: flex;
-  gap: 2.6cqw;
+  gap: 6cqw;
 }
 .fb-start__digits span {
   display: flex;
@@ -270,21 +272,25 @@
 .fb-start__digits b {
   font-family: "Barlow Condensed", sans-serif;
   font-weight: 700;
-  font-size: 7cqw;
+  font-size: 6.4cqw;
   line-height: 0.95;
   font-variant-numeric: tabular-nums;
   color: var(--text-hi);
 }
 .fb-start__digits i {
   font-style: normal;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 2.2cqw;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 3.6cqw;
+  line-height: 1;
+  margin-top: 1cqw;
   letter-spacing: 0.14em;
   color: color-mix(in srgb, var(--text-hi) 70%, transparent);
 }
 .fb-counters {
   display: flex;
-  gap: 2.4cqw;
+  gap: 4cqw;
+  align-items: center;
 }
 .fb-chip {
   display: inline-flex;
@@ -294,12 +300,12 @@
   background: rgb(0 0 0 / 0.55);
   border: 1px solid color-mix(in srgb, var(--chip) 45%, transparent);
   border-radius: 4px;
-  padding: 1cqw 2.6cqw;
+  padding: 2cqw 4cqw;
 }
 .fb-chip b {
   font-family: "Barlow Condensed", sans-serif;
   font-weight: 700;
-  font-size: 5cqw;
+  font-size: 6.4cqw;
   line-height: 1;
   font-variant-numeric: tabular-nums;
   color: var(--text-hi);
@@ -308,30 +314,13 @@
   font-style: normal;
   font-family: "Barlow Condensed", sans-serif;
   font-weight: 700;
-  font-size: 2.9cqw;
+  font-size: 3.6cqw;
   letter-spacing: 0.1em;
   color: var(--chip);
 }
-.fb-actions {
-  display: flex;
-  gap: 2.4cqw;
-  align-items: stretch;
-}
-.fb-details {
-  flex: 1;
-  min-height: 11cqw;
-  font-family: "Barlow Condensed", sans-serif;
-  font-weight: 700;
-  font-size: 4.2cqw;
-  letter-spacing: 0.1em;
-  white-space: nowrap;
-  color: var(--text-hi);
-  background: rgb(0 0 0 / 0.55);
-  border: 1px solid var(--c);
-  border-radius: 8px;
-  cursor: pointer;
-}
 .fb-heart {
+  margin-left: auto;
+  flex: none;
   width: 11cqw;
   min-height: 11cqw;
   display: flex;
