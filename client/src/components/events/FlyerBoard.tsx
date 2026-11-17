@@ -354,6 +354,7 @@ function PosterCell({
   listing,
   index,
   mtop,
+  rail = false,
   saved,
   onToggleSave,
   onOpenCard,
@@ -364,6 +365,9 @@ function PosterCell({
   listing: EventListing;
   index: number;
   mtop: number;
+  /** Rails never grow taller: a poster taller than the rail's standard
+   *  height (the 0.8 reference at full rail width) scales down to fit. */
+  rail?: boolean;
   saved: boolean;
   onToggleSave: (id: number) => void;
   onOpenCard: (listing: EventListing, el: HTMLElement | null) => void;
@@ -404,7 +408,15 @@ function PosterCell({
   };
 
   return (
-    <div className="cell" style={{ marginTop: mtop }}>
+    <div
+      className="cell"
+      style={{
+        marginTop: mtop,
+        ...(rail && aspect < 0.8
+          ? { width: `calc(var(--pw) * ${(aspect / 0.8).toFixed(3)})` }
+          : {}),
+      }}
+    >
       <article
         ref={articleRef}
         className={`poster att-${pinned ? "pin" : "tape"}${tear ? " torn" : ""} pdx-glass-rebind`}
@@ -995,6 +1007,7 @@ export default function FlyerBoard({
       listing={e}
       index={i}
       mtop={0}
+      rail
       saved={savedIds.has(e.id)}
       onToggleSave={onToggleSave}
       onOpenCard={openCard}
