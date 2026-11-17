@@ -140,7 +140,7 @@ function endMs(e: EventListing): number {
 }
 
 function dateStrOf(e: EventListing): string {
-  return e.dateStart ? pacificCalendarDate(e.dateStart) : "";
+  return pacificCalendarDate(e.dateStart) ?? "";
 }
 
 function countdownParts(ms: number): { d: string; h: string; m: string } {
