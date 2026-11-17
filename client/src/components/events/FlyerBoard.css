@@ -16,6 +16,9 @@
 .fbx h2, .fbx h3, .fbx h4, .fbx h5, .fbx p { margin: 0; }
 .fbx .hide { display: none !important; }
 .fbx-content { position: relative; z-index: 1; padding-bottom: 26px; }
+/* Body-portal wrapper for the fan deck + open card: carries the .fbx
+   scope without the board root's painted background. */
+.fbx.fbx-overlay { background: none; }
 
 /* ---------- rainbow board background (demo treatment) ---------- */
 .fbx .bgfx {
@@ -317,6 +320,13 @@
   pointer-events: none;
 }
 .fbx .pshade { pointer-events: none; color: var(--evz-mist-f4f8fa); margin-bottom: 2cqw; }
+/* Posterless events: the title block IS the flyer. It sits as a designed
+   text face — clear of the pin/tape zone and the SHARE / price row —
+   over an accent-tinted ground (the demo only ever showed this block
+   behind real flyer art, so the port gives it the open card's typo
+   treatment). */
+.fbx .poster.noart .pc { background: linear-gradient(160deg, color-mix(in srgb, var(--a) 24%, var(--fbx-pc-hi)), var(--evz-ink-0a0a0e) 74%); }
+.fbx .poster.noart .pshade { position: relative; z-index: 2; padding: 15cqw 4cqw 0; }
 .fbx .pshade h4 { font: 800 6.4cqw/1 "Barlow Condensed", sans-serif; text-transform: uppercase; }
 .fbx .pshade p { font: 500 3.6cqw var(--font-mono); color: var(--evz-mist-cfd8de); margin-top: 2cqw; }
 .fbx .pshare {
@@ -662,7 +672,7 @@
 .fbx .pcell.source .poster { transform: rotate(0deg) scale(1.03) !important; z-index: 8; }
 
 /* ---------- fan deck ---------- */
-.fbx .fanLayer { position: fixed; inset: 0; z-index: 230; pointer-events: none; }
+.fbx .fanLayer { position: fixed; inset: 0; z-index: 3020; pointer-events: none; }
 .fbx .fanLayer.on { pointer-events: auto; }
 .fbx .deck { position: absolute; width: 0; height: 0; z-index: 56; }
 .fbx .fancard {
@@ -775,7 +785,7 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity .35s;
-  z-index: 210;
+  z-index: 3000;
   backdrop-filter: blur(3px) brightness(.85);
   -webkit-backdrop-filter: blur(3px) brightness(.85);
 }
@@ -786,7 +796,7 @@
   top: 28px;
   width: min(360px, calc(100vw - 20px));
   height: min(892px, calc(100dvh - 64px));
-  z-index: 220;
+  z-index: 3010;
   border-radius: 14px;
   overflow: hidden;
   background: var(--fbx-card);
