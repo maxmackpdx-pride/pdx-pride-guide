@@ -179,62 +179,6 @@ function timeAgo(iso: string): string {
   return `${Math.floor(s / (86400 * 365))}y ago`;
 }
 
-/** Scroll-velocity sway, exactly as the demo drives it. */
-function useScrollSway() {
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const root = document.documentElement;
-    let cur = 0;
-    let tgt = 0;
-    let curY = 0;
-    let tgtY = 0;
-    let lastY: number | null = null;
-    let lastT = 0;
-    let raf = 0;
-    const loop = () => {
-      cur += (tgt - cur) * 0.14;
-      curY += (tgtY - curY) * 0.14;
-      if (performance.now() - lastT > 60) {
-        tgt *= 0.86;
-        tgtY *= 0.86;
-        if (Math.abs(tgt) < 0.02) tgt = 0;
-        if (Math.abs(tgtY) < 0.2) tgtY = 0;
-      }
-      root.style.setProperty("--sway", `${cur.toFixed(2)}deg`);
-      root.style.setProperty("--sway-y", `${curY.toFixed(1)}px`);
-      if (Math.abs(cur) > 0.01 || Math.abs(curY) > 0.1 || tgt !== 0 || tgtY !== 0) {
-        raf = requestAnimationFrame(loop);
-      } else {
-        raf = 0;
-        root.style.setProperty("--sway", "0deg");
-        root.style.setProperty("--sway-y", "0px");
-      }
-    };
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (lastY === null) {
-        lastY = y;
-        return;
-      }
-      const v = y - lastY;
-      lastY = y;
-      if (v === 0) return;
-      lastT = performance.now();
-      tgt = Math.max(-4.5, Math.min(4.5, v * 0.05));
-      tgtY = Math.max(-6, Math.min(6, v * 0.07));
-      if (!raf) raf = requestAnimationFrame(loop);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-      root.style.setProperty("--sway", "0deg");
-      root.style.setProperty("--sway-y", "0px");
-    };
-  }, []);
-}
-
 /** Pointer-tracked tilt for taped posters; the tape line stays put (demo). */
 function useDemoTilt(ref: React.RefObject<HTMLElement | null>, enabled: boolean) {
   useEffect(() => {
@@ -253,7 +197,7 @@ function useDemoTilt(ref: React.RefObject<HTMLElement | null>, enabled: boolean)
       cy += (ty - cy) * 0.16;
       el.style.transform =
         `perspective(900px) rotateX(${cy.toFixed(2)}deg) rotateY(${cx.toFixed(2)}deg) ` +
-        `rotate(calc(var(--rot, 0deg) + var(--sway, 0deg))) translateY(var(--sway-y, 0px))`;
+        `rotate(var(--rot, 0deg))`;
       if (Math.abs(tx - cx) > 0.01 || Math.abs(ty - cy) > 0.01) {
         raf = requestAnimationFrame(loop);
       } else {
@@ -347,9 +291,12 @@ function Hardware({ pinned, seedKey, dayColor, rot }: { pinned: boolean; seedKey
 
 type CellCommon = {
   tick: number;
-  aspect: number;
-  onAspect: (id: number, ar: number) => void;
 };
+
+/** Measured flyer proportions, shared by poster URL: the same flyer
+ * anywhere on the board gets its exact dimensions immediately, with no
+ * placeholder-proportioned jump while it loads. */
+const aspectByPosterUrl = new Map<string, number>();
 
 function PosterCell({
   listing,
@@ -360,8 +307,6 @@ function PosterCell({
   onToggleSave,
   onOpenCard,
   tick,
-  aspect,
-  onAspect,
 }: CellCommon & {
   listing: EventListing;
   index: number;
@@ -381,6 +326,7 @@ function PosterCell({
   const dayColor = dayColorVar(dateStr);
   const accent = listing.accentColor || dayColor;
   const poster = listingPosterUrl(listing);
+  const [aspect, setAspect] = useState(() => (poster ? aspectByPosterUrl.get(poster) ?? 0.8 : 0.8));
   const tear = useMemo(() => (pinned ? tearPolygons(key) : null), [pinned, key]);
   useDemoTilt(articleRef, !pinned);
 
@@ -450,9 +396,14 @@ function PosterCell({
               src={poster}
               alt=""
               loading="lazy"
+              decoding="async"
               onLoad={ev => {
                 const im = ev.currentTarget;
-                if (im.naturalWidth > 0 && im.naturalHeight > 0) onAspect(listing.id, im.naturalWidth / im.naturalHeight);
+                if (im.naturalWidth > 0 && im.naturalHeight > 0) {
+                  const ar = im.naturalWidth / im.naturalHeight;
+                  if (poster) aspectByPosterUrl.set(poster, ar);
+                  setAspect(ar);
+                }
               }}
             />
           ) : null}
@@ -555,8 +506,6 @@ function PastCell({
   isSource,
   onFan,
   tick,
-  aspect,
-  onAspect,
 }: CellCommon & {
   listing: EventListing;
   index: number;
@@ -572,6 +521,7 @@ function PastCell({
   const dayColor = dayColorVar(dateStr);
   const accent = listing.accentColor || dayColor;
   const poster = listingPosterUrl(listing);
+  const [aspect, setAspect] = useState(() => (poster ? aspectByPosterUrl.get(poster) ?? 0.8 : 0.8));
   const expiry = getMissedConnectionWindow(listing.dateStart, listing.dateEnd, tick)?.closesAt ?? tick;
   const parts = countdownParts(expiry - tick);
   const pill =
@@ -604,9 +554,14 @@ function PastCell({
               src={poster}
               alt=""
               loading="lazy"
+              decoding="async"
               onLoad={ev => {
                 const im = ev.currentTarget;
-                if (im.naturalWidth > 0 && im.naturalHeight > 0) onAspect(listing.id, im.naturalWidth / im.naturalHeight);
+                if (im.naturalWidth > 0 && im.naturalHeight > 0) {
+                  const ar = im.naturalWidth / im.naturalHeight;
+                  if (poster) aspectByPosterUrl.set(poster, ar);
+                  setAspect(ar);
+                }
               }}
             />
           ) : null}
@@ -653,7 +608,6 @@ export default function FlyerBoard({
   const [cols, setCols] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(min-width: 1100px)").matches ? 5 : 3,
   );
-  const [aspects, setAspects] = useState<Record<number, number>>({});
   const [openListing, setOpenListing] = useState<EventListing | null>(null);
   const [ocardOn, setOcardOn] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -669,7 +623,6 @@ export default function FlyerBoard({
   const pileWheelCool = useRef(false);
   const timersRef = useRef<number[]>([]);
 
-  useScrollSway();
 
   useEffect(() => {
     setTick(now);
@@ -687,10 +640,6 @@ export default function FlyerBoard({
   useEffect(() => () => {
     timersRef.current.forEach(t => window.clearTimeout(t));
   }, []);
-
-  const onAspect = (id: number, ar: number) =>
-    setAspects(prev => (prev[id] && Math.abs(prev[id] - ar) < 0.01 ? prev : { ...prev, [id]: ar }));
-  const aspectOf = (e: EventListing) => aspects[e.id] ?? 0.8;
 
   const todayStr = pacificTodayDate(tick);
   const todaySerial = serialOf(todayStr);
@@ -1017,8 +966,6 @@ export default function FlyerBoard({
       onToggleSave={onToggleSave}
       onOpenCard={openCard}
       tick={tick}
-      aspect={aspectOf(e)}
-      onAspect={onAspect}
     />
   );
 
@@ -1039,8 +986,6 @@ export default function FlyerBoard({
         onToggleSave={onToggleSave}
         onOpenCard={openCard}
         tick={tick}
-        aspect={aspectOf(item.e)}
-        onAspect={onAspect}
       />
     );
   });
@@ -1063,8 +1008,6 @@ export default function FlyerBoard({
           isSource={!!fan && listingKey(fan.listing) === listingKey(e)}
           onFan={openFan}
           tick={tick}
-          aspect={aspectOf(e)}
-          onAspect={onAspect}
         />,
       );
     });

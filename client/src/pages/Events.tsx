@@ -32,7 +32,6 @@ import ThisWeekRail, { type WeekDay } from "@/components/events/ThisWeekRail";
 import BoardShareButton from "@/components/BoardShareButton";
 import BoardFollowButton from "@/components/BoardFollowButton";
 import ScrollReveal from "@/components/ScrollReveal";
-import BoardCloseSeam from "@/components/BoardCloseSeam";
 import EventTypeTag from "../components/EventTypeTag";
 import EventzExpanded from "../components/events/EventzExpanded";
 import FlyerBoard from "../components/events/FlyerBoard";
@@ -664,9 +663,28 @@ export default function Events() {
      with ended listings excluded. Past view keeps the page's past pool; the
      board cuts it to the last 7 days itself. */
   const boardEvents = useMemo(() => {
-    if (pastView) return filtered;
-    return sortEvents(filterBoardEvents(events, "ALL", [], "", false, now), "start_time")
-      .filter(e => !boardEnded(e));
+    const pool = pastView
+      ? filtered
+      : sortEvents(filterBoardEvents(events, "ALL", [], "", false, now), "start_time")
+          .filter(e => !boardEnded(e));
+    /* Series poster fill: a recurring series often carries its real flyer
+       on some instances only. A bare instance of a series that has a flyer
+       shows that flyer; a series with no flyer anywhere stays bare. */
+    const seriesPoster = new Map<string, string>();
+    for (const e of events) {
+      const url = listingPosterUrl(e);
+      if (!url) continue;
+      const k = `${(e.title || "").trim().toLowerCase()}|${(e.venueName || "").trim().toLowerCase()}`;
+      if (!seriesPoster.has(k)) seriesPoster.set(k, url);
+    }
+    if (seriesPoster.size === 0) return pool;
+    return pool.map(e => {
+      if (listingPosterUrl(e)) return e;
+      const fill = seriesPoster.get(
+        `${(e.title || "").trim().toLowerCase()}|${(e.venueName || "").trim().toLowerCase()}`,
+      );
+      return fill ? { ...e, posterImageUrl: fill } : e;
+    });
   }, [pastView, filtered, events, now]);
 
   /* Agent helpers: the board's current scope as schema.org structured data.
@@ -857,10 +875,6 @@ export default function Events() {
         />
       )}
 
-      <BoardCloseSeam
-        line="Find the party. Show up for your people."
-        url="zaylist.com/events"
-      />
     </div>
   );
 }

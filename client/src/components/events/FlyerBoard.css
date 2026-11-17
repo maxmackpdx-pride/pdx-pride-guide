@@ -23,7 +23,7 @@
 /* ---------- rainbow board background (demo treatment) ---------- */
 .fbx .bgfx {
   --grad: var(--grad-rainbow);
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -61,7 +61,7 @@
   background-size: 20px 20px;
 }
 .fbx .vig {
-  position: absolute; inset: 0; pointer-events: none; z-index: 20;
+  position: fixed; inset: 0; pointer-events: none; z-index: 20;
   background:
     radial-gradient(125% 95% at 50% 38%, transparent 52%, rgba(0, 0, 0, .42) 100%),
     radial-gradient(95% 55% at 50% -12%, rgba(255, 214, 150, .12), transparent 60%);
@@ -243,7 +243,7 @@
   border-radius: .7cqw;
   cursor: pointer;
   width: 100%;
-  transform: rotate(calc(var(--rot, 0deg) + var(--sway, 0deg))) translateY(var(--sway-y, 0px));
+  transform: rotate(var(--rot, 0deg));
   border: 1px solid color-mix(in srgb, var(--a) 55%, var(--evz-line-17171d));
   box-shadow:
     0 0 0 2px var(--z-black),
