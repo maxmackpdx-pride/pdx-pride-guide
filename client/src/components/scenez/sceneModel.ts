@@ -4,6 +4,9 @@ export const sceneTypes=[['club','Clubs','#FFD700'],['party-collective','Party C
 export function sceneCategory(c:CommunitySummary){return (c as CommunitySummary & {sceneCategory?:string}).sceneCategory||null;}
 export function sceneModel(c:CommunitySummary,detail?:CommunityDetail){
  const key=sceneCategory(c);const known:Record<string,Record<string,string>>={
+ // Q Center's community image is a legacy brand graphic; keep its data intact
+ // while the separate logo slot uses the reviewed directory SVG.
+ 'q-center':{logo:resolveDirectoryLogo('Q Center')!},
  'lesbian-culture-club':{id:'club',wordmark:'LESBIAN\nCULTURE\nCLUB'},
  'pride-northwest':{id:'org',customArt:'/scenez-native/pride-collage.png',logo:'/scenez-native/pride.png'},
  'bearracuda':{id:'party',customArt:'/scenez-native/party-collage.png',wordmark:'BEARRACUDA',color:'#ff7800'},
