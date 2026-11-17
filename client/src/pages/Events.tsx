@@ -654,11 +654,20 @@ export default function Events() {
      default view it receives the whole upcoming pool — the day window is the
      sorter's job, applied when a specific day or window is picked. Search is
      global over the board, as designed. Past view keeps the filtered pool. */
+  const boardEnded = (e: EventListing) => {
+    const en = parsePacificDateTime(e.dateEnd) ?? parsePacificDateTime(e.dateStart);
+    if (en == null || en > now) return false;
+    // No recorded end + started today: the site treats it as still on.
+    if (!e.dateEnd && pacificCalendarDate(e.dateStart) === pacificCalendarDate(new Date(now).toISOString())) return false;
+    return true;
+  };
   const boardEvents = useMemo(() => {
     if (pastView) return filtered;
     const globalScope = activeDay === DEFAULT_WINDOW || activeDay === "ALL" || searchQuery.trim() !== "";
-    if (!globalScope) return filtered;
-    return sortEvents(filterBoardEvents(events, "ALL", activeFilters, searchQuery, false, now), sortMode);
+    const base = globalScope
+      ? sortEvents(filterBoardEvents(events, "ALL", activeFilters, searchQuery, false, now), sortMode)
+      : filtered;
+    return base.filter(e => !boardEnded(e));
   }, [pastView, activeDay, searchQuery, filtered, events, activeFilters, now, sortMode]);
   const boardGridItems = useMemo(() => {
     if (!posterServeReady) {

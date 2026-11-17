@@ -740,9 +740,11 @@ export default function FlyerBoard(props: FlyerBoardProps) {
       const s = startMs(e);
       const en = endMs(e);
       if (s <= nowMs && en > nowMs) nowItems.push(e);
+      else if (dateStr === today && s <= nowMs && !e.dateEnd) nowItems.push(e);
       else if (dateStr === today && s > nowMs) laterItems.push(e);
-      else if (dateStr !== today && weekendDates.has(dateStr)) { weekendItems.push(e); ahead.push(e); }
-      else ahead.push(e);
+      else if (dateStr !== today && s > nowMs && weekendDates.has(dateStr)) { weekendItems.push(e); ahead.push(e); }
+      else if (dateStr !== today && s > nowMs) ahead.push(e);
+      // else: already over — the past view carries it, not the upcoming board
     }
     // Preserve the page-selected order within each time section.
     return { nowItems, laterItems, weekendItems, ahead };
@@ -803,9 +805,8 @@ export default function FlyerBoard(props: FlyerBoardProps) {
     return out;
   }, [flow, visibleSlots]);
   const remainingSlots = useMemo(() => {
-    let used = 0;
-    for (const item of visibleFlow) used += slotCost(item);
-    return flow.reduce((acc, item) => acc + slotCost(item), 0) - used;
+    const shown = visibleFlow.filter(item => item.kind === "poster").length;
+    return flow.filter(item => item.kind === "poster").length - shown;
   }, [flow, visibleFlow]);
   const lastAheadDate =
     sections && sections.ahead.length
@@ -854,9 +855,8 @@ export default function FlyerBoard(props: FlyerBoardProps) {
     return out;
   }, [pastFlow, visibleSlots]);
   const pastRemaining = useMemo(() => {
-    let used = 0;
-    for (const item of visiblePastFlow) used += slotCost(item);
-    return pastFlow.reduce((acc, item) => acc + slotCost(item), 0) - used;
+    const shown = visiblePastFlow.filter(item => item.kind === "poster").length;
+    return pastFlow.filter(item => item.kind === "poster").length - shown;
   }, [pastFlow, visiblePastFlow]);
   const pastTotal = useMemo(() => {
     if (!pastView) return 0;
