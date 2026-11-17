@@ -427,7 +427,7 @@
 }
 .fb-endcap {
   text-align: center;
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.16em;
   color: var(--text-meta);
@@ -486,7 +486,7 @@
   letter-spacing: 0.05em;
 }
 .fb-pile__card span {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.14em;
 }
@@ -495,7 +495,7 @@
   height: 58px;
 }
 .fb-pile__cap {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 10.5px;
   letter-spacing: 0.16em;
   color: var(--text-meta);
@@ -531,14 +531,14 @@
   color: var(--neon-magenta);
 }
 .fb-pastsub {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.16em;
   color: var(--text-meta);
   margin: 0;
 }
 .fb-pasthint {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.14em;
   color: var(--text-faint);
@@ -587,7 +587,7 @@
   color: var(--neon-magenta);
 }
 .fb-pexp {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 4.8cqw;
   letter-spacing: 0.1em;
   color: var(--text-hi);
@@ -694,14 +694,14 @@
   cursor: pointer;
 }
 .fb-dcount {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.14em;
   color: var(--text-hi);
   white-space: nowrap;
 }
 .fb-fan__hint {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 10.5px;
   letter-spacing: 0.12em;
   color: var(--text-meta);
