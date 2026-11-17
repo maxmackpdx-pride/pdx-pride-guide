@@ -6,6 +6,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { listingKey, type EventListing } from "@shared/multiDayEvents";
@@ -419,7 +420,7 @@ function PosterCell({
     >
       <article
         ref={articleRef}
-        className={`poster att-${pinned ? "pin" : "tape"}${tear ? " torn" : ""} pdx-glass-rebind`}
+        className={`poster att-${pinned ? "pin" : "tape"}${tear ? " torn" : ""}${poster ? "" : " noart"} pdx-glass-rebind`}
         style={
           {
             "--a": accent,
@@ -655,6 +656,10 @@ export default function FlyerBoard({
   const [aspects, setAspects] = useState<Record<number, number>>({});
   const [openListing, setOpenListing] = useState<EventListing | null>(null);
   const [ocardOn, setOcardOn] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [fan, setFan] = useState<{ listing: EventListing; x: number; y: number } | null>(null);
   const [deckIdx, setDeckIdx] = useState(0);
   const flipElRef = useRef<HTMLElement | null>(null);
@@ -1290,9 +1295,14 @@ export default function FlyerBoard({
         )}
       </div>
 
-      {/* fan deck */}
-      <div
-        className={`fanLayer${fan ? " on" : ""}`}
+      {/* Fan deck + open card render in a body portal: the events page
+          flattens its children into a single z-index-2 layer, which let
+          the close seam and page chrome paint over the fixed card. */}
+      {mounted &&
+        createPortal(
+          <div className="fbx fbx-overlay">
+            <div
+              className={`fanLayer${fan ? " on" : ""}`}
         onClick={ev => {
           if (ev.target === ev.currentTarget) closeFan();
         }}
@@ -1485,7 +1495,7 @@ export default function FlyerBoard({
             </button>
             <div className="ocounters">
               <div className="ocount">
-                <b>{detailQuery.data ? String(gigs.length) : "–"}</b>
+                <b>{detailQuery.data && gigs.length > 0 ? String(gigs.length) : "–"}</b>
                 <i className="oc-g">GIGZ</i>
               </div>
               <div className="ocount">
@@ -1493,7 +1503,7 @@ export default function FlyerBoard({
                 <i className="oc-c">CARPOOL</i>
               </div>
               <div className="ocount">
-                <b>{detailQuery.data ? String(mizzCount ?? 0) : "–"}</b>
+                <b>{detailQuery.data && (mizzCount ?? 0) > 0 ? String(mizzCount) : "–"}</b>
                 <i className="oc-m">MIZZED</i>
               </div>
             </div>
@@ -1546,6 +1556,9 @@ export default function FlyerBoard({
           </div>
         </div>
       )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
