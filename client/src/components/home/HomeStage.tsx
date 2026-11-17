@@ -1,14 +1,7 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import HomeFlight from "@/components/home/HomeFlight";
 import { useTheme } from "@/context/ThemeContext";
 import { prefersStillMotion } from "@/lib/motion";
-import PerspectiveTunnelHero from "@/components/home/perspective-tunnel/PerspectiveTunnelHero";
-import { tunnelDayKey, tunnelDaySeed, type OutzideMapPlace } from "@/components/home/perspective-tunnel/tunnelCards";
-import { useFlyOutEnabled } from "@/components/home/perspective-tunnel/flyOut";
-import type { EventListing } from "@shared/multiDayEvents";
-import { isEventSchedulePast, parsePacificDateTime } from "@shared/missedConnections";
-import { apiRequest } from "@/lib/queryClient";
 import HomeStageCard from "@/components/home/HomeStageCard";
 import TonightPanel from "@/components/home/TonightPanel";
 import { HandwritingText } from "@/components/ui/handwriting-text";
@@ -34,52 +27,6 @@ const IDENTITY_LINES = [
   "Not your daddies Craigslist",
 ] as const;
 
-/**
- * Live data for the hero's flying cards: the same two queries (same keys, so the same cache) the Today rail reads.
- * Upcoming events only (ended ones drop out), soonest first; Outzide from the live places.json (blended-art places only).
- */
-function useTunnelData() {
-  // Phones fly no cards, so they fetch nothing for them (the Today rail runs its own queries).
-  const flyOut = useFlyOutEnabled();
-  // The fly-by set is daily: seeded from the Pacific date. When the date rolls over (midnight, or a tab left open /
-  // woken from sleep) switch to the new day's seed and refetch events and places so nothing stale carries over.
-  const queryClient = useQueryClient();
-  const [dayKey, setDayKey] = useState(() => tunnelDayKey());
-  const dayRef = useRef(dayKey);
-  useEffect(() => {
-    const sync = () => {
-      const next = tunnelDayKey();
-      if (next === dayRef.current) return;
-      dayRef.current = next;
-      setDayKey(next);
-      void queryClient.invalidateQueries({ queryKey: ["/api/events"] });
-      void queryClient.invalidateQueries({ queryKey: ["/outzide-map/places.json"] });
-    };
-    const timer = window.setInterval(sync, 60_000);
-    document.addEventListener("visibilitychange", sync);
-    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", sync); };
-  }, [queryClient]);
-  const { data: listings } = useQuery<EventListing[]>({
-    queryKey: ["/api/events"],
-    queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
-    staleTime: 30_000,
-    enabled: flyOut,
-  });
-  const { data: outz } = useQuery<{ places: OutzideMapPlace[] }>({
-    queryKey: ["/outzide-map/places.json"],
-    queryFn: () => apiRequest("GET", "/outzide-map/places.json?v=20261017-sculpted-v3").then(r => r.json()),
-    staleTime: 30_000,
-    enabled: flyOut,
-  });
-  const events = useMemo(() => {
-    const now = Date.now();
-    return (listings ?? [])
-      .filter(e => !isEventSchedulePast(e.dateStart, e.dateEnd, now))
-      .sort((a, b) => (parsePacificDateTime(a.dateStart) ?? 0) - (parsePacificDateTime(b.dateStart) ?? 0));
-  }, [listings, dayKey]);
-  return { events, outzPlaces: outz?.places, seed: tunnelDaySeed(dayKey) };
-}
-
 type Props = {
   afterWelcome?: ReactNode;
 };
@@ -88,7 +35,6 @@ export default function HomeStage({ afterWelcome }: Props) {
   const { calmMode } = useTheme();
   const logoRef = useRef<HTMLImageElement>(null);
   const [logoReady, setLogoReady] = useState(false);
-  const tunnel = useTunnelData();
   const [identityLine, setIdentityLine] = useState(0);
   const [stillIdentity, setStillIdentity] = useState(() => calmMode || prefersStillMotion());
 
@@ -124,29 +70,35 @@ export default function HomeStage({ afterWelcome }: Props) {
 
   return (
     <div className="home-front" id="top">
-      {/* The Perspective Tunnel Hero IS the homepage hero: a tall sticky stage (scroll drives the cards) that owns the
-          one globe canvas (HomeFlight), the wordmark, the cycling identity line, the Start here button, BETA badge
-          and the stat strip. Do not mount a second HomeFlight on this page. */}
-      <PerspectiveTunnelHero
-        events={tunnel.events}
-        outzPlaces={tunnel.outzPlaces}
-        seed={tunnel.seed}
-        still={calmMode}
-        wordmarkRef={logoRef}
-        globeLayer={<HomeFlight enabled={logoReady} />}
-        brandAccessory={<span className="home-front__beta">BETA</span>}
-        identity={(
-          <span key={identityLine} className="home-front__identity-cycle" data-still={stillIdentity}>
-            <HandwritingText
-              text={IDENTITY_LINES[identityLine]}
-              animate={!stillIdentity}
-              className="home-front__identity-script"
-              height="1.35em"
-            />
-          </span>
-        )}
-        foreground={afterWelcome}
-      />
+      {/* The homepage hero is the globe alone: one globe canvas (HomeFlight), the wordmark, the cycling
+          identity line and the BETA badge, with the stat strip pinned to the bottom of the welcome panel. */}
+      <div className="home-front__welcome">
+        <HomeFlight enabled={logoReady} />
+        <div className="home-front__hero">
+          <div className="home-front__brand-group">
+            <h1 className="sr-only">Zaylist</h1>
+            <span className="home-front__beta">BETA</span>
+            <div className="home-front__mark">
+              <div className="home-front__mark-art">
+                <img ref={logoRef} className="home-front__mark-core" src={WORDMARK} alt="Zaylist" width="2393" height="824" loading="eager" decoding="sync" />
+              </div>
+            </div>
+          </div>
+          <div className="home-front__welcome-copy">
+            <p className="home-front__identity-line">
+              <span key={identityLine} className="home-front__identity-cycle" data-still={stillIdentity}>
+                <HandwritingText
+                  text={IDENTITY_LINES[identityLine]}
+                  animate={!stillIdentity}
+                  className="home-front__identity-script"
+                  height="1.35em"
+                />
+              </span>
+            </p>
+          </div>
+        </div>
+        {afterWelcome}
+      </div>
 
       <div className="site-pre-footer-edge" aria-hidden="true" />
       <TonightPanel />

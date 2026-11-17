@@ -84,8 +84,8 @@ html:is([data-site-wallpaper="boot"], [data-site-wallpaper="live"], [data-site-w
 }
 
 /*
- * The hero panel (the globe stage, .ptunnel) is NOT on the wallpaper: it keeps its own solid near-black Zaylist
- * background (--z-oled, set in PerspectiveTunnelHero.css), full width, so no map or shader shows anywhere around or
+ * The hero panel (the globe hero, .home-front) is NOT on the wallpaper: it keeps its own solid near-black Zaylist
+ * background (set in HomeStage.css), full width, so no map or shader shows anywhere around or
  * behind the globe. The wallpaper starts at the second panel (Explore Today) and runs down the page. The seam is a
  * soft fade from the hero's black into the wallpaper along the top of that second panel, behind its content.
  */

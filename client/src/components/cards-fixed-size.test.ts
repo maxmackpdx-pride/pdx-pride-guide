@@ -13,7 +13,6 @@ const read = (rel: string) => readFileSync(join(here, rel), "utf8").replace(/\/\
 
 /** [css file, selector (exact, as written in the rule), expected width, expected height] */
 const FIXED: [string, string, string, string][] = [
-  ["home/perspective-tunnel/PerspectiveTunnelHero.css", ".ptunnel__card", "214px", "286px"],
   ["home/TonightPanel.css", ".home-tonight__item .tonight-card.tonight-card--card", "var(--event-card-width)", "var(--event-card-height)"],
   ["home/OutzSmallCard.css", ".outz-small", "136px", "170px"],
   ["home/HomeStageCard.css", ".home-stage-card", "360px", "216px"],
@@ -46,7 +45,7 @@ test("card roots declare one fixed width and height (no vw, clamp, min(), %, or 
 
 test("card CSS never applies scale()/scaleX()/scaleY()/zoom to a card", () => {
   const files = [
-    "home/perspective-tunnel/PerspectiveTunnelHero.css", "home/TonightPanel.css", "home/TonightEventCard.css",
+    "home/TonightPanel.css", "home/TonightEventCard.css",
     "home/TodayLocationCard.css", "home/OutzSmallCard.css", "home/HomeStageCard.css", "home/outz-accent-card.css",
     "directory/OutzideFeatured.css", "directory/PlacezOutzideSection.css", "board/MapBoardCards.css",
   ];
@@ -56,18 +55,4 @@ test("card CSS never applies scale()/scaleX()/scaleY()/zoom to a card", () => {
     assert.ok(!/(^|[;{\s])zoom\s*:/.test(css), `${f}: zoom`);
     assert.ok(!/(^|[;{\s])scale\s*:\s*(?!none)/.test(css), `${f}: scale property`);
   }
-});
-
-test("hero card TSX paints a translate + rotate only: no scale, rotateX/Y, translateZ or perspective", () => {
-  const tsx = readFileSync(join(here, "home/perspective-tunnel/PerspectiveTunnelHero.tsx"), "utf8");
-  const painted = /el\.style\.transform = `([^`]*)`/.exec(tsx)?.[1] ?? "";
-  assert.ok(painted.includes("translate(") && painted.includes("rotate("), painted);
-  assert.ok(!/scale|rotateX|rotateY|translate3d|translateZ|perspective/i.test(painted), painted);
-  const css = read("home/perspective-tunnel/PerspectiveTunnelHero.css");
-  assert.ok(!/perspective\s*:|preserve-3d/.test(css));
-});
-
-test("the hero never reintroduces a scale: sweep is x/y/rotZ/opacity", () => {
-  const math = readFileSync(join(here, "home/perspective-tunnel/tunnelMath.ts"), "utf8");
-  assert.ok(!/out\.(scale|z|rotX|rotY)\b/.test(math));
 });
