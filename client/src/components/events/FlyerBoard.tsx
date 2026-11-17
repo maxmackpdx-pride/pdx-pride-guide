@@ -293,7 +293,7 @@ function PosterCell({
       </div>
       <article
         ref={articleRef}
-        className={`fb-poster pdx-glass-rebind${pinned ? " fb-poster--pin" : " fb-poster--tape"}${tear ? " fb-poster--torn" : ""}`}
+        className={`fb-poster pdx-glass-rebind${pinned ? " fb-poster--pin" : " fb-poster--tape"}${tear ? " fb-poster--torn" : ""}${poster ? "" : " fb-poster--noposter"}`}
         style={{ "--c": accent, "--clip": tear?.clip, "--clip2": tear?.clip2 } as CSSProperties}
         onClick={open}
         onKeyDown={ev => {

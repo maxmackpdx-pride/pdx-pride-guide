@@ -79,10 +79,10 @@
 }
 .fb-tape {
   position: absolute;
-  top: -9px;
+  top: -13px;
   left: 50%;
-  width: 42%;
-  height: 25px;
+  width: 34%;
+  height: 20px;
   transform: translateX(-50%) rotate(-4deg);
   background: color-mix(in srgb, var(--tc) 68%, var(--paper));
   opacity: 0.92;
@@ -418,9 +418,9 @@
   font-weight: 800;
   font-size: 19px;
   letter-spacing: 0.1em;
-  color: var(--z-oled);
-  background: var(--paper);
-  border: none;
+  color: var(--paper);
+  background: var(--z-oled);
+  border: 1.5px solid color-mix(in srgb, var(--paper) 45%, transparent);
   border-radius: 999px;
   padding: 13px 30px;
   cursor: pointer;
@@ -785,4 +785,13 @@
 .fb-root.boardz-punk-scope {
   width: 100%;
   height: auto;
+}
+
+/* Posterless cards: the fallback art already carries the title as its
+   headline — the footer must not print it a second time. */
+.fb-poster--noposter .fb-title { display: none; }
+
+/* Let the board's end scroll clear of the mobile dock. */
+@media (max-width: 1099px) {
+  .fb-root { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 }
