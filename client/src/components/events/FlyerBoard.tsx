@@ -304,6 +304,9 @@ function PosterCell({
         }}
         tabIndex={0}
         role="button"
+        data-event-id={listing.id}
+        data-event-date={dateStrOf(listing)}
+        data-venue={listing.venueName}
         aria-label={`Open ${listing.title}`}
       >
         <div className="fb-art">
@@ -439,6 +442,9 @@ function PastCell({
         }}
         tabIndex={0}
         role="button"
+        data-event-id={listing.id}
+        data-event-date={dateStrOf(listing)}
+        data-venue={listing.venueName}
         aria-label={`See mizzed connections for ${listing.title}`}
       >
         <div className="fb-art">
@@ -944,7 +950,7 @@ export default function FlyerBoard(props: FlyerBoardProps) {
   return (
     <div className="fb-root boardz-punk-scope">
       {sections.nowItems.length > 0 && (
-        <section className="fb-sec" aria-label="Happening now">
+        <section className="fb-sec" id="happening-now" aria-label="Happening now">
           <h2 className="fb-sec__title">HAPPENING NOW</h2>
           <div className="fb-rail">
             {sections.nowItems.map(e => (
@@ -954,7 +960,7 @@ export default function FlyerBoard(props: FlyerBoardProps) {
         </section>
       )}
       {sections.laterItems.length > 0 && (
-        <section className="fb-sec" aria-label="Happening later today">
+        <section className="fb-sec" id="happening-later" aria-label="Happening later today">
           <h2 className="fb-sec__title">HAPPENING LATER</h2>
           <div className="fb-rail">
             {sections.laterItems.map(e => (
@@ -964,7 +970,7 @@ export default function FlyerBoard(props: FlyerBoardProps) {
         </section>
       )}
       {sections.weekendItems.length > 0 && (
-        <section className="fb-sec" aria-label="Happening this weekend">
+        <section className="fb-sec" id="this-weekend" aria-label="Happening this weekend">
           <h2 className="fb-sec__title">HAPPENING THIS WEEKEND</h2>
           <div className="fb-rail">
             {sections.weekendItems.map(e => (
@@ -974,7 +980,7 @@ export default function FlyerBoard(props: FlyerBoardProps) {
         </section>
       )}
       {hasAhead && (
-        <section className="fb-sec fb-sec--ahead" aria-label="Plan ahead">
+        <section className="fb-sec fb-sec--ahead" id="plan-ahead" aria-label="Plan ahead">
           <div className="fb-seam" aria-hidden="true" />
           <h2 className="fb-sec__title">PLAN AHEAD</h2>
           {renderFlow(visibleFlow, false)}

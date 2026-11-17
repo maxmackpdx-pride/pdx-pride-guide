@@ -667,6 +667,29 @@ export default function Events() {
     return scatterAffiliateCards(boardEvents, posterServeQuery.data?.ads ?? []);
   }, [boardEvents, posterServeReady, posterServeQuery.data?.ads]);
 
+  /* Agent helpers: the board's current scope as schema.org structured data.
+     The complete data set stays at /api/events (linked below); this block
+     describes what the page is showing, in the order it shows it. */
+  const boardJsonLd = useMemo(() => ({
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: boardEvents.slice(0, 100).map((e, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Event",
+        name: e.title,
+        startDate: e.dateStart,
+        ...(e.dateEnd ? { endDate: e.dateEnd } : {}),
+        eventStatus: "https://schema.org/EventScheduled",
+        location: { "@type": "Place", name: e.venueName, ...(e.address ? { address: e.address } : {}) },
+        ...(e.posterImageUrl ? { image: e.posterImageUrl.startsWith("http") ? e.posterImageUrl : `https://www.zaylist.com${e.posterImageUrl}` } : {}),
+        ...(e.admission === "FREE" ? { isAccessibleForFree: true } : {}),
+        url: `https://www.zaylist.com${eventPath(e.id, e.title, e.dayOfWeek)}`,
+      },
+    })),
+  }), [boardEvents]);
+
   const visibleGridItems = useMemo(
     () => gridItems.slice(0, visibleItemCount),
     [gridItems, visibleItemCount],
@@ -800,6 +823,9 @@ export default function Events() {
       ) : (
       <section className="events-board-feed board-active-feed diag">
         <div className="board-active-feed__inner">
+          <link rel="alternate" type="application/json" href="/api/events" title="Zaylist events — full JSON feed" />
+          <link rel="alternate" type="text/plain" href="/llms.txt" title="Zaylist for agents — llms.txt" />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(boardJsonLd) }} />
           <ScrollReveal delay={40}>
             <div className="events-board-feed__sticky">
               {pastView && (
