@@ -541,3 +541,11 @@ html.calm-mode .events-page > .events-day-dock { animation: none; }
   .events-page .events-rails>.events-rail-sec:has(.events-rail--open) { width:100%; }
   .events-page .events-rails .events-rail--open { justify-content:space-between; }
 }
+
+/* Flyer Board full-bleed on phones: the board and its backgrounds run to
+   the screen edges; the board's own internal padding insets the posters. */
+@media (max-width: 767px) {
+  html body .events-page.board-page--makeover .events-board-feed.board-active-feed .board-active-feed__inner {
+    padding-inline: 0;
+  }
+}
