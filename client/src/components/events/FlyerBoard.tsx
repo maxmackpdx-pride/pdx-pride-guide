@@ -139,6 +139,10 @@ function endMs(e: EventListing): number {
   return parsePacificDateTime(e.dateEnd) ?? startMs(e);
 }
 
+function dateStrOf(e: EventListing): string {
+  return e.dateStart ? pacificCalendarDate(e.dateStart) : "";
+}
+
 function countdownParts(ms: number): { d: string; h: string; m: string } {
   const totalMin = Math.max(0, Math.floor(ms / 60000));
   const d = Math.floor(totalMin / 1440);
@@ -237,7 +241,7 @@ function PosterCell({
   const seed = hashString(key);
   const pinned = seed % 2 === 0;
   const rot = ((seed % 61) / 10 - 3).toFixed(1);
-  const dateStr = pacificCalendarDate(listing.dateStart);
+  const dateStr = dateStrOf(listing);
   const dayColor = dayColorVar(dateStr);
   const accent = listing.accentColor || dayColor;
   const poster = listingPosterUrl(listing);
@@ -275,7 +279,7 @@ function PosterCell({
     >
       <div className={`fb-hw fb-hw--${pinned ? "pin" : "tape"}`} aria-hidden="true">
         {pinned ? (
-          <span className="fb-pinwrap" style={{ "--c": dayColor } as CSSProperties}>
+          <span className="fb-pinwrap pdx-glass-rebind" style={{ "--c": dayColor } as CSSProperties}>
             <BoardPushPin postKey={key} />
           </span>
         ) : (
@@ -284,7 +288,7 @@ function PosterCell({
       </div>
       <article
         ref={articleRef}
-        className={`fb-poster${pinned ? " fb-poster--pin" : " fb-poster--tape"}${tear ? " fb-poster--torn" : ""}`}
+        className={`fb-poster pdx-glass-rebind${pinned ? " fb-poster--pin" : " fb-poster--tape"}${tear ? " fb-poster--torn" : ""}`}
         style={{ "--c": accent, "--clip": tear?.clip, "--clip2": tear?.clip2 } as CSSProperties}
         onClick={open}
         onKeyDown={ev => {
@@ -367,7 +371,7 @@ function DayFlag({ dateStr }: { dateStr: string }) {
   const color = dayColorVar(dateStr);
   return (
     <div className="fb-cell fb-cell--flag" aria-hidden="true">
-      <div className="fb-vflag" style={{ "--c": color } as CSSProperties}>
+      <div className="fb-vflag pdx-glass-rebind" style={{ "--c": color } as CSSProperties}>
         <span className="fb-vflag__pin">
           <BoardPushPin postKey={`flag-${dateStr}`} />
         </span>
@@ -404,7 +408,7 @@ function PastCell({
   const seed = hashString(key);
   const pinned = seed % 2 === 0;
   const rot = ((seed % 61) / 10 - 3).toFixed(1);
-  const dateStr = pacificCalendarDate(listing.dateStart);
+  const dateStr = dateStrOf(listing);
   const dayColor = dayColorVar(dateStr);
   const accent = listing.accentColor || dayColor;
   const poster = listingPosterUrl(listing);
@@ -416,7 +420,7 @@ function PastCell({
     <div className="fb-cell fb-cell--past" style={{ "--rot": `${rot}deg` } as CSSProperties}>
       <div className={`fb-hw fb-hw--${pinned ? "pin" : "tape"}`} aria-hidden="true">
         {pinned ? (
-          <span className="fb-pinwrap" style={{ "--c": dayColor } as CSSProperties}>
+          <span className="fb-pinwrap pdx-glass-rebind" style={{ "--c": dayColor } as CSSProperties}>
             <BoardPushPin postKey={key} />
           </span>
         ) : (
@@ -424,7 +428,7 @@ function PastCell({
         )}
       </div>
       <article
-        className={`fb-poster fb-poster--past${wide ? " fb-poster--wide" : ""}`}
+        className={`fb-poster fb-poster--past pdx-glass-rebind${wide ? " fb-poster--wide" : ""}`}
         style={{ "--c": accent } as CSSProperties}
         onClick={() => onFan(listing)}
         onKeyDown={ev => {
@@ -672,7 +676,7 @@ export default function FlyerBoard(props: FlyerBoardProps) {
       const k = listingKey(e);
       if (seen.has(k)) continue;
       seen.add(k);
-      const dateStr = pacificCalendarDate(e.dateStart);
+      const dateStr = dateStrOf(e);
       const s = startMs(e);
       const en = endMs(e);
       if (s <= nowMs && en > nowMs) nowItems.push(e);
@@ -721,7 +725,7 @@ export default function FlyerBoard(props: FlyerBoardProps) {
     let posterIdx = 0;
     for (const m of mixed) {
       if (m.listing) {
-        const dateStr = pacificCalendarDate(m.listing.dateStart);
+        const dateStr = dateStrOf(m.listing);
         if (dateStr !== lastDate) {
           out.push({ kind: "flag", dateStr });
           lastDate = dateStr;
@@ -753,9 +757,10 @@ export default function FlyerBoard(props: FlyerBoardProps) {
     for (const item of visibleFlow) used += slotCost(item);
     return flow.reduce((acc, item) => acc + slotCost(item), 0) - used;
   }, [flow, visibleFlow]);
-  const lastAheadDate = sections?.ahead.length
-    ? pacificCalendarDate(sections.ahead[sections.ahead.length - 1].dateStart)
-    : null;
+  const lastAheadDate =
+    sections && sections.ahead.length
+      ? dateStrOf(sections.ahead[sections.ahead.length - 1])
+      : null;
 
   /* ---------- past mode ---------- */
   const [fanListing, setFanListing] = useState<EventListing | null>(null);
@@ -799,12 +804,12 @@ export default function FlyerBoard(props: FlyerBoardProps) {
     const today = pacificTodayDate(nowMs);
     const cutoff = pacificDateString((parsePacificDateTime(`${today}T12:00:00`) ?? nowMs) - 7 * DAY_MS);
     const last7 = events
-      .filter(e => pacificCalendarDate(e.dateStart) >= cutoff)
+      .filter(e => dateStrOf(e) >= cutoff)
       .sort((a, b) => startMs(b) - startMs(a));
     const out: FlowItem[] = [];
     let lastDate = "";
     for (const e of last7) {
-      const dateStr = pacificCalendarDate(e.dateStart);
+      const dateStr = dateStrOf(e);
       if (dateStr !== lastDate) {
         out.push({ kind: "flag", dateStr });
         lastDate = dateStr;
