@@ -1,9 +1,7 @@
 import { eventsTonightWindow } from "@shared/eventsTonight";
-import { ScrollDock, focusPageSearch } from "@/components/discovery/ScrollDock";
 import BoardShader from "@/components/board/BoardShader";
 import { createEventSearch, extractAgeIntent } from "@shared/eventSearch";
 import BrowseToolbar from "@/components/BrowseToolbar";
-import EventsDrawer from "@/components/events/EventsDrawer";
 import BrowseStatus from "@/components/BrowseStatus";
 import PageRecovery from "@/components/PageRecovery";
 import type React from "react";
@@ -661,20 +659,15 @@ export default function Events() {
     if (!e.dateEnd && pacificCalendarDate(e.dateStart) === pacificCalendarDate(new Date(now).toISOString())) return false;
     return true;
   };
+  /* The Flyer Board owns filtering now (its own filter row, search and
+     sections), so it always receives the whole upcoming pool, start-sorted,
+     with ended listings excluded. Past view keeps the page's past pool; the
+     board cuts it to the last 7 days itself. */
   const boardEvents = useMemo(() => {
     if (pastView) return filtered;
-    const globalScope = activeDay === DEFAULT_WINDOW || activeDay === "ALL" || searchQuery.trim() !== "";
-    const base = globalScope
-      ? sortEvents(filterBoardEvents(events, "ALL", activeFilters, searchQuery, false, now), sortMode)
-      : filtered;
-    return base.filter(e => !boardEnded(e));
-  }, [pastView, activeDay, searchQuery, filtered, events, activeFilters, now, sortMode]);
-  const boardGridItems = useMemo(() => {
-    if (!posterServeReady) {
-      return boardEvents.map((event) => ({ kind: "event" as const, event }));
-    }
-    return scatterAffiliateCards(boardEvents, posterServeQuery.data?.ads ?? []);
-  }, [boardEvents, posterServeReady, posterServeQuery.data?.ads]);
+    return sortEvents(filterBoardEvents(events, "ALL", [], "", false, now), "start_time")
+      .filter(e => !boardEnded(e));
+  }, [pastView, filtered, events, now]);
 
   /* Agent helpers: the board's current scope as schema.org structured data.
      The complete data set stays at /api/events (linked below); this block
@@ -756,65 +749,9 @@ export default function Events() {
       href="/events" label="Browse Eventz" missing={missing} retry={missing ? undefined : () => { void refetchRouteEvent(); }} />;
   }
 
-  // Day tabs render in the page and again in the dock that pins under the header
-  // once the page row scrolls away.
-  const renderDayTabs = (inDock: boolean) => (
-    <>
-    {dayRail.map(d => (
-      <button
-        key={d.key}
-        type="button"
-        className={`events-day-tab pdx-glass-rebind${d.key === DEFAULT_WINDOW ? " events-day-tab--tonight" : ""}`}
-        aria-pressed={!pastView && activeDay === d.key}
-        onClick={() => {
-          setPastView(false); setActiveDay(d.key);
-          setOpenRails(new Set(["happening", "next", "tonight", "late", "day", "evening", "tomorrow"]));
-          // From the dock, bring the page back to the top of that day's list.
-          const rail = dayRailRef.current;
-          if (inDock && rail) window.scrollTo({ top: rail.getBoundingClientRect().top + window.scrollY - (dockTop ?? 0) - 8, behavior: quietScroll() ? "auto" : "smooth" });
-        }}
-        style={{ "--c": d.color, "--day-text": d.text, "--day-ink": d.ink } as React.CSSProperties}
-        data-testid={inDock ? undefined : `day-tab-${d.key}`}
-      >
-        <span className="events-day-tab__top">{d.top}</span>
-        <span className="events-day-tab__sub">{d.sub}</span>
-        <span className="events-day-tab__count" aria-label={`${d.count} events`}>{d.count}</span>
-      </button>
-    ))}
-    <button
-      type="button"
-      className="events-day-tab events-day-tab--more pdx-glass-rebind"
-      aria-pressed={pastView || (activeDay !== "ALL" && !railKeys.has(activeDay))}
-      aria-haspopup="dialog"
-      onClick={() => setDrawerOpen(true)}
-    >
-      <span className="events-day-tab__top">More</span>
-      <span className="events-day-tab__sub">{moreLabel}</span>
-    </button>
-    </>
-  );
   return (
     <div className="zine-page events-page board-page board-page--makeover board-shader-page" data-shader-room="eventz">
       <BoardShader room="eventz" />
-      {dockTop != null && !drawerOpen && !mapOpen ? (
-        <ScrollDock top={dockTop} className="events-day-dock" railClassName="events-day-rail" label="Pick a day"
-          searchLabel="Search events" onSearch={() => focusPageSearch("#event-search", dockTop)}>
-          {renderDayTabs(true)}
-        </ScrollDock>
-      ) : null}
-      <header className="events-top pdx-glass-rebind" style={{ "--c": "var(--room-eventz)" } as React.CSSProperties}>
-        <div className="events-top__row">
-          <div className="events-top__id">
-            <p className="events-top__kicker">{todayKicker}</p>
-            <h1 className="events-top__mark"><EventzNeonLogo ready={upcomingCount > 0} className="events-top__logo" /></h1>
-          </div>
-          <div className="events-top__actions">
-            <BoardShareButton title="Eventz" path="/events" card={{ room: "Eventz", mark: "/brand/family/eventz.png" }} />
-            <BoardFollowButton board="eventz" />
-          </div>
-        </div>
-      </header>
-
 
       {activeTab === "schedule" ? (
         <ScrollReveal delay={50}>
@@ -835,74 +772,6 @@ export default function Events() {
           <link rel="alternate" type="application/json" href="/api/events" title="Zaylist events — full JSON feed" />
           <link rel="alternate" type="text/plain" href="/llms.txt" title="Zaylist for agents — llms.txt" />
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(boardJsonLd) }} />
-          <ScrollReveal delay={40}>
-            <div className="events-board-feed__sticky">
-              {pastView && (
-                <div className="board-active-feed__head">
-                  <h2 className="display section-heading board-active-feed__title">Past events</h2>
-                </div>
-              )}
-              <div className="events-browse">
-                <div className="events-day-row">
-                  <nav className="events-day-rail" aria-label="Pick a day" ref={dayRailRef}>
-                    {renderDayTabs(false)}
-                  </nav>
-                </div>
-              <BrowseToolbar label="Search and filter Eventz" className="board-active-feed__controls">
-                <div className="board-filter-row events-filter-row">
-                  <div className="events-filter-search">
-                    <SearchInput
-                      id="event-search"
-                      aria-label={pastView ? "Search past events" : "Search events"}
-                      placeholder={pastView ? "Search past events, venues, DJs, days…" : "Search events, venues, DJs, days…"}
-                      value={searchQuery}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                      onClear={() => setSearchQuery("")}
-                      data-testid="event-search"
-                      size="sm"
-                    />
-                  </div>
-                  <button type="button" className="events-tool-btn events-tool-btn--icon" aria-haspopup="dialog" aria-label={`Filters${drawerFilterCount ? `, ${drawerFilterCount} on` : ""}`} onClick={() => setDrawerOpen(true)} data-testid="events-filters-open">
-                    <SlidersHorizontal size={19} aria-hidden="true" />{drawerFilterCount ? <span className="events-tool-btn__count" aria-hidden="true">{drawerFilterCount}</span> : null}
-                  </button>
-                  <button type="button" className="events-tool-btn events-tool-btn--icon" aria-label="My Schedule" title="My Schedule" onClick={() => setActiveTab("schedule")} data-testid="toggle-calendar-view">
-                    <CalendarDays size={19} aria-hidden="true" />
-                  </button>
-                </div>
-                <div className="events-browse-actions">
-                  <button
-                    type="button"
-                    className="events-tool-btn events-view-all"
-                    data-testid="events-view-all"
-                    aria-pressed={!pastView && activeDay === "ALL"}
-                    onClick={() => { setPastView(false); setActiveDay("ALL"); }}
-                  >
-                    <Grid size={18} aria-hidden="true" />View all
-                  </button>
-                </div>
-              </BrowseToolbar>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          <div className="eb-result-head events-result-head">
-            <p role="status" data-testid="events-result-count">{isLoading ? "Loading events…" : `${boardEvents.length} ${boardEvents.length === 1 ? "event" : "events"}`}</p>
-                {(activeFilters.length > 0 || searchQuery.trim() || pastView || activeDay !== DEFAULT_WINDOW || sortMode !== "start_time") && (
-                  <button
-                    type="button"
-                    className="events-clear-filters"
-                    onClick={() => {
-                      setActiveFilters([]);
-                      setSearchQuery("");
-                      setPastView(false);
-                      setActiveDay(DEFAULT_WINDOW);
-                      setSortMode("start_time");
-                    }}
-                  >
-                    Clear filters
-                  </button>
-                )}
-          </div>
           <div className="board-active-feed__body">
 
         {isLoading ? (
@@ -952,8 +821,6 @@ export default function Events() {
         ) : (
           <FlyerBoard
             events={boardEvents}
-            paginationKey={JSON.stringify([activeDay, activeFilters, searchQuery, sortMode])}
-            gridItems={boardGridItems}
             pastEvents={pastEvents}
             pastView={pastView}
             onEnterPast={() => setPastView(true)}
@@ -971,108 +838,6 @@ export default function Events() {
       </section>
       )}
 
-
-      <EventsDrawer
-        open={drawerOpen}
-        onClose={closeDrawer}
-        title="Filters"
-        meta={`${boardEvents.length} ${boardEvents.length === 1 ? "event" : "events"}`}
-        footer={(
-          <Button type="button" variant="solid" accent="cyan" onClick={closeDrawer} style={{ width: "100%" }} data-testid="events-filters-apply">
-            Show {filtered.length} {filtered.length === 1 ? "event" : "events"}
-          </Button>
-        )}
-      >
-        <div className="events-drawer__section">
-          <span className="events-drawer__label">When</span>
-          <div className="events-drawer__chips" role="group" aria-label="Filter by date">
-            {dayChips.filter(chip => chip.key !== "TODAY").map((chip, i) => (
-              <FilterChip key={chip.key} selected={activeDay === chip.key} fill={activeDay === chip.key}
-                accent={windowAccent(chip.key, i)} onToggle={() => setActiveDay(chip.key)} data-testid={`filter-day-${chip.key}`}>
-                {chip.label}
-              </FilterChip>
-            ))}
-            <FilterChip
-              selected={pastView}
-              fill={pastView}
-              accent="var(--text-meta)"
-              onToggle={() => setPastView(v => !v)}
-              data-testid="filter-past-events"
-              className="events-filter-chip--past"
-            >
-              PAST{pastEvents.length > 0 ? ` · ${pastEvents.length}` : ""}
-            </FilterChip>
-          </div>
-        </div>
-        <div className="events-drawer__section">
-          <span className="events-drawer__label">Type</span>
-          <div className="events-drawer__chips" role="group" aria-label="Filter by type">
-            {EVENT_TYPE_FILTERS.map(f => (
-              <EventTypeTag
-                key={f}
-                label={f}
-                interactive
-                active={activeFilters.includes(f)}
-                onClick={() => toggleFilter(f)}
-                testId={`filter-type-${f.replace(/[+ ]/g, "-")}`}
-              />
-            ))}
-          </div>
-        </div>
-        <div className="events-drawer__section">
-          <label className="events-drawer__label" htmlFor="events-sort-select">Sort</label>
-          <div className="board-select-wrap">
-            <select
-              id="events-sort-select"
-              className="board-select events-sort__select"
-              value={sortMode}
-              onChange={e => setSortMode(e.target.value as SortMode)}
-              data-testid="events-sort"
-            >
-              {SORT_OPTIONS.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-            <span className="board-select-caret" aria-hidden="true"><ChevronDown size={14} /></span>
-          </div>
-        </div>
-      </EventsDrawer>
-
-      <EventsDrawer
-        open={mapOpen}
-        onClose={closeMap}
-        title="Mapz"
-        meta={`${filtered.length} ${filtered.length === 1 ? "event" : "events"} on this view`}
-        footer={(
-          <Link href="/map?layer=events" className="events-tool-btn events-tool-btn--block" onClick={closeMap} data-testid="events-map-full">
-            <MapIcon size={18} aria-hidden="true" />Open the full map
-          </Link>
-        )}
-      >
-        <div className="events-map-list" role="list">
-          {filtered.slice(0, mapRowLimit).map(e => {
-            const pinHref = e.lat != null && e.lng != null
-              ? `/map?layer=events&lat=${e.lat}&lng=${e.lng}&zoom=15`
-              : `/map?layer=events&q=${encodeURIComponent(e.title)}`;
-            const isToday = pacificCalendarDate(e.dateStart) === pacificTodayDate(now);
-            return (
-              <div className="events-map-row pdx-glass-rebind" role="listitem" key={listingKey(e)} style={{ "--c": `var(--day-${(e.dayOfWeek || "sat").toLowerCase()})` } as React.CSSProperties}>
-                <button type="button" className="events-map-row__open" onClick={() => { closeMap(); openEvent(e); }} aria-label={`Open ${e.title}`}>
-                  <EventThumb src={listingPosterUrl(e)} day={e.dayOfWeek} />
-                  <span className="events-map-row__copy"><strong>{e.title}</strong><small>{e.venueName}{e.neighborhood ? ` · ${e.neighborhood}` : ""}</small></span>
-                  <time dateTime={e.dateStart}>{!isToday && <small>{eventDateLabel(e.dateStart)}</small>}{eventTimeLabel(e.dateStart)}</time>
-                  <ChevronRight size={17} aria-hidden="true" />
-                </button>
-                <Link href={pinHref} className="events-map-row__pin" aria-label={`Show ${e.title} on the map`} onClick={closeMap}>
-                  <MapPin size={18} aria-hidden="true" />
-                </Link>
-              </div>
-            );
-          })}
-          {filtered.length === 0 && <p className="board-copy-sm">Nothing on this view. Try another day.</p>}
-          {filtered.length > mapRowLimit && <Button className="events-tool-btn events-tool-btn--block" onClick={() => setMapRowLimit(count => count + 40)}>Show more events ({Math.min(mapRowLimit, filtered.length)} of {filtered.length})</Button>}
-        </div>
-      </EventsDrawer>
 
       {user && mySavedUpcoming > 0 && activeTab === "board" && !selectedEvent && (
         <Link href="/schedule?view=mine" className="events-myschedule-pill" data-testid="events-my-schedule">

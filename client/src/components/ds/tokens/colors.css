@@ -26,6 +26,14 @@
   --evz-line-2c2c35: #2C2C35;  /* dashed claim border, quiet button borders */
   --evz-dot-3a3a44:  #3A3A44;  /* pager dots (inactive) */
   --evz-mist-f4f8fa: #F4F8FA;  /* brightest steel text (tag labels) */
+  --fbx-poster-paper: #EDE6D6; /* flyer board: poster back / paper body */
+  --fbx-trim-paper:   #F6F1E6; /* flyer board: torn-edge fibre rim */
+  --fbx-placeholder:  #5C5C66; /* flyer board: search placeholder */
+  --fbx-pc-hi:        #181820; /* flyer board: poster fallback gradient, top */
+  --fbx-chip-bg:      #101014; /* flyer board: counter boxes / inset chips */
+  --fbx-line-soft:    #1C1C22; /* flyer board: hairline borders */
+  --fbx-card:         #0C0C0F; /* flyer board: card surface */
+  --fbx-fan-text:     #EDF2F5; /* flyer board: fan card body text */
   --evz-mist-f2f5f7: #F2F5F7;  /* venue line on the expanded hero */
   --evz-mist-e8f0f5: #E8F0F5;  /* when line on the expanded hero */
   --evz-mist-cfd8de: #CFD8DE;  /* steel meta text */

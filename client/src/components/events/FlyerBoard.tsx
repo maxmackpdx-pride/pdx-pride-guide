@@ -1,14 +1,11 @@
 import type React from "react";
-import * as Dialog from "@radix-ui/react-dialog";
 import {
   useEffect,
   useMemo,
   useRef,
   useState,
   type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
 } from "react";
-import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { listingKey, type EventListing } from "@shared/multiDayEvents";
@@ -22,30 +19,29 @@ import { listingPosterUrl } from "@/lib/dsEvent";
 import { eventDateLabel, eventTimeLabel } from "@/lib/eventDisplay";
 import { eventPath } from "@shared/eventSlug";
 import type { EventModalOriginRect } from "../EventModal";
-import type { scatterAffiliateCards } from "@/lib/affiliateCards";
 import BoardPushPin from "@/components/board/BoardPushPin";
-import SpottedCard, { spottedAccent } from "@/components/SpottedCard";
 import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
-import PosterAdCard from "@/components/ads/PosterAdCard";
-import AffiliatePosterCard from "@/components/AffiliatePosterCard";
 import "../board/punk/push-pins.css";
 import "./FlyerBoard.css";
-import { fanSlots, isPosterActivation, connectionsForListing } from "./flyerBoardBehavior";
+import { connectionsForListing, isPosterActivation } from "./flyerBoardBehavior";
 
-type GridItem = ReturnType<typeof scatterAffiliateCards>[number];
-
+/**
+ * The Flyer Board — a faithful port of the approved demo (build_board_v5):
+ * same DOM, same geometry, same motion, fed by the live catalog. The board
+ * owns the page: its own filter row (ALL / TONIGHT / THIS WEEK / LATER +
+ * tag toggles + search), Happening Now / Later / This Weekend rails, the
+ * Plan Ahead flow with day flags and Load More, the pile into the past
+ * view, the Mizzed fan, and the flip-open card.
+ */
 export type FlyerBoardProps = {
-  /** Page-filtered pool: upcoming events, or past events while pastView is on. */
+  /** The whole upcoming pool; the board sections and filters it itself. */
   events: EventListing[];
-  /** Explicit filter changes reset pagination; background refreshes do not. */
-  paginationKey: string;
-  /** Events with affiliate/ad cards scattered in (upcoming mode, Plan Ahead flow). */
-  gridItems: GridItem[];
-  /** All past listings (pile artwork in upcoming mode). */
+  /** All past listings; the board keeps the last 7 days for the past view. */
   pastEvents: EventListing[];
   pastView: boolean;
   onEnterPast: () => void;
   onExitPast: () => void;
+  /** Opens the full production expanded card (deep actions: post a Mizzed, etc.). */
   onOpen: (listing: EventListing, originRect: EventModalOriginRect | null) => void;
   savedIds: Set<number>;
   onToggleSave: (id: number) => void;
@@ -55,6 +51,7 @@ export type FlyerBoardProps = {
 const PACIFIC = "America/Los_Angeles";
 const DAY_MS = 86_400_000;
 const WEEKDAY_CODES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
+const DOW_INDEX: Record<string, number> = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 const ADMISSION_LABEL: Record<string, string> = {
   FREE: "FREE",
@@ -68,9 +65,23 @@ const AGE_LABEL: Record<string, string> = {
   "18_PLUS": "18+",
   ALL_AGES: "All ages",
 };
-const GIGZ_COLOR = "var(--neon-violet)";
-const CARPOOL_COLOR = "var(--neon-orange)";
-const MIZZED_COLOR = "var(--neon-magenta)";
+/** The demo's rotation rhythm and stagger, by position in the container. */
+const ROT_CYCLE = [-2.2, 1.6, -1.2, 2.6, -2.8, 1.9];
+const MTOPS = [0, 10, 4, 14, 2, 8, 0, 12, 6, 2];
+const TAG_CHIPS: Array<[string, string]> = [
+  ["21plus", "21+"],
+  ["free", "FREE"],
+  ["party", "PARTY"],
+  ["drag", "DRAG"],
+  ["kink", "KINK"],
+  ["social", "SOCIAL"],
+];
+const PILE_SPOTS: Array<[number, number, number]> = [
+  [4, -9, 54],
+  [22, 7, 46],
+  [60, -6, 48],
+  [79, 9, 55],
+];
 
 function hashString(text: string): number {
   let hash = 0x811c9dc5;
@@ -92,7 +103,7 @@ function mulberry32(seed: number) {
   };
 }
 
-/** Seeded torn lower edge for pinned posters (ported from the approved demo). */
+/** Seeded torn lower edge for pinned posters (from the approved demo). */
 function tearPolygons(key: string): { clip: string; clip2: string } {
   const rand = mulberry32(hashString(key));
   const points = 14;
@@ -107,17 +118,6 @@ function tearPolygons(key: string): { clip: string; clip2: string } {
     return `polygon(${parts.join(",")})`;
   };
   return { clip: build(ridge), clip2: build(ridge.map(y => Math.max(0, y - lift))) };
-}
-
-function pacificDateString(ms: number): string {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: PACIFIC,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date(ms));
-  const get = (type: string) => parts.find(p => p.type === type)?.value || "";
-  return `${get("year")}-${get("month")}-${get("day")}`;
 }
 
 function weekdayCode(dateStr: string): string {
@@ -143,9 +143,16 @@ function startMs(e: EventListing): number {
 function endMs(e: EventListing): number {
   return parsePacificDateTime(e.dateEnd) ?? startMs(e);
 }
-
 function dateStrOf(e: EventListing): string {
   return pacificCalendarDate(e.dateStart) ?? "";
+}
+
+function serialOf(dateStr: string): number {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return Math.floor(Date.UTC(y || 1970, (m || 1) - 1, d || 1) / DAY_MS);
+}
+function dateStrFromSerial(serial: number): string {
+  return new Date(serial * DAY_MS).toISOString().slice(0, 10);
 }
 
 function countdownParts(ms: number): { d: string; h: string; m: string } {
@@ -160,8 +167,75 @@ function countdownParts(ms: number): { d: string; h: string; m: string } {
   };
 }
 
-/** Pointer-tracked tilt for taped posters; the tape line (top edge) stays put. */
-function useTapeTilt(ref: React.RefObject<HTMLElement | null>, enabled: boolean) {
+function timeAgo(iso: string): string {
+  const t = Date.parse(iso);
+  if (Number.isNaN(t)) return "";
+  const s = (Date.now() - t) / 1000;
+  if (s < 3600) return `${Math.max(1, Math.floor(s / 60))}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  if (s < 86400 * 30) return `${Math.floor(s / 86400)}d ago`;
+  if (s < 86400 * 365) return `${Math.floor(s / (86400 * 30))}mo ago`;
+  return `${Math.floor(s / (86400 * 365))}y ago`;
+}
+
+/** Scroll-velocity sway, exactly as the demo drives it. */
+function useScrollSway() {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const root = document.documentElement;
+    let cur = 0;
+    let tgt = 0;
+    let curY = 0;
+    let tgtY = 0;
+    let lastY: number | null = null;
+    let lastT = 0;
+    let raf = 0;
+    const loop = () => {
+      cur += (tgt - cur) * 0.14;
+      curY += (tgtY - curY) * 0.14;
+      if (performance.now() - lastT > 60) {
+        tgt *= 0.86;
+        tgtY *= 0.86;
+        if (Math.abs(tgt) < 0.02) tgt = 0;
+        if (Math.abs(tgtY) < 0.2) tgtY = 0;
+      }
+      root.style.setProperty("--sway", `${cur.toFixed(2)}deg`);
+      root.style.setProperty("--sway-y", `${curY.toFixed(1)}px`);
+      if (Math.abs(cur) > 0.01 || Math.abs(curY) > 0.1 || tgt !== 0 || tgtY !== 0) {
+        raf = requestAnimationFrame(loop);
+      } else {
+        raf = 0;
+        root.style.setProperty("--sway", "0deg");
+        root.style.setProperty("--sway-y", "0px");
+      }
+    };
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (lastY === null) {
+        lastY = y;
+        return;
+      }
+      const v = y - lastY;
+      lastY = y;
+      if (v === 0) return;
+      lastT = performance.now();
+      tgt = Math.max(-4.5, Math.min(4.5, v * 0.05));
+      tgtY = Math.max(-6, Math.min(6, v * 0.07));
+      if (!raf) raf = requestAnimationFrame(loop);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+      root.style.setProperty("--sway", "0deg");
+      root.style.setProperty("--sway-y", "0px");
+    };
+  }, []);
+}
+
+/** Pointer-tracked tilt for taped posters; the tape line stays put (demo). */
+function useDemoTilt(ref: React.RefObject<HTMLElement | null>, enabled: boolean) {
   useEffect(() => {
     const el = ref.current;
     if (!el || !enabled) return;
@@ -173,34 +247,31 @@ function useTapeTilt(ref: React.RefObject<HTMLElement | null>, enabled: boolean)
     let ty = 0;
     let cx = 0;
     let cy = 0;
-    let active = false;
     const loop = () => {
       cx += (tx - cx) * 0.16;
       cy += (ty - cy) * 0.16;
-      el.style.setProperty("--ry", `${(cx * 8).toFixed(2)}deg`);
-      el.style.setProperty("--rx", `${(-cy * 7).toFixed(2)}deg`);
-      if (active || Math.abs(tx - cx) > 0.001 || Math.abs(ty - cy) > 0.001) {
+      el.style.transform =
+        `perspective(900px) rotateX(${cy.toFixed(2)}deg) rotateY(${cx.toFixed(2)}deg) ` +
+        `rotate(calc(var(--rot, 0deg) + var(--sway, 0deg))) translateY(var(--sway-y, 0px))`;
+      if (Math.abs(tx - cx) > 0.01 || Math.abs(ty - cy) > 0.01) {
         raf = requestAnimationFrame(loop);
       } else {
         raf = 0;
       }
     };
-    const kick = () => {
-      if (!raf) raf = requestAnimationFrame(loop);
-    };
     const onMove = (ev: PointerEvent) => {
       const rect = el.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
-      tx = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
-      ty = ((ev.clientY - rect.top) / rect.height) * 2 - 1;
-      active = true;
-      kick();
+      tx = ((ev.clientX - rect.left) / rect.width - 0.5) * 16;
+      ty = -((ev.clientY - rect.top) / rect.height - 0.5) * 14;
+      el.classList.add("tilting");
+      if (!raf) raf = requestAnimationFrame(loop);
     };
     const onLeave = () => {
-      tx = 0;
-      ty = 0;
-      active = false;
-      kick();
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      el.classList.remove("tilting");
+      el.style.transform = "";
     };
     el.addEventListener("pointermove", onMove);
     el.addEventListener("pointerleave", onLeave);
@@ -212,609 +283,538 @@ function useTapeTilt(ref: React.RefObject<HTMLElement | null>, enabled: boolean)
   }, [ref, enabled]);
 }
 
-function HeartIcon({ filled }: { filled: boolean }) {
+function ShareIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false">
-      <path
-        d="M12 20.7C6.4 17 3 13.6 3 9.9 3 7.2 5.1 5 7.8 5c1.7 0 3.3.9 4.2 2.3C12.9 5.9 14.5 5 16.2 5 18.9 5 21 7.2 21 9.9c0 3.7-3.4 7.1-9 10.8Z"
-        fill={filled ? "currentColor" : "none"}
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <path d="m8.59 13.51 6.83 3.98" />
+      <path d="m15.41 6.51-6.82 3.98" />
     </svg>
   );
 }
 
-type CellHandlers = {
-  onOpen: FlyerBoardProps["onOpen"];
-  savedIds: Set<number>;
-  onToggleSave: (id: number) => void;
+function HeartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+    </svg>
+  );
+}
+
+/** The demo's tape: solid / wireframe material swap + tear-slice glitch. */
+function Tape({ seedKey }: { seedKey: string }) {
+  const style = useMemo(() => {
+    const text = `tape-${seedKey}`;
+    let seed = 0;
+    for (let i = 0; i < text.length; i++) seed = (Math.imul(seed, 31) + text.charCodeAt(i)) >>> 0;
+    const timing = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b) >>> 0;
+    return {
+      "--tape-cycle": `${(8.2 + (timing % 4901) / 1000).toFixed(3)}s`,
+      "--tape-phase": `${(-((timing >>> 7) % 13001) / 1000).toFixed(3)}s`,
+      "--tape-glitch-phase": `${(-((timing >>> 3) % 6701) / 1000).toFixed(3)}s`,
+    } as CSSProperties;
+  }, [seedKey]);
+  return (
+    <span className="tape" style={style} aria-hidden="true">
+      <i className="tape-solid" />
+      <i className="tape-wire" />
+      <i className="tape-slice tape-sa" />
+      <i className="tape-slice tape-sb" />
+    </span>
+  );
+}
+
+function Hardware({ pinned, seedKey, dayColor, rot }: { pinned: boolean; seedKey: string; dayColor: string; rot: number }) {
+  return (
+    <div
+      className={`hw hw-${pinned ? "pin" : "tape"}`}
+      style={{ "--tc": dayColor, transform: `rotate(${rot}deg)` } as CSSProperties}
+      aria-hidden="true"
+    >
+      {pinned ? (
+        <span className="pdx-glass-rebind" style={{ "--c": dayColor } as CSSProperties}>
+          <BoardPushPin postKey={seedKey} />
+        </span>
+      ) : (
+        <Tape seedKey={seedKey} />
+      )}
+    </div>
+  );
+}
+
+type CellCommon = {
   tick: number;
+  aspect: number;
+  onAspect: (id: number, ar: number) => void;
 };
 
 function PosterCell({
   listing,
-  handlers,
-  live,
-}: {
+  index,
+  mtop,
+  rail = false,
+  saved,
+  onToggleSave,
+  onOpenCard,
+  tick,
+  aspect,
+  onAspect,
+}: CellCommon & {
   listing: EventListing;
-  handlers: CellHandlers;
-  live?: boolean;
+  index: number;
+  mtop: number;
+  /** Rails never grow taller: a poster taller than the rail's standard
+   *  height (the 0.8 reference at full rail width) scales down to fit. */
+  rail?: boolean;
+  saved: boolean;
+  onToggleSave: (id: number) => void;
+  onOpenCard: (listing: EventListing, el: HTMLElement | null) => void;
 }) {
   const articleRef = useRef<HTMLElement | null>(null);
   const key = listingKey(listing);
-  const seed = hashString(key);
-  const pinned = seed % 2 === 0;
-  const rot = ((seed % 61) / 10 - 3).toFixed(1);
+  const pinned = index % 2 === 0;
+  const rot = ROT_CYCLE[index % ROT_CYCLE.length];
   const dateStr = dateStrOf(listing);
   const dayColor = dayColorVar(dateStr);
   const accent = listing.accentColor || dayColor;
   const poster = listingPosterUrl(listing);
   const tear = useMemo(() => (pinned ? tearPolygons(key) : null), [pinned, key]);
-  useTapeTilt(articleRef, !pinned);
+  useDemoTilt(articleRef, !pinned);
 
-  const open = (ev: ReactPointerEvent | React.MouseEvent) => {
-    const rect = articleRef.current?.getBoundingClientRect();
-    handlers.onOpen(
-      listing,
-      rect ? { left: rect.left, top: rect.top, width: rect.width, height: rect.height } : null,
-    );
-    ev.stopPropagation();
-  };
+  const cd = countdownParts(startMs(listing) - tick);
+  const age = AGE_LABEL[listing.ageRequirement ?? ""] ?? "";
+  const meta = `${eventDateLabel(listing.dateStart)} · ${eventTimeLabel(listing.dateStart)} · ${listing.venueName}${age ? ` · ${age}` : ""}`;
+  const price = ADMISSION_LABEL[listing.admission ?? "UNKNOWN"] ?? "PRICE NOT CONFIRMED";
+  const priceCls = listing.admission === "FREE" ? " free" : !listing.admission || listing.admission === "UNKNOWN" ? " unk" : "";
+
   const share = async (ev: React.MouseEvent) => {
     ev.stopPropagation();
-    const url = `${window.location.origin}${eventPath(listing.id, listing.title, listing.dayOfWeek)}`;
+    const url = `https://www.zaylist.com${eventPath(listing.id, listing.title, listing.dayOfWeek)}`;
     try {
-      if (navigator.share) await navigator.share({ title: listing.title, url });
-      else await navigator.clipboard.writeText(url);
+      if (navigator.share) {
+        await navigator.share({ title: listing.title, url });
+        return;
+      }
+      throw new Error("no native share");
     } catch {
-      /* share dismissed */
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch {
+        /* clipboard unavailable — the card still opens on tap */
+      }
     }
   };
-  const saved = handlers.savedIds.has(listing.id);
-  const cd = countdownParts(startMs(listing) - handlers.tick);
-  const age = AGE_LABEL[listing.ageRequirement || ""] || "";
-  const price = ADMISSION_LABEL[listing.admission || "UNKNOWN"] || "PRICE NOT CONFIRMED";
 
   return (
     <div
-      className="fb-cell"
-      style={{ "--rot": `${rot}deg` } as CSSProperties}
-      data-key={key}
+      className="cell"
+      style={{
+        marginTop: mtop,
+        ...(rail && aspect < 0.8
+          ? { width: `calc(var(--pw) * ${(aspect / 0.8).toFixed(3)})` }
+          : {}),
+      }}
     >
-      <div className={`fb-hw fb-hw--${pinned ? "pin" : "tape"}`} aria-hidden="true">
-        {pinned ? (
-          <span className="fb-pinwrap pdx-glass-rebind" style={{ "--c": dayColor } as CSSProperties}>
-            <BoardPushPin postKey={key} />
-          </span>
-        ) : (
-          <span className="fb-tape" style={{ "--tc": dayColor } as CSSProperties} />
-        )}
-      </div>
       <article
         ref={articleRef}
-        className={`fb-poster pdx-glass-rebind${pinned ? " fb-poster--pin" : " fb-poster--tape"}${tear ? " fb-poster--torn" : ""}${poster ? "" : " fb-poster--noposter"}`}
-        style={{ "--c": accent, "--clip": tear?.clip, "--clip2": tear?.clip2 } as CSSProperties}
-        onClick={open}
+        className={`poster att-${pinned ? "pin" : "tape"}${tear ? " torn" : ""} pdx-glass-rebind`}
+        style={
+          {
+            "--a": accent,
+            "--tc": dayColor,
+            "--rot": `${rot}deg`,
+            ...(tear ? { "--clip": tear.clip, "--clip2": tear.clip2 } : {}),
+          } as CSSProperties
+        }
+        role="button"
+        tabIndex={0}
+        aria-label={`Open ${listing.title}`}
+        data-event-id={listing.id}
+        data-event-date={dateStr}
+        data-venue={listing.venueName}
+        onClick={() => onOpenCard(listing, articleRef.current)}
         onKeyDown={ev => {
           if (isPosterActivation(ev.key, ev.target === ev.currentTarget)) {
             ev.preventDefault();
-            open(ev as unknown as React.MouseEvent);
+            onOpenCard(listing, articleRef.current);
           }
         }}
-        tabIndex={0}
-        role="button"
-        data-event-id={listing.id}
-        data-event-date={dateStrOf(listing)}
-        data-venue={listing.venueName}
-        aria-label={`Open ${listing.title}`}
       >
-        <div className="fb-art">
+        {tear ? <i className="trim" aria-hidden="true" /> : null}
+        <div className="pc" style={{ aspectRatio: aspect }}>
           {poster ? (
-            <img src={poster} alt="" loading="lazy" draggable={false} />
-          ) : (
-            <div className="fb-art--fallback">
-              <span>{listing.title}</span>
-            </div>
-          )}
-          <div className="fb-shade" />
-          <button type="button" className="fb-share" onClick={share} aria-label={`Share ${listing.title}`}>
+            <img
+              src={poster}
+              alt=""
+              loading="lazy"
+              onLoad={ev => {
+                const im = ev.currentTarget;
+                if (im.naturalWidth > 0 && im.naturalHeight > 0) onAspect(listing.id, im.naturalWidth / im.naturalHeight);
+              }}
+            />
+          ) : null}
+          <button type="button" className="pshare" aria-label={`Share ${listing.title}`} onClick={share}>
+            <ShareIcon />
             SHARE
           </button>
-          <span className="fb-price">{price}</span>
-          <div className="fb-pfoot">
-            <h3 className="fb-title">{listing.title}</h3>
-            <p className="fb-meta">
-              {eventDateLabel(listing.dateStart)} · {eventTimeLabel(listing.dateStart)} · {listing.venueName}
-              {age ? ` · ${age}` : ""}
-            </p>
-            <div className="fb-start">
-              {live ? (
-                <span className="fb-onnow">ON NOW</span>
-              ) : (
-                <>
-                  <span className="fb-start__label">STARTS IN</span>
-                  <span className="fb-start__digits">
-                    <span><b>{cd.d}</b><i>DAYS</i></span>
-                    <span><b>{cd.h}</b><i>HRS</i></span>
-                    <span><b>{cd.m}</b><i>MIN</i></span>
-                  </span>
-                </>
-              )}
+          <span className={`pprice${priceCls}`}>{price}</span>
+          <div className="pshade">
+            <h4>{listing.title}</h4>
+            <p>{meta}</p>
+          </div>
+          <div className="pfoot">
+            <div className="pstart">
+              <span className="ps-lab">STARTS IN</span>
+              <span className="ps-nums">
+                <span><b>{cd.d}</b><i>DAYS</i></span>
+                <span><b>{cd.h}</b><i>HRS</i></span>
+                <span><b>{cd.m}</b><i>MIN</i></span>
+              </span>
             </div>
-            <div className="fb-counters">
-              <span className="fb-chip" style={{ "--chip": GIGZ_COLOR } as CSSProperties}>
-                <b>–</b><i>GIGZ</i>
-              </span>
-              <span className="fb-chip" style={{ "--chip": CARPOOL_COLOR } as CSSProperties}>
-                <b>–</b><i>CARPOOL</i>
-              </span>
+            <div className="pactions">
+              <span className="pgigz"><b>–</b><i>GIGZ</i></span>
+              <span className="pgigz pcarpool"><b>–</b><i>CARPOOL</i></span>
               <button
                 type="button"
-                className={`fb-heart${saved ? " fb-heart--on" : ""}`}
+                className={`pheart${saved ? " saved" : ""}`}
+                aria-label={saved ? `Remove ${listing.title} from your schedule` : `Save ${listing.title}`}
                 aria-pressed={saved}
-                aria-label={saved ? `Remove ${listing.title} from My Schedule` : `Save ${listing.title} to My Schedule`}
                 onClick={ev => {
                   ev.stopPropagation();
-                  handlers.onToggleSave(listing.id);
+                  onToggleSave(listing.id);
                 }}
               >
-                <HeartIcon filled={saved} />
+                <HeartIcon />
               </button>
             </div>
           </div>
         </div>
-        {tear ? <div className="fb-trim" aria-hidden="true" /> : null}
+      </article>
+      <Hardware pinned={pinned} seedKey={key} dayColor={dayColor} rot={rot} />
+    </div>
+  );
+}
+
+function SubmitCell({ mtop }: { mtop: number }) {
+  return (
+    <div className="cell submitcell" style={{ marginTop: mtop }}>
+      <article
+        className="poster submit pdx-glass-rebind"
+        style={{ "--a": "var(--neon-cyan)", "--tc": "var(--neon-red)", "--rot": "-0.8deg" } as CSSProperties}
+        role="link"
+        tabIndex={0}
+        aria-label="Submit your event — it's free, takes two minutes"
+        onClick={() => {
+          window.location.href = "/submit";
+        }}
+        onKeyDown={ev => {
+          if (isPosterActivation(ev.key, ev.target === ev.currentTarget)) window.location.href = "/submit";
+        }}
+      >
+        <div className="pc" style={{ aspectRatio: 0.98 }}>
+          <div className="submit-in">
+            <div className="plus">+</div>
+            <div className="sub-t">SUBMIT YOUR EVENT</div>
+            <div className="sub-s">IT'S FREE · TAKES TWO MINUTES</div>
+          </div>
+        </div>
+        <Tape seedKey="submit" />
       </article>
     </div>
   );
 }
 
 function DayFlag({ dateStr }: { dateStr: string }) {
-  const color = dayColorVar(dateStr);
+  const dow = DOW_INDEX[weekdayCode(dateStr)] ?? 6;
+  const ink = dow === 1 || dow === 2 ? "var(--text-hi)" : "var(--paper-ink)";
   return (
-    <div className="fb-cell fb-cell--flag" aria-hidden="true">
-      <div className="fb-vflag pdx-glass-rebind" style={{ "--c": color } as CSSProperties}>
-        <span className="fb-vflag__pin">
-          <BoardPushPin postKey={`flag-${dateStr}`} />
+    <div className="cell dayflag-cell">
+      <div
+        className="vflag"
+        style={{ "--dc": dayColorVar(dateStr), "--ink": ink } as CSSProperties}
+      >
+        <span className="vflag-cloth" />
+        <span className="vflag-pin">
+          <span className="pdx-glass-rebind" style={{ "--c": dayColorVar(dateStr) } as CSSProperties}>
+            <BoardPushPin postKey={`flag-${dateStr}`} />
+          </span>
         </span>
-        <span className="fb-vflag__text">{flagLabel(dateStr)}</span>
+        <span className="vflag-t">{flagLabel(dateStr)}</span>
       </div>
-    </div>
-  );
-}
-
-function SubmitBlank() {
-  return (
-    <div className="fb-cell fb-cell--blank">
-      <Link href="/submit" className="fb-blank">
-        <span className="fb-blank__plus" aria-hidden="true">+</span>
-        <span className="fb-blank__label">SUBMIT YOUR EVENT</span>
-        <span className="fb-blank__sub">Free to list · takes a minute</span>
-      </Link>
     </div>
   );
 }
 
 function PastCell({
   listing,
-  count,
-  tick,
+  index,
+  pool,
+  isSource,
   onFan,
-}: {
+  tick,
+  aspect,
+  onAspect,
+}: CellCommon & {
   listing: EventListing;
-  count: number;
-  tick: number;
-  onFan: (listing: EventListing) => void;
+  index: number;
+  pool: MissedConnectionPost[];
+  isSource: boolean;
+  onFan: (listing: EventListing, el: HTMLElement | null) => void;
 }) {
+  const articleRef = useRef<HTMLElement | null>(null);
   const key = listingKey(listing);
-  const seed = hashString(key);
-  const pinned = seed % 2 === 0;
-  const rot = ((seed % 61) / 10 - 3).toFixed(1);
+  const pinned = index % 2 === 0;
+  const rot = ROT_CYCLE[index % ROT_CYCLE.length];
   const dateStr = dateStrOf(listing);
   const dayColor = dayColorVar(dateStr);
   const accent = listing.accentColor || dayColor;
   const poster = listingPosterUrl(listing);
   const expiry = getMissedConnectionWindow(listing.dateStart, listing.dateEnd, tick)?.closesAt ?? tick;
-  const left = expiry - tick;
-  const wide = false;
-
+  const parts = countdownParts(expiry - tick);
+  const pill =
+    expiry > tick
+      ? `POSTING OPEN · ${parseInt(parts.d, 10)}D ${parseInt(parts.h, 10)}H LEFT`
+      : "EXPIRED · STILL READABLE";
   return (
-    <div className="fb-cell fb-cell--past" style={{ "--rot": `${rot}deg` } as CSSProperties}>
-      <div className={`fb-hw fb-hw--${pinned ? "pin" : "tape"}`} aria-hidden="true">
-        {pinned ? (
-          <span className="fb-pinwrap pdx-glass-rebind" style={{ "--c": dayColor } as CSSProperties}>
-            <BoardPushPin postKey={key} />
-          </span>
-        ) : (
-          <span className="fb-tape" style={{ "--tc": dayColor } as CSSProperties} />
-        )}
-      </div>
+    <div className={`cell pcell${isSource ? " source" : ""}`}>
       <article
-        className={`fb-poster fb-poster--past pdx-glass-rebind${wide ? " fb-poster--wide" : ""}`}
-        style={{ "--c": accent } as CSSProperties}
-        onClick={() => onFan(listing)}
+        ref={articleRef}
+        className="poster past pdx-glass-rebind"
+        style={{ "--a": accent, "--tc": dayColor, "--rot": `${rot}deg` } as CSSProperties}
+        role="button"
+        tabIndex={0}
+        aria-label={`Fan out mizzed connections for ${listing.title}`}
+        data-event-id={listing.id}
+        data-event-date={dateStr}
+        data-venue={listing.venueName}
+        onClick={() => onFan(listing, articleRef.current)}
         onKeyDown={ev => {
-          if (ev.key === "Enter" || ev.key === " ") {
+          if (isPosterActivation(ev.key, ev.target === ev.currentTarget)) {
             ev.preventDefault();
-            onFan(listing);
+            onFan(listing, articleRef.current);
           }
         }}
-        tabIndex={0}
-        role="button"
-        data-event-id={listing.id}
-        data-event-date={dateStrOf(listing)}
-        data-venue={listing.venueName}
-        aria-label={`See mizzed connections for ${listing.title}`}
       >
-        <div className="fb-art">
+        <div className="pc" style={{ aspectRatio: aspect }}>
           {poster ? (
-            <img src={poster} alt="" loading="lazy" draggable={false} />
-          ) : (
-            <div className="fb-art--fallback">
-              <span>{listing.title}</span>
-            </div>
-          )}
-          <div className="fb-pwash" />
-          <div className="fb-pmizz">
-            <b>{String(count).padStart(2, "0")}</b>
-            <i>MIZZED CONNECTIONS</i>
-            <span className="fb-pexp">
-              {left > 0
-                ? `POSTING OPEN · ${Math.floor(left / DAY_MS)}D ${String(Math.floor((left % DAY_MS) / 3600000)).padStart(2, "0")}H LEFT`
-                : "EXPIRED · STILL READABLE"}
-            </span>
-          </div>
-          <p className="fb-pmeta">
-            {listing.title} · {eventDateLabel(listing.dateStart)}
-          </p>
-        </div>
-      </article>
-    </div>
-  );
-}
-
-function FanDeck({
-  listing,
-  posts,
-  onClose,
-  onOpenListing,
-}: {
-  listing: EventListing;
-  posts: MissedConnectionPost[];
-  onClose: () => void;
-  onOpenListing: (listing: EventListing) => void;
-}) {
-  const [index, setIndex] = useState(0);
-  const dragX = useRef<number | null>(null);
-  const returnFocus = useRef(typeof document !== "undefined" ? document.activeElement as HTMLElement | null : null);
-  const openingListing = useRef(false);
-  const total = Math.max(1, posts.length);
-  const step = (dir: number) => setIndex(i => (i + dir + total) % total);
-
-  useEffect(() => {
-    setIndex(0);
-  }, [listing]);
-
-
-  const cards: Array<{ post: MissedConnectionPost | null; offset: number; key: string }> = [];
-  if (posts.length === 0) {
-    cards.push({ post: null, offset: 0, key: "empty" });
-  } else {
-    for (const { index: i, offset } of fanSlots(posts.length, index)) {
-      cards.push({ post: posts[i], offset, key: `mc-${posts[i].id}` });
-    }
-  }
-
-  return (
-    <Dialog.Root open onOpenChange={open => { if (!open) onClose(); }}>
-    <Dialog.Portal>
-    <Dialog.Content asChild aria-describedby={undefined}
-      onCloseAutoFocus={ev => {
-        ev.preventDefault();
-        if (!openingListing.current) returnFocus.current?.focus();
-      }}
-      onKeyDown={ev => {
-        if (ev.target instanceof HTMLElement && ev.target.closest("input, textarea, select, [contenteditable=true]")) return;
-        if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") {
-          ev.preventDefault();
-          step(ev.key === "ArrowRight" ? 1 : -1);
-        }
-      }}
-    >
-    <div className="fb-fan" onClick={ev => { if (ev.target === ev.currentTarget) onClose(); }}>
-      <Dialog.Title className="fb-fan__title">Mizzed connections for {listing.title}</Dialog.Title>
-      <button type="button" className="fb-fan__close" aria-label="Close mizzed connections" onClick={onClose}>×</button>
-      <div
-        className="fb-deck"
-        onClick={ev => ev.stopPropagation()}
-        onPointerDown={ev => {
-          dragX.current = ev.clientX;
-        }}
-        onPointerUp={ev => {
-          if (dragX.current == null) return;
-          const dx = ev.clientX - dragX.current;
-          dragX.current = null;
-          if (dx > 40) step(-1);
-          else if (dx < -40) step(1);
-        }}
-      >
-        {cards.map(({ post, offset, key }) => {
-          const abs = Math.abs(offset);
-          const style = {
-            transform: `translateX(${offset * 36}%) rotate(${offset * 9}deg) scale(${1 - abs * 0.07})`,
-            zIndex: 10 - abs,
-            filter: `brightness(${abs === 0 ? 1 : abs === 1 ? 0.7 : 0.48})`,
-            opacity: abs > 2 ? 0 : 1,
-          } as CSSProperties;
-          return (
-            <div
-              key={key}
-              className={`fb-deck__card${offset === 0 ? " fb-deck__card--front" : ""}`}
-              style={style}
-              onClick={() => {
-                if (offset !== 0) setIndex((index + offset + total) % total);
-              }}
-            >
-              <div aria-hidden={offset !== 0 || undefined} ref={node => { if (node) node.inert = offset !== 0; }}>
-              {post ? (
-                <SpottedCard
-                  post={post}
-                  accentColor={spottedAccent(post.id)}
-                  onReply={() => { openingListing.current = true; onOpenListing(listing); }}
-                />
-              ) : (
-                <div className="fb-deck__empty">
-                  <b>No mizzed connections yet</b>
-                  <p>
-                    No one has posted a connection for this event yet. Posts stay readable here
-                    even after the event ends.
-                  </p>
-                </div>
-              )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="fb-decknav" onClick={ev => ev.stopPropagation()}>
-        <button type="button" aria-label="Previous connection" disabled={posts.length < 2} onClick={() => step(-1)}>
-          ‹
-        </button>
-        <span className="fb-dcount" aria-live="polite">
-          {posts.length === 0 ? 0 : index + 1} / {posts.length}
-        </span>
-        <button type="button" aria-label="Next connection" disabled={posts.length < 2} onClick={() => step(1)}>
-          ›
-        </button>
-      </div>
-      <p className="fb-fan__hint">
-        {listing.title} · {listing.venueName} — tap a side card or drag to sort through them
-      </p>
-    </div>
-    </Dialog.Content>
-    </Dialog.Portal>
-    </Dialog.Root>
-  );
-}
-
-function Pile({
-  pastEvents,
-  onEnterPast,
-}: {
-  pastEvents: EventListing[];
-  onEnterPast: () => void;
-}) {
-  const minis = pastEvents.slice(0, 5);
-  return (
-    <section className="fb-pile" aria-label="Go back in time with Mizzed Connections">
-      <div className="fb-pile__stage">
-        {minis.map((e, i) => {
-          const poster = listingPosterUrl(e);
-          if (!poster) return null;
-          return (
             <img
-              key={listingKey(e)}
-              className={`fb-pile__mini fb-pile__mini--${i}`}
               src={poster}
               alt=""
               loading="lazy"
-              draggable={false}
+              onLoad={ev => {
+                const im = ev.currentTarget;
+                if (im.naturalWidth > 0 && im.naturalHeight > 0) onAspect(listing.id, im.naturalWidth / im.naturalHeight);
+              }}
             />
-          );
-        })}
-        <button type="button" className="fb-pile__card" onClick={onEnterPast}>
-          <svg className="fb-pile__swipe" viewBox="0 0 120 64" aria-hidden="true" focusable="false">
-            <path d="M14 44 Q 58 22 96 30" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="1 9" />
-            <circle cx="17" cy="42" r="6" fill="currentColor" />
-            <path d="M104 31 L82 16 L84 46 Z" fill="currentColor" />
-          </svg>
-          <b>GO BACK IN TIME</b>
-          <span>PAST 7 DAYS · MIZZED CONNECTIONS</span>
-        </button>
-      </div>
-      <p className="fb-pile__cap">THE PILE · CLICK IT TO GO BACK 7 DAYS</p>
-    </section>
+          ) : null}
+          <div className={`pmizz${aspect > 1.4 ? " pmizz-wide" : ""}`}>
+            <b>{String(pool.length).padStart(2, "0")}</b>
+            <i>MIZZED CONNECTIONS</i>
+            <span>{pill}</span>
+          </div>
+        </div>
+      </article>
+      <Hardware pinned={pinned} seedKey={key} dayColor={dayColor} rot={rot} />
+    </div>
   );
 }
 
+type EventDetailResponse = {
+  gigs?: Array<{ id?: number | string; title?: string | null; description?: string | null }>;
+  missedConnections?: unknown[];
+};
+
+type WindowFilter = "all" | "tonight" | "week" | "later";
 type FlowItem =
-  | { kind: "poster"; listing: EventListing }
+  | { kind: "poster"; e: EventListing }
   | { kind: "flag"; dateStr: string }
-  | { kind: "blank" }
-  | { kind: "ad"; item: GridItem };
+  | { kind: "submit"; n: number };
 
-/** Posters swing with scroll velocity: faster scroll, bigger sway, springing back to rest. */
-function useScrollSway() {
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const root = document.documentElement;
-    let cur = 0, tgt = 0, yCur = 0, yTgt = 0, lastY: number | null = null, lastT = 0, raf: number | null = null;
-    const loop = () => {
-      cur += (tgt - cur) * 0.14;
-      yCur += (yTgt - yCur) * 0.14;
-      if (performance.now() - lastT > 60) {
-        tgt *= 0.86; yTgt *= 0.86;
-        if (Math.abs(tgt) < 0.02) tgt = 0;
-        if (Math.abs(yTgt) < 0.2) yTgt = 0;
-      }
-      root.style.setProperty("--sway", `${cur.toFixed(2)}deg`);
-      root.style.setProperty("--sway-y", `${yCur.toFixed(1)}px`);
-      if (Math.abs(cur) > 0.01 || Math.abs(yCur) > 0.1 || tgt !== 0 || yTgt !== 0) {
-        raf = requestAnimationFrame(loop);
-      } else {
-        raf = null;
-        root.style.setProperty("--sway", "0deg");
-        root.style.setProperty("--sway-y", "0px");
-      }
-    };
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (lastY === null) { lastY = y; return; }
-      const v = y - lastY;
-      lastY = y;
-      if (v === 0) return;
-      lastT = performance.now();
-      tgt = Math.max(-4.5, Math.min(4.5, v * 0.05));
-      yTgt = Math.max(-6, Math.min(6, v * 0.07));
-      if (raf === null) raf = requestAnimationFrame(loop);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (raf !== null) cancelAnimationFrame(raf);
-      root.style.removeProperty("--sway");
-      root.style.removeProperty("--sway-y");
-    };
-  }, []);
-}
-
-export default function FlyerBoard(props: FlyerBoardProps) {
-  const { events, gridItems, pastEvents, pastView, onEnterPast, onExitPast } = props;
-  const [tick, setTick] = useState(() => Date.now());
-  useEffect(() => {
-    const t = window.setInterval(() => setTick(Date.now()), 30_000);
-    return () => window.clearInterval(t);
-  }, []);
-  const nowMs = Math.max(props.now, tick);
-
-  const batch = () => (typeof window !== "undefined" && window.innerWidth < 768 ? 12 : 20);
-  const [visibleSlots, setVisibleSlots] = useState(20);
-  useEffect(() => {
-    setVisibleSlots(batch());
-  }, [props.paginationKey, pastView]);
+export default function FlyerBoard({
+  events,
+  pastEvents,
+  pastView,
+  onEnterPast,
+  onExitPast,
+  onOpen,
+  savedIds,
+  onToggleSave,
+  now,
+}: FlyerBoardProps) {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [tick, setTick] = useState(now);
+  const [fday, setFday] = useState<WindowFilter>("all");
+  const [tags, setTags] = useState<Set<string>>(new Set());
+  const [query, setQuery] = useState("");
+  const [budgetRows, setBudgetRows] = useState(4);
+  const [cols, setCols] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(min-width: 1100px)").matches ? 5 : 3,
+  );
+  const [aspects, setAspects] = useState<Record<number, number>>({});
+  const [openListing, setOpenListing] = useState<EventListing | null>(null);
+  const [ocardOn, setOcardOn] = useState(false);
+  const [fan, setFan] = useState<{ listing: EventListing; x: number; y: number } | null>(null);
+  const [deckIdx, setDeckIdx] = useState(0);
+  const flipElRef = useRef<HTMLElement | null>(null);
+  const fanReturnRef = useRef<HTMLElement | null>(null);
+  const fanDragX = useRef<number | null>(null);
+  const pileDragX = useRef<number | null>(null);
+  const pileWheelCool = useRef(false);
+  const timersRef = useRef<number[]>([]);
 
   useScrollSway();
 
-  const handlers: CellHandlers = {
-    onOpen: props.onOpen,
-    savedIds: props.savedIds,
-    onToggleSave: props.onToggleSave,
-    tick: nowMs,
+  useEffect(() => {
+    setTick(now);
+  }, [now]);
+  useEffect(() => {
+    const t = setInterval(() => setTick(Date.now()), 30_000);
+    return () => clearInterval(t);
+  }, []);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1100px)");
+    const fn = () => setCols(mq.matches ? 5 : 3);
+    mq.addEventListener("change", fn);
+    return () => mq.removeEventListener("change", fn);
+  }, []);
+  useEffect(() => () => {
+    timersRef.current.forEach(t => window.clearTimeout(t));
+  }, []);
+
+  const onAspect = (id: number, ar: number) =>
+    setAspects(prev => (prev[id] && Math.abs(prev[id] - ar) < 0.01 ? prev : { ...prev, [id]: ar }));
+  const aspectOf = (e: EventListing) => aspects[e.id] ?? 0.8;
+
+  const todayStr = pacificTodayDate(tick);
+  const todaySerial = serialOf(todayStr);
+  const todayDow = DOW_INDEX[weekdayCode(todayStr)] ?? 0;
+
+  const tagsOf = (e: EventListing): Set<string> => {
+    const s = new Set<string>();
+    if (e.ageRequirement === "21_PLUS") s.add("21plus");
+    if (e.admission === "FREE") s.add("free");
+    for (const t of e.eventTypes ?? []) {
+      const u = String(t).toUpperCase();
+      if (u === "PARTY") s.add("party");
+      else if (u === "DRAG") s.add("drag");
+      else if (u === "KINK") s.add("kink");
+      else if (u === "SOCIAL") s.add("social");
+    }
+    return s;
+  };
+  const fdayOf = (e: EventListing): WindowFilter => {
+    const diff = serialOf(dateStrOf(e)) - todaySerial;
+    if (diff <= 0) return "tonight";
+    if (diff <= 7) return "week";
+    return "later";
+  };
+  const searchText = (e: EventListing) =>
+    `${e.title} ${e.venueName} ${eventDateLabel(e.dateStart)} ${weekdayCode(dateStrOf(e))}`.toLowerCase();
+  const passCell = (e: EventListing): boolean => {
+    if (fday !== "all" && fdayOf(e) !== fday) return false;
+    if (tags.size > 0) {
+      const own = tagsOf(e);
+      for (const t of tags) if (!own.has(t)) return false;
+    }
+    if (query && !searchText(e).includes(query)) return false;
+    return true;
   };
 
-  /* ---------- upcoming sections ---------- */
+  const sorted = useMemo(() => [...events].sort((a, b) => startMs(a) - startMs(b)), [events]);
+
+  const weekendSet = useMemo(() => {
+    const set = new Set<string>();
+    if (todayDow !== 0) {
+      const sunday = todaySerial + ((7 - todayDow) % 7);
+      for (const s of [sunday - 2, sunday - 1, sunday]) {
+        const ds = dateStrFromSerial(s);
+        if (ds >= todayStr) set.add(ds);
+      }
+    }
+    return set;
+  }, [todaySerial, todayDow, todayStr]);
+
   const sections = useMemo(() => {
-    if (pastView) return null;
-    const today = pacificTodayDate(nowMs);
-    const noon = parsePacificDateTime(`${today}T12:00:00`) ?? nowMs;
-    const todayCode = weekdayCode(today);
-    const weekdayIdx = (WEEKDAY_CODES as readonly string[]).indexOf(todayCode);
-    const friday = noon + (5 - weekdayIdx) * DAY_MS;
-    const weekendDates = new Set([
-      pacificDateString(friday),
-      pacificDateString(friday + DAY_MS),
-      pacificDateString(friday + 2 * DAY_MS),
-    ]);
-    const nowItems: EventListing[] = [];
-    const laterItems: EventListing[] = [];
-    const weekendItems: EventListing[] = [];
-    const ahead: EventListing[] = [];
-    const seen = new Set<string>();
-    for (const e of events) {
-      const k = listingKey(e);
-      if (seen.has(k)) continue;
-      seen.add(k);
-      const dateStr = dateStrOf(e);
+    const nowList: EventListing[] = [];
+    const laterList: EventListing[] = [];
+    const weekendList: EventListing[] = [];
+    const aheadList: EventListing[] = [];
+    for (const e of sorted) {
+      const ds = dateStrOf(e);
       const s = startMs(e);
-      const en = endMs(e);
-      if (s <= nowMs && en > nowMs) nowItems.push(e);
-      else if (dateStr === today && s <= nowMs && !e.dateEnd) nowItems.push(e);
-      else if (dateStr === today && s > nowMs) laterItems.push(e);
-      else if (dateStr !== today && s > nowMs && weekendDates.has(dateStr)) { weekendItems.push(e); ahead.push(e); }
-      else if (dateStr !== today && s > nowMs) ahead.push(e);
-      // else: already over — the past view carries it, not the upcoming board
+      const running = s <= tick && (endMs(e) > tick || (!e.dateEnd && ds === todayStr));
+      if (running) nowList.push(e);
+      else if (ds === todayStr && s > tick) laterList.push(e);
+      if (!running && s > tick && weekendSet.has(ds)) weekendList.push(e);
+      if (ds > todayStr) aheadList.push(e);
     }
-    // Preserve the page-selected order within each time section.
-    return { nowItems, laterItems, weekendItems, ahead };
-  }, [events, pastView, nowMs]);
+    return { nowList, laterList, weekendList, aheadList };
+  }, [sorted, tick, todayStr, weekendSet]);
 
-  /* Plan Ahead flow: ahead posters + scattered ads + submit blanks + day flags. */
-  const flow = useMemo<FlowItem[]>(() => {
-    if (!sections) return [];
-    const aheadKeys = new Set(sections.ahead.map(e => listingKey(e)));
-    const mixed: Array<{ listing?: EventListing; item?: GridItem }> = [];
-    for (const item of gridItems) {
-      if (item.kind === "event") {
-        if (aheadKeys.has(listingKey(item.event))) mixed.push({ listing: item.event });
-      } else {
-        mixed.push({ item });
-      }
-    }
-    // If ads have not been scattered yet, gridItems is events-only; either way
-    // make sure every ahead event appears even if gridItems lagged behind.
-    const inMixed = new Set(
-      mixed.filter(m => m.listing).map(m => listingKey(m.listing as EventListing)),
-    );
-    for (const e of sections.ahead) {
-      if (!inMixed.has(listingKey(e))) mixed.push({ listing: e });
-    }
-    const totalPosters = mixed.filter(m => m.listing).length;
-    const marks = new Set([1, Math.floor(totalPosters / 2), Math.floor(totalPosters * 0.8)]);
-    const out: FlowItem[] = [];
+  const visibleNow = sections.nowList.filter(passCell);
+  const visibleLater = sections.laterList.filter(passCell);
+  const visibleWeekend = sections.weekendList.filter(passCell);
+
+  const flowData = useMemo(() => {
+    const eligible = sections.aheadList.filter(passCell);
+    const marks = new Set([
+      1,
+      Math.max(2, Math.floor(eligible.length / 2)),
+      Math.max(3, Math.floor(eligible.length * 0.8)),
+    ]);
+    const flow: FlowItem[] = [];
     let lastDate = "";
-    let posterIdx = 0;
-    for (const m of mixed) {
-      if (m.listing) {
-        const dateStr = dateStrOf(m.listing);
-        if (dateStr !== lastDate) {
-          out.push({ kind: "flag", dateStr });
-          lastDate = dateStr;
-        }
-        out.push({ kind: "poster", listing: m.listing });
-        if (marks.has(posterIdx)) out.push({ kind: "blank" });
-        posterIdx++;
-      } else if (m.item) {
-        out.push({ kind: "ad", item: m.item });
+    let posterCount = 0;
+    let submitN = 0;
+    for (const e of eligible) {
+      const ds = dateStrOf(e);
+      if (ds !== lastDate) {
+        flow.push({ kind: "flag", dateStr: ds });
+        lastDate = ds;
       }
+      flow.push({ kind: "poster", e });
+      posterCount++;
+      if (marks.has(posterCount)) flow.push({ kind: "submit", n: submitN++ });
     }
-    return out;
-  }, [sections, gridItems]);
+    const budget = budgetRows * cols;
+    let slots = 0;
+    let shownPosters = 0;
+    const shownGroups = new Set<string>();
+    const vis = flow.map(item => {
+      if (item.kind === "flag") return false;
+      if (slots < budget) {
+        slots++;
+        if (item.kind === "poster") {
+          shownPosters++;
+          shownGroups.add(dateStrOf(item.e));
+        }
+        return true;
+      }
+      return false;
+    });
+    flow.forEach((item, i) => {
+      if (item.kind === "flag") vis[i] = shownGroups.has(item.dateStr);
+    });
+    return {
+      eligible,
+      flow,
+      vis,
+      shownPosters,
+      remaining: eligible.length - shownPosters,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sections.aheadList, fday, tags, query, budgetRows, cols]);
 
-  const slotCost = (item: FlowItem) => (item.kind === "flag" ? 0 : 1);
-  const visibleFlow = useMemo(() => {
-    const out: FlowItem[] = [];
-    let used = 0;
-    for (const item of flow) {
-      const cost = slotCost(item);
-      if (used + cost > visibleSlots && cost > 0) break;
-      out.push(item);
-      used += cost;
-    }
-    return out;
-  }, [flow, visibleSlots]);
-  const remainingSlots = useMemo(() => {
-    const shown = visibleFlow.filter(item => item.kind === "poster").length;
-    return flow.filter(item => item.kind === "poster").length - shown;
-  }, [flow, visibleFlow]);
-  const lastAheadDate =
-    sections && sections.ahead.length
-      ? dateStrOf(sections.ahead[sections.ahead.length - 1])
-      : null;
+  const pastList = useMemo(
+    () =>
+      pastEvents
+        .filter(e => startMs(e) > tick - 7 * DAY_MS)
+        .sort((a, b) => startMs(b) - startMs(a)),
+    [pastEvents, tick],
+  );
 
-  /* ---------- past mode ---------- */
-  const [fanListing, setFanListing] = useState<EventListing | null>(null);
   const mcQuery = useQuery<MissedConnectionPost[]>({
     queryKey: ["/api/missed-connections"],
     queryFn: () => apiRequest("GET", "/api/missed-connections").then(r => r.json()),
@@ -823,181 +823,729 @@ export default function FlyerBoard(props: FlyerBoardProps) {
   });
   const mcFor = (e: EventListing): MissedConnectionPost[] =>
     connectionsForListing(mcQuery.data ?? [], e.id, e.venueName);
-
-  const pastFlow = useMemo<FlowItem[]>(() => {
-    if (!pastView) return [];
-    const today = pacificTodayDate(nowMs);
-    const cutoff = pacificDateString((parsePacificDateTime(`${today}T12:00:00`) ?? nowMs) - 7 * DAY_MS);
-    const last7 = events
-      .filter(e => dateStrOf(e) >= cutoff)
-      .sort((a, b) => startMs(b) - startMs(a));
-    const out: FlowItem[] = [];
-    let lastDate = "";
-    for (const e of last7) {
-      const dateStr = dateStrOf(e);
-      if (dateStr !== lastDate) {
-        out.push({ kind: "flag", dateStr });
-        lastDate = dateStr;
-      }
-      out.push({ kind: "poster", listing: e });
-    }
-    return out;
-  }, [events, pastView, nowMs]);
-  const visiblePastFlow = useMemo(() => {
-    const out: FlowItem[] = [];
-    let used = 0;
-    for (const item of pastFlow) {
-      const cost = slotCost(item);
-      if (used + cost > visibleSlots && cost > 0) break;
-      out.push(item);
-      used += cost;
-    }
-    return out;
-  }, [pastFlow, visibleSlots]);
-  const pastRemaining = useMemo(() => {
-    const shown = visiblePastFlow.filter(item => item.kind === "poster").length;
-    return pastFlow.filter(item => item.kind === "poster").length - shown;
-  }, [pastFlow, visiblePastFlow]);
-  const pastTotal = useMemo(() => {
-    if (!pastView) return 0;
+  const mcTotal = useMemo(() => {
     const ids = new Set<number>();
-    for (const item of pastFlow) {
-      if (item.kind === "poster") {
-        for (const p of mcFor(item.listing)) ids.add(p.id);
-      }
-    }
+    for (const e of pastList) for (const p of mcFor(e)) ids.add(p.id);
     return ids.size;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pastFlow, mcQuery.data]);
+  }, [pastList, mcQuery.data]);
 
-  const renderFlow = (items: FlowItem[], past: boolean) => (
-    <div className="fb-grid">
-      {items.map((item, i) => {
-        if (item.kind === "flag") return <DayFlag key={`flag-${item.dateStr}-${i}`} dateStr={item.dateStr} />;
-        if (item.kind === "blank") return <SubmitBlank key={`blank-${i}`} />;
-        if (item.kind === "ad") {
-          const ad = item.item;
-          if (ad.kind !== "affiliate") return null;
-          return (
-            <div key={ad.key} className="fb-cell fb-cell--ad">
-              <div className="ds-listing-card ds-listing-card--grid pdx-glass-rebind fb-adwrap">
-                {ad.ad ? (
-                  <PosterAdCard ad={ad.ad} brand={ad.brand} style={{ height: "100%" }} />
-                ) : (
-                  <AffiliatePosterCard brand={ad.brand} style={{ height: "100%" }} />
-                )}
-              </div>
-            </div>
-          );
-        }
-        return past ? (
-          <PastCell
-            key={listingKey(item.listing)}
-            listing={item.listing}
-            count={mcFor(item.listing).length}
-            tick={nowMs}
-            onFan={setFanListing}
-          />
-        ) : (
-          <PosterCell key={listingKey(item.listing)} listing={item.listing} handlers={handlers} />
-        );
-      })}
-    </div>
+  const detailQuery = useQuery<EventDetailResponse>({
+    queryKey: ["/api/events", openListing?.id, "detail"],
+    queryFn: () => apiRequest("GET", `/api/events/${openListing!.id}/detail`).then(r => r.json()),
+    enabled: !!openListing,
+    staleTime: 60_000,
+  });
+
+  /* ----- open card (demo flip) ----- */
+  const clearTimers = () => {
+    timersRef.current.forEach(t => window.clearTimeout(t));
+    timersRef.current = [];
+  };
+  const later = (fn: () => void, ms: number) => {
+    timersRef.current.push(window.setTimeout(fn, ms));
+  };
+  const openCard = (listing: EventListing, el: HTMLElement | null) => {
+    clearTimers();
+    setFan(null);
+    setOpenListing(listing);
+    flipElRef.current = el;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (el && !reduced) {
+      el.classList.add("flipping");
+      el.style.transition = "transform .2s ease-in";
+      el.style.transform = "perspective(900px) rotateY(88deg)";
+    }
+    later(() => setOcardOn(true), reduced ? 0 : 190);
+  };
+  const closeCard = () => {
+    setOcardOn(false);
+    const p = flipElRef.current;
+    flipElRef.current = null;
+    if (p) {
+      later(() => {
+        p.style.transition = "transform .3s cubic-bezier(.32,1.24,.36,1)";
+        p.style.transform = "";
+        later(() => {
+          p.classList.remove("flipping");
+          p.style.transition = "";
+        }, 330);
+      }, 150);
+    }
+    later(() => setOpenListing(null), 580);
+  };
+  useEffect(() => {
+    if (!ocardOn) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === "Escape") closeCard();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener("keydown", onKey);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ocardOn]);
+
+  /* ----- fan deck ----- */
+  const closeFan = () => {
+    setFan(null);
+    if (fanReturnRef.current) {
+      fanReturnRef.current.focus({ preventScroll: true });
+      fanReturnRef.current = null;
+    }
+  };
+  const openFan = (listing: EventListing, el: HTMLElement | null) => {
+    if (fan && listingKey(fan.listing) === listingKey(listing)) {
+      closeFan();
+      return;
+    }
+    const rect = el?.getBoundingClientRect();
+    fanReturnRef.current = el;
+    setFan({
+      listing,
+      x: rect ? rect.left + rect.width / 2 : window.innerWidth / 2,
+      y: rect ? rect.top + rect.height / 2 : 320,
+    });
+    setDeckIdx(0);
+  };
+  const fanPool = fan ? mcFor(fan.listing) : [];
+  const fanCount = Math.max(1, fanPool.length);
+  const stepDeck = (d: number) => setDeckIdx(i => (i + d + fanCount) % fanCount);
+  useEffect(() => {
+    if (!fan) return;
+    const onKey = (ev: KeyboardEvent) => {
+      const target = ev.target as HTMLElement | null;
+      if (target && /INPUT|TEXTAREA|SELECT/.test(target.tagName || "")) return;
+      if (ev.key === "Escape") closeFan();
+      else if (ev.key === "ArrowRight") {
+        ev.preventDefault();
+        stepDeck(1);
+      } else if (ev.key === "ArrowLeft") {
+        ev.preventDefault();
+        stepDeck(-1);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fan, fanCount]);
+
+  /* ----- reveal on scroll (demo) ----- */
+  const revealKey = [
+    pastView ? "past" : "main",
+    fday,
+    [...tags].sort().join("."),
+    query,
+    budgetRows,
+    cols,
+    visibleNow.length,
+    visibleLater.length,
+    visibleWeekend.length,
+    flowData.shownPosters,
+    pastList.length,
+  ].join("|");
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const cells = Array.from(root.querySelectorAll<HTMLElement>(".cell"));
+    cells.forEach((c, i) => {
+      c.style.transitionDelay = `${(i % cols) * 50}ms`;
+    });
+    if (!("IntersectionObserver" in window)) {
+      cells.forEach(c => c.classList.add("in"));
+      return;
+    }
+    const io = new IntersectionObserver(
+      es =>
+        es.forEach(en => {
+          if (en.isIntersecting) {
+            (en.target as HTMLElement).classList.add("in");
+            io.unobserve(en.target);
+          }
+        }),
+      { threshold: 0.05 },
+    );
+    cells.forEach(c => {
+      if (!c.classList.contains("in")) io.observe(c);
+    });
+    const fallback = window.setTimeout(() => cells.forEach(c => c.classList.add("in")), 1800);
+    return () => {
+      io.disconnect();
+      window.clearTimeout(fallback);
+    };
+  }, [revealKey, cols]);
+
+  const toggleTag = (t: string) => {
+    setTags(prev => {
+      const next = new Set(prev);
+      if (next.has(t)) next.delete(t);
+      else next.add(t);
+      return next;
+    });
+    setBudgetRows(4);
+  };
+  const clearFilters = () => {
+    setFday("all");
+    setTags(new Set());
+    setQuery("");
+    setBudgetRows(4);
+  };
+
+  const todayLabel = `${weekdayCode(todayStr)} ${MONTHS[Number(todayStr.split("-")[1]) - 1]} ${Number(todayStr.split("-")[2])}`;
+  const totalCount = visibleNow.length + visibleLater.length + visibleWeekend.length + flowData.shownPosters;
+  const lastEligible = flowData.eligible[flowData.eligible.length - 1];
+  const endLabel = lastEligible
+    ? `${MONTHS[Number(dateStrOf(lastEligible).split("-")[1]) - 1]} ${Number(dateStrOf(lastEligible).split("-")[2])}`
+    : "";
+
+  const renderRailCell = (e: EventListing, i: number) => (
+    <PosterCell
+      key={listingKey(e)}
+      listing={e}
+      index={i}
+      mtop={0}
+      rail
+      saved={savedIds.has(e.id)}
+      onToggleSave={onToggleSave}
+      onOpenCard={openCard}
+      tick={tick}
+      aspect={aspectOf(e)}
+      onAspect={onAspect}
+    />
   );
 
-  if (pastView) {
+  let flowPos = -1;
+  const flowCells = flowData.flow.map((item, i) => {
+    if (!flowData.vis[i]) return null;
+    if (item.kind === "flag") return <DayFlag key={`flag-${item.dateStr}`} dateStr={item.dateStr} />;
+    flowPos++;
+    const mtop = MTOPS[flowPos % MTOPS.length];
+    if (item.kind === "submit") return <SubmitCell key={`submit-${item.n}`} mtop={mtop} />;
     return (
-      <div className="fb-root boardz-punk-scope">
-        <div className="fb-pasthead">
-          <button type="button" className="fb-back" onClick={onExitPast}>
-            ← BACK TO UPCOMING
-          </button>
-          <h2 className="fb-mizzed-logo">
-            MIZZED <span>CONNECTIONS</span>
-          </h2>
-          <p className="fb-pastsub">
-            LAST 7 DAYS · {pastFlow.filter(i => i.kind === "poster").length} EVENTS · {pastTotal}{" "}
-            MIZZED CONNECTIONS
-          </p>
-          <p className="fb-pasthint">TAP A POSTER TO FAN ITS CONNECTIONS OUT · SORT THEM WITH THE ARROWS</p>
-        </div>
-        {renderFlow(visiblePastFlow, true)}
-        {pastRemaining > 0 && (
-          <div className="fb-loadmore">
-            <button type="button" onClick={() => setVisibleSlots(s => s + batch())}>
-              LOAD MORE · {pastRemaining} MORE
-            </button>
-          </div>
-        )}
-        {fanListing && (
-          <FanDeck
-            listing={fanListing}
-            posts={mcFor(fanListing)}
-            onClose={() => setFanListing(null)}
-            onOpenListing={listing => {
-              setFanListing(null);
-              props.onOpen(listing, null);
-            }}
-          />
-        )}
-      </div>
+      <PosterCell
+        key={listingKey(item.e)}
+        listing={item.e}
+        index={flowPos}
+        mtop={mtop}
+        saved={savedIds.has(item.e.id)}
+        onToggleSave={onToggleSave}
+        onOpenCard={openCard}
+        tick={tick}
+        aspect={aspectOf(item.e)}
+        onAspect={onAspect}
+      />
     );
+  });
+
+  const pastFlow: React.ReactNode[] = [];
+  {
+    let lastDate = "";
+    pastList.forEach((e, i) => {
+      const ds = dateStrOf(e);
+      if (ds !== lastDate) {
+        pastFlow.push(<DayFlag key={`pflag-${ds}`} dateStr={ds} />);
+        lastDate = ds;
+      }
+      pastFlow.push(
+        <PastCell
+          key={listingKey(e)}
+          listing={e}
+          index={i}
+          pool={mcFor(e)}
+          isSource={!!fan && listingKey(fan.listing) === listingKey(e)}
+          onFan={openFan}
+          tick={tick}
+          aspect={aspectOf(e)}
+          onAspect={onAspect}
+        />,
+      );
+    });
   }
 
-  if (!sections) return null;
-  const hasAhead = sections.ahead.length > 0;
+  const pileMinis = pastList.filter(e => listingPosterUrl(e)).slice(0, 4);
+
+  const openAccent = openListing ? openListing.accentColor || dayColorVar(dateStrOf(openListing)) : "var(--neon-red)";
+  const openPoster = openListing ? listingPosterUrl(openListing) : null;
+  const openCd = openListing ? countdownParts(startMs(openListing) - tick) : null;
+  const openRunning = openListing
+    ? startMs(openListing) <= tick && (endMs(openListing) > tick || (!openListing.dateEnd && dateStrOf(openListing) === todayStr))
+    : false;
+  const openCdText = openListing
+    ? openRunning
+      ? "ON NOW"
+      : `STARTS IN ${
+          Number(openCd!.d) > 0
+            ? `${Number(openCd!.d)}D ${Number(openCd!.h)}H`
+            : Number(openCd!.h) > 0
+              ? `${Number(openCd!.h)}H ${Number(openCd!.m)}M`
+              : `${Number(openCd!.m)}M`
+        }`
+    : "";
+  const gigs = detailQuery.data?.gigs ?? [];
+  const mizzCount = detailQuery.data?.missedConnections?.length;
 
   return (
-    <div className="fb-root boardz-punk-scope">
-      {sections.nowItems.length > 0 && (
-        <section className="fb-sec" id="happening-now" aria-label="Happening now">
-          <h2 className="fb-sec__title">HAPPENING NOW</h2>
-          <div className="fb-rail">
-            {sections.nowItems.map(e => (
-              <PosterCell key={listingKey(e)} listing={e} handlers={handlers} live />
-            ))}
+    <div className="fbx boardz-punk-scope" ref={rootRef}>
+      <div className="bgfx" aria-hidden="true">
+        <div className="bgfx-base" />
+        <div className="bgfx-streaks">
+          <i className="s1" />
+          <i className="s2" />
+          <i className="s3" />
+          <i className="s4" />
+          <i className="s5" />
+        </div>
+        <div className="bgfx-dots" />
+      </div>
+      <div className="vig" aria-hidden="true" />
+
+      <div className="fbar" role="group" aria-label="Filter the board">
+        {(["all", "tonight", "week", "later"] as WindowFilter[]).map(w => (
+          <button
+            key={w}
+            type="button"
+            className={`fchip${fday === w ? " on" : ""}`}
+            aria-pressed={fday === w}
+            onClick={() => {
+              setFday(w);
+              setBudgetRows(4);
+            }}
+          >
+            {w === "all" ? "ALL" : w === "tonight" ? "TONIGHT" : w === "week" ? "THIS WEEK" : "LATER"}
+          </button>
+        ))}
+        <span className="fdiv" />
+        {TAG_CHIPS.map(([token, label]) => (
+          <button
+            key={token}
+            type="button"
+            className={`fchip${tags.has(token) ? " on" : ""}`}
+            aria-pressed={tags.has(token)}
+            onClick={() => toggleTag(token)}
+          >
+            {label}
+          </button>
+        ))}
+        <input
+          className="fsearch"
+          type="text"
+          placeholder="SEARCH EVENTS, VENUES, DAYS…"
+          aria-label="Search events"
+          value={query}
+          onChange={e => {
+            setQuery(e.target.value.toLowerCase());
+            setBudgetRows(4);
+          }}
+        />
+        <span className="fcount">{pastView ? `${pastList.length} EVENTS` : `${totalCount} EVENTS`}</span>
+      </div>
+
+      <div className="fbx-content">
+        {pastView ? (
+          <div>
+            <div className="pasthead">
+              <button type="button" className="pastback" onClick={onExitPast}>
+                ← BACK TO UPCOMING
+              </button>
+              <div className="mizzlogo">
+                <svg viewBox="0 0 48 48" aria-hidden="true">
+                  <path
+                    d="M8 5h32a7 7 0 0 1 7 7v19a7 7 0 0 1-7 7H23l-10 9v-9H8a7 7 0 0 1-7-7V12a7 7 0 0 1 7-7z"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                  />
+                  <path d="M24 14v16M16 22h16" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+                </svg>
+                <div>
+                  <b>MIZZED</b>
+                  <i>CONNECTIONS</i>
+                </div>
+              </div>
+              <p className="pastsub">
+                LAST 7 DAYS · {pastList.length} EVENTS · {mcTotal} MIZZED CONNECTIONS
+                <br />
+                POSTERS SIT IN GREY — HOVER BRINGS THE COLOR BACK
+                <br />
+                TAP A POSTER TO FAN ITS CONNECTIONS OUT · SORT THEM WITH THE ARROWS
+              </p>
+            </div>
+            <div className={`lboard pastboard${fan ? " away" : ""}`}>{pastFlow}</div>
           </div>
-        </section>
-      )}
-      {sections.laterItems.length > 0 && (
-        <section className="fb-sec" id="happening-later" aria-label="Happening later today">
-          <h2 className="fb-sec__title">HAPPENING LATER</h2>
-          <div className="fb-rail">
-            {sections.laterItems.map(e => (
-              <PosterCell key={listingKey(e)} listing={e} handlers={handlers} />
-            ))}
+        ) : (
+          <div>
+            {visibleNow.length > 0 && (
+              <div className="bandsec" id="happening-now">
+                <div className="board-h">
+                  <span className="livedot" />
+                  <h3>HAPPENING NOW</h3>
+                  <span className="bcount">ON RIGHT NOW · {todayLabel}</span>
+                </div>
+                <div className="rail">{visibleNow.map(renderRailCell)}</div>
+              </div>
+            )}
+            {visibleLater.length > 0 && (
+              <div className="bandsec" id="happening-later">
+                <div className="board-h">
+                  <span className="tick-y" />
+                  <h3>HAPPENING LATER</h3>
+                  <span className="bcount">STILL TO COME TODAY · SAME DAY, LATER ON</span>
+                </div>
+                <div className="rail">{visibleLater.map(renderRailCell)}</div>
+              </div>
+            )}
+            {visibleWeekend.length > 0 && (
+              <div className="bandsec" id="this-weekend">
+                <div className="board-h">
+                  <span className="wkdot" />
+                  <h3>HAPPENING THIS WEEKEND</h3>
+                </div>
+                <div className="rail">{visibleWeekend.map(renderRailCell)}</div>
+              </div>
+            )}
+            <div className="futurezone" id="plan-ahead">
+              <div className="board-h">
+                <span className="tick" />
+                <h3>PLAN AHEAD</h3>
+                <span className="bcount">
+                  {flowData.shownPosters} OF {flowData.eligible.length} POSTERS · 4 ROWS AT A TIME
+                </span>
+              </div>
+              <div className="lboard">{flowCells}</div>
+              <div className={`empty${flowData.eligible.length === 0 ? " on" : ""}`}>
+                <h4>NOTHING ON THE BOARD MATCHES</h4>
+                <p>Check your filters or your spelling — or clear everything and start over.</p>
+                <button type="button" onClick={clearFilters}>
+                  CLEAR FILTERS
+                </button>
+              </div>
+              <button
+                type="button"
+                className={`lmore${flowData.remaining > 0 ? " on" : ""}`}
+                onClick={() => setBudgetRows(r => r + 4)}
+              >
+                <b>LOAD MORE · {flowData.remaining} MORE POSTERS</b>
+                <small>4 MORE ROWS · THE BOARD RUNS 6 MONTHS OUT</small>
+              </button>
+              <div className={`lend${flowData.remaining === 0 && flowData.eligible.length > 0 ? " on" : ""}`}>
+                END OF THE BOARD · EVERYTHING THROUGH {endLabel}
+              </div>
+            </div>
+            <div
+              className="pilewrap"
+              role="button"
+              tabIndex={0}
+              aria-label="Go back in time — past 7 days of mizzed connections"
+              onClick={onEnterPast}
+              onKeyDown={ev => {
+                if (isPosterActivation(ev.key, ev.target === ev.currentTarget)) onEnterPast();
+              }}
+              onPointerDown={ev => {
+                pileDragX.current = ev.clientX;
+              }}
+              onPointerUp={ev => {
+                if (pileDragX.current !== null && ev.clientX - pileDragX.current > 50) onEnterPast();
+                pileDragX.current = null;
+              }}
+              onWheel={ev => {
+                if (Math.abs(ev.deltaX) > 40 && !pileWheelCool.current) {
+                  pileWheelCool.current = true;
+                  onEnterPast();
+                  window.setTimeout(() => {
+                    pileWheelCool.current = false;
+                  }, 1200);
+                }
+              }}
+            >
+              <div className="pile">
+                {pileMinis.map((e, i) => (
+                  <span
+                    key={listingKey(e)}
+                    className="pilemini"
+                    style={{
+                      left: `${PILE_SPOTS[i][0]}%`,
+                      top: `${PILE_SPOTS[i][2]}%`,
+                      transform: `translateY(-50%) rotate(${PILE_SPOTS[i][1]}deg)`,
+                    }}
+                  >
+                    <img src={listingPosterUrl(e)} alt="" loading="lazy" />
+                  </span>
+                ))}
+                <div className="magcard">
+                  <svg viewBox="0 0 120 60" aria-hidden="true">
+                    <path d="M18 36 Q60 24 96 32" stroke="#fff" strokeWidth="4.5" fill="none" strokeLinecap="round" strokeDasharray="0.5 10" />
+                    <path d="M84 16 L104 31 L82 44" stroke="#fff" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="17" cy="37" r="7.5" fill="#fff" />
+                  </svg>
+                  <div className="mag-t">GO BACK IN TIME</div>
+                  <div className="mag-s">PAST 7 DAYS · MIZZED CONNECTIONS</div>
+                </div>
+              </div>
+              <p className="pile-cap">THE PILE · SWIPE ACROSS IT, DRAG IT, TWO-FINGER SWIPE IT — OR JUST CLICK IT</p>
+            </div>
           </div>
-        </section>
-      )}
-      {sections.weekendItems.length > 0 && (
-        <section className="fb-sec" id="this-weekend" aria-label="Happening this weekend">
-          <h2 className="fb-sec__title">HAPPENING THIS WEEKEND</h2>
-          <div className="fb-rail">
-            {sections.weekendItems.map(e => (
-              <PosterCell key={listingKey(e)} listing={e} handlers={handlers} />
-            ))}
+        )}
+      </div>
+
+      {/* fan deck */}
+      <div
+        className={`fanLayer${fan ? " on" : ""}`}
+        onClick={ev => {
+          if (ev.target === ev.currentTarget) closeFan();
+        }}
+      >
+        {fan && (
+          <>
+            <div
+              className="deck"
+              style={{ left: fan.x, top: fan.y }}
+              role="dialog"
+              aria-modal="true"
+              aria-label={`Mizzed connections for ${fan.listing.venueName}`}
+              onPointerDown={ev => {
+                fanDragX.current = ev.clientX;
+              }}
+              onPointerUp={ev => {
+                if (fanDragX.current === null) return;
+                const dx = ev.clientX - fanDragX.current;
+                fanDragX.current = null;
+                if (dx < -40) stepDeck(1);
+                else if (dx > 40) stepDeck(-1);
+              }}
+            >
+              {fanPool.length === 0 ? (
+                <div className="fancard" style={{ opacity: 1, transform: "translate(-50%,-50%)" }}>
+                  <span className="fc-quote">&ldquo;</span>
+                  <div className="fc-title">No mizzed connections yet</div>
+                  <p className="fc-body">
+                    Nobody has posted one for {fan.listing.venueName} from this night. Be the first — posts stay
+                    readable after they expire.
+                  </p>
+                  <div className="fc-foot">
+                    <span className="fc-loc">● {fan.listing.venueName}</span>
+                    <span className="fc-meta">BE THE FIRST</span>
+                  </div>
+                </div>
+              ) : (
+                fanPool.map((post, i) => {
+                  const off = i - deckIdx;
+                  const a = Math.abs(off);
+                  const style: CSSProperties =
+                    a > 2
+                      ? {
+                          opacity: 0,
+                          pointerEvents: "none",
+                          zIndex: 1,
+                          transform: `translate(-50%,-50%) rotate(${off * 9}deg) translateX(${off * 36}%) scale(.78)`,
+                        }
+                      : {
+                          opacity: a === 0 ? 1 : a === 1 ? 0.95 : 0.8,
+                          filter: a === 0 ? "none" : `brightness(${a === 1 ? 0.7 : 0.48})`,
+                          zIndex: 30 - a,
+                          transform: `translate(-50%,-50%) rotate(${off * 9}deg) translateX(${off * 36}%) scale(${1 - a * 0.07})`,
+                        };
+                  const venue = post.venueHint || post.placeName || post.eventVenue || fan.listing.venueName;
+                  const meta = `${post.anonymous ? "Anonymous" : "Posted"}${post.createdAt ? ` · ${timeAgo(post.createdAt)}` : ""}`;
+                  return (
+                    <div
+                      key={post.id}
+                      className="fancard"
+                      style={style}
+                      aria-hidden={off !== 0}
+                      onClick={ev => {
+                        ev.stopPropagation();
+                        if (i !== deckIdx) setDeckIdx(i);
+                      }}
+                    >
+                      {post.isDemo ? <span className="fc-demo">DEMO</span> : null}
+                      <span className="fc-quote">&ldquo;</span>
+                      {post.title ? <div className="fc-title">{post.title}</div> : null}
+                      <p className="fc-body">{post.body}</p>
+                      <div className="fc-foot">
+                        <span className="fc-loc">● {venue}</span>
+                        <span className="fc-meta">{meta}</span>
+                      </div>
+                      <div className="fc-actions">
+                        <button
+                          type="button"
+                          className="fc-msg"
+                          onClick={ev => {
+                            ev.stopPropagation();
+                            const target = fan.listing;
+                            closeFan();
+                            onOpen(target, null);
+                          }}
+                        >
+                          MESSAGE →
+                        </button>
+                        <button
+                          type="button"
+                          className="fc-share"
+                          onClick={async ev => {
+                            ev.stopPropagation();
+                            const url = `https://www.zaylist.com${eventPath(fan.listing.id, fan.listing.title, fan.listing.dayOfWeek)}`;
+                            try {
+                              if (navigator.share) await navigator.share({ title: fan.listing.title, url });
+                              else await navigator.clipboard.writeText(url);
+                            } catch {
+                              /* share dismissed */
+                            }
+                          }}
+                        >
+                          SHARE
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+              <div className="decknav">
+                <button type="button" className="dnav" aria-label="Previous connection" disabled={fanCount < 2} onClick={ev => { ev.stopPropagation(); stepDeck(-1); }}>
+                  ‹
+                </button>
+                <span className="dcount" aria-live="polite">
+                  {deckIdx + 1} / {fanCount}
+                </span>
+                <button type="button" className="dnav" aria-label="Next connection" disabled={fanCount < 2} onClick={ev => { ev.stopPropagation(); stepDeck(1); }}>
+                  ›
+                </button>
+              </div>
+            </div>
+            <button type="button" className="dfan-close" aria-label="Close mizzed connections" onClick={closeFan}>
+              ×
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* open card */}
+      <div className={`scrim${ocardOn ? " on" : ""}`} onClick={closeCard} />
+      {openListing && (
+        <div
+          className={`ocard${ocardOn ? " on" : ""}`}
+          style={{ "--a": openAccent } as CSSProperties}
+          role="dialog"
+          aria-modal="true"
+          aria-label={openListing.title}
+        >
+          <div
+            className="ox"
+            role="button"
+            tabIndex={0}
+            aria-label="Close"
+            onClick={closeCard}
+            onKeyDown={ev => {
+              if (ev.key === "Enter" || ev.key === " ") closeCard();
+            }}
+          >
+            ✕
           </div>
-        </section>
-      )}
-      {hasAhead && (
-        <section className="fb-sec fb-sec--ahead" id="plan-ahead" aria-label="Plan ahead">
-          <div className="fb-seam" aria-hidden="true" />
-          <h2 className="fb-sec__title">PLAN AHEAD</h2>
-          {renderFlow(visibleFlow, false)}
-          {remainingSlots > 0 ? (
-            <div className="fb-loadmore">
-              <button type="button" onClick={() => setVisibleSlots(s => s + batch())}>
-                LOAD MORE · {remainingSlots} MORE
+          <div className="oscroll">
+            <div className="ohero">
+              {openPoster ? (
+                <img src={openPoster} alt="" />
+              ) : (
+                <div
+                  className="ohero-typo"
+                  style={{ background: `linear-gradient(160deg, ${openAccent} 0%, var(--evz-ink-0a0a0e) 78%)` }}
+                >
+                  <div className="typo-t">{openListing.title}</div>
+                  <div className="typo-v" style={{ color: openAccent }}>
+                    {openListing.venueName.toUpperCase()}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="oid">
+              <div className="ochips">
+                {AGE_LABEL[openListing.ageRequirement ?? ""] ? (
+                  <span className="ochip">{AGE_LABEL[openListing.ageRequirement ?? ""]}</span>
+                ) : null}
+                {openListing.isSexPositive ? <span className="ochip">SEX-POSITIVE</span> : null}
+                <span className="ochip">{openCdText}</span>
+              </div>
+              <h2>{openListing.title}</h2>
+              <p className="ometa">
+                {eventDateLabel(openListing.dateStart)} · {eventTimeLabel(openListing.dateStart)}
+                {"\n"}
+                {openListing.venueName}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="ointerested"
+              aria-pressed={savedIds.has(openListing.id)}
+              onClick={() => onToggleSave(openListing.id)}
+            >
+              <b>I'M INTERESTED</b>
+              <span>{savedIds.has(openListing.id) ? "SAVED TO YOUR SCHEDULE" : "TAP TO SAVE YOUR SPOT"}</span>
+            </button>
+            <div className="ocounters">
+              <div className="ocount">
+                <b>{detailQuery.data ? String(gigs.length) : "–"}</b>
+                <i className="oc-g">GIGZ</i>
+              </div>
+              <div className="ocount">
+                <b>–</b>
+                <i className="oc-c">CARPOOL</i>
+              </div>
+              <div className="ocount">
+                <b>{detailQuery.data ? String(mizzCount ?? 0) : "–"}</b>
+                <i className="oc-m">MIZZED</i>
+              </div>
+            </div>
+            <div className="obody">
+              {gigs.length > 0 && (
+                <>
+                  <p className="osec">GIGZ · OPEN CALLS</p>
+                  {gigs.map((g, gi) => (
+                    <div className="gig" key={g.id ?? gi}>
+                      <div className="av" />
+                      <div>
+                        <h5>{(g.title || "OPEN CALL").toUpperCase()}</h5>
+                        {g.description ? <p>{g.description}</p> : null}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+              <button
+                type="button"
+                className="addm"
+                onClick={() => {
+                  const target = openListing;
+                  closeCard();
+                  onOpen(target, null);
+                }}
+              >
+                <b>+ ADD A MIZZED CONNECTION</b>
+                <p>Post during or after the event.</p>
               </button>
             </div>
-          ) : lastAheadDate ? (
-            <p className="fb-endcap">
-              END OF THE BOARD · EVERYTHING THROUGH {flagLabel(lastAheadDate)}
-            </p>
-          ) : null}
-        </section>
+          </div>
+          <div className="ofoot">
+            <div className="dots">
+              <i className="on" />
+              <i />
+              <i />
+              <i />
+              <i />
+            </div>
+            <button
+              type="button"
+              className="osave"
+              aria-pressed={savedIds.has(openListing.id)}
+              onClick={() => onToggleSave(openListing.id)}
+            >
+              {savedIds.has(openListing.id) ? "SAVED" : "SAVE THIS EVENT"}
+            </button>
+            <span className="oheart">♥</span>
+          </div>
+        </div>
       )}
-      <Pile pastEvents={pastEvents} onEnterPast={onEnterPast} />
     </div>
   );
 }
