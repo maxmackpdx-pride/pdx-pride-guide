@@ -950,6 +950,7 @@ export default function Events() {
         ) : (
           <FlyerBoard
             events={filtered}
+            paginationKey={JSON.stringify([activeDay, activeFilters, searchQuery, sortMode])}
             gridItems={gridItems}
             pastEvents={pastEvents}
             pastView={pastView}

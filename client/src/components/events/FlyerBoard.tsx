@@ -28,12 +28,15 @@ import PosterAdCard from "@/components/ads/PosterAdCard";
 import AffiliatePosterCard from "@/components/AffiliatePosterCard";
 import "../board/punk/push-pins.css";
 import "./FlyerBoard.css";
+import { fanSlots, isPosterActivation } from "./flyerBoardBehavior";
 
 type GridItem = ReturnType<typeof scatterAffiliateCards>[number];
 
 export type FlyerBoardProps = {
   /** Page-filtered pool: upcoming events, or past events while pastView is on. */
   events: EventListing[];
+  /** Explicit filter changes reset pagination; background refreshes do not. */
+  paginationKey: string;
   /** Events with affiliate/ad cards scattered in (upcoming mode, Plan Ahead flow). */
   gridItems: GridItem[];
   /** All past listings (pile artwork in upcoming mode). */
@@ -292,7 +295,7 @@ function PosterCell({
         style={{ "--c": accent, "--clip": tear?.clip, "--clip2": tear?.clip2 } as CSSProperties}
         onClick={open}
         onKeyDown={ev => {
-          if (ev.key === "Enter" || ev.key === " ") {
+          if (isPosterActivation(ev.key, ev.target === ev.currentTarget)) {
             ev.preventDefault();
             open(ev as unknown as React.MouseEvent);
           }
@@ -501,11 +504,7 @@ function FanDeck({
   if (posts.length === 0) {
     cards.push({ post: null, offset: 0, key: "empty" });
   } else {
-    const usedIdx = new Set<number>();
-    for (let offset = -2; offset <= 2; offset++) {
-      const i = (index + offset + posts.length) % posts.length;
-      if (usedIdx.has(i)) continue;
-      usedIdx.add(i);
+    for (const { index: i, offset } of fanSlots(posts.length, index)) {
       cards.push({ post: posts[i], offset, key: `mc-${posts[i].id}` });
     }
   }
@@ -645,7 +644,7 @@ export default function FlyerBoard(props: FlyerBoardProps) {
   const [visibleSlots, setVisibleSlots] = useState(20);
   useEffect(() => {
     setVisibleSlots(batch());
-  }, [events, pastView]);
+  }, [props.paginationKey, pastView]);
 
   const handlers: CellHandlers = {
     onOpen: props.onOpen,
@@ -684,11 +683,7 @@ export default function FlyerBoard(props: FlyerBoardProps) {
       else if (dateStr !== today && weekendDates.has(dateStr)) weekendItems.push(e);
       else ahead.push(e);
     }
-    const byStart = (a: EventListing, b: EventListing) => startMs(a) - startMs(b);
-    nowItems.sort(byStart);
-    laterItems.sort(byStart);
-    weekendItems.sort(byStart);
-    ahead.sort(byStart);
+    // Preserve the page-selected order within each time section.
     return { nowItems, laterItems, weekendItems, ahead };
   }, [events, pastView, nowMs]);
 
@@ -712,12 +707,6 @@ export default function FlyerBoard(props: FlyerBoardProps) {
     for (const e of sections.ahead) {
       if (!inMixed.has(listingKey(e))) mixed.push({ listing: e });
     }
-    mixed.sort((a, b) => {
-      const la = a.listing ?? (a.item?.kind === "event" ? a.item.event : null);
-      const lb = b.listing ?? (b.item?.kind === "event" ? b.item.event : null);
-      if (la && lb) return startMs(la) - startMs(lb);
-      return 0;
-    });
     const totalPosters = mixed.filter(m => m.listing).length;
     const marks = new Set([1, Math.floor(totalPosters / 2), Math.floor(totalPosters * 0.8)]);
     const out: FlowItem[] = [];
