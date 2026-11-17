@@ -17,14 +17,35 @@ export function fanSlots(count: number, selected: number): Array<{ index: number
   return slots.sort((a, b) => a.offset - b.offset);
 }
 
-/** A venue name cannot establish which event a connection belongs to. */
-export function connectionsByEvent<T extends { id: number; eventId?: number | null }>(posts: T[]): Map<number, T[]> {
-  const map = new Map<number, T[]>();
+/**
+ * A connection attached to an event belongs to that event alone — it never
+ * spills into another event at the same venue. A connection attached to no
+ * event (venue-hinted only) pools by venue, so it can fan under that venue's
+ * events until it is attached properly (founder rule, Nov 17, 2026).
+ */
+export function connectionsForListing<
+  T extends {
+    id: number;
+    eventId?: number | null;
+    venueHint?: string | null;
+    placeName?: string | null;
+    eventVenue?: string | null;
+  },
+>(posts: T[], eventId: number, venueName: string): T[] {
+  const own: T[] = [];
   for (const post of posts) {
-    if (post.eventId == null) continue;
-    const group = map.get(post.eventId) ?? [];
-    if (!group.some(existing => existing.id === post.id)) group.push(post);
-    map.set(post.eventId, group);
+    if (post.eventId === eventId && !own.some(existing => existing.id === post.id)) own.push(post);
   }
-  return map;
+  if (own.length > 0) return own;
+  const venue = venueName.trim().toLowerCase();
+  if (!venue) return [];
+  const pooled: T[] = [];
+  for (const post of posts) {
+    if (post.eventId != null) continue;
+    const hinted = [post.venueHint, post.placeName, post.eventVenue].some(
+      value => value?.trim().toLowerCase() === venue,
+    );
+    if (hinted && !pooled.some(existing => existing.id === post.id)) pooled.push(post);
+  }
+  return pooled;
 }

@@ -30,7 +30,7 @@ import PosterAdCard from "@/components/ads/PosterAdCard";
 import AffiliatePosterCard from "@/components/AffiliatePosterCard";
 import "../board/punk/push-pins.css";
 import "./FlyerBoard.css";
-import { fanSlots, isPosterActivation, connectionsByEvent } from "./flyerBoardBehavior";
+import { fanSlots, isPosterActivation, connectionsForListing } from "./flyerBoardBehavior";
 
 type GridItem = ReturnType<typeof scatterAffiliateCards>[number];
 
@@ -455,8 +455,8 @@ function PastCell({
             <i>MIZZED CONNECTIONS</i>
             <span className="fb-pexp">
               {left > 0
-                ? `POSTING CLOSES IN ${Math.floor(left / DAY_MS)}D ${String(Math.floor((left % DAY_MS) / 3600000)).padStart(2, "0")}H`
-                : "POSTING CLOSED"}
+                ? `POSTING OPEN · ${Math.floor(left / DAY_MS)}D ${String(Math.floor((left % DAY_MS) / 3600000)).padStart(2, "0")}H LEFT`
+                : "EXPIRED · STILL READABLE"}
             </span>
           </div>
           <p className="fb-pmeta">
@@ -561,8 +561,8 @@ function FanDeck({
                 <div className="fb-deck__empty">
                   <b>No mizzed connections yet</b>
                   <p>
-                    No active public connections are available for this event. Expired or removed
-                    posts are not shown.
+                    No one has posted a connection for this event yet. Posts stay readable here
+                    even after the event ends.
                   </p>
                 </div>
               )}
@@ -814,8 +814,8 @@ export default function FlyerBoard(props: FlyerBoardProps) {
     enabled: pastView,
     staleTime: 60_000,
   });
-  const mcByEvent = useMemo(() => connectionsByEvent(mcQuery.data ?? []), [mcQuery.data]);
-  const mcFor = (e: EventListing): MissedConnectionPost[] => mcByEvent.get(e.id) ?? [];
+  const mcFor = (e: EventListing): MissedConnectionPost[] =>
+    connectionsForListing(mcQuery.data ?? [], e.id, e.venueName);
 
   const pastFlow = useMemo<FlowItem[]>(() => {
     if (!pastView) return [];
@@ -862,7 +862,7 @@ export default function FlyerBoard(props: FlyerBoardProps) {
     }
     return ids.size;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pastFlow, mcByEvent]);
+  }, [pastFlow, mcQuery.data]);
 
   const renderFlow = (items: FlowItem[], past: boolean) => (
     <div className="fb-grid">

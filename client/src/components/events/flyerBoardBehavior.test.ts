@@ -38,24 +38,29 @@ test("refresh does not reset pagination or override caller ordering", () => {
   assert.doesNotMatch(source, /(?:nowItems|laterItems|weekendItems|ahead|mixed)\.sort\(/);
 });
 
-test("connections never spill into another event at the same venue", async () => {
-  const { connectionsByEvent } = await import("./flyerBoardBehavior");
+test("event-attached connections never spill; venue-hinted ones pool by venue", async () => {
+  const { connectionsForListing } = await import("./flyerBoardBehavior");
   const a = { id: 1, eventId: 10, venueHint: "Same venue" };
   const b = { id: 2, eventId: 11, venueHint: "Same venue" };
-  const map = connectionsByEvent([a, b, a, { id: 3, eventId: null, venueHint: "Same venue" }]);
-  assert.deepEqual(map.get(10), [a]);
-  assert.deepEqual(map.get(11), [b]);
-  assert.equal(map.size, 2);
+  const loose = { id: 3, eventId: null, venueHint: "Same venue" };
+  // an event with its own connections gets exactly those — nothing spills in
+  assert.deepEqual(connectionsForListing([a, b, a, loose], 10, "Same venue"), [a]);
+  assert.deepEqual(connectionsForListing([a, b, loose], 11, "Same venue"), [b]);
+  // an event with none of its own falls back to the venue pool
+  assert.deepEqual(connectionsForListing([a, b, loose], 12, "Same venue"), [loose]);
+  assert.deepEqual(connectionsForListing([a, b, loose], 12, "Elsewhere"), []);
 });
 
-test("fan uses modal focus management and does not promise archived visibility", () => {
+test("fan uses modal focus management and keeps expired connections readable", () => {
   assert.match(source, /<Dialog.Root open/);
   assert.match(source, /<Dialog.Content asChild/);
   assert.match(source, /returnFocus.current\?\.focus\(\)/);
   assert.match(source, /node.inert = offset !== 0/);
   assert.match(source, /aria-label="Close mizzed connections"/);
   assert.match(source, /getMissedConnectionWindow\(listing.dateStart, listing.dateEnd, tick\)/);
-  assert.doesNotMatch(source, /STILL READABLE|stays readable here even after/);
+  assert.match(source, /EXPIRED · STILL READABLE/);
+  assert.match(source, /stay readable here/);
+  assert.doesNotMatch(source, /POSTING CLOSED/);
 });
 
 test("whole board escapes the shared fixed-size card dimensions", () => {
