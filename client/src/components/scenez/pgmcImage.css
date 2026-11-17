@@ -1,0 +1,38 @@
+/* Scoped representative-photo layout: native bounds and artwork bytes stay unchanged. */
+.scenez-native .pgmc-image-card{--pgmc-panel:var(--pz-ink);--pgmc-text:var(--pz-paper)}
+.scenez-native .pgmc-image-card .pz-content{bottom:auto;pointer-events:none}
+.scenez-native .pgmc-image-card .pz-content:before{display:none}
+.scenez-native .pgmc-image-card .pz-identity{background:var(--pgmc-panel);color:var(--pgmc-text);padding:6px;border-radius:4px;gap:4px;min-width:0}
+.scenez-native .pgmc-image-card .pz-title{margin:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.scenez-native .pgmc-image-card .pz-descriptor{margin:0;min-width:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden;text-overflow:ellipsis;white-space:normal}
+.scenez-native .pgmc-image-card .scene-logo{object-fit:contain;bottom:auto;right:auto}
+.scenez-native .pgmc-image-card .scene-next-event{background:var(--pgmc-panel);min-width:0;overflow:hidden;z-index:4}
+.scenez-native .pgmc-image-card .scene-next-event span{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.scenez-native .pgmc-image-card .scene-next-event strong,.scenez-native .pgmc-image-card .scene-next-event time{min-width:0;white-space:nowrap}
+.scenez-native .pgmc-image-card .pz-actions{z-index:5}
+.scenez-native .pgmc-image-card .pz-details{background:var(--pgmc-panel)}
+.scenez-native .pgmc-image-card .pz-heart{z-index:6}
+.scenez-native .pgmc-image-card.pz-card--wide-map .pz-content{left:170px;right:14px;top:12px}
+.scenez-native .pgmc-image-card.pz-card--wide-map .scene-logo{left:14px;top:16px;width:144px;height:88px}
+.scenez-native .pgmc-image-card.pz-card--wide-map .scene-next-event{grid-template-columns:auto minmax(0,1fr) auto}
+.scenez-native .pgmc-image-card.pz-card--square .scene-logo{left:54px;width:140px}
+.scenez-native .pgmc-image-card.pz-card--square .pz-content{top:44px;left:14px;right:14px}
+.scenez-native .pgmc-image-card.pz-card--square .pz-identity{padding:4px;gap:3px}
+.scenez-native .pgmc-image-card.pz-card--tall .scene-logo{left:28px;top:14px;width:144px;height:132px}
+.scenez-native .pgmc-image-card.pz-card--tall .pz-content{top:160px;left:14px;right:14px}
+.scenez-native .pgmc-image-card.pz-card--tall .pz-descriptor{-webkit-line-clamp:2}
+.scenez-native .pgmc-image-card.pz-card--small .scene-logo{left:26px;top:7px;width:84px;height:36px}
+.scenez-native .pgmc-image-card.pz-card--small .pz-content{top:49px;left:8px;right:8px;bottom:auto}
+.scenez-native .pgmc-image-card.pz-card--small .pz-identity{padding:3px;gap:3px}
+.scenez-native .pgmc-image-card.pz-card--small .scene-next-event{left:8px;right:50px;height:44px;bottom:7px}
+
+.scenez-native .pgmc-image-card .scene-image-label{font:400 10px/12px Barlow,sans-serif;color:var(--pgmc-text)}
+.scenez-native .pgmc-image-card:is(.pz-card--tall,.pz-card--square) .pz-actions:has(.card-counter){display:grid;grid-template-columns:1fr 1fr;height:94px;gap:6px}
+.scenez-native .pgmc-image-card:is(.pz-card--tall,.pz-card--square) .pz-actions:has(.card-counter) .pz-details{grid-column:1/-1}
+.scenez-native .pgmc-image-card:is(.pz-card--tall,.pz-card--square) .card-counter{height:44px}
+.scenez-native .pgmc-image-card button:focus-visible,.scenez-native .scene-image-credit-link:focus-visible,.scenez-native .scene-image-credits a:focus-visible{outline:2px solid var(--pz-paper);outline-offset:2px}
+.scenez-native .scene-image-credit-link{display:block;background:var(--pz-ink);color:var(--pz-paper);border:1px solid currentColor;border-radius:4px;padding:5px 8px;margin-top:8px;min-height:32px;text-align:left;font:400 12px/16px Barlow,sans-serif}
+.scenez-native .scene-image-credits{color:var(--pz-paper);background:var(--pz-ink);padding:12px;border:1px solid currentColor;border-radius:6px;overflow-wrap:anywhere}
+.scenez-native .scene-image-credits a{color:inherit;text-decoration:underline}
+.scenez-native .pgmc-image-card.pz-card--square .scene-art.has-image .scene-logo.scene-logo--photo{top:4px;height:36px}
+.scenez-native .pgmc-image-card.pz-card--wide-map .pz-identity{padding:5px;gap:2px}

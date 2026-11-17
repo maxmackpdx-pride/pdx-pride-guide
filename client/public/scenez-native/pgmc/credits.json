@@ -1,0 +1,20 @@
+{
+  "photo": {
+    "file": "representative-piano.png",
+    "sha256": "a5ae5c04d7d8a4f002a0ab08f30b617bfca9c5ee236f769bdf27573f4f58cd7b",
+    "source": "https://commons.wikimedia.org/wiki/File:Piano_keys_close_up.jpg",
+    "author": "Puikstekend",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "AI-generated crop/reframing trial; not an exact photographic crop. Photo derivative offered under CC BY-SA 4.0.",
+    "representation": "Representative music imagery, not PGMC instrument, rehearsal space, performance venue, or members."
+  },
+  "logo": {
+    "file": "white-logo.svg",
+    "sha256": "53cc7e8b8f545bf70a8089dc4831d4e11f2d0cd0bdf8bc4d826503dbd573feaf",
+    "source": "https://www.pdxgmc.org/wp-content/uploads/2026/09/PGMC-logo.png",
+    "source_sha256": "389eb449080cb7550dc02e98038ff73230d233c962ad0d50c94893cc643e2ded",
+    "changes": "Adobe vectorization followed by reviewed white lettering, thin outline and shadow; not an official SVG.",
+    "license": "Organization-identification logo; not included in the photograph CC BY-SA license."
+  }
+}

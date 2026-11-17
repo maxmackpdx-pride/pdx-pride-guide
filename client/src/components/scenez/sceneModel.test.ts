@@ -30,3 +30,25 @@ test('Q Center override does not change other image precedence or bespoke SceneZ
  assert.equal(sceneModel({...source,slug:'pink-ponies',imageUrl:'https://example.com/legacy.png'}).logo,'/scenez-native/pink-ponies.png');
  assert.equal(sceneModel({...source,slug:'pride-northwest'}).customArt,'/scenez-native/pride-collage.png');
 });
+test('PGMC representative photo and styled logo remain separate and entity-scoped',()=>{
+ const c=Object.freeze({...source,slug:'portland-gay-men-s-chorus',name:"Portland Gay Men's Chorus",imageUrl:'https://www.pdxgmc.org/legacy-logo.png',neighborhood:'Unabridged community description'});
+ const m=sceneModel(c);
+ assert.equal(m.image,'/scenez-native/pgmc/representative-piano.png');
+ assert.equal(m.logo,'/scenez-native/pgmc/white-logo.svg');
+ assert.equal(m.artLayout,'pgmc');
+ assert.equal(m.imageLabel,'Illustrative music image');
+ assert.match(m.imageAlt!,/not a documented PGMC instrument/);
+ assert.equal(m.short,c.neighborhood);
+ assert.equal(c.imageUrl,'https://www.pdxgmc.org/legacy-logo.png');
+ const other=sceneModel({...c,slug:'other-choir'});
+ assert.equal(other.image,undefined);assert.equal(other.artLayout,undefined);assert.equal(other.logo,c.imageUrl);
+});
+test('PGMC ships the exact reviewed bytes with separate photo licensing metadata',async()=>{
+ const {readFile}=await import('node:fs/promises');const {createHash}=await import('node:crypto');
+ const root=new URL('../../../public/scenez-native/pgmc/',import.meta.url);
+ const credits=JSON.parse(await readFile(new URL('credits.json',root),'utf8'));
+ for(const [file,expected] of [['representative-piano.png','a5ae5c04d7d8a4f002a0ab08f30b617bfca9c5ee236f769bdf27573f4f58cd7b'],['white-logo.svg','53cc7e8b8f545bf70a8089dc4831d4e11f2d0cd0bdf8bc4d826503dbd573feaf']]){
+  assert.equal(createHash('sha256').update(await readFile(new URL(file,root))).digest('hex'),expected);
+ }
+ assert.equal(credits.photo.license,'CC BY-SA 4.0');assert.match(credits.photo.changes,/AI-generated/);assert.match(credits.logo.license,/not included/);
+});
