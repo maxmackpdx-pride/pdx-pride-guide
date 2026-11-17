@@ -37,6 +37,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 import BoardCloseSeam from "@/components/BoardCloseSeam";
 import EventTypeTag from "../components/EventTypeTag";
 import EventzExpanded from "../components/events/EventzExpanded";
+import FlyerBoard from "../components/events/FlyerBoard";
 import type { EventModalOriginRect } from "../components/EventModal";
 import Schedule from "@/pages/Schedule";
 import ScheduleCard from "@/components/ScheduleCard";
@@ -946,104 +947,19 @@ export default function Events() {
                 : "Clear filters"}
             </Button>
           </div>
-        ) : railBands ? (
-          <div className="events-rails">
-            {railBands.map((band, index) => {
-              const expanded = isMobile || activeDay.startsWith("D:") || openRails.has(band.id);
-              // Keep full and compact card types while mobile wraps both into two columns.
-              const size = band.id === "happening" || band.id === "next" ? "full" : "m";
-              return (
-                <section key={band.id} className={`events-rail-sec events-rail-sec--${size} events-rail-sec--${band.id} pdx-glass-rebind`} style={{ "--c": band.color } as React.CSSProperties} aria-labelledby={`events-rail-${band.id}`}>
-                  <div className="events-rail-sec__head">
-                    <h3 id={`events-rail-${band.id}`}><span aria-hidden="true" />{band.label}<small>{band.items.length}</small></h3>
-                    <div className="events-rail-sec__actions">
-                      {band.dayKey ? (
-                        <button type="button" className="events-rail-pill" onClick={() => { setPastView(false); setActiveDay(band.dayKey!); }}>
-                          See the day
-                        </button>
-                      ) : !isMobile && band.items.length > 2 && (
-                        <button
-                          type="button"
-                          className="events-rail-pill"
-                          aria-expanded={expanded}
-                          onClick={() => setOpenRails(prev => { const next = new Set(prev); if (next.has(band.id)) next.delete(band.id); else next.add(band.id); return next; })}
-                        >
-                          {expanded ? "Show less" : "View all"}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <EventsRail open={expanded} label={band.label} nudge={index === 0}>
-                    {band.items.map(e => (
-                      <div role="listitem" key={listingKey(e)} className="events-rail__item">
-                        {size === "full" ? (
-                          <TonightEventCard
-                            listing={e} rsvped={savedIds.has(e.id)}
-                            liveState={liveStateFor(e, now)}
-                            onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
-                            onOpen={listing => openEvent(listing)}
-                          />
-                        ) : (
-                          <EventRailCard
-                            listing={e} size={size} saved={savedIds.has(e.id)}
-                            liveState={liveStateFor(e, now)}
-                            onToggleSave={id => user ? toggleSave(id) : setShowSaveAuth(true)}
-                            onOpen={listing => openEvent(listing)}
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </EventsRail>
-                </section>
-              );
-            })}
-            {weekDays ? <ThisWeekRail days={weekDays} savedIds={savedIds} liveStateFor={weekLiveState} onToggleSave={weekToggleSave} onOpen={weekOpen} /> : null}
-          </div>
         ) : (
-          <div className="events-card-feed">
-          <div className="events-poster-grid">
-            {visibleGridItems.map((item) => {
-              if (item.kind === "affiliate") {
-                return (
-                  <div
-                    key={item.key}
-                    className="ds-listing-card ds-listing-card--grid pdx-glass-rebind"
-                  >
-                    {item.ad ? (
-                      <PosterAdCard
-                        ad={item.ad}
-                        brand={item.brand}
-                        style={{ height: "100%" }}
-                      />
-                    ) : (
-                      <AffiliatePosterCard
-                        brand={item.brand}
-                        style={{ height: "100%" }}
-                      />
-                    )}
-                  </div>
-                );
-              }
-              const e = item.event;
-              return (
-                <TonightEventCard
-                  key={listingKey(e)} listing={e} rsvped={savedIds.has(e.id)}
-                  liveState={pastView ? null : liveStateFor(e, now)}
-                  onToggleRsvp={id => user ? toggleSave(id) : setShowSaveAuth(true)}
-                  onOpen={listing => openEvent(listing)}
-                />
-              );
-            })}
-          </div>
-          </div>
-        )}
-
-        {!tonightBands && hasMoreVisibleItems && (
-          <div
-            ref={loadMoreRef}
-            className="events-progressive-loader"
-            role="status"
-            aria-label="Loading more events"
+          <FlyerBoard
+            events={filtered}
+            paginationKey={JSON.stringify([activeDay, activeFilters, searchQuery, sortMode])}
+            gridItems={gridItems}
+            pastEvents={pastEvents}
+            pastView={pastView}
+            onEnterPast={() => setPastView(true)}
+            onExitPast={() => setPastView(false)}
+            onOpen={(listing, rect) => openEvent(listing, rect)}
+            savedIds={savedIds}
+            onToggleSave={(id) => (user ? toggleSave(id) : setShowSaveAuth(true))}
+            now={now}
           />
         )}
 
