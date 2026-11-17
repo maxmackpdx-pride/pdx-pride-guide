@@ -1,4 +1,5 @@
 import type React from "react";
+import * as Dialog from "@radix-ui/react-dialog";
 import {
   useEffect,
   useMemo,
@@ -12,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { listingKey, type EventListing } from "@shared/multiDayEvents";
 import {
+  getMissedConnectionWindow,
   pacificCalendarDate,
   pacificTodayDate,
   parsePacificDateTime,
@@ -28,7 +30,7 @@ import PosterAdCard from "@/components/ads/PosterAdCard";
 import AffiliatePosterCard from "@/components/AffiliatePosterCard";
 import "../board/punk/push-pins.css";
 import "./FlyerBoard.css";
-import { fanSlots, isPosterActivation } from "./flyerBoardBehavior";
+import { fanSlots, isPosterActivation, connectionsByEvent } from "./flyerBoardBehavior";
 
 type GridItem = ReturnType<typeof scatterAffiliateCards>[number];
 
@@ -415,7 +417,7 @@ function PastCell({
   const dayColor = dayColorVar(dateStr);
   const accent = listing.accentColor || dayColor;
   const poster = listingPosterUrl(listing);
-  const expiry = startMs(listing) + 7 * DAY_MS;
+  const expiry = getMissedConnectionWindow(listing.dateStart, listing.dateEnd, tick)?.closesAt ?? tick;
   const left = expiry - tick;
   const wide = false;
 
@@ -458,8 +460,8 @@ function PastCell({
             <i>MIZZED CONNECTIONS</i>
             <span className="fb-pexp">
               {left > 0
-                ? `EXPIRES IN ${Math.floor(left / DAY_MS)}D ${String(Math.floor((left % DAY_MS) / 3600000)).padStart(2, "0")}H`
-                : "EXPIRED · STILL READABLE"}
+                ? `POSTING CLOSES IN ${Math.floor(left / DAY_MS)}D ${String(Math.floor((left % DAY_MS) / 3600000)).padStart(2, "0")}H`
+                : "POSTING CLOSED"}
             </span>
           </div>
           <p className="fb-pmeta">
@@ -484,21 +486,15 @@ function FanDeck({
 }) {
   const [index, setIndex] = useState(0);
   const dragX = useRef<number | null>(null);
+  const returnFocus = useRef(typeof document !== "undefined" ? document.activeElement as HTMLElement | null : null);
+  const openingListing = useRef(false);
   const total = Math.max(1, posts.length);
   const step = (dir: number) => setIndex(i => (i + dir + total) % total);
 
   useEffect(() => {
     setIndex(0);
   }, [listing]);
-  useEffect(() => {
-    const onKey = (ev: KeyboardEvent) => {
-      if (ev.key === "Escape") onClose();
-      if (ev.key === "ArrowRight") step(1);
-      if (ev.key === "ArrowLeft") step(-1);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  });
+
 
   const cards: Array<{ post: MissedConnectionPost | null; offset: number; key: string }> = [];
   if (posts.length === 0) {
@@ -510,13 +506,24 @@ function FanDeck({
   }
 
   return (
-    <div
-      className="fb-fan"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Mizzed connections for ${listing.title}`}
-      onClick={onClose}
+    <Dialog.Root open onOpenChange={open => { if (!open) onClose(); }}>
+    <Dialog.Portal>
+    <Dialog.Content asChild aria-describedby={undefined}
+      onCloseAutoFocus={ev => {
+        ev.preventDefault();
+        if (!openingListing.current) returnFocus.current?.focus();
+      }}
+      onKeyDown={ev => {
+        if (ev.target instanceof HTMLElement && ev.target.closest("input, textarea, select, [contenteditable=true]")) return;
+        if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") {
+          ev.preventDefault();
+          step(ev.key === "ArrowRight" ? 1 : -1);
+        }
+      }}
     >
+    <div className="fb-fan" onClick={ev => { if (ev.target === ev.currentTarget) onClose(); }}>
+      <Dialog.Title className="fb-fan__title">Mizzed connections for {listing.title}</Dialog.Title>
+      <button type="button" className="fb-fan__close" aria-label="Close mizzed connections" onClick={onClose}>×</button>
       <div
         className="fb-deck"
         onClick={ev => ev.stopPropagation()}
@@ -548,33 +555,35 @@ function FanDeck({
                 if (offset !== 0) setIndex((index + offset + total) % total);
               }}
             >
+              <div aria-hidden={offset !== 0 || undefined} ref={node => { if (node) node.inert = offset !== 0; }}>
               {post ? (
                 <SpottedCard
                   post={post}
                   accentColor={spottedAccent(post.id)}
-                  onReply={() => onOpenListing(listing)}
+                  onReply={() => { openingListing.current = true; onOpenListing(listing); }}
                 />
               ) : (
                 <div className="fb-deck__empty">
                   <b>No mizzed connections yet</b>
                   <p>
-                    Nobody has posted one for {listing.venueName} from this night. When they do, it
-                    lands here — and it stays readable here even after it expires.
+                    No active public connections are available for this event. Expired or removed
+                    posts are not shown.
                   </p>
                 </div>
               )}
+              </div>
             </div>
           );
         })}
       </div>
       <div className="fb-decknav" onClick={ev => ev.stopPropagation()}>
-        <button type="button" aria-label="Previous connection" onClick={() => step(-1)}>
+        <button type="button" aria-label="Previous connection" disabled={posts.length < 2} onClick={() => step(-1)}>
           ‹
         </button>
-        <span className="fb-dcount">
+        <span className="fb-dcount" aria-live="polite">
           {posts.length === 0 ? 0 : index + 1} / {posts.length}
         </span>
-        <button type="button" aria-label="Next connection" onClick={() => step(1)}>
+        <button type="button" aria-label="Next connection" disabled={posts.length < 2} onClick={() => step(1)}>
           ›
         </button>
       </div>
@@ -582,6 +591,9 @@ function FanDeck({
         {listing.title} · {listing.venueName} — tap a side card or drag to sort through them
       </p>
     </div>
+    </Dialog.Content>
+    </Dialog.Portal>
+    </Dialog.Root>
   );
 }
 
@@ -759,34 +771,8 @@ export default function FlyerBoard(props: FlyerBoardProps) {
     enabled: pastView,
     staleTime: 60_000,
   });
-  const mcByVenue = useMemo(() => {
-    const map = new Map<string, MissedConnectionPost[]>();
-    for (const post of mcQuery.data ?? []) {
-      if (post.eventId != null) {
-        const key = `event:${post.eventId}`;
-        map.set(key, [...(map.get(key) ?? []), post]);
-      }
-      const venue = (post.venueHint || post.placeName || post.eventVenue || "").trim().toLowerCase();
-      if (venue) {
-        const key = `venue:${venue}`;
-        map.set(key, [...(map.get(key) ?? []), post]);
-      }
-    }
-    return map;
-  }, [mcQuery.data]);
-  const mcFor = (e: EventListing): MissedConnectionPost[] => {
-    const byEvent = mcByVenue.get(`event:${e.id}`) ?? [];
-    const byVenue = mcByVenue.get(`venue:${e.venueName.trim().toLowerCase()}`) ?? [];
-    const seenIds = new Set<number>();
-    const out: MissedConnectionPost[] = [];
-    for (const p of [...byEvent, ...byVenue]) {
-      if (!seenIds.has(p.id)) {
-        seenIds.add(p.id);
-        out.push(p);
-      }
-    }
-    return out;
-  };
+  const mcByEvent = useMemo(() => connectionsByEvent(mcQuery.data ?? []), [mcQuery.data]);
+  const mcFor = (e: EventListing): MissedConnectionPost[] => mcByEvent.get(e.id) ?? [];
 
   const pastFlow = useMemo<FlowItem[]>(() => {
     if (!pastView) return [];
@@ -833,7 +819,7 @@ export default function FlyerBoard(props: FlyerBoardProps) {
     }
     return ids.size;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pastFlow, mcByVenue]);
+  }, [pastFlow, mcByEvent]);
 
   const renderFlow = (items: FlowItem[], past: boolean) => (
     <div className="fb-grid">

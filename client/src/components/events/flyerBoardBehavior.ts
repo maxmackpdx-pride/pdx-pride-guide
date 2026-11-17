@@ -16,3 +16,15 @@ export function fanSlots(count: number, selected: number): Array<{ index: number
   }
   return slots.sort((a, b) => a.offset - b.offset);
 }
+
+/** A venue name cannot establish which event a connection belongs to. */
+export function connectionsByEvent<T extends { id: number; eventId?: number | null }>(posts: T[]): Map<number, T[]> {
+  const map = new Map<number, T[]>();
+  for (const post of posts) {
+    if (post.eventId == null) continue;
+    const group = map.get(post.eventId) ?? [];
+    if (!group.some(existing => existing.id === post.id)) group.push(post);
+    map.set(post.eventId, group);
+  }
+  return map;
+}

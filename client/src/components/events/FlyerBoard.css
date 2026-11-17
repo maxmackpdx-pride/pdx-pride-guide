@@ -768,3 +768,32 @@
     transition: none !important;
   }
 }
+
+.fb-fan__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: var(--surface-card);
+  color: var(--text-hi);
+  font-size: 28px;
+  cursor: pointer;
+}
+.fb-fan__title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+/* The board scope also styles fixed-size cards; this root is a whole page. */
+.fb-root.boardz-punk-scope {
+  width: 100%;
+  height: auto;
+}
