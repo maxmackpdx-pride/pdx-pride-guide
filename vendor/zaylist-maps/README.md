@@ -83,3 +83,26 @@ a persisted URL camera no longer vetoes the Portland overview on boot,
 and Outzide's waypoint name labels are removed. GitHub runs 44258108571
 and 44258108636 passed the compiler checks, typechecking, map tests and
 both builds. The v1.0.23 parts remain in this folder for rollback.
+
+## v1.0.25: Tower-only light-box port (scene 03), fit-scale solver
+
+Source: `bcbb47fb373a1e877ccf94d41ba5b20f43d530d8` (immutable `v1.0.25`).
+Archive SHA-256: `9a20af1e0560bb48d5bf63db002548873805fa8d4d37b3a6b87659a294fafe51`.
+Mapz holograms ship the approved Tower light-box only (scene 03; scenes 01/02
+are out, not variants or fallbacks): the near state is the event poster sealed
+in the glass Tower slab (140x249x28, edge cage graded from the waypoint's
+assigned colour through a 48% blend into the poster's border token, white-hot
+core line, corner nodes, mid glass pane), or — for posterless events — the
+designed typographic face in the same slab, never bare text on a plate; beams
+take the sheet geometry (352 near, 276 far) and land under the furniture; the
+far state is the venue's extruded logo swapped in by a quick 540-degree spin,
+its back pre-mirrored so it never reads mirrored, and one furniture block
+(name, venue, start time, countdown only) stays up in both states. The layout
+solver gains fit-scale in both states: a hologram whose natural stack cannot
+fit above its anchor shrinks proportionally (the whole object, never
+re-typeset) down to a legibility floor instead of degrading to its far text
+state (near) or vanishing (far) — the geometry failure behind v1.0.24's
+billboards-or-nothing rendering at the default camera. Tests 429/429 on the
+tagged source; GitHub runs 44293528428 and 44293528463 passed the compiler checks,
+typechecking, map tests and both builds. The v1.0.24 parts remain in this
+folder for rollback.
