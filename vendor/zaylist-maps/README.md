@@ -124,3 +124,23 @@ the far beam width follows the placement scale. Tests 434/434 on the tagged
 source; GitHub runs 44344136151 and 44344139364 passed the compiler checks,
 typechecking, map tests and both builds. The v1.0.25 parts remain in this
 folder for rollback.
+
+## v1.0.27: Expand-crash fix, far-logo back face, preview-card legibility
+
+Source: `9e641e72bfa7bf1b810c301541a7e381cc57c362` (immutable `v1.0.27`).
+Archive SHA-256: `3d898b9c74f3f9c5f4936faad019ef407ff5c80f8a2a7d4dff5c1731a72bf6c6`.
+Expanding a map event card no longer crashes the page to black: the React
+Compiler had hoisted a useRef inlined in a returned object literal
+(useOpenCardClose, useIncidentalMap) into its memo-cache guard, so the hook
+was skipped on cache-hit re-renders and corrupted the caller's hook order;
+both hooks now call useRef as a top-level statement, a transform-level
+regression test pins that shape, and an error boundary around the expanded
+details degrades to the preview card as insurance. The far-state venue logo
+back face is a plain half-turn again — the scaleX(-1) pre-mirror
+double-flipped it, so a presented back read mirrored (the Badlands
+wordmark). Map preview card legibility: the date/time line clears the close
+chip, the flyer shows whole (contain, no fade mask), and the day-motif
+network pattern no longer sits behind the card copy. Tests 441/441 on the
+tagged source; GitHub runs 44406325296 and 44406325471 passed the compiler
+checks, typechecking, map tests and both builds. The v1.0.26 parts remain in
+this folder for rollback.
