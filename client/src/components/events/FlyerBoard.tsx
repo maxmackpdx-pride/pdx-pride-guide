@@ -298,6 +298,36 @@ type CellCommon = {
  * placeholder-proportioned jump while it loads. */
 const aspectByPosterUrl = new Map<string, number>();
 
+/** Native loading="lazy" never fires for poster images inside the board's
+ * transformed cells (measured live Nov 17, 2026: a card held fully in the
+ * viewport for 15s was never even requested). Drive poster loading from an
+ * IntersectionObserver instead: the img gets its src only when its cell
+ * nears the viewport, so off-board posters still cost no bandwidth. */
+function usePosterLoad<T extends HTMLElement>(poster: string | null) {
+  const ref = useRef<T | null>(null);
+  const [load, setLoad] = useState(false);
+  useEffect(() => {
+    if (!poster || load) return;
+    const el = ref.current;
+    if (!el || !("IntersectionObserver" in window)) {
+      setLoad(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      es => {
+        if (es.some(en => en.isIntersecting)) {
+          setLoad(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "800px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [poster, load]);
+  return [ref, load] as const;
+}
+
 function PosterCell({
   listing,
   index,
@@ -327,6 +357,7 @@ function PosterCell({
   const accent = listing.accentColor || dayColor;
   const poster = listingPosterUrl(listing);
   const [aspect, setAspect] = useState(() => (poster ? aspectByPosterUrl.get(poster) ?? 0.8 : 0.8));
+  const [cellRef, loadPoster] = usePosterLoad<HTMLDivElement>(poster);
   const tear = useMemo(() => (pinned ? tearPolygons(key) : null), [pinned, key]);
   useDemoTilt(articleRef, !pinned);
 
@@ -356,6 +387,7 @@ function PosterCell({
 
   return (
     <div
+      ref={cellRef}
       className="cell"
       style={{
         marginTop: mtop,
@@ -391,11 +423,10 @@ function PosterCell({
       >
         {tear ? <i className="trim" aria-hidden="true" /> : null}
         <div className="pc" style={{ aspectRatio: aspect }}>
-          {poster ? (
+          {poster && loadPoster ? (
             <img
               src={poster}
               alt=""
-              loading="lazy"
               decoding="async"
               onLoad={ev => {
                 const im = ev.currentTarget;
@@ -522,6 +553,7 @@ function PastCell({
   const accent = listing.accentColor || dayColor;
   const poster = listingPosterUrl(listing);
   const [aspect, setAspect] = useState(() => (poster ? aspectByPosterUrl.get(poster) ?? 0.8 : 0.8));
+  const [cellRef, loadPoster] = usePosterLoad<HTMLDivElement>(poster);
   const expiry = getMissedConnectionWindow(listing.dateStart, listing.dateEnd, tick)?.closesAt ?? tick;
   const parts = countdownParts(expiry - tick);
   const pill =
@@ -529,7 +561,7 @@ function PastCell({
       ? `POSTING OPEN · ${parseInt(parts.d, 10)}D ${parseInt(parts.h, 10)}H LEFT`
       : "EXPIRED · STILL READABLE";
   return (
-    <div className={`cell pcell${isSource ? " source" : ""}`}>
+    <div ref={cellRef} className={`cell pcell${isSource ? " source" : ""}`}>
       <article
         ref={articleRef}
         className="poster past pdx-glass-rebind"
@@ -549,11 +581,10 @@ function PastCell({
         }}
       >
         <div className="pc" style={{ aspectRatio: aspect }}>
-          {poster ? (
+          {poster && loadPoster ? (
             <img
               src={poster}
               alt=""
-              loading="lazy"
               decoding="async"
               onLoad={ev => {
                 const im = ev.currentTarget;
@@ -1219,7 +1250,7 @@ export default function FlyerBoard({
                       transform: `translateY(-50%) rotate(${PILE_SPOTS[i][1]}deg)`,
                     }}
                   >
-                    <img src={listingPosterUrl(e)} alt="" loading="lazy" />
+                    <img src={listingPosterUrl(e)} alt="" />
                   </span>
                 ))}
                 <div className="magcard">
