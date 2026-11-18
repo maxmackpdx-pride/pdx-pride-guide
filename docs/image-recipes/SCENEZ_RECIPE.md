@@ -10,6 +10,18 @@ Start with the exact project logo/brand asset. Search official community pages, 
 
 The current PGMC model explicitly labels the piano close-up **illustrative**, not a documented PGMC instrument. Preserve that disclosure. Q Center's legacy community graphic remains distinct from its reviewed directory-logo slot.
 
+## Latest no-location image recipe: November 16
+
+For a SceneZ club without a location, use **a general representative photo for the club, with no text in the photograph, and overlay the enhanced logo already on file**. Do not invent a venue or address. This owner direction is the image recipe for those cards, not a replacement for PlaceZ storefronts or OutZide landscapes. Preserve the exact enhanced logo as a separate asset. Use representative labeling when the image is illustrative rather than documentary.
+
+## Accepted family direction and boundaries
+
+The typography-focused Bearracuda concept was accepted for **Party Collectives**, not automatically every community category. Reuse that compact PlaceZ-derived anatomy and tactile torn-paper branding in each collective's actual brand color, with a complementary secondary accent. Other community types use their verified category token. Match current PlaceZ typography; the working specification was Barlow body and Barlow Condensed titles/actions, to be verified against current source.
+
+Wide art remains full-bleed left to right with its established gradient. Preserve exact existing shared heart, visible circle, touch target, edge and card geometry. If available space requires smaller display, uniformly scale the complete card and contents; do not independently narrow/reflow the card or change its artwork crop to fit. Current owner-approved component changes supersede historical snapshots.
+
+The accepted SceneZ page wordmark direction used BoardZ-inspired angular/chamfered block lettering with Xerox texture, white SCENE and orange-outline Z, no pushpins. The approved proof was a generated raster direction, not proof of an exact final font/vector or a production release. Page-level leather-pride/nightlife influences are not permission to impose adult imagery on every community.
+
 ## Family appearance without flattening identity
 
 Use the approved SceneZ collage family: layered physical paper, grunge/Xerox texture, editorial typography and fine circuit/traces. Keep authentic logo and art as separate layers. Reuse approved party/pride collage assets where the current model selects them; do not regenerate their logos or convert every community into a fabricated building.
