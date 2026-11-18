@@ -66,3 +66,20 @@ configuration covers Mapz, Outzide, Afterz, Boardz and ZayDark plus future React
 source. GitHub runs 43381530289 and 43381530411 passed release packaging,
 real page/pin transform checks, typechecking, map tests and both builds.
 The host lock records compiler provenance; live deployment must still be verified.
+
+## v1.0.24: Light-box holograms, bolder waypoint glyphs, Outzide Portland start
+
+Source: `022229e3c413c718d2ac766dfb643c14db750f69` (immutable `v1.0.24`).
+Archive SHA-256: `3689905795c31ab032b9694b30fa641b0975204a2cad41c0619f5d248c220aa7`.
+Mapz holograms are the winning six-lightbox system: near, the poster is
+sealed in a glass light-box (edge cage graded from the waypoint's assigned
+colour into the poster's own border token, a mid glass pane with its own
+cross-glitch, glitch/scanline signal layers); at far zoom it spins 540
+degrees into the venue's extruded real logo — no disc — and the four-line
+furniture (name, venue, start time, countdown; never a date or weekday)
+stays up in both states. Waypoint glyphs are bolder (icon stroke 0.7 to
+1.1, still centred on the kit shield). Outzide always starts in Portland:
+a persisted URL camera no longer vetoes the Portland overview on boot,
+and Outzide's waypoint name labels are removed. GitHub runs 44258108571
+and 44258108636 passed the compiler checks, typechecking, map tests and
+both builds. The v1.0.23 parts remain in this folder for rollback.
