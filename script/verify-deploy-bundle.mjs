@@ -18,6 +18,8 @@ const jsFile = jsFiles.join(", ");
 const js = jsFiles.map((f) => readFileSync(join(assetsDir, f), "utf8")).join("\n");
 const css = readFileSync(join(assetsDir, cssFile), "utf8");
 const sourceCss = readFileSync("client/src/index.css", "utf8");
+const eventsJs = jsFiles.filter(f => /^Events-.*\.js$/.test(f)).map(f => readFileSync(join(assetsDir, f), "utf8")).join("\n");
+const eventsCss = assets.filter(f => /^Events-.*\.css$/.test(f)).map(f => readFileSync(join(assetsDir, f), "utf8")).join("\n");
 
 // A cached map document must keep every relative import and logo in its version directory.
 const flightBase = JSON.parse(readFileSync("dist/public/home-flight-manifest.json", "utf8")).base;
@@ -36,7 +38,7 @@ const checks = {
     const route = `/home-globe/${name}`, built = join("dist/public", route);
     return js.includes(route) && existsSync(built) && readFileSync(`client/public${route}`).equals(readFileSync(built));
   }),
-  posterGrid: js.includes("events-poster-grid"),
+  flyerBoard: eventsJs.includes("fbx-content") && eventsJs.includes("PLAN AHEAD") && eventsCss.includes(".fbx .poster"),
   noEventBoardCard: !js.includes("EventBoardCard"),
   noLegacyPageHeroCss: !sourceCss.includes(".page-hero") && !sourceCss.includes(".zine-hero"),
   noRainbowButtonHover: !sourceCss.includes("linear-gradient(90deg, #E40303"),
