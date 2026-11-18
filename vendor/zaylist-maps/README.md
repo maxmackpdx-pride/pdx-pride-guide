@@ -106,3 +106,21 @@ billboards-or-nothing rendering at the default camera. Tests 429/429 on the
 tagged source; GitHub runs 44293528428 and 44293528463 passed the compiler checks,
 typechecking, map tests and both builds. The v1.0.24 parts remain in this
 folder for rollback.
+
+## v1.0.26: Tower adapts to the poster; far-state distance falloff
+
+Source: `5a0595c6b82c30b8c0ce1f95ab97546cbd47e527` (immutable `v1.0.26`).
+Archive SHA-256: `cda8a743e92cdb8be36b5f6bab16f97412cafec19809b9e71737c6f7e45e6e93`.
+The Tower light-box now takes each poster's own proportions: poster aspect is
+measured from the image itself at runtime (the events payload carries no
+dimensions) and the slab is derived at a held area budget with clamped
+width/height, so a landscape poster fills a wide, shorter slab with no
+letterbox bands, a portrait poster stays tower-like, and posterless events
+keep the Tower's portrait form with the designed typographic face. The solver
+collides and fit-scales on the per-poster box. Past the spin band the far logo
+and its beam scale down progressively with distance until the solver releases
+the hologram back to its waypoint; far forms render at their solved scale and
+the far beam width follows the placement scale. Tests 434/434 on the tagged
+source; GitHub runs 44344136151 and 44344139364 passed the compiler checks,
+typechecking, map tests and both builds. The v1.0.25 parts remain in this
+folder for rollback.
