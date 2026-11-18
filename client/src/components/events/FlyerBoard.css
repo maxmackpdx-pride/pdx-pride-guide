@@ -369,7 +369,8 @@
   left: 0; right: 0; bottom: 0;
   z-index: 3;
   padding: 10cqw 4cqw 4cqw;
-  background: linear-gradient(180deg, transparent, rgba(5, 5, 6, .66) 30%, rgba(5, 5, 6, .93) 68%);
+  /* Finish the fade within the top padding so every footer row has a solid backing. */
+  background: linear-gradient(to bottom, transparent, var(--z-black) 10cqw);
 }
 .fbx .pstart {
   display: flex;

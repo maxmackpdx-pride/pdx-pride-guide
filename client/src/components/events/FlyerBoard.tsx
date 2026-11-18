@@ -330,7 +330,16 @@ function PosterCell({
   const tear = useMemo(() => (pinned ? tearPolygons(key) : null), [pinned, key]);
   useDemoTilt(articleRef, !pinned);
 
-  const cd = countdownParts(startMs(listing) - tick);
+  const start = startMs(listing);
+  const end = parsePacificDateTime(listing.dateEnd);
+  const running = start <= tick && (
+    (end !== null && tick < end) ||
+    (!listing.dateEnd && dateStr === pacificTodayDate(tick))
+  );
+  const countdownLabel = running ? (end === null ? "ON NOW" : "ENDS IN") : "STARTS IN";
+  const cd = countdownLabel === "ON NOW" ? null : countdownParts(
+    running && end !== null ? end - tick : start - tick,
+  );
   const age = AGE_LABEL[listing.ageRequirement ?? ""] ?? "";
   const meta = `${eventDateLabel(listing.dateStart)} · ${eventTimeLabel(listing.dateStart)} · ${listing.venueName}${age ? ` · ${age}` : ""}`;
   const price = ADMISSION_LABEL[listing.admission ?? "UNKNOWN"] ?? "PRICE NOT CONFIRMED";
@@ -418,12 +427,14 @@ function PosterCell({
           </div>
           <div className="pfoot">
             <div className="pstart">
-              <span className="ps-lab">STARTS IN</span>
-              <span className="ps-nums">
-                <span><b>{cd.d}</b><i>DAYS</i></span>
-                <span><b>{cd.h}</b><i>HRS</i></span>
-                <span><b>{cd.m}</b><i>MIN</i></span>
-              </span>
+              <span className="ps-lab">{countdownLabel}</span>
+              {cd && (
+                <span className="ps-nums">
+                  <span><b>{cd.d}</b><i>DAYS</i></span>
+                  <span><b>{cd.h}</b><i>HRS</i></span>
+                  <span><b>{cd.m}</b><i>MIN</i></span>
+                </span>
+              )}
             </div>
             <div className="pactions">
               <span className="pgigz"><b>–</b><i>GIGZ</i></span>
