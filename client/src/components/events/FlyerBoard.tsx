@@ -279,7 +279,7 @@ function Hardware({ pinned, seedKey, dayColor, rot }: { pinned: boolean; seedKey
       aria-hidden="true"
     >
       {pinned ? (
-        <span className="pdx-glass-rebind" style={{ "--c": dayColor } as CSSProperties}>
+        <span className="boardz-punk-scope pdx-glass-rebind" style={{ "--c": dayColor } as CSSProperties}>
           <BoardPushPin postKey={seedKey} />
         </span>
       ) : (
@@ -489,7 +489,7 @@ function DayFlag({ dateStr }: { dateStr: string }) {
       >
         <span className="vflag-cloth" />
         <span className="vflag-pin">
-          <span className="pdx-glass-rebind" style={{ "--c": dayColorVar(dateStr) } as CSSProperties}>
+          <span className="boardz-punk-scope pdx-glass-rebind" style={{ "--c": dayColorVar(dateStr) } as CSSProperties}>
             <BoardPushPin postKey={`flag-${dateStr}`} />
           </span>
         </span>
@@ -1036,7 +1036,7 @@ export default function FlyerBoard({
   const mizzCount = detailQuery.data?.missedConnections?.length;
 
   return (
-    <div className="fbx boardz-punk-scope" ref={rootRef}>
+    <div className="fbx" ref={rootRef}>
       <div className="bgfx" aria-hidden="true">
         <div className="bgfx-base" />
         <div className="bgfx-streaks">
@@ -1130,7 +1130,7 @@ export default function FlyerBoard({
                 <div className="board-h">
                   <span className="livedot" />
                   <h3>HAPPENING NOW</h3>
-                  <span className="bcount">ON RIGHT NOW · {todayLabel}</span>
+                  <span className="bcount">{todayLabel}</span>
                 </div>
                 <div className="rail">{visibleNow.map(renderRailCell)}</div>
               </div>
@@ -1140,7 +1140,7 @@ export default function FlyerBoard({
                 <div className="board-h">
                   <span className="tick-y" />
                   <h3>HAPPENING LATER</h3>
-                  <span className="bcount">STILL TO COME TODAY · SAME DAY, LATER ON</span>
+                  <span className="bcount">LATER TODAY</span>
                 </div>
                 <div className="rail">{visibleLater.map(renderRailCell)}</div>
               </div>

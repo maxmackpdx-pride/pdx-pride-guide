@@ -186,6 +186,8 @@
 }
 
 /* ---------- hardware layer ---------- */
+/* Borrow the Boardz pin artwork without introducing its fixed card box. */
+.fbx .boardz-punk-scope { display: contents; }
 .fbx .hw { position: absolute; left: 0; right: 0; top: 0; height: 0; z-index: 20; pointer-events: none; }
 .fbx .cell:hover .hw { z-index: 20; }
 .fbx .hw-pin { transform-origin: 50% -1cqw; }
@@ -983,6 +985,27 @@
     transform: translate(-50%, -46%) perspective(1100px) rotateY(-86deg) rotateX(5deg) scale(.94);
   }
   .fbx .ocard.on { transform: translate(-50%, -50%) perspective(1100px) rotateY(0deg) rotateX(0deg) scale(1); }
+}
+
+@media (max-width: 767px) {
+  .fbx { --pw: clamp(216px, 65vw, 296px); }
+
+  .fbx .board-h {
+    display: grid;
+    grid-template-columns: 9px minmax(0, 1fr);
+    gap: 2px 10px;
+  }
+  .fbx .board-h .bcount { grid-column: 2; }
+
+  .fbx .rail {
+    gap: 12px;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 14px;
+  }
+  .fbx .rail .cell {
+    margin-left: 0;
+    scroll-snap-align: start;
+  }
 }
 
 /* Let the board's end scroll clear of the mobile dock. */

@@ -64,6 +64,7 @@ test("fan uses modal focus management and keeps expired connections readable", (
 });
 
 test("whole board escapes the shared fixed-size card dimensions", () => {
-  assert.match(css, /\.fb-root\.boardz-punk-scope\s*\{[^}]*width:\s*100%;[^}]*height:\s*auto;/);
-  assert.match(source, /<Dialog.Portal>/);
+  assert.match(source, /<div className="fbx" ref=\{rootRef\}>/);
+  assert.match(css, /\.fbx \.boardz-punk-scope\s*\{\s*display:\s*contents;/);
+  assert.match(source, /createPortal\([\s\S]*?className="fbx fbx-overlay"[\s\S]*?document\.body,/);
 });
