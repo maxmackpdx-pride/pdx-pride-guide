@@ -2,6 +2,18 @@
 
 Saved 2026-11-18. This preserves the distinctions between three existing pipelines; it does not authorize a batch, regenerate approved assets, or deploy.
 
+## Latest owner directions: November 13–16
+
+These refine the historical pipeline summaries below:
+- Selected direction: **Topographic Field Guide**. First find an openly reusable real photograph of the actual destination, enhance it to match the established set, then apply the latest card treatment. Public availability or the phrase “fair use image” is not itself reuse permission.
+- A modest camera-angle or lens adjustment is intended; recognizable geography remains protected.
+- **All images should share the same time of day, but Tucker has not selected the exact hour.** Warm late afternoon/low sun was an assistant proposal, not an approved decision. Do not silently declare that the batch lighting preset.
+- Full bleed at the top and both sides; torn lower silhouette with real exterior transparency. Mesh follows trees, rocks and mountains; topographical lines blend behind the enhanced real photograph rather than replacing it with generic geometry.
+- Water-movement/ripple lines use the **existing cyan token**, not a guessed hex.
+- Actual OutZide orange is the primary edge color; the destination-type waypoint color is the bold secondary. This is OutZide-specific, not a global PlaceZ/SceneZ rule.
+- Use the existing correct location-type waypoint at the top-left. Keep approved shared heart/edge anatomy and current canonical card proportions. A separate waypoint layer is an implementation interpretation, not permission to redraw the symbol.
+- National Park typeface was an offered option, not a final selected font. Preview reports do not establish physical-iPhone testing, acceptance or production rollout.
+
 ## Native screenprint artwork: current source-backed recovery
 
 Sources: [approved native credits](../../client/public/outzide-native/batch1/credits.json), [native page](../../client/src/pages/OutzidePlacesPage.tsx), and [byte-preservation/native crop tests](../../script/outz-approved-small-presentation.test.mjs). The credits describe the actual delivered treatment as **AI-assisted Xerox screenprint adaptation**, with orange/category-color accents, terrain-conforming mesh, water contours where present, and a torn-paper edge.
