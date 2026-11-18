@@ -5,6 +5,7 @@ import { seedOwnerRequestedPlaces20261013 } from "./seedOwnerRequestedPlaces2026
 import outzMapCatalog from "@shared/outzMapCatalog";
 import { seedDiscoveredQueerEvents20260928 } from "./seedDiscoveredQueerEvents20260928";
 import { seedPosterAudit20260928 } from "./seedPosterAudit20260928";
+import { seedQCenterEventImages20261118 } from "./seedQCenterEventImages20261118";
 import { seedHawksReviewedTimes20260928 } from "./seedHawksReviewedTimes20260928";
 import { seedHawksThroughApril2027 } from "./seedHawksThroughApril2027";
 import { seedApprovedEvents20260928 } from "./seedApprovedEvents20260928";
@@ -8568,6 +8569,10 @@ WHERE id = 53 AND lower(trim(name)) = 'bowery bagels'
   recordBootPhaseEventChanges(
     { actor: "seed:poster-audit-20260928", reason: "Boot seeder: poster audit 2026-09-28" },
     () => seedPosterAudit20260928(sqlite),
+  );
+  recordBootPhaseEventChanges(
+    { actor: "seed:q-center-event-images-20261118", reason: "Q Center event images reviewed under owner photo rule" },
+    () => seedQCenterEventImages20261118(sqlite),
   );
   // Flyer rules (Oct 2026): generated day posters are retired. A stored stand-in path
   // means "no flyer", so clear it; cards draw the day motif instead. Real flyers untouched.

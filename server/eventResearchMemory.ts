@@ -1093,6 +1093,7 @@ export function getEventResearchSourceMemory() {
     },
     flyerAuditPlaybook: {
       purpose: "Use flyer OCR as supporting evidence, never as sole truth.",
+      sourceEventImage: "Use the image the venue or host provides for the exact occurrence, including a text-free photo; verify the event from its source page and check any visible image text for conflicts.",
       verifyFields: [
         "event title",
         "date",

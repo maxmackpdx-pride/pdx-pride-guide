@@ -1,9 +1,10 @@
 import type { NudeBeachTab } from "./nudeBeaches";
 
 /**
- * Flyer rules
- * - A real promoter flyer is the only image an event shows.
- * - No flyer means no image: cards draw the event's day motif in the flyer slot
+ * Event artwork rules
+ * - Use the artwork the venue or host provides for the occurrence, including a
+ *   photo without flyer text when that is the image they chose for the event.
+ * - No event artwork means no image: cards draw the event's day motif in the flyer slot
  *   (client/src/components/events/DayMotif.tsx). The old generated day posters
  *   (/placeholders/event-day-*.svg, event-placeholder-*.svg) are retired.
  * - Rows saved with one of those retired paths still count as "no flyer".
@@ -15,7 +16,7 @@ export function isEventPlaceholderUrl(url: string | null | undefined): boolean {
   return /\/placeholders\/event-(placeholder|day)-/i.test(url);
 }
 
-/** The event's real flyer, or null when it has none (render the day motif instead). */
+/** The event's source-provided artwork, or null when it has none. */
 export function resolveEventPosterUrl(
   _eventId: number,
   posterImageUrl: string | null | undefined,

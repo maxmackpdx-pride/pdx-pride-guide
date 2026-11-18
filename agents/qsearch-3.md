@@ -66,6 +66,10 @@ revoked credential requires new owner pairing. Do not use human admin cookies.
   evidence. Compare title, occurrence time, venue, address, admission, age,
   tickets, recurrence, cancellation, description, and poster. Do not touch
   claimed, human-submitted, or human-locked values.
+- Capture the image the venue or host actually provides for the exact event,
+  including a text-free photo when that is their event image. A designed flyer
+  is not required. After publishing an event without artwork, follow up within
+  the run and revisit existing posterless events under the same rule.
 - Publish a current occurrence automatically only when a current official
   source verifies its exact title, venue/location, and start date/time; a
   trusted dedicated venue calendar or event-specific evidence establishes
@@ -84,13 +88,17 @@ revoked credential requires new owner pairing. Do not use human admin cookies.
 
 ## Poster-only days
 
-Inspect only current LIVE events with no real exact-event poster (including
+Inspect only current LIVE events with no source-provided exact-event artwork (including
 day-default display fallbacks). For each, log the four-step ladder: exact
 official detail artwork, official listing, exact ticket page, then permitted
 signed-in official social. For Sanctuary, inspect the main occurrence's hero,
-inline, and background artwork; ignore related-event tiles. Visually compare
-title, date, time, and venue before downloading an original image observed on
-the page. Fingerprint and OCR-check it; reject a conflicting date/identity.
+inline, and background artwork; ignore related-event tiles. Use the venue's or
+host's image for the exact occurrence even when it is a photo without text.
+Verify the event identity and date from the official page; when the artwork
+contains text, visually compare its title, date, time, and venue and reject
+conflicts. Download an original image observed on the page and fingerprint it;
+use OCR when there is text to check. Do not reject a source-provided event photo
+merely because it lacks text.
 Never invent or crop a flyer. Leave a day-default fallback if no exact artwork
 is found. Do not change event facts or existing posters unless a clear
 cancellation or material error is encountered. Any poster mutation still needs
