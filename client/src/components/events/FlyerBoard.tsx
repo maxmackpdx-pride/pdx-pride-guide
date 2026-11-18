@@ -303,7 +303,7 @@ const aspectByPosterUrl = new Map<string, number>();
  * viewport for 15s was never even requested). Drive poster loading from an
  * IntersectionObserver instead: the img gets its src only when its cell
  * nears the viewport, so off-board posters still cost no bandwidth. */
-function usePosterLoad<T extends HTMLElement>(poster: string | null) {
+function usePosterLoad<T extends HTMLElement>(poster: string | null | undefined) {
   const ref = useRef<T | null>(null);
   const [load, setLoad] = useState(false);
   useEffect(() => {
