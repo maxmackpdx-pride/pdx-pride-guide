@@ -1,0 +1,18 @@
+{
+  "verified_date": "2026-11-11",
+  "source": "PlaceZ-All-Formats-Dots-Kit after the user-approved footer and heart spacing update",
+  "status": "Five completed examples establish the shared baseline; Pizza Thief/#6 remains in progress.",
+  "files": {
+    "PlacezQuickCard.css": {
+      "source_path": "src/PlacezQuickCard.css",
+      "bytes": 29257,
+      "sha256": "f9ed814a9afcfe822027829812913f187c6e36f8a5f9301366f39cdc39e25db7"
+    },
+    "preview.css": {
+      "source_path": "src/preview.css",
+      "bytes": 3566,
+      "sha256": "fe08b3574601b0e7c2bb343ab3f21a49fded2cdfa6fa699475ac05e5e9703ccc"
+    }
+  },
+  "export_status": "Text provenance only; referenced CSS not copied or verified in this export"
+}
