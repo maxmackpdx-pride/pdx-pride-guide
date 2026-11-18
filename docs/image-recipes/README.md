@@ -10,6 +10,9 @@ Saved for Tucker on 2026-11-18 so Codex can pick up PlaceZ, OutZide and SceneZ w
 - [OutZide](OUTZIDE_RECIPE.md): native screenprint workflow, separate renderer-blend contract, and clearly separated older HDR pipeline.
 - [SceneZ](SCENEZ_RECIPE.md): source-grounded image/logo handoff, current assets and brand choices, with missing-preset limits explicit.
 
+- [PlaceZ reference index](PLACEZ_REFERENCE_INDEX.md): text-only visual checkpoint catalog and public source credits, with private/reuse limits intact.
+- [PlaceZ historical format contract](PLACEZ_FORMAT_SNAPSHOT.md) and [kit provenance](PLACEZ_KIT_PROVENANCE.json): exact recorded measurements/hashes; referenced CSS and image binaries are not included.
+
 ## What is and is not saved
 
 These are recipes and source pointers, not a new batch, a production rollout, a full asset archive or approval to publish photographs. No generated images, private reference files, credentials or personal records are included. No map/shader/header implementation is changed. Recent decorative header wallpapers are a different deliverable from these venue/destination/community photo treatments.
