@@ -19,6 +19,7 @@ import {
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import {
   eventLink,
+  isPublicListing,
   occurrenceDate,
   parseEventLink,
   productionOrigin,
@@ -130,11 +131,11 @@ export default function App() {
   async function loadFeed() {
     setFeedError("");
     try {
-      const data = await api("/api/events");
+      const data = await api("/api/events?visibility=public");
       if (!Array.isArray(data)) throw new Error("Unexpected event feed.");
       const today = occurrenceDate(new Date().toISOString());
       const upcoming = data.filter(
-        (row) => occurrenceDate(row.dateEnd || row.dateStart) >= today,
+        (row) => isPublicListing(row) && occurrenceDate(row.dateEnd || row.dateStart) >= today,
       );
       upcoming.sort((a, b) => a.dateStart.localeCompare(b.dateStart));
       setRows(upcoming);
@@ -149,12 +150,12 @@ export default function App() {
     setDetailError("");
     const token = ++detailEpoch.current;
     api(
-      `/api/events/${choice.id}` +
-        (choice.date ? `?date=${encodeURIComponent(choice.date)}` : ""),
+      `/api/events/${choice.id}?visibility=public` +
+        (choice.date ? `&date=${encodeURIComponent(choice.date)}` : ""),
     )
       .then((row) => {
         if (token === detailEpoch.current) {
-          if (choice.date && occurrenceDate(row.dateStart) !== choice.date)
+          if (!isPublicListing(row) || (choice.date && occurrenceDate(row.dateStart) !== choice.date))
             throw new Error("That event occurrence is unavailable.");
           setEvent(row);
         }

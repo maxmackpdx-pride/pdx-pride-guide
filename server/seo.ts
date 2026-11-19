@@ -337,6 +337,14 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     title: "OUR PLACEZ | Zaylist",
     description: "Queer-owned and queer-friendly bars, restaurants, cafes, venues, and services in Portland.",
   },
+  "/scenez": {
+    title: "SceneZ | Zaylist",
+    description: "Find Portland communities, explore memberships, and follow their updates.",
+  },
+  "/outzide/places": {
+    title: "OutZide destinations | Zaylist",
+    description: "Explore outdoor destinations, conditions, and community trip boards.",
+  },
   "/z": {
     title: "Z/LISTS | Zaylist",
     description: "Portland queer communities with real memberships, rules, moderators, posts, and related events.",
@@ -561,7 +569,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
           ? "/dashboard"
           : pathKey.startsWith("/the-hauz") || pathKey.startsWith("/hausing")
             ? "/the-hauz"
-            : pathKey.startsWith("/outzide/")
+            : pathKey.startsWith("/outzide/") && !ROUTE_SEO[pathKey]
               ? "/outzide"
               : pathKey;
   const routeSeo = ROUTE_SEO[routeKey] || ROUTE_SEO["/"];

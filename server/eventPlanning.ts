@@ -1,5 +1,6 @@
 import type Database from "better-sqlite3";
 import type { Express, RequestHandler, Response } from "express";
+import { hasPublicEventFlags } from "@shared/publicEventVisibility";
 import type { Event } from "@shared/schema";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
 import {
@@ -182,7 +183,7 @@ export function registerEventPlanning(
     )
       return undefined;
     const event = storage.getEvent(id);
-    if (!event || event.status !== "LIVE" || !visible(event)) return undefined;
+    if (!event || event.status !== "LIVE" || !hasPublicEventFlags(event) || !visible(event)) return undefined;
     return expandMultiDayEvents([event]).find(
       (e) => pacificCalendarDate(e.dateStart) === date,
     );

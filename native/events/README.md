@@ -1,6 +1,6 @@
 # Zaylist Events for iOS and Android
 
-This Expo prototype renders native poster rows, event details, account forms, buttons and sharing controls. It uses the same public event records, cookie-backed sign-in, private event saves and attendance routes as the website. The mobile package and lockfile are independent of the website.
+This Expo prototype renders native poster rows, event details, account forms, buttons and sharing controls. Browse and detail request the explicitly public feed and reject rows with private or missing visibility flags. The prototype uses the website’s cookie-backed sign-in, private event saves and attendance routes. The mobile package and lockfile are independent of the website.
 
 ## Run
 

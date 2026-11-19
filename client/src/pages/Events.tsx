@@ -40,6 +40,7 @@ import Schedule from "@/pages/Schedule";
 import ScheduleCard from "@/components/ScheduleCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePageSeo } from "@/hooks/usePageSeo";
+import { hasPublicEventFlags } from "@shared/publicEventVisibility";
 import { eventPath } from "@shared/eventSlug";
 import { scatterAffiliateCards } from "@/lib/affiliateCards";
 import { Grid, ChevronDown, ChevronRight, CalendarDays, Map as MapIcon, MapPin, SlidersHorizontal } from "lucide-react";
@@ -421,14 +422,15 @@ export default function Events() {
   }, []);
 
   const { data: events = [], isLoading, isError, refetch } = useQuery<EventListing[]>({
-    queryKey: ["/api/events"],
-    queryFn: () => apiRequest("GET", "/api/events").then(r => r.json()),
+    queryKey: ["/api/events", "public-browse"],
+    queryFn: () => apiRequest("GET", "/api/events?visibility=public").then(r => r.json()),
+    select: rows => rows.filter(hasPublicEventFlags),
     staleTime: 60_000,
     refetchOnMount: "always",
   });
 
   const { data: routeEvent, error: routeError, refetch: refetchRouteEvent } = useQuery<Event>({
-    queryKey: ["/api/events", routeEventId, routeDay, routeDate],
+    queryKey: ["/api/events", routeEventId, routeDay, routeDate, user?.id ?? null],
     queryFn: () => apiRequest("GET", `/api/events/${routeEventId}${routeDate ? `?date=${encodeURIComponent(routeDate)}` : routeDay ? `?day=${encodeURIComponent(routeDay)}` : ""}`).then(r => r.json()),
     enabled: routeEventId != null && Number.isFinite(routeEventId),
   });
@@ -472,7 +474,7 @@ export default function Events() {
     // Keep an already-open modal for this id (set optimistically on click)
     // rather than clearing or replacing it while routeEvent settles.
     setSelectedEvent(prev => {
-      if (prev && prev.id === routeEventId && (!routeDate || pacificCalendarDate(prev.dateStart) === routeDate) && (!routeDay || prev.dayOfWeek === routeDay)) return prev;
+      if (prev && hasPublicEventFlags(prev) && prev.id === routeEventId && (!routeDate || pacificCalendarDate(prev.dateStart) === routeDate) && (!routeDay || prev.dayOfWeek === routeDay)) return prev;
       return routeEvent ?? null;
     });
   }, [routeEventId, routeDay, routeDate, routeMatch, events, routeEvent]);

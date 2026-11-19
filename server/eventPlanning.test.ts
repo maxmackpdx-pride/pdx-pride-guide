@@ -34,6 +34,8 @@ test("planning is occurrence-, owner-, participant- and host-scoped", async (t) 
   const dbEvent = {
     id: 10,
     status: "LIVE",
+    isPublic: true,
+    isPrivate: false,
     title: "First",
     venueName: "Community room",
     dayOfWeek: "WED",

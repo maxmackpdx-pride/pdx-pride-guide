@@ -42,7 +42,7 @@ test("native clients use the real session, private save and public attendance co
   ).id;
   sqlite
     .prepare(
-      "UPDATE events SET status='LIVE', title='Fixture open studio',date_start=?,date_end=?,claimed_by=NULL,submitted_by=NULL WHERE id=?",
+      "UPDATE events SET status='LIVE', is_public=1, is_private=0, title='Fixture open studio',date_start=?,date_end=?,claimed_by=NULL,submitted_by=NULL WHERE id=?",
     )
     .run("2099-07-01T16:00:00", "2099-07-02T18:00:00", eventId);
   sqlite.prepare("DELETE FROM event_hosts WHERE event_id=?").run(eventId);
@@ -162,6 +162,38 @@ test("native clients use the real session, private save and public attendance co
     (await call(other.id, "DELETE", route + "/attendance")).status,
     200,
   );
+  const visibility = sqlite.prepare("UPDATE events SET is_public=?, is_private=? WHERE id=?");
+  for (const [published, privateFlag] of [[0, 0], [1, 1]]) {
+    visibility.run(published, privateFlag, eventId);
+    const filteredFeed = await call(0, "GET", "/api/events?visibility=public");
+    assert.equal(filteredFeed.status, 200);
+    assert.ok(!filteredFeed.data.some((e: { id: number }) => e.id === eventId));
+    const legacyFeed = await call(0, "GET", "/api/events");
+    assert.ok(legacyFeed.data.some((e: { id: number }) => e.id === eventId));
+    for (const viewer of [0, other.id, member.id]) {
+      assert.equal((await call(viewer, "GET", route + "?visibility=public")).status, 404);
+      assert.equal((await call(viewer, "GET", route + "?visibility=public&date=" + date)).status, 404);
+      assert.equal((await call(viewer, "GET", planning)).status, 404);
+    }
+    assert.equal((await call(other.id, "GET", route + "?date=" + date)).status, 404);
+    assert.equal((await call(0, "GET", route + "/detail?date=" + date)).status, 404);
+    assert.equal((await call(member.id, "GET", route + "?date=" + date)).status, 200);
+    assert.deepEqual((await call(member.id, "GET", route + "/detail?date=" + date)).data.gigs, []);
+    assert.equal((await call(member.id, "POST", "/api/gigs", gig)).status, 400);
+    sqlite.prepare("UPDATE users SET sub_admin=1 WHERE id=?").run(other.id);
+    assert.equal((await call(other.id, "GET", route + "?date=" + date)).status, 200);
+    assert.equal((await call(other.id, "GET", route + "?visibility=public&date=" + date)).status, 404);
+    sqlite.prepare("UPDATE users SET sub_admin=0 WHERE id=?").run(other.id);
+    assert.equal((await call(other.id, "GET", route + "?date=" + date)).status, 404);
+  }
+  visibility.run(1, 0, eventId);
+  const publicFeed = await call(0, "GET", "/api/events?visibility=public");
+  assert.ok(publicFeed.data.some((e: { id: number }) => e.id === eventId));
+  const { getTuckerHostedArchiveRow } = await import("../shared/tuckerHostedArchive");
+  const archived = getTuckerHostedArchiveRow(-900001)!;
+  const archiveRoute = "/api/events/" + archived.id + "?date=" + archived.dateStart.slice(0, 10);
+  assert.equal((await call(0, "GET", archiveRoute)).status, 200);
+  assert.equal((await call(0, "GET", archiveRoute + "&visibility=public")).status, 404);
   assert.equal((await call(member.id, "DELETE", route + "/save")).status, 200);
   assert.equal((await call(member.id, "POST", "/api/auth/logout")).status, 200);
   assert.equal(

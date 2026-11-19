@@ -20,6 +20,7 @@ import { registerBoardArchiveRoutes } from "./boardArchiveRoutes";
 import { readBoardMotif, saveBoardMotif, validateBoardMotif } from "./boardMotifs";
 import { registerBoardPlacement } from "./boardMapPlacement";
 import { homeCatalogCounts } from "./homeStats";
+import { hasPublicEventFlags } from "@shared/publicEventVisibility";
 import { registerEventPlanning } from "./eventPlanning";
 import { createEventSaves } from "./eventSaves";
 import { createBoardSaves, isSavedBoard } from "./boardSaves";
@@ -1148,6 +1149,16 @@ function sessionIsAdmin(req: any): boolean {
   return markAdminSessionForUser(req, user);
 }
 
+// Dated public links and the native public read must never surface a private listing.
+function mayReadEventDetail(req: express.Request, event: Event): boolean {
+  const publicOnly = req.query.visibility === "public";
+  const staff = !publicOnly && sessionIsAdmin(req);
+  if (!staff && (event.status !== "LIVE" || !isPublicEventVisibleUnderPrideCap(event))) return false;
+  if (!publicOnly && req.query.date === undefined) return true;
+  if (hasPublicEventFlags(event)) return true;
+  return !publicOnly && (staff || (!!req.session?.userId && storage.isUserEventHost(event.id, req.session.userId)));
+}
+
 function getAdminActorUserId(req: any): number | null {
   const sessionUser = req.session?.userId ? storage.getUserById(req.session.userId) : null;
   if (sessionUser && isMainAdminUser(sessionUser)) return sessionUser.id;
@@ -1271,7 +1282,8 @@ export function registerPublicEventFeedRoute(app: Express, httpServer: Server) {
       const { rows, status } = await feed.get();
       res.set("Cache-Control", status === "BYPASS" ? "private, no-store" : "private, no-cache");
       res.set("X-Event-Feed-Cache", status);
-      res.json(selectEventFeed(rows, query));
+      const selected = req.query.visibility === "public" ? rows.filter(hasPublicEventFlags) : rows;
+      res.json(selectEventFeed(selected, query));
     } catch (error) {
       res.set("Cache-Control", "private, no-store");
       if (error instanceof EventFeedQueryError) return res.status(400).json({ error: error.message });
@@ -2465,7 +2477,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const eventId = Number(req.params.id);
     if (isTuckerHostedArchiveId(eventId)) {
       const row = getTuckerHostedArchiveRow(eventId);
-      if (!row) return res.status(404).json({ error: "Not found" });
+      if (!row || req.query.visibility === "public") return res.status(404).json({ error: "Not found" });
       const archiveEvt = tuckerHostedArchiveAsEvent(row);
       const occurrences = expandMultiDayEvents([archiveEvt]);
       const listing = date ? occurrences.find(row => pacificCalendarDate(row.dateStart) === date) : occurrences[0] || archiveEvt;
@@ -2474,14 +2486,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
     const evt = storage.getEvent(eventId);
     if (!evt) return res.status(404).json({ error: "Not found" });
-    // Public detail must match list: only LIVE. Admins may open HIDDEN for moderation.
-    if (evt.status !== "LIVE" && !sessionIsAdmin(req)) {
-      return res.status(404).json({ error: "Not found" });
-    }
-    // Public detail must match list: suppress post-Pride starts while the lock is active.
-    if (!sessionIsAdmin(req) && !isPublicEventVisibleUnderPrideCap(evt)) {
-      return res.status(404).json({ error: "Not found" });
-    }
+    if (!mayReadEventDetail(req, evt)) return res.status(404).json({ error: "Not found" });
+    res.set("Cache-Control", "private, no-store");
     const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
     const expanded = expandMultiDayEvents([evt]);
     const day = typeof req.query.day === "string" ? req.query.day.toUpperCase() : "";
@@ -2505,12 +2511,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
     const evt = storage.getEvent(eventId);
     if (!evt) return res.status(404).json({ error: "Not found" });
-    if (evt.status !== "LIVE" && !sessionIsAdmin(req)) {
-      return res.status(404).json({ error: "Not found" });
-    }
-    if (!sessionIsAdmin(req) && !isPublicEventVisibleUnderPrideCap(evt)) {
-      return res.status(404).json({ error: "Not found" });
-    }
+    if (!mayReadEventDetail(req, evt)) return res.status(404).json({ error: "Not found" });
+    res.set("Cache-Control", "private, no-store");
     const pendingClaimIds = new Set(storage.getPendingClaimEventIds());
     const websites = venueWebsiteIndex();
     const expanded = expandMultiDayEvents([evt]);
@@ -2554,7 +2556,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         .map(x => slimPlace(x.b, x.d));
       const day = String(evt.dateStart).slice(0, 10);
       nearbyEvents = (storage.getEvents({ status: "LIVE" }) as any[])
-        .filter(e => e.id !== evt.id && String(e.dateStart).slice(0, 10) === day && typeof e.lat === "number" && typeof e.lng === "number")
+        .filter(e => hasPublicEventFlags(e) && e.id !== evt.id && String(e.dateStart).slice(0, 10) === day && typeof e.lat === "number" && typeof e.lng === "number")
         .map(e => ({ e, d: distMi(lat, lng, e.lat, e.lng) }))
         .filter(x => x.d <= 2)
         .sort((a, b) => a.d - b.d)

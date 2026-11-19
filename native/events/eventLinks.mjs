@@ -44,3 +44,9 @@ export function parseEventLink(value) {
     return null;
   }
 }
+
+// Expo is an independently installed project. Match the server’s public snapshot rules.
+export function isPublicListing(row) {
+  return row?.status === "LIVE" && (row.isPublic === true || row.isPublic === 1) &&
+    (row.isPrivate === false || row.isPrivate === 0);
+}

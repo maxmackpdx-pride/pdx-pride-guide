@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseEventLink, eventLink, occurrenceDate } from "./eventLinks.mjs";
+import { parseEventLink, eventLink, occurrenceDate, isPublicListing } from "./eventLinks.mjs";
 test("the public and installed app links keep the exact occurrence", () => {
   assert.deepEqual(parseEventLink(eventLink(234, "2026-11-21")), {
     id: 234,
@@ -20,4 +20,15 @@ test("the public and installed app links keep the exact occurrence", () => {
     null,
   );
   assert.equal(occurrenceDate("2026-11-19T03:30:00Z"), "2026-11-18");
+});
+
+test("native listing and detail require a live, explicitly public, non-private event", () => {
+  const publicRow = {status:"LIVE", isPublic:true, isPrivate:false};
+  assert.equal(isPublicListing(publicRow), true);
+  assert.equal(isPublicListing({status:"LIVE", isPublic:1, isPrivate:0}), true);
+  for (const row of [null, {}, {status:"LIVE"}, {...publicRow, status:"HIDDEN"},
+    {...publicRow, isPrivate:true}, {...publicRow, isPublic:false},
+    {...publicRow, isPrivate:null}, {...publicRow, isPublic:"1"}]) {
+    assert.equal(isPublicListing(row), false);
+  }
 });
