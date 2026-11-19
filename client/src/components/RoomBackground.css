@@ -9,8 +9,13 @@ html body .room-shader-page > .room-shader-background {
   inset: 0;
   width: 100%;
   /* Keep the top-heavy art and its dark tail together on portrait screens.
-     Filling the whole tall viewport would magnify the center of the artwork. */
-  height: min(100dvh, 100vw);
+     Filling the whole tall viewport would magnify the center of the artwork.
+     Nov 19, 2026 (later): Tucker asked for the shader bottom to come down
+     30% more with the art zoomed in 5% — the portrait band grows by the
+     same 30%, and the 5% zoom is the scale on this element below. */
+  height: min(130dvh, 130vw);
+  transform: scale(1.05);
+  transform-origin: 50% 0;
   pointer-events: none;
   z-index: 0;
   background-size: cover;
@@ -68,13 +73,16 @@ html body .room-shader-page .ns-logo img { filter: hue-rotate(-24deg); }
    cards sit at fixed layout positions, not at fractions of the viewport;
    each was tuned against the rendered page, not the raw texture math —
    the shaders darken their lower art, so the visible bottom lands higher
-   than the texture mapping alone predicts. Mobile/portrait unchanged. */
+   than the texture mapping alone predicts. Mobile/portrait unchanged.
+   Later Nov 19, 2026: Tucker called for the shader bottom to come down
+   30% more with a 5% zoom in — the heights below are the tuned heights
+   x1.3 and the zoom is the scale on the base rule above. */
 @media (min-width: 721px) {
   html body .room-shader-page { background: var(--z-oled) !important; }
-  html body .room-shader-page > .room-shader-background[room="eventz"] { height: 1000px; }
-  html body .room-shader-page > .room-shader-background[room="placez"] { height: 836px; }
-  html body .room-shader-page > .room-shader-background[room="scenez"] { height: 1150px; }
-  html body .room-shader-page > .room-shader-background[room="outzide"] { height: 1020px; }
+  html body .room-shader-page > .room-shader-background[room="eventz"] { height: 1300px; }
+  html body .room-shader-page > .room-shader-background[room="placez"] { height: 1087px; }
+  html body .room-shader-page > .room-shader-background[room="scenez"] { height: 1495px; }
+  html body .room-shader-page > .room-shader-background[room="outzide"] { height: 1326px; }
   html body .room-shader-page > .room-shader-background::after {
     content: "";
     position: absolute;
