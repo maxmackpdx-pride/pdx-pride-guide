@@ -329,6 +329,10 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
     title: "Dashboard | Zaylist",
     description: "Your Zaylist profile, submissions, GIGZ, GIFTZ, and event check-ins.",
   },
+  "/map": {
+    title: "Maps | Zaylist",
+    description: "Portland on one map: tonight's events, places, and posts from every room.",
+  },
   "/placez/map": {
     title: "PlaceZ | Zaylist",
     description: "Portland on one map: tonight's events, places, and posts from every room.",
