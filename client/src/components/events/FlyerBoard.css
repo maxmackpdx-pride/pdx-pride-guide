@@ -15,65 +15,13 @@
 }
 .fbx h2, .fbx h3, .fbx h4, .fbx h5, .fbx p { margin: 0; }
 .fbx .hide { display: none !important; }
-.fbx-content { position: relative; z-index: 1; padding-bottom: 26px; }
+.fbx-content { position: relative; z-index: 1; padding-bottom: calc(26px + var(--edrawer-h, 0px)); }
 /* Body-portal wrapper for the fan deck + open card: carries the .fbx
    scope without the board root's painted background. */
 .fbx.fbx-overlay { background: none; }
 
-/* ---------- filter bar ---------- */
-.fbx .fbar {
-  position: relative;
-  z-index: 26;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 10px 12px;
-  background: color-mix(in srgb, var(--z-black) 90%, transparent);
-  border-bottom: 1px solid var(--fbx-line-soft);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.fbx .fbar::-webkit-scrollbar { display: none; }
-.fbx .fchip {
-  flex: none;
-  font: 700 11.5px "Barlow Condensed", sans-serif;
-  letter-spacing: .08em;
-  color: var(--evz-mist-aeb8c3);
-  background: var(--fbx-card);
-  border: 1px solid var(--evz-line-2c2c35);
-  border-radius: 999px;
-  padding: 8px 14px;
-  cursor: pointer;
-  min-height: 36px;
-}
-.fbx .fchip.on {
-  color: var(--evz-mist-f4f8fa);
-  border-color: var(--neon-magenta);
-  box-shadow: 0 0 10px rgba(255, 31, 160, .4);
-}
-.fbx .fdiv { flex: none; width: 1px; height: 20px; background: var(--evz-line-2c2c35); margin: 0 3px; }
-.fbx .fsearch {
-  flex: 0 1 200px;
-  min-width: 112px;
-  background: var(--fbx-card);
-  border: 1px solid var(--evz-line-2c2c35);
-  border-radius: 999px;
-  color: var(--evz-mist-f4f8fa);
-  font: 600 11.5px "Barlow", sans-serif;
-  padding: 8px 13px;
-  outline: none;
-  margin-left: 6px;
-}
-.fbx .fsearch:focus { border-color: var(--neon-magenta); }
-.fbx .fsearch::placeholder { color: var(--fbx-placeholder); letter-spacing: .05em; }
-.fbx .fcount {
-  flex: none;
-  margin-left: auto;
-  font: 600 10.5px var(--font-mono);
-  color: var(--evz-gray-8a8a94);
-  letter-spacing: .08em;
-  padding-left: 8px;
-}
+/* The filter bar moved into the page's bottom filter drawer
+   (EventsFilterDrawer) — no filtering UI at the top of the board anymore. */
 
 /* ---------- section headers ---------- */
 .fbx .board-h {
@@ -107,7 +55,9 @@
   overflow-x: auto;
   scrollbar-width: none;
   gap: 10px;
-  padding: 12px 14px 20px;
+  /* Top room for the push pins: a pin stands ~28px above its poster, so the
+     rail's clip line must sit above the pins, not through them. */
+  padding: 42px 14px 20px;
 }
 .fbx .rail::-webkit-scrollbar { display: none; }
 .fbx .rail .cell { flex: none; width: var(--pw); position: relative; margin-left: -9px; }
@@ -1082,10 +1032,9 @@
 /* ---------- desktop ---------- */
 @media (min-width: 1100px) {
   .fbx { --pw: 264px; --pw2: 118px; --mw: 200px; --fw: 215px; }
-  .fbx .fbar { padding: 10px 22px; }
   .fbx .board-h { padding: 18px 24px 12px; background: linear-gradient(180deg, rgba(7, 5, 3, .94) 70%, transparent); }
   .fbx .board-h h3 { font-size: 24px; }
-  .fbx .rail { gap: 12px; padding: 14px 24px 24px; }
+  .fbx .rail { gap: 12px; padding: 42px 24px 24px; }
   .fbx .rail .cell { margin-left: -12px; }
   .fbx .rail .cell:first-child { margin-left: 0; }
   .fbx .lboard { gap: 12px; padding: 8px 24px 20px; --cols: 5; --gap: 12px; }
@@ -1135,7 +1084,7 @@
 /* Open card: everything below the hero rides above the poster's fade tail. */
 .fbx .otabs, .fbx .opageswrap, .fbx .ofoot { position: relative; z-index: 2; }
 
-.fbx .ocard :is(.oclose,.oshare,.oarw,.osave,.otabs button,.opage button), .fbx .fbar .fchip { min-height:44px; min-width:44px; }
+.fbx .ocard :is(.oclose,.oshare,.oarw,.osave,.otabs button,.opage button) { min-height:44px; min-width:44px; }
 .fbx .ointerested .evz-x__act-main {display:grid;gap:2px;}
 
 .fbx .ocard .ox {min-width:44px;min-height:44px}

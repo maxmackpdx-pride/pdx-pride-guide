@@ -63,6 +63,9 @@ export type FlyerBoardProps = {
   tags: Set<string>;
   setTags: React.Dispatch<React.SetStateAction<Set<string>>>;
   onClear: () => void;
+  /** Reports the board's visible event count (the old filter bar's number)
+      to the page, which now shows it inside the bottom filter drawer. */
+  onVisibleCount?: (count: number) => void;
 };
 
 const PACIFIC = "America/Los_Angeles";
@@ -84,14 +87,6 @@ async function shareEventListing(listing: EventListing) {
 /** The demo's rotation rhythm and stagger, by position in the container. */
 const ROT_CYCLE = [-2.2, 1.6, -1.2, 2.6, -2.8, 1.9];
 const MTOPS = [0, 10, 4, 14, 2, 8, 0, 12, 6, 2];
-const TAG_CHIPS: Array<[string, string]> = [
-  ["21plus", "21+"],
-  ["free", "FREE"],
-  ["party", "PARTY"],
-  ["drag", "DRAG"],
-  ["kink", "KINK"],
-  ["social", "SOCIAL"],
-];
 const PILE_SPOTS: Array<[number, number, number]> = [
   [4, -9, 54],
   [22, 7, 46],
@@ -705,7 +700,7 @@ export default function FlyerBoard({
   saveDisabled,
   savedIds,
   onToggleSave,
-  now, query, setQuery, fday, setFday, tags, setTags, onClear,
+  now, query, setQuery, fday, setFday, tags, setTags, onClear, onVisibleCount,
 }: FlyerBoardProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [tick, setTick] = useState(now);
@@ -1048,15 +1043,6 @@ export default function FlyerBoard({
     };
   }, [revealKey, cols]);
 
-  const toggleTag = (t: string) => {
-    setTags(prev => {
-      const next = new Set(prev);
-      if (next.has(t)) next.delete(t);
-      else next.add(t);
-      return next;
-    });
-    setBudgetRows(4);
-  };
   const clearFilters = () => {
     onClear();
     setFday("all");
@@ -1202,49 +1188,70 @@ export default function FlyerBoard({
     return out;
   }, [openListing, events]);
 
+  /* The board's filter row moved into the page's bottom filter drawer
+     (EventsFilterDrawer); the board reports its visible count up and takes
+     day jumps over the `zaylist:board-day` window event. */
+  useEffect(() => {
+    onVisibleCount?.(pastView ? pastList.length : totalCount);
+  }, [onVisibleCount, pastView, pastList.length, totalCount]);
+
+  const jumpRef = useRef<(date: string) => boolean>(() => false);
+  jumpRef.current = (date: string): boolean => {
+    const root = rootRef.current;
+    if (!root) return true;
+    const scrollToEl = (el: HTMLElement) => {
+      const y = el.getBoundingClientRect().top + window.scrollY - 88;
+      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+    };
+    if (pastView) {
+      const cell = root.querySelector<HTMLElement>(`.pastboard [data-event-date="${date}"]`);
+      if (cell) { scrollToEl(cell); return true; }
+      const head = root.querySelector<HTMLElement>(".pasthead");
+      if (head) { scrollToEl(head); return true; }
+      return false;
+    }
+    if (date <= todayStr) {
+      const first = root.querySelector<HTMLElement>(".bandsec, .futurezone");
+      if (first) { scrollToEl(first); return true; }
+      return false;
+    }
+    /* Future date: grow the Plan Ahead budget until that date's group is
+       on the board, then land on its first card (under its day flag). */
+    let slots = 0;
+    let needed = 0;
+    for (const item of flowData.flow) {
+      if (item.kind === "flag") continue;
+      slots++;
+      if (item.kind === "poster" && dateStrOf(item.e) === date) needed = slots;
+    }
+    if (needed === 0) {
+      const zone = root.querySelector<HTMLElement>(".futurezone");
+      if (zone) { scrollToEl(zone); return true; }
+      return false;
+    }
+    const rows = Math.ceil(needed / cols);
+    if (rows > budgetRows) { setBudgetRows(rows); return false; }
+    const cell = root.querySelector<HTMLElement>(`.futurezone [data-event-date="${date}"]`);
+    if (cell) { scrollToEl(cell); return true; }
+    return false;
+  };
+  useEffect(() => {
+    const onDay = (ev: Event) => {
+      const date = (ev as CustomEvent<{ date?: string }>).detail?.date;
+      if (!date) return;
+      let tries = 0;
+      const attempt = () => {
+        if (jumpRef.current(date)) return;
+        if (++tries <= 14) window.setTimeout(attempt, 90);
+      };
+      attempt();
+    };
+    window.addEventListener("zaylist:board-day", onDay);
+    return () => window.removeEventListener("zaylist:board-day", onDay);
+  }, []);
+
   return (
     <div className="fbx" ref={rootRef}>
-      <div className="fbar" role="group" aria-label="Filter the board">
-        {(["all", "tonight", "week", "later"] as WindowFilter[]).map(w => (
-          <button
-            key={w}
-            type="button"
-            className={`fchip${fday === w ? " on" : ""}`}
-            aria-pressed={fday === w}
-            onClick={() => {
-              setFday(w);
-              setBudgetRows(4);
-            }}
-          >
-            {w === "all" ? "ALL" : w === "tonight" ? "TONIGHT" : w === "week" ? "THIS WEEK" : "LATER"}
-          </button>
-        ))}
-        <span className="fdiv" />
-        {TAG_CHIPS.map(([token, label]) => (
-          <button
-            key={token}
-            type="button"
-            className={`fchip${tags.has(token) ? " on" : ""}`}
-            aria-pressed={tags.has(token)}
-            onClick={() => toggleTag(token)}
-          >
-            {label}
-          </button>
-        ))}
-        <input
-          className="fsearch"
-          type="text"
-          placeholder="SEARCH EVENTS, VENUES, DAYS…"
-          aria-label="Search events"
-          value={query}
-          onChange={e => {
-            setQuery(e.target.value);
-            setBudgetRows(4);
-          }}
-        />
-        <span className="fcount">{pastView ? `${pastList.length} EVENTS` : `${totalCount} EVENTS`}</span>
-      </div>
-
       <div className="fbx-content">
         {pastView ? (
           <div>
