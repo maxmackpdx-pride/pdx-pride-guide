@@ -1,5 +1,5 @@
+import RoomBackground from "@/components/RoomBackground";
 import { eventsTonightWindow } from "@shared/eventsTonight";
-import BoardShader from "@/components/board/BoardShader";
 import { createEventSearch, extractAgeIntent } from "@shared/eventSearch";
 import BrowseToolbar from "@/components/BrowseToolbar";
 import BrowseStatus from "@/components/BrowseStatus";
@@ -768,8 +768,8 @@ export default function Events() {
   }
 
   return (
-    <div className="zine-page events-page board-page board-page--makeover board-shader-page" data-shader-room="eventz">
-      <BoardShader room="eventz" />
+    <div className="zine-page events-page board-page board-page--makeover board-shader-page room-shader-page" data-shader-room="eventz">
+      <RoomBackground room="eventz" />
 
       {activeTab === "schedule" ? (
         <ScrollReveal delay={50}>
