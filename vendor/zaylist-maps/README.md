@@ -199,3 +199,21 @@ card system. Everything else is v1.0.29 unchanged. Tests 447/447 on
 the tagged source; GitHub runs 44475124215 and 44475124204 passed the
 compiler checks, typechecking, map tests and both builds. The v1.0.29
 parts remain in this folder for rollback.
+## v1.0.31: The heart is the Interested toggle on both card faces
+
+Source: `9b588d72155017561cda9fa06ff981376164fa89` (immutable `v1.0.31`).
+Archive SHA-256: `ae9b0ee1deb031d65918fa92506675b4c80bf235b618696d877827b9b24de072`.
+One-behavior change on top of v1.0.30: the expanded card's heart is
+restored, and on both faces the heart is the INTERESTED toggle — one
+shared interested state owned by MapzMapCard drives the front heart,
+the expanded heart, and the "I'm interested" row; neither heart is a
+separate save/favorite state. Both hearts gain breathing room: the
+front heart sits 6cqw in from the bottom and right edges (overlay band
+and wide-poster chunk alike), and the expanded footer padding grows so
+its heart's circle clears the bottom and right edges by the same
+measure. The events board ships the identical change (pdx-pride-guide
+PR #98) so both surfaces stay one card system. Everything else is
+v1.0.30 unchanged. Tests 447/447 on the tagged source; GitHub runs
+44489123636 and 44489123734 passed the compiler checks, typechecking,
+map tests and both builds. The v1.0.30 parts remain in this folder for
+rollback.
