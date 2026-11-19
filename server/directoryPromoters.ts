@@ -11,6 +11,8 @@ export type PromoterCatalogEvent = {
   lng?: number | null;
   claimedBy?: string | null;
   submittedBy?: string | null;
+  source?: string | null;
+  isClaimable?: boolean;
 };
 
 export type PromoterCatalogUser = DirectoryPromoter & { email?: string | null };
@@ -68,7 +70,7 @@ export function promotersForBusinesses(
       if (!eventMatchesBusiness(event, business)) continue;
       for (const hostId of hostsByEventId.get(event.id) ?? []) add(byId.get(hostId));
       if (event.claimedBy) add(byUsername.get(event.claimedBy) ?? byEmail.get(event.claimedBy));
-      if (event.submittedBy) add(byUsername.get(event.submittedBy) ?? byEmail.get(event.submittedBy));
+      if (event.submittedBy && event.source !== "community_tip" && !event.isClaimable) add(byUsername.get(event.submittedBy) ?? byEmail.get(event.submittedBy));
     }
     out.set(business.id, results);
   }

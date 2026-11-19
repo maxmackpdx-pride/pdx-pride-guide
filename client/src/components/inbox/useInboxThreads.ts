@@ -1,3 +1,4 @@
+import {useThreadArchive} from "./useThreadArchive";
 import { useCallback, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
@@ -10,25 +11,6 @@ import type { ApiMessageRow, Folder, LineupDecision, Thread, ThreadMessage, Thre
 import { GUIDE_PUBLIC_HANDLE, isGuideSystemUsername } from "@shared/peopleHub";
 import { trackProductEvent } from "@/lib/analytics";
 import { confirmSheet } from "@/components/ConfirmSheet";
-
-const ARCHIVE_KEY = "pdx-inbox-archived-v1";
-
-function loadArchived(): Set<string> {
-  if (typeof window === "undefined") return new Set();
-  try {
-    const raw = localStorage.getItem(ARCHIVE_KEY);
-    if (!raw) return new Set();
-    const parsed = JSON.parse(raw);
-    return new Set(Array.isArray(parsed) ? parsed.map(String) : []);
-  } catch {
-    return new Set();
-  }
-}
-
-function saveArchived(ids: Set<string>) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(ARCHIVE_KEY, JSON.stringify(Array.from(ids)));
-}
 
 function threadIdOf(row: ApiMessageRow): string {
   return String(row.threadId || row.thread_id || "").trim();
@@ -128,7 +110,7 @@ export function useInboxThreads(activeThreadId: string | null) {
   const queryClient = useQueryClient();
   const userId = user?.id ?? 0;
 
-  const [archivedIds, setArchivedIds] = useState<Set<string>>(() => loadArchived());
+  const {ids:archivedIds, change:changeArchive, query:archiveQuery} = useThreadArchive();
   const [forcedUnread, setForcedUnread] = useState<Record<string, boolean>>({});
   const [threadOverrides, setThreadOverrides] = useState<Record<string, Partial<Thread>>>({});
 
@@ -154,7 +136,7 @@ export function useInboxThreads(activeThreadId: string | null) {
     isError: inboxError,
     refetch: refetchInbox,
   } = useQuery<ApiMessageRow[]>({
-    queryKey: ["/api/messages/inbox"],
+    queryKey: ["/api/messages/inbox",userId],
     queryFn: async () => {
       const r = await fetch("/api/messages/inbox", { credentials: "include" });
       if (!r.ok) throw new Error("Could not load inbox");
@@ -169,7 +151,7 @@ export function useInboxThreads(activeThreadId: string | null) {
     isError: sentError,
     refetch: refetchSent,
   } = useQuery<ApiMessageRow[]>({
-    queryKey: ["/api/messages/sent"],
+    queryKey: ["/api/messages/sent",userId],
     queryFn: async () => {
       const r = await fetch("/api/messages/sent", { credentials: "include" });
       if (!r.ok) throw new Error("Could not load sent");
@@ -184,7 +166,7 @@ export function useInboxThreads(activeThreadId: string | null) {
     isError: activeError,
     refetch: refetchActive,
   } = useQuery({
-    queryKey: ["/api/messages/thread", activeThreadId],
+    queryKey: ["/api/messages/thread", activeThreadId,userId],
     queryFn: async () => {
       const r = await fetch(`/api/messages/thread/${encodeURIComponent(activeThreadId!)}`, { credentials: "include" });
       if (!r.ok) throw new Error("Could not load thread");
@@ -321,7 +303,7 @@ export function useInboxThreads(activeThreadId: string | null) {
       const data = (await r.json()) as { reactions?: ThreadMessage["reactions"] };
       // Optimistic: patch active thread cache so chips update immediately.
       queryClient.setQueryData(
-        ["/api/messages/thread", threadId],
+        ["/api/messages/thread", threadId, userId],
         (prev: { messages?: ApiMessageRow[] } | undefined) => {
           if (!prev?.messages) return prev;
           return {
@@ -336,7 +318,7 @@ export function useInboxThreads(activeThreadId: string | null) {
       );
       return data.reactions || [];
     },
-    [queryClient, toast],
+    [queryClient, toast, userId],
   );
 
   const setRead = useCallback(async (threadId: string, unread: boolean) => {
@@ -354,23 +336,8 @@ export function useInboxThreads(activeThreadId: string | null) {
     setForcedUnread(prev => ({ ...prev, [threadId]: unread }));
   }, [queryClient, threads]);
 
-  const archive = useCallback((threadId: string) => {
-    setArchivedIds(prev => {
-      const next = new Set(prev);
-      next.add(threadId);
-      saveArchived(next);
-      return next;
-    });
-  }, []);
-
-  const unarchive = useCallback((threadId: string) => {
-    setArchivedIds(prev => {
-      const next = new Set(prev);
-      next.delete(threadId);
-      saveArchived(next);
-      return next;
-    });
-  }, []);
+  const archive = (id:string) => changeArchive(id,true);
+  const unarchive = (id:string) => changeArchive(id,false);
 
   const remove = useCallback(async (threadId: string) => {
     const r = await fetch(`/api/messages/thread/${encodeURIComponent(threadId)}`, {
@@ -381,12 +348,6 @@ export function useInboxThreads(activeThreadId: string | null) {
       toast({ title: "Delete failed", variant: "destructive" });
       throw new Error("Delete failed");
     }
-    setArchivedIds(prev => {
-      const next = new Set(prev);
-      next.delete(threadId);
-      saveArchived(next);
-      return next;
-    });
     await refreshInboxQueries(queryClient);
     await queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", threadId] });
   }, [queryClient, toast]);
@@ -428,7 +389,7 @@ export function useInboxThreads(activeThreadId: string | null) {
 
   return {
     threads,
-    loading: inboxLoading || sentLoading,
+    loading: inboxLoading || sentLoading || archiveQuery.isLoading,
     listError: inboxError || sentError,
     activeLoading,
     activeError,
@@ -438,7 +399,7 @@ export function useInboxThreads(activeThreadId: string | null) {
     retryActive: async () => {
       await refetchActive();
     },
-    deletedCount,
+    deletedCount,archiveQuery,inboxError,sentError,refetchInbox,refetchSent,
     sendMessage,
     toggleReaction,
     setRead,

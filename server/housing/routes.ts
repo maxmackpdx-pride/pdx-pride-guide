@@ -492,7 +492,30 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     res.json({ reports: listHousingReports(db, String(req.query.status || "PENDING")) });
   });
 
-  // --- the consent gate: request to chat = request to join -------------------
+  // Requests share one conversation gate and have distinct household outcomes.
+
+  function ensureConversation(request: any, label: string): string {
+    return db.transaction(() => {
+      const current = getHousingRequest(db, request.id);
+      if (current.thread_id) return String(current.thread_id);
+      const subject = current.kind === "WAITLIST" ? "Waiting list: " : current.kind === "JOIN" ? "Asked to join: " : "My Hoüz: ";
+      const msg = deps.sendMessage(current.requester_user_id, current.recipient_user_id, subject + label,
+        current.note || subject + label, { threadId: "housing-request-" + current.id, contextType: "HOUSING", contextId: current.post_id, contextLabel: label });
+      if (!msg?.threadId) throw new Error("Conversation could not start");
+      attachHousingRequestThread(db, current.id, msg.threadId);
+      return msg.threadId;
+    }).immediate();
+  }
+
+  app.get("/api/housing/requests/:requestId", requireAuth, (req: any, res: any) => {
+    const request = getHousingRequest(db, asNum(req.params.requestId) || 0);
+    const actor = viewerId(req);
+    if (!request || (actor !== request.requester_user_id && actor !== request.recipient_user_id && !isHousingLead(db, request.post_id, actor!) && !isAdmin(req))) {
+      return res.status(404).json({error: "Request not found"});
+    }
+    res.setHeader("Cache-Control", "private, no-store");
+    res.json({id:request.id, postId:request.post_id, kind:request.kind, status:request.status, threadId:request.thread_id});
+  });
 
   app.post("/api/housing/:id/request", requireAuth, (req: any, res: any) => {
     const id = asNum(req.params.id);
@@ -509,44 +532,27 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     if (!recipientId) return res.status(404).json({ error: "Not found" });
     if (recipientId === userId) return res.status(400).json({ error: "This is your own post" });
 
-    let kind = String(req.body?.kind || "CHAT").toUpperCase() as HousingRequestKind;
+    let kind = String(req.body?.kind || (post.type === "FORMING" ? "JOIN" : "CHAT")).toUpperCase() as HousingRequestKind;
     if (!["CHAT", "JOIN", "WAITLIST"].includes(kind)) kind = "CHAT";
     // A full HAUS takes waitlist asks instead of dead-ending the person.
-    if (post.type === "FORMING") kind = post.isFull ? "WAITLIST" : "JOIN";
+    if (post.type !== "FORMING") kind = "CHAT";
+    else if (kind !== "CHAT") kind = (post.isFull || (post.seeking != null && post.seeking <= 0)) ? "WAITLIST" : kind;
 
     const note = asStr(req.body?.note, 1000) || "";
-    const { id: requestId, existing } = createHousingRequest(db, {
+    const { id: requestId, existing } = db.transaction(() => createHousingRequest(db, {
       postId: id,
       requesterUserId: userId,
       recipientUserId: recipientId,
       kind,
       note,
-    });
+    })).immediate();
     const current = getHousingRequest(db, requestId);
-    if (existing) {
-      return res.json({ request: { id: requestId, kind: current?.kind, status: current?.status }, alreadySent: true });
+    let threadId = current.thread_id;
+    if (!threadId && ["PENDING", "ACCEPTED"].includes(current.status)) {
+      try { threadId = ensureConversation(current, post.displayName || post.headline.slice(0, 60)); }
+      catch { /* Return the durable request ID so the same person can retry delivery. */ }
     }
-
-    // The message exists immediately so both sides see it in the floating inbox,
-    // but the thread stays pending until the recipient accepts.
-    try {
-      const label = post.displayName || post.headline.slice(0, 60);
-      const subject =
-        kind === "WAITLIST"
-          ? `Waiting list: ${label}`
-          : kind === "JOIN"
-            ? `Asked to join ${label}`
-            : `My Hoüz: ${label}`;
-      const msg = deps.sendMessage(userId, recipientId, subject, note || "Asked to chat about this post.", {
-        contextType: "HOUSING",
-        contextId: id,
-        contextLabel: label,
-      });
-      if (msg?.threadId) attachHousingRequestThread(db, requestId, msg.threadId);
-    } catch {
-      // The request stands even if the message could not be created.
-    }
-    res.json({ request: { id: requestId, kind, status: "PENDING" } });
+    res.json({ request: {id:requestId, kind:current.kind, status:current.status, threadId}, alreadySent:existing, conversationPending:!threadId && ["PENDING","ACCEPTED"].includes(current.status) });
   });
 
   app.get("/api/housing/:id/requests", requireAuth, (req: any, res: any) => {
@@ -559,7 +565,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     res.json({ requests: listPendingHousingRequests(db, id), waitlist: countHousingWaitlist(db, id) });
   });
 
-  /** Accepting opens the conversation. For a HAUS it also adds the member. */
+  /** Only an accepted JOIN with available space creates household membership. */
   app.post("/api/housing/requests/:requestId/accept", requireAuth, (req: any, res: any) => {
     const requestId = asNum(req.params.requestId);
     if (!requestId) return res.status(400).json({ error: "Invalid id" });
@@ -569,37 +575,40 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     if (request.recipient_user_id !== userId && !isHousingLead(db, request.post_id, userId) && !isAdmin(req)) {
       return res.status(403).json({ error: "Not yours to answer" });
     }
-    if (request.status !== "PENDING") return res.status(400).json({ error: "Already answered" });
-
-    resolveHousingRequest(db, requestId, "ACCEPTED");
+    if (request.status === "ACCEPTED") return res.json({ ok:true, kind:request.kind, threadId:request.thread_id, post:getHousingPost(db, request.post_id, userId) });
+    if (request.status !== "PENDING") return res.status(409).json({ error: "Already answered" });
     const post = getHousingPost(db, request.post_id, userId);
-    if (post?.type === "FORMING" && request.kind !== "WAITLIST") {
-      addHousingMember(db, request.post_id, { kind: "MEMBER", userId: request.requester_user_id, role: "MEMBER" });
-      const seeking = Math.max(0, (post.seeking ?? 0) - 1);
-      updateHousingPost(
-        db,
-        request.post_id,
-        seeking === 0 ? { seeking, isFull: true } : { seeking },
-        seeking === 0 ? "Household is full" : "Someone joined",
-      );
-    }
+    if (!post) return res.status(404).json({error:"Listing not found"});
     try {
-      deps.sendMessage(
-        userId,
-        request.requester_user_id,
-        `Accepted: ${post?.displayName || "My Hoüz"}`,
-        post?.type === "FORMING" ? "You are in. Welcome to the household." : "Happy to chat.",
-        {
-          threadId: request.thread_id || undefined,
-          contextType: "HOUSING",
-          contextId: request.post_id,
-          contextLabel: post?.displayName || null,
-        },
-      );
-    } catch {
-      /* acceptance stands even if the notice fails */
+      const outcome = db.transaction(() => {
+        const current = getHousingRequest(db, requestId);
+        if (current.status !== "PENDING") throw new Error("This request was already answered.");
+        const fresh = getHousingPost(db, current.post_id, userId)!;
+        const label = fresh.displayName || fresh.headline.slice(0,60);
+        const threadId = ensureConversation(current, label);
+        let kind: HousingRequestKind = current.kind;
+        if (kind === "JOIN" && fresh.type === "FORMING") {
+          const member = db.prepare("SELECT id FROM housing_members WHERE post_id=? AND user_id=?").get(fresh.id, current.requester_user_id);
+          if (!member && (fresh.isFull || (fresh.seeking != null && fresh.seeking <= 0))) kind = "WAITLIST";
+          if (!member && kind === "JOIN") {
+            addHousingMember(db, fresh.id, {kind:"MEMBER", userId:current.requester_user_id, role:"MEMBER"});
+            const seeking = Math.max(0, (fresh.seeking ?? 1) - 1);
+            updateHousingPost(db, fresh.id, {seeking, isFull:seeking === 0}, seeking ? "Someone joined" : "Household is full");
+          }
+        }
+        db.prepare("UPDATE housing_requests SET kind=? WHERE id=?").run(kind, requestId);
+        resolveHousingRequest(db, requestId, "ACCEPTED");
+        const message = kind === "WAITLIST" ? "You’re on the household waitlist." : kind === "JOIN" ? "You joined the household." : "Your request to chat was accepted.";
+        // A co-lead sends their decision separately from the original two-person conversation.
+        deps.sendMessage(userId, current.requester_user_id, "Request accepted: " + label, message, {
+          threadId: userId === current.recipient_user_id ? threadId : undefined, contextType:"HOUSING", contextId:current.post_id, contextLabel:label,
+        });
+        return {kind, threadId};
+      }).immediate();
+      res.json({ok:true, ...outcome, post:getHousingPost(db, request.post_id, userId)});
+    } catch (error) {
+      res.status(409).json({error: error instanceof Error ? error.message : "Could not complete this request. Retry."});
     }
-    res.json({ ok: true, post: getHousingPost(db, request.post_id, userId) });
   });
 
   /** Declining is quiet: status flips, no notification, no drama. */
@@ -612,6 +621,8 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     if (request.recipient_user_id !== userId && !isHousingLead(db, request.post_id, userId) && !isAdmin(req)) {
       return res.status(403).json({ error: "Not yours to answer" });
     }
+    if (request.status === "DECLINED") return res.json({ok:true});
+    if (request.status !== "PENDING") return res.status(409).json({error:"Request was already answered"});
     resolveHousingRequest(db, requestId, "DECLINED");
     res.json({ ok: true });
   });
@@ -622,6 +633,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
     const request = getHousingRequest(db, requestId);
     if (!request) return res.status(404).json({ error: "Not found" });
     if (request.requester_user_id !== viewerId(req)) return res.status(403).json({ error: "Not your request" });
+    if (request.status !== "PENDING" && !(request.kind === "WAITLIST" && request.status === "ACCEPTED")) return res.status(409).json({error:"Request was already answered"});
     resolveHousingRequest(db, requestId, "WITHDRAWN");
     res.json({ ok: true });
   });
@@ -645,7 +657,7 @@ export function registerHousingRoutes(app: Express, deps: Deps) {
       role: isRequester ? "requester" : "recipient",
       accepted,
       pending,
-      awaiting: isRequester && !accepted && request.status !== "WITHDRAWN",
+      awaiting: isRequester && pending,
       canNudge: isRequester && canSendHousingNudge(request.created_at, request.nudge_sent_at, Date.now()),
     });
   });

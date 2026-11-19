@@ -1,3 +1,4 @@
+import AuthModal from "@/components/AuthModal";
 import CommunityChatControls from '@/components/CommunityChatControls';
 import BoardShader from "@/components/board/BoardShader";
 import "@/components/BoardShareButton.css";
@@ -25,6 +26,7 @@ export default function Community({ params, embedded = false }: { params: { comm
   const slug = params.communitySlug.toLowerCase();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [signingIn,setSigningIn]=useState(false);
   const [postBody, setPostBody] = useState("");
   const [postTitle, setPostTitle] = useState("");
   const [postMediaUrl, setPostMediaUrl] = useState("");
@@ -124,11 +126,13 @@ export default function Community({ params, embedded = false }: { params: { comm
     <header className="z-community-detail__hero pdx-glass-rebind">
       {!embedded && <div className="z-community-detail__image" style={logo ? { backgroundImage: `url(${logo})`, backgroundSize: item.slug === "yes-coach-productions" && (!item.imageUrl || item.imageUrl === "/directory-logos/Yes_Coach_Productions.png") ? "75% auto" : !item.imageUrl || logo === "/community-logos/pink-ponies.jpeg" ? "contain" : undefined, backgroundColor: !item.imageUrl && item.slug === "lesbian-culture-club" ? "#f5f1e9" : undefined } : undefined}>{!logo ? <span aria-hidden="true">Z/</span> : null}</div>}
       <div className="z-community-detail__identity">{!embedded && <><p className="z-community-card__address">z/{item.slug}</p><h1>{item.name}</h1></>}<p className="z-community-detail__count">{item.memberCount} {item.memberCount === 1 ? "member" : "members"} · {item.posts.length} recent {item.posts.length === 1 ? "post" : "posts"}</p>{!embedded && <p className="z-community-detail__description">{item.description}</p>}<div className="z-community-detail__membership">
-        {user ? item.viewerMembershipStatus === "pending" ? <Button disabled accent="cyan">REQUEST PENDING</Button> : item.viewerRole === "owner" ? <p>You own this community. <button type="button" onClick={() => { setManaging(true); setTimeout(() => document.getElementById("community-members")?.scrollIntoView({ behavior: "smooth" }), 0); }}>Transfer ownership in Members</button> before leaving.</p> : <Button onClick={() => membership.mutate()} disabled={membership.isPending} accent="cyan">{item.viewerRole ? "LEAVE COMMUNITY" : item.membershipPolicy === "request" ? "REQUEST TO JOIN" : "JOIN COMMUNITY"}</Button> : <Link href="/dashboard"><Button as="span" accent="cyan">SIGN IN TO JOIN</Button></Link>}
+        {user ? item.viewerMembershipStatus === "pending" ? <Button disabled accent="cyan">REQUEST PENDING</Button> : item.viewerRole === "owner" ? <p>You own this community. <button type="button" onClick={() => { setManaging(true); setTimeout(() => document.getElementById("community-members")?.scrollIntoView({ behavior: "smooth" }), 0); }}>Transfer ownership in Members</button> before leaving.</p> : !item.viewerRole && item.membershipPolicy==="invite" ? <p>Invitation required. Contact a community moderator to join.</p> : !item.viewerRole && ["rejected","removed"].includes(item.viewerMembershipStatus||"") ? <p>Contact a community moderator about your membership.</p> : <Button onClick={() => membership.mutate()} disabled={membership.isPending} accent="cyan">{item.viewerRole ? "LEAVE COMMUNITY" : item.membershipPolicy === "request" ? "REQUEST TO JOIN" : "JOIN COMMUNITY"}</Button> : <Button accent="cyan" onClick={()=>setSigningIn(true)}>SIGN IN TO JOIN</Button>}
+        {!item.viewerRole && item.membershipPolicy!=="invite" && <p>Active membership follows community updates. You can unfollow while staying a member.</p>}
         {item.viewerRole ? <button type="button" className="z-community-follow pdx-glass-rebind" aria-pressed={item.viewerFollowing} disabled={follow.isPending} onClick={() => follow.mutate(!item.viewerFollowing)}>{item.viewerFollowing ? <Check size={17}/> : <Plus size={17}/>} {item.viewerFollowing ? "Following feed" : "Follow feed"}</button> : null}
         {item.canManage ? <Button onClick={() => setManaging(value => !value)}>{managing ? "CLOSE MODERATOR DESK" : "MANAGE COMMUNITY"}</Button> : null}</div>
       </div>
     </header>
+    {signingIn&&!user&&<AuthModal onClose={()=>setSigningIn(false)}/>}
     <CommunityPageInvitation community={item}/>
     {error ? <p className="z-community-detail__error" role="alert">{error}</p> : null}
     {notice ? <p role="status">{notice}</p> : null}

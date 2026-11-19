@@ -4,7 +4,7 @@ import type { MessageReactionCode } from "@shared/messageReactions";
 export type Category = "messages" | "spotted" | "gigs" | "gifting" | "sellz" | "housing" | "hosts" | "checkins";
 export type Folder = "inbox" | "sent" | "deleted";
 /** Admin account sub-views: moderation queue + shared guide-admin mailboxes. */
-export type QueueFolder = "active" | "completed" | "inbox" | "sent";
+export type QueueFolder = "active" | "completed" | "inbox" | "sent" | "archived";
 export type LineupDecision = "APPROVED" | "DENIED";
 
 /** Aggregated emoji reaction chip on a DM bubble. */

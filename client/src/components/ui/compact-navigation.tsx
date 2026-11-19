@@ -87,8 +87,8 @@ export function CompactHubLink({ active, unreadCount = 0, onNavigate, textOnly =
 /** Inbox lives beside Hub and retains the same attention count as the mobile dock. */
 export function CompactInboxLink({ onNavigate }: { onNavigate: () => void }) {
   const { open, openSheet, closeSheet } = useInboxSheet();
-  const { total } = useInboxAttentionCount();
-  return <button type="button" className={`znav-control znav-hub hub-disclosure pdx-glass-rebind${open ? " is-active" : ""}`} data-accent="cyan" data-inbox-open-trigger="header" aria-controls="inbox-panel" aria-expanded={open} aria-haspopup="dialog" aria-label={total > 0 ? `Inbox, ${total} need attention` : "Inbox"} title="Inbox" onClick={event => {
+  const { unread:total } = useInboxAttentionCount();
+  return <button type="button" className={`znav-control znav-hub hub-disclosure pdx-glass-rebind${open ? " is-active" : ""}`} data-accent="cyan" data-inbox-open-trigger="header" aria-controls="inbox-panel" aria-expanded={open} aria-haspopup="dialog" aria-label={total > 0 ? `Inbox, ${total} unread` : "Inbox"} title="Inbox" onClick={event => {
     onNavigate();
     if (open) closeSheet();
     else openSheet({ view: "inbox", account: "personal" }, event.currentTarget);

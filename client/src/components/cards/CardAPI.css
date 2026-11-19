@@ -61,3 +61,22 @@
 /* URL-opened details follow the same restrained navigation-width envelope. */
 .zay-card-direct-details--navigation{width:min(960px,86vw);max-width:none;position:relative;left:50%;transform:translateX(-50%);margin-inline:0}
 @media(max-width:959px){.zay-card-direct-details--navigation{width:min(576px,calc(100vw - 16px));margin-inline:0}}
+
+/* URL-opened Eventz details lock over the site chrome on phones (owner
+   geometry ruling): the card spans halfway into the top bar and halfway
+   into the bottom dock, floats over a scrim, and scrolls inside itself. */
+@media (max-width: 959px) {
+  body:has(.zay-card-direct-details .evz-x) { overflow: hidden; }
+  /* The doubled class is deliberate: .events-page > :not(.rg-stream-background)
+     also sets position on this wrapper at (0,2,0) and loads later, so a plain
+     :has() selector ties and loses. (0,3,0) wins outright. */
+  .zay-card-direct-details.zay-card-direct-details:has(.evz-x) {
+    position: fixed; inset: 0; z-index: 200; width: auto; max-width: none;
+    left: 0; transform: none; margin: 0;
+    padding: 30px 8px 38px;
+    background: rgba(3, 3, 4, .62);
+    box-sizing: border-box;
+  }
+  .zay-card-direct-details.zay-card-direct-details:has(.evz-x) > .zay-card-expanded { height: 100%; }
+  .zay-card-direct-details.zay-card-direct-details:has(.evz-x) .evz-x { height: 100%; max-height: none; }
+}

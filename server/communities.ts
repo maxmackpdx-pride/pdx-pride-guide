@@ -87,6 +87,45 @@ export function linkQSearchCommunityEvent(eventId:number,brands:Array<{businessI
   const insert=sqlite.prepare("INSERT OR IGNORE INTO community_relationships (community_id,target_type,target_id,relationship_type,created_at) VALUES (?,'event',?,'qsearch',?)");
   for(const brand of brands){if(brand.role!=="group"&&brand.role!=="place")continue;const community=find.get(brand.businessId) as {id:string}|undefined;if(community)insert.run(community.id,String(eventId),now());}
 }
+export type EventHostCommunity = { id: string; slug: string; name: string; businessId: number | null };
+
+/**
+ * The SceneZ community hosting an event, when a real connection exists:
+ * an explicit community_relationships link (written at QSearch publish),
+ * or the community's backing directory group being named in the event
+ * title / description — the same mention rule communityEvents() applies
+ * in reverse. Never invents a connection from a bare handle or username:
+ * a host that exists only as text (e.g. a FetLife handle) resolves to null.
+ */
+export function getEventHostCommunity(
+  eventId: number,
+  event: { title?: string | null; description?: string | null },
+): EventHostCommunity | null {
+  try {
+    const linked = sqlite.prepare(`
+      SELECT c.id, c.slug, c.name, c.source_business_id businessId
+      FROM community_relationships r
+      JOIN communities c ON c.id = r.community_id
+      WHERE r.target_type = 'event' AND r.target_id = ?
+        AND c.visibility IN ('public', 'discoverable')
+      ORDER BY r.created_at ASC LIMIT 1
+    `).get(String(eventId)) as EventHostCommunity | undefined;
+    if (linked) return linked;
+    const groups = sqlite.prepare(`
+      SELECT c.id, c.slug, c.name, c.source_business_id businessId, b.name groupName, b.type groupType
+      FROM communities c
+      JOIN businesses b ON b.id = c.source_business_id
+      WHERE c.visibility IN ('public', 'discoverable')
+        AND b.type IN ('group', 'nonprofit') AND b.active = 1
+    `).all() as Array<EventHostCommunity & { groupName: string; groupType: string }>;
+    for (const group of groups) {
+      if (eventMentionsDirectoryGroup(event, { name: group.groupName, type: group.groupType })) {
+        return { id: group.id, slug: group.slug, name: group.name, businessId: group.businessId };
+      }
+    }
+  } catch { /* community tables unavailable — no host connection */ }
+  return null;
+}
 export function linkQSearchCandidateEvent(candidateId:string,eventId:number){
   const row=sqlite.prepare("SELECT brands_json FROM qsearch_candidates WHERE id=?").get(candidateId) as {brands_json:string}|undefined;
   if(!row)return;

@@ -222,6 +222,9 @@ export default function Boards() {
   const results = featureFilters.sort === "newest" && !mineOnly && !savedOnly
     ? mixBoardDemos(filteredResults)
     : filteredResults;
+  const exampleCount = results.filter(post => post.isDemo).length;
+  const listingCount = results.length - exampleCount;
+  const partial = failed || (savedOnly && savedQuery.isError);
   // A category doorway shows every matching post; the mixed feed loads progressively.
   const visibleResults = results.slice(0, limit);
   const clear = () => update({ archive:null, q: null, intent: null, saved: null, mine:null,category:null,condition:null,price:null,remote:null,source:null,neighborhood:null,sort:null,tags:null }, true);
@@ -373,9 +376,9 @@ export default function Boards() {
                 <div className="eb-result-head ab-result-head">
                   <div className="ab-result-meta">
                   <p aria-live="polite">
-                    {loading
+                    {(loading || (savedOnly && savedQuery.isPending))
                       ? "Loading boards…"
-                      : `${results.length} ${results.length === 1 ? "post" : "posts"}${savedOnly ? " · Saved" : ""}`}
+                      : `${listingCount} ${listingCount === 1 ? "post" : "posts"}${partial ? " from available boards" : ""}${exampleCount ? ` · ${exampleCount} example${exampleCount === 1 ? "" : "s"}` : ""}${savedOnly ? " · Saved" : ""}`}
                   </p>
                   {(query || intent !== "all" || savedOnly || mineOnly || hasFeatureFilters) && (
                     <button type="button" className="eb-clear" onClick={clear}>
@@ -403,7 +406,7 @@ export default function Boards() {
                       aria-pressed={intent === "all"}
                       onClick={() => update({ intent: null }, true)}
                     >
-                      All types<span>{categoryPosts.length}</span>
+                      All types<span>{matchingCategoryPosts.filter(post => !post.isDemo).length}</span>
                     </button>
                     {intents.map((i) => (
                       <button
@@ -415,7 +418,7 @@ export default function Boards() {
                       >
                         {intentLabels[i]}
                         <span>
-                          {matchingCategoryPosts.filter((p) => p.intent === i).length}
+                          {matchingCategoryPosts.filter((p) => !p.isDemo && p.intent === i).length}
                         </span>
                       </button>
                     ))}

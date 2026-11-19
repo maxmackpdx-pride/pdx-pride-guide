@@ -97,6 +97,8 @@ export type HubV2ShellProps = {
  * - Admin = /admin only (admin nav only)
  * Desktop: left rail. Mobile: bottom drawer. Never mix rails by section alone.
  */
+import {useUnreadCount} from "@/hooks/useUnreadCount";
+
 export default function HubV2Shell({
   section,
   onSectionChange,
@@ -114,6 +116,7 @@ export default function HubV2Shell({
   hideMobileDrawer = false,
   mainToolbar,
 }: HubV2ShellProps) {
+  const personalUnread=useUnreadCount();
   const drawerExtra = sideExtraDrawer === undefined ? sideExtra : sideExtraDrawer;
   const [location, navigate] = useLocation();
   const { openSheet } = useInboxSheet();
@@ -493,8 +496,8 @@ export default function HubV2Shell({
           <button type="button" className="navi" onClick={openPersonalInbox}>
             <Inbox size={18} strokeWidth={2.2} aria-hidden />
             <span style={{ flex: 1 }}>Messages</span>
-            {pendingCount > 0 && isAdmin && (
-              <span className="hub-v2-pill">{pendingCount > 99 ? "99+" : pendingCount}</span>
+            {personalUnread > 0 && (
+              <span className="hub-v2-pill">{personalUnread > 99 ? "99+" : personalUnread}</span>
             )}
           </button>
         </>

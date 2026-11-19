@@ -1,3 +1,4 @@
+import { hasPublicEventFlags } from '../shared/publicEventVisibility';
 import type Database from 'better-sqlite3';
 
 export type CacheStatus = 'HIT' | 'MISS' | 'BYPASS';
@@ -52,7 +53,7 @@ export function createPublicEventFeedCache<T extends PublicRow>(db: Database.Dat
       requireCommittedState();
       if (before !== revision()) continue;
       // Missing flags are conservatively treated as not proven public.
-      const publicOnly = rows.every(row => (row.isPublic === true || row.isPublic === 1) && (row.isPrivate === false || row.isPrivate === 0));
+      const publicOnly = rows.every(hasPublicEventFlags);
       const json = JSON.stringify(rows);
       if (before !== revision()) continue;
       if (!publicOnly || Buffer.byteLength(json, 'utf8') > maxBytes) return { rows, status: 'BYPASS', revision: before };

@@ -9,7 +9,7 @@ import { dayComplementToken } from "@/lib/dsColors";
 import { PLACE_ACCENTS } from './discovery/placeTokens';
 import BoardPostFace from "@/components/board/BoardPostFace";
 import { ArrowRight } from "lucide-react";
-import { ArrowUpRight } from "lucide-react";
+import VenueClaimForm from "./placez/VenueClaimForm";
 import { mapBrowseHref } from "@/lib/mapBrowseHref";
 import DetailActions from "./DetailActions";
 import type React from "react";
@@ -312,29 +312,6 @@ function PlaceModalInner({
     },
   });
 
-  const claimMutation = useMutation({
-    mutationFn: (claimReason: string) => {
-      if (!place) throw new Error("No venue selected");
-      return apiRequest("POST", `/api/directory/${place.id}/claim`, { claimReason }).then(r => r.json());
-    },
-    onSuccess: (result: { autoApproved?: boolean }) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/directory"] });
-      toast({
-        title: result?.autoApproved ? "You're the owner" : "Claim submitted",
-        description: result?.autoApproved
-          ? "This venue is now linked to your account."
-          : "Sent to the site admin for approval.",
-      });
-    },
-    onError: (err: unknown) => {
-      toast({
-        title: "Could not submit claim",
-        description: err instanceof Error ? err.message : "Something went wrong. Try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
   if (!place) return null;
 
   const category = TYPE_TO_DS_CATEGORY[place.type] || "venues";
@@ -407,26 +384,6 @@ function PlaceModalInner({
   };
   const cancelEditing = () => setEditing(false);
   const saveEdits = () => saveMutation.mutate(isOwner ? ownerForm : form);
-
-  const requestClaim = () => {
-    if (!user || !place) {
-      if (!user) onRequireAuth();
-      return;
-    }
-    const brandNote = multiLoc
-      ? `\n\nThis listing covers ${locations.length} locations. Claiming means you represent the brand on Zaylist (all locations), not one storefront.`
-      : "";
-    const reason = window.prompt(
-      `Tell us about your connection to this business (e.g. "I own/manage this venue"):${brandNote}`,
-      "",
-    );
-    if (reason == null) return;
-    if (!reason.trim()) {
-      toast({ title: "Add a short reason", variant: "destructive" });
-      return;
-    }
-    claimMutation.mutate(reason.trim());
-  };
 
   const handleShare = async () => {
     setSharing(true);
@@ -793,41 +750,8 @@ function PlaceModalInner({
                     Edit venue info
                   </button>
                 )}
-                {!place.ownerId && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6, maxWidth: "36ch" }}>
-                    <button
-                      type="button"
-                      onClick={requestClaim}
-                      disabled={claimMutation.isPending}
-                      style={{
-                        background: "none", border: "none", color: accent, cursor: "pointer",
-                        fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.85rem", padding: 0,
-                        textAlign: "left",
-                      }}
-                    >
-                      <ArrowUpRight size={14} aria-hidden="true" />{" "}
-                      {claimMutation.isPending
-                        ? "Submitting…"
-                        : multiLoc
-                          ? "Claim this brand listing"
-                          : "Claim this business"}
-                    </button>
-                    {multiLoc ? (
-                      <p
-                        style={{
-                          margin: 0,
-                          fontFamily: "var(--font-body)",
-                          fontSize: "0.78rem",
-                          lineHeight: 1.45,
-                          color: "var(--text-lo)",
-                        }}
-                      >
-                        This listing covers {locations.length} locations. Claiming means you
-                        represent the brand on Zaylist.
-                      </p>
-                    ) : null}
-                  </div>
-                )}
+                <VenueClaimForm key={place.id} placeId={place.id} claimed={!!place.ownerId}
+                  locations={multiLoc ? locations.length : 1} userId={user?.id} onRequireAuth={onRequireAuth}/>
               </div>
             </>
           )}

@@ -30,7 +30,7 @@ function bucketRangeLabel(at: string): string {
   return `${fmt(start)} – ${fmt(end)}`;
 }
 
-export default function MemberGrowthChart({ buckets }: { buckets: MemberGrowthBucket[] }) {
+export default function MemberGrowthChart({ buckets, selectWindow = false }: { buckets: MemberGrowthBucket[]; selectWindow?: boolean }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const chart = useMemo(() => {
@@ -89,7 +89,7 @@ export default function MemberGrowthChart({ buckets }: { buckets: MemberGrowthBu
             strokeLinejoin="round"
           />
         </svg>
-        <div className="admin-stats__growth-chart__dots" role="presentation">
+        {!selectWindow && <div className="admin-stats__growth-chart__dots" role="presentation">
           {chart.dots.map(dot => {
             const bucket = buckets[dot.index];
             const isActive = activeIndex === dot.index;
@@ -108,13 +108,19 @@ export default function MemberGrowthChart({ buckets }: { buckets: MemberGrowthBu
               />
             );
           })}
-        </div>
+        </div>}
       </div>
 
-      {active && activeDot && (
+      {selectWindow && <label className="staff-growth-window">12-hour window
+        <select value={activeIndex ?? ""} onChange={e => setActiveIndex(e.target.value === "" ? null : Number(e.target.value))}>
+          <option value="">Choose a window</option>
+          {buckets.map((bucket,index) => <option key={bucket.at} value={index}>{bucketLabel(bucket.at)}</option>)}
+        </select>
+      </label>}
+      {active && (activeDot || selectWindow) && (
         <div
           className="admin-stats__growth-tooltip"
-          style={{ left: `${Math.min(Math.max(activeDot.x, 8), 92)}%` }}
+          style={selectWindow || !activeDot ? undefined : { left: `${Math.min(Math.max(activeDot.x, 8), 92)}%` }}
         >
           <div className="admin-stats__growth-tooltip__time">{bucketRangeLabel(active.at)}</div>
           <div className="admin-stats__growth-tooltip__grid">
@@ -133,9 +139,9 @@ export default function MemberGrowthChart({ buckets }: { buckets: MemberGrowthBu
         </div>
       )}
 
-      <p className="admin-stats__growth-chart__hint">
+      {!selectWindow && <p className="admin-stats__growth-chart__hint">
         Tap any dot for that 12-hour window. {buckets.length} buckets over 14 days.
-      </p>
+      </p>}
     </div>
   );
 }

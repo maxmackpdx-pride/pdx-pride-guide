@@ -1,3 +1,4 @@
+import {pacificCalendarDate} from '@shared/missedConnections';
 import { useResponsivePoster } from "@/lib/useResponsivePoster";
 import { restoreOriginalPoster, POSTER_DETAIL_SIZES } from "@/lib/responsivePoster";
 import { CardArtworkGlass } from "./CardArtworkGlass";
@@ -339,7 +340,7 @@ function EventModalInner({
   });
 
   const { data: talentRows = [] } = useQuery<EventTalentRow[]>({
-    queryKey: ["/api/events", event.id, "talent"],
+    queryKey: ["/api/events", event.id, "talent", user?.id ?? null],
     queryFn: () => fetch(`/api/events/${event.id}/talent`, { credentials: "include" }).then(r => r.ok ? r.json() : []),
   });
 
@@ -792,7 +793,7 @@ function EventModalInner({
         <div className="event-modal__chrome">
           <DetailActions label="event" onClose={handleClose} onShare={async () => {
                 try {
-                  const result = await shareEventLink(eventPath(event.id, event.title, event.dayOfWeek), event.title);
+                  const result = await shareEventLink(eventPath(event.id, event.title, event.dayOfWeek, pacificCalendarDate(event.dateStart)), event.title);
                   toast({ title: shareToastTitle(result, "event") });
                 } catch (err) {
                   if ((err as DOMException)?.name !== "AbortError") {
@@ -1338,7 +1339,7 @@ function EventModalInner({
             <div className="event-modal__disclosure-content">
               {event.address && <p className="event-modal__description">{event.address}</p>}
               {locationOpen && <EventLocationMap event={event} primary={DAY_COLORS[dayCode as keyof typeof DAY_COLORS] || "#00FFFF"} complementary={DAY_OPPOSITE[dayCode] || "#D4FF00"}
-                scheduled={rsvp.myEventIds.has(event.id)} schedulePending={rsvp.isRsvpPending(event.id)}
+                actionLabel={rsvp.myEventIds.has(event.id)?"Remove attendance · Keep following":"Going · Public · Follow updates"} scheduled={rsvp.myEventIds.has(event.id)} schedulePending={rsvp.isRsvpPending(event.id)}
                 onSchedule={() => rsvp.toggleRsvp(event.id)} />}
             </div>
           </details>

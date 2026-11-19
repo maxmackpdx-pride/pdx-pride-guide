@@ -123,6 +123,8 @@ export interface ScheduleProps {
   density?: Density;
   /** Home embed: horizontal week grid only (no hero, toolbar, or filters). */
   embed?: boolean;
+  /** Drawer embed: only the viewer's own schedule (saved + beach days). */
+  mineOnly?: boolean;
 }
 
 type View = 'mine' | 'all';
@@ -158,10 +160,11 @@ function nowMinutes(): number {
 export default function Schedule({
   density = 'Comfortable',
   embed = false,
+  mineOnly = false,
 }: ScheduleProps) {
   const { user } = useAuth();
   const { savedIds } = useSavedEvents();
-  const [view, setViewState] = useState<View>(() => new URLSearchParams(window.location.search).get('view') === 'mine' ? 'mine' : 'all');
+  const [view, setViewState] = useState<View>(() => mineOnly || new URLSearchParams(window.location.search).get('view') === 'mine' ? 'mine' : 'all');
   const [viewBootstrapped, setViewBootstrapped] = useState(false);
   const [fAdm, setFAdm] = useState<FilterMap>({});
   const [fType, setFType] = useState<FilterMap>({});
@@ -475,8 +478,10 @@ export default function Schedule({
 
   const inView = useCallback(
     (e: ScheduleEvent) =>
-      embed || view === 'all' || myScheduleIds.has(e.id) || isBeachScheduleEvent(e),
-    [embed, view, myScheduleIds],
+      mineOnly
+        ? myScheduleIds.has(e.id) || isBeachScheduleEvent(e)
+        : embed || view === 'all' || myScheduleIds.has(e.id) || isBeachScheduleEvent(e),
+    [embed, view, myScheduleIds, mineOnly],
   );
   const pass = useCallback((e: ScheduleEvent) => inView(e) && matchFilters(e), [inView, matchFilters]);
   const viewSet = useMemo(() => weekEvents.filter(inView), [weekEvents, inView]);
@@ -821,6 +826,26 @@ export default function Schedule({
     }, 80);
     return () => clearTimeout(id);
   }, [activeWeekStart, AXIS_W, BASE_DAY, HOUR_H]);
+
+  /* The events filter drawer's day picker jumps this schedule to a date:
+     switch to that date's week, then scroll its column into view. */
+  useEffect(() => {
+    const onDay = (ev: Event) => {
+      const date = (ev as CustomEvent<{ date?: string }>).detail?.date;
+      if (!date) return;
+      const monday = mondayOf(date);
+      if (monday !== activeWeekStart) setWeekStart(monday);
+      let tries = 0;
+      const attempt = () => {
+        const idx = weekColumnsRef.current.findIndex(c => c.ymd === date);
+        if (idx >= 0) { scrollDayIntoView(idx); return; }
+        if (++tries <= 12) window.setTimeout(attempt, 60);
+      };
+      window.setTimeout(attempt, 60);
+    };
+    window.addEventListener("zaylist:schedule-day", onDay);
+    return () => window.removeEventListener("zaylist:schedule-day", onDay);
+  }, [activeWeekStart, scrollDayIntoView]);
 
   /* ---- now line --------------------------------------------------- */
 
@@ -1229,8 +1254,8 @@ export default function Schedule({
       rsvpLabel: isBeach
         ? "Remove beach day"
         : rsvp
-          ? <>You’re going <Check size={14} aria-hidden="true" /></>
-          : "I’ll be there",
+          ? <>Remove attendance <Check size={14} aria-hidden="true" /></>
+          : "Going · Public",
       rsvpBtnStyle: S({
         fontFamily: "var(--font-display)",
         fontWeight: 900,
@@ -1393,6 +1418,7 @@ export default function Schedule({
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
           <button
+            title={selected.isBeach?undefined:selected.rsvp?"Removing attendance keeps your event follow.":"Shows your name and follows event updates."}
             onClick={(e) => {
               if (!selected.isBeach && !selected.rsvp) spawnRsvpSparks(e.currentTarget);
               toggleRsvp(selected.id);
@@ -1572,8 +1598,11 @@ export default function Schedule({
                   className={`sch-weeknav__day${count ? " has-events" : ""}${isToday ? " is-today" : ""}`}
                   style={{
                     color: dt,
-                    borderColor: count || isToday ? dc : "#2a2a32",
-                    background: count ? hexA(dc, 0.22) : "transparent",
+                    borderColor: count || isToday ? dc : undefined,
+                    /* Dock-icon material, with the day tint layered under it. */
+                    background: count
+                      ? `linear-gradient(165deg, rgba(15, 22, 29, .29), rgba(0, 2, 6, .43)), ${hexA(dc, 0.22)}`
+                      : undefined,
                   }}
                   onClick={() => scrollDayIntoView(i)}
                   aria-label={`${col.short} ${col.date}${isToday ? ", today" : ""}${count ? `, ${count} event${count === 1 ? "" : "s"}` : ", no events"}`}
@@ -1664,7 +1693,7 @@ export default function Schedule({
                         >
                           <div style={b.overlayStyle} aria-hidden />
                           {b.showQuick && (
-                            <button type="button" aria-label={`${b.rsvp ? "Remove from" : "Add to"} my schedule: ${b.title}`} aria-pressed={b.rsvp} onClick={b.onQuick} style={b.quickStyle}>
+                            <button type="button" title={b.rsvp?"Remove attendance and keep your event follow":"Going publicly shows your name and follows event updates"} aria-label={`${b.rsvp ? "Remove attendance" : "Going publicly and following updates"} · ${b.title}`} aria-pressed={b.rsvp} onClick={b.onQuick} style={b.quickStyle}>
                               {b.quickIcon}
                             </button>
                           )}

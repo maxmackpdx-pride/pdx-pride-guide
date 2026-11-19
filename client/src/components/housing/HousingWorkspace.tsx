@@ -546,9 +546,10 @@ function PeopleTab({
         {household.length === 0 ? <div className="hz-empty">Just you so far.</div> : null}
       </div>
 
+      {(accept.error || decline.error) && <p role="alert">{(accept.error || decline.error)?.message}</p>}
       {workspace.isLead && requests.length ? (
         <div style={{ marginTop: 16 }}>
-          <Mono accent>Asked to join</Mono>
+          <Mono accent>Requests</Mono>
           {requests.map((r) => (
             <div className="hz-member" key={r.id} style={{ marginTop: 10 }}>
               <UserAvatar
@@ -572,7 +573,7 @@ function PeopleTab({
                       accept.mutate(r.id);
                     }}
                   >
-                    Accept and open the chat
+                    {r.kind === "WAITLIST" || (r.kind === "JOIN" && isFull) ? "Accept onto waitlist" : r.kind === "JOIN" ? "Add to household" : "Accept chat"}
                   </Chip>
                   <Chip
                     disabled={pendingRef.current.has(r.id)}
@@ -588,7 +589,7 @@ function PeopleTab({
             </div>
           ))}
           <p style={{ marginTop: 10, color: "var(--text-lo)", fontSize: "var(--meta)" }}>
-            Asking to join is asking to chat. Nothing opens until the Lead accepts.
+            Only an accepted join request adds someone to the household.
           </p>
         </div>
       ) : null}

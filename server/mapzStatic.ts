@@ -38,7 +38,7 @@ export function staticTextPrecompressed(distPath:string):RequestHandler {
  };
 }
 
-const MUTABLE_STATIC=/^\/(?:outzide-map|map-foundation|mapz-map)\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-][a-zA-Z0-9_.-]*\.(?:js|css|json|svg|png|jpe?g|webp|avif)$/i;
+const MUTABLE_STATIC=/^\/(?:outzide-map|map-foundation|mapz-map|room-shaders)\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-][a-zA-Z0-9_.-]*\.(?:js|css|json|svg|png|jpe?g|webp|avif|glsl|vert|frag)$/i;
 const STATIC_FILE=/\.(?:js|mjs|css|json|map|svg|png|jpe?g|webp|avif|gif|ico|woff2?|ttf|glb|txt|xml)$/i;
 
 /**

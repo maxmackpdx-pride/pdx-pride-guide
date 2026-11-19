@@ -7,7 +7,7 @@ import DiscoveryFlow from '@/components/discovery/DiscoveryFlow';
 import RoomPlate from "@/components/board/RoomPlate";
 import RoomComposer, { ComposerRules, ComposerSubmit } from "@/components/board/RoomComposer";
 import { roomToast } from "@/lib/roomToast";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -481,13 +481,22 @@ export function GigListingCard({
 
 
 /** Shared by the map and the fallback posting surface. */
-export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {initialType?: GigFormData["postType"]; onClose: () => void; onPosted: (id: number) => void}) {
+export type GigComposerPrefill = Partial<Pick<GigFormData, "title" | "description" | "location" | "gigDate" | "gigTime">>;
+
+export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted, prefill, venueName, eventLink}: {
+  initialType?: GigFormData["postType"];
+  onClose: () => void;
+  onPosted: (id: number) => void;
+  eventLink?: { eventId: number; occurrenceDate: string };
+  prefill?: GigComposerPrefill;
+  venueName?: string;
+}) {
   const {user} = useAuth();
   const {toast} = useToast();
   const [acceptRules, setAcceptRules] = useState(false);
   const [mapLocation, setMapLocation] = useState<BoardMapPoint | null>(null);
   const [motifChoice, setMotifChoice] = useState("default");
-  const [venueQuery, setVenueQuery] = useState("");
+  const [venueQuery, setVenueQuery] = useState(venueName ?? "");
   const [linkedBusiness, setLinkedBusiness] = useState<{ id: number; name: string } | null>(null);
   const [venueBranch, setVenueBranch] = useState<"idle" | "private" | "newBusiness">("idle");
   const [newBusinessForm, setNewBusinessForm] = useState({
@@ -518,6 +527,18 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
       .slice(0, 5);
   }, [directoryBusinesses, venueQuery]);
 
+  // Event-card prefill: when the composer was opened from an event, link the
+  // event's venue automatically if the directory holds exactly one exact name
+  // match. Tried once — the poster can still unlink or pick a different venue.
+  const venueAutolinkTried = useRef(false);
+  useEffect(() => {
+    if (venueAutolinkTried.current || !venueName || linkedBusiness || directoryBusinesses.length === 0) return;
+    venueAutolinkTried.current = true;
+    const target = normalizeVenueQuery(venueName);
+    const exact = directoryBusinesses.filter(b => normalizeVenueQuery(b.name) === target);
+    if (exact.length === 1) setLinkedBusiness({ id: exact[0].id, name: exact[0].name });
+  }, [venueName, directoryBusinesses, linkedBusiness]);
+
   const newBusinessMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/directory/new-submission", newBusinessForm),
     onSuccess: () => {
@@ -535,14 +556,14 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
       postType: initialType,
       name: "",
       contactEmail: "",
-      title: "",
-      description: "",
+      title: prefill?.title ?? "",
+      description: prefill?.description ?? "",
       skills: "",
       compensation: "",
-      location: "",
+      location: prefill?.location ?? "",
       isRemote: false,
-      gigDate: "",
-      gigTime: "",
+      gigDate: prefill?.gigDate ?? "",
+      gigTime: prefill?.gigTime ?? "",
       businessId: null,
       imageUrl: "",
     },
@@ -551,7 +572,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
   const mutation = useMutation({
     mutationFn: (data: GigFormData) => {
       trackProductEvent("post_attempt", "gigz");
-      return apiRequest("POST", "/api/gigs", { ...data, mapLocation, motifChoice, acceptRules: true }).then(r => r.json());
+      return apiRequest("POST", "/api/gigs", { ...data, ...eventLink, mapLocation, motifChoice, acceptRules: true }).then(r => r.json());
     },
     onSuccess: (_data, variables) => {
       trackProductEvent("post_completed", "gigz");
@@ -606,6 +627,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted}: {i
                 <select
                   className="board-text-field"
                   value={postType}
+                  disabled={!!eventLink}
                   onChange={e => form.setValue("postType", e.target.value as GigFormData["postType"])}
                 >
                   <option value="LOOKING_FOR_WORK">I&apos;m looking for work</option>

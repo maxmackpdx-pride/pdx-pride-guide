@@ -25,7 +25,7 @@
   .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock {
     --dock-expanded-width:min(576px, calc(var(--dock-viewport-width,100vw) - max(8px, env(safe-area-inset-left,0px)) - max(8px, env(safe-area-inset-right,0px))));
     position:fixed; inset:auto auto calc(8px + env(safe-area-inset-bottom,0px)) max(8px, env(safe-area-inset-left,0px), calc((var(--dock-viewport-width,100vw) - 576px)/2));
-    width:var(--dock-expanded-width); max-width:none; height:82px; margin:0; border-radius:28px; overflow:hidden;
+    width:var(--dock-expanded-width); max-width:none; height:56px; margin:0; border-radius:28px; overflow:hidden;
     background:rgba(1,4,8,.27); isolation:isolate; transform:none; opacity:1;
     transition:width .32s cubic-bezier(.22,.8,.25,1),height .32s cubic-bezier(.22,.8,.25,1),left .32s cubic-bezier(.22,.8,.25,1),border-radius .32s;
   }
@@ -105,7 +105,7 @@
 @media (max-width:959px) {
   /* Mapz keeps the shared baseline, with only a 3px rise at its top edge. */
   .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock .hub-mobile-tab.znav-control[href="/map"] {
-    top:-3px; height:73px; min-height:73px;
+    top:-3px; height:47px; min-height:47px;
   }
   .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock:has([href="/map"][data-dock-selected="true"]) .z-mobile-dock__indicator {
     top:3px;

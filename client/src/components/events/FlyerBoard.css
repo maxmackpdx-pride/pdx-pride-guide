@@ -5,7 +5,7 @@
 
 .fbx {
   position: relative;
-  background: var(--z-oled);
+  background: transparent;
   color: var(--evz-mist-f4f8fa);
   font-family: "Barlow", sans-serif;
   --pw: 168px;
@@ -15,112 +15,13 @@
 }
 .fbx h2, .fbx h3, .fbx h4, .fbx h5, .fbx p { margin: 0; }
 .fbx .hide { display: none !important; }
-.fbx-content { position: relative; z-index: 1; padding-bottom: 26px; }
+.fbx-content { position: relative; z-index: 1; padding-bottom: calc(26px + var(--edrawer-h, 0px)); }
 /* Body-portal wrapper for the fan deck + open card: carries the .fbx
    scope without the board root's painted background. */
 .fbx.fbx-overlay { background: none; }
 
-/* ---------- rainbow board background (demo treatment) ---------- */
-.fbx .bgfx {
-  --grad: var(--grad-rainbow);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100dvh;
-  min-height: 560px;
-  overflow: hidden;
-  background: var(--z-oled);
-  z-index: 0;
-  pointer-events: none;
-}
-.fbx .bgfx-base {
-  position: absolute; inset: 0;
-  background: radial-gradient(100% 100% at 0% 0%, rgb(46, 46, 46) 0%, rgb(0, 0, 0) 100%);
-  -webkit-mask-image: radial-gradient(125% 100% at 0% 0%, var(--z-oled) 0%, rgba(0, 0, 0, .224) 88.2883%, transparent 100%);
-  mask-image: radial-gradient(125% 100% at 0% 0%, var(--z-oled) 0%, rgba(0, 0, 0, .224) 88.2883%, transparent 100%);
-}
-.fbx .bgfx-streaks {
-  position: absolute; inset: 0;
-  -webkit-mask-image: linear-gradient(180deg, var(--z-oled) 0%, transparent 88%);
-  mask-image: linear-gradient(180deg, var(--z-oled) 0%, transparent 88%);
-}
-.fbx .bgfx-streaks i {
-  position: absolute; inset: -12% -25%; opacity: .2;
-  background: var(--grad);
-  transform: skewX(45deg);
-}
-.fbx .bgfx-streaks .s1 { -webkit-mask-image: linear-gradient(90deg, transparent 0%, var(--z-oled) 20%, transparent 36%, var(--z-oled) 55%, rgba(0, 0, 0, .13) 67%, var(--z-oled) 78%, transparent 97%); mask-image: linear-gradient(90deg, transparent 0%, var(--z-oled) 20%, transparent 36%, var(--z-oled) 55%, rgba(0, 0, 0, .13) 67%, var(--z-oled) 78%, transparent 97%); }
-.fbx .bgfx-streaks .s2 { -webkit-mask-image: linear-gradient(90deg, transparent 11%, var(--z-oled) 25%, rgba(0, 0, 0, .55) 41%, rgba(0, 0, 0, .13) 67%, var(--z-oled) 78%, transparent 97%); mask-image: linear-gradient(90deg, transparent 11%, var(--z-oled) 25%, rgba(0, 0, 0, .55) 41%, rgba(0, 0, 0, .13) 67%, var(--z-oled) 78%, transparent 97%); }
-.fbx .bgfx-streaks .s3 { -webkit-mask-image: linear-gradient(90deg, transparent 9%, var(--z-oled) 20%, rgba(0, 0, 0, .55) 28%, rgba(0, 0, 0, .424) 40%, var(--z-oled) 48%, rgba(0, 0, 0, .267) 54%, rgba(0, 0, 0, .13) 78%, var(--z-oled) 88%, transparent 97%); mask-image: linear-gradient(90deg, transparent 9%, var(--z-oled) 20%, rgba(0, 0, 0, .55) 28%, rgba(0, 0, 0, .424) 40%, var(--z-oled) 48%, rgba(0, 0, 0, .267) 54%, rgba(0, 0, 0, .13) 78%, var(--z-oled) 88%, transparent 97%); }
-.fbx .bgfx-streaks .s4 { -webkit-mask-image: linear-gradient(90deg, transparent 0%, var(--z-oled) 17%, rgba(0, 0, 0, .55) 26%, var(--z-oled) 35%, transparent 47%, rgba(0, 0, 0, .13) 69%, var(--z-oled) 79%, transparent 97%); mask-image: linear-gradient(90deg, transparent 0%, var(--z-oled) 17%, rgba(0, 0, 0, .55) 26%, var(--z-oled) 35%, transparent 47%, rgba(0, 0, 0, .13) 69%, var(--z-oled) 79%, transparent 97%); }
-.fbx .bgfx-streaks .s5 { -webkit-mask-image: linear-gradient(90deg, transparent 0%, var(--z-oled) 20%, rgba(0, 0, 0, .55) 27%, var(--z-oled) 42%, transparent 48%, rgba(0, 0, 0, .13) 67%, var(--z-oled) 74%, var(--z-oled) 82%, rgba(0, 0, 0, .47) 88%, transparent 97%); mask-image: linear-gradient(90deg, transparent 0%, var(--z-oled) 20%, rgba(0, 0, 0, .55) 27%, var(--z-oled) 42%, transparent 48%, rgba(0, 0, 0, .13) 67%, var(--z-oled) 74%, var(--z-oled) 82%, rgba(0, 0, 0, .47) 88%, transparent 97%); }
-.fbx .bgfx-dots {
-  position: absolute; inset: 0; opacity: .14;
-  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, .5) 1px, transparent 0);
-  background-size: 20px 20px;
-}
-.fbx .vig {
-  position: fixed; inset: 0; pointer-events: none; z-index: 20;
-  background:
-    radial-gradient(125% 95% at 50% 38%, transparent 52%, rgba(0, 0, 0, .42) 100%),
-    radial-gradient(95% 55% at 50% -12%, rgba(255, 214, 150, .12), transparent 60%);
-}
-
-/* ---------- filter bar ---------- */
-.fbx .fbar {
-  position: relative;
-  z-index: 26;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 10px 12px;
-  background: color-mix(in srgb, var(--z-black) 90%, transparent);
-  border-bottom: 1px solid var(--fbx-line-soft);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.fbx .fbar::-webkit-scrollbar { display: none; }
-.fbx .fchip {
-  flex: none;
-  font: 700 11.5px "Barlow Condensed", sans-serif;
-  letter-spacing: .08em;
-  color: var(--evz-mist-aeb8c3);
-  background: var(--fbx-card);
-  border: 1px solid var(--evz-line-2c2c35);
-  border-radius: 999px;
-  padding: 8px 14px;
-  cursor: pointer;
-  min-height: 36px;
-}
-.fbx .fchip.on {
-  color: var(--evz-mist-f4f8fa);
-  border-color: var(--neon-magenta);
-  box-shadow: 0 0 10px rgba(255, 31, 160, .4);
-}
-.fbx .fdiv { flex: none; width: 1px; height: 20px; background: var(--evz-line-2c2c35); margin: 0 3px; }
-.fbx .fsearch {
-  flex: 0 1 200px;
-  min-width: 112px;
-  background: var(--fbx-card);
-  border: 1px solid var(--evz-line-2c2c35);
-  border-radius: 999px;
-  color: var(--evz-mist-f4f8fa);
-  font: 600 11.5px "Barlow", sans-serif;
-  padding: 8px 13px;
-  outline: none;
-  margin-left: 6px;
-}
-.fbx .fsearch:focus { border-color: var(--neon-magenta); }
-.fbx .fsearch::placeholder { color: var(--fbx-placeholder); letter-spacing: .05em; }
-.fbx .fcount {
-  flex: none;
-  margin-left: auto;
-  font: 600 10.5px var(--font-mono);
-  color: var(--evz-gray-8a8a94);
-  letter-spacing: .08em;
-  padding-left: 8px;
-}
+/* The filter bar moved into the page's bottom filter drawer
+   (EventsFilterDrawer) — no filtering UI at the top of the board anymore. */
 
 /* ---------- section headers ---------- */
 .fbx .board-h {
@@ -154,10 +55,18 @@
   overflow-x: auto;
   scrollbar-width: none;
   gap: 10px;
-  padding: 12px 14px 20px;
+  /* Top room for the push pins: a pin stands ~28px above its poster, so the
+     rail's clip line must sit above the pins, not through them. */
+  padding: 42px 14px 20px;
 }
 .fbx .rail::-webkit-scrollbar { display: none; }
 .fbx .rail .cell { flex: none; width: var(--pw); position: relative; margin-left: -9px; }
+/* Happening Now / Later / This Weekend cards at 70% (Tucker, Nov 19 2026):
+   --pw drives the container-query cell, so the whole poster object —
+   type, icons, hardware — shrinks proportionally. Plan Ahead (.lboard)
+   is not in these sections and keeps the full --pw. Rails never get
+   taller: heights follow the same aspect at the smaller width. */
+.fbx .bandsec--scaled { --pw: calc(168px * .7); }
 .fbx .rail .cell:first-child { margin-left: 0; }
 .fbx .lboard {
   display: flex;
@@ -183,6 +92,16 @@
   background: color-mix(in srgb, var(--evz-ink-0a0a0e) 55%, transparent);
   border-top: 1px solid var(--evz-line-2c2c35);
   padding-bottom: 6px;
+}
+
+/* Keep the current flyer widths while centering each overlapping row. */
+.fbx .futurezone .lboard { justify-content: center; column-gap: 0; }
+.fbx .futurezone .lboard > .cell { margin-inline: -3px; }
+.fbx .futurezone .lboard .cell.dayflag-cell {
+  position: absolute;
+  inset: 0 auto auto 0;
+  margin: 0;
+  pointer-events: none;
 }
 
 /* ---------- hardware layer ---------- */
@@ -328,12 +247,12 @@
    behind real flyer art, so the port gives it the open card's typo
    treatment). */
 .fbx .poster.noart .pc { background: linear-gradient(160deg, color-mix(in srgb, var(--a) 24%, var(--fbx-pc-hi)), var(--evz-ink-0a0a0e) 74%); }
-.fbx .poster.noart .pshade { position: relative; z-index: 2; padding: 15cqw 4cqw 0; }
+.fbx .poster.noart .pshade { position: relative; z-index: 2; padding: 36cqw 4cqw 0; }
 .fbx .pshade h4 { font: 800 6.4cqw/1 "Barlow Condensed", sans-serif; text-transform: uppercase; }
 .fbx .pshade p { font: 500 3.6cqw var(--font-mono); color: var(--evz-mist-cfd8de); margin-top: 2cqw; }
 .fbx .pshare {
   position: absolute;
-  top: 4cqw; left: 4cqw;
+  top: 4cqw; right: 4cqw;
   z-index: 5;
   display: inline-flex;
   align-items: center;
@@ -344,19 +263,19 @@
   border-radius: 1cqw;
   font: 700 3.6cqw/1 "Barlow Condensed", sans-serif;
   letter-spacing: .09em;
-  padding: 2cqw 4cqw;
+  padding: 2cqw 2.4cqw;
   cursor: pointer;
 }
 .fbx .pshare svg { width: 3.6cqw; height: 3.6cqw; }
 .fbx .pprice {
   position: absolute;
-  top: 4cqw; right: 4cqw;
+  top: 12.8cqw; right: 4cqw;
   z-index: 5;
   background: rgba(5, 5, 6, .85);
   border: 1px solid var(--evz-line-2c2c35);
   border-radius: 1cqw;
   padding: 2cqw 4cqw;
-  max-width: 56cqw;
+  max-width: 40cqw;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -366,20 +285,36 @@
 }
 .fbx .pprice.free { color: var(--green-acid); border-color: color-mix(in srgb, var(--green-acid) 45%, transparent); }
 .fbx .pprice.unk { color: var(--evz-gray-8a8a94); }
+.fbx .pprice-note {
+  margin: 3cqw 0 0;
+  font: 500 2.7cqw/1.35 var(--font-mono);
+  letter-spacing: .02em;
+  color: var(--evz-gray-8a8a94);
+}
 .fbx .pfoot {
   position: absolute;
   left: 0; right: 0; bottom: 0;
   z-index: 3;
-  padding: 10cqw 4cqw 4cqw;
-  background: linear-gradient(180deg, transparent, rgba(5, 5, 6, .66) 30%, rgba(5, 5, 6, .93) 68%);
+  /* The heart sits 6cqw in from the bottom and right edges (Tucker,
+   * Nov 19, 2026); the rest of the band keeps the 4cqw face margin. */
+  padding: 4cqw 6cqw 6cqw 4cqw;
+  /* Finish the fade within the top padding so the actions row has a solid backing. */
+  background: linear-gradient(to bottom, transparent, var(--z-black) 4cqw);
 }
-.fbx .pstart {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 4cqw;
+.fbx .pcdtop {
+  position: absolute;
+  top: 11.5cqw; left: 4cqw;
+  z-index: 5;
+  background: rgba(4, 4, 6, .55);
+  border: 1px solid rgba(244, 248, 250, .09);
+  border-radius: 2.4cqw;
+  padding: 2.6cqw 3.4cqw;
   text-shadow: 0 1px 7px rgba(0, 0, 0, .6), 0 0 2px rgba(0, 0, 0, .5);
+  pointer-events: none;
 }
+.fbx .pcdtop .ps-lab { display: block; margin-bottom: 1.6cqw; }
+.fbx .pcdtop .ps-nums { gap: 5cqw; }
+.fbx .poster.noart .pcdtop { top: 13.5cqw; }
 .fbx .ps-lab { font: 800 3.6cqw/1 "Barlow Condensed", sans-serif; letter-spacing: .14em; color: var(--a); }
 .fbx .ps-nums { display: flex; gap: 6cqw; }
 .fbx .ps-nums span { text-align: center; }
@@ -577,10 +512,8 @@
   z-index: 5;
   width: var(--mw);
   aspect-ratio: .8;
-  background: var(--neon-magenta);
-  border-radius: 10px;
   margin: 0 auto;
-  box-shadow: 0 0 24px rgba(255, 31, 160, .45), 0 18px 34px rgba(0, 0, 0, .55);
+  text-shadow: 0 1px 3px var(--paper-ink), 0 0 6px var(--paper-ink);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -591,7 +524,7 @@
   transition: transform .35s cubic-bezier(.32, 1.24, .36, 1);
 }
 .fbx .magcard:hover { transform: rotate(0deg) scale(1.03); }
-.fbx .magcard svg { width: 58%; }
+.fbx .magcard svg { width: 58%; filter: drop-shadow(0 1px 3px var(--paper-ink)); }
 .fbx .mag-t { font: 800 21px "Barlow Condensed", sans-serif; letter-spacing: .06em; color: var(--text-hi); }
 .fbx .mag-s { font: 600 8.5px var(--font-mono); color: rgba(255, 255, 255, .85); letter-spacing: .12em; }
 .fbx .pile-cap {
@@ -817,14 +750,15 @@
     0 14px 30px rgba(0, 0, 0, .6);
 }
 .fbx .ocard.on { opacity: 1; pointer-events: auto; transform: translate(-50%, 0) perspective(1100px) rotateY(0deg) rotateX(0deg) scale(1); }
-.fbx .ohero { position: relative; height: 248px; flex: none; overflow: hidden; background: var(--evz-ink-0a0a0e); }
+.fbx .ohero { position: relative; height: 248px; flex: none; overflow: visible; background: var(--evz-ink-0a0a0e); }
 .fbx .ohero img {
-  width: 100%; height: 100%;
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 380px;
   object-fit: cover;
   object-position: top center;
   display: block;
-  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 46%, transparent 98%);
-  mask-image: linear-gradient(to bottom, var(--z-oled) 46%, transparent 98%);
+  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 40%, transparent 96%);
+  mask-image: linear-gradient(to bottom, var(--z-oled) 40%, transparent 96%);
 }
 .fbx .ohero-typo { position: absolute; inset: 0; }
 .fbx .typo-t {
@@ -865,6 +799,7 @@
 .fbx .oid h2 { font: 800 25px/1.02 "Barlow Condensed", sans-serif; text-transform: uppercase; margin-top: 9px; }
 .fbx .ometa { font: 500 11.5px var(--font-mono); color: var(--evz-mist-cfd8de); margin-top: 6px; line-height: 1.55; white-space: pre-line; }
 .fbx .ointerested {
+  position: relative; z-index: 2;
   margin: 14px 16px 0;
   background: var(--z-oled);
   border: 1px solid color-mix(in srgb, var(--a) 45%, transparent);
@@ -939,7 +874,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px 18px;
+  padding: 12px 20px 20px;
   border-top: 1px solid var(--fbx-line-soft);
   background: rgba(10, 10, 14, .96);
 }
@@ -958,15 +893,175 @@
   background: none;
   cursor: pointer;
 }
-.fbx .oheart { color: var(--a); font-size: 18px; }
+/* The expanded card's heart (restored Nov 19, 2026): the INTERESTED
+ * toggle, same function as the front heart. A 44px circular button at
+ * the footer's right end; its edge clears the card's bottom and right
+ * edges by the foot's 20px padding, matching the front heart's inset. */
+.fbx .oheart {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--a);
+  border-radius: 50%;
+  background: none;
+  color: var(--a);
+  cursor: pointer;
+}
+.fbx .oheart[aria-pressed="true"] { background: color-mix(in srgb, var(--a) 24%, transparent); }
+.fbx .oheart:disabled { opacity: .7; cursor: progress; }
+
+/* ---------- wide-poster chunk + expanded pages (Nov 18, 2026) ---------- */
+.fbx .pblend {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 7.5cqw; z-index: 3;
+  background: linear-gradient(180deg, transparent, var(--evz-ink-0a0a0e));
+  pointer-events: none;
+}
+.fbx .pchunk { position: relative; z-index: 1; background: var(--evz-ink-0a0a0e); padding: 3.4cqw 6cqw 6cqw 4cqw; }
+.fbx .pchunk h4 {
+  font: 800 6.4cqw/1.05 var(--font-display);
+  text-transform: uppercase; color: var(--evz-mist-f4f8fa);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fbx .pchunk-meta {
+  font: 500 3.6cqw var(--font-mono); color: var(--evz-mist-cfd8de); margin-top: 2cqw;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fbx .pchunk-row { display: flex; align-items: center; gap: 3cqw; margin-top: 3.2cqw; }
+.fbx .oshare {
+  position: absolute; top: 10px; left: 10px; z-index: 6;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(5, 5, 6, .72); border: 1px solid var(--evz-line-2c2c35);
+  color: var(--evz-mist-f4f8fa);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.fbx .oshare svg { width: 16px; height: 16px; }
+.fbx .otabs { display: flex; flex: none; border-bottom: 1px solid var(--fbx-line-soft); margin: 14px 16px 0; }
+.fbx .otabs button {
+  flex: 1; background: none; border: none; border-bottom: 2px solid transparent;
+  color: var(--evz-gray-8a8a94);
+  font: 700 11.5px var(--font-display); letter-spacing: .07em;
+  padding: 9px 1px 7px; cursor: pointer;
+}
+.fbx .otabs button.on { color: var(--evz-mist-f4f8fa); border-bottom-color: var(--a); }
+.fbx .opages {
+  flex: 1; min-height: 0; display: flex; overflow-x: auto;
+  scroll-snap-type: x mandatory; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+}
+.fbx .opages::-webkit-scrollbar { display: none; }
+.fbx .opage {
+  flex: 0 0 100%; overflow-y: auto; padding: 16px;
+  scroll-snap-align: start; scrollbar-width: none; overscroll-behavior: contain;
+}
+.fbx .opage::-webkit-scrollbar { display: none; }
+.fbx .osec-r { float: right; color: var(--evz-gray-8a8a94); letter-spacing: .05em; }
+.fbx .oempty {
+  font-size: 12.5px; line-height: 1.55; color: var(--evz-gray-8a8a94);
+  border: 1px dashed var(--evz-line-2c2c35); border-radius: 9px; padding: 12px;
+}
+.fbx .ostarts {
+  border: 1px solid color-mix(in srgb, var(--a) 55%, transparent);
+  border-radius: 10px; padding: 12px 14px; text-align: center;
+  margin-bottom: 13px; background: var(--fbx-chip-bg);
+}
+.fbx .ostarts i { display: block; font: 700 11.5px var(--font-display); font-style: normal; letter-spacing: .24em; color: var(--a); }
+.fbx .ostarts b { display: block; font: 800 30px/1.1 var(--font-display); color: var(--evz-mist-f4f8fa); }
+.fbx .okv { display: flex; gap: 10px; font-size: 13.5px; line-height: 1.5; color: var(--evz-mist-f4f8fa); margin-bottom: 11px; }
+.fbx .okv .ok { font: 700 11px var(--font-display); letter-spacing: .12em; color: var(--evz-gray-8a8a94); flex: 0 0 74px; padding-top: 3px; }
+.fbx .odesc { font-size: 13.5px; line-height: 1.55; color: var(--evz-mist-cfd8de); margin-bottom: 13px; white-space: pre-line; }
+.fbx .onote {
+  font-size: 12.5px; line-height: 1.55; color: var(--evz-gray-8a8a94);
+  border: 1px dashed var(--evz-line-2c2c35); border-radius: 9px;
+  padding: 11px 12px; margin-top: 13px;
+}
+.fbx .olinkbtn {
+  display: flex; justify-content: space-between; align-items: center;
+  font: 800 15px var(--font-display); letter-spacing: .1em;
+  padding: 12px 13px; border-radius: 9px; margin-top: 10px;
+  border: 1px solid var(--evz-line-2c2c35); background: var(--z-oled);
+  color: var(--evz-mist-f4f8fa); text-decoration: none; cursor: pointer;
+}
+.fbx .olinkbtn.accent { border-color: var(--a); }
+.fbx .omap {
+  position: relative; height: 180px; border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--evz-line-2c2c35); background: var(--evz-ink-0a0a0e);
+  margin-bottom: 13px;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--a) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--a) 7%, transparent) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+.fbx .omap-river {
+  position: absolute; left: -10%; right: -10%; top: 56%; height: 26px;
+  background: color-mix(in srgb, var(--a) 18%, transparent);
+  transform: rotate(-7deg); border-radius: 50%;
+}
+.fbx .omap-road { position: absolute; background: color-mix(in srgb, var(--evz-mist-f4f8fa) 13%, transparent); }
+.fbx .omap-pin {
+  position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px;
+  border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+  background: var(--a); border: 2px solid var(--evz-mist-f4f8fa);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--a) 30%, transparent);
+}
+.fbx .omap-tag { position: absolute; top: 9px; left: 10px; font: 500 9.5px var(--font-mono); letter-spacing: .08em; color: var(--evz-gray-8a8a94); }
+.fbx .odir { display: flex; gap: 9px; }
+.fbx .odir a {
+  flex: 1; text-align: center; text-decoration: none;
+  font: 800 14px var(--font-display); letter-spacing: .08em;
+  padding: 11px 6px; border-radius: 9px;
+  border: 1px solid var(--a); background: var(--z-oled); color: var(--evz-mist-f4f8fa);
+}
+.fbx .odays { display: flex; gap: 6px; margin-bottom: 12px; }
+.fbx .oday {
+  flex: 1; background: var(--fbx-chip-bg); border: 1px solid var(--fbx-line-soft);
+  border-radius: 8px; padding: 7px 2px 6px; text-align: center; cursor: pointer;
+  color: var(--evz-mist-f4f8fa);
+}
+.fbx .oday i { display: block; font: 700 10px var(--font-display); font-style: normal; letter-spacing: .12em; color: var(--evz-gray-8a8a94); }
+.fbx .oday b { display: block; font: 800 18px/1.15 var(--font-display); }
+.fbx .oday span { display: block; font-size: 9px; color: var(--evz-gray-8a8a94); }
+.fbx .oday.hot { border-color: var(--a); }
+.fbx .oday.hot i { color: var(--a); }
+.fbx .orail { display: flex; gap: 9px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.fbx .orail::-webkit-scrollbar { display: none; }
+.fbx .omini { flex: 0 0 128px; border: 1px solid var(--fbx-line-soft); border-radius: 9px; padding: 9px 10px; background: var(--fbx-chip-bg); }
+.fbx .omini b { display: block; font: 700 13.5px var(--font-display); line-height: 1.2; color: var(--evz-mist-f4f8fa); }
+.fbx .omini span { display: block; font-size: 10.5px; color: var(--evz-gray-8a8a94); margin-top: 3px; line-height: 1.35; }
+.fbx .operson { display: flex; align-items: center; gap: 12px; padding: 9px 0; }
+.fbx .oavatar {
+  width: 46px; height: 46px; flex: none; border-radius: 50%;
+  background: color-mix(in srgb, var(--a) 30%, var(--fbx-chip-bg));
+  border: 2px solid var(--a);
+  display: flex; align-items: center; justify-content: center;
+  font: 800 18px var(--font-display); color: var(--evz-mist-f4f8fa);
+}
+.fbx .opn { display: block; font: 700 16.5px var(--font-display); line-height: 1.15; color: var(--evz-mist-f4f8fa); }
+.fbx .opr { display: block; font-size: 12px; color: var(--a); }
+.fbx .oclaimbox {
+  border: 1px solid var(--fbx-line-soft); border-radius: 10px;
+  padding: 14px; text-align: center; margin-bottom: 12px; background: var(--fbx-chip-bg);
+}
+.fbx .oct { font: 800 18px var(--font-display); letter-spacing: .16em; color: var(--evz-mist-f4f8fa); }
+.fbx .ocs { font-size: 12.5px; color: var(--evz-gray-8a8a94); line-height: 1.5; margin-top: 4px; }
+.fbx .oarw {
+  width: 30px; height: 30px; flex: none; border-radius: 50%;
+  background: var(--fbx-chip-bg); border: 1px solid var(--evz-line-2c2c35);
+  color: var(--evz-mist-f4f8fa); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.fbx .oarw:disabled { opacity: .3; }
+.fbx .opg { font: 500 9.5px var(--font-mono); color: var(--evz-gray-8a8a94); white-space: nowrap; }
 
 /* ---------- desktop ---------- */
 @media (min-width: 1100px) {
   .fbx { --pw: 264px; --pw2: 118px; --mw: 200px; --fw: 215px; }
-  .fbx .fbar { padding: 10px 22px; }
+  .fbx .bandsec--scaled { --pw: calc(264px * .7); }
   .fbx .board-h { padding: 18px 24px 12px; background: linear-gradient(180deg, rgba(7, 5, 3, .94) 70%, transparent); }
   .fbx .board-h h3 { font-size: 24px; }
-  .fbx .rail { gap: 12px; padding: 14px 24px 24px; }
+  .fbx .rail { gap: 12px; padding: 42px 24px 24px; }
   .fbx .rail .cell { margin-left: -12px; }
   .fbx .rail .cell:first-child { margin-left: 0; }
   .fbx .lboard { gap: 12px; padding: 8px 24px 20px; --cols: 5; --gap: 12px; }
@@ -989,6 +1084,7 @@
 
 @media (max-width: 767px) {
   .fbx { --pw: clamp(216px, 65vw, 296px); }
+  .fbx .bandsec--scaled { --pw: clamp(calc(216px * .7), 45.5vw, calc(296px * .7)); }
 
   .fbx .board-h {
     display: grid;
@@ -1011,4 +1107,15 @@
 /* Let the board's end scroll clear of the mobile dock. */
 @media (max-width: 1099px) {
   .fbx { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* Open card: everything below the hero rides above the poster's fade tail. */
+.fbx .otabs, .fbx .opageswrap, .fbx .ofoot { position: relative; z-index: 2; }
+
+.fbx .ocard :is(.oclose,.oshare,.oarw,.osave,.otabs button,.opage button) { min-height:44px; min-width:44px; }
+.fbx .ointerested .evz-x__act-main {display:grid;gap:2px;}
+
+.fbx .ocard .ox {min-width:44px;min-height:44px}
+.fbx .pheart::after,.fbx .pshare::after {
+ content:"";position:absolute;left:50%;top:50%;min-width:44px;min-height:44px;transform:translate(-50%,-50%);
 }

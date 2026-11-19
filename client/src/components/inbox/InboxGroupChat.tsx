@@ -1,3 +1,4 @@
+import { useEventChatHistory } from "@/hooks/useEventChatHistory";
 import CommunityInboxChat from './CommunityInboxChat';
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -78,12 +79,7 @@ function TimedInboxGroupChat({ target, onBack }: Props) {
   const beachId = !isEvent && !isOutz && isValidBeachId(String(target.id)) ? (String(target.id) as NudeBeachTab) : null;
   const beachDate = target.calendarDate || pacificTodayDate();
 
-  const eventQuery = useQuery<EventChatPayload>({
-    queryKey: ["/api/events", eventId, "chat"],
-    queryFn: () => apiRequest("GET", `/api/events/${eventId}/chat`).then(r => r.json()),
-    refetchInterval: 8_000,
-    enabled: isEvent && eventId != null && Number.isFinite(eventId),
-  });
+  const eventQuery = useEventChatHistory<EventChatPayload>(eventId, listRef);
 
   const beachQuery = useQuery<BeachChatPayload>({
     queryKey: ["/api/river-brats/checkins/chat", beachId, beachDate],
@@ -136,9 +132,9 @@ function TimedInboxGroupChat({ target, onBack }: Props) {
 
   useEffect(() => {
     const el = listRef.current;
-    if (!el) return;
+    if (!el || isEvent) return;
     el.scrollTop = el.scrollHeight;
-  }, [messages.length]);
+  }, [isEvent, messages.length]);
 
   const postMutation = useMutation({
     mutationFn: (text: string) => {
@@ -255,12 +251,14 @@ function TimedInboxGroupChat({ target, onBack }: Props) {
           <p className="inbox-group-chat__host-hint">Host tools live on the event page. Chat with the room here.</p>
         )}
 
-        <div className="inbox-group-chat__messages" ref={listRef}>
+        <div className="inbox-group-chat__messages" ref={listRef} onScroll={eventQuery.onScroll}>
+          {eventQuery.isError && <p role="alert">Could not load event chat. <button type="button" onClick={() => void eventQuery.retry()}>Retry</button></p>}
+          {eventQuery.canLoadEarlier && <button type="button" disabled={eventQuery.loadingEarlier} onClick={eventQuery.earlier}>{eventQuery.loadingEarlier ? "Loading earlier messages…" : eventQuery.earlierFailed ? "Retry earlier messages" : "Load earlier messages"}</button>}
           {isLoading && <p className="inbox-group-chat__empty">Loading chat…</p>}
-          {!isLoading && messages.length === 0 && <p className="inbox-group-chat__empty">{emptyCopy}</p>}
+          {!isLoading && !eventQuery.isError && messages.length === 0 && <p className="inbox-group-chat__empty">{emptyCopy}</p>}
           {messages.map(msg => (
             <div
-              key={msg.id}
+              key={msg.id} data-chat-id={msg.id}
               className={`inbox-group-chat__msg${msg.isMine ? " inbox-group-chat__msg--mine" : ""}`}
             >
               {!msg.isMine && (

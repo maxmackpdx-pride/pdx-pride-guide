@@ -1,3 +1,13 @@
+import { eventAge, eventPrice } from "@/lib/eventFacts";
+import { EventGoingButton, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
+import EventPlanning from "./EventPlanning";
+import {useHistoryState} from "wouter/use-browser-location";
+import {useAuth} from "@/context/AuthContext";
+import AuthModal from "@/components/AuthModal";
+import { useHeart } from "@/hooks/useHearts";
+import {useModalA11y} from "@/hooks/useModalA11y";
+import {sharePageLink,shareToastTitle} from "@/lib/shareEvent";
+import {toast} from "@/hooks/use-toast";
 import type React from "react";
 import {
   useEffect,
@@ -25,6 +35,8 @@ import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import "../board/punk/push-pins.css";
 import "./FlyerBoard.css";
 import { connectionsForListing, isPosterActivation } from "./flyerBoardBehavior";
+import { PosterlessFlyer } from "./PosterlessFlyer";
+import { resolveDirectoryLogo } from "@shared/directoryLogos";
 
 /**
  * The Flyer Board — a faithful port of the approved demo (build_board_v5):
@@ -44,9 +56,17 @@ export type FlyerBoardProps = {
   onExitPast: () => void;
   /** Opens the full production expanded card (deep actions: post a Mizzed, etc.). */
   onOpen: (listing: EventListing, originRect: EventModalOriginRect | null) => void;
-  savedIds: Set<number>;
-  onToggleSave: (id: number) => void;
   now: number;
+  query: string;
+  setQuery: (value: string) => void;
+  fday: string;
+  setFday: (value: string) => void;
+  tags: Set<string>;
+  setTags: React.Dispatch<React.SetStateAction<Set<string>>>;
+  onClear: () => void;
+  /** Reports the board's visible event count (the old filter bar's number)
+      to the page, which now shows it inside the bottom filter drawer. */
+  onVisibleCount?: (count: number) => void;
 };
 
 const PACIFIC = "America/Los_Angeles";
@@ -54,29 +74,20 @@ const DAY_MS = 86_400_000;
 const WEEKDAY_CODES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
 const DOW_INDEX: Record<string, number> = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-const ADMISSION_LABEL: Record<string, string> = {
-  FREE: "FREE",
-  TICKETED: "TICKETED",
-  DOOR_FEE: "COVER AT DOOR",
-  SUGGESTED_DONATION: "DONATION",
-  UNKNOWN: "PRICE NOT CONFIRMED",
-};
-const AGE_LABEL: Record<string, string> = {
-  "21_PLUS": "21+",
-  "18_PLUS": "18+",
-  ALL_AGES: "All ages",
-};
+const OPAGE_NAMES = ["FEED", "INFO", "MAPS", "MORE + NEARBY", "PEOPLE"];
+const OPAGE_LABELS = ["FEED", "INFO", "MAPS", "MORE", "PEOPLE"];
+async function shareEventListing(listing: EventListing) {
+  const url = eventPath(listing.id,listing.title,listing.dayOfWeek,dateStrOf(listing));
+  try {
+    const result = await sharePageLink(url,listing.title);
+    toast({title:shareToastTitle(result,"event")});
+  } catch (error) {
+    if (!(error instanceof Error && error.name === "AbortError")) toast({title:"Could not share the event",variant:"destructive"});
+  }
+}
 /** The demo's rotation rhythm and stagger, by position in the container. */
 const ROT_CYCLE = [-2.2, 1.6, -1.2, 2.6, -2.8, 1.9];
 const MTOPS = [0, 10, 4, 14, 2, 8, 0, 12, 6, 2];
-const TAG_CHIPS: Array<[string, string]> = [
-  ["21plus", "21+"],
-  ["free", "FREE"],
-  ["party", "PARTY"],
-  ["drag", "DRAG"],
-  ["kink", "KINK"],
-  ["social", "SOCIAL"],
-];
 const PILE_SPOTS: Array<[number, number, number]> = [
   [4, -9, 54],
   [22, 7, 46],
@@ -168,10 +179,10 @@ function countdownParts(ms: number): { d: string; h: string; m: string } {
   };
 }
 
-function timeAgo(iso: string): string {
+function timeAgo(iso: string, now: number): string {
   const t = Date.parse(iso);
   if (Number.isNaN(t)) return "";
-  const s = (Date.now() - t) / 1000;
+  const s = (now - t) / 1000;
   if (s < 3600) return `${Math.max(1, Math.floor(s / 60))}m ago`;
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
   if (s < 86400 * 30) return `${Math.floor(s / 86400)}d ago`;
@@ -298,13 +309,42 @@ type CellCommon = {
  * placeholder-proportioned jump while it loads. */
 const aspectByPosterUrl = new Map<string, number>();
 
+/** Native loading="lazy" never fires for poster images inside the board's
+ * transformed cells (measured live Nov 17, 2026: a card held fully in the
+ * viewport for 15s was never even requested). Drive poster loading from an
+ * IntersectionObserver instead: the img gets its src only when its cell
+ * nears the viewport, so off-board posters still cost no bandwidth. */
+function usePosterLoad<T extends HTMLElement>(poster: string | null | undefined) {
+  const ref = useRef<T | null>(null);
+  const [load, setLoad] = useState(false);
+  useEffect(() => {
+    if (!poster || load) return;
+    const el = ref.current;
+    if (!el || !("IntersectionObserver" in window)) {
+      setLoad(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      es => {
+        if (es.some(en => en.isIntersecting)) {
+          setLoad(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "800px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [poster, load]);
+  return [ref, load] as const;
+}
+
 function PosterCell({
   listing,
   index,
   mtop,
   rail = false,
-  saved,
-  onToggleSave,
+  showDayFlag = false,
   onOpenCard,
   tick,
 }: CellCommon & {
@@ -314,8 +354,7 @@ function PosterCell({
   /** Rails never grow taller: a poster taller than the rail's standard
    *  height (the 0.8 reference at full rail width) scales down to fit. */
   rail?: boolean;
-  saved: boolean;
-  onToggleSave: (id: number) => void;
+  showDayFlag?: boolean;
   onOpenCard: (listing: EventListing, el: HTMLElement | null) => void;
 }) {
   const articleRef = useRef<HTMLElement | null>(null);
@@ -327,35 +366,54 @@ function PosterCell({
   const accent = listing.accentColor || dayColor;
   const poster = listingPosterUrl(listing);
   const [aspect, setAspect] = useState(() => (poster ? aspectByPosterUrl.get(poster) ?? 0.8 : 0.8));
+  const [cellRef, loadPoster] = usePosterLoad<HTMLDivElement>(poster);
+  /* The heart means "you're interested" (Tucker's ruling, Nov 19, 2026):
+   * the same function on the front and the expanded card, driving the
+   * one shared interested (follow) state — never the private save.
+   * Filled = interested. The `.saved` class is the legacy on-state class. */
+  const heart = useHeart("event", String(listing.id), {
+    title: listing.title,
+    subtitle: listing.venueName,
+    image: poster,
+    href: eventPath(listing.id, listing.title, listing.dayOfWeek, dateStr),
+    accent: listing.accentColor ?? null,
+  });
+  const [heartAuth, setHeartAuth] = useState(false);
   const tear = useMemo(() => (pinned ? tearPolygons(key) : null), [pinned, key]);
   useDemoTilt(articleRef, !pinned);
 
-  const cd = countdownParts(startMs(listing) - tick);
-  const age = AGE_LABEL[listing.ageRequirement ?? ""] ?? "";
-  const meta = `${eventDateLabel(listing.dateStart)} · ${eventTimeLabel(listing.dateStart)} · ${listing.venueName}${age ? ` · ${age}` : ""}`;
-  const price = ADMISSION_LABEL[listing.admission ?? "UNKNOWN"] ?? "PRICE NOT CONFIRMED";
+  const start = startMs(listing);
+  const end = parsePacificDateTime(listing.dateEnd);
+  const running = start <= tick && (
+    (end !== null && tick < end) ||
+    (!listing.dateEnd && dateStr === pacificTodayDate(tick))
+  );
+  const countdownLabel = running ? (end === null ? "ON NOW" : "ENDS IN") : "STARTS IN";
+  const cd = countdownLabel === "ON NOW" ? null : countdownParts(
+    running && end !== null ? end - tick : start - tick,
+  );
+  const age = eventAge(listing.ageRequirement);
+  const meta = `${eventDateLabel(listing.dateStart)} · ${eventTimeLabel(listing.dateStart)} · ${listing.venueName} · ${listing.ageRequirement && age!=="Not stated"?age:"Age not stated"}`;
+  const price = eventPrice(listing.admission) === "Not confirmed" ? "PRICE NOT CONFIRMED" : eventPrice(listing.admission).toUpperCase();
   const priceCls = listing.admission === "FREE" ? " free" : !listing.admission || listing.admission === "UNKNOWN" ? " unk" : "";
+  /* An unconfirmed price is not a tag: it demotes to an asterisk
+   * small-print note at the bottom of the card's bottom band (Tucker's
+   * ruling, Nov 18, 2026). Confirmed prices keep the chip. */
+  const priceUnconfirmed = price === "PRICE NOT CONFIRMED";
+  /* Wide posters (landscape art) carry their info in a black chunk added
+   * below the poster, with a little gradient blending into the poster's
+   * bottom edge; tall posters keep the info laid over the poster with a
+   * gradient. (Tucker's ruling, Nov 18, 2026.) */
+  const wideChunk = !!poster && aspect >= 1.15;
 
   const share = async (ev: React.MouseEvent) => {
     ev.stopPropagation();
-    const url = `https://www.zaylist.com${eventPath(listing.id, listing.title, listing.dayOfWeek)}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: listing.title, url });
-        return;
-      }
-      throw new Error("no native share");
-    } catch {
-      try {
-        await navigator.clipboard.writeText(url);
-      } catch {
-        /* clipboard unavailable — the card still opens on tap */
-      }
-    }
+    await shareEventListing(listing);
   };
 
   return (
     <div
+      ref={cellRef}
       className="cell"
       style={{
         marginTop: mtop,
@@ -364,9 +422,10 @@ function PosterCell({
           : {}),
       }}
     >
+      {showDayFlag && <DayFlag dateStr={dateStr} />}
       <article
         ref={articleRef}
-        className={`poster att-${pinned ? "pin" : "tape"}${tear ? " torn" : ""}${poster ? "" : " noart"} pdx-glass-rebind`}
+        className={`poster att-${pinned ? "pin" : "tape"}${tear ? " torn" : ""}${poster ? "" : " noart"}${wideChunk ? " chunk" : ""} pdx-glass-rebind`}
         style={
           {
             "--a": accent,
@@ -391,11 +450,10 @@ function PosterCell({
       >
         {tear ? <i className="trim" aria-hidden="true" /> : null}
         <div className="pc" style={{ aspectRatio: aspect }}>
-          {poster ? (
+          {poster && loadPoster ? (
             <img
               src={poster}
               alt=""
-              loading="lazy"
               decoding="async"
               onLoad={ev => {
                 const im = ev.currentTarget;
@@ -407,44 +465,80 @@ function PosterCell({
               }}
             />
           ) : null}
+          {!poster ? <PosterlessFlyer logoUrl={resolveDirectoryLogo(listing.venueName)} /> : null}
           <button type="button" className="pshare" aria-label={`Share ${listing.title}`} onClick={share}>
             <ShareIcon />
-            SHARE
           </button>
-          <span className={`pprice${priceCls}`}>{price}</span>
-          <div className="pshade">
-            <h4>{listing.title}</h4>
-            <p>{meta}</p>
-          </div>
-          <div className="pfoot">
-            <div className="pstart">
-              <span className="ps-lab">STARTS IN</span>
+          {!priceUnconfirmed && <span className={`pprice${priceCls}`}>{price}</span>}
+          <div className="pcdtop">
+            <span className="ps-lab">{countdownLabel}</span>
+            {cd && (
               <span className="ps-nums">
                 <span><b>{cd.d}</b><i>DAYS</i></span>
                 <span><b>{cd.h}</b><i>HRS</i></span>
                 <span><b>{cd.m}</b><i>MIN</i></span>
               </span>
-            </div>
-            <div className="pactions">
+            )}
+          </div>
+          {wideChunk ? <span className="pblend" aria-hidden="true" /> : null}
+          {!wideChunk && (
+            <>
+              <div className="pshade">
+                <h4>{listing.title}</h4>
+                <p>{meta}</p>
+              </div>
+              <div className="pfoot">
+                <div className="pactions">
+                  <span className="pgigz"><b>–</b><i>GIGZ</i></span>
+                  <span className="pgigz pcarpool"><b>–</b><i>CARPOOL</i></span>
+                  <button
+                    type="button"
+                    className={`pheart${heart.hearted ? " saved" : ""}`}
+                    aria-label={heart.hearted ? `Remove interest in ${listing.title}` : `Mark interest in ${listing.title}`}
+                    title={heart.hearted ? "Interested" : "Mark interest"}
+                    disabled={heart.pending} aria-pressed={heart.hearted}
+                    onClick={ev => {
+                      ev.stopPropagation();
+                      heart.signedIn ? heart.toggle() : setHeartAuth(true);
+                    }}
+                  >
+                    <HeartIcon />
+                  </button>
+                </div>
+                {priceUnconfirmed && <p className="pprice-note">* Price not confirmed</p>}
+              </div>
+            </>
+          )}
+        </div>
+        {wideChunk && (
+          <div className="pchunk">
+            <h4>{listing.title}</h4>
+            <p className="pchunk-meta">
+              {listing.venueName} · {weekdayCode(dateStr)} {eventTimeLabel(listing.dateStart)}
+            </p>
+            <div className="pchunk-row">
               <span className="pgigz"><b>–</b><i>GIGZ</i></span>
               <span className="pgigz pcarpool"><b>–</b><i>CARPOOL</i></span>
               <button
                 type="button"
-                className={`pheart${saved ? " saved" : ""}`}
-                aria-label={saved ? `Remove ${listing.title} from your schedule` : `Save ${listing.title}`}
-                aria-pressed={saved}
+                className={`pheart${heart.hearted ? " saved" : ""}`}
+                aria-label={heart.hearted ? `Remove interest in ${listing.title}` : `Mark interest in ${listing.title}`}
+                title={heart.hearted ? "Interested" : "Mark interest"}
+                disabled={heart.pending} aria-pressed={heart.hearted}
                 onClick={ev => {
                   ev.stopPropagation();
-                  onToggleSave(listing.id);
+                  heart.signedIn ? heart.toggle() : setHeartAuth(true);
                 }}
               >
                 <HeartIcon />
               </button>
             </div>
+            {priceUnconfirmed && <p className="pprice-note">* Price not confirmed</p>}
           </div>
-        </div>
+        )}
       </article>
       <Hardware pinned={pinned} seedKey={key} dayColor={dayColor} rot={rot} />
+      {heartAuth && <AuthModal onClose={() => setHeartAuth(false)} />}
     </div>
   );
 }
@@ -522,6 +616,7 @@ function PastCell({
   const accent = listing.accentColor || dayColor;
   const poster = listingPosterUrl(listing);
   const [aspect, setAspect] = useState(() => (poster ? aspectByPosterUrl.get(poster) ?? 0.8 : 0.8));
+  const [cellRef, loadPoster] = usePosterLoad<HTMLDivElement>(poster);
   const expiry = getMissedConnectionWindow(listing.dateStart, listing.dateEnd, tick)?.closesAt ?? tick;
   const parts = countdownParts(expiry - tick);
   const pill =
@@ -529,7 +624,7 @@ function PastCell({
       ? `POSTING OPEN · ${parseInt(parts.d, 10)}D ${parseInt(parts.h, 10)}H LEFT`
       : "EXPIRED · STILL READABLE";
   return (
-    <div className={`cell pcell${isSource ? " source" : ""}`}>
+    <div ref={cellRef} className={`cell pcell${isSource ? " source" : ""}`}>
       <article
         ref={articleRef}
         className="poster past pdx-glass-rebind"
@@ -549,11 +644,10 @@ function PastCell({
         }}
       >
         <div className="pc" style={{ aspectRatio: aspect }}>
-          {poster ? (
+          {poster && loadPoster ? (
             <img
               src={poster}
               alt=""
-              loading="lazy"
               decoding="async"
               onLoad={ev => {
                 const im = ev.currentTarget;
@@ -578,8 +672,27 @@ function PastCell({
 }
 
 type EventDetailResponse = {
+  event?: {
+    description?: string | null;
+    isClaimable?: boolean;
+    hasPendingClaim?: boolean;
+    ticketUrl?: string | null;
+  } | null;
+  venue?: {
+    id?: number;
+    address?: string | null;
+    neighborhood?: string | null;
+    lat?: number | null;
+    lng?: number | null;
+  } | null;
+  hosts?: Array<{ displayName?: string | null; username?: string | null; role?: string | null }>;
+  talent?: Array<{ userId?: number; addedByUserId?: number | null; displayName?: string | null; username?: string | null; role?: string | null }>;
   gigs?: Array<{ id?: number | string; title?: string | null; description?: string | null }>;
   missedConnections?: unknown[];
+  nearby?: {
+    restaurants?: Array<{ name?: string | null; type?: string | null }>;
+    events?: Array<{ id?: number; title?: string | null; venueName?: string | null; dateStart?: string | null }>;
+  } | null;
 };
 
 type WindowFilter = "all" | "tonight" | "week" | "later";
@@ -595,21 +708,19 @@ export default function FlyerBoard({
   onEnterPast,
   onExitPast,
   onOpen,
-  savedIds,
-  onToggleSave,
-  now,
+  now, query, setQuery, fday, setFday, tags, setTags, onClear, onVisibleCount,
 }: FlyerBoardProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [tick, setTick] = useState(now);
-  const [fday, setFday] = useState<WindowFilter>("all");
-  const [tags, setTags] = useState<Set<string>>(new Set());
-  const [query, setQuery] = useState("");
   const [budgetRows, setBudgetRows] = useState(4);
   const [cols, setCols] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(min-width: 1100px)").matches ? 5 : 3,
   );
   const [openListing, setOpenListing] = useState<EventListing | null>(null);
   const [ocardOn, setOcardOn] = useState(false);
+  const [opage, setOpage] = useState(0);
+  const [oday, setOday] = useState(0);
+  const pagesRef = useRef<HTMLDivElement | null>(null);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
@@ -664,19 +775,15 @@ export default function FlyerBoard({
     if (diff <= 7) return "week";
     return "later";
   };
-  const searchText = (e: EventListing) =>
-    `${e.title} ${e.venueName} ${eventDateLabel(e.dateStart)} ${weekdayCode(dateStrOf(e))}`.toLowerCase();
   const passCell = (e: EventListing): boolean => {
     if (fday !== "all" && fdayOf(e) !== fday) return false;
     if (tags.size > 0) {
       const own = tagsOf(e);
       for (const t of tags) if (!own.has(t)) return false;
     }
-    if (query && !searchText(e).includes(query)) return false;
+    // The parent applies the shared event query, including verified age filters.
     return true;
   };
-
-  const sorted = useMemo(() => [...events].sort((a, b) => startMs(a) - startMs(b)), [events]);
 
   const weekendSet = useMemo(() => {
     const set = new Set<string>();
@@ -695,7 +802,7 @@ export default function FlyerBoard({
     const laterList: EventListing[] = [];
     const weekendList: EventListing[] = [];
     const aheadList: EventListing[] = [];
-    for (const e of sorted) {
+    for (const e of events) {
       const ds = dateStrOf(e);
       const s = startMs(e);
       const running = s <= tick && (endMs(e) > tick || (!e.dateEnd && ds === todayStr));
@@ -705,7 +812,7 @@ export default function FlyerBoard({
       if (ds > todayStr) aheadList.push(e);
     }
     return { nowList, laterList, weekendList, aheadList };
-  }, [sorted, tick, todayStr, weekendSet]);
+  }, [events, tick, todayStr, weekendSet]);
 
   const visibleNow = sections.nowList.filter(passCell);
   const visibleLater = sections.laterList.filter(passCell);
@@ -736,18 +843,17 @@ export default function FlyerBoard({
     let slots = 0;
     let shownPosters = 0;
     const shownGroups = new Set<string>();
-    const vis = flow.map(item => {
-      if (item.kind === "flag") return false;
-      if (slots < budget) {
-        slots++;
-        if (item.kind === "poster") {
-          shownPosters++;
-          shownGroups.add(dateStrOf(item.e));
-        }
-        return true;
+    const vis: boolean[] = [];
+    for (const item of flow) {
+      const visible = item.kind !== "flag" && slots < budget;
+      vis.push(visible);
+      if (!visible) continue;
+      slots++;
+      if (item.kind === "poster") {
+        shownPosters++;
+        shownGroups.add(dateStrOf(item.e));
       }
-      return false;
-    });
+    }
     flow.forEach((item, i) => {
       if (item.kind === "flag") vis[i] = shownGroups.has(item.dateStr);
     });
@@ -758,8 +864,7 @@ export default function FlyerBoard({
       shownPosters,
       remaining: eligible.length - shownPosters,
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sections.aheadList, fday, tags, query, budgetRows, cols]);
+  }, [sections.aheadList, passCell, budgetRows, cols]);
 
   const pastList = useMemo(
     () =>
@@ -781,12 +886,12 @@ export default function FlyerBoard({
     const ids = new Set<number>();
     for (const e of pastList) for (const p of mcFor(e)) ids.add(p.id);
     return ids.size;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pastList, mcQuery.data]);
+  }, [pastList, mcFor]);
 
+  const {user: viewer} = useAuth();
   const detailQuery = useQuery<EventDetailResponse>({
-    queryKey: ["/api/events", openListing?.id, "detail"],
-    queryFn: () => apiRequest("GET", `/api/events/${openListing!.id}/detail`).then(r => r.json()),
+    queryKey: ["/api/events", openListing?.id, "detail", viewer?.id, openListing && dateStrOf(openListing)],
+    queryFn: () => apiRequest("GET", `/api/events/${openListing!.id}/detail?date=${encodeURIComponent(dateStrOf(openListing!))}`).then(r => r.json()),
     enabled: !!openListing,
     staleTime: 60_000,
   });
@@ -799,12 +904,26 @@ export default function FlyerBoard({
   const later = (fn: () => void, ms: number) => {
     timersRef.current.push(window.setTimeout(fn, ms));
   };
+  const goOpage = (i: number) => {
+    const el = pagesRef.current;
+    if (el) el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
+  };
+  useEffect(() => {
+    if (pagesRef.current) pagesRef.current.scrollLeft = 0;
+  }, [openListing]);
+  const historyState = useHistoryState() as {flyerPoster?:{id:number;date:string}}|null;
+  const shareOpen = () => { if(openListing) void shareEventListing(openListing); };
   const openCard = (listing: EventListing, el: HTMLElement | null) => {
     clearTimers();
     setFan(null);
+    setOpage(0);
+    setOday(0);
     setOpenListing(listing);
+    if (!window.history.state?.flyerPoster) {
+      window.history.pushState({ ...window.history.state, flyerPoster: { id: listing.id, date: dateStrOf(listing) } }, "", window.location.href);
+    }
     flipElRef.current = el;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("calm-mode");
     if (el && !reduced) {
       el.classList.add("flipping");
       el.style.transition = "transform .2s ease-in";
@@ -812,10 +931,12 @@ export default function FlyerBoard({
     }
     later(() => setOcardOn(true), reduced ? 0 : 190);
   };
-  const closeCard = () => {
+  const closeCard = (fromHistory = false) => {
+    if (!fromHistory && window.history.state?.flyerPoster) { window.history.back(); return; }
     setOcardOn(false);
     const p = flipElRef.current;
     flipElRef.current = null;
+    requestAnimationFrame(() => p?.isConnected && p.focus({ preventScroll: true }));
     if (p) {
       later(() => {
         p.style.transition = "transform .3s cubic-bezier(.32,1.24,.36,1)";
@@ -829,19 +950,18 @@ export default function FlyerBoard({
     later(() => setOpenListing(null), 580);
   };
   useEffect(() => {
-    if (!ocardOn) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (ev: KeyboardEvent) => {
-      if (ev.key === "Escape") closeCard();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      document.removeEventListener("keydown", onKey);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ocardOn]);
+    const selection = historyState?.flyerPoster;
+    if (!selection) {
+      if (openListing && ocardOn) closeCard(true);
+      return;
+    }
+    if (openListing?.id === selection.id && dateStrOf(openListing) === selection.date) return;
+    const listing = [...events, ...pastEvents].find(row => row.id===selection.id && dateStrOf(row)===selection.date);
+    if (!listing) return;
+    const origin = rootRef.current?.querySelector<HTMLElement>(`[data-event-id="${selection.id}"][data-event-date="${selection.date}"]`);
+    openCard(listing, origin ?? null);
+  }, [historyState, events, pastEvents, openListing, ocardOn]);
+  const posterDialog = useModalA11y({open:ocardOn,onClose:()=>closeCard()});
 
   /* ----- fan deck ----- */
   const closeFan = () => {
@@ -851,6 +971,7 @@ export default function FlyerBoard({
       fanReturnRef.current = null;
     }
   };
+  const fanDialog = useModalA11y({open:!!fan,onClose:closeFan});
   const openFan = (listing: EventListing, el: HTMLElement | null) => {
     if (fan && listingKey(fan.listing) === listingKey(listing)) {
       closeFan();
@@ -873,8 +994,7 @@ export default function FlyerBoard({
     const onKey = (ev: KeyboardEvent) => {
       const target = ev.target as HTMLElement | null;
       if (target && /INPUT|TEXTAREA|SELECT/.test(target.tagName || "")) return;
-      if (ev.key === "Escape") closeFan();
-      else if (ev.key === "ArrowRight") {
+      if (ev.key === "ArrowRight") {
         ev.preventDefault();
         stepDeck(1);
       } else if (ev.key === "ArrowLeft") {
@@ -884,8 +1004,7 @@ export default function FlyerBoard({
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fan, fanCount]);
+  }, [fan, closeFan, stepDeck]);
 
   /* ----- reveal on scroll (demo) ----- */
   const revealKey = [
@@ -932,16 +1051,8 @@ export default function FlyerBoard({
     };
   }, [revealKey, cols]);
 
-  const toggleTag = (t: string) => {
-    setTags(prev => {
-      const next = new Set(prev);
-      if (next.has(t)) next.delete(t);
-      else next.add(t);
-      return next;
-    });
-    setBudgetRows(4);
-  };
   const clearFilters = () => {
+    onClear();
     setFday("all");
     setTags(new Set());
     setQuery("");
@@ -962,33 +1073,32 @@ export default function FlyerBoard({
       index={i}
       mtop={0}
       rail
-      saved={savedIds.has(e.id)}
-      onToggleSave={onToggleSave}
       onOpenCard={openCard}
       tick={tick}
     />
   );
 
-  let flowPos = -1;
-  const flowCells = flowData.flow.map((item, i) => {
-    if (!flowData.vis[i]) return null;
-    if (item.kind === "flag") return <DayFlag key={`flag-${item.dateStr}`} dateStr={item.dateStr} />;
-    flowPos++;
+  const flowCells: React.ReactNode[] = [];
+  for (const [i, item] of flowData.flow.entries()) {
+    if (!flowData.vis[i] || item.kind === "flag") continue;
+    const flowPos = flowCells.length;
     const mtop = MTOPS[flowPos % MTOPS.length];
-    if (item.kind === "submit") return <SubmitCell key={`submit-${item.n}`} mtop={mtop} />;
-    return (
+    if (item.kind === "submit") {
+      flowCells.push(<SubmitCell key={`submit-${item.n}`} mtop={mtop} />);
+      continue;
+    }
+    flowCells.push(
       <PosterCell
         key={listingKey(item.e)}
         listing={item.e}
+        showDayFlag={flowData.flow[i - 1]?.kind === "flag"}
         index={flowPos}
         mtop={mtop}
-        saved={savedIds.has(item.e.id)}
-        onToggleSave={onToggleSave}
         onOpenCard={openCard}
         tick={tick}
       />
     );
-  });
+  }
 
   const pastFlow: React.ReactNode[] = [];
   {
@@ -1032,65 +1142,118 @@ export default function FlyerBoard({
               : `${Number(openCd!.m)}M`
         }`
     : "";
-  const gigs = detailQuery.data?.gigs ?? [];
+  const venueId = detailQuery.data?.venue?.id;
+  const venueQuery = useQuery<{ promoters?: { id: number; displayName?: string; username: string }[] }>({
+    queryKey: ["/api/placez", venueId, "card-extras"],
+    queryFn: () => apiRequest("GET", `/api/placez/${venueId}`).then(r => r.json()),
+    enabled: !!venueId,
+    staleTime: 300_000,
+  });
+  const detailStatus = <EventReadStatus label="Event details" query={detailQuery} />;
   const mizzCount = detailQuery.data?.missedConnections?.length;
+  const detailEvent = detailQuery.data?.event ?? null;
+  const detailVenue = detailQuery.data?.venue ?? null;
+  const hosts = detailQuery.data?.hosts ?? [];
+  const talent = detailQuery.data?.talent ?? [];
+  const nearbyR = detailQuery.data?.nearby?.restaurants ?? [];
+  const nearbyE = detailQuery.data?.nearby?.events ?? [];
+  const openAddr = detailVenue?.address || openListing?.address || "";
+  const openDesc = detailEvent?.description || openListing?.description || "";
+  const openTicket = detailEvent?.ticketUrl || openListing?.ticketUrl || "";
+  const openClaimable = detailEvent?.isClaimable ?? openListing?.isClaimable ?? false;
+  const openPending = detailEvent?.hasPendingClaim ?? Boolean((openListing as { hasPendingClaim?: boolean } | null)?.hasPendingClaim);
+  const openLat = detailVenue?.lat ?? openListing?.lat ?? null;
+  const openLng = detailVenue?.lng ?? openListing?.lng ?? null;
+  const pinX = openLng != null ? Math.min(92, Math.max(8, ((openLng + 122.85) / 0.4) * 100)) : 50;
+  const pinY = openLat != null ? Math.min(88, Math.max(10, ((45.65 - openLat) / 0.2) * 100)) : 50;
+  const dirDest = encodeURIComponent(
+    `${openAddr ? `${openAddr}, ` : ""}${openListing?.venueName ?? ""}, Portland, OR`,
+  );
+  const openCdLabel = openCdText === "ON NOW" ? "HAPPENING" : openCdText.startsWith("ENDS") ? "ENDS IN" : "STARTS IN";
+  const openCdNums = openCdText.replace(/^(STARTS IN|ENDS IN)\s*/, "") || "ON NOW";
+  /* More-at-venue strip: the open event's venue, day by day, for the 7
+   * days starting on the event's own day (same shape as the expanded
+   * card's strip on the event page). */
+  const openStrip = useMemo(() => {
+    type StripDay = { ds: string; dow: string; num: number; items: EventListing[] };
+    if (!openListing) return [] as StripDay[];
+    const start = dateStrOf(openListing);
+    const [sy, sm, sd] = start.split("-").map(Number);
+    const out: StripDay[] = [];
+    for (let i = 0; i < 7; i++) {
+      const ds = new Date(Date.UTC(sy, sm - 1, sd + i)).toISOString().slice(0, 10);
+      const items = events
+        .filter(e2 => e2.id !== openListing.id && e2.venueName === openListing.venueName && dateStrOf(e2) === ds)
+        .sort((a, b) => a.dateStart.localeCompare(b.dateStart));
+      out.push({ ds, dow: weekdayCode(ds), num: Number(ds.slice(8, 10)), items });
+    }
+    return out;
+  }, [openListing, events]);
+
+  /* The board's filter row moved into the page's bottom filter drawer
+     (EventsFilterDrawer); the board reports its visible count up and takes
+     day jumps over the `zaylist:board-day` window event. */
+  useEffect(() => {
+    onVisibleCount?.(pastView ? pastList.length : totalCount);
+  }, [onVisibleCount, pastView, pastList.length, totalCount]);
+
+  const jumpRef = useRef<(date: string) => boolean>(() => false);
+  jumpRef.current = (date: string): boolean => {
+    const root = rootRef.current;
+    if (!root) return true;
+    const scrollToEl = (el: HTMLElement) => {
+      const y = el.getBoundingClientRect().top + window.scrollY - 88;
+      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+    };
+    if (pastView) {
+      const cell = root.querySelector<HTMLElement>(`.pastboard [data-event-date="${date}"]`);
+      if (cell) { scrollToEl(cell); return true; }
+      const head = root.querySelector<HTMLElement>(".pasthead");
+      if (head) { scrollToEl(head); return true; }
+      return false;
+    }
+    if (date <= todayStr) {
+      const first = root.querySelector<HTMLElement>(".bandsec, .futurezone");
+      if (first) { scrollToEl(first); return true; }
+      return false;
+    }
+    /* Future date: grow the Plan Ahead budget until that date's group is
+       on the board, then land on its first card (under its day flag). */
+    let slots = 0;
+    let needed = 0;
+    for (const item of flowData.flow) {
+      if (item.kind === "flag") continue;
+      slots++;
+      if (item.kind === "poster" && dateStrOf(item.e) === date) needed = slots;
+    }
+    if (needed === 0) {
+      const zone = root.querySelector<HTMLElement>(".futurezone");
+      if (zone) { scrollToEl(zone); return true; }
+      return false;
+    }
+    const rows = Math.ceil(needed / cols);
+    if (rows > budgetRows) { setBudgetRows(rows); return false; }
+    const cell = root.querySelector<HTMLElement>(`.futurezone [data-event-date="${date}"]`);
+    if (cell) { scrollToEl(cell); return true; }
+    return false;
+  };
+  useEffect(() => {
+    const onDay = (ev: Event) => {
+      const date = (ev as CustomEvent<{ date?: string }>).detail?.date;
+      if (!date) return;
+      let tries = 0;
+      const attempt = () => {
+        if (jumpRef.current(date)) return;
+        if (++tries <= 30) window.setTimeout(attempt, 100);
+      };
+      attempt();
+    };
+    window.addEventListener("zaylist:board-day", onDay);
+    return () => window.removeEventListener("zaylist:board-day", onDay);
+  }, []);
 
   return (
     <div className="fbx" ref={rootRef}>
-      <div className="bgfx" aria-hidden="true">
-        <div className="bgfx-base" />
-        <div className="bgfx-streaks">
-          <i className="s1" />
-          <i className="s2" />
-          <i className="s3" />
-          <i className="s4" />
-          <i className="s5" />
-        </div>
-        <div className="bgfx-dots" />
-      </div>
-      <div className="vig" aria-hidden="true" />
-
-      <div className="fbar" role="group" aria-label="Filter the board">
-        {(["all", "tonight", "week", "later"] as WindowFilter[]).map(w => (
-          <button
-            key={w}
-            type="button"
-            className={`fchip${fday === w ? " on" : ""}`}
-            aria-pressed={fday === w}
-            onClick={() => {
-              setFday(w);
-              setBudgetRows(4);
-            }}
-          >
-            {w === "all" ? "ALL" : w === "tonight" ? "TONIGHT" : w === "week" ? "THIS WEEK" : "LATER"}
-          </button>
-        ))}
-        <span className="fdiv" />
-        {TAG_CHIPS.map(([token, label]) => (
-          <button
-            key={token}
-            type="button"
-            className={`fchip${tags.has(token) ? " on" : ""}`}
-            aria-pressed={tags.has(token)}
-            onClick={() => toggleTag(token)}
-          >
-            {label}
-          </button>
-        ))}
-        <input
-          className="fsearch"
-          type="text"
-          placeholder="SEARCH EVENTS, VENUES, DAYS…"
-          aria-label="Search events"
-          value={query}
-          onChange={e => {
-            setQuery(e.target.value.toLowerCase());
-            setBudgetRows(4);
-          }}
-        />
-        <span className="fcount">{pastView ? `${pastList.length} EVENTS` : `${totalCount} EVENTS`}</span>
-      </div>
-
       <div className="fbx-content">
         {pastView ? (
           <div>
@@ -1126,7 +1289,7 @@ export default function FlyerBoard({
         ) : (
           <div>
             {visibleNow.length > 0 && (
-              <div className="bandsec" id="happening-now">
+              <div className="bandsec bandsec--scaled" id="happening-now">
                 <div className="board-h">
                   <span className="livedot" />
                   <h3>HAPPENING NOW</h3>
@@ -1136,7 +1299,7 @@ export default function FlyerBoard({
               </div>
             )}
             {visibleLater.length > 0 && (
-              <div className="bandsec" id="happening-later">
+              <div className="bandsec bandsec--scaled" id="happening-later">
                 <div className="board-h">
                   <span className="tick-y" />
                   <h3>HAPPENING LATER</h3>
@@ -1146,7 +1309,7 @@ export default function FlyerBoard({
               </div>
             )}
             {visibleWeekend.length > 0 && (
-              <div className="bandsec" id="this-weekend">
+              <div className="bandsec bandsec--scaled" id="this-weekend">
                 <div className="board-h">
                   <span className="wkdot" />
                   <h3>HAPPENING THIS WEEKEND</h3>
@@ -1219,7 +1382,7 @@ export default function FlyerBoard({
                       transform: `translateY(-50%) rotate(${PILE_SPOTS[i][1]}deg)`,
                     }}
                   >
-                    <img src={listingPosterUrl(e)} alt="" loading="lazy" />
+                    <img src={listingPosterUrl(e)} alt="" />
                   </span>
                 ))}
                 <div className="magcard">
@@ -1246,6 +1409,8 @@ export default function FlyerBoard({
           <div className="fbx fbx-overlay">
             <div
               className={`fanLayer${fan ? " on" : ""}`}
+              ref={fanDialog} role={fan?"dialog":undefined} aria-modal={fan?true:undefined}
+              aria-label={fan?`Mizzed connections for ${fan.listing.venueName}`:undefined}
         onClick={ev => {
           if (ev.target === ev.currentTarget) closeFan();
         }}
@@ -1255,9 +1420,7 @@ export default function FlyerBoard({
             <div
               className="deck"
               style={{ left: fan.x, top: fan.y }}
-              role="dialog"
-              aria-modal="true"
-              aria-label={`Mizzed connections for ${fan.listing.venueName}`}
+
               onPointerDown={ev => {
                 fanDragX.current = ev.clientX;
               }}
@@ -1301,10 +1464,11 @@ export default function FlyerBoard({
                           transform: `translate(-50%,-50%) rotate(${off * 9}deg) translateX(${off * 36}%) scale(${1 - a * 0.07})`,
                         };
                   const venue = post.venueHint || post.placeName || post.eventVenue || fan.listing.venueName;
-                  const meta = `${post.anonymous ? "Anonymous" : "Posted"}${post.createdAt ? ` · ${timeAgo(post.createdAt)}` : ""}`;
+                  const meta = `${post.anonymous ? "Anonymous" : "Posted"}${post.createdAt ? ` · ${timeAgo(post.createdAt, tick)}` : ""}`;
                   return (
                     <div
                       key={post.id}
+                      inert={off!==0}
                       className="fancard"
                       style={style}
                       aria-hidden={off !== 0}
@@ -1339,13 +1503,7 @@ export default function FlyerBoard({
                           className="fc-share"
                           onClick={async ev => {
                             ev.stopPropagation();
-                            const url = `https://www.zaylist.com${eventPath(fan.listing.id, fan.listing.title, fan.listing.dayOfWeek)}`;
-                            try {
-                              if (navigator.share) await navigator.share({ title: fan.listing.title, url });
-                              else await navigator.clipboard.writeText(url);
-                            } catch {
-                              /* share dismissed */
-                            }
+                            await shareEventListing(fan.listing);
                           }}
                         >
                           SHARE
@@ -1375,29 +1533,20 @@ export default function FlyerBoard({
       </div>
 
       {/* open card */}
-      <div className={`scrim${ocardOn ? " on" : ""}`} onClick={closeCard} />
+      <div className={`scrim${ocardOn ? " on" : ""}`} onClick={() => closeCard()} />
       {openListing && (
         <div
-          className={`ocard${ocardOn ? " on" : ""}`}
+          className={`ocard${ocardOn ? " on" : ""}`} ref={posterDialog} inert={!ocardOn}
           style={{ "--a": openAccent } as CSSProperties}
           role="dialog"
           aria-modal="true"
           aria-label={openListing.title}
         >
-          <div
-            className="ox"
-            role="button"
-            tabIndex={0}
-            aria-label="Close"
-            onClick={closeCard}
-            onKeyDown={ev => {
-              if (ev.key === "Enter" || ev.key === " ") closeCard();
-            }}
-          >
-            ✕
-          </div>
-          <div className="oscroll">
-            <div className="ohero">
+          <button type="button" className="ox" aria-label="Close event" onClick={()=>closeCard()}>✕</button>
+          <button type="button" className="oshare" aria-label={`Share ${openListing.title}`} onClick={shareOpen}>
+            <ShareIcon />
+          </button>
+          <div className="ohero">
               {openPoster ? (
                 <img src={openPoster} alt="" />
               ) : (
@@ -1414,9 +1563,7 @@ export default function FlyerBoard({
             </div>
             <div className="oid">
               <div className="ochips">
-                {AGE_LABEL[openListing.ageRequirement ?? ""] ? (
-                  <span className="ochip">{AGE_LABEL[openListing.ageRequirement ?? ""]}</span>
-                ) : null}
+                <span className="ochip">{eventAge(openListing.ageRequirement)==="Not stated"?"Age not stated":eventAge(openListing.ageRequirement)}</span>
                 {openListing.isSexPositive ? <span className="ochip">SEX-POSITIVE</span> : null}
                 <span className="ochip">{openCdText}</span>
               </div>
@@ -1427,75 +1574,311 @@ export default function FlyerBoard({
                 {openListing.venueName}
               </p>
             </div>
-            <button
-              type="button"
-              className="ointerested"
-              aria-pressed={savedIds.has(openListing.id)}
-              onClick={() => onToggleSave(openListing.id)}
-            >
-              <b>I'M INTERESTED</b>
-              <span>{savedIds.has(openListing.id) ? "SAVED TO YOUR SCHEDULE" : "TAP TO SAVE YOUR SPOT"}</span>
-            </button>
-            <div className="ocounters">
-              <div className="ocount">
-                <b>{detailQuery.data && gigs.length > 0 ? String(gigs.length) : "–"}</b>
-                <i className="oc-g">GIGZ</i>
-              </div>
-              <div className="ocount">
-                <b>–</b>
-                <i className="oc-c">CARPOOL</i>
-              </div>
-              <div className="ocount">
-                <b>{detailQuery.data && (mizzCount ?? 0) > 0 ? String(mizzCount) : "–"}</b>
-                <i className="oc-m">MIZZED</i>
-              </div>
+            <EventGoingButton eventId={openListing.id} past={!!openListing.dateEnd && endMs(openListing) < tick} poster />
+            <div className="otabs" role="tablist" aria-label="Event card pages">
+              {OPAGE_NAMES.map((n, i) => (
+                <button
+                  key={n}
+                  type="button"
+                  role="tab"
+                  aria-selected={opage === i}
+                  className={opage === i ? "on" : ""}
+                  onClick={() => goOpage(i)}
+                >
+                  {n}
+                </button>
+              ))}
             </div>
-            <div className="obody">
-              {gigs.length > 0 && (
-                <>
-                  <p className="osec">GIGZ · OPEN CALLS</p>
-                  {gigs.map((g, gi) => (
-                    <div className="gig" key={g.id ?? gi}>
-                      <div className="av" />
-                      <div>
-                        <h5>{(g.title || "OPEN CALL").toUpperCase()}</h5>
-                        {g.description ? <p>{g.description}</p> : null}
-                      </div>
-                    </div>
+            <div
+              className="opages"
+              ref={pagesRef}
+              onScroll={e => {
+                const el = e.currentTarget;
+                const i = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
+                if (i !== opage) setOpage(i);
+              }}
+            >
+              <section className="opage" inert={opage!==0} aria-hidden={opage!==0} aria-label="Feed">
+                {openListing.id > 0 && <EventPlanning eventId={openListing.id} occurrenceDate={openListing.dateStart} />}
+                <button
+                  type="button"
+                  className="addm"
+                  onClick={() => {
+                    const target = openListing;
+                    closeCard(true);
+                    onOpen(target, null);
+                  }}
+                >
+                  <b>+ ADD A MIZZED CONNECTION</b>
+                  <p>{mizzCount ? `${mizzCount} posted for this event` : "Post during or after the event."}</p>
+                </button>
+              </section>
+              <section className="opage" inert={opage!==1} aria-hidden={opage!==1} aria-label="Info">
+                <p className="osec">EVENT DETAILS</p>
+                <div className="ostarts">
+                  <i>{openCdLabel}</i>
+                  <b>{openCdNums}</b>
+                </div>
+                <div className="okv">
+                  <span className="ok">WHEN</span>
+                  <span>
+                    {eventDateLabel(openListing.dateStart)} · {eventTimeLabel(openListing.dateStart)}
+                  </span>
+                </div>
+                <div className="okv">
+                  <span className="ok">WHERE</span>
+                  <span>
+                    {openListing.venueName}
+                    {openAddr ? (
+                      <>
+                        <br />
+                        {openAddr}
+                      </>
+                    ) : null}
+                  </span>
+                </div>
+                {openDesc ? <p className="odesc">{openDesc}</p> : null}
+                <div className="okv">
+                  <span className="ok">ADMISSION</span>
+                  <span>{eventPrice(openListing.admission)}</span>
+                </div>
+                <div className="okv">
+                  <span className="ok">AGE</span>
+                  <span>{eventAge(openListing.ageRequirement)}</span>
+                </div>
+                {openTicket ? (
+                  <a className="olinkbtn accent" href={openTicket} target="_blank" rel="noreferrer">
+                    GET TICKETS <span>↗</span>
+                  </a>
+                ) : null}
+                {openClaimable ? (
+                  <p className="onote">
+                    This event has not been claimed by its organizer. Details were sourced from public listings —
+                    confirm time, venue, and ticketing directly before attending.
+                    {openPending ? " A claim is pending admin review." : ""}
+                  </p>
+                ) : null}
+                <a className="olinkbtn" href={eventPath(openListing.id, openListing.title, openListing.dayOfWeek, dateStrOf(openListing))}>
+                  REPORT / REQUEST A CHANGE <span>›</span>
+                </a>
+              </section>
+              <section className="opage" inert={opage!==2} aria-hidden={opage!==2} aria-label="Maps">
+                <p className="osec">
+                  MAP & DIRECTIONS <span className="osec-r">LOCATION OVERVIEW</span>
+                </p>
+                <div className="omap" aria-hidden="true">
+                  <span className="omap-river" />
+                  <span className="omap-road" style={{ left: 0, right: 0, top: "30%", height: 7 }} />
+                  <span className="omap-road" style={{ top: 0, bottom: 0, left: "38%", width: 7 }} />
+                  <span className="omap-road" style={{ left: 0, right: 0, top: "74%", height: 5 }} />
+                  <span className="omap-tag">REAL LOCATION · NO STREET TILES</span>
+                  <span className="omap-pin" style={{ left: `${pinX}%`, top: `${pinY}%` }} />
+                </div>
+                <div className="okv">
+                  <span className="ok">VENUE</span>
+                  <span>
+                    {openListing.venueName}
+                    {openAddr ? (
+                      <>
+                        <br />
+                        {openAddr}
+                      </>
+                    ) : null}
+                  </span>
+                </div>
+                <div className="odir">
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${dirDest}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    DIRECTIONS · GOOGLE
+                  </a>
+                  <a href={`https://maps.apple.com/?daddr=${dirDest}`} target="_blank" rel="noreferrer">
+                    DIRECTIONS · APPLE
+                  </a>
+                </div>
+              </section>
+              <section className="opage" inert={opage!==3} aria-hidden={opage!==3} aria-label="More and nearby">
+                <p className="osec">
+                  MORE AT {openListing.venueName.toUpperCase()} <span className="osec-r">THE SAME WEEK</span>
+                </p>
+                <div className="odays">
+                  {openStrip.map((d, i) => (
+                    <button
+                      key={d.ds}
+                      type="button"
+                      className={`oday${oday === i ? " hot" : ""}`}
+                      onClick={() => setOday(i)}
+                    >
+                      <i>{d.dow}</i>
+                      <b>{d.num}</b>
+                      <span>{d.items.length ? `${d.items.length} event${d.items.length === 1 ? "" : "s"}` : "—"}</span>
+                    </button>
                   ))}
-                </>
-              )}
-              <button
-                type="button"
-                className="addm"
-                onClick={() => {
-                  const target = openListing;
-                  closeCard();
-                  onOpen(target, null);
-                }}
-              >
-                <b>+ ADD A MIZZED CONNECTION</b>
-                <p>Post during or after the event.</p>
-              </button>
+                </div>
+                {openStrip[oday]?.items.length ? (
+                  <div className="orail">
+                    {openStrip[oday].items.map(n => (
+                      <div className="omini" key={n.id}>
+                        <b>{n.title}</b>
+                        <span>{eventTimeLabel(n.dateStart)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="oempty">No other events at {openListing.venueName} on this day.</p>
+                )}
+                <p className="osec" style={{ marginTop: 16 }}>
+                  RESTAURANTS CLOSE BY
+                </p>
+                {!Array.isArray(detailQuery.data?.nearby?.restaurants) ? detailStatus : nearbyR.length ? (
+                  <div className="orail">
+                    {nearbyR.map((r, i) => (
+                      <div className="omini" key={`${r.name ?? "r"}-${i}`}>
+                        <b>{r.name}</b>
+                        <span>{r.type || "restaurant"}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="oempty">No restaurants listed nearby yet.</p>
+                )}
+                <p className="osec" style={{ marginTop: 16 }}>
+                  EVENTS SAME DAY · CLOSE BY
+                </p>
+                {!Array.isArray(detailQuery.data?.nearby?.events) ? detailStatus : nearbyE.length ? (
+                  <div className="orail">
+                    {nearbyE.map((n, i) => (
+                      <div className="omini" key={n.id ?? i}>
+                        <b>{n.title}</b>
+                        <span>
+                          {n.venueName}
+                          {n.dateStart ? (
+                            <>
+                              <br />
+                              {eventDateLabel(n.dateStart)}
+                            </>
+                          ) : null}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="oempty">No other events close by on this day.</p>
+                )}
+              </section>
+              <section className="opage" inert={opage!==4} aria-hidden={opage!==4} aria-label="People">
+                <p className="osec">{hosts.length === 1 ? "HOST" : "HOSTS"}</p>
+                {!Array.isArray(detailQuery.data?.hosts) ? detailStatus : hosts.length > 0 ? (
+                  hosts.map((h, i) => {
+                    const name = h.displayName || h.username || "";
+                    const initials =
+                      name
+                        .trim()
+                        .split(/\s+/)
+                        .map(w => w[0])
+                        .slice(0, 2)
+                        .join("")
+                        .toUpperCase() || "?";
+                    return (
+                      <div className="operson" key={h.username ?? i}>
+                        <span className="oavatar">{initials}</span>
+                        <span>
+                          <span className="opn">{name}</span>
+                          {h.role ? (
+                            <span className="opr">{h.role === "PRIMARY" ? "Primary host" : h.role}</span>
+                          ) : null}
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <>
+                    <div className="oclaimbox">
+                      <p className="oct">{openPending ? "CLAIM IN REVIEW" : openClaimable ? "OPEN TO CLAIM" : "HOST INFORMATION"}</p>
+                      <p className="ocs">
+                        No public event host is listed.
+                        {openPending ? " A claim is pending admin review." : ""}
+                      </p>
+                    </div>
+                    {openClaimable && !openPending ? (
+                      <a className="olinkbtn" href={`/submit/claim/${openListing.id}`}>
+                        CLAIM THIS EVENT <span>›</span>
+                      </a>
+                    ) : null}
+                  </>
+                )}
+                {talent.length > 0 && (
+                  <>
+                    <p className="osec" style={{ marginTop: 16 }}>
+                      TALENT · THIS EDITION
+                    </p>
+                    {talent.map((t, i) => {
+                      const name = t.displayName || t.username || "";
+                      const initials =
+                        name
+                          .trim()
+                          .split(/\s+/)
+                          .map(w => w[0])
+                          .slice(0, 2)
+                          .join("")
+                          .toUpperCase() || "?";
+                      return (
+                        <div className="operson" key={t.username ?? i}>
+                          <span className="oavatar">{initials}</span>
+                          <span>
+                            <span className="opn">{name}</span>
+                            {t.role ? <span className="opr">{t.role}</span> : null}
+                            <span className="opr">{t.addedByUserId == null ? "Source unavailable" : t.addedByUserId === t.userId ? "Self-listed" : "Added by host or staff"}</span>
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
+                <p className="osec" style={{ marginTop: 16 }}>
+                  VENUE PROMOTERS
+                </p>
+                {!detailQuery.data ? detailStatus : !venueId ? <p className="oempty">No venue is linked.</p> : !Array.isArray(venueQuery.data?.promoters) ? <EventReadStatus label="Venue promoters" query={venueQuery} /> : venueQuery.data.promoters.length ? (
+                  <ul>{venueQuery.data.promoters.map(person => <li key={person.id}>{person.displayName || person.username}</li>)}</ul>
+                ) : <p className="oempty">No public promoters listed for this venue.</p>}
+              </section>
             </div>
-          </div>
           <div className="ofoot">
-            <div className="dots">
-              <i className="on" />
-              <i />
-              <i />
-              <i />
-              <i />
-            </div>
             <button
               type="button"
-              className="osave"
-              aria-pressed={savedIds.has(openListing.id)}
-              onClick={() => onToggleSave(openListing.id)}
+              className="oarw"
+              disabled={opage === 0}
+              onClick={() => goOpage(opage - 1)}
+              aria-label="Previous page"
             >
-              {savedIds.has(openListing.id) ? "SAVED" : "SAVE THIS EVENT"}
+              ‹
             </button>
-            <span className="oheart">♥</span>
+            <span className="opg">
+              PAGE {opage + 1} · {OPAGE_LABELS[opage]}
+            </span>
+            <button
+              type="button"
+              className="oarw"
+              disabled={opage === OPAGE_NAMES.length - 1}
+              onClick={() => goOpage(opage + 1)}
+              aria-label="Next page"
+            >
+              ›
+            </button>
+            <EventPrivateSaveButton eventId={openListing.id} poster />
+            <EventInterestedHeart
+              eventId={openListing.id}
+              variant="poster"
+              snapshot={{
+                title: openListing.title,
+                subtitle: openListing.venueName,
+                image: listingPosterUrl(openListing),
+                href: eventPath(openListing.id, openListing.title, openListing.dayOfWeek, dateStrOf(openListing)),
+                accent: openListing.accentColor ?? null,
+              }}
+            />
           </div>
         </div>
       )}

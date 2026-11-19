@@ -1,3 +1,7 @@
+import { toast } from "@/hooks/use-toast";
+import {ReportReceipts} from "./inbox/ReportReceipts";
+import {ImportDeviceArchive} from "./inbox/useThreadArchive";
+import {visibleThreads} from "./inbox/visibleThreads";
 import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
@@ -43,7 +47,7 @@ type InboxOverlayProps = {
   initialThreadId?: string | null;
 };
 
-function InboxPanelHeader({ onClose, onRefresh, refreshing = false, guest = false }: { onClose: () => void; onRefresh?: () => void; refreshing?: boolean; guest?: boolean }) {
+function InboxPanelHeader({ onClose, onRefresh, refreshing = false, guest = false, staff = false }: { staff?:boolean; onClose: () => void; onRefresh?: () => void; refreshing?: boolean; guest?: boolean }) {
   return <header className="hub-reader__header">
     <div className="hub-reader__heading">
       <div><h2>INBOX</h2><p>Your conversations.</p></div>
@@ -53,7 +57,7 @@ function InboxPanelHeader({ onClose, onRefresh, refreshing = false, guest = fals
       </div>
     </div>
     <Tabs.List className="hub-reader__tabs inbox-dropdown__tabs" aria-label="Inbox views">
-      {(["inbox", "posts", "stats"] as const).map(value => <Tabs.Trigger className="hub-reader__tab" value={value} key={value} disabled={guest && value !== "inbox"}>{value}</Tabs.Trigger>)}
+      {(["inbox", "posts", ...(staff ? ["stats"] : [])]).map(value => <Tabs.Trigger className="hub-reader__tab" value={value} key={value} disabled={guest && value !== "inbox"}>{value}</Tabs.Trigger>)}
     </Tabs.List>
   </header>;
 }
@@ -108,7 +112,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
   const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
   /** Owner desk is primary owner only (@tucker_pdmax), not other admins/super-admins. */
   const isOwner = Boolean(user?.isPrimaryOwner);
-  const adminMailActive = isAdmin && account === "admin" && (queueFolder === "inbox" || queueFolder === "sent");
+  const adminMailActive = isAdmin && account === "admin" && (queueFolder === "inbox" || queueFolder === "sent" || queueFolder === "archived");
 
   const {
     threads,
@@ -129,8 +133,11 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
     archive: archiveAdminGuide,
     unarchive: unarchiveAdminGuide,
     markAllRead: markAllAdminGuideRead,
-    remove: removeAdminGuideThread,
+
     unreadCount: adminGuideUnread,
+    loading: adminGuideLoading,
+    listError: adminGuideError,
+    retry: retryAdminGuide,
   } = useAdminGuideThreads(adminMailActive ? activeId : null, isAdmin);
   const [markingGuideAllRead, setMarkingGuideAllRead] = useState(false);
 
@@ -143,8 +150,8 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
   const housingThread = Boolean(
     activeThread && !adminMailActive && (activeThread.cat === "housing" || activeThread.contextType === "HOUSING"),
   );
-  const { data: housingGate = null, isLoading: housingGateLoading } = useQuery<HousingThreadGate | null>({
-    queryKey: ["/api/housing/requests/by-thread", activeId],
+  const { data: housingGate = null, isLoading: housingGateLoading, isError:housingGateError, refetch:reloadHousingGate } = useQuery<HousingThreadGate | null>({
+    queryKey: ["/api/housing/requests/by-thread", activeId, user?.id],
     enabled: housingThread && !!activeId,
     queryFn: async () => {
       const r = await fetch(`/api/housing/requests/by-thread/${encodeURIComponent(activeId!)}`, { credentials: "include" });
@@ -154,7 +161,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
     },
   });
   const housingComposerLocked = Boolean(
-    housingThread && (housingGateLoading || (housingGate && !housingGate.accepted)),
+    housingThread && (housingGateLoading || housingGateError || (housingGate && !housingGate.accepted)),
   );
 
   const { data: pendingAdmin = { count: 0, queueCount: 0, ownerCount: 0, guideUnread: 0, adminBadge: 0 } } = useQuery<{
@@ -164,7 +171,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
     guideUnread?: number;
     adminBadge?: number;
   }>({
-    queryKey: ["/api/admin/pending-count"],
+    queryKey: ["/api/admin/pending-count", user?.id],
     queryFn: () =>
       fetch("/api/admin/pending-count", { credentials: "include" }).then((r) =>
         r.ok ? r.json() : { count: 0, queueCount: 0, ownerCount: 0, guideUnread: 0, adminBadge: 0 },
@@ -196,9 +203,10 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
       setQuery("");
       return;
     }
-    setView(initialView ?? "inbox");
+    setView(initialView==="stats" && !isAdmin ? "inbox" : initialView ?? "inbox");
     if (initialAccount) {
-      setAccount(initialAccount);
+      const permitted = initialAccount === "personal" || (initialAccount === "admin" && isAdmin) || (initialAccount === "owner" && isOwner);
+      setAccount(permitted ? initialAccount : "personal");
     } else if (isAdmin && (pendingAdmin.count || 0) > 0) {
       setAccount("admin");
     } else if (isOwner && (pendingAdmin.ownerCount || 0) > 0) {
@@ -238,12 +246,12 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
   if (!user) {
     if (!isLocalDemo()) return null;
     return <>
-      <HeaderDropdown open={open} onOpenChange={next => { if (!next) onClose(); }} trigger={trigger} triggerSelector="[data-inbox-open-trigger]" id="inbox-panel" title="Inbox" description="Your messages, posts, and stats." className="inbox-overlay inbox-dropdown">
+      <HeaderDropdown open={open} onOpenChange={next => { if (!next) onClose(); }} trigger={trigger} triggerSelector="[data-inbox-open-trigger]" id="inbox-panel" title="Inbox" description="Your messages and posts." className="inbox-overlay inbox-dropdown">
         <Tabs.Root value={view} onValueChange={value => setView(value as View)} className="inbox-dropdown__reader">
           <InboxPanelHeader onClose={onClose} guest />
           <Tabs.Content value={view} className="hub-reader__state">
             <h3>Your conversations are here.</h3>
-            <p>Sign in to read messages, manage your posts, and see your stats.</p>
+            <p>Sign in to read your messages and manage your posts.</p>
             <button type="button" className="hub-reader__action pdx-glass-rebind" data-testid="inbox-demo-login" onClick={() => setShowAuth(true)}>Log in / Join</button>
           </Tabs.Content>
         </Tabs.Root>
@@ -260,12 +268,11 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
   const active = threads.filter((t) => !t.archived);
   const accountUnread: Record<Account, number> = {
     personal: active.filter((t) => t.folder === "inbox" && t.unread).length,
-    admin: pendingAdmin.adminBadge ?? ((pendingAdmin.count || 0) + (pendingAdmin.guideUnread || adminGuideUnread || 0)),
+    admin: pendingAdmin.queueCount ?? pendingAdmin.count ?? 0,
     owner: isOwner ? pendingAdmin.ownerCount || 0 : 0,
   };
-  const folderCount = (f: Folder) =>
-    f === "deleted" ? deletedCount : active.filter((t) => t.folder === f).length;
-  const catCount = (id: string) => (id === "all" ? active.length : active.filter((t) => t.cat === id).length);
+  const folderCount = (f: Folder) => visibleThreads(threads,f,filter,query).length;
+  const catCount = (id:string) => visibleThreads(threads,folder,id,query).length;
   const activeFilterLabel = (FILTERS.find((f) => f[0] === filter)?.[1] || "All").toUpperCase();
 
   // Open the thread in place (no navigation) and mark it read so the badge resets.
@@ -315,9 +322,9 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
 
   return (
     <>
-      <HeaderDropdown open={open} onOpenChange={next => { if (!next) onClose(); }} trigger={trigger} triggerSelector="[data-inbox-open-trigger]" id="inbox-panel" title="Inbox" description="Your messages, posts, stats, and account tools." className="inbox-overlay inbox-dropdown" actionContext={account === "owner" ? "owner" : account === "admin" ? "admin" : "hub"}>
+      <HeaderDropdown open={open} onOpenChange={next => { if (!next) onClose(); }} trigger={trigger} triggerSelector="[data-inbox-open-trigger]" id="inbox-panel" title="Inbox" description={isAdmin ? "Your messages, posts and staff tools." : "Your messages and posts."} className="inbox-overlay inbox-dropdown" actionContext={account === "owner" ? "owner" : account === "admin" ? "admin" : "hub"}>
         <Tabs.Root value={view} onValueChange={value => setView(value as View)} className="inbox-dropdown__reader">
-        <InboxPanelHeader onClose={onClose} refreshing={inboxRefreshing > 0} onRefresh={() => {
+        <InboxPanelHeader staff={isAdmin} onClose={onClose} refreshing={inboxRefreshing > 0} onRefresh={() => {
           for (const key of ["/api/messages/inbox", "/api/messages/sent", "/api/messages/unread-count", "/api/admin/pending-count"]) void queryClient.invalidateQueries({ queryKey: [key] });
         }} />
 
@@ -332,7 +339,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                     key={id}
                     type="button"
                     className={`inbox-exp-seg-tray__btn${act ? " is-active" : ""}`}
-                    onClick={() => setAccount(id)}
+                    onClick={() => {setAccount(id);setQueueFolder("active");setQueueWorkFilter("all");setFilter("all");setFolder("inbox");setQuery("");}}
                   >
                     {accountUnread[id] > 0 && (
                       <span
@@ -357,7 +364,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
               {([
                 ["inbox", "Received"],
                 ["sent", "Sent"],
-                ["deleted", "Recently deleted"],
+                ["deleted", "Archived"],
               ] as Array<[Folder, string]>).map(([f, label]) => {
                 const act = folder === f;
                 return (
@@ -438,6 +445,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                     ["active", "Queue"],
                     ["inbox", "Inbox"],
                     ["sent", "Sent"],
+                    ["archived","My archive"],
                     ["completed", "Done"],
                   ] as Array<[QueueFolder, string]>)
                 : ([
@@ -448,7 +456,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                 const act = queueFolder === f;
                 const badge =
                   f === "inbox"
-                    ? (pendingAdmin.guideUnread || adminGuideUnread || 0)
+                    ? (pendingAdmin.guideUnread ?? adminGuideUnread)
                     : f === "active"
                       ? (account === "owner" ? pendingAdmin.ownerCount || 0 : pendingAdmin.queueCount ?? pendingAdmin.count ?? 0)
                       : 0;
@@ -486,6 +494,8 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
           {activeGroup ? (
             <InboxGroupChat target={activeGroup} onBack={closeGroup} />
           ) : activeThread ? (
+            <>
+            {housingThread && housingGateError && <p role="alert">Could not load this housing request. <button type="button" onClick={() => void reloadHousingGate()}>Retry</button></p>}
             <ThreadDetail
               thread={activeThread}
               isAdminGuide={adminMailActive}
@@ -497,7 +507,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
               onHousingAccept={async () => {
                 if (!housingGate) return;
                 const r = await fetch(`/api/housing/requests/${housingGate.requestId}/accept`, { method: "POST", credentials: "include" });
-                if (!r.ok) return;
+                if (!r.ok) { toast({title:"Could not update this request", description:(await r.json().catch(() => ({}))).error || "Try again.",variant:"destructive"}); return; }
                 await queryClient.invalidateQueries({ queryKey: ["/api/housing/requests/by-thread", activeId] });
                 await queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", activeId] });
                 await queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
@@ -505,14 +515,14 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
               onHousingDecline={async () => {
                 if (!housingGate) return;
                 const r = await fetch(`/api/housing/requests/${housingGate.requestId}/decline`, { method: "POST", credentials: "include" });
-                if (!r.ok) return;
+                if (!r.ok) { toast({title:"Could not update this request", description:(await r.json().catch(() => ({}))).error || "Try again.",variant:"destructive"}); return; }
                 await queryClient.invalidateQueries({ queryKey: ["/api/housing/requests/by-thread", activeId] });
                 await queryClient.invalidateQueries({ queryKey: ["/api/messages/inbox"] });
               }}
               onHousingNudge={async () => {
                 if (!housingGate) return;
                 const r = await fetch(`/api/housing/requests/${housingGate.requestId}/nudge`, { method: "POST", credentials: "include" });
-                if (!r.ok) return;
+                if (!r.ok) { toast({title:"Could not update this request", description:(await r.json().catch(() => ({}))).error || "Try again.",variant:"destructive"}); return; }
                 await queryClient.invalidateQueries({ queryKey: ["/api/housing/requests/by-thread", activeId] });
                 await queryClient.invalidateQueries({ queryKey: ["/api/messages/thread", activeId] });
               }}
@@ -525,19 +535,11 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                   await toggleReaction(activeThread.id, messageId, code);
                 }
               }}
-              onArchive={() => {
-                if (adminMailActive) {
-                  archiveAdminGuide(activeThread.id);
-                  void removeAdminGuideThread(activeThread.id).catch(() => {
-                    /* local archive still applied */
-                  });
-                } else void archive(activeThread.id);
-                closeThread();
+              onArchive={async () => {
+                if(await (adminMailActive ? archiveAdminGuide(activeThread.id) : archive(activeThread.id))) closeThread();
               }}
-              onUnarchive={() => {
-                if (adminMailActive) unarchiveAdminGuide(activeThread.id);
-                else unarchive(activeThread.id);
-                closeThread();
+              onUnarchive={async () => {
+                if(await (adminMailActive ? unarchiveAdminGuide(activeThread.id) : unarchive(activeThread.id))) closeThread();
               }}
               onReveal={() => {
                 if (!adminMailActive) revealSelf(activeThread.id);
@@ -556,13 +558,14 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                 }
               }}
             />
+            </>
           ) : (
             <>
               {inboxActive && account === "personal" && isAdmin && (accountUnread.admin || 0) > 0 && (
                 <button
                   type="button"
                   className="inbox-exp-jump inbox-exp-jump--magenta"
-                  onClick={() => setAccount("admin")}
+                  onClick={() => {setAccount("admin");setQueueFolder("active");setQueueWorkFilter("all");}}
                 >
                   {accountUnread.admin} item{accountUnread.admin === 1 ? "" : "s"} in the shared admin inbox <ArrowRight size={14} aria-hidden="true" />
                 </button>
@@ -571,11 +574,14 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                 <button
                   type="button"
                   className="inbox-exp-jump inbox-exp-jump--purple"
-                  onClick={() => setAccount("owner")}
+                  onClick={() => {setAccount("owner");setQueueFolder("active");}}
                 >
                   {pendingAdmin.ownerCount} item{(pendingAdmin.ownerCount || 0) === 1 ? "" : "s"} on your Owner Desk <ArrowRight size={14} aria-hidden="true" />
                 </button>
               )}
+              {inboxActive && account==="personal" && folder==="inbox" && filter==="all" && !query && <ReportReceipts/>}
+              {inboxActive && ((account==="personal" && folder==="deleted") || (account==="admin" && queueFolder==="archived")) &&
+                <ImportDeviceArchive key={account} guide={account==="admin"} onChange={()=>void queryClient.invalidateQueries({queryKey:[account==="admin"?"/api/admin/messages/archive":"/api/messages/archive"]})}/>}
               {inboxActive && account === "personal" && (
                 <PersonalView
                   folder={folder}
@@ -587,8 +593,11 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                   onOpenGroup={openGroup}
                 />
               )}
-              {inboxActive && account === "admin" && (queueFolder === "inbox" || queueFolder === "sent") && (
+              {inboxActive && account === "admin" && (queueFolder === "inbox" || queueFolder === "sent" || queueFolder === "archived") && (
                 <AdminMessagesView
+                  loading={adminGuideLoading}
+                  failed={adminGuideError}
+                  onRetry={retryAdminGuide}
                   threads={adminThreads}
                   folder={queueFolder}
                   query={query}
@@ -596,9 +605,9 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                   markingAllRead={markingGuideAllRead}
                   onMarkAllRead={
                     queueFolder === "inbox"
-                      ? () => {
+                      ? (threadIds) => {
                           setMarkingGuideAllRead(true);
-                          void markAllAdminGuideRead().finally(() => setMarkingGuideAllRead(false));
+                          void markAllAdminGuideRead(threadIds).catch(() => {}).finally(() => setMarkingGuideAllRead(false));
                         }
                       : undefined
                   }
@@ -609,7 +618,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                   mode="admin"
                   initialWorkFilter={queueWorkFilter}
                   queueFolder={queueFolder}
-                  guideUnread={pendingAdmin.guideUnread || adminGuideUnread || 0}
+                  guideUnread={pendingAdmin.guideUnread ?? adminGuideUnread}
                   ownerCount={isOwner ? (pendingAdmin.ownerCount || 0) : 0}
                   onOpenGuideInbox={() => {
                     setQueueFolder("inbox");
@@ -626,7 +635,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                 <QueueView mode="owner" queueFolder={queueFolder === "completed" ? "completed" : "active"} />
               )}
               {view === "posts" && <PostsView onNavigate={navigateFromSheet} />}
-              {view === "stats" && <StatsView onOpenQueue={isAdmin ? (status) => {setQueueWorkFilter(status);setView("inbox");setAccount("admin");setQueueFolder("active");} : undefined} />}
+              {isAdmin && view === "stats" && <StatsView onOpenQueue={isAdmin ? (status) => {setQueueWorkFilter(status);setView("inbox");setAccount("admin");setQueueFolder("active");} : undefined} />}
             </>
           )}
         </Tabs.Content>
@@ -799,11 +808,11 @@ function ThreadDetail({
       {housingGate?.pending && housingGate.role === "recipient" && (
         <div className="inbox-exp-thread__panel inbox-exp-thread__panel--lineup">
           <div className="inbox-exp-thread__panel-copy inbox-exp-thread__panel-copy--actions">
-            Asked to chat about this My Hoüz post. Nothing opens until you accept.
+            {housingGate.kind === "WAITLIST" ? "Asked to join the waitlist." : housingGate.kind === "JOIN" ? "Asked to join the household. If the last spot fills, they’ll join the waitlist." : "Asked to chat about this My Hoüz post."}
           </div>
           <div className="inbox-exp-thread__panel-actions">
             <button type="button" className="inbox-exp-thread__btn-approve" onClick={onHousingAccept}>
-              Accept
+              {housingGate.kind === "WAITLIST" ? "Accept onto waitlist" : housingGate.kind === "JOIN" ? "Accept join request" : "Accept chat"}
             </button>
             <button type="button" className="inbox-exp-thread__btn-decline" onClick={onHousingDecline}>
               Not right now
@@ -820,7 +829,7 @@ function ThreadDetail({
             body={m.body}
             self={m.self}
             reactions={m.reactions}
-            disabled={readOnly || !onReact}
+            disabled={readOnly || housingLocked || !onReact}
             timeLabel={m.at}
             onToggle={async (code) => {
               if (!onReact) return;
@@ -857,7 +866,7 @@ function ThreadDetail({
       )}
       {!readOnly && housingLocked && (
         <div className="inbox-exp-thread__readonly">
-          {housingGate?.role === "requester" ? "Waiting on them to accept" : "Accept to open the chat"}
+          {housingGate && !housingGate.pending ? "This request is closed" : housingGate?.role === "requester" ? "Waiting on them to accept" : housingGate ? "Accept to open the chat" : "Checking request status"}
         </div>
       )}
       {readOnly && (

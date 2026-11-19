@@ -109,9 +109,10 @@
   height: 44px;
   display: grid;
   place-items: center;
-  border: 1px solid #2a2a32;
+  border: 1px solid rgba(172, 207, 231, .16);
   border-radius: 12px;
-  background: rgba(255, 255, 255, .03);
+  background: linear-gradient(165deg, rgba(15, 22, 29, .29), rgba(0, 2, 6, .43));
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .2), inset 0 1px 1px rgba(222, 241, 252, .08), inset 0 -2px 3px rgba(0, 0, 0, .22);
   color: #cfcfd6;
   font-size: 22px;
   line-height: 1;
@@ -141,9 +142,10 @@
 .sch-weeknav__today {
   min-height: 36px;
   padding: 6px 12px;
-  border: 1px solid #2a2a32;
+  border: 1px solid rgba(172, 207, 231, .16);
   border-radius: 999px;
-  background: rgba(255, 255, 255, .03);
+  background: linear-gradient(165deg, rgba(15, 22, 29, .29), rgba(0, 2, 6, .43));
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .2), inset 0 1px 1px rgba(222, 241, 252, .08), inset 0 -2px 3px rgba(0, 0, 0, .22);
   color: var(--neon-cyan, #19e3ff);
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 10px;
@@ -174,9 +176,11 @@
   justify-content: center;
   gap: 1px;
   padding: 4px 2px 6px;
-  border: 1px solid #2a2a32;
+  border: 1px solid rgba(172, 207, 231, .16);
   border-radius: 10px;
-  background: transparent;
+  /* Dock-icon material under the day tint (the tint itself is inline). */
+  background: linear-gradient(165deg, rgba(15, 22, 29, .29), rgba(0, 2, 6, .43));
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .2), inset 0 1px 1px rgba(222, 241, 252, .08), inset 0 -2px 3px rgba(0, 0, 0, .22);
   cursor: pointer;
 }
 .sch-weeknav__day.has-events {
@@ -239,6 +243,9 @@
 }
 
 @media (max-width: 640px) {
+  /* Full-height week navigator (the brief 50% shrink was superseded the
+     same day — My Schedule moved into the Events drawer instead), wearing
+     the dock's liquid-glass material. */
   .sch-weeknav {
     position: fixed;
     left: 0;
@@ -247,10 +254,12 @@
     z-index: 54;
     margin: 0;
     padding: 8px 10px 10px;
-    background: rgba(6, 6, 10, 0.94);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid #1c1c22;
+    background:
+      linear-gradient(164deg, rgba(123, 182, 201, .13), rgba(7, 13, 20, .05) 38%, rgba(4, 8, 12, .18) 66%, rgba(57, 102, 144, .11)),
+      rgba(1, 4, 8, .55);
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    border-top: 1px solid rgba(172, 207, 231, .16);
     max-width: none;
   }
   .sch-weeknav__days {

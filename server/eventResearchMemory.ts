@@ -821,6 +821,53 @@ export function listEventResearchChanges(limit = 100) {
   });
 }
 
+/**
+ * The most recent source URL recorded for an event, from the evidence
+ * receipts QSearch attaches to every agent create/edit
+ * (agent_event_change_log.evidence_receipts_json). The events table itself
+ * has no source-URL column — this change log is the only per-event source
+ * trail in the data model. Returns null for events that never went through
+ * the agent event-research API (admin-seeded, community submissions).
+ */
+export function getLatestEventSourceUrl(eventId: number): string | null {
+  if (!Number.isSafeInteger(eventId) || eventId < 1) return null;
+  try {
+    ensureEventResearchChangeTable();
+    const rows = sqlite.prepare(`
+      SELECT evidence_receipts_json FROM agent_event_change_log
+      WHERE event_id = ? AND rolled_back_at IS NULL
+      ORDER BY id DESC LIMIT 25
+    `).all(eventId) as Array<{ evidence_receipts_json: string }>;
+    for (const row of rows) {
+      let receipts: unknown;
+      try { receipts = JSON.parse(String(row.evidence_receipts_json || "[]")); } catch { continue; }
+      if (!Array.isArray(receipts)) continue;
+      for (const receipt of receipts) {
+        const url = safeResearchUrl(String((receipt as { sourceUrl?: unknown })?.sourceUrl || ""));
+        if (url) return url;
+      }
+    }
+  } catch { /* change log unavailable — no source trail for this event */ }
+  return null;
+}
+
+/**
+ * The platform an event's listing came from, derived from the same
+ * evidence-receipt trail as getLatestEventSourceUrl but exposing only the
+ * host ("fetlife" for fetlife.com) — never the URL itself. Public-safe:
+ * the posterless fallback flyer (Tucker, Nov 19, 2026) uses it to pick the
+ * FetLife mark over the venue logo for FetLife-sourced events.
+ */
+export function getLatestEventSourcePlatform(eventId: number): string | null {
+  const url = getLatestEventSourceUrl(eventId);
+  if (!url) return null;
+  try {
+    const host = new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+    if (host === "fetlife.com" || host.endsWith(".fetlife.com")) return "fetlife";
+    return host || null;
+  } catch { return null; }
+}
+
 function ensureAgentMemoryColumn(name: string, definition: string) {
   const columns = sqlite.prepare("PRAGMA table_info(agent_event_source_paths)").all() as Array<{
     name: string;

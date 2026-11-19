@@ -404,15 +404,15 @@ function RequestButton({
     return (
       <Btn kind="solid" onClick={() => h.onRequest("CHAT")}>
         <HousingIcon name="message" />
-        Open the chat
+        {post.myRequest?.kind === "WAITLIST" ? "On the waitlist · Open chat" : post.myRequest?.kind === "JOIN" ? "Household member · Open chat" : "Open the chat"}
       </Btn>
     );
   }
   const pending = status === "PENDING";
   return (
-    <Btn kind="solid" disabled={pending} onClick={() => h.onRequest(kind)}>
+    <Btn kind="solid" disabled={status === "DECLINED"} onClick={() => h.onRequest(kind)}>
       <HousingIcon name={icon} />
-      {pending ? "Request sent" : label}
+      {pending ? post.myRequest?.threadId ? "Open pending request" : "Retry conversation" : status === "DECLINED" ? "Request closed" : label}
     </Btn>
   );
 }

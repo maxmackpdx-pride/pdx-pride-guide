@@ -3,6 +3,7 @@ import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import type {Event} from '@shared/schema';
 import type {Business} from '@/pages/Directory';
 import {mapBookmark} from '@/lib/mapBookmarks';
+const AfterzInvitations=lazy(()=>import("@/components/afterz/AfterzInvitations"));
 const EventModal=lazy(()=>import('@/components/EventModal'));
 const PlaceModal=lazy(()=>import('@/components/PlaceModal'));
 import {useSearch} from 'wouter';
@@ -60,6 +61,7 @@ export default function UnifiedMap(){
  return <section className="zaylist-unified-map" aria-label="Zaylist five-mode map" data-map-release={release.tag} data-map-commit={release.commit} style={{position:'fixed',inset:0,zIndex:45,background:'var(--z-black,#050506)'}}>
   <div ref={node} style={{width:'100%',height:'100%',position:'relative'}}/>
   {placezPortals}
+  {initialMode()==="afterz" && <Suspense fallback={null}><AfterzInvitations signIn={()=>setAuthOpen(true)} signingIn={authOpen && !user}/></Suspense>}
   {error&&<div role="alert" style={{position:'absolute',inset:0,display:'grid',placeContent:'center',padding:24,background:'var(--z-black,#050506)',color:'white',gap:16}}><h1>Map unavailable</h1><p>{error}</p><button type="button" onClick={()=>setAttempt(v=>v+1)}>Retry map</button><a href="/events">Browse events without the map</a><a href="/">Back to Zaylist</a></div>}
   {legacyError&&<div role="alert" style={{position:'absolute',top:80,left:16,right:16,padding:16,background:'var(--z-black)',color:'white',zIndex:300}}>{legacyError} <button onClick={closeLegacy}>Dismiss</button></div>}
   {legacyDetail&&<Suspense fallback={<p role="status">Loading bookmarked details…</p>}>{legacyDetail.kind==='event'?<EventModal event={legacyDetail.record} onClose={closeLegacy}/>:<PlaceModal place={legacyDetail.record} onClose={closeLegacy} onRequireAuth={()=>setAuthOpen(true)}/>}</Suspense>}

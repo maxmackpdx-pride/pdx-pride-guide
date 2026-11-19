@@ -27,7 +27,11 @@ type QueueRowKind =
   | "gig_pending"
   | "owner_desk";
 
+import {ReportConversation} from "../ReportReceipts";
+
 type QueueRow = {
+  memberConversation?: boolean;
+  deskSource?: "desk"|"feedback";
   id: string;
   kind: QueueRowKind;
   entityId: number;
@@ -436,6 +440,8 @@ function mapOwnerDeskItem(r: any, completed = false): QueueRow | null {
     meta: `${r.contactName || "Someone"}${r.createdAt ? " · " + ts(r.createdAt) : ""}`,
     fields,
     note: String(r.body || ""),
+    memberConversation: Boolean(r.memberConversation),
+    deskSource: r.source === "feedback" ? "feedback" : "desk",
     replyEmail: r.contactEmail ? String(r.contactEmail) : undefined,
     attachments,
     outcome: completed ? "RESOLVED" : undefined,
@@ -655,8 +661,8 @@ export default function QueueView({
     qc.invalidateQueries({queryKey: ["/api/admin/metrics"]});
   };
   const resolveOwnerDesk = useMutation({
-    mutationFn: (id: number) =>
-      apiRequest("POST", `/api/admin/feedback/${id}/resolve`, {}),
+    mutationFn: (row:QueueRow) =>
+      apiRequest("POST", `/api/admin/feedback/${row.entityId}/resolve`, {source:row.deskSource}),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/feedback"] });
       qc.invalidateQueries({ queryKey: ["/api/admin/pending-count"] });
@@ -1371,11 +1377,11 @@ export default function QueueView({
                 {q.kind === "owner_desk" && (
                   <>
                     {q.replyEmail
-                      ? btn("REPLY", C.purple, () => {
+                      ? btn("REPLY BY EMAIL", C.purple, () => {
                           window.location.href = `mailto:${q.replyEmail}?subject=${encodeURIComponent(`Re: ${q.title}`)}`;
                         })
                       : null}
-                    {btn("MARK DONE", C.green, () => resolveOwnerDesk.mutate(q.entityId), true)}
+                    {btn("MARK DONE", C.green, () => resolveOwnerDesk.mutate(q), true)}
                   </>
                 )}
               </div>
@@ -1418,6 +1424,7 @@ export default function QueueView({
         <section className="inbox-workspace__queue" aria-label="Case list"><div className="inbox-workspace__queue-heading">{rowsFiltered.length} {completed ? "recent decisions" : "open cases"}</div>{rowsFiltered.map(row=><button key={row.id} type="button" aria-pressed={focused?.id===row.id} className={focused?.id===row.id ? "is-selected" : ""} onClick={()=>{setFocusedId(row.id); setWorkAction(null); setWorkReason("");}}><span className="inbox-workspace__case-kind">{row.tag}<small>{row.outcome || workflowFor(row)?.status || "Review"}</small></span><strong>{row.title}</strong><span>{row.meta}</span><small>{claimFor(row.kind,row.entityId)?.assigneeUsername ? `Assigned to @${claimFor(row.kind,row.entityId)?.assigneeUsername}` : row.kind === "owner_desk" || row.kind === "logo_request" ? "Primary owner" : "Unassigned"}</small></button>)}</section>
         {focused && <section className="inbox-workspace__detail" aria-label="Selected case">
           {renderQueueRow(focused)}
+          {focused.kind==="owner_desk" && focused.memberConversation && <ReportConversation key={focused.id} id={focused.entityId} owner/>}
           {!completed && !["owner_desk","logo_request"].includes(focused.kind) && <div className="inbox-workspace__workflow">
             {workflowFor(focused)?.reason && <p><b>{workflowFor(focused)?.status === "escalated" ? "Owner decision requested" : "Waiting on"}:</b> {workflowFor(focused)?.reason}</p>}
             {workflowFor(focused)?.status === "escalated" && !user?.isPrimaryOwner ? <p>Only the primary owner can decide or return this case to review.</p> : <>

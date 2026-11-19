@@ -143,6 +143,7 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
         <div className="inbox-sheet-host" aria-hidden={!open}>
           <Suspense fallback={null}>
             <InboxOverlay
+              key={String(user?.id) + "/" + Boolean(user?.isAdmin || user?.isSuperAdmin) + "/" + Boolean(user?.isPrimaryOwner)}
               open={open}
               trigger={trigger}
               onClose={closeSheet}

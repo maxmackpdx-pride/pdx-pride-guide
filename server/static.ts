@@ -11,7 +11,7 @@ const APP_PATHS = new Set([
   "/", "/map-demo", "/index.html", "/z", "/events", "/map", "/boardz", "/boards", "/all-boards", "/our-boardz", "/all-boards", "/schedule", "/submit", "/gigz", "/giftz", "/sellz",
   "/gigz/new", "/giftz/new", "/sellz/new", "/mizzed/new",
   "/my-houz", "/my-houz/new", "/houz", "/the-hauz", "/the-hauz/new", "/about", "/aboutz", "/resources", "/rezources", "/needz", "/resume", "/contact", "/sponsors", "/access", "/legal",
-  "/admin", "/dashboard", "/settings/notifications", "/reset-password", "/inbox", "/mizzed", "/directory", "/outzide", "/design-preview", "/design-system/specimen", "/next", "/darkroom",
+  "/admin", "/dashboard", "/settings/notifications", "/reset-password", "/inbox", "/mizzed", "/directory", "/scenez", "/outzide", "/design-preview", "/design-system/specimen", "/next", "/darkroom",
 ]);
 function isAppPath(pathname: string) {
   const normalized = pathname.replace(/\/+$/, "").toLowerCase() || "/";
@@ -19,8 +19,7 @@ function isAppPath(pathname: string) {
     || /^\/(?:z|u|outzide|my-houz|the-hauz)\/[^/]+$/.test(normalized) || /^\/submit\/claim\/[^/]+$/.test(normalized);
 }
 
-export function serveStatic(app: Express) {
-  const distPath = path.resolve(__dirname, "public");
+export function serveStatic(app: Express, distPath = path.resolve(__dirname, "public")) {
   if (!fs.existsSync(distPath)) {
     throw new Error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`,

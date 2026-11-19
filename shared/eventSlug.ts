@@ -12,10 +12,12 @@ export function slugifyEventTitle(title: string): string {
 /** @deprecated Use slugifyEventTitle - kept for existing imports */
 export const eventSlug = slugifyEventTitle;
 
-export function eventPath(id: number, title: string, day?: string | null): string {
+export function eventPath(id: number, title: string, day?: string | null, date?: string | null): string {
   const base = `/events/${id}/${slugifyEventTitle(title)}`;
-  if (day) return `${base}?day=${encodeURIComponent(day.toUpperCase())}`;
-  return base;
+  const params = new URLSearchParams();
+  if (day) params.set("day", day.toUpperCase());
+  if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) params.set("date", date);
+  return params.size ? `${base}?${params}` : base;
 }
 
 export function eventUrl(id: number, title: string, siteUrl = "https://www.zaylist.com", day?: string | null): string {

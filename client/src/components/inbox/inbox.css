@@ -1784,7 +1784,7 @@ html.calm-mode .inbox-overlay::after,
 
 .inbox-exp-stats-pulse {
   border: 1px solid var(--panel-border);
-  border-top: 3px solid #2BFF00;
+  border-top: 3px solid var(--staff-green);
   border-radius: 12px;
   background: var(--panel-card);
   padding: 16px;
@@ -1793,9 +1793,9 @@ html.calm-mode .inbox-overlay::after,
 
 .inbox-exp-stats-pulse__label {
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
-  font-size: 9.5px;
+  font-size: 11px;
   letter-spacing: 0.12em;
-  color: #8a8a92;
+  color: var(--staff-muted);
 }
 
 .inbox-exp-stats-pulse__row {
@@ -1810,21 +1810,21 @@ html.calm-mode .inbox-overlay::after,
   font-weight: 800;
   font-size: 56px;
   line-height: 0.85;
-  color: #fff;
+  color: var(--staff-ink);
   font-variant-numeric: tabular-nums;
 }
 
 .inbox-exp-stats-pulse__sub {
   font-size: 14px;
-  color: #d6d6dc;
+  color: var(--staff-ink);
   line-height: 1.3;
 }
 
 .inbox-exp-stats-pulse__foot {
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.08em;
-  color: #6a6a72;
+  color: var(--staff-muted);
   margin-top: 10px;
 }
 
@@ -1834,7 +1834,7 @@ html.calm-mode .inbox-overlay::after,
   font-weight: 800;
   font-size: 22px;
   letter-spacing: 0.02em;
-  color: #fff;
+  color: var(--staff-ink);
 }
 
 .inbox-exp-stats-title--first {
@@ -1848,7 +1848,7 @@ html.calm-mode .inbox-overlay::after,
 .inbox-exp-stats-copy {
   margin: 0 2px 12px;
   font-size: 12px;
-  color: #6a6a72;
+  color: var(--staff-muted);
   line-height: 1.4;
 }
 
@@ -1881,9 +1881,9 @@ html.calm-mode .inbox-overlay::after,
 
 .inbox-exp-stats-snapshot__label {
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.1em;
-  color: #c8c4bb;
+  color: var(--staff-ink);
 }
 
 .inbox-exp-stats-grid {
@@ -1904,15 +1904,15 @@ html.calm-mode .inbox-overlay::after,
   font-weight: 800;
   font-size: 34px;
   line-height: 0.85;
-  color: #fff;
+  color: var(--staff-ink);
   font-variant-numeric: tabular-nums;
 }
 
 .inbox-exp-stats-tile__label {
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.09em;
-  color: #8a8a92;
+  color: var(--staff-muted);
   margin-top: 7px;
 }
 
@@ -1929,21 +1929,21 @@ html.calm-mode .inbox-overlay::after,
 
 .inbox-exp-stats-hbar__label {
   font-size: 13px;
-  color: #d6d6dc;
+  color: var(--staff-ink);
 }
 
 .inbox-exp-stats-hbar__value {
   font-family: var(--font-display), "Barlow Condensed", sans-serif;
   font-weight: 800;
   font-size: 15px;
-  color: #fff;
+  color: var(--staff-ink);
   font-variant-numeric: tabular-nums;
 }
 
 .inbox-exp-stats-hbar__track {
   height: 6px;
   border-radius: 999px;
-  background: #1a1a1f;
+  background: var(--staff-rule);
   overflow: hidden;
 }
 
@@ -1977,9 +1977,9 @@ html.calm-mode .inbox-overlay::after,
 .inbox-exp-action-flow__speed span,
 .inbox-exp-action-flow__integrity span {
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
-  font-size: 8.5px;
+  font-size: 11px;
   letter-spacing: 0.1em;
-  color: #8a8a92;
+  color: var(--staff-muted);
 }
 
 .inbox-exp-action-flow__title {
@@ -1989,7 +1989,7 @@ html.calm-mode .inbox-overlay::after,
   font-size: 30px;
   line-height: 0.95;
   letter-spacing: 0.01em;
-  color: #fff;
+  color: var(--staff-ink);
 }
 
 .inbox-exp-action-flow__speed {
@@ -2017,7 +2017,7 @@ html.calm-mode .inbox-overlay::after,
   padding: 12px 17px 0;
   font-size: 12px;
   line-height: 1.45;
-  color: #8a8a92;
+  color: var(--staff-muted);
 }
 
 .inbox-exp-action-flow__lanes,
@@ -2060,14 +2060,14 @@ html.calm-mode .inbox-overlay::after,
   display: flex;
   align-items: baseline;
   gap: 6px;
-  color: #8a8a92;
+  color: var(--staff-muted);
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
-  font-size: 8px;
+  font-size: 11px;
   letter-spacing: 0.08em;
 }
 
 .inbox-exp-action-flow__rate strong {
-  color: #fff;
+  color: var(--staff-ink);
   font-family: var(--font-display), "Barlow Condensed", sans-serif;
   font-size: 20px;
   letter-spacing: 0;
@@ -2093,7 +2093,7 @@ html.calm-mode .inbox-overlay::after,
 .inbox-exp-action-flow__stage-value {
   display: block;
   margin-top: 2px;
-  color: #fff;
+  color: var(--staff-ink);
   font-family: var(--font-display), "Barlow Condensed", sans-serif;
   font-size: 25px;
   line-height: 0.95;
@@ -2105,7 +2105,7 @@ html.calm-mode .inbox-overlay::after,
   height: 5px;
   margin-top: 7px;
   border-radius: 999px;
-  background: #1a1a1f;
+  background: var(--staff-rule);
   overflow: hidden;
 }
 
@@ -2125,13 +2125,13 @@ html.calm-mode .inbox-overlay::after,
   min-height: 42px;
   padding: 0 17px;
   border-top: 1px solid var(--panel-border);
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--staff-paper);
 }
 
 .inbox-exp-action-flow__integrity strong {
-  color: #d6d6dc;
+  color: var(--staff-ink);
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
-  font-size: 8.5px;
+  font-size: 11px;
   letter-spacing: 0.08em;
   text-align: right;
 }
@@ -2154,7 +2154,7 @@ html.calm-mode .inbox-overlay::after,
   }
 
   .inbox-exp-action-flow__stage-label {
-    font-size: 7.5px;
+    font-size: 11px;
     letter-spacing: 0.07em;
   }
 }
@@ -2193,14 +2193,14 @@ html.calm-mode .inbox-overlay::after,
   font-weight: 800;
   font-size: 26px;
   line-height: 0.9;
-  color: #fff;
+  color: var(--staff-ink);
 }
 
 .inbox-exp-stats-donut__total-label {
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
-  font-size: 7px;
+  font-size: 11px;
   letter-spacing: 0.1em;
-  color: #8a8a92;
+  color: var(--staff-muted);
 }
 
 .inbox-exp-stats-legend {
@@ -2227,7 +2227,7 @@ html.calm-mode .inbox-overlay::after,
 
 .inbox-exp-stats-legend__label {
   font-size: 13px;
-  color: #d6d6dc;
+  color: var(--staff-ink);
   flex: 1;
 }
 
@@ -2235,7 +2235,7 @@ html.calm-mode .inbox-overlay::after,
   font-family: var(--font-display), "Barlow Condensed", sans-serif;
   font-weight: 800;
   font-size: 20px;
-  color: #fff;
+  color: var(--staff-ink);
 }
 
 .inbox-exp-stats-badges {
@@ -2247,7 +2247,7 @@ html.calm-mode .inbox-overlay::after,
 
 .inbox-exp-stats-badge {
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
-  font-size: 8.5px;
+  font-size: 11px;
   letter-spacing: 0.08em;
   font-weight: 600;
   padding: 4px 8px;
@@ -2259,9 +2259,9 @@ html.calm-mode .inbox-overlay::after,
 
 .inbox-exp-stats-metric__label {
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
-  font-size: 8.5px;
+  font-size: 11px;
   letter-spacing: 0.09em;
-  color: #8a8a92;
+  color: var(--staff-muted);
 }
 
 .inbox-exp-stats-metric__value {
@@ -2269,7 +2269,7 @@ html.calm-mode .inbox-overlay::after,
   font-weight: 800;
   font-size: 30px;
   line-height: 0.9;
-  color: #fff;
+  color: var(--staff-ink);
   margin-top: 8px;
   font-variant-numeric: tabular-nums;
 }
@@ -2291,9 +2291,9 @@ html.calm-mode .inbox-overlay::after,
 
 .inbox-exp-stats-chart__title {
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.1em;
-  color: #8a8a92;
+  color: var(--staff-muted);
 }
 
 .inbox-exp-stats-chart__delta {
@@ -2301,9 +2301,9 @@ html.calm-mode .inbox-overlay::after,
   align-items: center;
   gap: 5px;
   font-family: var(--font-mono, ui-monospace, Menlo, monospace);
-  font-size: 8.5px;
+  font-size: 11px;
   letter-spacing: 0.09em;
-  color: #2BFF00;
+  color: var(--staff-green);
 }
 
 .inbox-exp-stats-chart__delta-dot {
@@ -2346,3 +2346,8 @@ html.calm-mode .inbox-overlay::after,
 .inbox-exp-bulkbar button:disabled { opacity: .42; cursor: default; }
 @media (max-width: 560px) { .inbox-exp-bulkbar > span { width: 100%; margin: 0; } .inbox-exp-bulkbar button { flex: 1 1 auto; } }
 .inbox-exp-queue-row__head-main { min-width: 0; flex: 1; display: flex; align-items: center; gap: inherit; border: 0; padding: 0; background: transparent; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+
+.report-receipts,.report-conversation {padding:.8rem;color:inherit;min-width:0;overflow-wrap:anywhere}
+.report-receipts h3,.report-conversation p {margin:0 0 .55rem}
+.report-receipts button,.report-conversation button {min-height:44px;text-align:start;color:inherit;text-decoration:underline}
+.report-conversation textarea {display:block;width:100%;min-height:5rem;padding:.6rem;background:var(--ink-850);color:var(--text-hi);border:1px solid currentColor;border-radius:6px}

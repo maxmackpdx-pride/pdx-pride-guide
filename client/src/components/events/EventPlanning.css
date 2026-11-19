@@ -1,0 +1,36 @@
+.event-planning {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  color: inherit;
+}
+.event-planning h3,
+.event-planning p,
+.event-planning ul {
+  margin: 0;
+}
+.event-planning ul {
+  padding-inline-start: 1.2rem;
+}
+.event-planning li {
+  padding-block: 0.25rem;
+  overflow-wrap: anywhere;
+}
+.event-planning form,
+.event-planning label {
+  display: grid;
+  gap: 0.35rem;
+}
+.event-planning button,
+.event-planning a,
+.event-planning input {
+  min-height: 44px;
+  max-width: 100%;
+}
+.event-planning button,
+.event-planning a {
+  display: inline-flex;
+  align-items: center;
+  padding-inline: 0.65rem;
+  text-decoration: underline;
+}

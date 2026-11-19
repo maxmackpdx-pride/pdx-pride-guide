@@ -1,9 +1,25 @@
 /* Eventz expanded card on the Placez setup. One card, five swipe pages,
    flyer from the top, gradient starting 35% down the card, black action
    cards, pager + save pinned at the bottom, bloom held at the raised level.
-   Made-by: Muse */
+   Made-by: Muse
+
+   Nov 19, 2026 fixes (Tucker):
+   - Scroll sticking: the pager is a horizontal scroll-snap container whose
+     children are themselves vertical scrollers, and nothing set
+     overscroll-behavior — at a page's top/bottom edge the gesture chained
+     into the pager / surrounding board and the page felt stuck. Pages and
+     the pager now contain overscroll, snap stops are firm, and momentum
+     scrolling is explicit.
+   - The page scroller now spans the FULL card height positioned BEHIND the
+     flyer layer (pageswrap z-index -1 inside the card's stacking context):
+     content scrolls up underneath the flyer + gradient, which are
+     byte-for-byte unchanged. Pages carry top/bottom padding equal to the
+     hero + actions + tabs stack (--evz-top-offset) and the pinned footer
+     (--evz-bottom-offset) so the resting layout is exactly where it was. */
 .evz-x {
   --ac: var(--c, var(--neon-magenta));
+  --evz-top-offset: 471px;
+  --evz-bottom-offset: 118px;
   position: relative; display: flex; flex-direction: column;
   width: 100%; height: min(768px, calc(100dvh - 16px));
   background: var(--ink-800); color: var(--text-hi);
@@ -16,14 +32,14 @@
 .evz-x button:focus-visible { outline: 2px solid var(--ac); outline-offset: -3px; }
 
 /* ── Hero: flyer full-size from the top ─────────────────────────────── */
-.evz-x__hero { position: relative; flex: none; height: 336px; overflow: hidden; }
+.evz-x__hero { position: relative; flex: none; height: 336px; overflow: hidden; pointer-events: none; }
 .evz-x__flyer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
 .evz-x__flyer--none { background: color-mix(in srgb, var(--ac) 14%, var(--ink-800)); }
 /* The gradient starts 35% of the way down the card (768px reference height)
    and reaches the card ink before the identity block ends. */
-.evz-x__grad { position: absolute; left: 0; right: 0; top: 0; height: 768px; pointer-events: none;
+.evz-x__grad { position: absolute; left: 0; right: 0; top: 0; height: 768px; z-index: 1; pointer-events: none;
   background: linear-gradient(to bottom, rgba(11, 11, 11, 0) 35%, rgba(11, 11, 11, .45) 47%, rgba(11, 11, 11, .88) 56%, var(--ink-800) 66%); }
-.evz-x__chrome { position: absolute; top: 10px; right: 10px; z-index: 5; display: flex; gap: 8px; }
+.evz-x__chrome { position: absolute; top: 10px; right: 10px; z-index: 5; display: flex; gap: 8px; pointer-events: auto; }
 .evz-x__iconbtn { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%;
   border: 1px solid color-mix(in srgb, var(--ac) 55%, transparent); background: rgba(4, 9, 13, .8); color: var(--text-hi); }
 .evz-x__iconbtn--sm { width: 34px; height: 34px; }
@@ -53,15 +69,19 @@
 .evz-x__tabs button { padding: 0 0 7px; border: 0; background: transparent; color: var(--evz-gray-8a8a94);
   font: 800 9.5px/1 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .09em; }
 .evz-x__tabs button.on { color: var(--text-hi); box-shadow: 0 2px 0 var(--ac); }
-.evz-x__pageswrap { position: relative; flex: 1; min-height: 0; }
-.evz-x__pages { display: flex; height: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.evz-x__pageswrap { position: absolute; inset: 0; z-index: -1; }
+.evz-x__pages { display: flex; height: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none;
+  overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .evz-x__pages::-webkit-scrollbar { display: none; }
-.evz-x__page { flex: 0 0 100%; width: 100%; height: 100%; overflow-y: auto; scroll-snap-align: start; padding: 13px 16px 16px; box-sizing: border-box; }
+.evz-x__page { flex: 0 0 100%; width: 100%; height: 100%; overflow-y: auto; scroll-snap-align: start; scroll-snap-stop: always;
+  overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  padding: calc(var(--evz-top-offset) + 13px) 16px calc(var(--evz-bottom-offset) + 16px); box-sizing: border-box; }
 .evz-x__sech { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 8px;
   font: 800 12.5px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .05em; }
 .evz-x__sech:not(:first-child) { margin-top: 16px; }
 .evz-x__sech-r { font: 600 9.5px/1 var(--font-body, sans-serif); color: var(--evz-gray-8a8a94); letter-spacing: .03em; text-transform: none; }
 .evz-x__act--dash { border-style: dashed; margin-top: 14px; }
+.evz-x__act--owner { margin-top: 14px; }
 .evz-x__cnt { background: var(--ac); color: var(--z-black); border-radius: 5px; padding: 1px 7px; font-size: 11px; }
 .evz-x__empty { margin: 0; font: 400 12.5px/1.55 var(--font-body, sans-serif); color: var(--evz-mist-9aa7b0); }
 
@@ -86,6 +106,8 @@
 .evz-x__kv > svg { color: var(--ac); flex: none; margin-top: 1px; }
 .evz-x__kv-k { flex: none; width: 84px; font: 700 10px/1.5 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .1em; color: var(--evz-mist-9aa7b0); }
 .evz-x__desc { margin: 0; padding: 11px 0 2px; font: 400 12.5px/1.6 var(--font-body, sans-serif); color: var(--evz-gray-c6c6cf); white-space: pre-wrap; }
+.evz-x__linkrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.evz-x__venuelink { color: var(--ac); text-decoration: underline; text-underline-offset: 2px; }
 .evz-x__link { display: inline-flex; align-items: center; gap: 6px; margin-top: 13px; padding: 9px 12px;
   border: 1px solid var(--ac); border-radius: 8px; background: rgba(4, 9, 13, .62); color: var(--text-hi); text-decoration: none;
   font: 700 12.5px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .04em; }
@@ -116,7 +138,7 @@
   font: 400 12px/1.5 var(--font-body, sans-serif); color: var(--evz-mist-9aa7b0); }
 
 /* More + Nearby rails */
-.evz-x__rail { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: none; }
+.evz-x__rail { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: none; overscroll-behavior-x: contain; }
 .evz-x__rail::-webkit-scrollbar { display: none; }
 .evz-x__railcard { --ac: var(--c); position: relative; flex: none; width: 136px; height: 170px; padding: 0;
   border: 1px solid color-mix(in srgb, var(--ac) 45%, var(--evz-ink-0a0a0e)); border-radius: 12px; overflow: hidden;
@@ -143,19 +165,25 @@
   font: 700 12px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .05em; }
 
 /* Mizzed overlay (the add action, opened from its black card) */
-.evz-x__mizzed { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; background: var(--ink-800); }
+.evz-x__mizzed { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; background: var(--ink-800);
+  padding-top: var(--evz-top-offset); box-sizing: border-box; }
 .evz-x__mizzed-head { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px;
   border-bottom: 1px solid var(--panel-border); font: 800 12.5px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .05em; }
-.evz-x__mizzed-body { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 14px 14px; }
+.evz-x__mizzed-body { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 14px 14px; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 
 /* ── Pinned footer: pager + save ────────────────────────────────────── */
-.evz-x__foot { flex: none; border-top: 1px solid var(--panel-border); padding: 9px 14px 11px; background: var(--ink-800); }
+/* Footer padding gives the restored heart its clearance: the visible
+   circle (44px button, ::before inset 6px) sits 22px from the right
+   edge and 20px from the bottom — the same inset language as the
+   front card hearts (Tucker, Nov 19, 2026). margin-top:auto (expanded-card
+   fix set) keeps the footer pinned with the pageswrap out of flow. */
+.evz-x__foot { flex: none; margin-top: auto; border-top: 1px solid var(--panel-border); padding: 12px 16px 14px; background: var(--ink-800); }
 .evz-x__pager { display: flex; align-items: center; justify-content: space-between; }
 .evz-x__arw { width: 34px; height: 30px; display: grid; place-items: center; border: 1px solid var(--evz-line-2c2c35); border-radius: 8px; background: transparent; color: var(--evz-mist-cfd8de); }
 .evz-x__arw:disabled { opacity: .35; cursor: default; }
 .evz-x__dots { display: flex; align-items: center; gap: 5px; }
-.evz-x__dots button { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 99px; background: var(--evz-dot-3a3a44); }
-.evz-x__dots button.on { background: var(--ac); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ac) 25%, transparent); }
+.evz-x__dots i { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 99px; background: var(--evz-dot-3a3a44); }
+.evz-x__dots i.on { background: var(--ac); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ac) 25%, transparent); }
 .evz-x__pg { margin-left: 8px; font: 600 9px/1 var(--font-mono, monospace); letter-spacing: .06em; color: var(--evz-gray-8a8a94); }
 .evz-x__save { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; }
 .evz-x__savet { padding: 4px 0; border: 0; background: transparent; color: var(--text-hi);
@@ -164,8 +192,19 @@
 .evz-x__heart::before { content: ""; position: absolute; inset: 6px; border: 1px solid var(--ac); border-radius: 50%; background: rgba(4, 9, 13, .55); }
 .evz-x__heart svg { position: relative; }
 .evz-x__heart[aria-pressed="true"] { color: var(--ac); }
+.evz-x__heart[aria-pressed="true"] svg { fill: currentColor; }
+.evz-x__heart:disabled { opacity: .7; cursor: progress; }
 
 @media (max-width: 480px) {
+  .evz-x { --evz-top-offset: 435px; }
   .evz-x__hero { height: 300px; }
   .evz-x__title { font-size: 27px; }
 }
+
+/* The hero gradient is a card-level layer (moved out of the clipped hero):
+   the flyer fades down behind the I'M INTERESTED row, and the card's content
+   rides above the fade. */
+.evz-x__actions, .evz-x__tabs, .evz-x__foot { position: relative; z-index: 2; }
+
+.evz-x__arw, .evz-x__iconbtn--sm, .evz-x__tabs button, .evz-x__savet, .evz-x__page button { min-width: 44px; min-height: 44px; }
+.evz-x__save .evz-x__savet { flex: 1; width: auto; text-align: center; }

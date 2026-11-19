@@ -125,7 +125,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-body::before {
+html:not(:has(.room-shader-page)) body::before {
   content: "";
   position: fixed;
   inset: 0;
@@ -160,7 +160,7 @@ body::before {
   box-sizing: border-box;
 }
 
-.zine-page {
+.zine-page:not(.room-shader-page) {
   position: relative;
   isolation: isolate;
   background:
@@ -172,7 +172,7 @@ body::before {
 /* Absolute (not fixed): fixed grain lives inside main (z-index 2) and paints
    over the site footer (z-index 1) while you scroll - Places and every other
    zine page looked noisy under the footer. Absolute keeps texture on-page. */
-.zine-page::before {
+.zine-page:not(.room-shader-page)::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -3869,7 +3869,7 @@ button.event-type-filter {
 }
 
 /* Absolute, not fixed - same footer bleed as zine-page (Places, Gigs, Gifting, etc.) */
-.board-page::after {
+.board-page:not(.room-shader-page)::after {
   content: "";
   position: absolute;
   inset: 0;

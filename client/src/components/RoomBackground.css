@@ -1,0 +1,81 @@
+html body .room-shader-page {
+  position: relative;
+  isolation: isolate;
+  background: var(--z-oled);
+}
+html body .room-shader-page > .room-shader-background {
+  display: block;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  /* Keep the top-heavy art and its dark tail together on portrait screens.
+     Filling the whole tall viewport would magnify the center of the artwork. */
+  height: min(100dvh, 100vw);
+  pointer-events: none;
+  z-index: 0;
+  background-size: cover;
+  background-position: center top;
+  background-image: var(--room-fallback-image);
+}
+html body .room-shader-page > .room-shader-background:defined { background-image: none; }
+html body .room-shader-page > header,
+html body .room-shader-page > .pl-body,
+html body .room-shader-page > .new-scenez,
+html body .room-shader-page > .ol-body,
+html body .room-shader-page > .events-board-feed,
+html body .room-shader-page > .scroll-reveal {
+  position: relative;
+  z-index: 1;
+}
+html body .room-shader-page .pl-centered-hero__art {
+  width: min(76vw, 760px);
+  height: auto;
+  object-fit: contain;
+  margin: 64px auto 32px;
+}
+
+/* Shader pages sit on pure black all the way out — the page backdrop
+   (html, body and the app shell) is the same --z-oled black the room
+   textures fade to, so no gray shows at the edges or on overscroll.
+   (Tucker, Nov 19, 2026: "no gray behind it anymore. It's all black.") */
+html:has(.room-shader-page),
+body:has(.room-shader-page),
+.app-shell:has(.room-shader-page) {
+  background: var(--z-oled) !important;
+}
+
+/* SceneZ wordmark blend fix: the approved wordmark PNG sits on black and
+   its wrapper blends with `screen` so the black drops out over the waves —
+   but the wrapper chain (.new-scenez stacking context + .ns-hero
+   isolation) trapped the blend inside its own group, so the black painted
+   as a hard rectangle once the shader extended behind the hero. Releasing
+   both lets the blend reach the shader canvas, as designed. */
+html body .room-shader-page > .new-scenez { z-index: auto; }
+html body .room-shader-page > .new-scenez .ns-hero { isolation: auto; }
+
+/* Desktop (Tucker, Nov 18–19, 2026): the room shader no longer fills the
+   screen to all four corners. Each band is sized so the bottom of the
+   room's featured art lands just below the page's Discover cards (Events:
+   the Happening Now row) and the rest of the page is the pure black the
+   shader's own bottom ends in. Heights are in px because the Discover
+   cards sit at fixed layout positions, not at fractions of the viewport;
+   each was tuned against the rendered page, not the raw texture math —
+   the shaders darken their lower art, so the visible bottom lands higher
+   than the texture mapping alone predicts. Mobile/portrait unchanged. */
+@media (min-width: 721px) {
+  html body .room-shader-page { background: var(--z-oled) !important; }
+  html body .room-shader-page > .room-shader-background[room="eventz"] { height: 1000px; }
+  html body .room-shader-page > .room-shader-background[room="placez"] { height: 836px; }
+  html body .room-shader-page > .room-shader-background[room="scenez"] { height: 1150px; }
+  html body .room-shader-page > .room-shader-background[room="outzide"] { height: 1020px; }
+  html body .room-shader-page > .room-shader-background::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 22%;
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent, var(--z-oled));
+  }
+}

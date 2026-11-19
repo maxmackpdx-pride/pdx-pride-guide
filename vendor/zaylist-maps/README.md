@@ -83,3 +83,152 @@ a persisted URL camera no longer vetoes the Portland overview on boot,
 and Outzide's waypoint name labels are removed. GitHub runs 44258108571
 and 44258108636 passed the compiler checks, typechecking, map tests and
 both builds. The v1.0.23 parts remain in this folder for rollback.
+
+## v1.0.25: Tower-only light-box port (scene 03), fit-scale solver
+
+Source: `bcbb47fb373a1e877ccf94d41ba5b20f43d530d8` (immutable `v1.0.25`).
+Archive SHA-256: `9a20af1e0560bb48d5bf63db002548873805fa8d4d37b3a6b87659a294fafe51`.
+Mapz holograms ship the approved Tower light-box only (scene 03; scenes 01/02
+are out, not variants or fallbacks): the near state is the event poster sealed
+in the glass Tower slab (140x249x28, edge cage graded from the waypoint's
+assigned colour through a 48% blend into the poster's border token, white-hot
+core line, corner nodes, mid glass pane), or — for posterless events — the
+designed typographic face in the same slab, never bare text on a plate; beams
+take the sheet geometry (352 near, 276 far) and land under the furniture; the
+far state is the venue's extruded logo swapped in by a quick 540-degree spin,
+its back pre-mirrored so it never reads mirrored, and one furniture block
+(name, venue, start time, countdown only) stays up in both states. The layout
+solver gains fit-scale in both states: a hologram whose natural stack cannot
+fit above its anchor shrinks proportionally (the whole object, never
+re-typeset) down to a legibility floor instead of degrading to its far text
+state (near) or vanishing (far) — the geometry failure behind v1.0.24's
+billboards-or-nothing rendering at the default camera. Tests 429/429 on the
+tagged source; GitHub runs 44293528428 and 44293528463 passed the compiler checks,
+typechecking, map tests and both builds. The v1.0.24 parts remain in this
+folder for rollback.
+
+## v1.0.26: Tower adapts to the poster; far-state distance falloff
+
+Source: `5a0595c6b82c30b8c0ce1f95ab97546cbd47e527` (immutable `v1.0.26`).
+Archive SHA-256: `cda8a743e92cdb8be36b5f6bab16f97412cafec19809b9e71737c6f7e45e6e93`.
+The Tower light-box now takes each poster's own proportions: poster aspect is
+measured from the image itself at runtime (the events payload carries no
+dimensions) and the slab is derived at a held area budget with clamped
+width/height, so a landscape poster fills a wide, shorter slab with no
+letterbox bands, a portrait poster stays tower-like, and posterless events
+keep the Tower's portrait form with the designed typographic face. The solver
+collides and fit-scales on the per-poster box. Past the spin band the far logo
+and its beam scale down progressively with distance until the solver releases
+the hologram back to its waypoint; far forms render at their solved scale and
+the far beam width follows the placement scale. Tests 434/434 on the tagged
+source; GitHub runs 44344136151 and 44344139364 passed the compiler checks,
+typechecking, map tests and both builds. The v1.0.25 parts remain in this
+folder for rollback.
+
+## v1.0.27: Expand-crash fix, far-logo back face, preview-card legibility
+
+Source: `9e641e72bfa7bf1b810c301541a7e381cc57c362` (immutable `v1.0.27`).
+Archive SHA-256: `3d898b9c74f3f9c5f4936faad019ef407ff5c80f8a2a7d4dff5c1731a72bf6c6`.
+Expanding a map event card no longer crashes the page to black: the React
+Compiler had hoisted a useRef inlined in a returned object literal
+(useOpenCardClose, useIncidentalMap) into its memo-cache guard, so the hook
+was skipped on cache-hit re-renders and corrupted the caller's hook order;
+both hooks now call useRef as a top-level statement, a transform-level
+regression test pins that shape, and an error boundary around the expanded
+details degrades to the preview card as insurance. The far-state venue logo
+back face is a plain half-turn again — the scaleX(-1) pre-mirror
+double-flipped it, so a presented back read mirrored (the Badlands
+wordmark). Map preview card legibility: the date/time line clears the close
+chip, the flyer shows whole (contain, no fade mask), and the day-motif
+network pattern no longer sits behind the card copy. Tests 441/441 on the
+tagged source; GitHub runs 44406325296 and 44406325471 passed the compiler
+checks, typechecking, map tests and both builds. The v1.0.26 parts remain in
+this folder for rollback.
+
+## v1.0.28: Map cards + hologram flyer unified with the new events cards
+
+Source: `b5e8c7081ef8298978ba4f72305a49d55e2a2e9b` (immutable `v1.0.28`).
+Archive SHA-256: `9ce169c4d0c3f1771ee8c4af44dda9c2f497f979d7453d5d7f16ebd234cf0c1f`.
+The map's event cards and the Tower hologram's flyer are now the events
+page's new card system, fed by the same live API. The events adapter
+carries the full publicEvent record — the old 18-field whitelist dropped
+isSexPositive, isClaimable, hasPendingClaim, lat/lng, venueWebsite and
+source — so map cards render from the same record the board renders
+from. A map tap opens the new FRONT card (variant A: countdown module
+top-left, share icon + price chip top-right, Gigz/Carpool boxes + heart
+in the bottom band, wide posters get the black chunk below the poster)
+centered over a blurred scrim, not locked to the docks; a second tap
+grows it into the new EXPANDED card (Feed / Info / Maps / More + Nearby
+/ People from GET /api/events/:id/detail plus GET /api/placez/:id),
+which alone locks full-screen above the top bar and bottom dock. The
+legacy EventModal snapshot path is gone from production event details,
+and the Mapz drawer footer now reads LIVE EVENTS · ZAYLIST EVENTS API.
+The Tower hologram's flyer face carries the front card's countdown
+module in hologram-law form (IN … / LIVE, no label, no days unit); the
+law's furniture block, spin, far falloff and solver are unchanged, as
+are the v1.0.27 expand-crash fix and its error boundary. Tests 447/447
+on the tagged source; GitHub runs 44457309400 and 44457309352 passed
+the compiler checks, typechecking, map tests and both builds. The
+v1.0.27 parts remain in this folder for rollback.
+
+## v1.0.29: Card scrim blur survives the CSS pipeline
+
+Source: `5ca82c92ea62c62beb6045eaa6bdb97e17d9b86b` (immutable `v1.0.29`).
+Archive SHA-256: `81d01df85d28bc95eb57407902ee0329bc5d8af9756d8ba8f39c960d26159044`.
+One-line fix on top of v1.0.28: the map card overlay's blur was written
+standard-property-first, and the CSS pipeline drops the standard
+backdrop-filter declaration in that order, leaving only the -webkit-
+form, which Chromium does not apply — the front card's scrim dimmed but
+did not blur there. The overlay rule now writes -webkit-backdrop-filter
+first and the standard backdrop-filter last; both declarations are
+verified present in the built release CSS. Everything else is v1.0.28
+unchanged. Tests 447/447 on the tagged source; GitHub runs 44461430505
+and 44461430471 passed the compiler checks, typechecking, map tests and
+both builds. The v1.0.28 parts remain in this folder for rollback.
+## v1.0.30: Unconfirmed price demotes to asterisk small print
+
+Source: `a10c93f520adb1ca6e345f9eb4c557a7cd16a32f` (immutable `v1.0.30`).
+Archive SHA-256: `06e8fc48ba4cce78fd90e7f59bb057b99c174df8c0687be36d585acf522d9a41`.
+One-treatment change on top of v1.0.29: PRICE NOT CONFIRMED no longer
+renders as a chip on the map front card. An unconfirmed price is an
+asterisk small-print note ("* Price not confirmed") at the bottom of
+the card's bottom band, in both the overlay band and the wide-poster
+chunk; confirmed prices keep the chip. The events board ships the
+identical change (pdx-pride-guide PR #97) so both surfaces stay one
+card system. Everything else is v1.0.29 unchanged. Tests 447/447 on
+the tagged source; GitHub runs 44475124215 and 44475124204 passed the
+compiler checks, typechecking, map tests and both builds. The v1.0.29
+parts remain in this folder for rollback.
+## v1.0.31: The heart is the Interested toggle on both card faces
+
+Source: `9b588d72155017561cda9fa06ff981376164fa89` (immutable `v1.0.31`).
+Archive SHA-256: `ae9b0ee1deb031d65918fa92506675b4c80bf235b618696d877827b9b24de072`.
+One-behavior change on top of v1.0.30: the expanded card's heart is
+restored, and on both faces the heart is the INTERESTED toggle — one
+shared interested state owned by MapzMapCard drives the front heart,
+the expanded heart, and the "I'm interested" row; neither heart is a
+separate save/favorite state. Both hearts gain breathing room: the
+front heart sits 6cqw in from the bottom and right edges (overlay band
+and wide-poster chunk alike), and the expanded footer padding grows so
+its heart's circle clears the bottom and right edges by the same
+measure. The events board ships the identical change (pdx-pride-guide
+PR #98) so both surfaces stay one card system. Everything else is
+v1.0.30 unchanged. Tests 447/447 on the tagged source; GitHub runs
+44489123636 and 44489123734 passed the compiler checks, typechecking,
+map tests and both builds. The v1.0.30 parts remain in this folder for
+rollback.
+## v1.0.32: Card dialogs rise above the site dock
+
+Source: `1d8c7349f49b85f5689540403a384bce5efa64f6` (immutable `v1.0.32`).
+Archive SHA-256: `c28346bee748d58052743716dd0e0d27ed1471b0f6cf0db919409252820b2670`.
+One-mechanics change on top of v1.0.31: the card dialogs (mapz-map
+and board-map families) rise above the site dock — overlay z-index
+130, dialog 131, against the dock's computed 120. A live geometry
+check after v1.0.31 showed the expanded card's footer at the viewport
+bottom (heart at y785-829 on an 844px phone) covered by the dock
+(y754-836), leaving the heart restored in v1.0.31 — and the whole
+footer row — untappable on the map at phone size. No card behavior
+changes; everything else is v1.0.31 unchanged. Tests 447/447 on the
+tagged source; GitHub runs 44499433303 and 44499433243 passed the
+compiler checks, typechecking, map tests and both builds. The
+v1.0.31 parts remain in this folder for rollback.

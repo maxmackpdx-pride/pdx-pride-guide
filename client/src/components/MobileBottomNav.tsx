@@ -93,11 +93,11 @@ export default function MobileBottomNav() {
             data-accent="cyan"
             aria-current={eventsActive ? "page" : undefined}
             aria-label="Eventz"
+            title="Eventz"
             onClick={handleNavLink}
           >
             <span className="znav-icon-row"><CalendarDays size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Eventz</span>
-          </Link>
+                      </Link>
 
           <a
             href="/directory"
@@ -112,8 +112,7 @@ export default function MobileBottomNav() {
             onClick={togglePlacesFan}
           >
             <span className="znav-icon-row"><MapPin size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Placez</span>
-          </a>
+                      </a>
 
           <a
             href="/map"
@@ -141,8 +140,7 @@ export default function MobileBottomNav() {
                 </g>
               </svg>
             </span>
-            <span className="znav-caption">MAPZ</span>
-          </a>
+                      </a>
 
           <Link
             href="/boardz"
@@ -150,11 +148,11 @@ export default function MobileBottomNav() {
             data-accent="magenta"
             aria-current={boardsActive ? "page" : undefined}
             aria-label="Boardz"
+            title="Boardz"
             onClick={handleNavLink}
           >
             <span className="znav-icon-row"><LayoutGrid size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">Boardz</span>
-          </Link>
+                      </Link>
 
           <Link
             href="/needz"
@@ -166,8 +164,7 @@ export default function MobileBottomNav() {
             onClick={handleNavLink}
           >
             <span className="znav-icon-row"><LifeBuoy size={20} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="znav-caption">NEEDZ</span>
-          </Link>
+                      </Link>
       </MobileDockShell>
 
       <MobileWorldFan open={fanOpen === "maps"} onClose={closeFan} onNavigate={handleWorldNavigate} />

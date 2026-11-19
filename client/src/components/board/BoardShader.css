@@ -1,5 +1,4 @@
 .board-shader-page[data-shader-room] {
-  --board-shader-color: var(--room-eventz);
   position: relative;
   isolation: isolate;
   background-color: var(--z-black);
@@ -45,17 +44,6 @@
   -webkit-mask-image: linear-gradient(to bottom, var(--z-black) 0%, var(--z-black) 10%, color-mix(in srgb, var(--z-black) 98%, transparent) 20%, color-mix(in srgb, var(--z-black) 93%, transparent) 30%, color-mix(in srgb, var(--z-black) 82%, transparent) 40%, color-mix(in srgb, var(--z-black) 66%, transparent) 50%, color-mix(in srgb, var(--z-black) 48%, transparent) 60%, color-mix(in srgb, var(--z-black) 30%, transparent) 70%, color-mix(in srgb, var(--z-black) 19%, transparent) 80%, color-mix(in srgb, var(--z-black) 13%, transparent) 90%, color-mix(in srgb, var(--z-black) 13%, transparent) 100%);
   backdrop-filter: blur(13.8px);
   -webkit-backdrop-filter: blur(13.8px);
-}
-.events-page.board-shader-page::before { content: none; }
-.events-page.board-shader-page > .board-shader-veil {
-  background: linear-gradient(to bottom,
-    var(--z-black) 0%, var(--z-black) 12%,
-    color-mix(in srgb,var(--z-black) 78%,transparent) 32%, color-mix(in srgb,var(--z-black) 62%,transparent) 55%,
-    color-mix(in srgb,var(--z-black) 28%,transparent) 78%, color-mix(in srgb,var(--z-black) 8%,transparent) 100%);
-  mask-image: none;
-  -webkit-mask-image: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 .hz.board-shader-page .hz-wash,
 .hz.board-shader-page .hz-grain { display: none; }

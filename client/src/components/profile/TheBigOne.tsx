@@ -158,8 +158,8 @@ export default function TheBigOne({
   const admission = event.admission ? admissionDisplayLabel(event.admission)?.toUpperCase() : null;
   const dayInk = dayCode === "MON" || dayCode === "TUE" ? "#fff" : "#050506";
 
-  const rsvpLabel = isGoing ? "You're in" : "RSVP";
-  const rsvpCaption = isGoing ? "See you on the floor" : "Secure your spot";
+  const rsvpLabel = isGoing ? "Remove attendance" : "Going · Public";
+  const rsvpCaption = isGoing ? "Keeps your event follow" : "Shows your name and follows event updates";
 
   return (
     <section
@@ -236,10 +236,10 @@ export default function TheBigOne({
             <button
               type="button"
               className={`tbo__rsvp-pill${isGoing ? " is-going" : ""}`}
-              onClick={onRsvp}
+              onClick={onRsvp} title={rsvpCaption}
               disabled={!onRsvp}
             >
-              {isGoing ? <>You're in <Check size={14} aria-hidden="true" /></> : "RSVP"}
+              {isGoing ? <>Remove attendance <Check size={14} aria-hidden="true" /></> : "Going · Public"}
             </button>
           </div>
         </div>

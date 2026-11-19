@@ -6,14 +6,15 @@ import "./site-wallpaper.css";
 /** "boot" is the moment before the first frame: the legacy page overlays are already hidden, so they never flash. */
 type State = "idle" | "boot" | "live" | "still" | "fallback";
 
-/** Placez is the directory: /directory and every place page under it. */
+/** The legacy circuit wallpaper remains on individual PlaceZ detail pages. */
 function isPlacezRoute(path: string) {
   const bare = path.split("?")[0].replace(/\/+$/, "") || "/";
-  return bare === "/directory" || bare.startsWith("/directory/");
+  return bare.startsWith("/directory/");
 }
 
 /**
- * The wallpaper runs on Placez ONLY (owner's order, Nov 7). Every other
+ * The wallpaper runs on PlaceZ details only. Discovery pages own their room shaders.
+ * Every other
  * route hides it — including the full-bleed map routes, whose own map
  * covers the page anyway. No frames are spent there.
  */
@@ -27,16 +28,7 @@ function isBoardRoute(path: string) {
   return bare === "/boardz" || bare === "/boards" || bare === "/all-boards" || bare === "/our-boardz";
 }
 
-/**
- * The shared page wallpaper, mounted once in the app shell but running on Placez (the
- * directory) only — every other route tears it down and keeps its own CSS atmosphere.
- * The surface itself is the standalone circuit-cork board (no wordmark) served
- * from /circuit-wallpaper/index.html and embedded as a frame inside this layer; the state
- * contract is unchanged, so Placez keeps the same behaviour: Calm mode and reduced motion
- * hold one still frame (the board honours prefers-reduced-motion itself), Save-Data and a
- * failed frame load fall back without ever blanking the page — the original CSS atmosphere
- * layers that the page already carries take over again.
- */
+/** Legacy circuit surface for PlaceZ details. Room-shader discovery routes unmount it in App. */
 export default function SiteWallpaper() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [location] = useLocation();

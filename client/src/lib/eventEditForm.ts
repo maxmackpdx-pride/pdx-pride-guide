@@ -1,3 +1,4 @@
+import { legacyOrganizer } from "@shared/eventHostAuthority";
 import type { Event } from "@shared/schema";
 import { jsonTagsToSubmitLabels, submitLabelsToJsonTags } from "@shared/eventTypeTags";
 import { prideDayFromDate } from "@shared/eventWeek";
@@ -67,8 +68,6 @@ export function userCanEditEvent(
   if (user.isAdmin) return true;
   if (hostUserIds.includes(user.id)) return true;
   if (event.claimedBy && event.claimedBy === user.username) return true;
-  if (event.submittedBy) {
-    if (event.submittedBy === user.email || event.submittedBy === user.username) return true;
-  }
-  return false;
+  const fallback = legacyOrganizer(event, hostUserIds.length > 0);
+  return Boolean(fallback && (fallback === user.email || fallback === user.username));
 }

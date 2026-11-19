@@ -1,0 +1,101 @@
+/* Dock-locked drawer (Tucker, Nov 19 2026). Materials mirror the Events
+   drawer: black panel, accent-mixed border, bloom shadow. The lip sits
+   directly on top of the 56px icon-only bottom dock. Token colors only —
+   the build's token guard allows no raw color literals in new files. */
+.dock-drawer-lip,
+.dock-drawer {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  width: min(640px, calc(100% - 16px));
+  margin: 0 auto;
+  z-index: 150;
+  background: var(--z-black);
+  border: 1px solid color-mix(in srgb, var(--c) 55%, var(--z-black));
+  border-bottom: 0;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 0 0 2px var(--z-black), inset 0 1px 0 color-mix(in srgb, var(--c) 60%, transparent);
+  color: var(--text-hi);
+}
+.dock-drawer-lip { height: 30px; }
+.dock-drawer-lip__label {
+  position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+  font: 700 10px/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-meta); pointer-events: none;
+}
+.dock-drawer {
+  display: flex; flex-direction: column;
+  max-height: 62dvh;
+  animation: dock-drawer-in .38s cubic-bezier(.22, 1.25, .36, 1) both;
+}
+.dock-drawer.is-stop2 { height: calc(100dvh - 72px); max-height: none; }
+.dock-drawer.is-dragging { transition: none; animation: none; }
+.dock-drawer.is-bounce { animation: dock-drawer-bounce .45s cubic-bezier(.22, 1.4, .36, 1); }
+@keyframes dock-drawer-in { from { transform: translateY(102%); } to { transform: translateY(0); } }
+@keyframes dock-drawer-bounce {
+  0% { transform: translateY(-14px); }
+  45% { transform: translateY(4px); }
+  75% { transform: translateY(-2px); }
+  100% { transform: translateY(0); }
+}
+.dock-drawer__grip {
+  flex: none; position: relative; width: 100%; height: 34px; min-height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; border: 0; background: none; cursor: grab; touch-action: none; color: inherit;
+}
+.dock-drawer__grip:active { cursor: grabbing; }
+.dock-drawer__grip:focus-visible { outline: 2px solid var(--c); outline-offset: -4px; border-radius: 12px; }
+.dock-drawer-lip .dock-drawer__grip { height: 30px; min-height: 30px; }
+/* The handle: three stacked lines, centered. */
+.dock-drawer__lines { display: flex; flex-direction: column; gap: 3px; align-items: center; }
+.dock-drawer__lines i { display: block; width: 44px; height: 4px; border-radius: 999px; background: var(--border-strong); }
+.dock-drawer__body {
+  flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  padding: 2px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column; gap: 18px;
+}
+.dock-drawer__label {
+  margin: 0 0 8px; color: var(--text-meta);
+  font: 700 11px/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dock-drawer, .dock-drawer.is-bounce { animation: none; }
+}
+:is(html.calm-mode, :root[data-calm="true"]) .dock-drawer { animation: none; }
+
+/* Drawer sections shared by the Placez and Events drawers. */
+.dock-drawer .pz-drawer-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.dock-drawer .pz-drawer-filters button {
+  min-height: 44px; padding: 10px 14px; border-radius: 999px; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--category, var(--c)) 55%, transparent);
+  background: color-mix(in srgb, var(--category, var(--c)) 10%, transparent);
+  color: var(--text-hi); font: 700 13px/1.1 var(--font-body);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.dock-drawer .pz-drawer-filters button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--category, var(--c)) 26%, transparent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--category, var(--c)) 30%, transparent);
+}
+.dock-drawer .pz-drawer-rail {
+  display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x proximity;
+  padding: 4px 2px 10px; scrollbar-width: none; overscroll-behavior-inline: contain;
+}
+.dock-drawer .pz-drawer-rail::-webkit-scrollbar { display: none; }
+.dock-drawer .pz-drawer-rail > * { flex: none; scroll-snap-align: start; }
+.dock-drawer .pz-drawer-saved { display: flex; flex-direction: column; gap: 16px; }
+.dock-drawer .pz-drawer-saved__group h4 {
+  margin: 0 0 8px; font: 800 13px/1 var(--font-body); letter-spacing: .05em;
+  text-transform: uppercase; color: var(--category, var(--text-hi));
+}
+.dock-drawer .pz-drawer-saved__cards { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+.dock-drawer .pz-drawer-saved__cards::-webkit-scrollbar { display: none; }
+.dock-drawer .pz-drawer-saved__cards > * { flex: none; }
+.dock-drawer .pz-drawer-empty { margin: 0; font: 400 13px/1.5 var(--font-body); color: var(--text-body); }
+/* Upcoming rail cards carry NO buttons: every control inside the face is
+   hidden in this rail only; the card's own open surface is the tap target. */
+.dock-drawer .pz-drawer-bare button:not(.pz-open-surface):not(.oz-hit) { visibility: hidden; }
+.dock-drawer .pz-drawer-bare .pz-heart,
+.dock-drawer .pz-drawer-bare .oz-closed-actions { visibility: hidden; }
+
+/* The bottom dock itself is mobile-only (<=959px); the drawer follows it. */
+@media (min-width:960px){.dock-drawer,.dock-drawer-lip{display:none}}

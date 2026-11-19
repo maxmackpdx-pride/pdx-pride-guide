@@ -56,7 +56,7 @@ export default function AdminMetricsPanel({
   enabled: boolean;
   onMetricClick?: (tab: string, metricKey: keyof AdminMetrics) => void;
 }) {
-  const { data, isFetching, refetch, dataUpdatedAt } = useQuery<AdminMetrics>({
+  const { data, isFetching, isError, refetch, dataUpdatedAt } = useQuery<AdminMetrics>({
     queryKey: ["/api/admin/metrics"],
     queryFn: () => apiRequest("GET", "/api/admin/metrics").then(r => r.json()),
     enabled,
@@ -65,7 +65,10 @@ export default function AdminMetricsPanel({
     refetchInterval: 60_000,
   });
 
-  if (!data) return null;
+  if(!enabled)return null;
+  if(!data)return isError
+    ? <p role="alert">Stats unavailable. <button className="dash-btn" onClick={()=>void refetch()}>Retry</button></p>
+    : <p role="status">Loading site stats…</p>;
 
   const updatedLabel = data.generatedAt
     ? new Date(data.generatedAt).toLocaleString()

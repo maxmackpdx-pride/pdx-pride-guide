@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "wouter";
 import { ArrowUpRight, Search, X } from "lucide-react";
 import { RESOURCE_CATEGORIES, type ResourceOrg } from "@/lib/resourcesData";
@@ -61,7 +63,7 @@ function platformGroups(objects: PlatformHit[]): SearchGroup[] {
     if (!label || !item.url) continue;
     const subtitle = item.type === "event" ? [item.venueName, item.neighborhood].filter(Boolean).join(" · ")
       : item.type === "place" || item.type === "organization" ? [item.neighborhood, item.placeType].filter(Boolean).join(" · ")
-      : item.type === "community" ? `${item.memberCount ?? 0} members`
+      : item.type === "community" ? (typeof item.memberCount === "number" ? `${item.memberCount} members` : "")
       : item.type === "gig" ? item.location || "" : item.type === "listing" ? item.category || "" : item.summary || "";
     const hits = groups.get(label) || [];
     hits.push({ key: `${item.type}-${item.id}`, label: item.name, subtitle, href: item.url });
@@ -73,19 +75,41 @@ function platformGroups(objects: PlatformHit[]): SearchGroup[] {
 /** Sitewide search, opened from the nav or with Cmd/Ctrl+K. */
 export default function SiteSearch({ open, onClose }: SiteSearchProps) {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
+  const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
   const [query, setQuery] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
-  const [objects, setObjects] = useState<PlatformHit[]>([]);
-  const [loading, setLoading] = useState(false);
+  const currentQuery = query.trim();
+  const remote = useInfiniteQuery({
+    queryKey: ["site-search", user?.id ?? null, debouncedQ],
+    enabled: open && debouncedQ.length >= 2 && debouncedQ === currentQuery,
+    initialPageParam: "",
+    queryFn: async ({ pageParam, signal }) => {
+      const params = new URLSearchParams({ q: debouncedQ, types: PLATFORM_TYPES, limit: "40" });
+      if (pageParam) params.set("cursor", pageParam);
+      const response = await fetch(`/api/v1/search?${params}`, { credentials: "include", signal });
+      if (!response.ok) throw new Error("Search could not load");
+      const result = await response.json() as { data: PlatformHit[]; meta?: { nextCursor?: string | null } };
+      if (!Array.isArray(result.data)) throw new Error("Invalid search response");
+      return result;
+    },
+    getNextPageParam: page => page.meta?.nextCursor || undefined,
+    staleTime: 15_000,
+    retry: false,
+  });
+  const objects = useMemo(() => currentQuery === debouncedQ ? remote.data?.pages.flatMap(page => page.data) ?? [] : [], [remote.data, currentQuery, debouncedQ]);
+  const loading = currentQuery.length >= 2 && (currentQuery !== debouncedQ || remote.isPending);
+  const failed = currentQuery === debouncedQ && remote.isError;
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     if (!open) return;
-    setQuery(""); setDebouncedQ(""); setObjects([]); setActiveIndex(0);
+    setQuery(""); setDebouncedQ(""); setActiveIndex(0);
+    const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const timer = window.setTimeout(() => inputRef.current?.focus(), 30);
-    return () => window.clearTimeout(timer);
+    return () => { window.clearTimeout(timer); if (trigger?.isConnected) trigger.focus({ preventScroll: true }); };
   }, [open]);
   useEffect(() => {
     if (!open) return;
@@ -95,25 +119,17 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        const controls = panelRef.current?.querySelectorAll<HTMLElement>('input,button:not([disabled]):not([tabindex="-1"])');
+        const first = controls?.[0], last = controls?.[controls.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }
       if (event.key === "Escape") { event.preventDefault(); onClose(); }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
-  useEffect(() => {
-    if (!open || debouncedQ.length < 2) { setObjects([]); setLoading(false); return; }
-    const controller = new AbortController();
-    setLoading(true);
-    fetch(`/api/v1/search?q=${encodeURIComponent(debouncedQ)}&types=${PLATFORM_TYPES}&limit=100`, {
-      credentials: "include", signal: controller.signal,
-    })
-      .then((response) => response.ok ? response.json() : { data: [] })
-      .then((payload) => { if (!controller.signal.aborted) setObjects(Array.isArray(payload?.data) ? payload.data : []); })
-      .catch((error) => { if (error?.name !== "AbortError") setObjects([]); })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
-    return () => controller.abort();
-  }, [debouncedQ, open]);
-
   const groups = useMemo<SearchGroup[]>(() => {
     if (query.trim().length < 2) return [];
     const resource = resourceHits(query.trim());
@@ -125,10 +141,17 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
   }, [objects, query]);
   const flat = useMemo(() => groups.flatMap((group) => group.hits), [groups]);
   useEffect(() => setActiveIndex(0), [query]);
+  useEffect(() => {
+    if (open && flat[activeIndex]) document.getElementById(`${listId}-option-${activeIndex}`)?.scrollIntoView({ block: "nearest" });
+  }, [activeIndex, flat, open, listId]);
   const go = useCallback((href: string) => {
     onClose();
     if (href.startsWith("/needz?find=") && window.location.pathname === "/needz") {
-      window.location.assign(href);
+      const target = new URL(window.location.href);
+      target.searchParams.delete("community");
+      target.searchParams.delete("resource");
+      target.searchParams.set("find", new URL(href, target).searchParams.get("find")!);
+      setLocation(target.pathname + target.search, {state:{...window.history.state,needzDetailFromBrowse:true}});
       return;
     }
     setLocation(href);
@@ -142,24 +165,24 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
 
   return <div className="site-search" role="presentation">
     <div className="site-search__backdrop" onClick={onClose} data-testid="site-search-backdrop" />
-    <div className="site-search__panel" role="dialog" aria-modal="true" aria-label="Search Zaylist" data-testid="site-search-panel">
+    <div ref={panelRef} className="site-search__panel" role="dialog" aria-modal="true" aria-label="Search Zaylist" data-testid="site-search-panel">
       <div className="site-search__head">
         <Search size={19} className="site-search__icon" aria-hidden="true" />
         <input ref={inputRef} type="search" className="site-search__input" placeholder="Search all of Zaylist…" aria-label="Search all of Zaylist"
-          value={query} onChange={(event) => { setQuery(event.target.value); setObjects([]); }} onKeyDown={onKeyDown} aria-controls={listId}
+          role="combobox" aria-expanded={true} aria-activedescendant={flat[activeIndex] ? `${listId}-option-${activeIndex}` : undefined} value={query} maxLength={200} onChange={(event) => setQuery(event.target.value)} onKeyDown={onKeyDown} aria-controls={listId}
           aria-autocomplete="list" data-testid="site-search-input" autoComplete="off" spellCheck={false} />
         <button type="button" className="site-search__close" onClick={onClose} aria-label="Close search"><X size={20} /></button>
       </div>
       <div id={listId} className="site-search__body" role="listbox" aria-label="Search results">
         {query.trim().length < 2 && <p className="site-search__hint">Search NEEDZ, EVENTZ, PLACEZ, Our BoardZ, people, and pages.</p>}
         {loading && <p className="site-search__hint" role="status">Searching…</p>}
-        {query.trim().length >= 2 && !loading && flat.length === 0 && <p className="site-search__hint">No matches for “{query.trim()}”.</p>}
+        {query.trim().length >= 2 && !loading && !failed && flat.length === 0 && <p className="site-search__hint">No matches for “{query.trim()}”.</p>}
         {groups.map((group) => <section className="site-search__group" key={group.label}>
           <h3 className="site-search__group-title">{group.label}</h3>
           <ul className="site-search__list">{group.hits.map((hit) => {
             const index = flat.findIndex((item) => item.key === hit.key);
             const active = index === activeIndex;
-            return <li key={hit.key}><button type="button" role="option" aria-selected={active}
+            return <li key={hit.key}><button type="button" id={`${listId}-option-${index}`} tabIndex={-1} role="option" aria-selected={active}
               className={`site-search__item${active ? " is-active" : ""}`} onMouseEnter={() => setActiveIndex(index)} onClick={() => go(hit.href)}>
               <span className="site-search__item-copy"><span className="site-search__item-label">{hit.label}</span>
                 {hit.subtitle && <small className="site-search__item-sub">{hit.subtitle}</small>}
@@ -168,6 +191,8 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
           })}</ul>
         </section>)}
       </div>
+      {failed && <div role="status" className="site-search__hint">Some search results could not load. <button type="button" onClick={() => remote.isFetchNextPageError ? void remote.fetchNextPage() : void remote.refetch()}>Try again</button></div>}
+      {!failed && !loading && remote.hasNextPage && <button type="button" className="site-search__more" disabled={remote.isFetchingNextPage} onClick={() => void remote.fetchNextPage()}>{remote.isFetchingNextPage ? "Loading…" : "Load more results"}</button>}
       <p className="site-search__footer">↑ ↓ to move · Enter to open · Esc to close</p>
     </div>
   </div>;

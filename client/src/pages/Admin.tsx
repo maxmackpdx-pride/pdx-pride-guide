@@ -75,6 +75,7 @@ interface AdminEvent {
   admission: string;
   ticketUrl: string | null;
   posterImageUrl: string | null;
+  accentColor: string | null;
   isClaimable: boolean;
   isHouseParty: boolean;
   isPrivate: boolean;
@@ -133,6 +134,7 @@ interface AdminGig {
   isRemote: boolean;
   status: string;
   createdAt: string;
+  userId?: number | null;
   username?: string;
   displayName?: string | null;
   posterPhotoUrl?: string | null;
@@ -233,6 +235,7 @@ export default function Admin() {
   const { toast } = useToast();
   const { user, loading: authLoading, logout } = useAuth();
   const { openSheet } = useInboxSheet();
+  const { calmMode, toggleCalmMode } = useTheme();
   const [, navigate] = useLocation();
   const [authenticated, setAuthenticated] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
@@ -1715,7 +1718,6 @@ export default function Admin() {
 
   const viewMeta = ADMIN_VIEW_META[activeTab as AdminViewKey] ?? ADMIN_VIEW_META.overview;
   const pushOk = !!pushStatus?.configured;
-  const { calmMode, toggleCalmMode } = useTheme();
 
   /** Map /admin tabs → hub sections so member/admin share one left rail. */
   const hubSectionFromTab = (tab: AdminTab): HubSection => {
@@ -1892,20 +1894,20 @@ export default function Admin() {
             testPushPending={testPushMutation.isPending}
             breakdown={pendingAdmin.breakdown}
           />
-          <div className="mt-6 p-4 border border-white/10" style={{ background: "#0d0d0d" }} data-testid="admin-activity-log">
-            <p className="display text-sm mb-3" style={{ color: "#B06BFF" }}>ACTIVITY LOG</p>
-            <p className="text-white/40 text-xs mb-3">
+          <section className="staff-reading admin-activity-log" aria-label="Activity log" data-testid="admin-activity-log">
+            <h2 className="admin-shell__section-label">Activity log</h2>
+            <p className="text-xs mb-3">
               Append-only admin actions (approves, denials, claims, guide messages). Open the floating inbox for queue work.
             </p>
             {adminActivityLog.length === 0 ? (
-              <p className="text-white/30 text-xs m-0">No recent actions.</p>
+              <p className="text-xs m-0">No recent actions.</p>
             ) : (
               <ul className="m-0 p-0 list-none space-y-2 max-h-[360px] overflow-y-auto">
                 {adminActivityLog.map(a => (
-                  <li key={a.id} className="text-sm text-white/75 border-t border-white/10 pt-2">
-                    <span style={{ color: "#19E3FF", fontFamily: "var(--font-mono, monospace)", fontSize: 11 }}>{a.action}</span>
+                  <li key={a.id} className="text-sm pt-2">
+                    <span style={{ color: "var(--staff-accent)", fontFamily: "var(--font-mono, monospace)", fontSize: 11 }}>{a.action}</span>
                     {a.targetLabel ? ` · ${a.targetLabel}` : ""}
-                    <div className="text-white/35 text-xs mt-0.5">
+                    <div className="text-xs mt-0.5">
                       {a.actorUsername ? `@${a.actorUsername}` : "admin"}
                       {a.createdAt ? ` · ${new Date(a.createdAt).toLocaleString()}` : ""}
                     </div>
@@ -1915,12 +1917,12 @@ export default function Admin() {
             )}
             <button
               type="button"
-              className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border mt-3"
+              className="admin-shell__ghost-btn"
               onClick={() => openSheet({ view: "inbox", account: "admin" })}
             >
               OPEN QUEUE
             </button>
-          </div>
+          </section>
           </>
         )}
 
@@ -2395,6 +2397,23 @@ export default function Admin() {
                             </select>
                           </div>
                           <div>
+                            <label className="display text-xs text-white/40 block mb-1">ACCENT COLOR (CARD)</label>
+                            <select value={editForm.accentColor || ""} onChange={e => setEditForm(f => ({ ...f, accentColor: e.target.value || null }))}
+                              className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400">
+                              <option value="">AUTO (POSTER / DAY COLOR)</option>
+                              <option value="#0066FF">BLUE #0066FF</option>
+                              <option value="#00FFFF">CYAN #00FFFF</option>
+                              <option value="#FF1FA0">MAGENTA #FF1FA0</option>
+                              <option value="#D4FF00">ACID YELLOW #D4FF00</option>
+                              <option value="#7B00FF">VIOLET #7B00FF</option>
+                              <option value="#FF7B00">SAFETY ORANGE #FF7B00</option>
+                              <option value="#FF0000">RED #FF0000</option>
+                              <option value="#2BFF00">ACID GREEN #2BFF00</option>
+                              <option value="#FFDD00">AFTERZ YELLOW #FFDD00</option>
+                              <option value="#FF5F6D">CORAL #FF5F6D</option>
+                            </select>
+                          </div>
+                          <div>
                             <label className="display text-xs text-white/40 block mb-1">LAT / LNG</label>
                             <div className="flex gap-2">
                               <input type="number" step="any" value={editForm.lat ?? ""} onChange={e => setEditForm(f => ({ ...f, lat: Number(e.target.value) }))}
@@ -2595,6 +2614,11 @@ export default function Admin() {
                             <label className="display text-xs text-white/40 block mb-1">LOCATION</label>
                             <input value={gigEditForm.location || ""} onChange={e => setGigEditForm(f => ({ ...f, location: e.target.value }))}
                               placeholder="Portland / Remote" className={adminFieldClass} />
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">OWNER USER ID</label>
+                            <input type="number" min="1" value={gigEditForm.userId ?? ""} onChange={e => setGigEditForm(f => ({ ...f, userId: e.target.value === "" ? null : Number(e.target.value) }))}
+                              placeholder="Account that posted this gig" className={adminFieldClass} />
                           </div>
                           <div className="md:col-span-2">
                             <label className="display text-xs text-white/40 block mb-1">SKILLS</label>

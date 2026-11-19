@@ -570,12 +570,26 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
     const requestKey = `${embeddedDetail ? "embedded" : location}:${selection.key}`;
     if ((selection.row || embeddedDetail) && openedRequest.current !== requestKey) { openedRequest.current = requestKey; setDetail(selection.row || null); setDetailOpen(true); }
     if (selection.row && detailOpen && openedRequest.current === requestKey) setDetail(selection.row);
-    if (!selection.requested) openedRequest.current = null;
+    if (!selection.requested && openedRequest.current) {
+      openedRequest.current = null; setDetailOpen(false); setDetail(null);
+    }
   }, [location, locationSearch, allRows, embeddedDetail?.name, embeddedDetail?.communitySlug, detailOpen]);
   const openDetail = useCallback((row: Row) => {
     detailTrigger.current = document.activeElement as HTMLElement;
-    setDetail(row); setDetailOpen(true);
-  }, []);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("find"); url.searchParams.delete("community");
+    url.searchParams.set("resource", row.org.name);
+    if (row.community) url.searchParams.set("community", row.community.slug);
+    navigate(url.pathname + url.search, { state: { ...window.history.state, needzDetailFromBrowse: true } });
+  }, [navigate]);
+  const closeDetail = () => {
+    setDetailOpen(false);
+    if (embeddedDetail) { onEmbeddedClose?.(); return; }
+    if (window.history.state?.needzDetailFromBrowse) { window.history.back(); return; }
+    const url = new URL(window.location.href);
+    for (const key of ["find", "resource", "community"]) url.searchParams.delete(key);
+    navigate(url.pathname + url.search, { replace: true });
+  };
   const choose = (id: string) => {
     setMode("directory");
     setBrowseView("grid");
@@ -679,9 +693,9 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
       <Dialog.Root
         modal={false}
         open={detailOpen}
-        onOpenChange={open => {setDetailOpen(open); if (!open && embeddedDetail) onEmbeddedClose?.();}}
+        onOpenChange={open => { if (open) setDetailOpen(true); else closeDetail(); }}
       >
-        {detailOpen && <CardDetails key={detail?.org.name ?? embeddedDetail?.name ?? "resource"} onClose={() => closeOpenCard(() => { setDetailOpen(false); if (embeddedDetail) onEmbeddedClose?.(); })}>
+        {detailOpen && <CardDetails key={detail?.org.name ?? embeddedDetail?.name ?? "resource"} onClose={() => closeOpenCard(closeDetail)}>
           <OpenCardMeta title={detail?.org.name || embeddedDetail?.name || "NEEDZ"} description={detail?.org.desc || ""} />
           <Dialog.Content
             ref={detailPanel}
