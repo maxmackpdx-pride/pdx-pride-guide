@@ -248,3 +248,20 @@ both its venue (linked) and its host group. Everything else is v1.0.32
 unchanged. Tests 448/448 on the tagged source; GitHub runs 44517719943
 and 44517720056 passed the compiler checks, typechecking, map tests
 and both builds. The v1.0.32 parts remain in this folder for rollback.
+
+## v1.0.34: Gradient veil fix for the expanded card
+
+Source: `69ead917e296273624041d51a66ed4772a5046f2` (immutable `v1.0.34`).
+Archive SHA-256: `56fc95be0587e3ce0518c090c7075799cf4d4622dad17aad1f8b25dfede2395a`.
+Follow-on to v1.0.33, caught by live verification: the expanded card's
+gradient layer (768px tall, solid ink from 507px) painted over the
+pages once they moved behind the flyer layer at z-index -1, so the
+Info page rendered ghosted. The layer is now capped at the stack
+offset with its stops in px (269/361/430/507 — the old 35/47/56/66%
+of 768px): the flyer's fade is pixel-identical, but the layer ends
+where the page content begins. The same fix ships for the site's
+EventzExpanded in this PR — the defect was confirmed live there too.
+Everything else is v1.0.33 unchanged. Tests 449/449 on the tagged
+source; GitHub runs 44525308761 and 44525308905 passed the compiler
+checks, typechecking, map tests and both builds. The v1.0.33 parts
+remain in this folder for rollback.
