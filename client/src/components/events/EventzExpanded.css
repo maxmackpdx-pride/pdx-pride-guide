@@ -36,9 +36,14 @@
 .evz-x__flyer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
 .evz-x__flyer--none { background: color-mix(in srgb, var(--ac) 14%, var(--ink-800)); }
 /* The gradient starts 35% of the way down the card (768px reference height)
-   and reaches the card ink before the identity block ends. */
-.evz-x__grad { position: absolute; left: 0; right: 0; top: 0; height: 768px; z-index: 1; pointer-events: none;
-  background: linear-gradient(to bottom, rgba(11, 11, 11, 0) 35%, rgba(11, 11, 11, .45) 47%, rgba(11, 11, 11, .88) 56%, var(--ink-800) 66%); }
+   and reaches the card ink before the identity block ends. The layer is
+   capped at the stack offset (--evz-top-offset) with its stops expressed
+   in px (269/361/430/507 — the old 35/47/56/66% of 768px), so the flyer's
+   fade is pixel-identical but the layer ends where the page content
+   begins: at its old 768px height its solid tail veiled the pages riding
+   behind it at z-index -1 (caught live, Nov 19, 2026). */
+.evz-x__grad { position: absolute; left: 0; right: 0; top: 0; height: var(--evz-top-offset); z-index: 1; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(11, 11, 11, 0) 269px, rgba(11, 11, 11, .45) 361px, rgba(11, 11, 11, .88) 430px, var(--ink-800) 507px); }
 .evz-x__chrome { position: absolute; top: 10px; right: 10px; z-index: 5; display: flex; gap: 8px; pointer-events: auto; }
 .evz-x__iconbtn { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%;
   border: 1px solid color-mix(in srgb, var(--ac) 55%, transparent); background: rgba(4, 9, 13, .8); color: var(--text-hi); }
