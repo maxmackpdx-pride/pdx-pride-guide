@@ -43,6 +43,9 @@ html body .room-shader-page .pl-centered-hero__art {
 @media (min-width: 721px) {
   html body .room-shader-page { background: #000; }
   html body .room-shader-page > .room-shader-background { height: 50dvh; }
+  /* Outzide's mountain art runs lower, so its band comes down further:
+     about 25% above halfway (Tucker, Nov 18, 2026). */
+  html body .room-shader-page > .room-shader-background[room="outzide"] { height: 75dvh; }
   html body .room-shader-page > .room-shader-background::after {
     content: "";
     position: absolute;
