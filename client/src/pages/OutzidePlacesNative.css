@@ -45,18 +45,19 @@ html:has(.outz-native-dialog[open]){scrollbar-gutter:auto;overflow:hidden}.outz-
 .outz-native-page .ol-hero{position:relative;padding-top:8px}
 .outz-native-page .ol-full-logo{width:72%;margin-bottom:0}
 .outz-native-page .places-page-switch--compact{position:relative;top:auto;left:auto;width:76%;margin:0 auto 8px;z-index:3;padding:0}
-.outz-native-page .places-page-switch--compact>div{display:flex;padding:2px;border:1px solid var(--ol-paper);border-radius:28px;background:var(--places-art-ink-080b0d);box-shadow:0 0 6px color-mix(in srgb,var(--neon-orange) 25%,transparent)}
+.outz-native-page .places-page-switch--compact>div{display:flex;padding:2px;border:var(--glass-card-neutral-border);border-radius:28px;background:var(--glass-card-neutral-bg);box-shadow:var(--chrome-keyline),var(--chrome-bevel-dark),var(--chrome-floor);-webkit-backdrop-filter:blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation));backdrop-filter:blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation))}
 .outz-native-page .places-page-switch--compact a{flex:1;min-width:0;padding:6px 3px;border-radius:22px;font:900 14px/1 'Barlow Condensed',sans-serif;text-transform:uppercase;color:var(--ol-paper)}
 .outz-native-page .places-page-switch--compact a>span:last-child{display:flex;gap:6px;align-items:center;justify-content:center;white-space:nowrap;position:relative}
 .outz-native-page .places-page-switch--compact svg{width:17px;height:17px;flex:none}
 .outz-native-page .places-page-switch--compact a.is-active{color:var(--neon-orange)}
-.outz-native-page .places-page-switch--compact .places-page-switch__active{border:1px solid var(--neon-orange);background:transparent;box-shadow:0 0 5px color-mix(in srgb,var(--neon-orange) 25%,transparent)}
+.outz-native-page .places-page-switch--compact .places-page-switch__active{border:1px solid var(--neon-orange);background:var(--glass-card-neutral-bg);box-shadow:var(--chrome-bevel-dark),var(--chrome-floor)}
 .outz-native-page .ol-body{padding-top:12px}
-.outz-native-page .ol-search{padding:6px 7px 6px 14px;gap:12px;border-radius:17px;min-height:50px}
+.outz-native-page .ol-search{padding:6px 7px 6px 14px;gap:12px;border:var(--glass-card-neutral-border);border-radius:17px;min-height:50px;background:var(--glass-card-neutral-bg);box-shadow:var(--chrome-keyline),var(--chrome-bevel-dark),var(--chrome-floor);-webkit-backdrop-filter:blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation));backdrop-filter:blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation))}
+.outz-native-page .ol-search:focus-within{border-color:var(--neon-orange)}
 .outz-native-page .ol-search>svg{width:24px;height:24px;flex:none}
 .outz-native-page .ol-search input{min-width:0;flex:1;font:900 clamp(12px,3.4vw,18px)/1 'Barlow Condensed',sans-serif;text-transform:uppercase}
 .outz-native-page .ol-search input::placeholder{color:var(--ol-paper);opacity:1}
-.outz-native-page .ol-search button{width:42px;height:38px;flex:none;display:grid;place-items:center;background:var(--neon-orange);color:var(--places-art-ink-080b0d);border:0;clip-path:polygon(7% 0,100% 2%,95% 100%,0 96%);cursor:pointer}
+.outz-native-page .ol-search button{width:42px;height:38px;flex:none;display:grid;place-items:center;background:var(--neon-orange);color:var(--places-art-ink-080b0d);border:0;border-radius:var(--chrome-radius-md);box-shadow:var(--chrome-keyline),var(--chrome-bevel),var(--chrome-floor);cursor:pointer}
 .outz-native-page .ol-search button svg{width:24px;height:24px}
 .outz-native-page .ol-map-link{display:flex;justify-content:flex-end;align-items:center;gap:3px;margin:8px 0 18px;color:var(--neon-orange);font:800 12px/1.2 'Barlow Condensed',sans-serif;text-decoration:none}
 .outz-native-page .ol-map-link svg{width:10px;height:10px}
