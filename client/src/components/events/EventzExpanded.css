@@ -21,7 +21,7 @@
 .evz-x__flyer--none { background: color-mix(in srgb, var(--ac) 14%, var(--ink-800)); }
 /* The gradient starts 35% of the way down the card (768px reference height)
    and reaches the card ink before the identity block ends. */
-.evz-x__grad { position: absolute; left: 0; right: 0; top: 0; height: 768px; pointer-events: none;
+.evz-x__grad { position: absolute; left: 0; right: 0; top: 0; height: 768px; z-index: 1; pointer-events: none;
   background: linear-gradient(to bottom, rgba(11, 11, 11, 0) 35%, rgba(11, 11, 11, .45) 47%, rgba(11, 11, 11, .88) 56%, var(--ink-800) 66%); }
 .evz-x__chrome { position: absolute; top: 10px; right: 10px; z-index: 5; display: flex; gap: 8px; }
 .evz-x__iconbtn { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%;
@@ -169,3 +169,8 @@
   .evz-x__hero { height: 300px; }
   .evz-x__title { font-size: 27px; }
 }
+
+/* The hero gradient is a card-level layer (moved out of the clipped hero):
+   the flyer fades down behind the I'M INTERESTED row, and the card's content
+   rides above the fade. */
+.evz-x__actions, .evz-x__tabs, .evz-x__pageswrap, .evz-x__foot { position: relative; z-index: 2; }

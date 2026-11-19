@@ -75,6 +75,7 @@ interface AdminEvent {
   admission: string;
   ticketUrl: string | null;
   posterImageUrl: string | null;
+  accentColor: string | null;
   isClaimable: boolean;
   isHouseParty: boolean;
   isPrivate: boolean;
@@ -2392,6 +2393,23 @@ export default function Admin() {
                             <select value={editForm.status || "LIVE"} onChange={e => setEditForm(f => ({ ...f, status: e.target.value }))}
                               className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400">
                               {["LIVE","HIDDEN","CANCELLED"].map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">ACCENT COLOR (CARD)</label>
+                            <select value={editForm.accentColor || ""} onChange={e => setEditForm(f => ({ ...f, accentColor: e.target.value || null }))}
+                              className="w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400">
+                              <option value="">AUTO (POSTER / DAY COLOR)</option>
+                              <option value="#0066FF">BLUE #0066FF</option>
+                              <option value="#00FFFF">CYAN #00FFFF</option>
+                              <option value="#FF1FA0">MAGENTA #FF1FA0</option>
+                              <option value="#D4FF00">ACID YELLOW #D4FF00</option>
+                              <option value="#7B00FF">VIOLET #7B00FF</option>
+                              <option value="#FF7B00">SAFETY ORANGE #FF7B00</option>
+                              <option value="#FF0000">RED #FF0000</option>
+                              <option value="#2BFF00">ACID GREEN #2BFF00</option>
+                              <option value="#FFDD00">AFTERZ YELLOW #FFDD00</option>
+                              <option value="#FF5F6D">CORAL #FF5F6D</option>
                             </select>
                           </div>
                           <div>
