@@ -301,7 +301,7 @@ function filterBoardEvents(
 
 /** Branded 1200×630 card (replaces raw flyer as social preview image). */
 function eventOgCardImage(eventId: number) {
-  return `https://www.zaylist.com/api/og/event/${eventId}`;
+  return `https://www.zaylist.com/api/og/event/${eventId}?v=2`;
 }
 
 function truncateSeo(text: string, max = 160) {

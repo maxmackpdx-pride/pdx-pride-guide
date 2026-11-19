@@ -421,7 +421,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
     placeSeo
       ? {
           url: placeUrl(placeSeo.id, placeSeo.name),
-          image: `https://www.zaylist.com/api/og/place/${placeSeo.id}`,
+          image: `https://www.zaylist.com/api/og/place/${placeSeo.id}?v=3`,
           imageAlt: placeSeo.name,
           type: "article",
         }
