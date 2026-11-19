@@ -53,6 +53,13 @@ body:has(.room-shader-page),
 html body .room-shader-page > .new-scenez { z-index: auto; }
 html body .room-shader-page > .new-scenez .ns-hero { isolation: auto; }
 
+/* SceneZ wordmark Z (Tucker, Nov 19, 2026): the approved wordmark's Z is
+   Safety Orange; rotate it to the SceneZ red so the wordmark matches the
+   page's red chrome. The wordmark's only saturated color is the Z
+   (hue ~24deg), so a -24deg rotation lands it on red while the white
+   SCENE letters stay untouched. */
+html body .room-shader-page .ns-logo img { filter: hue-rotate(-24deg); }
+
 /* Desktop (Tucker, Nov 18–19, 2026): the room shader no longer fills the
    screen to all four corners. Each band is sized so the bottom of the
    room's featured art lands just below the page's Discover cards (Events:
