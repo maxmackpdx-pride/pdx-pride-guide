@@ -41,6 +41,7 @@ class ZayRoomBackground extends HTMLElement {
     if(!this.isConnected)return;
     const generation=++this.#generation,room=this.room;
     this.#stop();this.#ready=false;this.#canvas.hidden=true;
+    this.dataset.renderer='loading';delete this.dataset.shaderError;
     this.#release(this.#renderer);this.#renderer=null;
     const image=this.shadowRoot.querySelector('img');
     image.src=new URL('textures/'+room+'.jpg',import.meta.url);
@@ -60,9 +61,13 @@ class ZayRoomBackground extends HTMLElement {
       renderer=new RoomRenderer(next,assets);await renderer.prepare();
       if(generation!==this.#generation){this.#release(renderer);return}
       this.#canvas.replaceWith(next);this.#canvas=next;this.#renderer=renderer;
-      this.#ready=true;this.#refresh();next.hidden=false;
+      this.#ready=true;this.#refresh();next.hidden=false;this.dataset.renderer='webgl';
     }catch(error){
-      this.#release(renderer);if(generation===this.#generation)this.dispatchEvent(new CustomEvent('shadererror',{detail:error}));
+      this.#release(renderer);if(generation===this.#generation){
+        this.dataset.renderer='fallback';this.dataset.shaderError=String(error?.message||error);
+        console.warn('Room shader could not start:',room,error);
+        this.dispatchEvent(new CustomEvent('shadererror',{detail:error}));
+      }
     }
   }
   #release(renderer){
