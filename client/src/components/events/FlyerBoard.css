@@ -339,7 +339,9 @@
   position: absolute;
   left: 0; right: 0; bottom: 0;
   z-index: 3;
-  padding: 4cqw;
+  /* The heart sits 6cqw in from the bottom and right edges (Tucker,
+   * Nov 19, 2026); the rest of the band keeps the 4cqw face margin. */
+  padding: 4cqw 6cqw 6cqw 4cqw;
   /* Finish the fade within the top padding so the actions row has a solid backing. */
   background: linear-gradient(to bottom, transparent, var(--z-black) 4cqw);
 }
@@ -916,7 +918,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px 18px;
+  padding: 12px 20px 20px;
   border-top: 1px solid var(--fbx-line-soft);
   background: rgba(10, 10, 14, .96);
 }
@@ -935,7 +937,25 @@
   background: none;
   cursor: pointer;
 }
-.fbx .oheart { color: var(--a); font-size: 18px; }
+/* The expanded card's heart (restored Nov 19, 2026): the INTERESTED
+ * toggle, same function as the front heart. A 44px circular button at
+ * the footer's right end; its edge clears the card's bottom and right
+ * edges by the foot's 20px padding, matching the front heart's inset. */
+.fbx .oheart {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--a);
+  border-radius: 50%;
+  background: none;
+  color: var(--a);
+  cursor: pointer;
+}
+.fbx .oheart[aria-pressed="true"] { background: color-mix(in srgb, var(--a) 24%, transparent); }
+.fbx .oheart:disabled { opacity: .7; cursor: progress; }
 
 /* ---------- wide-poster chunk + expanded pages (Nov 18, 2026) ---------- */
 .fbx .pblend {
@@ -943,7 +963,7 @@
   background: linear-gradient(180deg, transparent, var(--evz-ink-0a0a0e));
   pointer-events: none;
 }
-.fbx .pchunk { position: relative; z-index: 1; background: var(--evz-ink-0a0a0e); padding: 3.4cqw 4cqw 4cqw; }
+.fbx .pchunk { position: relative; z-index: 1; background: var(--evz-ink-0a0a0e); padding: 3.4cqw 6cqw 6cqw 4cqw; }
 .fbx .pchunk h4 {
   font: 800 6.4cqw/1.05 var(--font-display);
   text-transform: uppercase; color: var(--evz-mist-f4f8fa);

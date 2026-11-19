@@ -110,7 +110,7 @@ describe("approved FlyerBoard interactions", {timeout:90_000}, () => {
   }
   const posterIds = (page:Page) => page.locator(".lboard .poster[data-event-id]").evaluateAll(nodes=>nodes.map(node=>Number((node as HTMLElement).dataset.eventId)));
 
-  test("paper trim stays behind artwork and leaves Share and private Save reachable",async t=>{
+  test("paper trim stays behind artwork and leaves Share and the interested heart reachable",async t=>{
     const page=await boardPage("/events");t.after(()=>page.close());
     const poster=page.locator(".lboard .poster.torn").first();
     const art=poster.locator(".pc img");
@@ -125,7 +125,7 @@ describe("approved FlyerBoard interactions", {timeout:90_000}, () => {
     assert.equal(artReceivesHits,true);
     // Actionability checks hit-testing, visibility and coverage without sharing or saving.
     await poster.getByRole("button",{name:/^Share /}).click({trial:true});
-    await poster.getByRole("button",{name:/^Save .* privately$/}).click({trial:true});
+    await poster.getByRole("button",{name:/^Mark interest in /}).click({trial:true});
   });
 
   test("a feed refresh preserves loaded rows and the caller’s descending title order",async t=>{
