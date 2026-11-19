@@ -11915,6 +11915,7 @@ export const storage: IStorage = {
       gigDate: data.gigDate ?? null,
       gigTime: data.gigTime ?? null,
       imageUrl: data.imageUrl ?? null,
+      userId: data.userId ?? null,
     };
     sqlite.prepare(`
       UPDATE gig_posts
@@ -11930,7 +11931,8 @@ export const storage: IStorage = {
           status = COALESCE(@status, status),
           gig_date = COALESCE(@gigDate, gig_date),
           gig_time = COALESCE(@gigTime, gig_time),
-          image_url = COALESCE(@imageUrl, image_url)
+          image_url = COALESCE(@imageUrl, image_url),
+          user_id = COALESCE(@userId, user_id)
       WHERE id = @id
     `).run(params);
     return storage.getGigPosts().find(g => g.id === id);

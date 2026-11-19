@@ -8204,6 +8204,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const fields = [
       "postType", "title", "name", "contactEmail", "description", "skills",
       "compensation", "location", "isRemote", "status", "gigDate", "gigTime", "imageUrl",
+      "userId",
     ] as const;
     for (const key of fields) {
       if (req.body[key] !== undefined) patch[key] = req.body[key];
@@ -8215,6 +8216,13 @@ export function registerRoutes(httpServer: Server, app: Express) {
       return res.status(400).json({ error: "Invalid status" });
     }
     if (patch.status) patch.status = String(patch.status).toUpperCase();
+    if (patch.userId !== undefined && patch.userId !== null) {
+      const uid = Number(patch.userId);
+      if (!Number.isInteger(uid) || uid <= 0 || !storage.getUserById(uid)) {
+        return res.status(400).json({ error: "Unknown owner user" });
+      }
+      patch.userId = uid;
+    }
     const updated = storage.adminUpdateGigPost(id, patch as any);
     if (!updated) return res.status(404).json({ error: "Not found" });
     res.json(updated);
