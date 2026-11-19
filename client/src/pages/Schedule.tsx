@@ -822,6 +822,26 @@ export default function Schedule({
     return () => clearTimeout(id);
   }, [activeWeekStart, AXIS_W, BASE_DAY, HOUR_H]);
 
+  /* The events filter drawer's day picker jumps this schedule to a date:
+     switch to that date's week, then scroll its column into view. */
+  useEffect(() => {
+    const onDay = (ev: Event) => {
+      const date = (ev as CustomEvent<{ date?: string }>).detail?.date;
+      if (!date) return;
+      const monday = mondayOf(date);
+      if (monday !== activeWeekStart) setWeekStart(monday);
+      let tries = 0;
+      const attempt = () => {
+        const idx = weekColumnsRef.current.findIndex(c => c.ymd === date);
+        if (idx >= 0) { scrollDayIntoView(idx); return; }
+        if (++tries <= 12) window.setTimeout(attempt, 60);
+      };
+      window.setTimeout(attempt, 60);
+    };
+    window.addEventListener("zaylist:schedule-day", onDay);
+    return () => window.removeEventListener("zaylist:schedule-day", onDay);
+  }, [activeWeekStart, scrollDayIntoView]);
+
   /* ---- now line --------------------------------------------------- */
 
   const nowShown = now != null && now >= START * 60 && now <= END * 60;
@@ -1573,8 +1593,11 @@ export default function Schedule({
                   className={`sch-weeknav__day${count ? " has-events" : ""}${isToday ? " is-today" : ""}`}
                   style={{
                     color: dt,
-                    borderColor: count || isToday ? dc : "#2a2a32",
-                    background: count ? hexA(dc, 0.22) : "transparent",
+                    borderColor: count || isToday ? dc : undefined,
+                    /* Dock-icon material, with the day tint layered under it. */
+                    background: count
+                      ? `linear-gradient(165deg, rgba(15, 22, 29, .29), rgba(0, 2, 6, .43)), ${hexA(dc, 0.22)}`
+                      : undefined,
                   }}
                   onClick={() => scrollDayIntoView(i)}
                   aria-label={`${col.short} ${col.date}${isToday ? ", today" : ""}${count ? `, ${count} event${count === 1 ? "" : "s"}` : ", no events"}`}
