@@ -82,6 +82,10 @@
    42x44, radius 10, filled with the page accent, dark arrow. SceneZ's is
    sized in sceneReference.css; PlaceZ's paper fill is its white accent. */
 .pl-page.pl-production .pl-body .pl-search button { width: 42px; min-width: 42px; height: 44px; border-radius: 10px; background: var(--paper); color: var(--ink); }
+/* PlacezLanding.css still paints .pl-search svg:last-child paper — a rule
+   from the bare-arrow era. On the paper-filled button the arrow vanished
+   (paper on paper); outrank it so the arrow reads dark on the fill. */
+.pl-page.pl-production .pl-body .pl-search button svg { color: var(--ink); }
 .places-locked-slot { flex: none; position: relative; }
 .places-locked-slot > div { position: relative; }
 
