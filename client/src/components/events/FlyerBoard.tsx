@@ -1241,7 +1241,7 @@ export default function FlyerBoard({
       let tries = 0;
       const attempt = () => {
         if (jumpRef.current(date)) return;
-        if (++tries <= 14) window.setTimeout(attempt, 90);
+        if (++tries <= 30) window.setTimeout(attempt, 100);
       };
       attempt();
     };
