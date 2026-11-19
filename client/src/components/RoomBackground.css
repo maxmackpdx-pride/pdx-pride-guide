@@ -34,18 +34,40 @@ html body .room-shader-page .pl-centered-hero__art {
   margin: 64px auto 32px;
 }
 
-/* Desktop (Tucker, Nov 18, 2026): the room shader comes down about halfway
-   and stops — it no longer fills the screen to all four corners. The rest of
-   the page is the same pure black the shader's own bottom ends in (every
-   room texture fades to pure black; that black is the --z-oled token), and
-   the band's lower edge fades into it so no room shows a hard cut through
-   its art. Portrait/mobile keeps the treatment above. */
+/* Shader pages sit on pure black all the way out — the page backdrop
+   (html, body and the app shell) is the same --z-oled black the room
+   textures fade to, so no gray shows at the edges or on overscroll.
+   (Tucker, Nov 19, 2026: "no gray behind it anymore. It's all black.") */
+html:has(.room-shader-page),
+body:has(.room-shader-page),
+.app-shell:has(.room-shader-page) {
+  background: var(--z-oled) !important;
+}
+
+/* SceneZ wordmark blend fix: the approved wordmark PNG sits on black and
+   its wrapper blends with `screen` so the black drops out over the waves —
+   but the wrapper chain (.new-scenez stacking context + .ns-hero
+   isolation) trapped the blend inside its own group, so the black painted
+   as a hard rectangle once the shader extended behind the hero. Releasing
+   both lets the blend reach the shader canvas, as designed. */
+html body .room-shader-page > .new-scenez { z-index: auto; }
+html body .room-shader-page > .new-scenez .ns-hero { isolation: auto; }
+
+/* Desktop (Tucker, Nov 18–19, 2026): the room shader no longer fills the
+   screen to all four corners. Each band is sized so the bottom of the
+   room's featured art lands just below the page's Discover cards (Events:
+   the Happening Now row) and the rest of the page is the pure black the
+   shader's own bottom ends in. Heights are in px because the Discover
+   cards sit at fixed layout positions, not at fractions of the viewport;
+   each was tuned against the rendered page, not the raw texture math —
+   the shaders darken their lower art, so the visible bottom lands higher
+   than the texture mapping alone predicts. Mobile/portrait unchanged. */
 @media (min-width: 721px) {
   html body .room-shader-page { background: var(--z-oled) !important; }
-  html body .room-shader-page > .room-shader-background { height: 50dvh; }
-  /* Outzide's mountain art runs lower, so its band comes down further:
-     about 25% above halfway (Tucker, Nov 18, 2026). */
-  html body .room-shader-page > .room-shader-background[room="outzide"] { height: 75dvh; }
+  html body .room-shader-page > .room-shader-background[room="eventz"] { height: 1000px; }
+  html body .room-shader-page > .room-shader-background[room="placez"] { height: 836px; }
+  html body .room-shader-page > .room-shader-background[room="scenez"] { height: 1150px; }
+  html body .room-shader-page > .room-shader-background[room="outzide"] { height: 1020px; }
   html body .room-shader-page > .room-shader-background::after {
     content: "";
     position: absolute;
