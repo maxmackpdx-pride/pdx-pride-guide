@@ -397,12 +397,6 @@ function PosterCell({
    * bottom edge; tall posters keep the info laid over the poster with a
    * gradient. (Tucker's ruling, Nov 18, 2026.) */
   const wideChunk = !!poster && aspect >= 1.15;
-  const chunkCd =
-    countdownLabel === "ON NOW"
-      ? "ON NOW"
-      : cd
-        ? `${countdownLabel} ${Number(cd.d) > 0 ? `${cd.d}D ${cd.h}H` : `${cd.h}H ${cd.m}M`}`
-        : countdownLabel;
 
   const share = async (ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -478,9 +472,18 @@ function PosterCell({
           ) : null}
           <button type="button" className="pshare" aria-label={`Share ${listing.title}`} onClick={share}>
             <ShareIcon />
-            SHARE
           </button>
           <span className={`pprice${priceCls}`}>{price}</span>
+          <div className="pcdtop">
+            <span className="ps-lab">{countdownLabel}</span>
+            {cd && (
+              <span className="ps-nums">
+                <span><b>{cd.d}</b><i>DAYS</i></span>
+                <span><b>{cd.h}</b><i>HRS</i></span>
+                <span><b>{cd.m}</b><i>MIN</i></span>
+              </span>
+            )}
+          </div>
           {wideChunk ? <span className="pblend" aria-hidden="true" /> : null}
           {!wideChunk && (
             <>
@@ -489,16 +492,6 @@ function PosterCell({
                 <p>{meta}</p>
               </div>
               <div className="pfoot">
-                <div className="pstart">
-                  <span className="ps-lab">{countdownLabel}</span>
-                  {cd && (
-                    <span className="ps-nums">
-                      <span><b>{cd.d}</b><i>DAYS</i></span>
-                      <span><b>{cd.h}</b><i>HRS</i></span>
-                      <span><b>{cd.m}</b><i>MIN</i></span>
-                    </span>
-                  )}
-                </div>
                 <div className="pactions">
                   <span className="pgigz"><b>–</b><i>GIGZ</i></span>
                   <span className="pgigz pcarpool"><b>–</b><i>CARPOOL</i></span>
@@ -526,12 +519,8 @@ function PosterCell({
               {listing.venueName} · {weekdayCode(dateStr)} {eventTimeLabel(listing.dateStart)}
             </p>
             <div className="pchunk-row">
-              <span className="ppill">{chunkCd}</span>
-              <span className="ptexts">
-                <span className="pt-g">GIGZ</span> <b>–</b>
-                <span className="pt-sep">·</span>
-                <span className="pt-c">CARPOOL</span> <b>–</b>
-              </span>
+              <span className="pgigz"><b>–</b><i>GIGZ</i></span>
+              <span className="pgigz pcarpool"><b>–</b><i>CARPOOL</i></span>
               <button
                 type="button"
                 className={`pheart${saved ? " saved" : ""}`}

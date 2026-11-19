@@ -291,12 +291,12 @@
    behind real flyer art, so the port gives it the open card's typo
    treatment). */
 .fbx .poster.noart .pc { background: linear-gradient(160deg, color-mix(in srgb, var(--a) 24%, var(--fbx-pc-hi)), var(--evz-ink-0a0a0e) 74%); }
-.fbx .poster.noart .pshade { position: relative; z-index: 2; padding: 15cqw 4cqw 0; }
+.fbx .poster.noart .pshade { position: relative; z-index: 2; padding: 36cqw 4cqw 0; }
 .fbx .pshade h4 { font: 800 6.4cqw/1 "Barlow Condensed", sans-serif; text-transform: uppercase; }
 .fbx .pshade p { font: 500 3.6cqw var(--font-mono); color: var(--evz-mist-cfd8de); margin-top: 2cqw; }
 .fbx .pshare {
   position: absolute;
-  top: 4cqw; left: 4cqw;
+  top: 4cqw; right: 4cqw;
   z-index: 5;
   display: inline-flex;
   align-items: center;
@@ -307,19 +307,19 @@
   border-radius: 1cqw;
   font: 700 3.6cqw/1 "Barlow Condensed", sans-serif;
   letter-spacing: .09em;
-  padding: 2cqw 4cqw;
+  padding: 2cqw 2.4cqw;
   cursor: pointer;
 }
 .fbx .pshare svg { width: 3.6cqw; height: 3.6cqw; }
 .fbx .pprice {
   position: absolute;
-  top: 4cqw; right: 4cqw;
+  top: 12.8cqw; right: 4cqw;
   z-index: 5;
   background: rgba(5, 5, 6, .85);
   border: 1px solid var(--evz-line-2c2c35);
   border-radius: 1cqw;
   padding: 2cqw 4cqw;
-  max-width: 56cqw;
+  max-width: 40cqw;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -333,17 +333,24 @@
   position: absolute;
   left: 0; right: 0; bottom: 0;
   z-index: 3;
-  padding: 10cqw 4cqw 4cqw;
-  /* Finish the fade within the top padding so every footer row has a solid backing. */
-  background: linear-gradient(to bottom, transparent, var(--z-black) 10cqw);
+  padding: 4cqw;
+  /* Finish the fade within the top padding so the actions row has a solid backing. */
+  background: linear-gradient(to bottom, transparent, var(--z-black) 4cqw);
 }
-.fbx .pstart {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 4cqw;
+.fbx .pcdtop {
+  position: absolute;
+  top: 11.5cqw; left: 4cqw;
+  z-index: 5;
+  background: rgba(4, 4, 6, .55);
+  border: 1px solid rgba(244, 248, 250, .09);
+  border-radius: 2.4cqw;
+  padding: 2.6cqw 3.4cqw;
   text-shadow: 0 1px 7px rgba(0, 0, 0, .6), 0 0 2px rgba(0, 0, 0, .5);
+  pointer-events: none;
 }
+.fbx .pcdtop .ps-lab { display: block; margin-bottom: 1.6cqw; }
+.fbx .pcdtop .ps-nums { gap: 5cqw; }
+.fbx .poster.noart .pcdtop { top: 13.5cqw; }
 .fbx .ps-lab { font: 800 3.6cqw/1 "Barlow Condensed", sans-serif; letter-spacing: .14em; color: var(--a); }
 .fbx .ps-nums { display: flex; gap: 6cqw; }
 .fbx .ps-nums span { text-align: center; }
@@ -940,17 +947,7 @@
   font: 500 3.6cqw var(--font-mono); color: var(--evz-mist-cfd8de); margin-top: 2cqw;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.fbx .pchunk-row { display: flex; align-items: center; justify-content: space-between; gap: 3cqw; margin-top: 3.2cqw; }
-.fbx .ppill {
-  background: var(--evz-mist-f4f8fa); color: var(--z-black);
-  font-weight: 700; font-size: 3.9cqw; letter-spacing: .03em;
-  padding: 1.7cqw 3.4cqw; border-radius: 999px; white-space: nowrap;
-}
-.fbx .ptexts { font: 700 4.2cqw var(--font-display); letter-spacing: .05em; display: flex; align-items: center; gap: 1.6cqw; }
-.fbx .ptexts b { color: var(--evz-mist-f4f8fa); }
-.fbx .pt-g { color: var(--neon-violet); }
-.fbx .pt-c { color: var(--neon-orange); }
-.fbx .pt-sep { color: var(--evz-gray-8a8a94); }
+.fbx .pchunk-row { display: flex; align-items: center; gap: 3cqw; margin-top: 3.2cqw; }
 .fbx .oshare {
   position: absolute; top: 10px; left: 10px; z-index: 6;
   width: 34px; height: 34px; border-radius: 50%;
