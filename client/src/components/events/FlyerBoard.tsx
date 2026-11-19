@@ -183,10 +183,10 @@ function countdownParts(ms: number): { d: string; h: string; m: string } {
   };
 }
 
-function timeAgo(iso: string): string {
+function timeAgo(iso: string, now: number): string {
   const t = Date.parse(iso);
   if (Number.isNaN(t)) return "";
-  const s = (Date.now() - t) / 1000;
+  const s = (now - t) / 1000;
   if (s < 3600) return `${Math.max(1, Math.floor(s / 60))}m ago`;
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
   if (s < 86400 * 30) return `${Math.floor(s / 86400)}d ago`;
@@ -343,6 +343,23 @@ function usePosterLoad<T extends HTMLElement>(poster: string | null | undefined)
   return [ref, load] as const;
 }
 
+async function shareEventListing(listing: EventListing) {
+  const url = `https://www.zaylist.com${eventPath(listing.id, listing.title, listing.dayOfWeek)}`;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: listing.title, url });
+      return;
+    } catch {
+      // Fall back to copying the link.
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch {
+    /* Clipboard unavailable. */
+  }
+}
+
 function PosterCell({
   listing,
   index,
@@ -400,20 +417,7 @@ function PosterCell({
 
   const share = async (ev: React.MouseEvent) => {
     ev.stopPropagation();
-    const url = `https://www.zaylist.com${eventPath(listing.id, listing.title, listing.dayOfWeek)}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: listing.title, url });
-        return;
-      }
-      throw new Error("no native share");
-    } catch {
-      try {
-        await navigator.clipboard.writeText(url);
-      } catch {
-        /* clipboard unavailable — the card still opens on tap */
-      }
-    }
+    await shareEventListing(listing);
   };
 
   return (
@@ -850,18 +854,17 @@ export default function FlyerBoard({
     let slots = 0;
     let shownPosters = 0;
     const shownGroups = new Set<string>();
-    const vis = flow.map(item => {
-      if (item.kind === "flag") return false;
-      if (slots < budget) {
-        slots++;
-        if (item.kind === "poster") {
-          shownPosters++;
-          shownGroups.add(dateStrOf(item.e));
-        }
-        return true;
+    const vis: boolean[] = [];
+    for (const item of flow) {
+      const visible = item.kind !== "flag" && slots < budget;
+      vis.push(visible);
+      if (!visible) continue;
+      slots++;
+      if (item.kind === "poster") {
+        shownPosters++;
+        shownGroups.add(dateStrOf(item.e));
       }
-      return false;
-    });
+    }
     flow.forEach((item, i) => {
       if (item.kind === "flag") vis[i] = shownGroups.has(item.dateStr);
     });
@@ -872,8 +875,7 @@ export default function FlyerBoard({
       shownPosters,
       remaining: eligible.length - shownPosters,
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sections.aheadList, fday, tags, query, budgetRows, cols]);
+  }, [sections.aheadList, passCell, budgetRows, cols]);
 
   const pastList = useMemo(
     () =>
@@ -895,8 +897,7 @@ export default function FlyerBoard({
     const ids = new Set<number>();
     for (const e of pastList) for (const p of mcFor(e)) ids.add(p.id);
     return ids.size;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pastList, mcQuery.data]);
+  }, [pastList, mcFor]);
 
   const detailQuery = useQuery<EventDetailResponse>({
     queryKey: ["/api/events", openListing?.id, "detail"],
@@ -922,20 +923,7 @@ export default function FlyerBoard({
   }, [openListing]);
   const shareOpen = async () => {
     if (!openListing) return;
-    const url = `https://www.zaylist.com${eventPath(openListing.id, openListing.title, openListing.dayOfWeek)}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: openListing.title, url });
-        return;
-      }
-      throw new Error("no native share");
-    } catch {
-      try {
-        await navigator.clipboard.writeText(url);
-      } catch {
-        /* clipboard unavailable */
-      }
-    }
+    await shareEventListing(openListing);
   };
   const openCard = (listing: EventListing, el: HTMLElement | null) => {
     clearTimers();
@@ -980,8 +968,7 @@ export default function FlyerBoard({
       document.body.style.overflow = prev;
       document.removeEventListener("keydown", onKey);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ocardOn]);
+  }, [ocardOn, closeCard]);
 
   /* ----- fan deck ----- */
   const closeFan = () => {
@@ -1024,8 +1011,7 @@ export default function FlyerBoard({
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fan, fanCount]);
+  }, [fan, closeFan, stepDeck]);
 
   /* ----- reveal on scroll (demo) ----- */
   const revealKey = [
@@ -1109,14 +1095,16 @@ export default function FlyerBoard({
     />
   );
 
-  let flowPos = -1;
-  const flowCells = flowData.flow.map((item, i) => {
-    if (!flowData.vis[i]) return null;
-    if (item.kind === "flag") return null;
-    flowPos++;
+  const flowCells: React.ReactNode[] = [];
+  for (const [i, item] of flowData.flow.entries()) {
+    if (!flowData.vis[i] || item.kind === "flag") continue;
+    const flowPos = flowCells.length;
     const mtop = MTOPS[flowPos % MTOPS.length];
-    if (item.kind === "submit") return <SubmitCell key={`submit-${item.n}`} mtop={mtop} />;
-    return (
+    if (item.kind === "submit") {
+      flowCells.push(<SubmitCell key={`submit-${item.n}`} mtop={mtop} />);
+      continue;
+    }
+    flowCells.push(
       <PosterCell
         key={listingKey(item.e)}
         listing={item.e}
@@ -1129,7 +1117,7 @@ export default function FlyerBoard({
         tick={tick}
       />
     );
-  });
+  }
 
   const pastFlow: React.ReactNode[] = [];
   {
@@ -1467,7 +1455,7 @@ export default function FlyerBoard({
                           transform: `translate(-50%,-50%) rotate(${off * 9}deg) translateX(${off * 36}%) scale(${1 - a * 0.07})`,
                         };
                   const venue = post.venueHint || post.placeName || post.eventVenue || fan.listing.venueName;
-                  const meta = `${post.anonymous ? "Anonymous" : "Posted"}${post.createdAt ? ` · ${timeAgo(post.createdAt)}` : ""}`;
+                  const meta = `${post.anonymous ? "Anonymous" : "Posted"}${post.createdAt ? ` · ${timeAgo(post.createdAt, tick)}` : ""}`;
                   return (
                     <div
                       key={post.id}

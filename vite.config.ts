@@ -34,11 +34,11 @@ export default defineConfig(({ command }):UserConfig => {
       include: cardSourcePatterns,
       exclude: cardCompilerExcludedPatterns,
     }),
-    // Only the three new landing-page functions opt in. Inline modal and
+    // Only annotated landing-page functions opt in. Inline modal and
     // mutation controllers stay outside compiler scope unless separately reviewed.
     babel({
       presets: [reactCompilerPreset({ compilationMode: "annotation" })],
-      include: /[\\/]client[\\/]src[\\/]pages[\\/](?:PlacezBrowse|Scenez|OutzidePlacesPage)\.tsx$/,
+      include: /[\\/]client[\\/]src[\\/]pages[\\/](?:Events|PlacezBrowse|Scenez|OutzidePlacesPage)\.tsx$/,
     }),
     {
       name: "version-home-flight-assets",

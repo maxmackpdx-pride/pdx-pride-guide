@@ -18,7 +18,7 @@ const inScope=[
  ...placezCompilerModules.map(module=>'components/'+module+'.tsx'),
  ...cardFaceModules.map(face=>'components/'+face+(face.startsWith('board/punk/')?'.jsx':'.tsx')),
 ];
-const pageFunctions=['PlacezBrowse','Scenez','OutzidePlacesPage'];
+const pageFunctions=['Events','PlacezBrowse','Scenez','OutzidePlacesPage'];
 const outOfScope=[
  'components/discovery/PlaceDiscoveryCard.tsx',
  'components/home/TodayLocationCard.tsx',
@@ -71,7 +71,11 @@ try{
    assert.equal(compiled,expected,`Incorrect real-app React Compiler scope: ${url}`);
    const target=placezCompilerModules.find(module=>file===`components/${module}.tsx`);
    const functionProof=target?assertCompiledFunction(transformed.code,({'scenez/SceneCardFace':'Closed','outz/native/NativeOutzideFace':'OutzClosed'}[target]||target.split('/').pop()),expected):null;
-   inspected.push({url,compiled,functionProof});
+   if(file==='components/events/FlyerBoard.tsx'){
+    for(const name of ['FlyerBoard','PosterCell','PastCell']){
+     inspected.push({url,compiled,functionProof:assertCompiledFunction(transformed.code,name,true)});
+    }
+   }else inspected.push({url,compiled,functionProof});
   }
  }
  for(const name of pageFunctions){
@@ -83,7 +87,7 @@ try{
   inspected.push({url,compiled:true,functionProof});
  }
  console.log('REACT_COMPILER_PRODUCTION_SCOPE '+JSON.stringify({
-  mode:'card-presentation-infer-three-pages-annotation',config:'vite.config.ts',
+  mode:'card-presentation-infer-annotated-pages',config:'vite.config.ts',
   functionProofs:inspected.filter(item=>item.functionProof).map(item=>item.functionProof),
   compiled:inspected.filter(item=>item.compiled).map(item=>item.url),
   excluded:inspected.filter(item=>!item.compiled).map(item=>item.url),

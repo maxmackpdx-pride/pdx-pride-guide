@@ -315,6 +315,7 @@ function readSearchParam(key: string) {
 }
 
 export default function Events() {
+  "use memo";
   const [now, setNow] = useState(Date.now);
   useEffect(() => {
     const refresh = () => setNow(Date.now());
@@ -651,18 +652,18 @@ export default function Events() {
      default view it receives the whole upcoming pool — the day window is the
      sorter's job, applied when a specific day or window is picked. Search is
      global over the board, as designed. Past view keeps the filtered pool. */
-  const boardEnded = (e: EventListing) => {
-    const en = parsePacificDateTime(e.dateEnd) ?? parsePacificDateTime(e.dateStart);
-    if (en == null || en > now) return false;
-    // No recorded end + started today: the site treats it as still on.
-    if (!e.dateEnd && pacificCalendarDate(e.dateStart) === pacificCalendarDate(new Date(now).toISOString())) return false;
-    return true;
-  };
   /* The Flyer Board owns filtering now (its own filter row, search and
      sections), so it always receives the whole upcoming pool, start-sorted,
      with ended listings excluded. Past view keeps the page's past pool; the
      board cuts it to the last 7 days itself. */
   const boardEvents = useMemo(() => {
+    const boardEnded = (e: EventListing) => {
+      const en = parsePacificDateTime(e.dateEnd) ?? parsePacificDateTime(e.dateStart);
+      if (en == null || en > now) return false;
+      // No recorded end + started today: the site treats it as still on.
+      if (!e.dateEnd && pacificCalendarDate(e.dateStart) === pacificCalendarDate(new Date(now).toISOString())) return false;
+      return true;
+    };
     const pool = pastView
       ? filtered
       : sortEvents(filterBoardEvents(events, "ALL", [], "", false, now), "start_time")
