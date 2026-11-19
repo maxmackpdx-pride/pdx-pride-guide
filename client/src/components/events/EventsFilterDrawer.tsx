@@ -108,9 +108,15 @@ export default function EventsFilterDrawer({
   const measureFull = () => {
     const root = rootRef.current;
     if (!root) return 0;
-    /* The sheet's bottom edge is anchored to the dock; full screen means
-       the body runs from that edge up to the top of the viewport. */
-    return Math.max(320, root.getBoundingClientRect().bottom - LIP_H);
+    /* Full screen = the whole app frame between the site header and the
+       dock: the sheet's bottom edge is anchored to the dock, and its top
+       stops just below the header. Running to the very top of the
+       viewport would slide the lip UNDER the header bar (which lives in
+       a 9000-range stacking shell) and leave stage 2 with no grabbable
+       handle — the two-stage close depends on that lip. */
+    const header = document.querySelector(".site-hub-mtop, .site-header");
+    const headerBottom = header ? Math.max(0, header.getBoundingClientRect().bottom) : 0;
+    return Math.max(320, root.getBoundingClientRect().bottom - headerBottom - LIP_H);
   };
 
   const goStage = (next: Stage) => {
