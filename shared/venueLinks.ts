@@ -92,6 +92,55 @@ export const VENUE_WEBSITE_FALLBACKS: Record<string, string> = {
   pluspsychiatry: "https://www.pluspsychiatry.com",
 };
 
+export type VenueBusinessCandidate = { name?: string | null };
+
+const VENUE_CITY_SUFFIX_TOKENS = new Set(["portland", "pdx", "oregon", "or"]);
+
+function venueCoreKey(value: string | null | undefined): string {
+  const key = normalizeVenueKey(value);
+  if (!key) return "";
+  const tokens = key.split(" ").filter(Boolean);
+  while (tokens.length > 1 && VENUE_CITY_SUFFIX_TOKENS.has(tokens[tokens.length - 1])) tokens.pop();
+  return tokens.join(" ");
+}
+
+/**
+ * Resolve an event's venueName to a directory business without requiring an
+ * exact string match: case / whitespace / punctuation-insensitive via
+ * normalizeVenueKey, tolerant of trailing city suffixes ("Eagle" vs
+ * "Eagle Portland") and of one name being a token-boundary prefix of the
+ * other ("Darcelle XV" vs "Darcelle XV Showplace", "Sanctuary" vs
+ * "Sanctuary Club"). Returns null when nothing matches — a shared single
+ * word is never enough to guess a connection.
+ */
+export function matchVenueBusinessByName<T extends VenueBusinessCandidate>(
+  venueName: string | null | undefined,
+  businesses: readonly T[],
+): T | null {
+  const key = normalizeVenueKey(venueName);
+  if (!key) return null;
+  // A venueName that is only a city name ("Portland") names no venue.
+  if (!key.includes(" ") && VENUE_CITY_SUFFIX_TOKENS.has(key)) return null;
+  const core = venueCoreKey(venueName);
+  let prefixMatch: T | null = null;
+  for (const biz of businesses) {
+    const bizKey = normalizeVenueKey(biz?.name);
+    if (!bizKey) continue;
+    if (bizKey === key) return biz;
+    const bizCore = venueCoreKey(biz?.name);
+    if (!bizCore) continue;
+    if (core && bizCore === core) return biz;
+    if (!prefixMatch && core) {
+      const shorter = core.length <= bizCore.length ? core : bizCore;
+      const longer = core.length <= bizCore.length ? bizCore : core;
+      // The shorter side must be a real name fragment, never a bare city
+      // token ("Portland" must not claim "Portland Gay Men's Chorus").
+      if (shorter.length >= 4 && !VENUE_CITY_SUFFIX_TOKENS.has(shorter) && longer.startsWith(`${shorter} `)) prefixMatch = biz;
+    }
+  }
+  return prefixMatch;
+}
+
 export type VenueWebsiteSource = {
   name?: string | null;
   website?: string | null;

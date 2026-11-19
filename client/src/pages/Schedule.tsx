@@ -123,6 +123,8 @@ export interface ScheduleProps {
   density?: Density;
   /** Home embed: horizontal week grid only (no hero, toolbar, or filters). */
   embed?: boolean;
+  /** Drawer embed: only the viewer's own schedule (saved + beach days). */
+  mineOnly?: boolean;
 }
 
 type View = 'mine' | 'all';
@@ -158,10 +160,11 @@ function nowMinutes(): number {
 export default function Schedule({
   density = 'Comfortable',
   embed = false,
+  mineOnly = false,
 }: ScheduleProps) {
   const { user } = useAuth();
   const { savedIds } = useSavedEvents();
-  const [view, setViewState] = useState<View>(() => new URLSearchParams(window.location.search).get('view') === 'mine' ? 'mine' : 'all');
+  const [view, setViewState] = useState<View>(() => mineOnly || new URLSearchParams(window.location.search).get('view') === 'mine' ? 'mine' : 'all');
   const [viewBootstrapped, setViewBootstrapped] = useState(false);
   const [fAdm, setFAdm] = useState<FilterMap>({});
   const [fType, setFType] = useState<FilterMap>({});
@@ -475,8 +478,10 @@ export default function Schedule({
 
   const inView = useCallback(
     (e: ScheduleEvent) =>
-      embed || view === 'all' || myScheduleIds.has(e.id) || isBeachScheduleEvent(e),
-    [embed, view, myScheduleIds],
+      mineOnly
+        ? myScheduleIds.has(e.id) || isBeachScheduleEvent(e)
+        : embed || view === 'all' || myScheduleIds.has(e.id) || isBeachScheduleEvent(e),
+    [embed, view, myScheduleIds, mineOnly],
   );
   const pass = useCallback((e: ScheduleEvent) => inView(e) && matchFilters(e), [inView, matchFilters]);
   const viewSet = useMemo(() => weekEvents.filter(inView), [weekEvents, inView]);

@@ -87,7 +87,7 @@ import {
   isTuckerHostedArchiveId,
   tuckerHostedArchiveAsEvent,
 } from "@shared/tuckerHostedArchive";
-import { buildVenueWebsiteIndex, resolveVenueWebsite } from "@shared/venueLinks";
+import { buildVenueWebsiteIndex, resolveVenueWebsite, matchVenueBusinessByName } from "@shared/venueLinks";
 import {
   enrichEventForMap,
   fillEventMapCoordinates,
@@ -103,7 +103,7 @@ import { PRODUCT_EVENT_NAMES, recordPageView, recordProductEvent } from "./analy
 import { registerAdRoutes } from "./adsRoutes";
 import { registerHousingRoutes } from "./housing/routes";
 import { getCommunityChatRoomsForUser } from './communityChat';
-import { registerCommunityRoutes, searchCommunities, linkQSearchCandidateEvent } from "./communities";
+import { registerCommunityRoutes, searchCommunities, linkQSearchCandidateEvent, getEventHostCommunity } from "./communities";
 import { registerPlatformV1 } from "./platformV1";
 import { getSystemDiagnosticsDigest, recordSystemDiagnostic } from "./systemDiagnostics";
 import { commitIngest, previewIngest, mergeDraftIntoEvent } from "./ingest";
@@ -176,6 +176,8 @@ import {
   createEventFromResearch,
   eventForResearchAgent,
   getEventResearchSourceMemory,
+  getLatestEventSourcePlatform,
+  getLatestEventSourceUrl,
   listEventResearchChanges,
   recordEventResearchPath,
   rollbackEventResearchChange,
@@ -1157,6 +1159,38 @@ function mayReadEventDetail(req: express.Request, event: Event): boolean {
   if (!publicOnly && req.query.date === undefined) return true;
   if (hasPublicEventFlags(event)) return true;
   return !publicOnly && (staff || (!!req.session?.userId && storage.isUserEventHost(event.id, req.session.userId)));
+}
+
+// ─── SOURCE LINK GATE — THE one place this visibility is decided ───
+// Tucker (Nov 19, 2026): the expanded event card's SOURCE LINK button is
+// visible only to admins, the event's promoters/hosts, and the event's
+// owner/claimant. He is reconsidering ("maybe source links should be
+// public") but has NOT decided. To make source links public, flip
+// SOURCE_LINK_PUBLIC to true — that one line is the whole change: the
+// detail endpoint then includes the URL for every viewer, and the client
+// (which renders only what the response carries) needs no edit. While
+// false, the URL is withheld from the response entirely for everyone
+// else — it never reaches their DOM.
+const SOURCE_LINK_PUBLIC = false;
+
+function canViewSourceLink(req: any, evt: any, hosts: Array<{ userId: number }>): boolean {
+  if (SOURCE_LINK_PUBLIC) return true;
+  const userId = req.session?.userId;
+  if (!userId) return false;
+  if (sessionIsAdmin(req)) return true;
+  const user = storage.getUserById(userId);
+  if (!user) return false;
+  if (userIsAdminNow(user)) return true;
+  // The event's promoters are its hosts (the People page's host list).
+  if (hosts.some(h => h.userId === user.id)) return true;
+  if (storage.isUserEventHost(evt.id, user.id)) return true;
+  // Owner / claimant: claimedBy stores the claim owner's username or email.
+  const claim = String(evt.claimedBy || "").trim().toLowerCase().replace(/^@/, "");
+  if (claim && (
+    claim === String(user.username || "").trim().toLowerCase()
+    || claim === String(user.email || "").trim().toLowerCase()
+  )) return true;
+  return false;
 }
 
 function getAdminActorUserId(req: any): number | null {
@@ -2520,9 +2554,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const event = publicEvent(listing, pendingClaimIds, websites);
 
     const businesses = storage.getBusinesses() as any[];
-    const venue = businesses.find(
-      b => (b.name || "").trim().toLowerCase() === (evt.venueName || "").trim().toLowerCase(),
-    ) || null;
+    // Robust venue match (normalized, city-suffix and prefix tolerant) —
+    // the old exact-string compare missed real directory venues whose
+    // names differ only in punctuation or a "Portland"-style suffix.
+    const venue = matchVenueBusinessByName(evt.venueName, businesses);
     const slimPlace = (b: any, distanceMi?: number) => ({
       id: b.id, name: b.name, type: b.type, neighborhood: b.neighborhood ?? null,
       address: b.address ?? null, imageUrl: b.imageUrl ?? null,
@@ -2564,10 +2599,27 @@ export function registerRoutes(httpServer: Server, app: Express) {
         .map(x => ({ ...publicEvent(x.e, pendingClaimIds, websites), distanceMi: Math.round(x.d * 10) / 10 }));
     }
 
+    const hosts = storage.getEventHosts(evt.id);
+    // Host-group connection (SceneZ community) alongside the venue
+    // connection — an event at a venue but hosted by a group carries both.
+    const hostGroup = getEventHostCommunity(evt.id, evt);
+    // Source link: only computed and included for viewers who pass the
+    // gate (see canViewSourceLink / SOURCE_LINK_PUBLIC above). For
+    // everyone else the field is absent from the response entirely.
+    const sourceLink = canViewSourceLink(req, evt, hosts)
+      ? getLatestEventSourceUrl(evt.id)
+      : null;
+
     res.json({
       event,
       venue: venue ? slimPlace(venue) : null,
-      hosts: storage.getEventHosts(evt.id),
+      hosts,
+      hostGroup,
+      // Platform only (never the URL): drives the posterless fallback
+      // flyer's FetLife mark. The source URL itself stays behind the
+      // canViewSourceLink gate above.
+      sourcePlatform: getLatestEventSourcePlatform(evt.id),
+      ...(sourceLink ? { sourceLink } : {}),
       talent: storage.getEventTalent(evt.id, { includePending: false }),
       gigs,
       missedConnections: storage.getMissedConnectionsByEvent(evt.id, req.session?.userId),

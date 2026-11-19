@@ -1,12 +1,122 @@
 @import "@/components/ds/tokens/places-recovered-art.css";
-.places-page-switch{position:relative;z-index:4;padding:12px 16px;display:flex;justify-content:center}.places-page-switch>div{display:flex;isolation:isolate;width:min(100%,460px);padding:4px;border:1px solid var(--places-art-ink-ffffff30);border-radius:30px;background:var(--places-art-ink-080b10dd)}.places-page-switch a{position:relative;flex:1;padding:10px;text-align:center;border-radius:25px;color:var(--places-art-ink-b9bec8);font-weight:800;font-size:14px;text-decoration:none}.places-page-switch a>span:last-child{position:relative;z-index:1}.places-page-switch a.is-active{color:white}.places-page-switch__active{position:absolute;inset:0;border:1px solid var(--places-art-ink-ff7b0090);background:var(--places-art-ink-ff7b0020);border-radius:25px;box-shadow:0 0 14px var(--places-art-ink-ff7b0020)}.places-page-switch a{display:grid;place-items:center;min-height:44px;box-sizing:border-box}
-.pl-search button{display:grid;place-items:center;min-width:44px;min-height:44px;border:0;background:transparent;color:inherit}
-.places-locked-slot{flex:none;position:relative}.places-locked-slot>div{position:relative}
+
+/* =====================================================================
+   Placez-family chrome (Tucker, Nov 19 2026): ONE geometry on SceneZ,
+   Placez and Outzide, templated on OutZide's compact switch and body.
+   --places-search-h / insets below are the shared chrome measurements.
+   ===================================================================== */
+:root {
+  --places-chrome-inline: 15px;
+  --places-search-h: 52px;
+}
+
+/* ---- P1a: the slider. OutZide compact outer size on every page:
+   width 76% centered, track padding 2px, links min-height 44px
+   (outer height 50px), radius 28px track / 22px thumb. ---- */
+.places-page-switch { position: relative; z-index: 4; width: 76%; margin: 0 auto; padding: 0; display: flex; justify-content: center; }
+/* Subtle rainbow (Tucker, Nov 19 2026): the design guide's spectrum
+   (--grad-rainbow, the hero-logo order) as a soft blurred glow feathering
+   out under the slider track — no hard edges, no bars, just light. */
+.places-page-switch::before {
+  content: ""; position: absolute; left: 6%; right: 6%; bottom: -12px; height: 24px;
+  border-radius: 999px; background: var(--grad-rainbow);
+  filter: blur(16px); opacity: .16; z-index: -1; pointer-events: none;
+}
+.places-page-switch > div { display: flex; isolation: isolate; width: 100%; padding: 2px; border: var(--glass-card-neutral-border); border-radius: 28px; background: var(--glass-card-neutral-bg); box-shadow: var(--chrome-keyline), var(--chrome-bevel-dark), var(--chrome-floor); -webkit-backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation)); backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation)); touch-action: pan-y; }
+.places-page-switch a { position: relative; flex: 1; min-width: 0; min-height: 44px; box-sizing: border-box; display: grid; place-items: center; padding: 6px 3px; text-align: center; border-radius: 22px; color: var(--places-art-ink-b9bec8); font: 800 14px/1 var(--font-body); letter-spacing: .02em; text-transform: uppercase; text-decoration: none; }
+.places-page-switch a > span:last-child { position: relative; z-index: 1; display: flex; gap: 6px; align-items: center; justify-content: center; white-space: nowrap; }
+.places-page-switch a svg { width: 17px; height: 17px; flex: none; }
+.places-page-switch a.is-active { color: white; }
+/* Deep-glass thumb: transparent glass over the labels, 1px edge + bloom in
+   the active page's token color (Placez card bloom recipe). The bloom
+   properties transition so the color cross-fades while the thumb travels. */
+.places-page-switch__active {
+  position: absolute; inset: 0; border-radius: 22px;
+  background: linear-gradient(165deg, color-mix(in srgb, var(--page-accent, var(--neon-orange)) 16%, transparent), color-mix(in srgb, var(--z-black) 42%, transparent));
+  -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4);
+  border: 1px solid color-mix(in srgb, var(--page-accent, var(--neon-orange)) 55%, var(--z-black));
+  box-shadow: 0 0 0 2px var(--z-black), 0 0 7px 1px color-mix(in srgb, var(--page-accent, var(--neon-orange)) 36%, transparent), 0 0 14px color-mix(in srgb, var(--page-accent, var(--neon-orange)) 16%, transparent);
+  transition: border-color .45s ease, box-shadow .45s ease, background .45s ease;
+}
+@media (min-width: 600px) {
+  .places-page-switch a { font-size: 20px; padding: 9px 4px; }
+  .places-page-switch a svg { width: 22px; height: 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .places-page-switch__active { transition: none; } }
+
+/* Page-level switch containers: strip the old per-page sizing so the
+   slider above is the only geometry. */
+.pl-page.pl-production .places-page-switch { max-width: none; margin: 18px auto; padding-inline: 0; }
+.scenez-native .places-page-switch { width: 76%; }
+
+/* ---- Shared chrome geometry: search, filters, discovery ----
+   Heights, top offsets and side insets match OutZide's (.ol-body /
+   .ol-search / .ol-filters) on all three pages. Zaylist Barlow
+   (var(--font-body)) is the secondary font in these chrome spots. */
+.pl-page.pl-production .pl-body { padding: 22px var(--places-chrome-inline) 30px; }
+.scenez-native .new-scenez main.ns-body { padding: 22px var(--places-chrome-inline) 60px; }
+
+.pl-page .pl-body .pl-search,
+.outz-native-page .ol-body .ol-search,
+.scenez-native .new-scenez .ns-search {
+  height: var(--places-search-h); min-height: var(--places-search-h);
+  padding: 0 12px; gap: 10px; border-radius: 16px; align-items: center;
+}
+.pl-page .pl-search input,
+.outz-native-page .ol-search input,
+.scenez-native .new-scenez .ns-search input {
+  font: 700 16px/1.2 var(--font-body); letter-spacing: 0; text-transform: none; font-style: normal;
+}
+.pl-page .pl-filters { gap: 12px 10px; margin: 16px 0 26px; }
+.pl-page .pl-filters button { min-height: 76px; padding: 12px 9px; }
+.pl-page .pl-filters button b:not(.pl-age) { font: 800 clamp(17px, 3.4vw, 24px)/1.05 var(--font-body); font-style: normal; }
+.outz-landing .ol-filters button b { font: 800 15px/1.1 var(--font-body); font-style: normal; }
+.scenez-native .new-scenez main .ns-filters { gap: 12px 10px; margin: 16px 0 26px; }
+.scenez-native .new-scenez main .ns-filters button { min-height: 76px; }
+.scenez-native .new-scenez main .ns-filters strong { font: 800 clamp(13px, 2.4vw, 19px)/1.1 var(--font-body); letter-spacing: .03em; }
+.pl-page .pl-discover .pl-section-title { margin: 14px 0 4px; }
+.outz-native-page .ol-discover-heading > span { font: 700 10px/1.2 var(--font-body); }
+
+.pl-search button { display: grid; place-items: center; min-width: 44px; min-height: 44px; border: 0; background: transparent; color: inherit; }
+.places-locked-slot { flex: none; position: relative; }
+.places-locked-slot > div { position: relative; }
 
 .places-locked-slot [data-corner-control="heart"] button::after,
 .places-locked-slot button[data-corner-control="heart"]::after {
-  content:"";position:absolute;inset:50% auto auto 50%;
-  width:var(--places-hit-size,44px);height:var(--places-hit-size,44px);
-  transform:translate(-50%,-50%);
+  content: ""; position: absolute; inset: 50% auto auto 50%;
+  width: var(--places-hit-size, 44px); height: var(--places-hit-size, 44px);
+  transform: translate(-50%, -50%);
 }
-.places-card-view button,.places-card-load-more,.scenez-native .ns-search-go,.outz-native-page .ol-search button {min-height:44px}
+.places-card-view button, .places-card-load-more, .scenez-native .ns-search-go, .outz-native-page .ol-search button { min-height: 44px; }
+
+/* ---- P2: In Your City rails ----
+   Rail headers are the Events section headers (.fbx .board-h) shrunk
+   proportionally to ~70%: same gradient lock, same display font,
+   every measurement scaled, nothing re-typeset. */
+.pz-rail-h {
+  display: flex; align-items: center; gap: 7px; width: 100%;
+  padding: 10px 14px 7px; border: 0; text-align: left; cursor: pointer;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--z-black) 94%, transparent) 72%, transparent);
+  color: inherit; font: inherit;
+}
+.pz-rail-h h3 { margin: 0; font: 800 14px "Barlow Condensed", sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--rail-accent, inherit); }
+.pz-rail-h .pz-rail-h__count { font: 600 10.5px var(--font-body); color: var(--rail-accent, inherit); letter-spacing: .05em; }
+.pz-rail-h .pz-rail-h__go { margin-left: auto; font: 700 11px var(--font-body); letter-spacing: .06em; text-transform: uppercase; opacity: .75; }
+.pz-small-rail {
+  display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x proximity;
+  padding: 10px 14px 18px; scrollbar-width: none; overscroll-behavior-inline: contain;
+}
+.pz-small-rail::-webkit-scrollbar { display: none; }
+.pz-small-rail > * { flex: none; scroll-snap-align: start; }
+.pz-rails { min-width: 0; }
+
+/* ---- Card-size slider (in the drawer, at the start of the tags):
+   the P1a slider recipe at 2 options — glass track, deep-glass thumb,
+   accent edge + bloom, Barlow labels. ---- */
+.pz-size-slider { display: flex; isolation: isolate; width: 100%; box-sizing: border-box; padding: 2px; margin: 0 0 10px; border: var(--glass-card-neutral-border); border-radius: 28px; background: var(--glass-card-neutral-bg); box-shadow: var(--chrome-keyline), var(--chrome-bevel-dark), var(--chrome-floor); -webkit-backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation)); backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation)); }
+.pz-size-slider button { position: relative; flex: 1; min-width: 0; min-height: 44px; box-sizing: border-box; display: grid; place-items: center; padding: 6px 3px; border: 0; border-radius: 22px; background: transparent; color: var(--places-art-ink-b9bec8); font: 800 14px/1 var(--font-body); letter-spacing: .02em; text-transform: uppercase; cursor: pointer; }
+.pz-size-slider button[aria-pressed="true"] { color: white; }
+.pz-size-slider__thumb { position: absolute; inset: 0; border-radius: 22px; background: linear-gradient(165deg, color-mix(in srgb, var(--page-accent, var(--neon-cyan)) 16%, transparent), color-mix(in srgb, var(--z-black) 42%, transparent)); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4); border: 1px solid color-mix(in srgb, var(--page-accent, var(--neon-cyan)) 55%, var(--z-black)); box-shadow: 0 0 0 2px var(--z-black), 0 0 7px 1px color-mix(in srgb, var(--page-accent, var(--neon-cyan)) 36%, transparent), 0 0 14px color-mix(in srgb, var(--page-accent, var(--neon-cyan)) 16%, transparent); transition: border-color .45s ease, box-shadow .45s ease, background .45s ease; }
+.pz-size-slider__label { position: relative; z-index: 1; }
+.pz-size-slider button:focus-visible { outline: 2px solid var(--page-accent, var(--neon-cyan)); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .pz-size-slider__thumb { transition: none; } }

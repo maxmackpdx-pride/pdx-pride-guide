@@ -1,0 +1,25 @@
+/* Posterless fallback flyer treatment (Tucker, Nov 19, 2026): black
+   treatment, place image centered + slightly blurred behind, logo dead
+   center. Selectors outrank the board's `.fbx .pc img` catch-all so the
+   logo keeps its own contain sizing inside FlyerBoard cells. Tokens only —
+   no raw hex (deploy token guard). Made-by: Muse */
+.plf {
+  position: absolute; inset: 0; overflow: hidden;
+  background: var(--z-oled); pointer-events: none;
+}
+.plf img.plf__img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  filter: blur(14px); transform: scale(1.15); opacity: .5;
+}
+.plf__scrim { position: absolute; inset: 0; background: var(--z-oled); opacity: .22; }
+.plf img.plf__logo {
+  position: absolute; left: 50%; top: 50%; width: auto; height: auto;
+  max-width: 46%; max-height: 36%;
+  transform: translate(-50%, -50%); object-fit: contain;
+}
+.plf__word {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  font: 800 30px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  letter-spacing: .02em; color: var(--text-hi); white-space: nowrap;
+}

@@ -1,6 +1,7 @@
 import { pacificCalendarDate } from "@shared/missedConnections";
 import { eventAge, eventPrice } from "@/lib/eventFacts";
 import { EventGoingButton, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
+import { PosterlessFlyer } from "./PosterlessFlyer";
 import EventPlanning from "./EventPlanning";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -11,6 +12,7 @@ import { EVENT_TALENT_ROLE_COLORS, EVENT_TALENT_ROLE_LABELS, type EventTalentRow
 import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { resolveVenueWebsite } from "@shared/venueLinks";
+import { resolveDirectoryLogo } from "@shared/directoryLogos";
 import { CardDetails } from "@/components/cards/CardAPI";
 import { OpenCardMeta } from "@/components/cards/react19Card";
 import { closeOpenCard } from "@/components/cards/react19CardModel";
@@ -36,11 +38,14 @@ import "./EventzExpanded.css";
 
 /**
  * The Eventz expanded card, built on the Placez setup: one card, five swipe
- * pages (Feed / Info / Maps / More + Nearby / People), the flyer full-size
- * from the top with its gradient starting 35% down the card, black action
- * cards, and the pager + SAVE THIS EVENT pinned at the bottom. Data comes
- * from GET /api/events/:id/detail. Admin / edit / moderation stay in
- * EventModal, one tap away from the Info page. Made-by: Muse
+ * pages (Info / Feed / Maps / More + Nearby / People — Info is the first
+ * page per Tucker's Nov 19, 2026 ruling, superseding the Feed-first order),
+ * the flyer full-size from the top with its gradient starting 35% down the
+ * card, black action cards, and the pager + SAVE THIS EVENT pinned at the
+ * bottom. The page scroller spans the full card behind the flyer layer, so
+ * content scrolls up underneath the flyer instead of stopping below it.
+ * Data comes from GET /api/events/:id/detail. Admin / edit / moderation
+ * stay in EventModal, one tap away from the Info page. Made-by: Muse
  */
 
 type DetailHost = {
@@ -79,17 +84,32 @@ type SlimPlace = {
 
 type NearbyEvent = Event & { distanceMi?: number };
 
+type DetailHostGroup = {
+  id: string;
+  slug: string;
+  name: string;
+  businessId?: number | null;
+};
+
 type EventDetail = {
   event: Event;
   venue: SlimPlace | null;
   hosts: DetailHost[];
+  hostGroup?: DetailHostGroup | null;
+  /** Only present when the server passes this viewer through the source
+   *  link gate (admins / promoters / owner, or public if the gate flips);
+   *  absent from the payload entirely for everyone else. */
+  sourceLink?: string | null;
+  /** Origin platform only ("fetlife", another host, or null) — public;
+   *  picks the mark on the posterless fallback flyer. */
+  sourcePlatform?: string | null;
   talent: EventTalentRow[];
   gigs: DetailGig[];
   missedConnections: unknown[];
   nearby: { restaurants: SlimPlace[]; events: NearbyEvent[] };
 };
 
-const PAGES = ["Feed", "Info", "Maps", "More", "People"] as const;
+const PAGES = ["Info", "Feed", "Maps", "More", "People"] as const;
 
 type EventzExpandedProps = {
   event: Event;
@@ -205,6 +225,17 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
   const restaurants: SlimPlace[] = Array.isArray(detail?.nearby?.restaurants) ? detail.nearby.restaurants : [];
   const nearbyEvents: NearbyEvent[] = Array.isArray(detail?.nearby?.events) ? detail.nearby.events : [];
   const venue = detail?.venue ?? null;
+  const hostGroup = detail?.hostGroup ?? null;
+  // The source URL is only present in the payload when the server's
+  // source-link gate passed for this viewer (canViewSourceLink in
+  // server/routes.ts) — the button never renders for anyone else.
+  const sourceUrl = publicHttpUrl(detail?.sourceLink);
+  // Posterless fallback flyer (Tucker, Nov 19, 2026): FetLife-sourced
+  // events carry the FetLife mark; everything else carries the venue's
+  // directory logo. Neither asset → the typographic face stays.
+  const isFetLife = detail?.sourcePlatform === "fetlife";
+  const fallbackLogo = isFetLife ? null : resolveDirectoryLogo(event.venueName, venue?.imageUrl);
+  const fallbackWordmark = isFetLife ? "FetLife" : null;
 
   // The venue's own payload feeds two v12 sections the event detail does not
   // carry: "More at {venue}" (next-7-days strip on More + Nearby) and the
@@ -282,7 +313,12 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
       <header className="evz-x__hero">
         {poster
           ? <img {...posterAttributes} alt="" loading="lazy" decoding="async" className="evz-x__flyer" onError={(e) => { restoreOriginalPoster(e.currentTarget, poster); }} />
-          : <span className="evz-x__flyer evz-x__flyer--none" aria-hidden="true" />}
+          : (
+            <>
+              <span className="evz-x__flyer evz-x__flyer--none" aria-hidden="true" />
+              <PosterlessFlyer placeImageUrl={venue?.imageUrl} logoUrl={fallbackLogo} wordmark={fallbackWordmark} />
+            </>
+          )}
         <div className="evz-x__chrome">
           <button type="button" className="evz-x__iconbtn" onClick={share} aria-label={`Share ${event.title}`}><Share2 size={17} aria-hidden="true" /></button>
           <button type="button" className="evz-x__iconbtn" onClick={requestClose} aria-label={`Close ${event.title}`}><X size={19} aria-hidden="true" /></button>
@@ -308,27 +344,26 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
 
       <div className="evz-x__pageswrap">
         <div className="evz-x__pages" ref={pagesRef} onScroll={onPagesScroll}>
-          <section className="evz-x__page" inert={page!==0} aria-hidden={page!==0} aria-label="Feed — Gigz">
-            {event.id > 0 && <EventPlanning eventId={event.id} occurrenceDate={event.dateStart} />}
-            <button type="button" className="evz-x__act evz-x__act--dash" aria-expanded={mizzedOpen} onClick={() => setMizzedOpen((open) => !open)}>
-              <span className="evz-x__act-main">
-                <span className="evz-x__act-t">Add a Mizzed Connection</span>
-                <span className="evz-x__act-s">{missedCount > 0 ? `${missedCount} posted for this event` : "Met someone at this event? Post it — during or after."}</span>
-              </span>
-              <span className="evz-x__act-ar" aria-hidden="true">+</span>
-            </button>
-          </section>
-
-          <section className="evz-x__page" inert={page!==1} aria-hidden={page!==1} aria-label="Info">
+          <section className="evz-x__page" inert={page!==0} aria-hidden={page!==0} aria-label="Info">
             <div className="evz-x__sech"><span>Event details</span></div>
             <StartsInBox event={event} />
             <div className="evz-x__kv"><Clock3 size={17} aria-hidden="true" /><span>{whenLine}</span></div>
-            <div className="evz-x__kv"><MapPin size={17} aria-hidden="true" /><span>{event.venueName}{event.address ? <><br />{event.address}</> : null}</span></div>
+            <div className="evz-x__kv"><MapPin size={17} aria-hidden="true" /><span>{venue ? <Link href={placePath(venue.id, venue.name)} className="evz-x__venuelink">{event.venueName}</Link> : event.venueName}{event.address ? <><br />{event.address}</> : null}</span></div>
+            {hostGroup ? (
+              <div className="evz-x__kv"><span className="evz-x__kv-k">Hosted by</span><span><Link href={`/z/${hostGroup.slug}`} className="evz-x__venuelink">{hostGroup.name}</Link></span></div>
+            ) : null}
             {event.description ? <p className="evz-x__desc">{event.description}</p> : null}
             <div className="evz-x__kv"><span className="evz-x__kv-k">Admission</span><span>{admission}</span></div>
             <div className="evz-x__kv"><span className="evz-x__kv-k">Age</span><span>{age}</span></div>
-            {primaryLink ? (
-              <a className="evz-x__link" href={primaryLink.href} target="_blank" rel="noopener noreferrer">{primaryLink.label} <ArrowUpRight size={16} aria-hidden="true" /></a>
+            {(primaryLink || sourceUrl) ? (
+              <div className="evz-x__linkrow">
+                {primaryLink ? (
+                  <a className="evz-x__link" href={primaryLink.href} target="_blank" rel="noopener noreferrer">{primaryLink.label} <ArrowUpRight size={16} aria-hidden="true" /></a>
+                ) : null}
+                {sourceUrl ? (
+                  <a className="evz-x__link" href={sourceUrl} target="_blank" rel="noopener noreferrer">Source link <ArrowUpRight size={16} aria-hidden="true" /></a>
+                ) : null}
+              </div>
             ) : null}
             {claimable ? (
               <p className="evz-x__note">This event has not been claimed by its organizer. Details were sourced from public listings. Please confirm time, venue, and ticketing directly before attending.{hasPendingClaim ? " A claim is pending admin review." : ""}</p>
@@ -337,6 +372,17 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
               {canManage ? <button type="button" className="evz-x__managebtn" onClick={onManage}>Manage event</button> : null}
               <button type="button" className="evz-x__managebtn" onClick={onManage}>Report / request a change</button>
             </div>
+          </section>
+
+          <section className="evz-x__page" inert={page!==1} aria-hidden={page!==1} aria-label="Feed — Gigz">
+            {event.id > 0 && <EventPlanning eventId={event.id} occurrenceDate={event.dateStart} />}
+            <button type="button" className="evz-x__act evz-x__act--dash" aria-expanded={mizzedOpen} onClick={() => setMizzedOpen((open) => !open)}>
+              <span className="evz-x__act-main">
+                <span className="evz-x__act-t">Add a Mizzed Connection</span>
+                <span className="evz-x__act-s">{missedCount > 0 ? `${missedCount} posted for this event` : "Met someone at this event? Post it — during or after."}</span>
+              </span>
+              <span className="evz-x__act-ar" aria-hidden="true">+</span>
+            </button>
           </section>
 
           <section className="evz-x__page" inert={page!==2} aria-hidden={page!==2} aria-label="Maps">

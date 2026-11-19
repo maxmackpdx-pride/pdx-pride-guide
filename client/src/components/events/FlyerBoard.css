@@ -61,6 +61,12 @@
 }
 .fbx .rail::-webkit-scrollbar { display: none; }
 .fbx .rail .cell { flex: none; width: var(--pw); position: relative; margin-left: -9px; }
+/* Happening Now / Later / This Weekend cards at 70% (Tucker, Nov 19 2026):
+   --pw drives the container-query cell, so the whole poster object —
+   type, icons, hardware — shrinks proportionally. Plan Ahead (.lboard)
+   is not in these sections and keeps the full --pw. Rails never get
+   taller: heights follow the same aspect at the smaller width. */
+.fbx .bandsec--scaled { --pw: calc(168px * .7); }
 .fbx .rail .cell:first-child { margin-left: 0; }
 .fbx .lboard {
   display: flex;
@@ -1052,6 +1058,7 @@
 /* ---------- desktop ---------- */
 @media (min-width: 1100px) {
   .fbx { --pw: 264px; --pw2: 118px; --mw: 200px; --fw: 215px; }
+  .fbx .bandsec--scaled { --pw: calc(264px * .7); }
   .fbx .board-h { padding: 18px 24px 12px; background: linear-gradient(180deg, rgba(7, 5, 3, .94) 70%, transparent); }
   .fbx .board-h h3 { font-size: 24px; }
   .fbx .rail { gap: 12px; padding: 42px 24px 24px; }
@@ -1077,6 +1084,7 @@
 
 @media (max-width: 767px) {
   .fbx { --pw: clamp(216px, 65vw, 296px); }
+  .fbx .bandsec--scaled { --pw: clamp(calc(216px * .7), 45.5vw, calc(296px * .7)); }
 
   .fbx .board-h {
     display: grid;

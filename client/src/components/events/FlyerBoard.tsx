@@ -35,6 +35,8 @@ import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import "../board/punk/push-pins.css";
 import "./FlyerBoard.css";
 import { connectionsForListing, isPosterActivation } from "./flyerBoardBehavior";
+import { PosterlessFlyer } from "./PosterlessFlyer";
+import { resolveDirectoryLogo } from "@shared/directoryLogos";
 
 /**
  * The Flyer Board — a faithful port of the approved demo (build_board_v5):
@@ -463,6 +465,7 @@ function PosterCell({
               }}
             />
           ) : null}
+          {!poster ? <PosterlessFlyer logoUrl={resolveDirectoryLogo(listing.venueName)} /> : null}
           <button type="button" className="pshare" aria-label={`Share ${listing.title}`} onClick={share}>
             <ShareIcon />
           </button>
@@ -1286,7 +1289,7 @@ export default function FlyerBoard({
         ) : (
           <div>
             {visibleNow.length > 0 && (
-              <div className="bandsec" id="happening-now">
+              <div className="bandsec bandsec--scaled" id="happening-now">
                 <div className="board-h">
                   <span className="livedot" />
                   <h3>HAPPENING NOW</h3>
@@ -1296,7 +1299,7 @@ export default function FlyerBoard({
               </div>
             )}
             {visibleLater.length > 0 && (
-              <div className="bandsec" id="happening-later">
+              <div className="bandsec bandsec--scaled" id="happening-later">
                 <div className="board-h">
                   <span className="tick-y" />
                   <h3>HAPPENING LATER</h3>
@@ -1306,7 +1309,7 @@ export default function FlyerBoard({
               </div>
             )}
             {visibleWeekend.length > 0 && (
-              <div className="bandsec" id="this-weekend">
+              <div className="bandsec bandsec--scaled" id="this-weekend">
                 <div className="board-h">
                   <span className="wkdot" />
                   <h3>HAPPENING THIS WEEKEND</h3>
