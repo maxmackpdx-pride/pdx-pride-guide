@@ -6,7 +6,7 @@ import BrowseStatus from "@/components/BrowseStatus";
 import PageRecovery from "@/components/PageRecovery";
 import type React from "react";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { Link, useRoute, useSearch, useLocation } from "wouter";
+import { useRoute, useSearch, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
@@ -17,7 +17,6 @@ import { matchesEventTypeFilters, readEventTypeFilters } from "@/lib/eventBrowse
 import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
 import EventsRailSkeleton from "@/components/events/EventsRailSkeleton";
 import TonightEventCard, { type TonightCardLive } from "@/components/home/TonightEventCard";
-import ZLineIcon from "@/components/ZLineIcon";
 import { listingPosterUrl } from "@/lib/dsEvent";
 import { eventTimeLabel, eventDateLabel } from "@/lib/eventDisplay";
 import { useSavedEvents } from "@/hooks/useSavedEvents";
@@ -31,20 +30,18 @@ import EventsRail from "@/components/events/EventsRail";
 import ThisWeekRail, { type WeekDay } from "@/components/events/ThisWeekRail";
 import BoardShareButton from "@/components/BoardShareButton";
 import BoardFollowButton from "@/components/BoardFollowButton";
-import ScrollReveal from "@/components/ScrollReveal";
 import EventTypeTag from "../components/EventTypeTag";
 import EventzExpanded from "../components/events/EventzExpanded";
 import FlyerBoard from "../components/events/FlyerBoard";
 import EventsFilterDrawer, { type EventsFilterDay } from "../components/events/EventsFilterDrawer";
 import type { EventModalOriginRect } from "../components/EventModal";
 import Schedule from "@/pages/Schedule";
-import ScheduleCard from "@/components/ScheduleCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { hasPublicEventFlags } from "@shared/publicEventVisibility";
 import { eventPath } from "@shared/eventSlug";
 import { scatterAffiliateCards } from "@/lib/affiliateCards";
-import { Grid, ChevronDown, ChevronRight, CalendarDays, Map as MapIcon, MapPin, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, ChevronRight, CalendarDays, Map as MapIcon, MapPin, SlidersHorizontal } from "lucide-react";
 import { Button, FilterChip, SearchInput } from "@/components/ds";
 
 import { DAY_SORT_ORDER } from "@shared/eventWeek";
@@ -362,17 +359,6 @@ export default function Events() {
   ));
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [sortMode, setSortMode] = useState<SortMode>(() => SORT_OPTIONS.find(option => option.value === readSearchParam("sort"))?.value || "start_time");
-  const [activeTab, setActiveTabState] = useState<"board" | "schedule">(() =>
-    readSearchParam("tab").toLowerCase() === "schedule" ? "schedule" : "board",
-  );
-  const setActiveTab = useCallback((tab: "board" | "schedule") => {
-    setActiveTabState(tab);
-    const params = new URLSearchParams(window.location.search);
-    if (tab === "schedule") params.set("tab", "schedule");
-    else params.delete("tab");
-    const qs = params.toString();
-    setLocation(qs ? `/events?${qs}` : "/events");
-  }, [setLocation]);
   const browseQuery = useCallback(() => {
     const params = new URLSearchParams();
     if (boardWindow !== "all") params.set("period", boardWindow);
@@ -382,9 +368,8 @@ export default function Events() {
     if (activeFilters.length) params.set("type", activeFilters.join("|"));
     if (pastView) params.set("past", "1");
     if (sortMode !== "start_time") params.set("sort", sortMode);
-    if (activeTab === "schedule") params.set("tab", activeTab);
     return params;
-  }, [searchQuery, activeDay, activeFilters, pastView, sortMode, activeTab, boardWindow, boardTags]);
+  }, [searchQuery, activeDay, activeFilters, pastView, sortMode, boardWindow, boardTags]);
   const openEvent = useCallback((event: EventListing, originRect: EventModalOriginRect | null = null) => {
     setEventOriginRect(originRect);
     setSelectedEvent(event);
@@ -416,7 +401,7 @@ export default function Events() {
       setPastView(readSearchParam("past") === "1");
       setSearchQuery(readSearchParam("q"));
       setSortMode(SORT_OPTIONS.find(option => option.value === readSearchParam("sort"))?.value || "start_time");
-      setActiveTabState(readSearchParam("tab") === "schedule" ? "schedule" : "board");
+
     };
     window.addEventListener("popstate", restore);
     return () => window.removeEventListener("popstate", restore);
@@ -436,7 +421,7 @@ export default function Events() {
   const [pickedDay, setPickedDay] = useState<string | null>(null);
   const onBoardCount = useCallback((n: number) => setBoardCount(n), []);
   const onDrawerHeight = useCallback((h: number) => setDrawerH(h), []);
-  const drawerPast = pastView && activeTab === "board";
+  const drawerPast = pastView;
   const drawerDays = useMemo<EventsFilterDay[]>(() => {
     const todayStr = pacificTodayDate(now);
     const todayNoon = parsePacificDateTime(`${todayStr}T12:00:00`) ?? now;
@@ -465,21 +450,20 @@ export default function Events() {
   }, []);
   const pickDrawerDay = useCallback((date: string) => {
     setPickedDay(date);
-    if (activeTab === "schedule") {
-      window.dispatchEvent(new CustomEvent("zaylist:schedule-day", { detail: { date } }));
-      return;
-    }
     /* A day jump always lands on the full board: clear the other filters,
-       then let the board scroll Plan Ahead to that date's cards. */
+       then let the board scroll Plan Ahead to that date's cards. (The
+       drawer's full-screen schedule layer hears the same day through the
+       schedule's own listener and follows along.) */
     setActiveDay(DEFAULT_WINDOW);
     setActiveFilters([]);
     setBoardWindow("all");
     setBoardTags(new Set());
     setSearchQuery("");
+    window.dispatchEvent(new CustomEvent("zaylist:schedule-day", { detail: { date } }));
     requestAnimationFrame(() => requestAnimationFrame(() => {
       window.dispatchEvent(new CustomEvent("zaylist:board-day", { detail: { date } }));
     }));
-  }, [activeTab]);
+  }, []);
 
   const { data: routeEvent, error: routeError, refetch: refetchRouteEvent } = useQuery<Event>({
     queryKey: ["/api/events", routeEventId, routeDay, routeDate, user?.id ?? null],
@@ -580,7 +564,6 @@ export default function Events() {
   const dayRailRef = useRef<HTMLElement>(null);
   const [dockTop, setDockTop] = useState<number | null>(null);
   useEffect(() => {
-    if (activeTab !== "board") { setDockTop(null); return; }
     let frame = 0;
     const measure = () => {
       frame = 0;
@@ -596,7 +579,7 @@ export default function Events() {
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); if (frame) cancelAnimationFrame(frame); };
-  }, [activeTab]);
+  }, []);
 
   // A single day reads as a timeline. Today: on now, starting soon, today,
   // late. Any other day on the rail: daytime, evening, late.
@@ -685,10 +668,6 @@ export default function Events() {
   const [openRails, setOpenRails] = useState<Set<string>>(() => new Set());
   useEffect(() => { setOpenRails(new Set()); }, [activeDay, activeFilters, searchQuery]);
 
-  const mySavedUpcoming = useMemo(
-    () => liveEvents.filter(e => savedIds.has(e.id)).length,
-    [liveEvents, savedIds],
-  );
   const drawerFilterCount = (activeDay === "ALL" || railKeys.has(activeDay) ? 0 : 1) + Number(pastView) + Number(sortMode !== "start_time") + activeFilters.length;
 
   const posterServeQuery = useQuery<{ ads: AdServePayload[] }>({
@@ -799,7 +778,7 @@ export default function Events() {
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [hasMoreVisibleItems, isMobile, visibleItemCount, activeTab, activeDay, sortMode]);
+  }, [hasMoreVisibleItems, isMobile, visibleItemCount, activeDay, sortMode]);
 
   // All upcoming (not-yet-ended) live events - the site is year-round now.
   const upcomingCount = liveEvents.length;
@@ -838,20 +817,6 @@ export default function Events() {
     >
       <RoomBackground room="eventz" />
 
-      {activeTab === "schedule" ? (
-        <ScrollReveal delay={50}>
-          <div className="events-page__body events-page__body--schedule">
-            <div className="events-schedule-switch">
-              <button type="button" className="events-tool-btn" onClick={() => setActiveTab("board")}>
-                <Grid size={18} aria-hidden="true" />Back to flyers
-              </button>
-            </div>
-            <ScheduleCard>
-              <Schedule embed />
-            </ScheduleCard>
-          </div>
-        </ScrollReveal>
-      ) : (
       <section className="events-board-feed board-active-feed diag">
         <div className="board-active-feed__inner">
           <link rel="alternate" type="application/json" href="/api/events" title="Zaylist events — full JSON feed" />
@@ -926,9 +891,9 @@ export default function Events() {
           </div>
         </div>
       </section>
-      )}
 
-
+      {/* My Schedule no longer lives on this page: it is the drawer's
+          full-screen second layer (Your Schedule). */}
       <EventsFilterDrawer
         window={boardWindow}
         onWindow={(value) => { setPickedDay(null); setBoardWindow(value); }}
@@ -936,21 +901,13 @@ export default function Events() {
         onToggleTag={toggleDrawerTag}
         query={searchQuery}
         onQuery={(value) => { setPickedDay(null); setSearchQuery(value); }}
-        count={activeTab === "schedule"
-          ? drawerDays.reduce((n, d) => n + d.count, 0)
-          : boardCount > 0 ? boardCount : boardEvents.length}
+        count={boardCount > 0 ? boardCount : boardEvents.length}
         days={drawerDays}
         pastView={drawerPast}
         onPickDay={pickDrawerDay}
         onHeightChange={onDrawerHeight}
+        scheduleContent={<Schedule embed />}
       />
-
-      {user && mySavedUpcoming > 0 && activeTab === "board" && !selectedEvent && (
-        <Link href="/schedule?view=mine" className="events-myschedule-pill" data-testid="events-my-schedule">
-          <ZLineIcon name="favorite" size={18} filled />
-          My Schedule · {mySavedUpcoming}
-        </Link>
-      )}
 
       {showSaveAuth && <AuthModal onClose={() => setShowSaveAuth(false)} />}
       {selectedEvent && (

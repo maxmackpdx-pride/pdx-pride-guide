@@ -1,8 +1,9 @@
-/* Events filter drawer — a persistent bottom sheet locked to the top of the
-   mobile dock (same lock line as the My Schedule week navigator: dock height
-   + dock offset + safe area). Shell and buttons use the dock's liquid-glass
-   material; the day picker borrows the My Schedule calendar buttons at their
-   own size, laid out left to right in the day colors. */
+/* Events filter drawer — a three-stage bottom sheet locked to the top of
+   the mobile dock (dock height + dock offset + safe area). Stage 1: the
+   board's filter chips above a My Schedule-style day picker (same button
+   size, day colors), in the dock's liquid-glass material. Stage 2 (the
+   double pull): full screen, holding Your Schedule. The lip — a thick grab
+   handle with 3 stacked lines — drags through every stage. */
 
 .edrawer {
   position: fixed;
@@ -23,6 +24,12 @@
   overflow: hidden;
 }
 
+/* Full screen: above the site header, squared top corners. */
+.edrawer.is-full {
+  z-index: 2400;
+  border-radius: 0 0 24px 24px;
+}
+
 /* Arrival: the drawer pops open with a bounce. */
 .edrawer.is-arriving { animation: edrawer-arrive .85s cubic-bezier(.28, .9, .3, 1) both; }
 @keyframes edrawer-arrive {
@@ -30,6 +37,16 @@
   45% { transform: translateY(-7px); }
   68% { transform: translateY(3px); }
   84% { transform: translateY(-1px); }
+  100% { transform: translateY(0); }
+}
+
+/* Two-stage close: landing back at stage 1 from full screen settles with a
+   slight bounce. */
+.edrawer.is-settling { animation: edrawer-settle .55s cubic-bezier(.28, .9, .3, 1) both; }
+@keyframes edrawer-settle {
+  0% { transform: translateY(-8px); }
+  45% { transform: translateY(5px); }
+  70% { transform: translateY(-2px); }
   100% { transform: translateY(0); }
 }
 
@@ -58,13 +75,13 @@
   box-shadow: inset 0 1px .75px rgba(226, 244, 255, .35), 0 1px 2px rgba(0, 0, 0, .35);
 }
 
-/* ---- body: filters above the day picker ---- */
+/* ---- body ---- */
 .edrawer__bodywrap {
   overflow: hidden;
-  transition: height .5s cubic-bezier(.34, 1.25, .44, 1);
+  transition: height .55s cubic-bezier(.34, 1.25, .44, 1);
 }
 .edrawer.is-dragging .edrawer__bodywrap { transition: none; }
-.edrawer__body { padding: 2px 12px 12px; }
+.edrawer__stage1 { padding: 2px 12px 8px; }
 
 .edrawer__filters {
   display: flex;
@@ -177,14 +194,69 @@
 }
 .edrawer__idle { width: 4px; height: 4px; border-radius: 50%; background: rgba(255, 255, 255, .18); }
 
+/* ---- the second pull: below the day picker, drags to full screen ---- */
+.edrawer__pull {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 7px 0 3px;
+  border: 0;
+  border-top: 1px solid rgba(172, 207, 231, .14);
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  color: #aeb7c4;
+}
+.edrawer__pull:active { cursor: grabbing; }
+.edrawer__pull:focus-visible { outline: 2px solid var(--neon-cyan, #00ffff); outline-offset: -2px; }
+.edrawer__pull-lines { display: flex; flex-direction: column; align-items: center; gap: 2.5px; pointer-events: none; }
+.edrawer__pull-lines i {
+  display: block;
+  width: 26px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(226, 244, 255, .45);
+}
+.edrawer__pull-label {
+  font: 700 10.5px var(--font-mono, monospace);
+  letter-spacing: .16em;
+  pointer-events: none;
+}
+.edrawer__pull-chev {
+  font-size: 15px;
+  line-height: 1;
+  transform: rotate(-90deg);
+  pointer-events: none;
+  color: rgba(226, 244, 255, .6);
+}
+
+/* ---- stage 2: Your Schedule, full screen ---- */
+.edrawer__stage2 {
+  height: 100%;
+  overflow-y: auto;
+  padding: 2px 10px 16px;
+  overscroll-behavior: contain;
+}
+.edrawer__stage2-head {
+  font: 800 15px "Barlow Condensed", sans-serif;
+  letter-spacing: .12em;
+  color: var(--evz-mist-f4f8fa, #f4f8fa);
+  padding: 2px 2px 8px;
+}
+.edrawer__stage2 .sch-root--embed { background: transparent; }
+
 /* Desktop: no bottom dock — the drawer floats above the page foot. */
 @media (min-width: 960px) {
-  /* The week navigator is in-flow on desktop, so no lift is needed there. */
   .edrawer { bottom: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .edrawer.is-arriving { animation: none; }
+  .edrawer.is-arriving, .edrawer.is-settling { animation: none; }
   .edrawer__bodywrap { transition: none; }
 }
-html.calm-mode .edrawer.is-arriving, html[data-calm="true"] .edrawer.is-arriving { animation: none; }
+html.calm-mode .edrawer.is-arriving, html[data-calm="true"] .edrawer.is-arriving,
+html.calm-mode .edrawer.is-settling, html[data-calm="true"] .edrawer.is-settling { animation: none; }

@@ -243,8 +243,9 @@
 }
 
 @media (max-width: 640px) {
-  /* Half-height week navigator in the dock's liquid-glass material
-     (was 122px tall; now ~63px). */
+  /* Full-height week navigator (the brief 50% shrink was superseded the
+     same day — My Schedule moved into the Events drawer instead), wearing
+     the dock's liquid-glass material. */
   .sch-weeknav {
     position: fixed;
     left: 0;
@@ -252,8 +253,7 @@
     bottom: calc(var(--site-mobile-nav-height, 98px) + env(safe-area-inset-bottom, 0px));
     z-index: 54;
     margin: 0;
-    gap: 4px;
-    padding: 4px 10px 5px;
+    padding: 8px 10px 10px;
     background:
       linear-gradient(164deg, rgba(123, 182, 201, .13), rgba(7, 13, 20, .05) 38%, rgba(4, 8, 12, .18) 66%, rgba(57, 102, 144, .11)),
       rgba(1, 4, 8, .55);
@@ -262,50 +262,37 @@
     border-top: 1px solid rgba(172, 207, 231, .16);
     max-width: none;
   }
-  .sch-weeknav__period { gap: 6px; }
-  .sch-weeknav__arrow {
-    width: 26px;
-    height: 26px;
-    font-size: 15px;
-    border-radius: 8px;
-  }
-  .sch-weeknav__today {
-    min-height: 24px;
-    padding: 3px 9px;
-    font-size: 9px;
-  }
   .sch-weeknav__days {
     max-width: none;
   }
   .sch-weeknav__range {
-    font-size: .8rem;
+    font-size: 1.05rem;
   }
-  .sch-weeknav__day {
-    min-height: 24px;
-    padding: 2px 1px 3px;
-    border-radius: 8px;
-    gap: 0;
-  }
-  .sch-weeknav__dow { font-size: 7.5px; }
-  .sch-weeknav__dom { font-size: 11px; }
-  .sch-weeknav__mark { min-height: 8px; }
-  .sch-weeknav__count { font-size: 8px; }
-  .sch-weeknav__idle { width: 3px; height: 3px; }
   .sch-toast {
-    bottom: calc(var(--site-mobile-nav-height, 98px) + env(safe-area-inset-bottom, 0px) + 64px);
+    bottom: calc(var(--site-mobile-nav-height, 98px) + env(safe-area-inset-bottom, 0px) + 118px);
   }
 }
 
 @media (max-width: 360px) {
   .sch-weeknav {
-    padding: 4px 8px 5px;
-    gap: 4px;
+    padding: 6px 8px 8px;
+    gap: 8px;
+  }
+  .sch-weeknav__arrow {
+    width: 44px;
+    height: 44px;
   }
   .sch-weeknav__today {
-    padding: 3px 8px;
+    min-height: 36px;
+    padding: 6px 10px;
+  }
+  .sch-weeknav__day {
+    min-height: 44px;
+    padding: 3px 1px 4px;
+    border-radius: 8px;
   }
   .sch-weeknav__dom {
-    font-size: 11px;
+    font-size: 13px;
   }
 }
 
