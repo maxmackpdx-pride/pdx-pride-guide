@@ -35,6 +35,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 import EventTypeTag from "../components/EventTypeTag";
 import EventzExpanded from "../components/events/EventzExpanded";
 import FlyerBoard from "../components/events/FlyerBoard";
+import EventsFilterDrawer, { type EventsFilterDay } from "../components/events/EventsFilterDrawer";
 import type { EventModalOriginRect } from "../components/EventModal";
 import Schedule from "@/pages/Schedule";
 import ScheduleCard from "@/components/ScheduleCard";
@@ -429,6 +430,57 @@ export default function Events() {
     refetchOnMount: "always",
   });
 
+  /* ---- bottom filter drawer (filters + day picker, locked to the dock) ---- */
+  const [drawerH, setDrawerH] = useState(0);
+  const [boardCount, setBoardCount] = useState(0);
+  const [pickedDay, setPickedDay] = useState<string | null>(null);
+  const onBoardCount = useCallback((n: number) => setBoardCount(n), []);
+  const onDrawerHeight = useCallback((h: number) => setDrawerH(h), []);
+  const drawerPast = pastView && activeTab === "board";
+  const drawerDays = useMemo<EventsFilterDay[]>(() => {
+    const todayStr = pacificTodayDate(now);
+    const todayNoon = parsePacificDateTime(`${todayStr}T12:00:00`) ?? now;
+    const offsets = drawerPast ? [-6, -5, -4, -3, -2, -1, 0] : [0, 1, 2, 3, 4, 5, 6];
+    return offsets.map(off => {
+      const ms = todayNoon + off * 86400000;
+      const date = pacDate(ms);
+      return {
+        date,
+        dowCode: WEEKDAY_CODES[pacWeekday(ms)],
+        dom: Number(date.slice(8, 10)),
+        count: filterBoardEvents(events, `D:${date}`, activeFilters, searchQuery, drawerPast, now).length,
+        isToday: date === todayStr,
+        selected: pickedDay === date,
+      };
+    });
+  }, [events, activeFilters, searchQuery, drawerPast, now, pickedDay]);
+  const toggleDrawerTag = useCallback((token: string) => {
+    setPickedDay(null);
+    setBoardTags(prev => {
+      const next = new Set(prev);
+      if (next.has(token)) next.delete(token);
+      else next.add(token);
+      return next;
+    });
+  }, []);
+  const pickDrawerDay = useCallback((date: string) => {
+    setPickedDay(date);
+    if (activeTab === "schedule") {
+      window.dispatchEvent(new CustomEvent("zaylist:schedule-day", { detail: { date } }));
+      return;
+    }
+    /* A day jump always lands on the full board: clear the other filters,
+       then let the board scroll Plan Ahead to that date's cards. */
+    setActiveDay(DEFAULT_WINDOW);
+    setActiveFilters([]);
+    setBoardWindow("all");
+    setBoardTags(new Set());
+    setSearchQuery("");
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      window.dispatchEvent(new CustomEvent("zaylist:board-day", { detail: { date } }));
+    }));
+  }, [activeTab]);
+
   const { data: routeEvent, error: routeError, refetch: refetchRouteEvent } = useQuery<Event>({
     queryKey: ["/api/events", routeEventId, routeDay, routeDate, user?.id ?? null],
     queryFn: () => apiRequest("GET", `/api/events/${routeEventId}${routeDate ? `?date=${encodeURIComponent(routeDate)}` : routeDay ? `?day=${encodeURIComponent(routeDay)}` : ""}`).then(r => r.json()),
@@ -780,7 +832,10 @@ export default function Events() {
   }
 
   return (
-    <div className="zine-page events-page board-page board-page--makeover room-shader-page">
+    <div
+      className="zine-page events-page board-page board-page--makeover room-shader-page"
+      style={{ "--edrawer-h": `${drawerH}px` } as React.CSSProperties}
+    >
       <RoomBackground room="eventz" />
 
       {activeTab === "schedule" ? (
@@ -860,6 +915,7 @@ export default function Events() {
             onExitPast={() => setPastView(false)}
             onOpen={(listing, rect) => openEvent(listing, rect)}
             now={now}
+            onVisibleCount={onBoardCount}
           />
         )}
 
@@ -869,6 +925,22 @@ export default function Events() {
       </section>
       )}
 
+
+      <EventsFilterDrawer
+        window={boardWindow}
+        onWindow={(value) => { setPickedDay(null); setBoardWindow(value); }}
+        tags={boardTags}
+        onToggleTag={toggleDrawerTag}
+        query={searchQuery}
+        onQuery={(value) => { setPickedDay(null); setSearchQuery(value); }}
+        count={activeTab === "schedule"
+          ? drawerDays.reduce((n, d) => n + d.count, 0)
+          : boardCount > 0 ? boardCount : boardEvents.length}
+        days={drawerDays}
+        pastView={drawerPast}
+        onPickDay={pickDrawerDay}
+        onHeightChange={onDrawerHeight}
+      />
 
       {user && mySavedUpcoming > 0 && activeTab === "board" && !selectedEvent && (
         <Link href="/schedule?view=mine" className="events-myschedule-pill" data-testid="events-my-schedule">
