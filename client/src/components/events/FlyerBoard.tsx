@@ -1192,7 +1192,7 @@ export default function FlyerBoard({
   const openDesc = detailEvent?.description || openListing?.description || "";
   const openTicket = detailEvent?.ticketUrl || openListing?.ticketUrl || "";
   const openClaimable = detailEvent?.isClaimable ?? openListing?.isClaimable ?? false;
-  const openPending = detailEvent?.hasPendingClaim ?? openListing?.hasPendingClaim ?? false;
+  const openPending = detailEvent?.hasPendingClaim ?? false;
   const openLat = detailVenue?.lat ?? openListing?.lat ?? null;
   const openLng = detailVenue?.lng ?? openListing?.lng ?? null;
   const pinX = openLng != null ? Math.min(92, Math.max(8, ((openLng + 122.85) / 0.4) * 100)) : 50;
