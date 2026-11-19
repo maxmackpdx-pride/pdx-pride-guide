@@ -1,0 +1,77 @@
+.afterz-invite-trigger {
+  position: absolute;
+  z-index: 5;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(86px, calc(env(safe-area-inset-bottom) + 76px));
+  min-height: 44px;
+  padding: 0.4rem 1rem;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--amber) 10%, var(--ink-850));
+  color: color-mix(in srgb, var(--amber) 60%, var(--text-hi));
+  border: 1px solid var(--amber);
+  font-weight: 700;
+}
+.afterz-invite-sheet {
+  z-index: 10020;
+  display: block;
+  max-width: min(92vw, 32rem);
+  max-height: 82dvh;
+  overflow: auto;
+  background: var(--ink-750);
+  color: var(--text-mid);
+  border: 1px solid color-mix(in srgb, var(--amber) 38%, var(--ink-850));
+  border-radius: 14px;
+  padding: 1.5rem;
+  overscroll-behavior: contain;
+}
+.afterz-invite-sheet h3,
+.afterz-invite-sheet h4 {
+  font-weight: 700;
+  margin: 0.8rem 0 0.2rem;
+}
+.afterz-invite-sheet p,
+.afterz-invite-sheet li {
+  margin: 0.4rem 0;
+  overflow-wrap: anywhere;
+}
+.afterz-invite-sheet label {
+  display: block;
+  margin: 0.65rem 0;
+}
+.afterz-invite-sheet input:not([type="checkbox"]),
+.afterz-invite-sheet textarea {
+  display: block;
+  width: 100%;
+  padding: 0.55rem;
+  color: var(--text-hi);
+  background: var(--ink-850);
+  border: 1px solid var(--text-lo);
+  border-radius: 6px;
+}
+.afterz-invite-sheet button {
+  min-height: 44px;
+  color: color-mix(in srgb, var(--amber) 50%, var(--text-hi));
+  text-decoration: underline;
+  padding: 0 0.5rem;
+}
+.afterz-invite-sheet button:disabled {
+  opacity: 0.55;
+}
+.afterz-invite-sheet ul,
+.afterz-chat {
+  list-style: none;
+  padding: 0;
+}
+.afterz-chat {
+  max-height: 26dvh;
+  overflow: auto;
+}
+.afterz-guest {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.afterz-guest span {
+  flex: 1;
+}

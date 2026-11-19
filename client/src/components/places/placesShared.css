@@ -1,2 +1,12 @@
 @import "@/components/ds/tokens/places-recovered-art.css";
-.places-page-switch{position:relative;z-index:4;padding:12px 16px;display:flex;justify-content:center}.places-page-switch>div{display:flex;isolation:isolate;width:min(100%,460px);padding:4px;border:1px solid var(--places-art-ink-ffffff30);border-radius:30px;background:var(--places-art-ink-080b10dd)}.places-page-switch a{position:relative;flex:1;padding:10px;text-align:center;border-radius:25px;color:var(--places-art-ink-b9bec8);font-weight:800;font-size:14px;text-decoration:none}.places-page-switch a>span:last-child{position:relative;z-index:1}.places-page-switch a.is-active{color:white}.places-page-switch__active{position:absolute;inset:0;border:1px solid var(--places-art-ink-ff7b0090);background:var(--places-art-ink-ff7b0020);border-radius:25px;box-shadow:0 0 14px var(--places-art-ink-ff7b0020)}.places-locked-slot{flex:none;position:relative}.places-locked-slot>div{position:relative}
+.places-page-switch{position:relative;z-index:4;padding:12px 16px;display:flex;justify-content:center}.places-page-switch>div{display:flex;isolation:isolate;width:min(100%,460px);padding:4px;border:1px solid var(--places-art-ink-ffffff30);border-radius:30px;background:var(--places-art-ink-080b10dd)}.places-page-switch a{position:relative;flex:1;padding:10px;text-align:center;border-radius:25px;color:var(--places-art-ink-b9bec8);font-weight:800;font-size:14px;text-decoration:none}.places-page-switch a>span:last-child{position:relative;z-index:1}.places-page-switch a.is-active{color:white}.places-page-switch__active{position:absolute;inset:0;border:1px solid var(--places-art-ink-ff7b0090);background:var(--places-art-ink-ff7b0020);border-radius:25px;box-shadow:0 0 14px var(--places-art-ink-ff7b0020)}.places-page-switch a{display:grid;place-items:center;min-height:44px;box-sizing:border-box}
+.pl-search button{display:grid;place-items:center;min-width:44px;min-height:44px;border:0;background:transparent;color:inherit}
+.places-locked-slot{flex:none;position:relative}.places-locked-slot>div{position:relative}
+
+.places-locked-slot [data-corner-control="heart"] button::after,
+.places-locked-slot button[data-corner-control="heart"]::after {
+  content:"";position:absolute;inset:50% auto auto 50%;
+  width:var(--places-hit-size,44px);height:var(--places-hit-size,44px);
+  transform:translate(-50%,-50%);
+}
+.places-card-view button,.places-card-load-more,.scenez-native .ns-search-go,.outz-native-page .ol-search button {min-height:44px}

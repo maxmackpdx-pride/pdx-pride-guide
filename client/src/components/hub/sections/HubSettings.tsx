@@ -63,8 +63,8 @@ export default function HubSettings({ onLogout }: Props) {
       <div className="card hub-settings__card hub-settings__card--comfortable pdx-glass-rebind">
         <div className="kick hub-settings__section-kick hub-settings__section-kick--privacy">Privacy</div>
         <p className="hub-settings__note">
-          Public profile visibility, RSVP visibility, and check-in privacy are not live yet. We removed the
-          pretend toggles so nothing looks saved when it is not.
+          Your saved events are private. Going publicly shows your name on the event and follows its updates.
+          Your profile shows the details you choose to share.
         </p>
       </div>
 

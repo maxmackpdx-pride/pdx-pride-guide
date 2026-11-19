@@ -1,3 +1,5 @@
+import { legacyOrganizer } from "@shared/eventHostAuthority";
+import { initPickupNotices } from "./pickupReservation";
 import { pacificDayStart } from "./inboxReportingTime";
 import { withoutArchivedPosts } from "./boardArchive";
 import { seedResearchedProviderCards20261013 } from "./seedResearchedProviderCards20261013";
@@ -13,6 +15,7 @@ import { eventRetentionCutoff, isExpiredEvent } from "./eventRetention";
 import { hashPassword, verifyPassword, isLegacyPasswordHash } from "./passwords";
 export { hashPassword, verifyPassword, isLegacyPasswordHash } from "./passwords";
 import { randomUUID } from "node:crypto";
+import { resolveBusinessLocations } from "@shared/businessLocations";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { and, eq } from "drizzle-orm";
@@ -105,7 +108,7 @@ import {
   isEventAfterVenueClose,
   matchClosedVenue,
 } from "@shared/closedVenues";
-import { listHousingPosts } from "./housing/store";
+import { housingConversationLocked, HOUSING_CONVERSATION_LOCKED, listHousingPosts } from "./housing/store";
 import { HOUSING_TYPE_LABEL, type HousingType } from "../shared/housing";
 import { shouldCoalesceChange } from "../shared/changeCoalesce";
 import { ensureSystemDiagnosticsTable } from "./systemDiagnostics";
@@ -117,6 +120,9 @@ const HOUSING_FEED_ACTION: Record<HousingType, string> = {
   FORMING: "Is building a Hoüz",
   MANAGED: "New managed unit on My Hoüz",
 };
+
+// SQL equivalent of legacyOrganizer for host-scoped queries that select from events AS e.
+const legacyOrganizerWhere = "e.submitted_by IS NOT NULL AND e.is_claimable=0 AND coalesce(trim(e.claimed_by),'')='' AND e.source!='community_tip' AND NOT EXISTS (SELECT 1 FROM event_hosts host WHERE host.event_id=e.id)";
 
 /** getGigPosts LEFT JOINs users, so each row carries the poster's author
  * fields on top of the raw gig_posts columns. */
@@ -438,6 +444,7 @@ sqlite.exec(`
     created_at TEXT NOT NULL DEFAULT ''
   );
 `);
+initPickupNotices(sqlite);
 try {
   const bcols = new Set(
     sqlite.prepare(`PRAGMA table_info(businesses)`).all().map((c: any) => c.name),
@@ -552,6 +559,7 @@ sqlite.exec(`
     resolved_at TEXT,
     nudge_sent_at TEXT
   );
+  CREATE INDEX IF NOT EXISTS idx_housing_request_thread ON housing_requests(thread_id);
   CREATE INDEX IF NOT EXISTS idx_housing_requests_post ON housing_requests(post_id, status);
   CREATE INDEX IF NOT EXISTS idx_housing_requests_recipient ON housing_requests(recipient_user_id, status);
 
@@ -9691,14 +9699,14 @@ function sendAsGuideAdmin(
 
 function notifySubmissionMerged(
   sub: { id: number; title: string; submitterEmail: string },
-  eventTitle: string,
+  eventTitle: string, eventId: number,
 ) {
   const recipient = storage.getUserByEmail(sub.submitterEmail);
   if (!recipient) return;
   notifyGuideInbox(
     recipient.id,
     `Merged: ${sub.title}`,
-    `Your submission was merged into the existing listing "${eventTitle}". You're attached as the host, open your dashboard to manage it and post updates.`,
+    `Your submission was merged into the existing listing "${eventTitle}". Thank you for contributing the correction. /events/${eventId}`,
     {
       contextType: "SUBMISSION",
       contextId: sub.id,
@@ -9731,17 +9739,21 @@ function notifyProfilePhotoReject(toUserId: number, reasonCode: string, note?: s
 }
 
 function notifySubmissionOutcome(
-  sub: { id: number; title: string; type: string; submitterEmail: string },
+  sub: { id: number; title: string; type: string; submitterEmail: string; eventId?: number | null },
   approved: boolean,
   reason?: string,
 ) {
   const recipient = storage.getUserByEmail(sub.submitterEmail);
   if (!recipient) return;
   if (approved) {
-    const body = sub.type === "CLAIM"
-      ? `Your claim for "${sub.title}" was approved. Open your dashboard to manage the event and post host updates.`
-      : `Your event "${sub.title}" is live on Zaylist. Open your dashboard to see it listed.`;
-    notifyGuideInbox(recipient.id, `Approved: ${sub.title}`, body, {
+    const link = sub.eventId ? " /events/" + sub.eventId : "";
+    const body = sub.type === "PROMOTER_APPLICATION"
+      ? "Your promoter application was approved. Open Promoters to submit or claim an event."
+      : sub.type === "CLAIM" ? "Your event claim was approved. You can manage the listing." + link
+      : sub.type === "SUGGEST" ? "Your tip was published as an unclaimed community listing." + link
+      : "Your event is published on Zaylist." + link;
+    const subject = sub.type === "PROMOTER_APPLICATION" ? "Promoter approved" : "Approved: " + sub.title;
+    notifyGuideInbox(recipient.id, subject, body, {
       contextType: "SUBMISSION",
       contextId: sub.id,
       contextLabel: sub.title,
@@ -10152,7 +10164,8 @@ export interface IStorage {
     events: Array<{ id: number; title: string; subtitle: string; href: string }>;
     places: Array<{ id: number; name: string; subtitle: string; href: string }>;
   };
-  getEventChatMessages(eventId: number, viewerUserId: number): {
+  getEventChatMessages(eventId: number, viewerUserId: number, beforeId?: number): {
+    nextBeforeId?: number | null;
     messages: any[];
     expiresAt: string | null;
     chatOpen: boolean;
@@ -11413,103 +11426,32 @@ export const storage: IStorage = {
     }
     return { deleted: deleted.length, usernames: deleted };
   },
-  autoApproveClaim(id: number, claimedByUsername: string) {
-    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
-    if (!sub || sub.type !== "CLAIM" || !sub.eventId) return;
-    const now = new Date().toISOString();
-    db.update(submissions).set({
-      status: "APPROVED",
-      approvals: JSON.stringify([claimedByUsername]),
-      adminNotes: `Auto-approved: @${claimedByUsername} is a verified promoter, no manual review required.`,
-    }).where(eq(submissions.id, id)).run();
-    const claimBefore = db.select().from(events).where(eq(events.id, sub.eventId)).get() as Record<string, unknown> | undefined;
-    db.update(events).set({
-      isClaimable: false,
-      claimedBy: claimedByUsername,
-      adminNotes: null,
-    }).where(eq(events.id, sub.eventId)).run();
-    if (claimBefore) {
-      recordEventMutation({
-        eventId: sub.eventId,
-        before: claimBefore,
-        after: db.select().from(events).where(eq(events.id, sub.eventId)).get() as Record<string, unknown> | undefined,
-        actor: "submission-auto-approve",
-        reason: "Claim auto-approved for a verified promoter",
-      });
-    }
-    const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
-    if (submitter) {
-      if (submitter.promoterStatus !== "approved") {
-        db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
-      }
-      storage.setPrimaryEventHost(sub.eventId, submitter.id, null);
-    }
+  autoApproveClaim(id, username) {
+    if (storage.getSubmission(id)?.type === "CLAIM") storage.approveSubmission(id, username);
   },
-  autoApproveSubmission(id, claimedByUsername) {
-    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
-    if (!sub || sub.type !== "NEW_EVENT") return;
-    const directoryRows = db.select().from(businesses).all().filter(b => b.active);
-    const coords = mergeMapCoordinates({
-      venueName: sub.venueName,
-      address: sub.address,
-      lat: sub.lat,
-      lng: sub.lng,
-    }, directoryRows);
-    db.update(submissions).set({ status: "APPROVED", approvals: JSON.stringify([claimedByUsername]) }).where(eq(submissions.id, id)).run();
-    const nowIso = new Date().toISOString();
-    const created = db.insert(events).values({
-      title: sub.title, description: sub.description,
-      venueName: sub.venueName, address: sub.address,
-      neighborhood: sub.neighborhood, lat: coords.lat, lng: coords.lng,
-      dateStart: sub.dateStart, dateEnd: sub.dateEnd, dayOfWeek: sub.dayOfWeek,
-      ageRequirement: sub.ageRequirement, eventTypes: sub.eventTypes,
-      admission: sub.admission, ticketUrl: sub.ticketUrl,
-      isPublic: sub.isPublic, isPrivate: sub.isPrivate,
-      isHouseParty: sub.isHouseParty, isSexPositive: sub.isSexPositive,
-      nudityOk: sub.nudityOk, posterImageUrl: sub.posterImageUrl,
-      status: "LIVE", source: "user_submitted",
-      isClaimable: false, claimedBy: claimedByUsername,
-      submittedBy: sub.submitterEmail, adminNotes: null,
-      createdAt: nowIso,
-      updatedAt: nowIso,
-    }).returning().get();
-    if (created) {
-      recordEventMutation({
-        operation: "create",
-        eventId: created.id,
-        before: null,
-        after: created as Record<string, unknown>,
-        actor: "submission-auto-approve",
-        reason: "New-event submission auto-approved for a verified promoter",
-      });
-    }
-    const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
-    if (created && submitter) {
-      if (submitter.promoterStatus === "pending") {
-        db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
-      }
-      storage.setPrimaryEventHost(created.id, submitter.id, null);
-    }
+  autoApproveSubmission(id, username) {
+    if (storage.getSubmission(id)?.type === "NEW_EVENT") storage.approveSubmission(id, username);
   },
   approveSubmission(id, adminName) {
-    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
-    if (!sub) return undefined;
-    let approvalList: string[] = [];
-    try {
-      const parsed = JSON.parse(sub.approvals || "[]");
-      approvalList = Array.isArray(parsed) ? parsed : [];
-    } catch {
-      approvalList = [];
-    }
-    if (!approvalList.includes(adminName)) approvalList.push(adminName);
-    const newStatus = approvalList.length >= 1 ? "APPROVED" : "PENDING";
-    db.update(submissions).set({ approvals: JSON.stringify(approvalList), status: newStatus }).where(eq(submissions.id, id)).run();
-    if (newStatus === "APPROVED") {
+    return sqlite.transaction(() => {
+      const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
+      if (!sub) return undefined;
+      if (sub.status === "APPROVED") return sub;
+      if (sub.status !== "PENDING") throw new Error("Submission already resolved. Refresh the queue.");
+      if (!["NEW_EVENT","SUGGEST","CLAIM","PROMOTER_APPLICATION"].includes(sub.type)) throw new Error("Review this submission as a correction to the existing listing.");
+      if (sub.type === "CLAIM") {
+        const target = sub.eventId && storage.getEvent(sub.eventId);
+        if (!target || target.status !== "LIVE" || !target.isClaimable || target.claimedBy) {
+          throw new Error("This event is no longer available to claim.");
+        }
+      }
+      db.update(submissions).set({ approvals: JSON.stringify([adminName]), status: "APPROVED" }).where(eq(submissions.id, id)).run();
       const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
 
       if (sub.type === "PROMOTER_APPLICATION") {
-        // Standalone promoter application - approve user, no event created
-        if (submitter) db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+        if (!submitter) throw new Error("This applicant no longer has an account.");
+        db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+        storage.resolvePromoterApplicationSubmissions(submitter.id, "approved", adminName);
       } else if (sub.type === "CLAIM" && sub.eventId) {
         const claimBefore = db.select().from(events).where(eq(events.id, sub.eventId)).get() as Record<string, unknown> | undefined;
         db.update(events).set({
@@ -11529,6 +11471,7 @@ export const storage: IStorage = {
         }
         if (submitter) {
           db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+          storage.resolvePromoterApplicationSubmissions(submitter.id, "approved", adminName);
           storage.setPrimaryEventHost(sub.eventId, submitter.id, null);
         }
       } else if (sub.type === "SUGGEST") {
@@ -11558,6 +11501,7 @@ export const storage: IStorage = {
           updatedAt: tipNow,
         }).returning().get();
         if (tipCreated) {
+          db.update(submissions).set({ eventId: tipCreated.id }).where(eq(submissions.id, id)).run();
           recordEventMutation({
             operation: "create",
             eventId: tipCreated.id,
@@ -11594,6 +11538,7 @@ export const storage: IStorage = {
           updatedAt: newNow,
         }).returning().get();
         if (created) {
+          db.update(submissions).set({ eventId: created.id }).where(eq(submissions.id, id)).run();
           recordEventMutation({
             operation: "create",
             eventId: created.id,
@@ -11606,84 +11551,85 @@ export const storage: IStorage = {
         if (submitter) {
           if (submitter.promoterStatus === "pending") {
             db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+            storage.resolvePromoterApplicationSubmissions(submitter.id, "approved", adminName);
           }
           storage.setPrimaryEventHost(created.id, submitter.id, null);
         }
       }
-      notifySubmissionOutcome(sub, true);
-    }
-    return db.select().from(submissions).where(eq(submissions.id, id)).get();
+      const resolved = storage.getSubmission(id)!;
+      if (sub.type !== "PROMOTER_APPLICATION" || submitter?.promoterStatus !== "approved") notifySubmissionOutcome(resolved, true);
+      return resolved;
+    }).immediate();
   },
   mergeSubmissionIntoEvent(id, eventId, adminName) {
-    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
-    if (!sub) return { error: "Submission not found" };
-    if (sub.status !== "PENDING") return { error: "Submission is not pending" };
-    if (sub.type !== "NEW_EVENT" && sub.type !== "SUGGEST") {
-      return { error: "Only new event submissions can be merged" };
-    }
-
-    const existing = db.select().from(events).where(eq(events.id, eventId)).get();
-    if (!existing) return { error: "Event not found" };
-    if (existing.status !== "LIVE") return { error: "Only live events can receive a merge" };
-
-    const patch = buildSubmissionMergePatch(existing, sub);
-    const directoryRows = db.select().from(businesses).all().filter(b => b.active);
-    const coords = mergeMapCoordinates({
-      venueName: (patch.venueName as string | undefined) ?? existing.venueName,
-      address: (patch.address as string | undefined) ?? existing.address,
-      lat: existing.lat,
-      lng: existing.lng,
-    }, directoryRows);
-
-    const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
-    const claimedBy = existing.claimedBy || submitter?.username || null;
-
-    db.update(events).set({
-      ...patch,
-      lat: coords.lat,
-      lng: coords.lng,
-      isClaimable: false,
-      claimedBy,
-      submittedBy: existing.submittedBy || sub.submitterEmail,
-      adminNotes: existing.adminNotes,
-    } as any).where(eq(events.id, eventId)).run();
-    recordEventMutation({
-      eventId,
-      before: existing as Record<string, unknown>,
-      after: db.select().from(events).where(eq(events.id, eventId)).get() as Record<string, unknown> | undefined,
-      actor: `admin:${adminName}`,
-      reason: "Submission merged into existing event",
-    });
-
-    db.update(submissions).set({
-      status: "APPROVED",
-      approvals: JSON.stringify([adminName]),
-      adminNotes: `Merged into event #${eventId} (${existing.title}) by ${adminName}.`,
-      eventId,
-    }).where(eq(submissions.id, id)).run();
-
-    if (submitter) {
-      if (submitter.promoterStatus === "pending") {
-        db.update(users).set({ promoterStatus: "approved" }).where(eq(users.id, submitter.id)).run();
+    return sqlite.transaction(() => {
+      const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
+      if (!sub) return { error: "Submission not found" };
+      if (sub.status === "APPROVED" && sub.eventId === eventId && sub.adminNotes?.startsWith("Merged into event #")) {
+        const event = storage.getEvent(eventId);
+        if (event) return { event, submission: sub };
       }
-      storage.setPrimaryEventHost(eventId, submitter.id, null);
-    }
+      if (sub.status !== "PENDING") return { error: "Submission is not pending" };
+      if (sub.type !== "NEW_EVENT" && sub.type !== "SUGGEST") {
+        return { error: "Only new event submissions can be merged" };
+      }
 
-    const updatedEvent = db.select().from(events).where(eq(events.id, eventId)).get()!;
-    const updatedSub = db.select().from(submissions).where(eq(submissions.id, id)).get()!;
-    notifySubmissionMerged(sub, updatedEvent.title);
-    return { event: updatedEvent, submission: updatedSub };
+      const existing = db.select().from(events).where(eq(events.id, eventId)).get();
+      if (!existing) return { error: "Event not found" };
+      if (existing.status !== "LIVE") return { error: "Only live events can receive a merge" };
+
+      const patch = buildSubmissionMergePatch(existing, sub);
+      const directoryRows = db.select().from(businesses).all().filter(b => b.active);
+      const coords = mergeMapCoordinates({
+        venueName: (patch.venueName as string | undefined) ?? existing.venueName,
+        address: (patch.address as string | undefined) ?? existing.address,
+        lat: existing.lat,
+        lng: existing.lng,
+      }, directoryRows);
+
+      db.update(events).set({
+        ...patch,
+        lat: coords.lat,
+        lng: coords.lng,
+        updatedAt: new Date().toISOString(),
+      } as any).where(eq(events.id, eventId)).run();
+      recordEventMutation({
+        eventId,
+        before: existing as Record<string, unknown>,
+        after: db.select().from(events).where(eq(events.id, eventId)).get() as Record<string, unknown> | undefined,
+        actor: `admin:${adminName}`,
+        reason: "Submission merged into existing event",
+      });
+
+      db.update(submissions).set({
+        status: "APPROVED",
+        approvals: JSON.stringify([adminName]),
+        adminNotes: `Merged into event #${eventId} (${existing.title}) by ${adminName}.`,
+        eventId,
+      }).where(eq(submissions.id, id)).run();
+
+      const updatedEvent = db.select().from(events).where(eq(events.id, eventId)).get()!;
+      const updatedSub = db.select().from(submissions).where(eq(submissions.id, id)).get()!;
+      notifySubmissionMerged(sub, updatedEvent.title, eventId);
+      return { event: updatedEvent, submission: updatedSub };
+    }).immediate();
   },
   rejectSubmission(id, reason) {
-    const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
-    db.update(submissions).set({ status: "REJECTED", adminNotes: reason }).where(eq(submissions.id, id)).run();
-    if (sub?.type === "PROMOTER_APPLICATION") {
-      const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
-      if (submitter?.promoterStatus === "pending") {
-        db.update(users).set({ promoterStatus: "rejected" }).where(eq(users.id, submitter.id)).run();
+    return sqlite.transaction(() => {
+      const sub = db.select().from(submissions).where(eq(submissions.id, id)).get();
+      if (!sub || sub.status === "REJECTED") return;
+      if (sub.status !== "PENDING") throw new Error("Submission already resolved. Refresh the queue.");
+      db.update(submissions).set({ status: "REJECTED", adminNotes: reason }).where(eq(submissions.id, id)).run();
+      if (sub?.type === "PROMOTER_APPLICATION") {
+        const submitter = db.select().from(users).where(eq(users.email, sub.submitterEmail)).get();
+        if (submitter?.promoterStatus === "approved") throw new Error("This applicant already has promoter access.");
+        if (submitter) {
+          db.update(users).set({ promoterStatus: "rejected" }).where(eq(users.id, submitter.id)).run();
+          storage.resolvePromoterApplicationSubmissions(submitter.id, "rejected", undefined, reason);
+        }
       }
-    }
-    if (sub) notifySubmissionOutcome(sub, false, reason);
+      if (sub) notifySubmissionOutcome(sub, false, reason);
+    }).immediate();
   },
   getGigPosts(status) {
     ensureGigPostsSchema();
@@ -12805,7 +12751,7 @@ export const storage: IStorage = {
     }
     return db.insert(attendances).values(values as any).returning().get();
   },
-  getEventChatMessages(eventId, viewerUserId) {
+  getEventChatMessages(eventId, viewerUserId, beforeId) {
     const evt = storage.getEvent(eventId);
     const win = evt ? getEventChatWindow(evt.dateStart, evt.dateEnd) : null;
     const isHost = storage.isUserEventHost(eventId, viewerUserId);
@@ -12836,11 +12782,13 @@ export const storage: IStorage = {
              u.photo_url AS photoUrl, u.avatar_choice AS avatarChoice, u.avatar_ring AS avatarRing
       FROM event_chat_messages m
       LEFT JOIN users u ON u.id = m.user_id
-      WHERE m.event_id = ?
-      ORDER BY m.created_at ASC
-      LIMIT 200
-    `).all(eventId) as any[];
-    const messages = rows.map(row => {
+      WHERE m.event_id = ? AND m.id < ?
+      ORDER BY m.id DESC
+      LIMIT 201
+    `).all(eventId, beforeId ?? Number.MAX_SAFE_INTEGER) as any[];
+    const page = rows.slice(0, 200).reverse();
+    const nextBeforeId = rows.length > 200 ? page[0].id : null;
+    const messages = page.map(row => {
       const isSelf = row.userId === viewerUserId;
       const anonymous = Boolean(row.isAnonymous);
       if (anonymous && !isSelf) {
@@ -12876,6 +12824,7 @@ export const storage: IStorage = {
     });
     return {
       messages,
+      nextBeforeId,
       expiresAt: closesAt,
       chatOpen: true,
       opensAt,
@@ -13182,6 +13131,7 @@ export const storage: IStorage = {
     }
   },
   setPromoterStatus(userId, status) {
+    if (storage.getUserById(userId)?.promoterStatus === status) return;
     db.update(users).set({ promoterStatus: status }).where(eq(users.id, userId)).run();
     if (status === "approved") {
       notifyGuideInbox(
@@ -13303,7 +13253,7 @@ export const storage: IStorage = {
             LOWER(TRIM(e.claimed_by)) = LOWER(?)
             OR LOWER(TRIM(e.claimed_by)) = LOWER(?)
           ))
-          OR (e.submitted_by IS NOT NULL AND (
+          OR (${legacyOrganizerWhere} AND (
             LOWER(TRIM(e.submitted_by)) = LOWER(?)
             OR LOWER(TRIM(e.submitted_by)) = LOWER(?)
           ))
@@ -13408,7 +13358,7 @@ export const storage: IStorage = {
     }
     const evt = storage.getEvent(eventId);
     if (!evt) return undefined;
-    for (const key of [evt.claimedBy, evt.submittedBy]) {
+    for (const key of [evt.claimedBy, legacyOrganizer(evt, hosts.length > 0)]) {
       if (!key) continue;
       const user = storage.resolveUserByIdentifier(String(key));
       if (!user) continue;
@@ -13484,8 +13434,9 @@ export const storage: IStorage = {
       const claimedHost = storage.resolveUserByIdentifier(evt.claimedBy);
       if (claimedHost?.id === userId) return true;
     }
-    if (evt.submittedBy) {
-      const submittedHost = storage.resolveUserByIdentifier(evt.submittedBy);
+    const legacyHost = legacyOrganizer(evt, Boolean(sqlite.prepare("SELECT 1 FROM event_hosts WHERE event_id=? LIMIT 1").get(eventId)));
+    if (legacyHost) {
+      const submittedHost = storage.resolveUserByIdentifier(legacyHost);
       if (submittedHost?.id === userId) return true;
     }
     return false;
@@ -13652,8 +13603,9 @@ export const storage: IStorage = {
       const owner = storage.getUserByUsername(evt.claimedBy) || storage.getUserByEmail(evt.claimedBy);
       addUserId(owner?.id);
     }
-    if (evt.submittedBy) {
-      const submitter = storage.getUserByEmail(evt.submittedBy) || storage.getUserByUsername(evt.submittedBy);
+    const legacyHost = legacyOrganizer(evt, false);
+    if (legacyHost) {
+      const submitter = storage.resolveUserByIdentifier(legacyHost);
       addUserId(submitter?.id);
     }
     return ids;
@@ -13803,7 +13755,8 @@ export const storage: IStorage = {
     ensureEventTalentSchema();
     const row = storage.getEventTalentById(talentId);
     if (!row) return { error: "Not found" };
-    const canManage = opts?.isAdmin || storage.isUserEventHost(row.eventId, userId);
+    const selfCredit = row.userId === userId && row.addedByUserId === userId;
+    const canManage = selfCredit || opts?.isAdmin || storage.isUserEventHost(row.eventId, userId);
     if (!canManage) return { error: "Not authorized" };
     sqlite.prepare(`DELETE FROM event_talent WHERE id = ?`).run(talentId);
     return { ok: true };
@@ -14409,13 +14362,14 @@ export const storage: IStorage = {
     }
     const row = sqlite
       .prepare(
-        `SELECT id, from_user_id AS fromUserId, to_user_id AS toUserId,
+        `SELECT id, thread_id AS threadId, from_user_id AS fromUserId, to_user_id AS toUserId,
                 deleted_by_from AS deletedByFrom, deleted_by_to AS deletedByTo
          FROM messages WHERE id = ?`,
       )
       .get(id) as
       | {
           id: number;
+          threadId: string;
           fromUserId: number;
           toUserId: number;
           deletedByFrom: number;
@@ -14432,6 +14386,8 @@ export const storage: IStorage = {
     if (row.toUserId === userId && row.deletedByTo) {
       return { reactions: [], error: "Not found" };
     }
+
+    if (housingConversationLocked(sqlite, row.threadId)) return {reactions:[], error:HOUSING_CONVERSATION_LOCKED};
 
     const existing = sqlite
       .prepare(
@@ -14598,30 +14554,38 @@ export const storage: IStorage = {
     db.update(giftingPosts).set({ status } as any).where(eq(giftingPosts.id, postId)).run();
   },
   reopenGiftingPost(postId, userId) {
-    const post = this.getGiftingPost(postId);
-    if (!post || Number(post.user_id) !== userId) throw new Error("Not your post");
-    const selected = sqlite.prepare(`SELECT id FROM gifting_interests WHERE post_id = ? AND status = 'SELECTED' LIMIT 1`).get(postId) as { id: number } | undefined;
-    if (selected) {
-      sqlite.prepare(`UPDATE gifting_interests SET status = 'DECLINED' WHERE id = ?`).run(selected.id);
-    } else if (Number(post.interestCount || 0) >= 3 && (post.post_type || post.postType) === "GIFT") {
-      // A full gift must release an existing hand before another person can respond.
-      const lastInterest = sqlite.prepare(`SELECT id FROM gifting_interests WHERE post_id = ? AND status = 'INTERESTED' ORDER BY created_at DESC, id DESC LIMIT 1`).get(postId) as { id: number } | undefined;
-      if (lastInterest) sqlite.prepare(`UPDATE gifting_interests SET status = 'DECLINED' WHERE id = ?`).run(lastInterest.id);
-    }
-    db.update(giftingPosts).set({
-      status: post.post_type === "ISO" ? "LOOKING" : "REOPENED",
-      selectedInterestId: null,
-    } as any).where(eq(giftingPosts.id, postId)).run();
+    return sqlite.transaction(() => {
+      const post = this.getGiftingPost(postId);
+      if (!post || Number(post.user_id) !== userId) throw new Error("Not your post");
+      const selected = sqlite.prepare(`SELECT id FROM gifting_interests WHERE post_id = ? AND status = 'SELECTED' LIMIT 1`).get(postId) as { id: number } | undefined;
+      if (selected) {
+        sqlite.prepare(`UPDATE gifting_interests SET status = 'DECLINED' WHERE id = ?`).run(selected.id);
+      } else if (Number(post.interestCount || 0) >= 3 && (post.post_type || post.postType) === "GIFT") {
+        // A full gift must release an existing hand before another person can respond.
+        const lastInterest = sqlite.prepare(`SELECT id FROM gifting_interests WHERE post_id = ? AND status = 'INTERESTED' ORDER BY created_at DESC, id DESC LIMIT 1`).get(postId) as { id: number } | undefined;
+        if (lastInterest) sqlite.prepare(`UPDATE gifting_interests SET status = 'DECLINED' WHERE id = ?`).run(lastInterest.id);
+      }
+      db.update(giftingPosts).set({
+        status: post.post_type === "ISO" ? "LOOKING" : "REOPENED",
+        selectedInterestId: null,
+      } as any).where(eq(giftingPosts.id, postId)).run();
+    }).immediate();
   },
   renewGiftingPost(postId, userId) {
-    const post = this.getGiftingPost(postId);
-    if (!post || Number(post.user_id) !== userId) throw new Error("Not your post");
-    if (Number(post.renew_count || 0) >= 1) throw new Error("Posts can only be renewed once.");
-    db.update(giftingPosts).set({
-      status: post.post_type === "ISO" ? "LOOKING" : "OPEN",
-      renewCount: Number(post.renew_count || 0) + 1,
-      expiresAt: giftingExpiry(post.post_type),
-    } as any).where(eq(giftingPosts.id, postId)).run();
+    return sqlite.transaction(() => {
+      const post = this.getGiftingPost(postId);
+      if (!post || Number(post.user_id) !== userId) throw new Error("Not your post");
+      if (Number(post.renew_count || 0) >= 1) throw new Error("Posts can only be renewed once.");
+      if (post.selected_interest_id) {
+        sqlite.prepare("UPDATE gifting_interests SET status='DECLINED' WHERE id=? AND status='SELECTED'").run(post.selected_interest_id);
+      }
+      db.update(giftingPosts).set({
+        status: post.post_type === "ISO" ? "LOOKING" : "OPEN",
+        selectedInterestId: null,
+        renewCount: Number(post.renew_count || 0) + 1,
+        expiresAt: giftingExpiry(post.post_type),
+      } as any).where(eq(giftingPosts.id, postId)).run();
+    }).immediate();
   },
   reportGiftingPost(data) {
     db.insert(giftingReports).values({ ...data, status: "PENDING", createdAt: new Date().toISOString() } as any).run();
@@ -14732,18 +14696,28 @@ export const storage: IStorage = {
     sqlite.prepare(`UPDATE sellz_interests SET status='DECLINED' WHERE post_id=? AND id!=?`).run(postId, interestId);
     sqlite.prepare(`UPDATE sellz_interests SET status='SELECTED' WHERE id=?`).run(interestId);
     sqlite.prepare(`UPDATE sellz_posts SET status='RESERVED', selected_interest_id=? WHERE id=?`).run(interestId, postId);
-    return interest;
+    return {...interest,status:"SELECTED"};
   },
   setSellzStatus(postId, userId, status) {
-    const post = this.getSellzPost(postId);
-    if (!post || Number(post.user_id) !== userId) throw new Error("Not your listing");
-    sqlite.prepare(`UPDATE sellz_posts SET status=?, selected_interest_id=CASE WHEN ?='ACTIVE' THEN NULL ELSE selected_interest_id END WHERE id=?`).run(status, status, postId);
+    return sqlite.transaction(() => {
+      const post = this.getSellzPost(postId);
+      if (!post || Number(post.user_id) !== userId) throw new Error("Not your listing");
+      if (status === "ACTIVE" && post.selected_interest_id) {
+        sqlite.prepare("UPDATE sellz_interests SET status='DECLINED' WHERE id=? AND status='SELECTED'").run(post.selected_interest_id);
+      }
+      sqlite.prepare(`UPDATE sellz_posts SET status=?, selected_interest_id=CASE WHEN ?='ACTIVE' THEN NULL ELSE selected_interest_id END WHERE id=?`).run(status, status, postId);
+    }).immediate();
   },
   renewSellzPost(postId, userId) {
-    const post = this.getSellzPost(postId);
-    if (!post || Number(post.user_id) !== userId) throw new Error("Not your listing");
-    const expiresAt = new Date(Date.now() + 30 * 86400000).toISOString();
-    sqlite.prepare(`UPDATE sellz_posts SET status='ACTIVE', expires_at=?, selected_interest_id=NULL WHERE id=?`).run(expiresAt, postId);
+    return sqlite.transaction(() => {
+      const post = this.getSellzPost(postId);
+      if (!post || Number(post.user_id) !== userId) throw new Error("Not your listing");
+      if (post.selected_interest_id) {
+        sqlite.prepare("UPDATE sellz_interests SET status='DECLINED' WHERE id=? AND status='SELECTED'").run(post.selected_interest_id);
+      }
+      const expiresAt = new Date(Date.now() + 30 * 86400000).toISOString();
+      sqlite.prepare(`UPDATE sellz_posts SET status='ACTIVE', expires_at=?, selected_interest_id=NULL WHERE id=?`).run(expiresAt, postId);
+    }).immediate();
   },
   deleteSellzPost(postId, userId) {
     const post = this.getSellzPost(postId);
@@ -15174,7 +15148,7 @@ export const storage: IStorage = {
       FROM events e
       WHERE e.id IN (SELECT event_id FROM event_hosts WHERE user_id = ?)
          OR (e.claimed_by IS NOT NULL AND e.claimed_by = ?)
-         OR (e.submitted_by IS NOT NULL AND (e.submitted_by = ? OR e.submitted_by = ?))
+         OR (${legacyOrganizerWhere} AND (e.submitted_by = ? OR e.submitted_by = ?))
     `).all(userId, user.username, user.email, user.username) as Array<{
       id: number; venueName: string; address: string | null; lat: number | null; lng: number | null;
     }>;
@@ -15284,58 +15258,85 @@ export const storage: IStorage = {
     });
   },
   approveBusinessClaim(id, adminName) {
-    const claim = db.select().from(businessClaims).where(eq(businessClaims.id, id)).get();
-    if (!claim) return { error: "Claim not found" };
-    if (claim.status !== "PENDING") return { error: "Claim already resolved" };
-    let mergePatch: Record<string, unknown> = {};
-    if (claim.adminNotes) {
-      try {
-        const parsed = JSON.parse(claim.adminNotes);
-        if (parsed?.mergePayload && typeof parsed.mergePayload === "object") {
-          mergePatch = parsed.mergePayload;
+    return sqlite.transaction(() => {
+      const claim = db.select().from(businessClaims).where(eq(businessClaims.id, id)).get();
+      if (!claim) return { error: "Claim not found" };
+      const venue = storage.getBusiness(claim.businessId);
+      if (!venue) return { error: "Venue not found" };
+      if (claim.status === "APPROVED" && venue.ownerId === claim.userId) return { ok: true };
+      if (claim.status !== "PENDING") return { error: "Claim already resolved" };
+      if (venue.ownerId && venue.ownerId !== claim.userId) return { error: "This venue already has an owner. Use the ownership transfer action." };
+      const community = sqlite.prepare("SELECT id FROM communities WHERE source_business_id=?").get(claim.businessId) as {id:string}|undefined;
+      const conflictingOwner = community && sqlite.prepare("SELECT 1 FROM community_memberships WHERE community_id=? AND role='owner' AND status='active' AND user_id!=? LIMIT 1").get(community.id,claim.userId);
+      if (conflictingOwner) return {error: "The linked community has a different owner. Resolve ownership before approving this claim."};
+
+      let mergePatch: Record<string, unknown> = {};
+      if (claim.adminNotes) {
+        try {
+          const parsed = JSON.parse(claim.adminNotes);
+          if (parsed?.mergePayload && typeof parsed.mergePayload === "object") {
+            mergePatch = parsed.mergePayload;
+          }
+        } catch {
+          // claimReason-only claims have no merge payload
         }
-      } catch {
-        // claimReason-only claims have no merge payload
       }
-    }
-    const ownerPatch: Record<string, unknown> = { ownerId: claim.userId, ...mergePatch };
-    db.update(businesses).set(ownerPatch as any).where(eq(businesses.id, claim.businessId)).run();
-    db.update(businessClaims).set({
-      status: "APPROVED",
-      adminNotes: `Approved by ${adminName}`,
-    }).where(eq(businessClaims.id, id)).run();
-    // Group listings back Z/List communities. An approved claim should give
-    // the representative the community owner role as well as Placez ownership.
-    const community = sqlite.prepare("SELECT id FROM communities WHERE source_business_id=?").get(claim.businessId) as {id:string}|undefined;
-    const communityHasOwner = community && sqlite.prepare("SELECT 1 FROM community_memberships WHERE community_id=? AND role='owner' AND status='active'").get(community.id);
-    if (community && !communityHasOwner) {
-      sqlite.prepare(`INSERT INTO community_memberships (community_id,user_id,role,status,rules_version,joined_at)
-        VALUES (?,?,'owner','active','1',?)
-        ON CONFLICT(community_id,user_id) DO UPDATE SET role='owner',status='active'`)
-        .run(community.id,claim.userId,new Date().toISOString());
-    }
-    notifyGuideInbox(
-      claim.userId,
-      community && !communityHasOwner ? "Community claim approved" : "Venue claim approved",
-      community && !communityHasOwner ? "You're now the owner of this Z/List community. Open it to manage members and posts." : "You're now the owner of your venue. Manage it from your Hub.",
-      { contextType: "GUIDE_UPDATE" },
-    );
-    return { ok: true };
-  },
-  rejectBusinessClaim(id, reason) {
-    db.update(businessClaims).set({
-      status: "REJECTED",
-      adminNotes: reason ?? null,
-    }).where(eq(businessClaims.id, id)).run();
-    const claim = db.select().from(businessClaims).where(eq(businessClaims.id, id)).get();
-    if (claim) {
+      const ownerPatch: Record<string, unknown> = { ...mergePatch, ownerId: claim.userId };
+      const approvedVenue = { ...venue, ...mergePatch };
+      const locations = resolveBusinessLocations(approvedVenue).map(location => [location.label,location.address].filter(Boolean).join(" · "));
+      const scope = approvedVenue.name + (locations.length > 1 ? " (" + locations.join(", ") + ")" : "");
+      db.update(businesses).set(ownerPatch as any).where(eq(businesses.id, claim.businessId)).run();
+      db.update(businessClaims).set({
+        status: "APPROVED",
+        adminNotes: `Approved by ${adminName}`,
+      }).where(eq(businessClaims.id, id)).run();
+      // Group listings back Z/List communities. An approved claim should give
+      // the representative the community owner role as well as Placez ownership.
+      if (community) {
+        sqlite.prepare(`INSERT INTO community_memberships (community_id,user_id,role,status,rules_version,joined_at)
+          VALUES (?,?,'owner','active','1',?)
+          ON CONFLICT(community_id,user_id) DO UPDATE SET role='owner',status='active'`)
+          .run(community.id,claim.userId,new Date().toISOString());
+      }
       notifyGuideInbox(
         claim.userId,
-        "Venue claim update",
-        "Your venue claim wasn't approved. Reach out via Contact if you think this was a mistake.",
-        { contextType: "GUIDE_UPDATE" },
+        community ? "Community and venue claim approved" : "Venue claim approved",
+        "You now manage " + scope + (community ? " and its linked community." : "."),
+        { contextType: "GUIDE_UPDATE", contextId: id },
       );
-    }
+      const competitors = sqlite.prepare("SELECT id,user_id FROM business_claims WHERE business_id=? AND status='PENDING'").all(claim.businessId) as Array<{id:number; user_id:number}>;
+      const notified = new Set<number>();
+      for (const other of competitors) {
+        if (other.user_id === claim.userId) {
+          sqlite.prepare("UPDATE business_claims SET status='APPROVED',admin_notes=? WHERE id=?").run("Same representative approved on claim #" + id,other.id);
+          continue;
+        }
+        sqlite.prepare("UPDATE business_claims SET status='REJECTED',admin_notes=? WHERE id=?").run("Another representative was approved.", other.id);
+        if (notified.has(other.user_id)) continue;
+        notified.add(other.user_id);
+        notifyGuideInbox(other.user_id, "Venue claim closed", "Your claim for " + scope + " closed because another representative was approved.", {contextType:"GUIDE_UPDATE",contextId:other.id});
+      }
+      return { ok: true };
+    }).immediate();
+  },
+  rejectBusinessClaim(id, reason) {
+    return sqlite.transaction(() => {
+      const previous = db.select().from(businessClaims).where(eq(businessClaims.id, id)).get();
+      if (!previous || previous.status !== "PENDING") return;
+      db.update(businessClaims).set({
+        status: "REJECTED",
+        adminNotes: reason ?? null,
+      }).where(eq(businessClaims.id, id)).run();
+      const claim = db.select().from(businessClaims).where(eq(businessClaims.id, id)).get();
+      if (claim) {
+        notifyGuideInbox(
+          claim.userId,
+          "Venue claim update",
+          "Your venue claim wasn't approved. Reach out via Contact if you think this was a mistake.",
+          { contextType: "GUIDE_UPDATE" },
+        );
+      }
+    }).immediate();
   },
   createBusinessSubmission(userId, data) {
     ensureBusinessSubmissionsSchema();
@@ -15490,10 +15491,7 @@ export const storage: IStorage = {
       const liveEvents = storage.getEvents({ status: "LIVE" });
       for (const evt of liveEvents) {
         if (!eventMatchesBusiness(evt, business)) continue;
-        const isHost = storage.isUserEventHost(evt.id, blockedUserId)
-          || evt.claimedBy === blockedUser.username
-          || evt.submittedBy === blockedUser.email
-          || evt.submittedBy === blockedUser.username;
+        const isHost = storage.isUserEventHost(evt.id, blockedUserId);
         if (!isHost) continue;
         storage.createModerationRequest({
           type: "FLAGGED_BY_OWNER",
@@ -16698,15 +16696,15 @@ export const storage: IStorage = {
 
 try {
   const ownerRows = sqlite.prepare(`
-    SELECT id, claimed_by AS claimedBy, submitted_by AS submittedBy
+    SELECT id, claimed_by AS claimedBy, submitted_by AS submittedBy, source, is_claimable AS isClaimable
     FROM events
     WHERE (claimed_by IS NOT NULL AND TRIM(claimed_by) != '')
        OR (submitted_by IS NOT NULL AND TRIM(submitted_by) != '')
-  `).all() as { id: number; claimedBy: string | null; submittedBy: string | null }[];
+  `).all() as { id: number; claimedBy: string | null; submittedBy: string | null; source: string; isClaimable:boolean }[];
   for (const row of ownerRows) {
     const countRow = sqlite.prepare(`SELECT COUNT(*) AS count FROM event_hosts WHERE event_id = ?`).get(row.id) as { count: number };
     if (countRow.count > 0) continue;
-    const ownerKey = row.claimedBy || row.submittedBy;
+    const ownerKey = row.claimedBy || legacyOrganizer(row, false);
     if (!ownerKey) continue;
     const user = storage.resolveUserByIdentifier(ownerKey);
     if (user) storage.setPrimaryEventHost(row.id, user.id, null);

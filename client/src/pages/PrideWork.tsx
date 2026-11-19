@@ -483,14 +483,11 @@ export function GigListingCard({
 /** Shared by the map and the fallback posting surface. */
 export type GigComposerPrefill = Partial<Pick<GigFormData, "title" | "description" | "location" | "gigDate" | "gigTime">>;
 
-export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted, prefill, venueName}: {
+export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted, prefill, venueName, eventLink}: {
   initialType?: GigFormData["postType"];
   onClose: () => void;
   onPosted: (id: number) => void;
-  /** Opened from an event card (owner posting a gig for their event): seeds
-   * the form so the gig lands on the event's date, at its venue, naming the
-   * event. The event-linked back end is coming soon; until then the gig posts
-   * through the same venue-linked fields as every other gig. */
+  eventLink?: { eventId: number; occurrenceDate: string };
   prefill?: GigComposerPrefill;
   venueName?: string;
 }) {
@@ -575,7 +572,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted, pre
   const mutation = useMutation({
     mutationFn: (data: GigFormData) => {
       trackProductEvent("post_attempt", "gigz");
-      return apiRequest("POST", "/api/gigs", { ...data, mapLocation, motifChoice, acceptRules: true }).then(r => r.json());
+      return apiRequest("POST", "/api/gigs", { ...data, ...eventLink, mapLocation, motifChoice, acceptRules: true }).then(r => r.json());
     },
     onSuccess: (_data, variables) => {
       trackProductEvent("post_completed", "gigz");
@@ -630,6 +627,7 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted, pre
                 <select
                   className="board-text-field"
                   value={postType}
+                  disabled={!!eventLink}
                   onChange={e => form.setValue("postType", e.target.value as GigFormData["postType"])}
                 >
                   <option value="LOOKING_FOR_WORK">I&apos;m looking for work</option>

@@ -1,3 +1,8 @@
+import { housingConversationLocked, HOUSING_CONVERSATION_LOCKED } from "./housing/store";
+import {registerDevicePushCheck} from "./devicePushCheck";
+import {registerAfterzInvites} from "./afterzInvites";
+import { pickupPending, reservePickup } from "./pickupReservation";
+import {registerMemberInbox} from "./memberInbox";
 import {registerCardNotificationRoutes} from './cardNotifications';
 import mapRelease from "../shared/mapReleaseLock.json";
 import {registerMapSocialRoutes} from "./mapSocialRoutes";
@@ -15,6 +20,7 @@ import { registerBoardArchiveRoutes } from "./boardArchiveRoutes";
 import { readBoardMotif, saveBoardMotif, validateBoardMotif } from "./boardMotifs";
 import { registerBoardPlacement } from "./boardMapPlacement";
 import { homeCatalogCounts } from "./homeStats";
+import { registerEventPlanning } from "./eventPlanning";
 import { createEventSaves } from "./eventSaves";
 import { createBoardSaves, isSavedBoard } from "./boardSaves";
 import { publicBoardMapLocations } from './boardMapLocations';
@@ -139,6 +145,7 @@ import { igFromUrl, igGraphPull, igPasteAssist, parseInstagramHandle } from "./q
 import { buildScanCandidates } from "./qsearch/analyze";
 import { saveCandidates } from "./qsearch/store";
 import { createHash, randomUUID } from "node:crypto";
+import { runSubmissionIntent } from "./submissionIntent";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import {
@@ -834,6 +841,7 @@ function publicGiftingPost(post: any, viewerUserId?: number) {
     photoUrls: post.photoUrls || [],
     status: post.status,
     selectedInterestId: isPoster ? selectedInterestId : null,
+    pickupNoticePending: !!selectedInterestId && (isPoster || viewerInterest?.id === selectedInterestId) && pickupPending(sqlite, "GIFTING", selectedInterestId),
     renewCount: post.renewCount ?? post.renew_count ?? 0,
     expiresAt: post.expiresAt ?? post.expires_at,
     reportCount: post.reportCount ?? post.report_count ?? 0,
@@ -881,6 +889,7 @@ function publicSellzPost(post: any, viewerUserId?: number) {
     pickupPreference: post.pickupPreference ?? post.pickup_preference,
     photoUrls: post.photoUrls || [], status: post.status,
     selectedInterestId: isMine ? selectedInterestId : null,
+    pickupNoticePending: !!selectedInterestId && (isMine || safeInterests.some((i:any) => i.id === selectedInterestId)) && pickupPending(sqlite, "SELLZ", selectedInterestId),
     expiresAt: post.expiresAt ?? post.expires_at,
     createdAt: post.createdAt ?? post.created_at,
     interestCount: Number(post.interestCount || 0), interests: safeInterests,
@@ -1282,6 +1291,15 @@ export function registerRoutes(httpServer: Server, app: Express) {
   const sessionMiddleware = createSessionMiddleware(sqlite);
   app.use("/api", sessionMiddleware);
   registerMapSocialRoutes(app,{db:sqlite,getUserById:id=>storage.getUserById(id)});
+  registerDevicePushCheck(app,sqlite,requireAuth,storage);
+  const afterzInvites=registerAfterzInvites(app,sqlite,requireAuth);
+  httpServer.once("close",afterzInvites.dispose);
+  const memberInbox=registerMemberInbox(app,sqlite,requireAuth,requireAdmin,requirePrimaryInboxOwner,()=>storage.resolveGuideAdminUser()?.id);
+  function guideInboxUnread(reviewerId: number) {
+    const guide = storage.resolveGuideAdminUser();
+    return guide ? memberInbox.unreadThreads(guide.id, reviewerId, "guide") : 0;
+  }
+
   registerFoodResources(app);
   registerBoardArchiveRoutes(app, sqlite, requireAuth, httpServer);
   const profileLayouts=createProfileLayoutStore(sqlite);
@@ -1294,6 +1312,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   };
   registerProfileLayoutRoutes(app,requireAuth,profileLayouts,eligibleProfileSource);
   const eventSaves = createEventSaves(sqlite);
+  const eventPlanning = registerEventPlanning(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate);
   const boardSaves = createBoardSaves(sqlite);
   assertProductionPersistence();
   assertProductionSecrets();
@@ -2441,12 +2460,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.get("/api/events/:id", (req, res) => {
+    const date = req.query.date;
+    if (date !== undefined && (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date))) return res.status(400).json({error:"Invalid occurrence date"});
     const eventId = Number(req.params.id);
     if (isTuckerHostedArchiveId(eventId)) {
       const row = getTuckerHostedArchiveRow(eventId);
       if (!row) return res.status(404).json({ error: "Not found" });
       const archiveEvt = tuckerHostedArchiveAsEvent(row);
-      const listing = expandMultiDayEvents([archiveEvt])[0] || archiveEvt;
+      const occurrences = expandMultiDayEvents([archiveEvt]);
+      const listing = date ? occurrences.find(row => pacificCalendarDate(row.dateStart) === date) : occurrences[0] || archiveEvt;
+      if (!listing) return res.status(404).json({error:"Occurrence not found"});
       return res.json(publicEvent(listing, new Set(), venueWebsiteIndex()));
     }
     const evt = storage.getEvent(eventId);
@@ -2463,7 +2486,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const expanded = expandMultiDayEvents([evt]);
     const day = typeof req.query.day === "string" ? req.query.day.toUpperCase() : "";
     // Prefer expanded listing; do not fall back to raw post-Pride rows for public.
-    const listing =
+    const listing = date ? expanded.find(row => pacificCalendarDate(row.dateStart) === date) :
       (day ? expanded.find(e => e.dayOfWeek === day) : undefined)
       || expanded[0]
       || (sessionIsAdmin(req) ? evt : null);
@@ -2513,12 +2536,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
       return 2 * R * Math.asin(Math.sqrt(s));
     };
 
-    const gigs = venue
-      ? (storage.getGigPosts("LIVE") as any[])
-          .filter(g => g.businessId === venue.id)
-          .slice(0, 20)
-          .map(g => ({ id: g.id, title: g.title, postType: g.postType, createdAt: g.createdAt, location: g.location ?? null, description: g.description ?? null, compensation: g.compensation ?? null, gigDate: g.gigDate ?? null, gigTime: g.gigTime ?? null }))
-      : [];
+    const occurrenceDate = typeof req.query.date === "string" ? req.query.date : pacificCalendarDate(listing.dateStart);
+    const gigs = occurrenceDate && eventPlanning.occurrence(evt.id, occurrenceDate)
+      ? eventPlanning.store.gigs(evt.id, occurrenceDate) : [];
 
     let nearbyRestaurants: any[] = [];
     let nearbyEvents: any[] = [];
@@ -2572,127 +2592,131 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const promoterStatus = user.promoterStatus || "none";
       const isAdminUser = userIsAdminNow(user);
 
-      // Standalone promoter application - no event fields needed
-      if (type === "PROMOTER_APPLICATION") {
-        const rawProofUrl = String(req.body.ticketUrl || "").trim();
-        const proofUrl = publicHttpUrl(rawProofUrl);
-        if (rawProofUrl && (!proofUrl || !/^https?:\/\//i.test(proofUrl))) {
-          return res.status(400).json({ error: "Enter a valid https:// or http:// proof link." });
+      const result = runSubmissionIntent(sqlite, user.id, req.header("Idempotency-Key"), req.body, () => {
+        // Standalone promoter application - no event fields needed
+        if (type === "PROMOTER_APPLICATION") {
+          if (promoterStatus === "approved") throw Object.assign(new Error("You already have promoter access."), {status:409});
+          const existing = sqlite.prepare("SELECT id FROM submissions WHERE type='PROMOTER_APPLICATION' AND submitter_email=? AND status='PENDING' ORDER BY id LIMIT 1").get(user.email) as {id:number}|undefined;
+          if (existing) return {...storage.getSubmission(existing.id), pendingPromoterReview:true};
+          const rawProofUrl = String(req.body.ticketUrl || "").trim();
+          const proofUrl = publicHttpUrl(rawProofUrl);
+          if (rawProofUrl && (!proofUrl || !/^https?:\/\//i.test(proofUrl))) {
+            throw Object.assign(new Error("Enter a valid https:// or http:// proof link."), { status: 400 });
+          }
+          const now = new Date().toISOString();
+          const data = insertSubmissionSchema.parse({
+            type: "PROMOTER_APPLICATION",
+            title: `Promoter Application: ${user.displayName || user.username}`,
+            description: String(req.body.claimReason || req.body.description || "").trim() || "No details provided",
+            venueName: "N/A",
+            dateStart: now,
+            dateEnd: now,
+            ageRequirement: "ALL_AGES",
+            eventTypes: "[]",
+            admission: "FREE",
+            isPublic: true,
+            submitterName: user.displayName || user.username,
+            submitterEmail: user.email,
+            submitterOrg: req.body.submitterOrg || null,
+            claimReason: String(req.body.claimReason || "").trim() || null,
+            ticketUrl: proofUrl,
+          });
+          const sub = storage.createSubmission(data);
+          storage.setPromoterStatus(user.id, "pending");
+          return { ...sub, pendingPromoterReview: true };
         }
-        const now = new Date().toISOString();
+
+        const eventId = type === "CLAIM" ? Number(req.body.eventId) : null;
+        const claimEventId = eventId ?? 0;
+        const claimEvent = type === "CLAIM" && Number.isFinite(claimEventId) ? storage.getEvent(claimEventId) : null;
+        if (type === "CLAIM") {
+          if (!claimEvent || claimEvent.status !== "LIVE" || !claimEvent.isClaimable || claimEvent.claimedBy) {
+            throw Object.assign(new Error("This event is not available to claim."), { status: 400 });
+          }
+          if (storage.getPendingClaimEventIds().includes(claimEventId)) {
+            throw Object.assign(new Error("This event already has a pending claim."), { status: 409 });
+          }
+        }
+        const source = type === "CLAIM" && claimEvent ? claimEvent : { ...req.body };
+        if (type === "NEW_EVENT" || type === "SUGGEST") {
+          const dateError = eventDatesError({ dateStart: source.dateStart || "", dateEnd: source.dateEnd || "" }) || validateEventDates(source.dateStart, source.dateEnd);
+          if (dateError) throw Object.assign(new Error(dateError), { status: 400 });
+          syncDayOfWeek(source);
+        }
+        if (type === "NEW_EVENT" || type === "CLAIM") {
+          const blockedBusiness = storage.getBlockedBusinessMatch(user.id, {
+            venueName: source.venueName || "",
+            address: source.address ?? null,
+            lat: source.lat ?? null,
+            lng: source.lng ?? null,
+          });
+          if (blockedBusiness) {
+            throw Object.assign(new Error(`${blockedBusiness.name} has blocked you from posting events at their venue.`), { status: 403 });
+          }
+        }
         const data = insertSubmissionSchema.parse({
-          type: "PROMOTER_APPLICATION",
-          title: `Promoter Application: ${user.displayName || user.username}`,
-          description: String(req.body.claimReason || req.body.description || "").trim() || "No details provided",
-          venueName: "N/A",
-          dateStart: now,
-          dateEnd: now,
-          ageRequirement: "ALL_AGES",
-          eventTypes: "[]",
-          admission: "FREE",
-          isPublic: true,
+          ...source,
+          type,
+          eventId: type === "CLAIM" ? claimEventId : null,
           submitterName: user.displayName || user.username,
           submitterEmail: user.email,
           submitterOrg: req.body.submitterOrg || null,
-          claimReason: String(req.body.claimReason || "").trim() || null,
-          ticketUrl: proofUrl,
+          claimReason: type === "CLAIM" ? req.body.claimReason : null,
+          eventTypes: type === "CLAIM"
+            ? source.eventTypes
+            : (typeof req.body.eventTypes === "string"
+                ? req.body.eventTypes
+                : JSON.stringify(req.body.eventTypes || [])),
         });
         const sub = storage.createSubmission(data);
-        if (promoterStatus === "none") storage.setPromoterStatus(user.id, "pending");
-        return res.json({ ...sub, pendingPromoterReview: true });
-      }
+        const potentialMatches = type === "NEW_EVENT" || type === "SUGGEST"
+          ? enrichSubmissionMatches(sub)
+          : [];
+        const strongDuplicate = type === "NEW_EVENT"
+          ? submissionHasStrongDuplicate(potentialMatches)
+          : undefined;
 
-      const eventId = type === "CLAIM" ? Number(req.body.eventId) : null;
-      const claimEventId = eventId ?? 0;
-      const claimEvent = type === "CLAIM" && Number.isFinite(claimEventId) ? storage.getEvent(claimEventId) : null;
-      if (type === "CLAIM") {
-        if (!claimEvent || claimEvent.status !== "LIVE" || !claimEvent.isClaimable || claimEvent.claimedBy) {
-          return res.status(400).json({ error: "This event is not available to claim." });
+        // Approved promoters / admins bypass the review queue unless a likely duplicate exists
+        if (type === "NEW_EVENT" && (promoterStatus === "approved" || isAdminUser) && !strongDuplicate) {
+          const approved = storage.approveSubmission(sub.id, user.username)!;
+          const created = approved.eventId && storage.getEvent(approved.eventId);
+          if (created) {
+            void fillEventMapCoordinates(created.id).catch(err =>
+              console.error("[fillEventMapCoordinates] submit auto-approve failed:", err),
+            );
+          }
+          return { ...approved, autoApproved: true, potentialMatches };
         }
-        if (storage.getPendingClaimEventIds().includes(claimEventId)) {
-          return res.status(409).json({ error: "This event already has a pending claim." });
+        if (type === "NEW_EVENT" && strongDuplicate) {
+          return {
+            ...sub,
+            potentialMatches,
+            heldForReview: true,
+            heldReason: `Possible duplicate of "${strongDuplicate.title}"`,
+          };
         }
-      }
-      const source = type === "CLAIM" && claimEvent ? claimEvent : { ...req.body };
-      if (type === "NEW_EVENT" || type === "SUGGEST") {
-        const dateError = eventDatesError({ dateStart: source.dateStart || "", dateEnd: source.dateEnd || "" }) || validateEventDates(source.dateStart, source.dateEnd);
-        if (dateError) return res.status(400).json({ error: dateError });
-        syncDayOfWeek(source);
-      }
-      if (type === "NEW_EVENT" || type === "CLAIM") {
-        const blockedBusiness = storage.getBlockedBusinessMatch(user.id, {
-          venueName: source.venueName || "",
-          address: source.address ?? null,
-          lat: source.lat ?? null,
-          lng: source.lng ?? null,
-        });
-        if (blockedBusiness) {
-          return res.status(403).json({ error: `${blockedBusiness.name} has blocked you from posting events at their venue.` });
+        if (type === "CLAIM" && (promoterStatus === "approved" || isAdminUser)) {
+          const approved = storage.approveSubmission(sub.id, user.username)!;
+          return { ...approved, autoApproved: true };
         }
-      }
-      const data = insertSubmissionSchema.parse({
-        ...source,
-        type,
-        eventId: type === "CLAIM" ? claimEventId : null,
-        submitterName: user.displayName || user.username,
-        submitterEmail: user.email,
-        submitterOrg: req.body.submitterOrg || null,
-        claimReason: type === "CLAIM" ? req.body.claimReason : null,
-        eventTypes: type === "CLAIM"
-          ? source.eventTypes
-          : (typeof req.body.eventTypes === "string"
-              ? req.body.eventTypes
-              : JSON.stringify(req.body.eventTypes || [])),
+
+        // NEW_EVENT from unapproved user → goes to queue + flags them for promoter review
+        if (type === "NEW_EVENT" && promoterStatus !== "approved" && !isAdminUser) {
+          if (promoterStatus === "none") storage.setPromoterStatus(user.id, "pending");
+          return { ...sub, pendingPromoterReview: true, potentialMatches };
+        }
+
+        // CLAIM from unapproved user → flag for promoter review
+        if (type === "CLAIM" && promoterStatus !== "approved" && !isAdminUser) {
+          if (promoterStatus === "none") storage.setPromoterStatus(user.id, "pending");
+        }
+
+        // SUGGEST goes straight to queue, no promoter status change
+        return { ...sub, potentialMatches };
       });
-      const sub = storage.createSubmission(data);
-      const potentialMatches = type === "NEW_EVENT" || type === "SUGGEST"
-        ? enrichSubmissionMatches(sub)
-        : [];
-      const strongDuplicate = type === "NEW_EVENT"
-        ? submissionHasStrongDuplicate(potentialMatches)
-        : undefined;
-
-      // Approved promoters / admins bypass the review queue unless a likely duplicate exists
-      if (type === "NEW_EVENT" && (promoterStatus === "approved" || isAdminUser) && !strongDuplicate) {
-        storage.autoApproveSubmission(sub.id, user.username);
-        const created = storage.getEvents({ status: "LIVE" })
-          .filter(evt => evt.submittedBy === user.email && evt.title === sub.title)
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
-        if (created) {
-          void fillEventMapCoordinates(created.id).catch(err =>
-            console.error("[fillEventMapCoordinates] submit auto-approve failed:", err),
-          );
-        }
-        return res.json({ ...sub, autoApproved: true, potentialMatches });
-      }
-      if (type === "NEW_EVENT" && strongDuplicate) {
-        return res.json({
-          ...sub,
-          potentialMatches,
-          heldForReview: true,
-          heldReason: `Possible duplicate of "${strongDuplicate.title}"`,
-        });
-      }
-      if (type === "CLAIM" && (promoterStatus === "approved" || isAdminUser)) {
-        storage.autoApproveClaim(sub.id, user.username);
-        return res.json({ ...sub, autoApproved: true });
-      }
-
-      // NEW_EVENT from unapproved user → goes to queue + flags them for promoter review
-      if (type === "NEW_EVENT" && promoterStatus !== "approved" && !isAdminUser) {
-        if (promoterStatus === "none") storage.setPromoterStatus(user.id, "pending");
-        return res.json({ ...sub, pendingPromoterReview: true, potentialMatches });
-      }
-
-      // CLAIM from unapproved user → flag for promoter review
-      if (type === "CLAIM" && promoterStatus !== "approved" && !isAdminUser) {
-        if (promoterStatus === "none") storage.setPromoterStatus(user.id, "pending");
-      }
-
-      // SUGGEST goes straight to queue, no promoter status change
-      res.json({ ...sub, potentialMatches });
+      res.json(result);
     } catch (e: any) {
-      res.status(400).json({ error: e.message });
+      res.status(e.status || 400).json({ error: e.message });
     }
   });
 
@@ -2836,8 +2860,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
         userAgent: String(req.body.userAgent || req.get("user-agent") || "").slice(0, 500),
       };
       if (!payload.message) return res.status(400).json({ error: "message required" });
-      const feedback = storage.createFeedbackReport(insertFeedbackReportSchema.parse(payload));
-      res.json({ ok: true, id: feedback.id });
+      const memberId = req.body?.inAppReplies === true ? req.session.userId : undefined;
+      if (req.body?.inAppReplies === true && (!memberId || storage.getUserById(memberId)?.status !== "active")) {
+        return res.status(401).json({error: "Sign in to receive replies in your inbox."});
+      }
+      const result = sqlite.transaction(() => {
+        const feedback = storage.createFeedbackReport(insertFeedbackReportSchema.parse(payload));
+        const receiptId = memberId ? memberInbox.addReceipt("desk", feedback.id, memberId, payload.message.slice(0,120)) : undefined;
+        return { ok:true, id:feedback.id, receiptId };
+      })();
+      res.json(result);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
@@ -2941,7 +2973,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/events/:id/chat", requireAuth, (req, res) => {
     const eventId = Number(req.params.id);
-    const payload = storage.getEventChatMessages(eventId, req.session.userId!);
+    const before = req.query.before === undefined ? undefined : Number(req.query.before);
+    if (before !== undefined && (!Number.isSafeInteger(before) || before <= 0)) return res.status(400).json({error:"Invalid message cursor"});
+    res.setHeader("Cache-Control","private, no-store");
+    const payload = storage.getEventChatMessages(eventId, req.session.userId!, before);
     res.json(payload);
   });
 
@@ -3260,7 +3295,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const eligible = user?.promoterStatus === "approved" || isMainAdminUser(user);
     if (eligible && result.claim && !pendingMerge) {
       const approval = storage.approveBusinessClaim(result.claim.id, user?.username || "system");
-      return res.json({ ok: true, autoApproved: true, ...approval });
+      if (!approval.error) return res.json({ ok: true, autoApproved: true, claimId: result.claim.id });
     }
     res.json({ ok: true, autoApproved: false, claim: result.claim });
     try {
@@ -3561,9 +3596,24 @@ export function registerRoutes(httpServer: Server, app: Express) {
         const business = storage.getBusiness(data.businessId);
         if (!business || !business.active) return res.status(400).json({ error: "That venue is not available to link." });
       }
-      const gig = storage.createGigPost({ ...data, userId } as any);
-      saveBoardMapLocation("gigz", gig.id, validatedMapPoint);
-      saveBoardMotif(sqlite,"gigz",gig.id,motifChoice);
+      const linked = req.body.eventId !== undefined || req.body.occurrenceDate !== undefined;
+      const eventId = req.body.eventId;
+      const occurrenceDate = req.body.occurrenceDate;
+      if (linked) {
+        const instance = eventPlanning.occurrence(eventId, occurrenceDate);
+        if (!instance || !eventPlanning.acceptsPlanning(instance)) {
+          return res.status(400).json({ error: "Choose an available event occurrence." });
+        }
+        if (!storage.isUserEventHost(eventId, userId)) return res.status(403).json({ error: "Only this event’s hosts can attach a gig." });
+        if (data.postType !== "POSTING_GIG") return res.status(400).json({ error: "Only an offered gig can be linked to an event." });
+      }
+      const gig = sqlite.transaction(() => {
+        const created = storage.createGigPost({ ...data, userId } as any);
+        saveBoardMapLocation("gigz", created.id, validatedMapPoint);
+        saveBoardMotif(sqlite, "gigz", created.id, motifChoice);
+        if (linked) eventPlanning.store.linkGig(created.id, eventId, occurrenceDate);
+        return created;
+      })();
       res.json(gig);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
@@ -3769,16 +3819,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/gifting/:id/interests/:interestId/choose", requireAuth, (req, res) => {
     try {
-      const selected = storage.chooseGiftingInterest(Number(req.params.id), Number(req.params.interestId), req.session.userId!);
-      if (!selected) return res.status(404).json({ error: "Interest not found" });
-      const post = storage.getGiftingPost(Number(req.params.id));
-      const body = String(req.body.body || `You were picked for "${post?.title}". Coordinate pickup here.`).trim();
-      storage.sendMessage(req.session.userId!, Number((selected as any).userId), `Gifting pickup: ${post?.title || "Gift"}`, body, {
-        contextType: "GIFTING",
-        contextId: Number(req.params.id),
-        contextLabel: post?.title || null,
-      });
-      res.json(selected);
+      const postId = Number(req.params.id), interestId = Number(req.params.interestId), actor = req.session.userId!;
+      const post = storage.getGiftingPost(postId);
+      if (!post) return res.status(404).json({error:"Listing not found"});
+      const body = String(req.body?.body || "You were picked for " + post.title + ". Coordinate pickup here.").trim().slice(0,2000);
+      const result = reservePickup(sqlite, "GIFTING", postId, interestId, actor, body,
+        () => storage.chooseGiftingInterest(postId, interestId, actor),
+        (to, subject, text) => storage.sendMessage(actor,to,subject,text,{contextType:"GIFTING",contextId:postId,contextLabel:post.title}));
+      res.json(result);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
@@ -3940,12 +3988,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/sellz/:id/interests/:interestId/choose", requireAuth, (req, res) => {
     try {
-      const selected = storage.chooseSellzInterest(Number(req.params.id), Number(req.params.interestId), req.session.userId!);
-      const post = storage.getSellzPost(Number(req.params.id));
-      storage.sendMessage(req.session.userId!, Number(selected.user_id), `Reserved for you: ${post?.title || "SELLZ listing"}`,
-        String(req.body.note || "You are first in line. Coordinate payment and pickup here."),
-        { contextType: "SELLZ", contextId: Number(req.params.id), contextLabel: post?.title || null });
-      res.json(selected);
+      const postId = Number(req.params.id), interestId = Number(req.params.interestId), actor = req.session.userId!;
+      const post = storage.getSellzPost(postId);
+      if (!post) return res.status(404).json({error:"Listing not found"});
+      const body = String(req.body?.note || "You are first in line. Coordinate payment and pickup here.").trim().slice(0,2000);
+      const result = reservePickup(sqlite, "SELLZ", postId, interestId, actor, body,
+        () => storage.chooseSellzInterest(postId, interestId, actor),
+        (to, subject, text) => storage.sendMessage(actor,to,subject,text,{contextType:"SELLZ",contextId:postId,contextLabel:post.title}));
+      res.json(result);
     } catch (e: any) { res.status(400).json({ error: e.message }); }
   });
 
@@ -5490,7 +5540,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // ─── MESSAGES ────────────────────────────────────────────────────────────
   app.get("/api/messages/unread-count", requireAuth, (req, res) => {
-    res.json({ count: storage.getUnreadCount(req.session.userId!) });
+    const id=req.session.userId!;
+    res.set("Cache-Control", "private, no-store").json({ count: memberInbox.unreadThreads(id, id, "personal") });
   });
 
   // Group chats the viewer belongs to (event rooms via check-in/hosting, plus
@@ -5524,6 +5575,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const thread = storage.getThread(req.params.threadId);
     const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
     if (!visible || thread.length === 0) return res.status(404).json({ error: "Thread not found" });
+    if (housingConversationLocked(sqlite, String(req.params.threadId))) return res.status(409).json({error:HOUSING_CONVERSATION_LOCKED});
     const first = thread[0] as any;
     const last = thread[thread.length - 1] as any;
     const toUserId = last.fromUserId === req.session.userId ? last.toUserId : last.fromUserId;
@@ -5544,6 +5596,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const thread = storage.getThread(threadId);
     const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
     if (!visible) return res.status(404).json({ error: "Thread not found" });
+    if (housingConversationLocked(sqlite, String(req.params.threadId))) return res.status(409).json({error:HOUSING_CONVERSATION_LOCKED});
     const key = `${threadId}:${req.session.userId}`;
     if (req.body?.active) inboxTyping.set(key, { userId: req.session.userId!, updatedAt: Date.now() });
     else inboxTyping.delete(key);
@@ -5555,6 +5608,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const thread = storage.getThread(threadId);
     const visible = thread.some((m: any) => m.fromUserId === req.session.userId || m.toUserId === req.session.userId);
     if (!visible) return res.status(404).json({ error: "Thread not found" });
+    if (housingConversationLocked(sqlite, threadId)) return res.json({active:false});
     const cutoff = Date.now() - 12_000;
     let active = false;
     for (const [key, state] of inboxTyping) {
@@ -5584,7 +5638,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!emoji) return res.status(400).json({ error: "emoji required" });
     const result = storage.toggleMessageReaction(messageId, req.session.userId!, emoji);
     if (result.error) {
-      const status = result.error === "Invalid reaction" ? 400 : 404;
+      const status = result.error === HOUSING_CONVERSATION_LOCKED ? 409 : result.error === "Invalid reaction" ? 400 : 404;
       return res.status(status).json({ error: result.error });
     }
     res.json({ reactions: result.reactions });
@@ -5722,6 +5776,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const userId = req.session?.userId;
     const isAdmin = sessionIsAdmin(req);
     const canManage = isAdmin || (userId && storage.isUserEventHost(evt.id, userId));
+    res.setHeader("Cache-Control", "private, no-store");
     const talent = storage.getEventTalent(evt.id, { includePending: Boolean(canManage) });
     res.json(talent);
   });
@@ -5794,8 +5849,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.delete("/api/events/:id/talent/:talentId", requireAuth, (req, res) => {
     const talentId = Number(req.params.talentId);
+    const talent = storage.getEventTalentById(talentId);
+    if (!talent || talent.eventId !== Number(req.params.id)) return res.status(404).json({error:"Credit not found for this event"});
     const result = storage.removeEventTalent(talentId, req.session.userId!, { isAdmin: sessionIsAdmin(req) });
-    if (result.error) return res.status(400).json({ error: result.error });
+    if (result.error) return res.status(403).json({ error: result.error });
     res.json(result);
   });
 
@@ -6081,21 +6138,23 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/admin/submissions/:id/approve", requireAdmin, (req, res) => {
-    const { adminName } = req.body;
-    if (!adminName) return res.status(400).json({ error: "adminName required" });
-    const pending = storage.getSubmissions().find(s => s.id === Number(req.params.id));
+    const adminName = getAdminActor(req).username || "admin";
+    const pending = storage.getSubmission(Number(req.params.id));
+    if (!pending) return res.status(404).json({ error: "Submission not found" });
+    if (pending.status === "APPROVED") return res.json(pending);
+    if (pending.status !== "PENDING") return res.status(409).json({error:"Submission already resolved. Refresh the queue."});
     // Only event submissions carry real dates - promoter applications and
     // claims store a placeholder timestamp where start === end.
     if (pending && (pending.type === "NEW_EVENT" || pending.type === "SUGGEST")) {
       const dateErr = validateEventDates(pending.dateStart, pending.dateEnd);
       if (dateErr) return res.status(400).json({ error: `Cannot approve: ${dateErr}` });
     }
-    const sub = storage.approveSubmission(Number(req.params.id), adminName);
+    let sub;
+    try { sub = storage.approveSubmission(pending.id, adminName); }
+    catch (error) { return res.status(409).json({error: error instanceof Error ? error.message : "Could not approve submission"}); }
     if (!sub) return res.status(404).json({ error: "Not found" });
     if (sub.status === "APPROVED" && (sub.type === "NEW_EVENT" || sub.type === "SUGGEST")) {
-      const created = storage.getEvents({ status: "LIVE" })
-        .filter(evt => evt.submittedBy === sub.submitterEmail && evt.title === sub.title)
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+      const created = sub.eventId && storage.getEvent(sub.eventId);
       if (created) {
         void fillEventMapCoordinates(created.id).catch(err =>
           console.error("[fillEventMapCoordinates] admin create failed:", err),
@@ -6115,6 +6174,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.post("/api/admin/submissions/:id/reject", requireAdmin, (req, res) => {
     const { reason } = req.body;
     const id = Number(req.params.id);
+    const existing = storage.getSubmission(id);
+    if (!existing) return res.status(404).json({ error: "Submission not found" });
+    if (existing.status === "REJECTED") return res.json({ok:true});
+    if (existing.status !== "PENDING") return res.status(409).json({error:"Submission already resolved. Refresh the queue."});
     storage.rejectSubmission(id, reason || "");
     auditAdmin(req, "reject_submission", {
       type: "submission",
@@ -6140,8 +6203,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/admin/submissions/:id/merge", requireAdmin, async (req, res) => {
-    const { adminName, eventId } = req.body;
-    if (!adminName) return res.status(400).json({ error: "adminName required" });
+    const adminName = getAdminActor(req).username || "admin";
+    const {eventId} = req.body;
     const targetEventId = Number(eventId);
     if (!Number.isFinite(targetEventId)) return res.status(400).json({ error: "eventId required" });
 
@@ -6151,7 +6214,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (dateErr) return res.status(400).json({ error: `Cannot merge: ${dateErr}` });
 
     const result = storage.mergeSubmissionIntoEvent(Number(req.params.id), targetEventId, adminName);
-    if ("error" in result) return res.status(400).json({ error: result.error });
+    if ("error" in result) return res.status(sub.status === "PENDING" ? 400 : 409).json({ error: result.error });
 
     await fillEventMapCoordinates(result.event.id);
     res.json(result);
@@ -6195,13 +6258,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const userId = Number(req.params.userId);
     const user = storage.getUserById(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
+    if (user.promoterStatus === "approved") return res.json({ok:true, promoterStatus:"approved"});
+    if (user.promoterStatus !== "pending") return res.status(409).json({error:"This promoter request was already resolved."});
     const adminName = getSessionAdminUser(req)?.displayName
       || getSessionAdminUser(req)?.username
       || storage.getUserById(req.session.userId!)?.displayName
       || storage.getUserById(req.session.userId!)?.username
       || "admin";
-    storage.setPromoterStatus(userId, "approved");
-    storage.resolvePromoterApplicationSubmissions(userId, "approved", adminName);
+    sqlite.transaction(() => {
+      storage.setPromoterStatus(userId, "approved");
+      storage.resolvePromoterApplicationSubmissions(userId, "approved", adminName);
+    }).immediate();
     auditAdmin(req, "approve_promoter", {
       type: "promoter",
       id: userId,
@@ -6215,8 +6282,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const userId = Number(req.params.userId);
     const user = storage.getUserById(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
-    storage.setPromoterStatus(userId, "rejected");
-    storage.resolvePromoterApplicationSubmissions(userId, "rejected", "admin", "Promoter request denied");
+    if (user.promoterStatus === "rejected") return res.json({ok:true, promoterStatus:"rejected"});
+    if (user.promoterStatus !== "pending") return res.status(409).json({error:"This promoter request was already resolved."});
+    sqlite.transaction(() => {
+      storage.setPromoterStatus(userId, "rejected");
+      storage.resolvePromoterApplicationSubmissions(userId, "rejected", "admin", "Promoter request denied");
+    }).immediate();
     auditAdmin(req, "deny_promoter", {
       type: "promoter",
       id: userId,
@@ -6234,10 +6305,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/admin/business-claims/:id/approve", requireAdmin, (req, res) => {
-    const adminName = String(req.body?.adminName || "Admin");
+    const adminName = getAdminActor(req).username || "admin";
     const id = Number(req.params.id);
     const result = storage.approveBusinessClaim(id, adminName);
-    if ("error" in result) return res.status(400).json({ error: result.error });
+    if (result.error) return res.status(409).json({ error: result.error });
     auditAdmin(req, "approve_business_claim", { type: "business_claim", id });
     releaseAdminQueueClaim("business_claim", id, getAdminActor(req).id || 0, { force: true });
     res.json(result);
@@ -6245,6 +6316,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.post("/api/admin/business-claims/:id/deny", requireAdmin, (req, res) => {
     const id = Number(req.params.id);
+    const previous = sqlite.prepare("SELECT status FROM business_claims WHERE id=?").get(id) as {status:string}|undefined;
+    if (!previous) return res.status(404).json({error:"Claim not found"});
+    if (previous.status === "REJECTED") return res.json({ok:true});
+    if (previous.status !== "PENDING") return res.status(409).json({error:"This claim was already settled."});
     storage.rejectBusinessClaim(id, req.body?.reason);
     auditAdmin(req, "deny_business_claim", { type: "business_claim", id, detail: { reason: req.body?.reason || null } });
     releaseAdminQueueClaim("business_claim", id, getAdminActor(req).id || 0, { force: true });
@@ -6658,7 +6733,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
       .filter((x) => x !== null)
       .join("\n");
     // Appeals go to shared Admin queue (moderation), not Owner Desk only.
-    const row = storage.createModerationRequest({
+    const appeal = sqlite.transaction(() => {
+      const row = storage.createModerationRequest({
       type: "SUSPEND_APPEAL",
       eventId: 0,
       eventTitle: `@${user.username}`,
@@ -6666,7 +6742,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
       requesterEmail: user.email,
       proof,
     });
-    res.json({ ok: true, appealId: row.id });
+      const receiptId = memberInbox.addReceipt("appeal",row.id,user!.id,"Suspension appeal");
+      return {ok:true,appealId:row.id,receiptId};
+    })();
+    res.json(appeal);
   });
 
   app.post("/api/admin/users/:username/reject-photo", requireAdmin, (req, res) => {
@@ -6704,7 +6783,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const user = storage.getUserById(req.session.userId!);
     if (!user) return res.status(401).json({ error: "Sign in required" });
     const primaryOwner = storage.isPrimarySiteOwner(user);
-    const breakdown = storage.getAdminQueueBreakdown();
+    const breakdown = { ...storage.getAdminQueueBreakdown(), guideUnread: guideInboxUnread(req.session.userId!) };
     const ownerCount = primaryOwner ? storage.getOwnerDeskCount() + getAdminQueueAggregate().workSummary.escalated : 0;
     res.setHeader("Cache-Control", "private, no-store");
     res.json({ ...claimDailyInboxReminder(user.id, breakdown.total + breakdown.guideUnread, ownerCount, primaryOwner), adminFolder: breakdown.total > 0 ? "active" : "inbox" });
@@ -6714,7 +6793,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
     const ownerEscalationCount = user && storage.isPrimarySiteOwner(user) ? getAdminQueueAggregate().workSummary.escalated : 0;
     const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() + ownerEscalationCount : 0;
-    const breakdown = storage.getAdminQueueBreakdown();
+    const breakdown = { ...storage.getAdminQueueBreakdown(), guideUnread: guideInboxUnread(req.session.userId!) };
     const queueCount = breakdown.total;
     const guideUnread = breakdown.guideUnread;
     res.json({
@@ -6736,7 +6815,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
    */
   app.get("/api/admin/pulse", requireAdmin, (req, res) => {
     const user = req.session.userId ? storage.getUserById(req.session.userId) : null;
-    const breakdown = storage.getAdminQueueBreakdown();
+    const breakdown = { ...storage.getAdminQueueBreakdown(), guideUnread: guideInboxUnread(req.session.userId!) };
     const ownerEscalationCount = user && storage.isPrimarySiteOwner(user) ? getAdminQueueAggregate().workSummary.escalated : 0;
     const ownerCount = user && storage.isPrimarySiteOwner(user) ? storage.getOwnerDeskCount() + ownerEscalationCount : 0;
     const metrics = storage.getAdminMetrics();
@@ -7880,9 +7959,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!user || !storage.isPrimarySiteOwner(user)) {
       return res.status(403).json({ error: "Owner only" });
     }
+    const linkedIds=new Set((sqlite.prepare("SELECT case_id AS id FROM member_report_receipts WHERE kind='desk'").all() as {id:number}[]).map(row=>row.id));
+    const withConversation=(item:ReturnType<typeof storage.getOwnerDeskItems>[number])=>({...item,memberConversation:item.source==="desk" && linkedIds.has(item.id)});
     const status = String(req.query.status || "").toUpperCase();
     if (status === "RESOLVED") {
-      const items = storage.getOwnerDeskItems("RESOLVED")
+      const items = storage.getOwnerDeskItems("RESOLVED").map(withConversation)
         .filter((item) => item.resolvedAt || item.status === "RESOLVED")
         .sort((a, b) => {
           const aTs = Date.parse(a.resolvedAt || a.createdAt) || 0;
@@ -7891,7 +7972,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         });
       return res.json(items);
     }
-    res.json(storage.getOwnerDeskItems(req.query.all === "true" ? undefined : "OPEN"));
+    res.json(storage.getOwnerDeskItems(req.query.all === "true" ? undefined : "OPEN").map(withConversation));
   });
 
   // Deliberately has no product UI. This is the private landing zone read by
@@ -8232,7 +8313,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/admin/inbox", requireAdmin, (req, res) => {
     const pendingSubs = storage.getSubmissions("PENDING").length;
     const pendingMod = storage.getModerationRequests("PENDING").length;
-    const guideUnread = storage.getGuideAdminUnreadCount();
+    const guideUnread = guideInboxUnread(req.session.userId!);
     res.json({
       pendingSubmissions: pendingSubs,
       pendingModeration: pendingMod,
@@ -8251,8 +8332,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json(storage.getGuideAdminSent());
   });
 
-  app.get("/api/admin/messages/unread-count", requireAdmin, (_req, res) => {
-    res.json({ count: storage.getGuideAdminUnreadCount() });
+  app.get("/api/admin/messages/unread-count", requireAdmin, (req, res) => {
+    res.json({ count: guideInboxUnread(req.session.userId!) });
   });
 
   app.get("/api/admin/messages/thread/:threadId", requireAdmin, (req, res) => {
@@ -8273,7 +8354,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     if (!emoji) return res.status(400).json({ error: "emoji required" });
     const result = storage.toggleMessageReaction(messageId, guide.id, emoji);
     if (result.error) {
-      const status = result.error === "Invalid reaction" ? 400 : 404;
+      const status = result.error === HOUSING_CONVERSATION_LOCKED ? 409 : result.error === "Invalid reaction" ? 400 : 404;
       return res.status(status).json({ error: result.error });
     }
     res.json({ reactions: result.reactions });
@@ -8290,6 +8371,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const thread = storage.getThread(req.params.threadId);
     const visible = thread.some((m: any) => m.fromUserId === guide.id || m.toUserId === guide.id);
     if (!visible || thread.length === 0) return res.status(404).json({ error: "Thread not found" });
+    if (housingConversationLocked(sqlite, String(req.params.threadId))) return res.status(409).json({error:HOUSING_CONVERSATION_LOCKED});
     const first = thread[0] as any;
     const last = thread[thread.length - 1] as any;
     const toUserId = last.fromUserId === guide.id ? last.toUserId : last.fromUserId;
@@ -8353,7 +8435,22 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true, message: msg });
   });
 
-  app.post("/api/admin/messages/mark-all-read", requireAdmin, (_req, res) => {
+  app.post("/api/admin/messages/mark-all-read", requireAdmin, (req, res) => {
+    if (req.body?.threadIds !== undefined) {
+      const { threadIds } = req.body;
+      if (!Array.isArray(threadIds) || threadIds.some(id => typeof id !== "string" || id.length > 256)) {
+        return res.status(400).json({ error: "Invalid conversation selection" });
+      }
+      const guide = storage.resolveGuideAdminUser();
+      if (!guide) return res.status(503).json({ error: "Guide admin identity unavailable" });
+      const cleared = sqlite.prepare(`UPDATE messages SET is_read=1 WHERE to_user_id=? AND deleted_by_to=0 AND is_read=0
+        AND thread_id IN (SELECT value FROM json_each(?))
+        AND NOT EXISTS (SELECT 1 FROM member_thread_archives a WHERE a.user_id=? AND a.mailbox='guide' AND a.thread_id=messages.thread_id)
+        AND NOT EXISTS (SELECT 1 FROM member_blocks b WHERE (b.blocker_user_id=messages.from_user_id AND b.blocked_user_id=messages.to_user_id)
+          OR (b.blocker_user_id=messages.to_user_id AND b.blocked_user_id=messages.from_user_id))`)
+        .run(guide.id, JSON.stringify(threadIds), req.session.userId!).changes;
+      return res.json({ ok:true, cleared });
+    }
     const cleared = storage.markGuideAdminInboxRead();
     res.json({ ok: true, cleared });
   });

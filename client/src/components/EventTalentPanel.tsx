@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { roomToast } from "@/lib/roomToast";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import UserAvatar from "@/components/UserAvatar";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
@@ -77,8 +77,9 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#D4F
   const [hostRole, setHostRole] = useState<EventTalentRole | null>(null);
   const [selfRole, setSelfRole] = useState<EventTalentRole | null>(null);
 
-  const { data: talent = [], refetch } = useQuery<EventTalentRow[]>({
-    queryKey: ["/api/events", eventId, "talent", mode],
+  const queryClient = useQueryClient();
+  const { data: talent = [] } = useQuery<EventTalentRow[]>({
+    queryKey: ["/api/events", eventId, "talent", user?.id ?? null],
     queryFn: () => fetch(`/api/events/${eventId}/talent`, { credentials: "include" }).then(r => r.ok ? r.json() : []),
   });
 
@@ -87,7 +88,10 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#D4F
   const grouped = groupByRole(live);
   const myRows = user ? talent.filter(t => t.userId === user.id) : [];
 
-  const invalidate = () => refetch();
+  const invalidate = () => {
+    void queryClient.invalidateQueries({queryKey:["/api/events", eventId]});
+    void queryClient.invalidateQueries({queryKey:["/api/events/mine/talent"]});
+  };
 
   const addMutation = useMutation({
     mutationFn: async () => {
@@ -212,16 +216,16 @@ export default function EventTalentPanel({ eventId, eventTitle, dayColor = "#D4F
                         ) : (
                           <span className="event-host-name">{row.displayName || row.username}</span>
                         )}
-                        <span style={{ fontSize: "0.68rem", color: "var(--text-meta)" }}>@{row.username}</span>
+                        <span style={{ fontSize: "0.68rem", color: "var(--text-meta)" }}>@{row.username}{row.addedByUserId ? row.addedByUserId === row.userId ? " · Self-listed" : " · Added by event staff" : ""}</span>
                       </div>
-                      {mode === "manage" && (
+                      {(mode === "manage" || (user?.id === row.userId && row.addedByUserId === row.userId)) && (
                         <button
                           type="button"
                           onClick={() => removeMutation.mutate(row.id)}
                           disabled={removeMutation.isPending}
                           style={{ background: "none", border: "none", color: "#FF0000", fontSize: "0.65rem", cursor: "pointer", fontFamily: "var(--font-display)" }}
                         >
-                          REMOVE
+                          {mode === "manage" ? "Remove" : "Withdraw my credit"}
                         </button>
                       )}
                     </div>

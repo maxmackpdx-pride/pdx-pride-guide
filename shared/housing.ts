@@ -344,7 +344,7 @@ export type HousingPostView = {
   /** The managed listing this HAÜS formed around, when it was built from one. */
   around?: { postId: number; propertyName: string; managerName: string } | null;
   /** Viewer state for the join gesture. */
-  myRequest?: { id: number; kind: HousingRequestKind; status: HousingRequestStatus } | null;
+  myRequest?: { id: number; kind: HousingRequestKind; status: HousingRequestStatus; threadId?: string | null } | null;
 
   // MANAGED
   manager?: { id: number; name: string; company?: string | null; siteDomain?: string | null } | null;

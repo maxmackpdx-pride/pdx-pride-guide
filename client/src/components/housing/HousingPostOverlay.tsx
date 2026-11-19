@@ -20,7 +20,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import { queryClient } from "@/lib/queryClient";
 import {
-  applyHousingRequest,
   applyHousingSavedToggle,
   beginInFlight,
   endInFlight,
@@ -153,8 +152,12 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
       if (!response.ok) throw new Error((await response.json())?.error || "Could not send that");
       return response.json();
     },
-    onMutate: async (kind) => { const snap = await snapshotQueries(queryClient, HOUSING_KEY); applyHousingRequest(queryClient, postId, { id: -1, kind, status: "PENDING" }); return { snap }; },
-    onError: (error: Error, _kind, context) => { restoreQueries(queryClient, context?.snap); toast({ title: "Did not send", description: error.message, variant: "destructive" }); },
+    onSuccess: (data) => {
+      const request = data.request;
+      if (request.threadId && (request.status === "ACCEPTED" || (data.alreadySent && request.status === "PENDING"))) openSheet({view:"inbox", account:"personal", threadId:request.threadId});
+      else toast({title: request.status === "DECLINED" ? "Request closed" : data.conversationPending ? "Request saved. Retry opening the conversation." : request.kind === "WAITLIST" ? "Waitlist request sent" : request.kind === "JOIN" ? "Join request sent" : "Chat request sent"});
+    },
+    onError: (error: Error) => toast({title:"Could not complete request", description:error.message, variant:"destructive"}),
     onSettled: () => { endInFlight(requestPendingRef.current, postId); invalidate(); },
   });
   const saveMutation = useMutation({
@@ -183,8 +186,8 @@ export default function HousingPostOverlay({ post: initialPost, userId, initialD
   };
   const request = (kind: HousingRequestKind) => {
     if (!requireAuth() || isOwner) return;
-    if (post.myRequest?.status === "ACCEPTED") { openSheet({ view: "inbox" }); return; }
-    if (post.myRequest?.status === "PENDING" || !beginInFlight(requestPendingRef.current, postId)) return;
+    if (post.myRequest?.threadId && ["PENDING","ACCEPTED"].includes(post.myRequest.status)) { openSheet({ view: "inbox", account:"personal", threadId:post.myRequest.threadId }); return; }
+    if (!beginInFlight(requestPendingRef.current, postId)) return;
     requestMutation.mutate(kind);
   };
   const save = () => {

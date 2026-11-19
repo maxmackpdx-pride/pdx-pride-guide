@@ -1229,8 +1229,8 @@ export default function Schedule({
       rsvpLabel: isBeach
         ? "Remove beach day"
         : rsvp
-          ? <>You’re going <Check size={14} aria-hidden="true" /></>
-          : "I’ll be there",
+          ? <>Remove attendance <Check size={14} aria-hidden="true" /></>
+          : "Going · Public",
       rsvpBtnStyle: S({
         fontFamily: "var(--font-display)",
         fontWeight: 900,
@@ -1393,6 +1393,7 @@ export default function Schedule({
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
           <button
+            title={selected.isBeach?undefined:selected.rsvp?"Removing attendance keeps your event follow.":"Shows your name and follows event updates."}
             onClick={(e) => {
               if (!selected.isBeach && !selected.rsvp) spawnRsvpSparks(e.currentTarget);
               toggleRsvp(selected.id);
@@ -1664,7 +1665,7 @@ export default function Schedule({
                         >
                           <div style={b.overlayStyle} aria-hidden />
                           {b.showQuick && (
-                            <button type="button" aria-label={`${b.rsvp ? "Remove from" : "Add to"} my schedule: ${b.title}`} aria-pressed={b.rsvp} onClick={b.onQuick} style={b.quickStyle}>
+                            <button type="button" title={b.rsvp?"Remove attendance and keep your event follow":"Going publicly shows your name and follows event updates"} aria-label={`${b.rsvp ? "Remove attendance" : "Going publicly and following updates"} · ${b.title}`} aria-pressed={b.rsvp} onClick={b.onQuick} style={b.quickStyle}>
                               {b.quickIcon}
                             </button>
                           )}

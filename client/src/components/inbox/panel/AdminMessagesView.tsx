@@ -21,6 +21,7 @@ function tagFor(cat: string) {
 /** Shared guide-admin Inbox / Sent list under floating inbox → Admin. */
 export default function AdminMessagesView({
   threads,
+  loading, failed, onRetry,
   folder,
   query,
   onOpenThread,
@@ -28,15 +29,18 @@ export default function AdminMessagesView({
   markingAllRead,
 }: {
   threads: Thread[];
-  folder: "inbox" | "sent";
+  loading: boolean;
+  failed: boolean;
+  onRetry: () => void;
+  folder: "inbox" | "sent" | "archived";
   query: string;
   onOpenThread: (id: string) => void;
-  onMarkAllRead?: () => void;
+  onMarkAllRead?: (threadIds: string[]) => void;
   markingAllRead?: boolean;
 }) {
   const q = query.trim().toLowerCase();
   const rows = threads
-    .filter((t) => !t.archived && t.folder === folder)
+    .filter((t) => folder==="archived" ? t.archived : !t.archived && t.folder === folder)
     .filter(
       (t) =>
         !q ||
@@ -47,10 +51,13 @@ export default function AdminMessagesView({
 
   const unread = rows.filter((t) => t.unread).length;
 
+  if (failed) return <p role="alert" className="inbox-exp-empty">Guide mail unavailable. <button onClick={onRetry}>Retry</button></p>;
+  if (loading) return <p role="status" className="inbox-exp-empty">Loading guide mail…</p>;
+
   if (rows.length === 0) {
     return (
       <div className="inbox-exp-empty">
-        {folder === "sent" ? "NO SENT ADMIN MESSAGES" : "NO REPLIES IN ADMIN INBOX"}
+        {folder === "archived" ? "NO ARCHIVED CONVERSATIONS" : folder === "sent" ? "NO SENT ADMIN MESSAGES" : "NO REPLIES IN ADMIN INBOX"}
       </div>
     );
   }
@@ -74,7 +81,7 @@ export default function AdminMessagesView({
             type="button"
             className="inbox-exp-mark-read"
             disabled={markingAllRead}
-            onClick={() => onMarkAllRead()}
+            onClick={() => onMarkAllRead(rows.filter(row => row.unread).map(row => row.id))}
           >
             {markingAllRead ? "MARKING…" : `MARK ALL READ (${unread})`}
           </button>

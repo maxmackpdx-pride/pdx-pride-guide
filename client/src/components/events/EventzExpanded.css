@@ -155,8 +155,8 @@
 .evz-x__arw { width: 34px; height: 30px; display: grid; place-items: center; border: 1px solid var(--evz-line-2c2c35); border-radius: 8px; background: transparent; color: var(--evz-mist-cfd8de); }
 .evz-x__arw:disabled { opacity: .35; cursor: default; }
 .evz-x__dots { display: flex; align-items: center; gap: 5px; }
-.evz-x__dots button { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 99px; background: var(--evz-dot-3a3a44); }
-.evz-x__dots button.on { background: var(--ac); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ac) 25%, transparent); }
+.evz-x__dots i { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 99px; background: var(--evz-dot-3a3a44); }
+.evz-x__dots i.on { background: var(--ac); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ac) 25%, transparent); }
 .evz-x__pg { margin-left: 8px; font: 600 9px/1 var(--font-mono, monospace); letter-spacing: .06em; color: var(--evz-gray-8a8a94); }
 .evz-x__save { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; }
 .evz-x__savet { padding: 4px 0; border: 0; background: transparent; color: var(--text-hi);
@@ -175,3 +175,6 @@
    the flyer fades down behind the I'M INTERESTED row, and the card's content
    rides above the fade. */
 .evz-x__actions, .evz-x__tabs, .evz-x__pageswrap, .evz-x__foot { position: relative; z-index: 2; }
+
+.evz-x__arw, .evz-x__iconbtn--sm, .evz-x__tabs button, .evz-x__savet, .evz-x__page button { min-width: 44px; min-height: 44px; }
+.evz-x__save .evz-x__savet { width: 100%; text-align: center; }

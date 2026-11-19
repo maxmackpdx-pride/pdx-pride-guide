@@ -1,5 +1,9 @@
+import { pacificCalendarDate } from "@shared/missedConnections";
+import { eventAge, eventPrice } from "@/lib/eventFacts";
+import { EventGoingButton, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
+import EventPlanning from "./EventPlanning";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { ArrowUpRight, ChevronLeft, ChevronRight, Clock3, MapPin, Share2, X } from "lucide-react";
 import type { Event } from "@shared/schema";
@@ -12,8 +16,6 @@ import { OpenCardMeta } from "@/components/cards/react19Card";
 import { closeOpenCard } from "@/components/cards/react19CardModel";
 import { useOpenCardClose } from "@/hooks/useOpenCardClose";
 import { useAuth } from "@/context/AuthContext";
-import { useSavedEvents } from "@/hooks/useSavedEvents";
-import { useEventRsvp } from "@/hooks/useEventRsvp";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { dayAccentToken } from "@/lib/dsColors";
@@ -24,15 +26,12 @@ import { parsePacificDateTime } from "@shared/missedConnections";
 import { eventPath } from "@shared/eventSlug";
 import { placePath } from "@shared/placeSlug";
 import { shareEventLink, shareToastTitle } from "@/lib/shareEvent";
-import { timeAgo } from "@/lib/timeAgo";
 import { useResponsivePoster } from "@/lib/useResponsivePoster";
 import { POSTER_DETAIL_SIZES, restoreOriginalPoster } from "@/lib/responsivePoster";
 import UserAvatar from "@/components/UserAvatar";
 import AuthModal from "@/components/AuthModal";
 import MissedConnectionsPanel from "@/components/MissedConnectionsPanel";
 import EventModal, { type EventModalOriginRect } from "@/components/EventModal";
-import { GigComposer } from "@/pages/PrideWork";
-import ZLineIcon from "@/components/ZLineIcon";
 import "./EventzExpanded.css";
 
 /**
@@ -185,26 +184,23 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const queryClient = useQueryClient();
-  const saves = useSavedEvents();
-  const rsvp = useEventRsvp();
   const [showAuth, setShowAuth] = useState(false);
   const [page, setPage] = useState(0);
   const [mizzedOpen, setMizzedOpen] = useState(false);
-  const [gigOpen, setGigOpen] = useState(false);
   const [venueDay, setVenueDay] = useState<string | null>(null);
   const pagesRef = useRef<HTMLDivElement>(null);
   const { dialogRef, requestClose } = useOpenCardClose(onClose);
 
-  const { data: rawDetail } = useQuery<EventDetail>({
-    queryKey: ["/api/events", event.id, "detail"],
-    queryFn: () => apiRequest("GET", `/api/events/${event.id}/detail`).then((r) => r.json()),
+  const detailQuery = useQuery<EventDetail>({
+    queryKey: ["/api/events", event.id, "detail", user?.id, pacificCalendarDate(event.dateStart)],
+    queryFn: () => apiRequest("GET", `/api/events/${event.id}/detail?date=${encodeURIComponent(pacificCalendarDate(event.dateStart)??"")}`).then((r) => r.json()),
     staleTime: 60_000,
   });
+  const rawDetail = detailQuery.data;
+  const detailStatus = <EventReadStatus label="Event details" query={detailQuery} />;
   const detail = rawDetail && !Array.isArray(rawDetail) ? rawDetail : undefined;
   const hosts: DetailHost[] = Array.isArray(detail?.hosts) ? detail.hosts : [];
   const talent: EventTalentRow[] = Array.isArray(detail?.talent) ? detail.talent : [];
-  const gigs: DetailGig[] = Array.isArray(detail?.gigs) ? detail.gigs : [];
   const missedCount = Array.isArray(detail?.missedConnections) ? detail.missedConnections.length : 0;
   const restaurants: SlimPlace[] = Array.isArray(detail?.nearby?.restaurants) ? detail.nearby.restaurants : [];
   const nearbyEvents: NearbyEvent[] = Array.isArray(detail?.nearby?.events) ? detail.nearby.events : [];
@@ -213,12 +209,13 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
   // The venue's own payload feeds two v12 sections the event detail does not
   // carry: "More at {venue}" (next-7-days strip on More + Nearby) and the
   // Promoters block on People.
-  const { data: placeData } = useQuery<{ upcomingEvents?: PlaceUpcomingEvent[]; promoters?: PlacePromoter[] }>({
+  const placeQuery = useQuery<{ upcomingEvents?: PlaceUpcomingEvent[]; promoters?: PlacePromoter[] }>({
     queryKey: ["/api/placez", venue?.id, "card-extras"],
     queryFn: () => apiRequest("GET", `/api/placez/${venue!.id}`).then((r) => r.json()),
     enabled: Boolean(venue?.id),
     staleTime: 300_000,
   });
+  const placeData = placeQuery.data;
   const venueUpcoming: PlaceUpcomingEvent[] = Array.isArray(placeData?.upcomingEvents) ? placeData.upcomingEvents : [];
   const promoters: PlacePromoter[] = Array.isArray(placeData?.promoters) ? placeData.promoters : [];
   const eventDayKey = pacificDayKey(event.dateStart);
@@ -236,23 +233,15 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
   const accent = flyerAccent ?? dayAccentToken(day);
   const poster = listingPosterUrl(event);
   const posterAttributes = useResponsivePoster(poster, POSTER_DETAIL_SIZES);
-  const saved = saves.savedIds.has(event.id);
-  const interested = rsvp.myEventIds.has(event.id);
   const endMs = parsePacificDateTime(event.dateEnd);
   const isPastEvent = endMs != null && endMs < Date.now();
-  const hasPendingClaim = Boolean((event as { hasPendingClaim?: boolean }).hasPendingClaim);
+  const hasPendingClaim = Boolean(((detail?.event ?? event) as { hasPendingClaim?: boolean }).hasPendingClaim);
+  const claimable = (detail?.event ?? event).isClaimable && !(detail?.event ?? event).claimedBy;
   const canManage = Boolean(user?.isAdmin) || Boolean(user && hosts.some((h) => h.userId === user.id));
-  // Owner gig posting (Tucker, Nov 18, 2026): a claimed event's owner posts a
-  // gig FROM the event. The composer is pre-filled with the event's Pacific
-  // date + start time and a description naming the event; the event-linked
-  // back end is coming soon, so the gig posts through the venue-linked fields.
-  const gigPrefillDate = pacificDayKey(event.dateStart) ?? "";
-  const gigStartMs = parsePacificDateTime(event.dateStart);
-  const gigPrefillTime = gigStartMs == null ? "" : new Intl.DateTimeFormat("en-GB", { timeZone: "America/Los_Angeles", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(gigStartMs));
   const primaryLink = primaryLinkFor(event);
-  const age = event.ageRequirement === "21_PLUS" ? "21+" : event.ageRequirement === "18_PLUS" ? "18+" : "All ages";
-  const admission = event.admission === "FREE" ? "Free" : event.admission === "SUGGESTED_DONATION" ? "Suggested donation" : event.admission === "DOOR_FEE" ? "Door fee" : "Ticketed";
-  const rawChips = [...getEventTypeTagsForEvent(event).slice(0, 3), age, ...(event.isSexPositive ? ["Sex-positive"] : [])];
+  const age = eventAge(event.ageRequirement);
+  const admission = eventPrice(event.admission);
+  const rawChips = [...getEventTypeTagsForEvent(event).slice(0, 3), ...(age === "Not stated" ? [] : [age]), ...(event.isSexPositive ? ["Sex-positive"] : [])];
   const seenChipKeys = new Set<string>();
   const chips = rawChips.filter((chip) => {
     const key = chip.toLowerCase().replace(/-/g, " ").replace(/\s+/g, " ").trim();
@@ -278,10 +267,9 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
     const index = Math.round(el.scrollLeft / el.clientWidth);
     if (index !== page && index >= 0 && index < PAGES.length) setPage(index);
   };
-  const toggleSave = () => { if (user) saves.toggleSave(event.id); else setShowAuth(true); };
   const share = async () => {
     try {
-      const result = await shareEventLink(eventPath(event.id, event.title, event.dayOfWeek), event.title);
+      const result = await shareEventLink(eventPath(event.id, event.title, event.dayOfWeek, pacificCalendarDate(event.dateStart)), event.title);
       toast({ title: shareToastTitle(result, "event") });
     } catch (error) {
       if ((error as Error)?.name !== "AbortError") toast({ title: "Could not share. Please try again.", variant: "destructive" });
@@ -307,13 +295,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
       </header>
 
       <div className="evz-x__actions">
-        <button type="button" className="evz-x__act" aria-pressed={interested} disabled={rsvp.isRsvpPending(event.id)} onClick={() => rsvp.toggleRsvp(event.id)}>
-          <span className="evz-x__act-main">
-            <span className="evz-x__act-t">{isPastEvent ? "I was there" : interested ? "You're interested" : "I'm interested"}</span>
-            <span className="evz-x__act-s">{interested ? "You're on the list — tap to undo" : "Join the interested list for this event"}</span>
-          </span>
-          <span className="evz-x__act-ar" aria-hidden="true">›</span>
-        </button>
+        <EventGoingButton eventId={event.id} past={isPastEvent} />
       </div>
 
       <nav className="evz-x__tabs" aria-label="Event pages">
@@ -326,26 +308,8 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
 
       <div className="evz-x__pageswrap">
         <div className="evz-x__pages" ref={pagesRef} onScroll={onPagesScroll}>
-          <section className="evz-x__page" aria-label="Feed — Gigz">
-            <div className="evz-x__sech"><span>Gigz at {event.venueName}</span>{detail ? <span className="evz-x__cnt">{gigs.length}</span> : null}</div>
-            {!detail ? <p className="evz-x__empty">Loading Gigz…</p> : gigs.length === 0 ? (
-              <p className="evz-x__empty">No Gigz posted at {event.venueName} right now. Gigz the venue posts land here.</p>
-            ) : gigs.map((gig) => (
-              <article key={gig.id} className="evz-x__gig">
-                <div className="evz-x__gig-t"><span>{gig.title}</span>{gig.compensation ? <span className="evz-x__gig-pay">{gig.compensation}</span> : null}</div>
-                <p className="evz-x__gig-meta">{[gig.postType?.replace(/_/g, " "), gig.gigDate ? `${gig.gigDate}${gig.gigTime ? ` · ${gig.gigTime}` : ""}` : timeAgo(gig.createdAt), gig.location].filter(Boolean).join(" · ")}</p>
-                {gig.description ? <p className="evz-x__gig-desc">{gig.description}</p> : null}
-              </article>
-            ))}
-            {canManage ? (
-              <button type="button" className="evz-x__act evz-x__act--owner" onClick={() => setGigOpen(true)}>
-                <span className="evz-x__act-main">
-                  <span className="evz-x__act-t">Post a Gig for this event</span>
-                  <span className="evz-x__act-s">Hiring for this event? Post it to Gigz — pre-filled with this event&apos;s date and venue.</span>
-                </span>
-                <span className="evz-x__act-ar" aria-hidden="true">+</span>
-              </button>
-            ) : null}
+          <section className="evz-x__page" inert={page!==0} aria-hidden={page!==0} aria-label="Feed — Gigz">
+            {event.id > 0 && <EventPlanning eventId={event.id} occurrenceDate={event.dateStart} />}
             <button type="button" className="evz-x__act evz-x__act--dash" aria-expanded={mizzedOpen} onClick={() => setMizzedOpen((open) => !open)}>
               <span className="evz-x__act-main">
                 <span className="evz-x__act-t">Add a Mizzed Connection</span>
@@ -355,7 +319,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
             </button>
           </section>
 
-          <section className="evz-x__page" aria-label="Info">
+          <section className="evz-x__page" inert={page!==1} aria-hidden={page!==1} aria-label="Info">
             <div className="evz-x__sech"><span>Event details</span></div>
             <StartsInBox event={event} />
             <div className="evz-x__kv"><Clock3 size={17} aria-hidden="true" /><span>{whenLine}</span></div>
@@ -366,7 +330,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
             {primaryLink ? (
               <a className="evz-x__link" href={primaryLink.href} target="_blank" rel="noopener noreferrer">{primaryLink.label} <ArrowUpRight size={16} aria-hidden="true" /></a>
             ) : null}
-            {event.isClaimable ? (
+            {claimable ? (
               <p className="evz-x__note">This event has not been claimed by its organizer. Details were sourced from public listings. Please confirm time, venue, and ticketing directly before attending.{hasPendingClaim ? " A claim is pending admin review." : ""}</p>
             ) : null}
             <div className="evz-x__manage">
@@ -375,7 +339,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
             </div>
           </section>
 
-          <section className="evz-x__page" aria-label="Maps">
+          <section className="evz-x__page" inert={page!==2} aria-hidden={page!==2} aria-label="Maps">
             <div className="evz-x__sech"><span>Map &amp; directions</span><span className="evz-x__sech-r">Location overview</span></div>
             <div className="evz-x__mapbox" aria-hidden="true"><span className="evz-x__pin" /></div>
             <div className="evz-x__kv"><MapPin size={17} aria-hidden="true" /><span>This event · {event.venueName}<br />{event.address || venue?.address || "Portland, OR"}<br /><span className="evz-x__note-inline">Real locations, no street tiles. Directions open in your chosen app.</span></span></div>
@@ -385,7 +349,8 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
             </div>
           </section>
 
-          <section className="evz-x__page" aria-label="More + Nearby">
+          <section className="evz-x__page" inert={page!==3} aria-hidden={page!==3} aria-label="More + Nearby">
+            {venue && !Array.isArray(placeData?.upcomingEvents) && <EventReadStatus label="More at this venue" query={placeQuery} />}
             {venue && stripDays.some((d) => d.events.length > 0) ? (
               <>
                 <div className="evz-x__sech"><span>More at {event.venueName}</span><span className="evz-x__sech-r">Next 7 days</span></div>
@@ -402,7 +367,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
                   <div className="evz-x__rail">
                     {selectedDay.events.slice(0, 8).map((near) => (
                       <button key={near.id} type="button" className="evz-x__railcard" style={{ "--ac": accent } as CSSProperties}
-                        onClick={() => setLocation(eventPath(near.id, near.title, near.dayOfWeek ?? undefined))}
+                        onClick={() => setLocation(eventPath(near.id, near.title, near.dayOfWeek, pacificCalendarDate(near.dateStart)))}
                         aria-label={`Open ${near.title}`}>
                         {near.posterImageUrl
                           ? <img src={near.posterImageUrl} alt="" loading="lazy" className="evz-x__railimg" />
@@ -420,7 +385,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
               </>
             ) : null}
             <div className="evz-x__sech"><span>Restaurants close by</span></div>
-            {!detail ? <p className="evz-x__empty">Loading nearby…</p> : restaurants.length === 0 ? (
+            {!Array.isArray(detail?.nearby?.restaurants) ? detailStatus : restaurants.length === 0 ? (
               <p className="evz-x__empty">No restaurants mapped close by yet.</p>
             ) : (
               <div className="evz-x__rail">
@@ -438,7 +403,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
               </div>
             )}
             <div className="evz-x__sech"><span>Events same day · close by</span></div>
-            {!detail ? <p className="evz-x__empty">Loading nearby events…</p> : nearbyEvents.length === 0 ? (
+            {!Array.isArray(detail?.nearby?.events) ? detailStatus : nearbyEvents.length === 0 ? (
               <p className="evz-x__empty">No other events close by on this day.</p>
             ) : (
               <div className="evz-x__rail">
@@ -447,7 +412,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
                   const nearAccent = (near as { accentColor?: string | null }).accentColor || accent;
                   return (
                     <button key={near.id} type="button" className="evz-x__railcard" style={{ "--ac": nearAccent } as CSSProperties}
-                      onClick={() => { if (onOpenEvent) onOpenEvent(near); else setLocation(eventPath(near.id, near.title, near.dayOfWeek)); }}
+                      onClick={() => { if (onOpenEvent) onOpenEvent(near); else setLocation(eventPath(near.id, near.title, near.dayOfWeek, pacificCalendarDate(near.dateStart))); }}
                       aria-label={`Open ${near.title}`}>
                       {nearPoster
                         ? <img src={nearPoster} alt="" loading="lazy" className="evz-x__railimg" />
@@ -463,9 +428,9 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
             )}
           </section>
 
-          <section className="evz-x__page" aria-label="People">
+          <section className="evz-x__page" inert={page!==4} aria-hidden={page!==4} aria-label="People">
             <div className="evz-x__sech"><span>{hosts.length === 1 ? "Host" : "Hosts"}</span></div>
-            {hosts.length > 0 ? (
+            {!Array.isArray(detail?.hosts) ? detailStatus : hosts.length > 0 ? (
               <div className="evz-x__people">
                 {hosts.map((host) => {
                   const inner = (
@@ -485,11 +450,11 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
             ) : (
               <>
                 <div className="evz-x__claim">
-                  <p className="evz-x__claim-t">Unclaimed</p>
-                  <p className="evz-x__claim-s">Most events go unclaimed — no host has claimed this event yet.</p>
+                  <p className="evz-x__claim-t">{hasPendingClaim ? "Claim in review" : claimable ? "Open to claim" : "Host information"}</p>
+                  <p className="evz-x__claim-s">No public event host is listed.</p>
                   {hasPendingClaim ? <p className="evz-x__claim-s">A claim is pending admin review.</p> : null}
                 </div>
-                {event.isClaimable && !hasPendingClaim ? (
+                {claimable && !hasPendingClaim ? (
                   <button type="button" className="evz-x__act" onClick={() => { if (user) setLocation(`/submit/claim/${event.id}`); else setShowAuth(true); }}>
                     <span className="evz-x__act-main">
                       <span className="evz-x__act-t">Claim this event</span>
@@ -509,15 +474,15 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
                       <UserAvatar photoUrl={row.photoUrl} avatarChoice={row.avatarChoice} avatarRing={row.avatarRing} displayName={row.displayName} username={row.username} size={48} />
                       <span className="evz-x__person-meta">
                         <span className="evz-x__person-name">{row.displayName || row.username}</span>
-                        <span className="evz-x__person-role" style={{ color: EVENT_TALENT_ROLE_COLORS[row.role]?.color }}>{EVENT_TALENT_ROLE_LABELS[row.role] || row.role}</span>
+                        <span className="evz-x__person-role" style={{ color: EVENT_TALENT_ROLE_COLORS[row.role]?.color }}>{EVENT_TALENT_ROLE_LABELS[row.role] || row.role} · {row.addedByUserId == null ? "Source unavailable" : row.addedByUserId === row.userId ? "Self-listed" : "Added by host or staff"}</span>
                       </span>
                     </div>
                   ))}
                 </div>
               </>
             ) : null}
-            <div className="evz-x__sech"><span>Promoters</span></div>
-            {promoters.length > 0 ? (
+            <div className="evz-x__sech"><span>Venue promoters</span></div>
+            {!detail ? detailStatus : !venue ? <p>No venue is linked.</p> : !Array.isArray(placeData?.promoters) ? <EventReadStatus label="Venue promoters" query={placeQuery} /> : promoters.length > 0 ? (
               <div className="evz-x__people">
                 {promoters.map((promoter, index) => (
                   <div key={index} className="evz-x__person">
@@ -528,7 +493,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
                 ))}
               </div>
             ) : (
-              <p className="evz-x__empty-block">No promoters are connected yet.</p>
+              <p className="evz-x__empty-block">No public promoters listed for this venue.</p>
             )}
           </section>
         </div>
@@ -551,39 +516,18 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
           <button type="button" className="evz-x__arw" onClick={() => goTo(page - 1)} disabled={page === 0} aria-label="Previous page"><ChevronLeft size={17} aria-hidden="true" /></button>
           <div className="evz-x__dots">
             {PAGES.map((label, index) => (
-              <button key={label} type="button" className={index === page ? "on" : ""} onClick={() => goTo(index)} aria-label={`Go to ${label} page`} />
+              <i key={label} aria-hidden="true" className={index === page ? "on" : ""} />
             ))}
             <span className="evz-x__pg">Page {page + 1} · {PAGES[page]}</span>
           </div>
           <button type="button" className="evz-x__arw" onClick={() => goTo(page + 1)} disabled={page === PAGES.length - 1} aria-label="Next page"><ChevronRight size={17} aria-hidden="true" /></button>
         </div>
         <div className="evz-x__save">
-          <button type="button" className="evz-x__savet" aria-pressed={saved} onClick={toggleSave}>Save this event</button>
-          <button type="button" className="evz-x__heart" aria-pressed={saved} aria-label={`${saved ? "Remove" : "Add"} ${event.title} ${saved ? "from" : "to"} my schedule`} onClick={toggleSave}>
-            <ZLineIcon name="favorite" size={18} filled={saved} />
-          </button>
+          <EventPrivateSaveButton eventId={event.id} />
         </div>
       </footer>
 
-      {gigOpen ? (
-        <GigComposer
-          initialType="POSTING_GIG"
-          onClose={() => setGigOpen(false)}
-          onPosted={() => {
-            setGigOpen(false);
-            queryClient.invalidateQueries({ queryKey: ["/api/events", event.id, "detail"] });
-          }}
-          venueName={event.venueName}
-          prefill={{
-            description: `Gig for ${event.title} at ${event.venueName}. `,
-            location: event.venueName,
-            gigDate: gigPrefillDate,
-            gigTime: gigPrefillTime,
-          }}
-        />
-      ) : null}
-
-      {(showAuth || rsvp.showAuth) && <AuthModal onClose={() => { setShowAuth(false); rsvp.setShowAuth(false); }} />}
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </div>
   );
 }

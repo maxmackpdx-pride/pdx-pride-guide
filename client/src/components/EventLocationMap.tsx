@@ -11,6 +11,7 @@ export default function EventLocationMap({
   primary,
   complementary,
   scheduled,
+  actionLabel,
   schedulePending,
   onSchedule,
 }: {
@@ -18,6 +19,7 @@ export default function EventLocationMap({
   primary: string;
   complementary: string;
   scheduled: boolean;
+  actionLabel?: string;
   schedulePending: boolean;
   onSchedule: () => void;
 }) {
@@ -71,7 +73,7 @@ export default function EventLocationMap({
         {!event.isPrivate && <button type="button" onClick={copyAddress} aria-label="Copy event address"><CopyStateIcon copied={copied} /><span>{copied ? "Copied" : "Copy"}</span></button>}
         <button type="button" onClick={onSchedule} disabled={schedulePending} aria-pressed={scheduled}>
           {scheduled ? <Check aria-hidden="true" /> : <CalendarPlus aria-hidden="true" />}
-          <span>{scheduled ? "Scheduled" : "Schedule"}</span>
+          <span>{actionLabel ?? (scheduled ? "Scheduled" : "Schedule")}</span>
         </button>
       </div>
     </section>

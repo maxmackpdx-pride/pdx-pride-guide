@@ -280,7 +280,7 @@ export function shapePosts(db: Database, rows: PostRow[], opts: ShapeOpts = {}):
   const savedIds = new Set<number>();
   /** post_id → seen_updated_at (ISO). Drives per-viewer "what changed" chip. */
   const saveSeenAt = new Map<number, string | null>();
-  const myRequests = new Map<number, { id: number; kind: HousingRequestKind; status: HousingRequestStatus }>();
+  const myRequests = new Map<number, { id: number; kind: HousingRequestKind; status: HousingRequestStatus; threadId: string | null }>();
   if (viewerId) {
     const placeholders = ids.map(() => "?").join(",");
     const saves = db
@@ -294,14 +294,14 @@ export function shapePosts(db: Database, rows: PostRow[], opts: ShapeOpts = {}):
     }
     const reqs = db
       .prepare(
-        `SELECT id, post_id, kind, status FROM housing_requests
+        `SELECT id, post_id, kind, status, thread_id FROM housing_requests
           WHERE requester_user_id = ? AND post_id IN (${placeholders})
           ORDER BY id DESC`,
       )
       .all(viewerId, ...ids) as any[];
     for (const r of reqs) {
       if (!myRequests.has(r.post_id)) {
-        myRequests.set(r.post_id, { id: r.id, kind: r.kind, status: r.status });
+        myRequests.set(r.post_id, { id: r.id, kind: r.kind, status: r.status, threadId:r.thread_id });
       }
     }
   }
@@ -886,6 +886,14 @@ export function getHousingRequestByThread(db: Database, threadId: string): any |
   return db.prepare(`SELECT * FROM housing_requests WHERE thread_id = ?`).get(id) as any;
 }
 
+export const HOUSING_CONVERSATION_LOCKED = "This conversation requires an accepted housing request.";
+
+/** System-generated requests and decisions can be delivered before consent. Member
+ * replies, reactions and typing are available only once a linked request is accepted. */
+export function housingConversationLocked(db: Database, threadId: string): boolean {
+  return Boolean(db.prepare("SELECT 1 FROM housing_requests WHERE thread_id=? AND status!='ACCEPTED' LIMIT 1").get(threadId));
+}
+
 export function markHousingRequestNudged(db: Database, id: number): void {
   db.prepare(`UPDATE housing_requests SET nudge_sent_at = ? WHERE id = ? AND nudge_sent_at IS NULL`).run(nowIso(), id);
 }
@@ -975,7 +983,7 @@ export function listHousingWaitlist(db: Database, postId: number): any[] {
       `SELECT r.*, u.username, u.display_name, u.photo_url
          FROM housing_requests r
          JOIN users u ON u.id = r.requester_user_id
-        WHERE r.post_id = ? AND r.kind = 'WAITLIST' AND r.status = 'PENDING'
+        WHERE r.post_id = ? AND r.kind = 'WAITLIST' AND r.status IN ('PENDING','ACCEPTED')
         ORDER BY r.created_at ASC`,
     )
     .all(postId) as any[];
@@ -985,7 +993,7 @@ export function countHousingWaitlist(db: Database, postId: number): number {
   const row = db
     .prepare(
       `SELECT COUNT(*) AS n FROM housing_requests
-        WHERE post_id = ? AND kind = 'WAITLIST' AND status = 'PENDING'`,
+        WHERE post_id = ? AND kind = 'WAITLIST' AND status IN ('PENDING','ACCEPTED')`,
     )
     .get(postId) as { n: number } | undefined;
   return row?.n ?? 0;

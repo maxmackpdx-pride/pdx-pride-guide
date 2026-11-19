@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "Zaylist Events",
+    "slug": "zaylist-events-prototype",
+    "version": "0.1.0",
+    "scheme": "zaylistevents",
+    "platforms": ["ios", "android"],
+    "ios": {"bundleIdentifier": "com.zaylist.prototype.events"},
+    "android": {"package": "com.zaylist.prototype.events"}
+  }
+}

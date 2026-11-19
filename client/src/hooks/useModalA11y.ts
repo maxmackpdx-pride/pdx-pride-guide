@@ -36,7 +36,7 @@ export function useModalA11y(opts: {
     const focusables = () =>
       node
         ? (Array.from(node.querySelectorAll(FOCUSABLE)) as HTMLElement[]).filter(
-            el => !el.hasAttribute("disabled") && el.tabIndex !== -1 && el.offsetParent !== null,
+            el => !el.hasAttribute("disabled") && !el.closest("[inert]") && el.tabIndex !== -1 && el.offsetParent !== null,
           )
         : [];
 

@@ -1,87 +1,64 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { DEFAULT_ATTENDANCE_PHRASE_KEY, attendancePhraseLabel } from "@shared/attendancePhrases";
-import {
-  applyRsvpQueryData,
-  beginInFlight,
-  endInFlight,
-  restoreRsvp,
-  RSVP_CHECKINS_KEY,
-  RSVP_SUMMARIES_KEY,
-  snapshotRsvp,
-  type CheckInRow,
-} from "@/lib/optimisticCache";
+import { RSVP_CHECKINS_KEY, RSVP_SUMMARIES_KEY, type CheckInRow } from "@/lib/optimisticCache";
 
-/**
- * Shared RSVP (attendance check-in) toggle. Schedule, Home, Events rails, and
- * profile going-chips all share this path so chip + attendance count roll back
- * together on a 500 or a dropped network.
- */
 export function useEventRsvp() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
-  const pendingRef = useRef(new Set<number>());
-  const [, setPendingTick] = useState(0);
-
-  const { data: myCheckIns = [] } = useQuery<CheckInRow[]>({
-    queryKey: [...RSVP_CHECKINS_KEY],
-    queryFn: () => apiRequest("GET", "/api/events/mine/check-ins").then((r) => r.json()),
+  const pending = useRef(new Set<string>());
+  const [, invalidatePending] = useState(0);
+  const userId = user?.id;
+  const viewer = useRef(userId);
+  useEffect(()=>{viewer.current=userId;},[userId]);
+  const query = useQuery<CheckInRow[]>({
+    queryKey: [...RSVP_CHECKINS_KEY, userId],
+    queryFn: () => apiRequest("GET", "/api/events/mine/check-ins").then(r => r.json()),
     enabled: !!user,
   });
-
-  const myEventIds = useMemo(
-    () => new Set(myCheckIns.map((c) => c.eventId)),
-    [myCheckIns],
-  );
-
-  const rsvpMutation = useMutation({
-    mutationFn: async ({ eventId, nextGoing }: { eventId: number; nextGoing: boolean }) => {
+  const myEventIds = useMemo(() => new Set(query.data?.map(row => row.eventId)), [query.data]);
+  const mutation = useMutation({
+    mutationFn: async ({ eventId, nextGoing }: { eventId: number; actor: number; nextGoing: boolean }) => {
       if (nextGoing) {
         await apiRequest("POST", `/api/events/${eventId}/attendance`, {
-          message: attendancePhraseLabel(DEFAULT_ATTENDANCE_PHRASE_KEY),
-          visibility: "public",
-          isAnonymous: false,
+          message: attendancePhraseLabel(DEFAULT_ATTENDANCE_PHRASE_KEY), visibility: "public", isAnonymous: false,
         });
-        return;
+      } else {
+        await apiRequest("DELETE", `/api/events/${eventId}/attendance`);
       }
-      await apiRequest("DELETE", `/api/events/${eventId}/attendance`);
     },
-    onMutate: async ({ eventId, nextGoing }) => {
-      const snap = await snapshotRsvp(queryClient);
-      applyRsvpQueryData(queryClient, eventId, nextGoing);
-      return { snap };
+    onSuccess: (_, { eventId, actor, nextGoing }) => {
+      // Mutations touch the originating viewer only; one event cannot roll back another.
+      const key = [...RSVP_CHECKINS_KEY, actor];
+      if (queryClient.getQueryData(key) !== undefined) {
+        queryClient.setQueryData<CheckInRow[]>(key, rows => {
+          const others = (rows ?? []).filter(row => row.eventId !== eventId);
+          return nextGoing ? [...others, { eventId }] : others;
+        });
+      }
+      if(viewer.current===actor) toast({ title: nextGoing ? "Public attendance recorded" : "Attendance removed" });
     },
-    onError: (_err, vars, ctx) => {
-      restoreRsvp(queryClient, ctx?.snap);
-    },
-    onSettled: (_data, _err, vars) => {
-      endInFlight(pendingRef.current, vars.eventId);
-      setPendingTick((n) => n + 1);
-      void queryClient.invalidateQueries({ queryKey: ["profile"] });
-      queryClient.invalidateQueries({ queryKey: [...RSVP_CHECKINS_KEY] });
-      void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
-      void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
-      queryClient.invalidateQueries({ queryKey: [...RSVP_SUMMARIES_KEY] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events", vars.eventId, "attendance"] });
+    onError: (_, {actor}) => {if(viewer.current===actor) toast({ title: "Attendance could not be updated", description: "Check your connection and try again.", variant: "destructive" });},
+    onSettled: (_, __, { eventId, actor }) => {
+      pending.current.delete(`${actor}:${eventId}`);
+      invalidatePending(n => n + 1);
+      for (const key of [RSVP_CHECKINS_KEY, RSVP_SUMMARIES_KEY, ["profile"], ["/api/hub/feed"], ["/api/hub/feed/head"], ["/api/hearts"], ["/api/events", eventId, "attendance"]]) {
+        void queryClient.invalidateQueries({ queryKey: key });
+      }
     },
   });
-
-  const isRsvpPending = useCallback((eventId: number) => pendingRef.current.has(eventId), []);
-
-  const toggleRsvp = useCallback(
-    (eventId: number) => {
-      if (!user) {
-        setShowAuth(true);
-        return;
-      }
-      if (!beginInFlight(pendingRef.current, eventId)) return;
-      setPendingTick((n) => n + 1);
-      rsvpMutation.mutate({ eventId, nextGoing: !myEventIds.has(eventId) });
-    },
-    [user, myEventIds, rsvpMutation],
-  );
-
-  return { myEventIds, toggleRsvp, showAuth, setShowAuth, isRsvpPending };
+  const isRsvpPending = useCallback((eventId: number) => pending.current.has(`${userId}:${eventId}`), [userId]);
+  const toggleRsvp = (eventId: number) => {
+    if (userId == null) { setShowAuth(true); return; }
+    if (query.isError) { void query.refetch(); return; }
+    if (query.isPending || isRsvpPending(eventId)) return;
+    pending.current.add(`${userId}:${eventId}`);
+    invalidatePending(n => n + 1);
+    mutation.mutate({ eventId, actor: userId, nextGoing: !myEventIds.has(eventId) });
+  };
+  return { myEventIds, toggleRsvp, showAuth, setShowAuth, isRsvpPending, loading: !!user && query.isPending, error: !!user && query.isError, retry: query.refetch };
 }

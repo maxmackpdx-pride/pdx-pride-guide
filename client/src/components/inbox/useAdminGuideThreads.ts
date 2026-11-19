@@ -1,4 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
+import {useThreadArchive} from "./useThreadArchive";
+import {useAuth} from "@/context/AuthContext";
+import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { counterpartyAvatar, senderAvatar, type InboxPartyAvatar } from "@/lib/inboxAvatar";
@@ -6,25 +8,6 @@ import { contextLabelOf, contextTypeOf } from "@/lib/inboxContext";
 import { GUIDE_PUBLIC_HANDLE, isGuideSystemUsername } from "@shared/peopleHub";
 import { categoryFromContext, formatThreadTime } from "./mapContext";
 import type { ApiMessageRow, Folder, Thread, ThreadMessage } from "./types";
-
-const ARCHIVE_KEY = "pdx-admin-guide-archived-v1";
-
-function loadArchived(): Set<string> {
-  if (typeof window === "undefined") return new Set();
-  try {
-    const raw = localStorage.getItem(ARCHIVE_KEY);
-    if (!raw) return new Set();
-    const parsed = JSON.parse(raw);
-    return new Set(Array.isArray(parsed) ? parsed.map(String) : []);
-  } catch {
-    return new Set();
-  }
-}
-
-function saveArchived(ids: Set<string>) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(ARCHIVE_KEY, JSON.stringify(Array.from(ids)));
-}
 
 function threadIdOf(row: ApiMessageRow): string {
   return String(row.threadId || row.thread_id || "").trim();
@@ -97,10 +80,11 @@ async function refreshAdminGuideQueries(queryClient: ReturnType<typeof useQueryC
 export function useAdminGuideThreads(activeThreadId: string | null, enabled: boolean) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [archivedIds, setArchivedIds] = useState<Set<string>>(() => loadArchived());
+  const {user} = useAuth();
+  const {ids:archivedIds,change:changeArchive,query:archiveQuery} = useThreadArchive(true,enabled);
 
-  const { data: inbox = [], isLoading: inboxLoading } = useQuery<ApiMessageRow[]>({
-    queryKey: ["/api/admin/messages/inbox"],
+  const { data: inbox = [], isLoading: inboxLoading, isError: inboxError, refetch: refetchInbox } = useQuery<ApiMessageRow[]>({
+    queryKey: ["/api/admin/messages/inbox",user?.id],
     queryFn: async () => {
       const r = await fetch("/api/admin/messages/inbox", { credentials: "include" });
       if (!r.ok) throw new Error("Could not load admin inbox");
@@ -110,8 +94,8 @@ export function useAdminGuideThreads(activeThreadId: string | null, enabled: boo
     refetchInterval: enabled ? 60_000 : false,
   });
 
-  const { data: sent = [], isLoading: sentLoading } = useQuery<ApiMessageRow[]>({
-    queryKey: ["/api/admin/messages/sent"],
+  const { data: sent = [], isLoading: sentLoading, isError: sentError, refetch: refetchSent } = useQuery<ApiMessageRow[]>({
+    queryKey: ["/api/admin/messages/sent",user?.id],
     queryFn: async () => {
       const r = await fetch("/api/admin/messages/sent", { credentials: "include" });
       if (!r.ok) throw new Error("Could not load admin sent");
@@ -122,7 +106,7 @@ export function useAdminGuideThreads(activeThreadId: string | null, enabled: boo
   });
 
   const { data: activePayload } = useQuery({
-    queryKey: ["/api/admin/messages/thread", activeThreadId],
+    queryKey: ["/api/admin/messages/thread", activeThreadId,user?.id],
     queryFn: async () => {
       const r = await fetch(`/api/admin/messages/thread/${encodeURIComponent(activeThreadId!)}`, {
         credentials: "include",
@@ -227,7 +211,7 @@ export function useAdminGuideThreads(activeThreadId: string | null, enabled: boo
       }
       const data = (await r.json()) as { reactions?: ThreadMessage["reactions"] };
       queryClient.setQueryData(
-        ["/api/admin/messages/thread", threadId],
+        ["/api/admin/messages/thread", threadId, user?.id],
         (prev: { messages?: ApiMessageRow[] } | undefined) => {
           if (!prev?.messages) return prev;
           return {
@@ -242,7 +226,7 @@ export function useAdminGuideThreads(activeThreadId: string | null, enabled: boo
       );
       return data.reactions || [];
     },
-    [queryClient, toast],
+    [queryClient, toast, user?.id],
   );
 
   const setRead = useCallback(
@@ -258,27 +242,14 @@ export function useAdminGuideThreads(activeThreadId: string | null, enabled: boo
     [queryClient, threads],
   );
 
-  const archive = useCallback((threadId: string) => {
-    setArchivedIds((prev) => {
-      const next = new Set(prev);
-      next.add(threadId);
-      saveArchived(next);
-      return next;
-    });
-  }, []);
+  const archive = (id:string) => changeArchive(id,true);
+  const unarchive = (id:string) => changeArchive(id,false);
 
-  const unarchive = useCallback((threadId: string) => {
-    setArchivedIds((prev) => {
-      const next = new Set(prev);
-      next.delete(threadId);
-      saveArchived(next);
-      return next;
-    });
-  }, []);
-
-  const markAllRead = useCallback(async () => {
+  const markAllRead = useCallback(async (threadIds: string[]) => {
     const r = await fetch("/api/admin/messages/mark-all-read", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({threadIds}),
       credentials: "include",
     });
     if (!r.ok) {
@@ -298,12 +269,6 @@ export function useAdminGuideThreads(activeThreadId: string | null, enabled: boo
         toast({ title: "Delete failed", variant: "destructive" });
         throw new Error("Delete failed");
       }
-      setArchivedIds((prev) => {
-        const next = new Set(prev);
-        next.delete(threadId);
-        saveArchived(next);
-        return next;
-      });
       await refreshAdminGuideQueries(queryClient);
       await queryClient.invalidateQueries({ queryKey: ["/api/admin/messages/thread", threadId] });
     },
@@ -317,7 +282,9 @@ export function useAdminGuideThreads(activeThreadId: string | null, enabled: boo
 
   return {
     threads,
-    loading: inboxLoading || sentLoading,
+    loading: inboxLoading || sentLoading || archiveQuery.isLoading,
+    listError: inboxError || sentError || archiveQuery.isError,
+    retry: () => { void Promise.all([refetchInbox(), refetchSent(), archiveQuery.refetch()]); },
     unreadCount,
     sendMessage,
     toggleReaction,

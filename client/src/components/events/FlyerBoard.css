@@ -1134,3 +1134,11 @@
 
 /* Open card: everything below the hero rides above the poster's fade tail. */
 .fbx .otabs, .fbx .opageswrap, .fbx .ofoot { position: relative; z-index: 2; }
+
+.fbx .ocard :is(.oclose,.oshare,.oarw,.osave,.otabs button,.opage button), .fbx .fbar .fchip { min-height:44px; min-width:44px; }
+.fbx .ointerested .evz-x__act-main {display:grid;gap:2px;}
+
+.fbx .ocard .ox {min-width:44px;min-height:44px}
+.fbx .pheart::after,.fbx .pshare::after {
+ content:"";position:absolute;left:50%;top:50%;min-width:44px;min-height:44px;transform:translate(-50%,-50%);
+}

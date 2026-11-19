@@ -1,3 +1,5 @@
+import {useAuth} from "@/context/AuthContext";
+import {useQueryClient} from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -29,6 +31,10 @@ export function FeedbackButton() {
 }
 
 export function FeedbackModal({ onClose }: { onClose: () => void }) {
+  const {user}=useAuth();
+  const client=useQueryClient();
+  const [inAppReplies,setInAppReplies]=useState(false);
+  const [receipt,setReceipt]=useState<number|null>(null);
   const [form, setForm] = useState({
     category: "BUG",
     severity: "MEDIUM",
@@ -64,14 +70,18 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          inAppReplies:Boolean(user && inAppReplies),
           pageUrl: window.location.href,
           userAgent: navigator.userAgent,
         }),
       });
       if (!res.ok) throw new Error("Feedback failed");
+      const result=await res.json();
+      setReceipt(result.receiptId ?? null);
+      void client.invalidateQueries({queryKey:["/api/me/report-receipts"]});
       setForm(prev => ({ ...prev, message: "", steps: "" }));
       setStatus("sent");
-      setTimeout(onClose, 1800);
+
     } catch {
       setStatus("error");
     }
@@ -141,6 +151,7 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
               <option value="BLOCKER">Blocker</option>
             </select>
           </div>
+          {user && <label><input type="checkbox" checked={inAppReplies} onChange={e=>setInAppReplies(e.target.checked)}/> Keep a receipt and receive private replies in my Zaylist inbox</label>}
           <input
             value={form.email}
             onChange={e => update("email", e.target.value)}
@@ -171,7 +182,7 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
           >
             {status === "sending" ? "SENDING..." : "SUBMIT FEEDBACK"}
           </button>
-          {status === "sent" && <div className="display" style={{ color: "#D4FF00", fontSize: "0.78rem" }}>Got it. Thank you for helping us sand the sharp edges.</div>}
+          {status === "sent" && <div className="display" style={{ color: "#D4FF00", fontSize: "0.78rem" }}>{receipt ? `Report #${receipt} received. Open your inbox for private replies.` : "Feedback received."}</div>}
           {status === "error" && <div className="display" style={{ color: "#FF0000", fontSize: "0.78rem" }}>That did not send. Please try once more.</div>}
         </form>
       </div>

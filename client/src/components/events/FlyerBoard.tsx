@@ -1,3 +1,11 @@
+import { eventAge, eventPrice } from "@/lib/eventFacts";
+import { EventGoingButton, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
+import EventPlanning from "./EventPlanning";
+import {useHistoryState} from "wouter/use-browser-location";
+import {useAuth} from "@/context/AuthContext";
+import {useModalA11y} from "@/hooks/useModalA11y";
+import {sharePageLink,shareToastTitle} from "@/lib/shareEvent";
+import {toast} from "@/hooks/use-toast";
 import type React from "react";
 import {
   useEffect,
@@ -44,9 +52,17 @@ export type FlyerBoardProps = {
   onExitPast: () => void;
   /** Opens the full production expanded card (deep actions: post a Mizzed, etc.). */
   onOpen: (listing: EventListing, originRect: EventModalOriginRect | null) => void;
+  saveDisabled: boolean;
   savedIds: Set<number>;
   onToggleSave: (id: number) => void;
   now: number;
+  query: string;
+  setQuery: (value: string) => void;
+  fday: string;
+  setFday: (value: string) => void;
+  tags: Set<string>;
+  setTags: React.Dispatch<React.SetStateAction<Set<string>>>;
+  onClear: () => void;
 };
 
 const PACIFIC = "America/Los_Angeles";
@@ -54,33 +70,17 @@ const DAY_MS = 86_400_000;
 const WEEKDAY_CODES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
 const DOW_INDEX: Record<string, number> = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-const ADMISSION_LABEL: Record<string, string> = {
-  FREE: "FREE",
-  TICKETED: "TICKETED",
-  DOOR_FEE: "COVER AT DOOR",
-  SUGGESTED_DONATION: "DONATION",
-  UNKNOWN: "PRICE NOT CONFIRMED",
-};
-const ADMISSION_FULL: Record<string, string> = {
-  FREE: "Free",
-  TICKETED: "Ticketed",
-  DOOR_FEE: "Cover at door",
-  SUGGESTED_DONATION: "Suggested donation",
-  UNKNOWN: "Not confirmed",
-};
-const AGE_FULL: Record<string, string> = {
-  "21_PLUS": "21+",
-  "18_PLUS": "18+",
-  ALL_AGES: "All ages",
-  UNVERIFIED: "Not stated",
-};
 const OPAGE_NAMES = ["FEED", "INFO", "MAPS", "MORE + NEARBY", "PEOPLE"];
 const OPAGE_LABELS = ["FEED", "INFO", "MAPS", "MORE", "PEOPLE"];
-const AGE_LABEL: Record<string, string> = {
-  "21_PLUS": "21+",
-  "18_PLUS": "18+",
-  ALL_AGES: "All ages",
-};
+async function shareEventListing(listing: EventListing) {
+  const url = eventPath(listing.id,listing.title,listing.dayOfWeek,dateStrOf(listing));
+  try {
+    const result = await sharePageLink(url,listing.title);
+    toast({title:shareToastTitle(result,"event")});
+  } catch (error) {
+    if (!(error instanceof Error && error.name === "AbortError")) toast({title:"Could not share the event",variant:"destructive"});
+  }
+}
 /** The demo's rotation rhythm and stagger, by position in the container. */
 const ROT_CYCLE = [-2.2, 1.6, -1.2, 2.6, -2.8, 1.9];
 const MTOPS = [0, 10, 4, 14, 2, 8, 0, 12, 6, 2];
@@ -343,29 +343,13 @@ function usePosterLoad<T extends HTMLElement>(poster: string | null | undefined)
   return [ref, load] as const;
 }
 
-async function shareEventListing(listing: EventListing) {
-  const url = `https://www.zaylist.com${eventPath(listing.id, listing.title, listing.dayOfWeek)}`;
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: listing.title, url });
-      return;
-    } catch {
-      // Fall back to copying the link.
-    }
-  }
-  try {
-    await navigator.clipboard.writeText(url);
-  } catch {
-    /* Clipboard unavailable. */
-  }
-}
-
 function PosterCell({
   listing,
   index,
   mtop,
   rail = false,
   showDayFlag = false,
+  saveDisabled,
   saved,
   onToggleSave,
   onOpenCard,
@@ -378,6 +362,7 @@ function PosterCell({
    *  height (the 0.8 reference at full rail width) scales down to fit. */
   rail?: boolean;
   showDayFlag?: boolean;
+  saveDisabled: boolean;
   saved: boolean;
   onToggleSave: (id: number) => void;
   onOpenCard: (listing: EventListing, el: HTMLElement | null) => void;
@@ -405,9 +390,9 @@ function PosterCell({
   const cd = countdownLabel === "ON NOW" ? null : countdownParts(
     running && end !== null ? end - tick : start - tick,
   );
-  const age = AGE_LABEL[listing.ageRequirement ?? ""] ?? "";
-  const meta = `${eventDateLabel(listing.dateStart)} · ${eventTimeLabel(listing.dateStart)} · ${listing.venueName}${age ? ` · ${age}` : ""}`;
-  const price = ADMISSION_LABEL[listing.admission ?? "UNKNOWN"] ?? "PRICE NOT CONFIRMED";
+  const age = eventAge(listing.ageRequirement);
+  const meta = `${eventDateLabel(listing.dateStart)} · ${eventTimeLabel(listing.dateStart)} · ${listing.venueName} · ${listing.ageRequirement && age!=="Not stated"?age:"Age not stated"}`;
+  const price = eventPrice(listing.admission) === "Not confirmed" ? "PRICE NOT CONFIRMED" : eventPrice(listing.admission).toUpperCase();
   const priceCls = listing.admission === "FREE" ? " free" : !listing.admission || listing.admission === "UNKNOWN" ? " unk" : "";
   /* An unconfirmed price is not a tag: it demotes to an asterisk
    * small-print note at the bottom of the card's bottom band (Tucker's
@@ -506,8 +491,8 @@ function PosterCell({
                   <button
                     type="button"
                     className={`pheart${saved ? " saved" : ""}`}
-                    aria-label={saved ? `Remove ${listing.title} from your schedule` : `Save ${listing.title}`}
-                    aria-pressed={saved}
+                    aria-label={saved ? `Remove ${listing.title} from your private schedule` : `Save ${listing.title} privately`}
+                    disabled={saveDisabled} aria-pressed={saved}
                     onClick={ev => {
                       ev.stopPropagation();
                       onToggleSave(listing.id);
@@ -533,8 +518,8 @@ function PosterCell({
               <button
                 type="button"
                 className={`pheart${saved ? " saved" : ""}`}
-                aria-label={saved ? `Remove ${listing.title} from your schedule` : `Save ${listing.title}`}
-                aria-pressed={saved}
+                aria-label={saved ? `Remove ${listing.title} from your private schedule` : `Save ${listing.title} privately`}
+                disabled={saveDisabled} aria-pressed={saved}
                 onClick={ev => {
                   ev.stopPropagation();
                   onToggleSave(listing.id);
@@ -688,13 +673,14 @@ type EventDetailResponse = {
     ticketUrl?: string | null;
   } | null;
   venue?: {
+    id?: number;
     address?: string | null;
     neighborhood?: string | null;
     lat?: number | null;
     lng?: number | null;
   } | null;
   hosts?: Array<{ displayName?: string | null; username?: string | null; role?: string | null }>;
-  talent?: Array<{ displayName?: string | null; username?: string | null; role?: string | null }>;
+  talent?: Array<{ userId?: number; addedByUserId?: number | null; displayName?: string | null; username?: string | null; role?: string | null }>;
   gigs?: Array<{ id?: number | string; title?: string | null; description?: string | null }>;
   missedConnections?: unknown[];
   nearby?: {
@@ -716,15 +702,13 @@ export default function FlyerBoard({
   onEnterPast,
   onExitPast,
   onOpen,
+  saveDisabled,
   savedIds,
   onToggleSave,
-  now,
+  now, query, setQuery, fday, setFday, tags, setTags, onClear,
 }: FlyerBoardProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [tick, setTick] = useState(now);
-  const [fday, setFday] = useState<WindowFilter>("all");
-  const [tags, setTags] = useState<Set<string>>(new Set());
-  const [query, setQuery] = useState("");
   const [budgetRows, setBudgetRows] = useState(4);
   const [cols, setCols] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(min-width: 1100px)").matches ? 5 : 3,
@@ -788,15 +772,13 @@ export default function FlyerBoard({
     if (diff <= 7) return "week";
     return "later";
   };
-  const searchText = (e: EventListing) =>
-    `${e.title} ${e.venueName} ${eventDateLabel(e.dateStart)} ${weekdayCode(dateStrOf(e))}`.toLowerCase();
   const passCell = (e: EventListing): boolean => {
     if (fday !== "all" && fdayOf(e) !== fday) return false;
     if (tags.size > 0) {
       const own = tagsOf(e);
       for (const t of tags) if (!own.has(t)) return false;
     }
-    if (query && !searchText(e).includes(query)) return false;
+    // The parent applies the shared event query, including verified age filters.
     return true;
   };
 
@@ -905,9 +887,10 @@ export default function FlyerBoard({
     return ids.size;
   }, [pastList, mcFor]);
 
+  const {user: viewer} = useAuth();
   const detailQuery = useQuery<EventDetailResponse>({
-    queryKey: ["/api/events", openListing?.id, "detail"],
-    queryFn: () => apiRequest("GET", `/api/events/${openListing!.id}/detail`).then(r => r.json()),
+    queryKey: ["/api/events", openListing?.id, "detail", viewer?.id, openListing && dateStrOf(openListing)],
+    queryFn: () => apiRequest("GET", `/api/events/${openListing!.id}/detail?date=${encodeURIComponent(dateStrOf(openListing!))}`).then(r => r.json()),
     enabled: !!openListing,
     staleTime: 60_000,
   });
@@ -927,18 +910,19 @@ export default function FlyerBoard({
   useEffect(() => {
     if (pagesRef.current) pagesRef.current.scrollLeft = 0;
   }, [openListing]);
-  const shareOpen = async () => {
-    if (!openListing) return;
-    await shareEventListing(openListing);
-  };
+  const historyState = useHistoryState() as {flyerPoster?:{id:number;date:string}}|null;
+  const shareOpen = () => { if(openListing) void shareEventListing(openListing); };
   const openCard = (listing: EventListing, el: HTMLElement | null) => {
     clearTimers();
     setFan(null);
     setOpage(0);
     setOday(0);
     setOpenListing(listing);
+    if (!window.history.state?.flyerPoster) {
+      window.history.pushState({ ...window.history.state, flyerPoster: { id: listing.id, date: dateStrOf(listing) } }, "", window.location.href);
+    }
     flipElRef.current = el;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("calm-mode");
     if (el && !reduced) {
       el.classList.add("flipping");
       el.style.transition = "transform .2s ease-in";
@@ -946,10 +930,12 @@ export default function FlyerBoard({
     }
     later(() => setOcardOn(true), reduced ? 0 : 190);
   };
-  const closeCard = () => {
+  const closeCard = (fromHistory = false) => {
+    if (!fromHistory && window.history.state?.flyerPoster) { window.history.back(); return; }
     setOcardOn(false);
     const p = flipElRef.current;
     flipElRef.current = null;
+    requestAnimationFrame(() => p?.isConnected && p.focus({ preventScroll: true }));
     if (p) {
       later(() => {
         p.style.transition = "transform .3s cubic-bezier(.32,1.24,.36,1)";
@@ -963,18 +949,18 @@ export default function FlyerBoard({
     later(() => setOpenListing(null), 580);
   };
   useEffect(() => {
-    if (!ocardOn) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (ev: KeyboardEvent) => {
-      if (ev.key === "Escape") closeCard();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [ocardOn, closeCard]);
+    const selection = historyState?.flyerPoster;
+    if (!selection) {
+      if (openListing && ocardOn) closeCard(true);
+      return;
+    }
+    if (openListing?.id === selection.id && dateStrOf(openListing) === selection.date) return;
+    const listing = [...events, ...pastEvents].find(row => row.id===selection.id && dateStrOf(row)===selection.date);
+    if (!listing) return;
+    const origin = rootRef.current?.querySelector<HTMLElement>(`[data-event-id="${selection.id}"][data-event-date="${selection.date}"]`);
+    openCard(listing, origin ?? null);
+  }, [historyState, events, pastEvents, openListing, ocardOn]);
+  const posterDialog = useModalA11y({open:ocardOn,onClose:()=>closeCard()});
 
   /* ----- fan deck ----- */
   const closeFan = () => {
@@ -984,6 +970,7 @@ export default function FlyerBoard({
       fanReturnRef.current = null;
     }
   };
+  const fanDialog = useModalA11y({open:!!fan,onClose:closeFan});
   const openFan = (listing: EventListing, el: HTMLElement | null) => {
     if (fan && listingKey(fan.listing) === listingKey(listing)) {
       closeFan();
@@ -1006,8 +993,7 @@ export default function FlyerBoard({
     const onKey = (ev: KeyboardEvent) => {
       const target = ev.target as HTMLElement | null;
       if (target && /INPUT|TEXTAREA|SELECT/.test(target.tagName || "")) return;
-      if (ev.key === "Escape") closeFan();
-      else if (ev.key === "ArrowRight") {
+      if (ev.key === "ArrowRight") {
         ev.preventDefault();
         stepDeck(1);
       } else if (ev.key === "ArrowLeft") {
@@ -1074,6 +1060,7 @@ export default function FlyerBoard({
     setBudgetRows(4);
   };
   const clearFilters = () => {
+    onClear();
     setFday("all");
     setTags(new Set());
     setQuery("");
@@ -1094,6 +1081,7 @@ export default function FlyerBoard({
       index={i}
       mtop={0}
       rail
+      saveDisabled={saveDisabled}
       saved={savedIds.has(e.id)}
       onToggleSave={onToggleSave}
       onOpenCard={openCard}
@@ -1117,7 +1105,8 @@ export default function FlyerBoard({
         showDayFlag={flowData.flow[i - 1]?.kind === "flag"}
         index={flowPos}
         mtop={mtop}
-        saved={savedIds.has(item.e.id)}
+        saveDisabled={saveDisabled}
+      saved={savedIds.has(item.e.id)}
         onToggleSave={onToggleSave}
         onOpenCard={openCard}
         tick={tick}
@@ -1167,7 +1156,14 @@ export default function FlyerBoard({
               : `${Number(openCd!.m)}M`
         }`
     : "";
-  const gigs = detailQuery.data?.gigs ?? [];
+  const venueId = detailQuery.data?.venue?.id;
+  const venueQuery = useQuery<{ promoters?: { id: number; displayName?: string; username: string }[] }>({
+    queryKey: ["/api/placez", venueId, "card-extras"],
+    queryFn: () => apiRequest("GET", `/api/placez/${venueId}`).then(r => r.json()),
+    enabled: !!venueId,
+    staleTime: 300_000,
+  });
+  const detailStatus = <EventReadStatus label="Event details" query={detailQuery} />;
   const mizzCount = detailQuery.data?.missedConnections?.length;
   const detailEvent = detailQuery.data?.event ?? null;
   const detailVenue = detailQuery.data?.venue ?? null;
@@ -1179,7 +1175,7 @@ export default function FlyerBoard({
   const openDesc = detailEvent?.description || openListing?.description || "";
   const openTicket = detailEvent?.ticketUrl || openListing?.ticketUrl || "";
   const openClaimable = detailEvent?.isClaimable ?? openListing?.isClaimable ?? false;
-  const openPending = detailEvent?.hasPendingClaim ?? false;
+  const openPending = detailEvent?.hasPendingClaim ?? Boolean((openListing as { hasPendingClaim?: boolean } | null)?.hasPendingClaim);
   const openLat = detailVenue?.lat ?? openListing?.lat ?? null;
   const openLng = detailVenue?.lng ?? openListing?.lng ?? null;
   const pinX = openLng != null ? Math.min(92, Math.max(8, ((openLng + 122.85) / 0.4) * 100)) : 50;
@@ -1244,7 +1240,7 @@ export default function FlyerBoard({
           aria-label="Search events"
           value={query}
           onChange={e => {
-            setQuery(e.target.value.toLowerCase());
+            setQuery(e.target.value);
             setBudgetRows(4);
           }}
         />
@@ -1406,6 +1402,8 @@ export default function FlyerBoard({
           <div className="fbx fbx-overlay">
             <div
               className={`fanLayer${fan ? " on" : ""}`}
+              ref={fanDialog} role={fan?"dialog":undefined} aria-modal={fan?true:undefined}
+              aria-label={fan?`Mizzed connections for ${fan.listing.venueName}`:undefined}
         onClick={ev => {
           if (ev.target === ev.currentTarget) closeFan();
         }}
@@ -1415,9 +1413,7 @@ export default function FlyerBoard({
             <div
               className="deck"
               style={{ left: fan.x, top: fan.y }}
-              role="dialog"
-              aria-modal="true"
-              aria-label={`Mizzed connections for ${fan.listing.venueName}`}
+
               onPointerDown={ev => {
                 fanDragX.current = ev.clientX;
               }}
@@ -1465,6 +1461,7 @@ export default function FlyerBoard({
                   return (
                     <div
                       key={post.id}
+                      inert={off!==0}
                       className="fancard"
                       style={style}
                       aria-hidden={off !== 0}
@@ -1499,13 +1496,7 @@ export default function FlyerBoard({
                           className="fc-share"
                           onClick={async ev => {
                             ev.stopPropagation();
-                            const url = `https://www.zaylist.com${eventPath(fan.listing.id, fan.listing.title, fan.listing.dayOfWeek)}`;
-                            try {
-                              if (navigator.share) await navigator.share({ title: fan.listing.title, url });
-                              else await navigator.clipboard.writeText(url);
-                            } catch {
-                              /* share dismissed */
-                            }
+                            await shareEventListing(fan.listing);
                           }}
                         >
                           SHARE
@@ -1535,27 +1526,16 @@ export default function FlyerBoard({
       </div>
 
       {/* open card */}
-      <div className={`scrim${ocardOn ? " on" : ""}`} onClick={closeCard} />
+      <div className={`scrim${ocardOn ? " on" : ""}`} onClick={() => closeCard()} />
       {openListing && (
         <div
-          className={`ocard${ocardOn ? " on" : ""}`}
+          className={`ocard${ocardOn ? " on" : ""}`} ref={posterDialog} inert={!ocardOn}
           style={{ "--a": openAccent } as CSSProperties}
           role="dialog"
           aria-modal="true"
           aria-label={openListing.title}
         >
-          <div
-            className="ox"
-            role="button"
-            tabIndex={0}
-            aria-label="Close"
-            onClick={closeCard}
-            onKeyDown={ev => {
-              if (ev.key === "Enter" || ev.key === " ") closeCard();
-            }}
-          >
-            ✕
-          </div>
+          <button type="button" className="ox" aria-label="Close event" onClick={()=>closeCard()}>✕</button>
           <button type="button" className="oshare" aria-label={`Share ${openListing.title}`} onClick={shareOpen}>
             <ShareIcon />
           </button>
@@ -1576,9 +1556,7 @@ export default function FlyerBoard({
             </div>
             <div className="oid">
               <div className="ochips">
-                {AGE_LABEL[openListing.ageRequirement ?? ""] ? (
-                  <span className="ochip">{AGE_LABEL[openListing.ageRequirement ?? ""]}</span>
-                ) : null}
+                <span className="ochip">{eventAge(openListing.ageRequirement)==="Not stated"?"Age not stated":eventAge(openListing.ageRequirement)}</span>
                 {openListing.isSexPositive ? <span className="ochip">SEX-POSITIVE</span> : null}
                 <span className="ochip">{openCdText}</span>
               </div>
@@ -1589,15 +1567,7 @@ export default function FlyerBoard({
                 {openListing.venueName}
               </p>
             </div>
-            <button
-              type="button"
-              className="ointerested"
-              aria-pressed={savedIds.has(openListing.id)}
-              onClick={() => onToggleSave(openListing.id)}
-            >
-              <b>I'M INTERESTED</b>
-              <span>{savedIds.has(openListing.id) ? "SAVED TO YOUR SCHEDULE" : "TAP TO SAVE YOUR SPOT"}</span>
-            </button>
+            <EventGoingButton eventId={openListing.id} past={!!openListing.dateEnd && endMs(openListing) < tick} poster />
             <div className="otabs" role="tablist" aria-label="Event card pages">
               {OPAGE_NAMES.map((n, i) => (
                 <button
@@ -1621,31 +1591,14 @@ export default function FlyerBoard({
                 if (i !== opage) setOpage(i);
               }}
             >
-              <section className="opage" aria-label="Feed">
-                <p className="osec">
-                  GIGZ AT {openListing.venueName.toUpperCase()} <span className="osec-r">{gigs.length} OPEN</span>
-                </p>
-                {gigs.length > 0 ? (
-                  gigs.map((g, gi) => (
-                    <div className="gig" key={g.id ?? gi}>
-                      <div className="av" />
-                      <div>
-                        <h5>{(g.title || "OPEN CALL").toUpperCase()}</h5>
-                        {g.description ? <p>{g.description}</p> : null}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="oempty">
-                    No Gigz posted at {openListing.venueName} right now. Gigz the venue posts land here.
-                  </p>
-                )}
+              <section className="opage" inert={opage!==0} aria-hidden={opage!==0} aria-label="Feed">
+                {openListing.id > 0 && <EventPlanning eventId={openListing.id} occurrenceDate={openListing.dateStart} />}
                 <button
                   type="button"
                   className="addm"
                   onClick={() => {
                     const target = openListing;
-                    closeCard();
+                    closeCard(true);
                     onOpen(target, null);
                   }}
                 >
@@ -1653,7 +1606,7 @@ export default function FlyerBoard({
                   <p>{mizzCount ? `${mizzCount} posted for this event` : "Post during or after the event."}</p>
                 </button>
               </section>
-              <section className="opage" aria-label="Info">
+              <section className="opage" inert={opage!==1} aria-hidden={opage!==1} aria-label="Info">
                 <p className="osec">EVENT DETAILS</p>
                 <div className="ostarts">
                   <i>{openCdLabel}</i>
@@ -1680,11 +1633,11 @@ export default function FlyerBoard({
                 {openDesc ? <p className="odesc">{openDesc}</p> : null}
                 <div className="okv">
                   <span className="ok">ADMISSION</span>
-                  <span>{ADMISSION_FULL[openListing.admission ?? "UNKNOWN"] ?? "Not confirmed"}</span>
+                  <span>{eventPrice(openListing.admission)}</span>
                 </div>
                 <div className="okv">
                   <span className="ok">AGE</span>
-                  <span>{AGE_FULL[openListing.ageRequirement ?? ""] ?? "Not stated"}</span>
+                  <span>{eventAge(openListing.ageRequirement)}</span>
                 </div>
                 {openTicket ? (
                   <a className="olinkbtn accent" href={openTicket} target="_blank" rel="noreferrer">
@@ -1698,11 +1651,11 @@ export default function FlyerBoard({
                     {openPending ? " A claim is pending admin review." : ""}
                   </p>
                 ) : null}
-                <a className="olinkbtn" href={eventPath(openListing.id, openListing.title, openListing.dayOfWeek)}>
+                <a className="olinkbtn" href={eventPath(openListing.id, openListing.title, openListing.dayOfWeek, dateStrOf(openListing))}>
                   REPORT / REQUEST A CHANGE <span>›</span>
                 </a>
               </section>
-              <section className="opage" aria-label="Maps">
+              <section className="opage" inert={opage!==2} aria-hidden={opage!==2} aria-label="Maps">
                 <p className="osec">
                   MAP & DIRECTIONS <span className="osec-r">LOCATION OVERVIEW</span>
                 </p>
@@ -1739,7 +1692,7 @@ export default function FlyerBoard({
                   </a>
                 </div>
               </section>
-              <section className="opage" aria-label="More and nearby">
+              <section className="opage" inert={opage!==3} aria-hidden={opage!==3} aria-label="More and nearby">
                 <p className="osec">
                   MORE AT {openListing.venueName.toUpperCase()} <span className="osec-r">THE SAME WEEK</span>
                 </p>
@@ -1772,7 +1725,7 @@ export default function FlyerBoard({
                 <p className="osec" style={{ marginTop: 16 }}>
                   RESTAURANTS CLOSE BY
                 </p>
-                {nearbyR.length ? (
+                {!Array.isArray(detailQuery.data?.nearby?.restaurants) ? detailStatus : nearbyR.length ? (
                   <div className="orail">
                     {nearbyR.map((r, i) => (
                       <div className="omini" key={`${r.name ?? "r"}-${i}`}>
@@ -1787,7 +1740,7 @@ export default function FlyerBoard({
                 <p className="osec" style={{ marginTop: 16 }}>
                   EVENTS SAME DAY · CLOSE BY
                 </p>
-                {nearbyE.length ? (
+                {!Array.isArray(detailQuery.data?.nearby?.events) ? detailStatus : nearbyE.length ? (
                   <div className="orail">
                     {nearbyE.map((n, i) => (
                       <div className="omini" key={n.id ?? i}>
@@ -1808,9 +1761,9 @@ export default function FlyerBoard({
                   <p className="oempty">No other events close by on this day.</p>
                 )}
               </section>
-              <section className="opage" aria-label="People">
+              <section className="opage" inert={opage!==4} aria-hidden={opage!==4} aria-label="People">
                 <p className="osec">{hosts.length === 1 ? "HOST" : "HOSTS"}</p>
-                {hosts.length > 0 ? (
+                {!Array.isArray(detailQuery.data?.hosts) ? detailStatus : hosts.length > 0 ? (
                   hosts.map((h, i) => {
                     const name = h.displayName || h.username || "";
                     const initials =
@@ -1836,9 +1789,9 @@ export default function FlyerBoard({
                 ) : (
                   <>
                     <div className="oclaimbox">
-                      <p className="oct">UNCLAIMED</p>
+                      <p className="oct">{openPending ? "CLAIM IN REVIEW" : openClaimable ? "OPEN TO CLAIM" : "HOST INFORMATION"}</p>
                       <p className="ocs">
-                        Most events go unclaimed — no host has claimed this event yet.
+                        No public event host is listed.
                         {openPending ? " A claim is pending admin review." : ""}
                       </p>
                     </div>
@@ -1870,6 +1823,7 @@ export default function FlyerBoard({
                           <span>
                             <span className="opn">{name}</span>
                             {t.role ? <span className="opr">{t.role}</span> : null}
+                            <span className="opr">{t.addedByUserId == null ? "Source unavailable" : t.addedByUserId === t.userId ? "Self-listed" : "Added by host or staff"}</span>
                           </span>
                         </div>
                       );
@@ -1877,9 +1831,11 @@ export default function FlyerBoard({
                   </>
                 )}
                 <p className="osec" style={{ marginTop: 16 }}>
-                  PROMOTERS
+                  VENUE PROMOTERS
                 </p>
-                <p className="oempty">No promoters are connected yet.</p>
+                {!detailQuery.data ? detailStatus : !venueId ? <p className="oempty">No venue is linked.</p> : !Array.isArray(venueQuery.data?.promoters) ? <EventReadStatus label="Venue promoters" query={venueQuery} /> : venueQuery.data.promoters.length ? (
+                  <ul>{venueQuery.data.promoters.map(person => <li key={person.id}>{person.displayName || person.username}</li>)}</ul>
+                ) : <p className="oempty">No public promoters listed for this venue.</p>}
               </section>
             </div>
           <div className="ofoot">
@@ -1904,15 +1860,7 @@ export default function FlyerBoard({
             >
               ›
             </button>
-            <button
-              type="button"
-              className="osave"
-              aria-pressed={savedIds.has(openListing.id)}
-              onClick={() => onToggleSave(openListing.id)}
-            >
-              {savedIds.has(openListing.id) ? "SAVED" : "SAVE THIS EVENT"}
-            </button>
-            <span className="oheart">♥</span>
+            <EventPrivateSaveButton eventId={openListing.id} poster />
           </div>
         </div>
       )}

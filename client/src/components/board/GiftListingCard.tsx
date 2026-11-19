@@ -45,6 +45,7 @@ export type GiftingPost = {
   interestCount: number;
   viewerInterested?: boolean;
   viewerSelected?: boolean;
+  pickupNoticePending?: boolean;
   isMine?: boolean;
   interests?: Array<{ id: number; userId: number; note: string; status: string; username: string; displayName?: string; photoUrl?: string | null; avatarChoice?: number; avatarRing?: string | null }>;
 };
@@ -145,7 +146,7 @@ export function giftingMotifVariant(post: GiftingPost): "gift" | "search" {
 
 function cardStatus(post: GiftingPost) {
   if (post.status === "PENDING") return "Pending admin review";
-  if (post.viewerSelected) return "Selected · check your inbox";
+  if (post.viewerSelected) return post.pickupNoticePending ? "Selected · pickup message pending" : "Selected · check your inbox";
   if (post.viewerInterested && post.postType === "GIFT") return "Hand raised";
   if (post.viewerInterested && post.postType === "ISO") return "Offer sent";
   if (post.postType === "ISO") return "Open · make an offer";
@@ -194,7 +195,7 @@ export default function GiftListingCard({ post, skipLeadPhoto = false, expanded,
         credentials: "include",
         body: JSON.stringify(data || {}),
       });
-      if (!res.ok) throw new Error((await res.text()) || res.statusText);
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || res.statusText);
       return res;
     },
     onMutate: async ({ url }) => {
@@ -207,6 +208,11 @@ export default function GiftListingCard({ post, skipLeadPhoto = false, expanded,
     onError: (err: any, _vars, ctx) => {
       if (ctx?.snap) restoreQueries(queryClient, ctx.snap);
       toast({ title: "Could not update", description: err.message, variant: "destructive" });
+    },
+    onSuccess: async (response, vars) => {
+      if (!vars.url.endsWith("/choose")) return;
+      const result = await response.json();
+      toast({title:result.pickupNoticePending ? "Recipient selected. Pickup message pending." : "Pickup message sent"});
     },
     onSettled: (_data, _err, vars) => {
       if (/\/(interest|offer)$/.test(vars.url)) endInFlight(raisePendingRef.current, post.id);
@@ -381,7 +387,7 @@ export default function GiftListingCard({ post, skipLeadPhoto = false, expanded,
           <div className="gifting-details">{post.category} · {post.pickupPreference}</div>
           <div className="gifting-listing-actions">
             <button type="button" onClick={handleShare}><Share2 size={14} /> Share listing</button>
-            {post.viewerSelected ? <span>Selected · check your inbox to coordinate</span> : null}
+            {post.viewerSelected ? <span>{post.pickupNoticePending ? "Selected · pickup message pending" : "Selected · check your inbox to coordinate"}</span> : null}
           </div>
           {!post.isMine && !["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(post.status) && (
             <div className="gifting-response">
@@ -439,10 +445,10 @@ export default function GiftListingCard({ post, skipLeadPhoto = false, expanded,
                         href={memberProfileHref(i.username)}
                         size={28}
                       />
-                      <span>{i.displayName || i.username}: {i.note}</span>
-                      {i.status === "INTERESTED" && (
+                      <span>{i.displayName || i.username}: {i.note}{i.status === "SELECTED" ? " · Selected" : ""}</span>
+                      {(i.status === "INTERESTED" || (i.status === "SELECTED" && post.pickupNoticePending)) && (
                         <button onClick={() => actionMutation.mutate({ url: `/api/gifting/${post.id}/interests/${i.id}/choose` })}>
-                          Pick
+                          {i.status === "SELECTED" ? "Retry pickup message" : "Pick"}
                         </button>
                       )}
                     </div>

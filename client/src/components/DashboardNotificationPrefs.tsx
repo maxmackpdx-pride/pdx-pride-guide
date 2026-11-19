@@ -1,3 +1,5 @@
+import {useAuth} from "@/context/AuthContext";
+import DeviceAlertStatus from "./DeviceAlertStatus";
 import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
@@ -39,6 +41,7 @@ export default function DashboardNotificationPrefs({
   embedded?: boolean;
 }) {
   const { toast } = useToast();
+  const {user}=useAuth();
   const supported = canUseWebPush();
   const [pushActive, setPushActive] = useState<boolean | null>(null);
 
@@ -60,9 +63,14 @@ export default function DashboardNotificationPrefs({
     };
   }, [refreshPushState]);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["/api/users/me/notification-prefs"],
-    queryFn: () => fetch("/api/users/me/notification-prefs", { credentials: "include" }).then(r => r.json()),
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["/api/users/me/notification-prefs",user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const response = await fetch("/api/users/me/notification-prefs", {credentials:"include"});
+      if (!response.ok) throw new Error("Notification preferences unavailable.");
+      return response.json();
+    },
   });
 
   const prefs: NotificationPrefs = data?.prefs || {
@@ -84,6 +92,7 @@ export default function DashboardNotificationPrefs({
       if (!res.ok) throw new Error("Could not save notification preferences");
       return res.json();
     },
+    onError: () => toast({title:"Could not save notification preferences",description:"Try again.",variant:"destructive"}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users/me/notification-prefs"] });
     },
@@ -159,10 +168,11 @@ export default function DashboardNotificationPrefs({
         {!supported
           ? "Push is unavailable on this browser or device. These choices still save for your push-enabled devices. Your inbox and email delivery are unchanged."
           : pushActive
-            ? "Push is on for this device. Choose which alerts you want below."
+            ? "This browser has a push subscription. Choose which alerts you want below."
             : "Enable device push to receive the alerts selected below. These preferences save to your account; inbox messages and email delivery are unchanged."}
       </p>
 
+      <DeviceAlertStatus supported={supported} active={pushActive}/>
       {showEnableAsk && (
         <div className={embedded ? "hub-settings-prefs__enable-row" : undefined} style={embedded ? undefined : { display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
           <button
@@ -223,7 +233,7 @@ export default function DashboardNotificationPrefs({
         </p>
       )}
 
-      {isLoading ? (
+      {isError ? <p role="alert">Notification preferences unavailable. <button onClick={()=>void refetch()}>Retry</button></p> : isLoading ? (
         <p className={embedded ? "hub-settings-prefs__loading" : undefined} style={embedded ? undefined : { fontSize: "0.75rem", color: "#6f736c" }}>
           Loading preferences…
         </p>

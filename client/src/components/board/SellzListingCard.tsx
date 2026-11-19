@@ -28,7 +28,7 @@ export type SellzPost = {
   isDemo?: boolean;
   id: number; userId: number; title: string; description: string; category: string; condition: string;
   priceCents: number; negotiable: boolean; neighborhood: string; pickupPreference: string; photoUrls: string[];
-  status: string; createdAt: string; expiresAt: string; interestCount: number; isMine: boolean; viewerSelected?: boolean;
+  status: string; createdAt: string; expiresAt: string; interestCount: number; isMine: boolean; viewerSelected?: boolean; pickupNoticePending?: boolean;
   username: string; displayName?: string | null; posterPhotoUrl?: string | null; avatarChoice?: number; posterAvatarRing?: string | null;
   interests?: SellzInterest[];
 };
@@ -66,7 +66,8 @@ export default function SellzListingCard({ post, skipLeadPhoto = false, expanded
       if (ctx?.snap) restoreQueries(queryClient, ctx.snap);
       toast({ title: "Could not update", description: error.message, variant: "destructive" });
     },
-    onSuccess: (_data, vars) => {
+    onSuccess: (data, vars) => {
+      if (vars.path.endsWith("/choose")) toast({title:data.pickupNoticePending ? "Buyer selected. Pickup message pending." : "Pickup message sent"});
       if (vars.method === "DELETE") onDeleted?.();
     },
     onSettled: (_data, _err, vars) => {
@@ -99,6 +100,7 @@ export default function SellzListingCard({ post, skipLeadPhoto = false, expanded
   if (!expanded) return <BoardPostFace category="sellz" post={post} onOpen={onToggle}/>;
   return (
     <article id={`sellz-post-${post.id}`} className={`boardz-open-surface board-listing-card board-listing-card--makeover board-listing-card--glass sellz-card${expanded ? " is-expanded" : ""} pdx-glass-rebind`} style={style}>
+      {post.viewerSelected && <p>{post.pickupNoticePending ? "Reserved for you · pickup message pending" : "Reserved for you · check your inbox"}</p>}
       {isDemo ? <span className="pdx-demo-sticker" aria-hidden="true">DEMO</span> : null}
       <BoardPostFace category="sellz" post={post} hero/>
       <button className="sellz-card__open" type="button" onClick={onToggle} aria-expanded={expanded} aria-controls={`sellz-details-${post.id}`} aria-label={`${expanded ? "Close" : "Open"} listing: ${post.title}`} />
@@ -150,7 +152,7 @@ export default function SellzListingCard({ post, skipLeadPhoto = false, expanded
             <label><input type="checkbox" checked={edit.negotiable} onChange={e => setEdit({ ...edit, negotiable: e.target.checked })} /> Open to offers</label>
             <button onClick={() => { act(`/api/sellz/${post.id}`, edit, "PUT"); setEditing(false); }}>Save changes</button>
           </div> : null}
-          {post.interests?.map(interest => <div className="gifting-interest" key={interest.id}><span><strong>@{interest.username}</strong> {interest.offerCents ? `offered ${money(interest.offerCents)}` : "asked"}: {interest.note}</span><button onClick={() => act(`/api/sellz/${post.id}/interests/${interest.id}/choose`)}>Choose buyer</button></div>)}
+          {post.interests?.map(interest => <div className="gifting-interest" key={interest.id}><span><strong>@{interest.username}</strong> {interest.offerCents ? `offered ${money(interest.offerCents)}` : "asked"}: {interest.note}</span>{interest.status === "SELECTED" && <span>Selected</span>}{(interest.status === "INTERESTED" || (interest.status === "SELECTED" && post.pickupNoticePending)) && <button onClick={() => act(`/api/sellz/${post.id}/interests/${interest.id}/choose`)}>{interest.status === "SELECTED" ? "Retry pickup message" : "Choose buyer"}</button>}</div>)}
         </details> : <details className="gifting-report"><summary><ShieldAlert size={14} /> Report listing</summary><textarea aria-label="Reason for reporting this listing" value={report} onChange={e => setReport(e.target.value)} /><button onClick={() => act(`/api/sellz/${post.id}/report`, { reason: report })}>Send report</button></details>}
       </div> : null}
     </article>

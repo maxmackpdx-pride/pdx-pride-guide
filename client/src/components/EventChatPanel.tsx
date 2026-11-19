@@ -1,5 +1,6 @@
+import { useEventChatHistory } from "@/hooks/useEventChatHistory";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
 import { memberProfileHref } from "@/lib/avatarLinks";
@@ -66,12 +67,8 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
   const [tick, setTick] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const { data, isLoading } = useQuery<ChatPayload>({
-    queryKey: ["/api/events", eventId, "chat"],
-    queryFn: () => apiRequest("GET", `/api/events/${eventId}/chat`).then(r => r.json()),
-    refetchInterval: 8_000,
-  });
-
+  const history = useEventChatHistory<ChatPayload>(eventId, listRef);
+  const {data, isLoading} = history;
   const messages = data?.messages ?? [];
   const expiresAt = data?.expiresAt ?? null;
   const chatOpen = data?.chatOpen ?? false;
@@ -85,12 +82,6 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
     const id = window.setInterval(() => setTick(t => t + 1), 30_000);
     return () => window.clearInterval(id);
   }, []);
-
-  useEffect(() => {
-    const el = listRef.current;
-    if (!el) return;
-    el.scrollTop = el.scrollHeight;
-  }, [messages.length]);
 
   const postMutation = useMutation({
     mutationFn: (text: string) =>
@@ -186,24 +177,26 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
           </div>
         )}
 
-        <div className="event-chat-panel__messages" ref={listRef}>
+        <div className="event-chat-panel__messages" ref={listRef} onScroll={history.onScroll}>
+          {history.isError && <p role="alert">Could not load event chat. <button type="button" onClick={() => void history.retry()}>Retry</button></p>}
+          {history.canLoadEarlier && <button type="button" disabled={history.loadingEarlier} onClick={history.earlier}>{history.loadingEarlier ? "Loading earlier messages…" : history.earlierFailed ? "Retry earlier messages" : "Load earlier messages"}</button>}
           {isLoading && <p className="event-chat-panel__empty">Loading chat…</p>}
-          {!isLoading && messages.length === 0 && windowState === "BEFORE" && (
+          {!isLoading && !history.isError && messages.length === 0 && windowState === "BEFORE" && (
             <p className="event-chat-panel__empty">
               You&apos;re on the list. The room opens 48 hours before doors. Check back then.
             </p>
           )}
-          {!isLoading && messages.length === 0 && windowState === "OPEN" && (
+          {!isLoading && !history.isError && messages.length === 0 && windowState === "OPEN" && (
             <p className="event-chat-panel__empty">
               You're checked in. Say hi - everyone going can see this until 4 hours after the event ends.
             </p>
           )}
-          {!isLoading && messages.length === 0 && windowState === "CLOSED" && (
+          {!isLoading && !history.isError && messages.length === 0 && windowState === "CLOSED" && (
             <p className="event-chat-panel__empty">This chat has closed.</p>
           )}
           {messages.map(msg => (
             <div
-              key={msg.id}
+              key={msg.id} data-chat-id={msg.id}
               className={`event-chat-panel__msg${msg.isMine ? " event-chat-panel__msg--mine" : ""}`}
             >
               {!msg.isMine && (

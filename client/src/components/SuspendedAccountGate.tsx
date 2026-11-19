@@ -1,3 +1,5 @@
+import {ReportReceipts} from "./inbox/ReportReceipts";
+import {useQueryClient} from "@tanstack/react-query";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -6,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
  */
 export default function SuspendedAccountGate() {
   const { user, loading, logout, refreshUser } = useAuth();
+  const client=useQueryClient();
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
@@ -34,6 +37,7 @@ export default function SuspendedAccountGate() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Could not submit appeal");
+      void client.invalidateQueries({queryKey:["/api/auth/suspension-appeal/receipts"]});
       setSent(true);
     } catch (e: any) {
       setError(e?.message || "Could not submit appeal");
@@ -108,6 +112,7 @@ export default function SuspendedAccountGate() {
           </p>
         )}
 
+        <ReportReceipts appealsOnly/>
         {!sent ? (
           <>
             <label

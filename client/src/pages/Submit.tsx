@@ -1,14 +1,14 @@
 import { ArrowLeft } from "lucide-react";
 import { roomToast } from "@/lib/roomToast";
 import { Check } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ImageUploader from "@/components/ImageUploader";
 import AuthModal from "@/components/AuthModal";
 import { useAuth } from "@/context/AuthContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import type { Event } from "@shared/schema";
 import EventTypeTag from "@/components/EventTypeTag";
 import PageHeader from "@/components/PageHeader";
@@ -128,7 +128,7 @@ function InlineFormError({ message }: { message: string | null }) {
 
 function liveChip(isVerified: boolean): StatusChip {
   return isVerified
-    ? { label: "Goes live now", color: "var(--panel-lime, #D4FF00)" }
+    ? { label: "Verified promoter", color: "var(--panel-lime, #D4FF00)" }
     : { label: "Reviewed first", color: "var(--panel-cyan, #19e3ff)" };
 }
 
@@ -155,7 +155,7 @@ const stroke = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLin
 const emptyEventForm = () => ({
   title: "", description: "", venueName: "", address: "", neighborhood: "SE Portland",
   dateStart: "", dateEnd: "",
-  ageRequirement: "ALL_AGES", admission: "FREE", ticketUrl: "",
+  ageRequirement: "UNVERIFIED", admission: "UNKNOWN", ticketUrl: "",
   posterImageUrl: "", isPublic: true, isHouseParty: false,
   isSexPositive: false, nudityOk: false, selectedTypes: [] as string[],
 });
@@ -172,6 +172,18 @@ export default function Submit() {
   );
   const { toast } = useToast();
   const { user, loading } = useAuth();
+  const intents = useRef(new Map<string, { fingerprint: string; token: string }>());
+  const [receipt, setReceipt] = useState<{ id?: number; eventId?: number; title: string; desc: string } | null>(null);
+  async function sendSubmission(body: { type: string; [field: string]: unknown }) {
+    const intent = `${user?.id}:${body.type}`;
+    const fingerprint = JSON.stringify(body);
+    let entry = intents.current.get(intent);
+    if (entry?.fingerprint !== fingerprint) {
+      entry = {fingerprint, token: crypto.randomUUID()};
+      intents.current.set(intent, entry);
+    }
+    return apiRequest("POST", "/api/submit", body, { "Idempotency-Key": entry.token });
+  }
   const [showAuth, setShowAuth] = useState(false);
   const [authDismissed, setAuthDismissed] = useState(false);
   const [eventSubmitSuccess, setEventSubmitSuccess] = useState<{
@@ -304,6 +316,9 @@ export default function Submit() {
   }));
 
   const goMode = (m: PageMode) => {
+    setReceipt(null);
+    setFlowSuccess(null);
+    setEventSubmitSuccess(null);
     if (!user) { openAuth(m); return; }
     setMode(m);
     // Single-page submit: no step navigation (submitStep kept only for auth restore).
@@ -317,11 +332,11 @@ export default function Submit() {
   const suggestChip: StatusChip = { label: "No promoter status", color: "var(--panel-magenta, #ff1fa0)" };
 
   const submitNote = isApproved
-    ? "You're verified. This event publishes the moment you submit."
-    : "First submission: we verify you and publish your event together, usually within a day.";
+    ? "Verified submissions can publish immediately. Possible duplicates go to review."
+    : "Your promoter application and event go to review.";
   const claimNote = isApproved
-    ? "Verified promoters claim instantly, no review."
-    : "Claiming also gets you verified. Reviewed once, then instant after.";
+    ? "Eligible verified promoters can claim an available event immediately."
+    : "Your claim and promoter status will be reviewed.";
 
   const paths: PathDef[] = [
     {
@@ -344,7 +359,7 @@ export default function Submit() {
       key: "apply" as const,
       title: "Apply as promoter",
       forWho: "Not posting yet, want the fast lane later.",
-      outcome: "Get verified once. Skip the queue after.",
+      outcome: "Apply for verified promoter access.",
       accent: "var(--panel-purple, #b06bff)",
       chip: applyChip,
     }] : []),
@@ -361,7 +376,7 @@ export default function Submit() {
   /** Deep-glass intake rows - every status chip is the same solid glass pill.
    *  "Goes live now" always lime fill; other chips use the row accent (cyan / purple / magenta). */
   const intakeActions: PromoterIntakeAction[] = paths.map((path) => {
-    const goesLive = /goes live/i.test(path.chip.label);
+    const goesLive = path.chip.label === "Verified promoter";
     return {
       key: path.key as PromoterIntakeActionKey,
       title: path.title,
@@ -380,7 +395,7 @@ export default function Submit() {
   // Promoter application mutation (standalone "apply" path only)
   const applyMutation = useMutation({
     mutationFn: async () => {
-      const r = await apiRequest("POST", "/api/submit", {
+      const r = await sendSubmission({
         type: "PROMOTER_APPLICATION",
         submitterOrg,
         ticketUrl: promoterForm.proofUrl,
@@ -390,7 +405,9 @@ export default function Submit() {
       if (!r.ok) throw new Error(payload.message || payload.error || "Submission failed");
       return payload;
     },
-    onSuccess: () => {
+    onSuccess: (payload) => {
+      intents.current.delete(`${user?.id}:PROMOTER_APPLICATION`);
+      setReceipt({id:payload.id,title:"Application submitted",desc:"Your promoter application is in review."});
       setFormError(null);
       toast({ title: "Application submitted", description: "We'll review your promoter request and get back to you." });
       setPromoterForm(emptyPromoterForm());
@@ -412,7 +429,7 @@ export default function Submit() {
         const dateError = eventDatesError(eventForm);
         if (dateError) throw new Error(dateError);
       }
-      const r = await apiRequest("POST", "/api/submit", {
+      const r = await sendSubmission({
         type: opts.type,
         ...(isSuggest ? {
           title: eventForm.title,
@@ -421,8 +438,8 @@ export default function Submit() {
           dateStart: `${suggestDate}T00:00`,
           dateEnd: `${suggestDate}T23:59`,
           dayOfWeek: prideDayFromDate(`${suggestDate}T00:00`),
-          ageRequirement: "ALL_AGES",
-          admission: "FREE",
+          ageRequirement: "UNVERIFIED",
+          admission: "UNKNOWN",
           isPublic: true,
           ticketUrl: eventForm.ticketUrl,
           eventTypes: "[]",
@@ -443,35 +460,38 @@ export default function Submit() {
     },
     onSuccess: (payload, vars) => {
       setFormError(null);
-      const autoApproved = !!payload.autoApproved;
+      intents.current.delete(`${user?.id}:${vars.type}`);
+      if (vars.type === "NEW_EVENT") intents.current.delete(`${user?.id}:PROMOTER_APPLICATION`);
+      const autoApproved = payload.autoApproved === true;
       const heldForReview = !!payload.heldForReview;
       const msgs: Record<string, { title: string; desc: string }> = {
         NEW_EVENT: {
           title: heldForReview
             ? "Submitted for admin review"
-            : autoApproved || isApproved
+            : autoApproved
               ? "Event is live"
               : "Submitted for review",
           desc: heldForReview
             ? (payload.heldReason
               ? `${payload.heldReason}. An admin will merge your updates with the existing listing or publish separately.`
               : "We found a similar event already on Zaylist. An admin will review before publishing.")
-            : autoApproved || isApproved
+            : autoApproved
               ? "Your event is now live on Zaylist and on your profile."
-              : "Your event and promoter application are in the queue. We will publish them together once approved.",
+              : "Your event and promoter application are in the queue. We will review both submissions.",
         },
         SUGGEST: {
           title: "Tip received",
           desc: "We will review it and may add the event to Zaylist. Thanks for the heads up.",
         },
         CLAIM: {
-          title: autoApproved || isApproved ? "Event claimed" : "Claim submitted",
-          desc: autoApproved || isApproved
+          title: autoApproved ? "Event claimed" : "Claim submitted",
+          desc: autoApproved
             ? "You are now the host of this event. It is live on your profile."
             : "Your claim is in review. We will let you know when it goes live.",
         },
       };
       const m = msgs[vars.type] || msgs.NEW_EVENT;
+      setReceipt({ ...m, id: payload.id, eventId: autoApproved && Number.isSafeInteger(payload.eventId) && payload.eventId > 0 ? payload.eventId : undefined });
       toast({ title: m.title, description: m.desc });
       if (vars.type === "NEW_EVENT") {
         setEventSubmitSuccess({
@@ -512,27 +532,34 @@ export default function Submit() {
     setMode("landing");
   };
 
+  const [sendingApplication, setSendingApplication] = useState(false);
   const handleSubmitWithEvent = async () => {
     if (!user) { openAuth(); return; }
     setFormError(null);
-    if (!isApproved) {
-      // Fire promoter application first - bail out if it fails
-      const r = await apiRequest("POST", "/api/submit", {
+    if (!isApproved && promoterStatus !== "pending") {
+      setSendingApplication(true);
+      try { await sendSubmission({
         type: "PROMOTER_APPLICATION",
         submitterOrg,
         ticketUrl: promoterForm.proofUrl,
         claimReason: promoterForm.appReason,
       });
-      if (!r.ok) {
-        const payload = await r.json().catch(() => ({}));
-        const message = payload.error || "Could not submit promoter application. Please try again.";
+      } catch (error) {
+        const message = parseApiError(error, "Could not submit your promoter application. Please try again.");
         setFormError(message);
         toast(roomToast("eventz", "didn't send", message));
         return;
+      } finally {
+        setSendingApplication(false);
       }
     }
     eventMutation.mutate({ type: "NEW_EVENT" });
   };
+
+  const receiptDetails = receipt && <div className="submit-success__body" role="status">
+    {receipt.id && <p>Submission #{receipt.id}</p>}
+    {receipt.eventId && <Link href={`/events/${receipt.eventId}`}>Open event listing →</Link>}
+  </div>;
 
   const heroCopy: Record<PageMode, { kicker: string; title: string; accent: PageHeaderAccent; lede: string }> = {
     landing: {
@@ -674,7 +701,7 @@ export default function Submit() {
                 <div>
                   <div className="submit-banner__title">Application pending</div>
                   <p className="submit-banner__body">
-                    Your promoter application is in the review queue. You can still submit and claim now, both go live once you are approved. We will message you.
+                    Your promoter application is in the review queue. You can still submit an event or claim for review. We will message you.
                   </p>
                 </div>
               </div>
@@ -726,6 +753,7 @@ export default function Submit() {
                 <p className="submit-success__body" style={{ marginBottom: eventSubmitSuccess.potentialMatches?.length ? 16 : 22 }}>
                   {eventSubmitSuccess.desc}
                 </p>
+                {receiptDetails}
                 {eventSubmitSuccess.potentialMatches && eventSubmitSuccess.potentialMatches.length > 0 && (
                   <div className="submit-match-box">
                     <p className="submit-match-box__title">Similar events on Zaylist</p>
@@ -771,7 +799,7 @@ export default function Submit() {
                       <FormSection
                         number={1}
                         title="About you"
-                        help="You only do this once. Approval unlocks instant publishing later."
+                        help="Approval enables publishing, subject to duplicate checks."
                         accent="purple"
                       >
                         <div className="gifting-form-grid">
@@ -896,6 +924,7 @@ export default function Submit() {
                       <label>
                         Age
                         <select className="board-text-field" value={eventForm.ageRequirement} onChange={e => setEventForm(f => ({ ...f, ageRequirement: e.target.value }))}>
+                          <option value="UNVERIFIED">Not confirmed</option>
                           <option value="ALL_AGES">All ages</option>
                           <option value="18_PLUS">18+</option>
                           <option value="21_PLUS">21+</option>
@@ -969,7 +998,7 @@ export default function Submit() {
                     <InlineFormError message={formError} />
                     <Button
                       type="submit"
-                      disabled={eventMutation.isPending}
+                      disabled={sendingApplication || eventMutation.isPending}
                       variant="solid"
                       accent="lime"
                       size="lg"
@@ -980,7 +1009,7 @@ export default function Submit() {
                       {eventMutation.isPending
                         ? "Submitting..."
                         : isApproved
-                          ? "Submit event, goes live now"
+                          ? "Submit event"
                           : "Submit event for review"}
                     </Button>
                   </ScrollReveal>
@@ -998,6 +1027,7 @@ export default function Submit() {
             <p className="submit-success__body">
               We will review your promoter request and be in touch. You will get a message when you are approved.
             </p>
+            {receiptDetails}
             <button type="button" onClick={backToLanding} className="submit-hub-link">Back to hub</button>
           </div>
         ) : (
@@ -1006,7 +1036,7 @@ export default function Submit() {
             <RoomKicker room="eventz" accent="var(--panel-purple, #b06bff)" as="div">Promoter verification</RoomKicker>
             <h2 className="display section-heading">Apply as promoter</h2>
             <p className="board-copy-sm">
-              Get verified once. After that, every event you post goes live with no review. One-time application, reviewed by a human.
+              A reviewer checks your application. Verified promoters can publish eligible events directly. Possible duplicates still go to review.
             </p>
             {promoterStatus === "pending" && (
               <p className="board-copy-sm">Your promoter application is in the admin queue. You will be notified when it is reviewed.</p>
@@ -1076,6 +1106,7 @@ export default function Submit() {
             <p className="submit-success__body">
               We will review it and may add the event to Zaylist. Thanks for the heads up.
             </p>
+            {receiptDetails}
             <button type="button" onClick={backToLanding} className="submit-hub-link">Back to hub</button>
           </div>
         ) : (
@@ -1139,7 +1170,7 @@ export default function Submit() {
                 </div>
               </FormSection>
               <InlineFormError message={formError} />
-              <Button type="submit" disabled={eventMutation.isPending} variant="solid" accent="pink" size="lg" arrow block>
+              <Button type="submit" disabled={sendingApplication || eventMutation.isPending} variant="solid" accent="pink" size="lg" arrow block>
                 {eventMutation.isPending ? "Sending..." : "Send tip"}
               </Button>
               <p className="submit-form-foot">
@@ -1153,12 +1184,11 @@ export default function Submit() {
         {mode === "claim" && (flowSuccess === "claim" ? (
           <div className="submit-success submit-success--cyan">
             <div className="submit-success__check" aria-hidden="true"><Check size={28} /></div>
-            <div className="submit-success__title">{isApproved ? "Event claimed" : "Claim submitted"}</div>
+            <div className="submit-success__title">{receipt?.title}</div>
             <p className="submit-success__body">
-              {isApproved
-                ? "You are now the host of this event. It is live on your profile."
-                : "Your claim is in review. We will let you know when it goes live."}
+              {receipt?.desc}
             </p>
+            {receiptDetails}
             <button type="button" onClick={backToLanding} className="submit-hub-link">Back to hub</button>
           </div>
         ) : (
@@ -1220,7 +1250,7 @@ export default function Submit() {
                 </div>
               </FormSection>
               <InlineFormError message={formError} />
-              <Button type="submit" disabled={eventMutation.isPending} variant="solid" accent="cyan" size="lg" arrow block data-testid="submit-button">
+              <Button type="submit" disabled={sendingApplication || eventMutation.isPending} variant="solid" accent="cyan" size="lg" arrow block data-testid="submit-button">
                 {eventMutation.isPending
                   ? "Submitting..."
                   : isApproved

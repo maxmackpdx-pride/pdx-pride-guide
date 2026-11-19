@@ -6,7 +6,7 @@ import BrowseStatus from "@/components/BrowseStatus";
 import PageRecovery from "@/components/PageRecovery";
 import type React from "react";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { Link, useRoute, useLocation } from "wouter";
+import { Link, useRoute, useSearch, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
@@ -40,7 +40,7 @@ import Schedule from "@/pages/Schedule";
 import ScheduleCard from "@/components/ScheduleCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import { eventPath, eventUrl } from "@shared/eventSlug";
+import { eventPath } from "@shared/eventSlug";
 import { scatterAffiliateCards } from "@/lib/affiliateCards";
 import { Grid, ChevronDown, ChevronRight, CalendarDays, Map as MapIcon, MapPin, SlidersHorizontal } from "lucide-react";
 import { Button, FilterChip, SearchInput } from "@/components/ds";
@@ -329,13 +329,17 @@ export default function Events() {
     };
   }, [now]);
   const { user } = useAuth();
-  const { savedIds, toggleSave } = useSavedEvents();
+  const { savedIds, toggleSave, loading: savesLoading, pending: savesPending } = useSavedEvents();
   const [showSaveAuth, setShowSaveAuth] = useState(false);
   const isMobile = useIsMobile() || (typeof window !== "undefined" && window.innerWidth < 768);
   const [routeMatch, routeParams] = useRoute("/events/:id/:slug?");
   const [location, setLocation] = useLocation();
   const routeEventId = routeMatch && routeParams?.id ? Number(routeParams.id) : null;
-  const routeDay = useMemo(() => readSearchParam("day").toUpperCase(), [location]);
+  const routeSearch = new URLSearchParams(useSearch());
+  const routeDay = routeSearch.get("day")?.toUpperCase() || "";
+  const routeDate = routeSearch.get("date") || "";
+  const [boardWindow, setBoardWindow] = useState(() => readSearchParam("period") || "all");
+  const [boardTags, setBoardTags] = useState<Set<string>>(() => new Set(readSearchParam("tags").split(",").filter(Boolean)));
   const [activeDay, setActiveDay] = useState(() => readSearchParam("window") || (readSearchParam("type") ? "ALL" : DEFAULT_WINDOW));
   const [drawerOpen, setDrawerOpen] = useState(false);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
@@ -369,6 +373,8 @@ export default function Events() {
   }, [setLocation]);
   const browseQuery = useCallback(() => {
     const params = new URLSearchParams();
+    if (boardWindow !== "all") params.set("period", boardWindow);
+    if (boardTags.size) params.set("tags", [...boardTags].join(","));
     if (searchQuery.trim()) params.set("q", searchQuery.trim());
     if (activeDay !== DEFAULT_WINDOW) params.set("window", activeDay);
     if (activeFilters.length) params.set("type", activeFilters.join("|"));
@@ -376,19 +382,20 @@ export default function Events() {
     if (sortMode !== "start_time") params.set("sort", sortMode);
     if (activeTab === "schedule") params.set("tab", activeTab);
     return params;
-  }, [searchQuery, activeDay, activeFilters, pastView, sortMode, activeTab]);
+  }, [searchQuery, activeDay, activeFilters, pastView, sortMode, activeTab, boardWindow, boardTags]);
   const openEvent = useCallback((event: EventListing, originRect: EventModalOriginRect | null = null) => {
     setEventOriginRect(originRect);
     setSelectedEvent(event);
-    const target = new URL(eventPath(event.id, event.title, event.dayOfWeek), window.location.origin);
+    const target = new URL(eventPath(event.id, event.title, event.dayOfWeek, pacificCalendarDate(event.dateStart)), window.location.origin);
     browseQuery().forEach((value, key) => target.searchParams.set(key, value));
-    setLocation(target.pathname + target.search);
+    setLocation(target.pathname + target.search, { state: { eventFromBrowse: true } });
   }, [setLocation, browseQuery]);
   const closeEvent = useCallback(() => {
     setSelectedEvent(null);
     setEventOriginRect(null);
+    if (window.history.state?.eventFromBrowse) { window.history.back(); return; }
     const query = browseQuery().toString();
-    setLocation(query ? `/events?${query}` : "/events");
+    setLocation(query ? `/events?${query}` : "/events", { replace:true });
   }, [setLocation, browseQuery]);
   useEffect(() => {
     if (routeMatch) return;
@@ -400,6 +407,8 @@ export default function Events() {
   }, [browseQuery, routeMatch]);
   useEffect(() => {
     const restore = () => {
+      setBoardWindow(readSearchParam("period") || "all");
+      setBoardTags(new Set(readSearchParam("tags").split(",").filter(Boolean)));
       setActiveDay(readSearchParam("window") || (readSearchParam("type") ? "ALL" : DEFAULT_WINDOW));
       setActiveFilters(readEventTypeFilters(readSearchParam("type")));
       setPastView(readSearchParam("past") === "1");
@@ -419,8 +428,8 @@ export default function Events() {
   });
 
   const { data: routeEvent, error: routeError, refetch: refetchRouteEvent } = useQuery<Event>({
-    queryKey: ["/api/events", routeEventId, routeDay],
-    queryFn: () => apiRequest("GET", `/api/events/${routeEventId}${routeDay ? `?day=${routeDay}` : ""}`).then(r => r.json()),
+    queryKey: ["/api/events", routeEventId, routeDay, routeDate],
+    queryFn: () => apiRequest("GET", `/api/events/${routeEventId}${routeDate ? `?date=${encodeURIComponent(routeDate)}` : routeDay ? `?day=${encodeURIComponent(routeDay)}` : ""}`).then(r => r.json()),
     enabled: routeEventId != null && Number.isFinite(routeEventId),
   });
 
@@ -434,7 +443,7 @@ export default function Events() {
       : "Browse every live Portland night on EVENTZ. Filter by day, type, and neighborhood.",
     shareEvent
       ? {
-          url: eventUrl(shareEvent.id, shareEvent.title),
+          url: `https://www.zaylist.com${eventPath(shareEvent.id,shareEvent.title,shareEvent.dayOfWeek,pacificCalendarDate(shareEvent.dateStart))}`,
           image: eventOgCardImage(shareEvent.id),
           imageAlt: shareEvent.title,
           type: "article",
@@ -451,7 +460,7 @@ export default function Events() {
       return;
     }
     const matches = events.filter(e => e.id === routeEventId);
-    const fromList = routeDay
+    const fromList = routeDate ? matches.find(e => pacificCalendarDate(e.dateStart) === routeDate) : routeDay
       ? matches.find(e => e.dayOfWeek === routeDay)
       : matches.length === 1
         ? matches[0]
@@ -463,10 +472,10 @@ export default function Events() {
     // Keep an already-open modal for this id (set optimistically on click)
     // rather than clearing or replacing it while routeEvent settles.
     setSelectedEvent(prev => {
-      if (prev && prev.id === routeEventId) return prev;
-      return routeEvent ?? prev;
+      if (prev && prev.id === routeEventId && (!routeDate || pacificCalendarDate(prev.dateStart) === routeDate) && (!routeDay || prev.dayOfWeek === routeDay)) return prev;
+      return routeEvent ?? null;
     });
-  }, [routeEventId, routeDay, routeMatch, events, routeEvent]);
+  }, [routeEventId, routeDay, routeDate, routeMatch, events, routeEvent]);
 
   const liveEvents = useMemo(() => events.filter(e => !isPastListing(e,now)), [events, now]);
   const pastEvents = useMemo(() => events.filter(e => isPastListing(e,now)), [events, now]);
@@ -666,7 +675,7 @@ export default function Events() {
     };
     const pool = pastView
       ? filtered
-      : sortEvents(filterBoardEvents(events, "ALL", [], "", false, now), "start_time")
+      : sortEvents(filterBoardEvents(events, activeDay === DEFAULT_WINDOW ? "ALL" : activeDay, activeFilters, searchQuery.trim(), false, now), "start_time")
           .filter(e => !boardEnded(e));
     /* Series poster fill: a recurring series often carries its real flyer
        on some instances only. A bare instance of a series that has a flyer
@@ -686,7 +695,7 @@ export default function Events() {
       );
       return fill ? { ...e, posterImageUrl: fill } : e;
     });
-  }, [pastView, filtered, events, now]);
+  }, [pastView, filtered, events, now, activeDay, activeFilters, searchQuery]);
 
   /* Agent helpers: the board's current scope as schema.org structured data.
      The complete data set stays at /api/events (linked below); this block
@@ -706,7 +715,7 @@ export default function Events() {
         location: { "@type": "Place", name: e.venueName, ...(e.address ? { address: e.address } : {}) },
         ...(e.posterImageUrl ? { image: e.posterImageUrl.startsWith("http") ? e.posterImageUrl : `https://www.zaylist.com${e.posterImageUrl}` } : {}),
         ...(e.admission === "FREE" ? { isAccessibleForFree: true } : {}),
-        url: `https://www.zaylist.com${eventPath(e.id, e.title, e.dayOfWeek)}`,
+        url: `https://www.zaylist.com${eventPath(e.id, e.title, e.dayOfWeek, pacificCalendarDate(e.dateStart))}`,
       },
     })),
   }), [boardEvents]);
@@ -797,7 +806,7 @@ export default function Events() {
           <EventsRailSkeleton />
         ) : isError ? (
           <BrowseStatus error title="Events couldn’t load" description="Your filters are still here. Try loading the events again." onAction={() => void refetch()} />
-        ) : boardEvents.length === 0 ? (
+        ) : poolEvents.length === 0 ? (
           <div className="browse-status" role="status">
             <p className="display section-heading">
               {poolEvents.length === 0
@@ -840,11 +849,15 @@ export default function Events() {
         ) : (
           <FlyerBoard
             events={boardEvents}
-            pastEvents={pastEvents}
+            query={searchQuery} setQuery={setSearchQuery}
+            fday={boardWindow} setFday={setBoardWindow} tags={boardTags} setTags={setBoardTags}
+            onClear={() => { setActiveDay(DEFAULT_WINDOW); setActiveFilters([]); }}
+            pastEvents={pastView ? boardEvents : pastEvents}
             pastView={pastView}
             onEnterPast={() => setPastView(true)}
             onExitPast={() => setPastView(false)}
             onOpen={(listing, rect) => openEvent(listing, rect)}
+            saveDisabled={savesLoading || savesPending}
             savedIds={savedIds}
             onToggleSave={(id) => (user ? toggleSave(id) : setShowSaveAuth(true))}
             now={now}

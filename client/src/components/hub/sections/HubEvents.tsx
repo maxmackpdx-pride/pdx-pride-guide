@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
+import { apiRequest } from "@/lib/queryClient";
 
 export type HubEventRow = {
   id: string | number;
@@ -77,6 +80,12 @@ export default function HubEvents({
     });
   }, [focusSection]);
 
+  const { user } = useAuth();
+  const metrics = useQuery<{events:{id:number;title:string;activeGoing:number}[]}>({
+    queryKey:["/api/organizer/events/metrics",user?.id],
+    enabled:tab==="hosting" && !!user,
+    queryFn:()=>apiRequest("GET","/api/organizer/events/metrics").then(r=>r.json()),
+  });
   const lists: Record<EventsTab, HubEventRow[]> = { going, hosting };
   const eventList = lists[tab];
 
@@ -96,6 +105,13 @@ export default function HubEvents({
           </button>
         ))}
       </div>
+
+      {tab==="hosting" && user && <section aria-label="Organizer attendance">
+        {metrics.isLoading ? <p role="status">Loading organizer attendance…</p> :
+          metrics.isError ? <p role="alert">Attendance is unavailable. <button type="button" onClick={()=>metrics.refetch()}>Try again</button></p> :
+          !!metrics.data?.events.length && <><h2>Active Going RSVPs</h2><ul>{metrics.data.events.map(e=>
+            <li key={e.id}><Link href={`/events/${e.id}`}>{e.title}</Link> · {e.activeGoing} going</li>)}</ul></>}
+      </section>}
 
       <div className="hub-events-panel" id={tab === "going" ? "checkins" : "events"}>
         {loading && (
