@@ -1,6 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
-import { createPortal } from "react-dom";
+import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
 import "./EventsFilterDrawer.css";
+
+/** A date-window chip (All / Today / Tonight / This week / months…). */
+export type EventsFilterWindowChip = { key: string; label: string };
 
 export type EventsFilterDay = {
   /** YYYY-MM-DD (Pacific). */
@@ -44,6 +47,11 @@ type Stage = 0 | 1 | 2;
  * down, or a second drag down from stage 1, closes it to the dock. The lip
  * (3 stacked lines) drags or taps through the same stages. Not a modal at
  * stages 0–1: the page stays live behind it.
+ *
+ * Blend (Nov 19): stage 1 also carries the event-type chips and a
+ * Back-in-time toggle (second filter row, still above the day picker) and
+ * the board's window chips under the day picker. With `startAtSchedule`
+ * (the /schedule deep link) the sheet arrives already at stage 2.
  */
 export default function EventsFilterDrawer({
   window: windowFilter,
@@ -58,6 +66,13 @@ export default function EventsFilterDrawer({
   onPickDay,
   onHeightChange,
   scheduleContent,
+  activeTypes,
+  onToggleType,
+  onTogglePast,
+  windowChips,
+  activeWindow,
+  onPickWindow,
+  startAtSchedule = false,
 }: {
   window: string;
   onWindow: (value: string) => void;
@@ -73,14 +88,25 @@ export default function EventsFilterDrawer({
   /** Your Schedule (the condensed week grid), shown at full-screen stage 2.
       Mounted lazily the first time stage 2 is reached, then kept mounted. */
   scheduleContent?: ReactNode;
+  /** Event-type filters currently on (EVENT_TYPE_FILTERS labels). */
+  activeTypes?: string[];
+  onToggleType?: (filter: string) => void;
+  /** Back-in-time toggle (past board view). */
+  onTogglePast?: () => void;
+  /** Date-window chips for the row under the day picker. */
+  windowChips?: EventsFilterWindowChip[];
+  activeWindow?: string;
+  onPickWindow?: (key: string) => void;
+  /** Arrive already at stage 2 (the /schedule deep link). */
+  startAtSchedule?: boolean;
 }) {
-  const [stage, setStage] = useState<Stage>(1);
-  const [arriving, setArriving] = useState(true);
+  const [stage, setStage] = useState<Stage>(startAtSchedule ? 2 : 1);
+  const [arriving, setArriving] = useState(!startAtSchedule);
   const [settling, setSettling] = useState(false);
   const [dragH, setDragH] = useState<number | null>(null);
   const [bodyH, setBodyH] = useState(0);
   const [fullH, setFullH] = useState(0);
-  const [stage2Mounted, setStage2Mounted] = useState(false);
+  const [stage2Mounted, setStage2Mounted] = useState(startAtSchedule);
   const rootRef = useRef<HTMLElement>(null);
   const stage1Ref = useRef<HTMLDivElement>(null);
   const lipRef = useRef<HTMLButtonElement>(null);
@@ -95,6 +121,7 @@ export default function EventsFilterDrawer({
         read the dragH state, whose closure can be a render behind when
         pointer events arrive faster than React flushes (a fast flick). */
     h: number;
+    startT: number;
     moved: number;
     lastY: number;
     lastT: number;
@@ -112,9 +139,15 @@ export default function EventsFilterDrawer({
   const measureFull = () => {
     const root = rootRef.current;
     if (!root) return 0;
-    /* The sheet's bottom edge is anchored to the dock; full screen means
-       the body runs from that edge up to the top of the viewport. */
-    return Math.max(0, Math.floor(root.getBoundingClientRect().bottom - LIP_H - 2));
+    /* Full screen = the whole app frame between the site header and the
+       dock: the sheet's bottom edge is anchored to the dock, and its top
+       stops just below the header. Running to the very top of the
+       viewport would slide the lip UNDER the header bar (which lives in
+       a 9000-range stacking shell) and leave stage 2 with no grabbable
+       handle — the two-stage close depends on that lip. */
+    const header = document.querySelector(".site-hub-mtop, .site-header");
+    const headerBottom = header ? Math.max(0, header.getBoundingClientRect().bottom) : 0;
+    return Math.max(0, Math.floor(root.getBoundingClientRect().bottom - headerBottom - LIP_H - 2));
   };
 
   const goStage = (next: Stage) => {
@@ -181,6 +214,7 @@ export default function EventsFilterDrawer({
       startY: event.clientY,
       startH: shownH,
       h: shownH,
+      startT: performance.now(),
       moved: 0,
       lastY: event.clientY,
       lastT: performance.now(),
@@ -219,8 +253,13 @@ export default function EventsFilterDrawer({
     }
     if (d.from === 2) {
       /* Two-stage close: a hard/fast drag down skips stage 1 entirely;
-         a normal swipe down stops at stage 1 with a bounce. */
-      if (d.velocity > 0.85) { goStage(0); return; }
+         a normal swipe down stops at stage 1 with a bounce. Speed is the
+         better of the smoothed instantaneous velocity and the gesture's
+         average speed — the instantaneous estimate under-reads when
+         pointermove events arrive sparsely, while the average stays
+         honest for a flick and low for a slow drag or a held pause. */
+      const avgV = Math.abs(d.moved) / Math.max(1, performance.now() - d.startT);
+      if (Math.max(d.velocity, avgV) > 0.85) { goStage(0); return; }
       if (h < fullH - 50) { goStage(1); return; }
       goStage(2);
       return;
@@ -234,7 +273,6 @@ export default function EventsFilterDrawer({
     nextFocus.current = focus;
     goStage(next);
   };
-
   useLayoutEffect(() => {
     if (!nextFocus.current) return;
     const target = nextFocus.current === "pull" ? pullRef.current : lipRef.current;
@@ -242,8 +280,8 @@ export default function EventsFilterDrawer({
     target?.focus({ preventScroll: true });
   }, [stage]);
 
-  /* Pointer taps already resolve in onPointerUp. Only handle native
-     button activation without a pointer here (keyboard/assistive tech). */
+  // The pointer-up handler already activates taps. Native button clicks
+  // with no pointer are keyboard or assistive-technology activation.
   const onActivation = (source: "lip" | "pull") => (event: ReactMouseEvent<HTMLButtonElement>) => {
     if (event.detail !== 0) return;
     if (source === "pull") { keyboardStage(2); return; }
@@ -255,6 +293,9 @@ export default function EventsFilterDrawer({
   };
   const onDrawerKey = (event: ReactKeyboardEvent<HTMLElement>) => {
     if (event.key !== "Escape" || stage === 0 || event.defaultPrevented) return;
+    // Schedule's existing window listener closes its detail popover.
+    // Let it receive this Escape even when focus is still on the opener.
+    if (stage === 2 && rootRef.current?.querySelector(".sch-pop")) return;
     event.preventDefault();
     event.stopPropagation();
     keyboardStage(stage === 2 ? 1 : 0, stage === 2 ? "pull" : "lip");
@@ -265,10 +306,7 @@ export default function EventsFilterDrawer({
     onPickDay(date);
   };
 
-  if (typeof document === "undefined") return null;
-  // Keep all stages on one stable portal: the route stacking context sits
-  // below mobile chrome and moving only stage 2 would remount the handles.
-  return createPortal(
+  return (
     <section
       ref={rootRef}
       className={`edrawer${arriving ? " is-arriving" : ""}${settling ? " is-settling" : ""}${dragH != null ? " is-dragging" : ""}${stage === 2 ? " is-full" : ""}`}
@@ -328,6 +366,34 @@ export default function EventsFilterDrawer({
             />
             <span className="edrawer__count">{count} EVENTS</span>
           </div>
+          {onToggleType ? (
+            <div className="edrawer__types" role="group" aria-label="Filter by event type">
+              {EVENT_TYPE_FILTERS.map(f => (
+                <button
+                  key={f}
+                  type="button"
+                  className={`edrawer__chip${activeTypes?.includes(f) ? " on" : ""}`}
+                  aria-pressed={!!activeTypes?.includes(f)}
+                  onClick={() => onToggleType(f)}
+                >
+                  {f}
+                </button>
+              ))}
+              {onTogglePast ? (
+                <>
+                  <span className="edrawer__div" />
+                  <button
+                    type="button"
+                    className={`edrawer__chip${pastView ? " on" : ""}`}
+                    aria-pressed={pastView}
+                    onClick={onTogglePast}
+                  >
+                    {pastView ? "BACK TO UPCOMING" : "BACK IN TIME"}
+                  </button>
+                </>
+              ) : null}
+            </div>
+          ) : null}
           <div className="edrawer__days" role="group" aria-label={pastView ? "Jump to a past day" : "Jump to a day"}>
             {days.map(d => {
               const lower = d.dowCode.toLowerCase();
@@ -351,6 +417,21 @@ export default function EventsFilterDrawer({
               );
             })}
           </div>
+          {windowChips && windowChips.length > 0 && onPickWindow ? (
+            <div className="edrawer__windows" role="group" aria-label="Jump to a date window">
+              {windowChips.map(c => (
+                <button
+                  key={c.key}
+                  type="button"
+                  className={`edrawer__chip${activeWindow === c.key ? " on" : ""}`}
+                  aria-pressed={activeWindow === c.key}
+                  onClick={() => onPickWindow(c.key)}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
           <button
             type="button"
             ref={pullRef}
@@ -374,7 +455,6 @@ export default function EventsFilterDrawer({
           </div>
         ) : null}
       </div>
-    </section>,
-    document.body,
+    </section>
   );
 }

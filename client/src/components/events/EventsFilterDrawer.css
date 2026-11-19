@@ -140,6 +140,27 @@
   padding-left: 8px;
 }
 
+/* ---- blend rows: event types above the day picker, windows below it ---- */
+.edrawer__types {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 0 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.edrawer__types::-webkit-scrollbar { display: none; }
+.edrawer__windows {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 0 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  text-transform: uppercase;
+}
+.edrawer__windows::-webkit-scrollbar { display: none; }
+
 /* ---- day picker: My Schedule calendar buttons, dock material ---- */
 .edrawer__days {
   display: grid;
