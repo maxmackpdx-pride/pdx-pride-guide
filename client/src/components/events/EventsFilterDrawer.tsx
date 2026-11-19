@@ -96,7 +96,10 @@ export default function EventsFilterDrawer({
 
   const stageH = (s: Stage) => (s === 0 ? 0 : s === 1 ? bodyH : fullH);
   const shownH = dragH != null ? dragH : stageH(stage);
-  const showSchedule = stage === 2 || (dragH != null && dragH > bodyH + 40);
+  /* Content swaps only on stage change, never mid-drag: hiding stage 1
+     while its pull handle is being dragged hides the dragged element and
+     kills the gesture before pointerup can land the next stage. */
+  const showSchedule = stage === 2;
 
   const measureFull = () => {
     const root = rootRef.current;
