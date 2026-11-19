@@ -961,6 +961,158 @@
 }
 .fbx .oheart { color: var(--a); font-size: 18px; }
 
+/* ---------- wide-poster chunk + expanded pages (Nov 18, 2026) ---------- */
+.fbx .pblend {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 7.5cqw; z-index: 3;
+  background: linear-gradient(180deg, transparent, var(--evz-ink-0a0a0e));
+  pointer-events: none;
+}
+.fbx .pchunk { background: var(--evz-ink-0a0a0e); padding: 3.4cqw 4cqw 4cqw; }
+.fbx .pchunk h4 {
+  font: 800 6.4cqw/1.05 var(--font-display);
+  text-transform: uppercase; color: var(--evz-mist-f4f8fa);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fbx .pchunk-meta {
+  font: 500 3.6cqw var(--font-mono); color: var(--evz-mist-cfd8de); margin-top: 2cqw;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fbx .pchunk-row { display: flex; align-items: center; justify-content: space-between; gap: 3cqw; margin-top: 3.2cqw; }
+.fbx .ppill {
+  background: var(--evz-mist-f4f8fa); color: var(--z-black);
+  font-weight: 700; font-size: 3.9cqw; letter-spacing: .03em;
+  padding: 1.7cqw 3.4cqw; border-radius: 999px; white-space: nowrap;
+}
+.fbx .ptexts { font: 700 4.2cqw var(--font-display); letter-spacing: .05em; display: flex; align-items: center; gap: 1.6cqw; }
+.fbx .ptexts b { color: var(--evz-mist-f4f8fa); }
+.fbx .pt-g { color: var(--neon-violet); }
+.fbx .pt-c { color: var(--neon-orange); }
+.fbx .pt-sep { color: var(--evz-gray-8a8a94); }
+.fbx .oshare {
+  position: absolute; top: 10px; left: 10px; z-index: 6;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(5, 5, 6, .72); border: 1px solid var(--evz-line-2c2c35);
+  color: var(--evz-mist-f4f8fa);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.fbx .oshare svg { width: 16px; height: 16px; }
+.fbx .otabs { display: flex; flex: none; border-bottom: 1px solid var(--fbx-line-soft); margin: 14px 16px 0; }
+.fbx .otabs button {
+  flex: 1; background: none; border: none; border-bottom: 2px solid transparent;
+  color: var(--evz-gray-8a8a94);
+  font: 700 11.5px var(--font-display); letter-spacing: .07em;
+  padding: 9px 1px 7px; cursor: pointer;
+}
+.fbx .otabs button.on { color: var(--evz-mist-f4f8fa); border-bottom-color: var(--a); }
+.fbx .opages {
+  flex: 1; min-height: 0; display: flex; overflow-x: auto;
+  scroll-snap-type: x mandatory; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+}
+.fbx .opages::-webkit-scrollbar { display: none; }
+.fbx .opage {
+  flex: 0 0 100%; overflow-y: auto; padding: 16px;
+  scroll-snap-align: start; scrollbar-width: none; overscroll-behavior: contain;
+}
+.fbx .opage::-webkit-scrollbar { display: none; }
+.fbx .osec-r { float: right; color: var(--evz-gray-8a8a94); letter-spacing: .05em; }
+.fbx .oempty {
+  font-size: 12.5px; line-height: 1.55; color: var(--evz-gray-8a8a94);
+  border: 1px dashed var(--evz-line-2c2c35); border-radius: 9px; padding: 12px;
+}
+.fbx .ostarts {
+  border: 1px solid color-mix(in srgb, var(--a) 55%, transparent);
+  border-radius: 10px; padding: 12px 14px; text-align: center;
+  margin-bottom: 13px; background: var(--fbx-chip-bg);
+}
+.fbx .ostarts i { display: block; font: 700 11.5px var(--font-display); font-style: normal; letter-spacing: .24em; color: var(--a); }
+.fbx .ostarts b { display: block; font: 800 30px/1.1 var(--font-display); color: var(--evz-mist-f4f8fa); }
+.fbx .okv { display: flex; gap: 10px; font-size: 13.5px; line-height: 1.5; color: var(--evz-mist-f4f8fa); margin-bottom: 11px; }
+.fbx .okv .ok { font: 700 11px var(--font-display); letter-spacing: .12em; color: var(--evz-gray-8a8a94); flex: 0 0 74px; padding-top: 3px; }
+.fbx .odesc { font-size: 13.5px; line-height: 1.55; color: var(--evz-mist-cfd8de); margin-bottom: 13px; white-space: pre-line; }
+.fbx .onote {
+  font-size: 12.5px; line-height: 1.55; color: var(--evz-gray-8a8a94);
+  border: 1px dashed var(--evz-line-2c2c35); border-radius: 9px;
+  padding: 11px 12px; margin-top: 13px;
+}
+.fbx .olinkbtn {
+  display: flex; justify-content: space-between; align-items: center;
+  font: 800 15px var(--font-display); letter-spacing: .1em;
+  padding: 12px 13px; border-radius: 9px; margin-top: 10px;
+  border: 1px solid var(--evz-line-2c2c35); background: var(--z-oled);
+  color: var(--evz-mist-f4f8fa); text-decoration: none; cursor: pointer;
+}
+.fbx .olinkbtn.accent { border-color: var(--a); }
+.fbx .omap {
+  position: relative; height: 180px; border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--evz-line-2c2c35); background: var(--evz-ink-0a0a0e);
+  margin-bottom: 13px;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--a) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--a) 7%, transparent) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+.fbx .omap-river {
+  position: absolute; left: -10%; right: -10%; top: 56%; height: 26px;
+  background: color-mix(in srgb, var(--a) 18%, transparent);
+  transform: rotate(-7deg); border-radius: 50%;
+}
+.fbx .omap-road { position: absolute; background: color-mix(in srgb, var(--evz-mist-f4f8fa) 13%, transparent); }
+.fbx .omap-pin {
+  position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px;
+  border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+  background: var(--a); border: 2px solid var(--evz-mist-f4f8fa);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--a) 30%, transparent);
+}
+.fbx .omap-tag { position: absolute; top: 9px; left: 10px; font: 500 9.5px var(--font-mono); letter-spacing: .08em; color: var(--evz-gray-8a8a94); }
+.fbx .odir { display: flex; gap: 9px; }
+.fbx .odir a {
+  flex: 1; text-align: center; text-decoration: none;
+  font: 800 14px var(--font-display); letter-spacing: .08em;
+  padding: 11px 6px; border-radius: 9px;
+  border: 1px solid var(--a); background: var(--z-oled); color: var(--evz-mist-f4f8fa);
+}
+.fbx .odays { display: flex; gap: 6px; margin-bottom: 12px; }
+.fbx .oday {
+  flex: 1; background: var(--fbx-chip-bg); border: 1px solid var(--fbx-line-soft);
+  border-radius: 8px; padding: 7px 2px 6px; text-align: center; cursor: pointer;
+  color: var(--evz-mist-f4f8fa);
+}
+.fbx .oday i { display: block; font: 700 10px var(--font-display); font-style: normal; letter-spacing: .12em; color: var(--evz-gray-8a8a94); }
+.fbx .oday b { display: block; font: 800 18px/1.15 var(--font-display); }
+.fbx .oday span { display: block; font-size: 9px; color: var(--evz-gray-8a8a94); }
+.fbx .oday.hot { border-color: var(--a); }
+.fbx .oday.hot i { color: var(--a); }
+.fbx .orail { display: flex; gap: 9px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.fbx .orail::-webkit-scrollbar { display: none; }
+.fbx .omini { flex: 0 0 128px; border: 1px solid var(--fbx-line-soft); border-radius: 9px; padding: 9px 10px; background: var(--fbx-chip-bg); }
+.fbx .omini b { display: block; font: 700 13.5px var(--font-display); line-height: 1.2; color: var(--evz-mist-f4f8fa); }
+.fbx .omini span { display: block; font-size: 10.5px; color: var(--evz-gray-8a8a94); margin-top: 3px; line-height: 1.35; }
+.fbx .operson { display: flex; align-items: center; gap: 12px; padding: 9px 0; }
+.fbx .oavatar {
+  width: 46px; height: 46px; flex: none; border-radius: 50%;
+  background: color-mix(in srgb, var(--a) 30%, var(--fbx-chip-bg));
+  border: 2px solid var(--a);
+  display: flex; align-items: center; justify-content: center;
+  font: 800 18px var(--font-display); color: var(--evz-mist-f4f8fa);
+}
+.fbx .opn { display: block; font: 700 16.5px var(--font-display); line-height: 1.15; color: var(--evz-mist-f4f8fa); }
+.fbx .opr { display: block; font-size: 12px; color: var(--a); }
+.fbx .oclaimbox {
+  border: 1px solid var(--fbx-line-soft); border-radius: 10px;
+  padding: 14px; text-align: center; margin-bottom: 12px; background: var(--fbx-chip-bg);
+}
+.fbx .oct { font: 800 18px var(--font-display); letter-spacing: .16em; color: var(--evz-mist-f4f8fa); }
+.fbx .ocs { font-size: 12.5px; color: var(--evz-gray-8a8a94); line-height: 1.5; margin-top: 4px; }
+.fbx .oarw {
+  width: 30px; height: 30px; flex: none; border-radius: 50%;
+  background: var(--fbx-chip-bg); border: 1px solid var(--evz-line-2c2c35);
+  color: var(--evz-mist-f4f8fa); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.fbx .oarw:disabled { opacity: .3; }
+.fbx .opg { font: 500 9.5px var(--font-mono); color: var(--evz-gray-8a8a94); white-space: nowrap; }
+
 /* ---------- desktop ---------- */
 @media (min-width: 1100px) {
   .fbx { --pw: 264px; --pw2: 118px; --mw: 200px; --fw: 215px; }

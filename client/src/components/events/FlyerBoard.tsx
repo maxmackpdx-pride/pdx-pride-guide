@@ -61,6 +61,21 @@ const ADMISSION_LABEL: Record<string, string> = {
   SUGGESTED_DONATION: "DONATION",
   UNKNOWN: "PRICE NOT CONFIRMED",
 };
+const ADMISSION_FULL: Record<string, string> = {
+  FREE: "Free",
+  TICKETED: "Ticketed",
+  DOOR_FEE: "Cover at door",
+  SUGGESTED_DONATION: "Suggested donation",
+  UNKNOWN: "Not confirmed",
+};
+const AGE_FULL: Record<string, string> = {
+  "21_PLUS": "21+",
+  "18_PLUS": "18+",
+  ALL_AGES: "All ages",
+  UNVERIFIED: "Not stated",
+};
+const OPAGE_NAMES = ["FEED", "INFO", "MAPS", "MORE + NEARBY", "PEOPLE"];
+const OPAGE_LABELS = ["FEED", "INFO", "MAPS", "MORE", "PEOPLE"];
 const AGE_LABEL: Record<string, string> = {
   "21_PLUS": "21+",
   "18_PLUS": "18+",
@@ -375,6 +390,17 @@ function PosterCell({
   const meta = `${eventDateLabel(listing.dateStart)} · ${eventTimeLabel(listing.dateStart)} · ${listing.venueName}${age ? ` · ${age}` : ""}`;
   const price = ADMISSION_LABEL[listing.admission ?? "UNKNOWN"] ?? "PRICE NOT CONFIRMED";
   const priceCls = listing.admission === "FREE" ? " free" : !listing.admission || listing.admission === "UNKNOWN" ? " unk" : "";
+  /* Wide posters (landscape art) carry their info in a black chunk added
+   * below the poster, with a little gradient blending into the poster's
+   * bottom edge; tall posters keep the info laid over the poster with a
+   * gradient. (Tucker's ruling, Nov 18, 2026.) */
+  const wideChunk = !!poster && aspect >= 1.15;
+  const chunkCd =
+    countdownLabel === "ON NOW"
+      ? "ON NOW"
+      : cd
+        ? `${countdownLabel} ${Number(cd.d) > 0 ? `${cd.d}D ${cd.h}H` : `${cd.h}H ${cd.m}M`}`
+        : countdownLabel;
 
   const share = async (ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -407,7 +433,7 @@ function PosterCell({
     >
       <article
         ref={articleRef}
-        className={`poster att-${pinned ? "pin" : "tape"}${tear ? " torn" : ""}${poster ? "" : " noart"} pdx-glass-rebind`}
+        className={`poster att-${pinned ? "pin" : "tape"}${tear ? " torn" : ""}${poster ? "" : " noart"}${wideChunk ? " chunk" : ""} pdx-glass-rebind`}
         style={
           {
             "--a": accent,
@@ -452,24 +478,57 @@ function PosterCell({
             SHARE
           </button>
           <span className={`pprice${priceCls}`}>{price}</span>
-          <div className="pshade">
+          {wideChunk ? <span className="pblend" aria-hidden="true" /> : null}
+          {!wideChunk && (
+            <>
+              <div className="pshade">
+                <h4>{listing.title}</h4>
+                <p>{meta}</p>
+              </div>
+              <div className="pfoot">
+                <div className="pstart">
+                  <span className="ps-lab">{countdownLabel}</span>
+                  {cd && (
+                    <span className="ps-nums">
+                      <span><b>{cd.d}</b><i>DAYS</i></span>
+                      <span><b>{cd.h}</b><i>HRS</i></span>
+                      <span><b>{cd.m}</b><i>MIN</i></span>
+                    </span>
+                  )}
+                </div>
+                <div className="pactions">
+                  <span className="pgigz"><b>–</b><i>GIGZ</i></span>
+                  <span className="pgigz pcarpool"><b>–</b><i>CARPOOL</i></span>
+                  <button
+                    type="button"
+                    className={`pheart${saved ? " saved" : ""}`}
+                    aria-label={saved ? `Remove ${listing.title} from your schedule` : `Save ${listing.title}`}
+                    aria-pressed={saved}
+                    onClick={ev => {
+                      ev.stopPropagation();
+                      onToggleSave(listing.id);
+                    }}
+                  >
+                    <HeartIcon />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        {wideChunk && (
+          <div className="pchunk">
             <h4>{listing.title}</h4>
-            <p>{meta}</p>
-          </div>
-          <div className="pfoot">
-            <div className="pstart">
-              <span className="ps-lab">{countdownLabel}</span>
-              {cd && (
-                <span className="ps-nums">
-                  <span><b>{cd.d}</b><i>DAYS</i></span>
-                  <span><b>{cd.h}</b><i>HRS</i></span>
-                  <span><b>{cd.m}</b><i>MIN</i></span>
-                </span>
-              )}
-            </div>
-            <div className="pactions">
-              <span className="pgigz"><b>–</b><i>GIGZ</i></span>
-              <span className="pgigz pcarpool"><b>–</b><i>CARPOOL</i></span>
+            <p className="pchunk-meta">
+              {listing.venueName} · {weekdayCode(dateStr)} {eventTimeLabel(listing.dateStart)}
+            </p>
+            <div className="pchunk-row">
+              <span className="ppill">{chunkCd}</span>
+              <span className="ptexts">
+                <span className="pt-g">GIGZ</span> <b>–</b>
+                <span className="pt-sep">·</span>
+                <span className="pt-c">CARPOOL</span> <b>–</b>
+              </span>
               <button
                 type="button"
                 className={`pheart${saved ? " saved" : ""}`}
@@ -484,7 +543,7 @@ function PosterCell({
               </button>
             </div>
           </div>
-        </div>
+        )}
       </article>
       <Hardware pinned={pinned} seedKey={key} dayColor={dayColor} rot={rot} />
     </div>
@@ -620,8 +679,26 @@ function PastCell({
 }
 
 type EventDetailResponse = {
+  event?: {
+    description?: string | null;
+    isClaimable?: boolean;
+    hasPendingClaim?: boolean;
+    ticketUrl?: string | null;
+  } | null;
+  venue?: {
+    address?: string | null;
+    neighborhood?: string | null;
+    lat?: number | null;
+    lng?: number | null;
+  } | null;
+  hosts?: Array<{ displayName?: string | null; username?: string | null; role?: string | null }>;
+  talent?: Array<{ displayName?: string | null; username?: string | null; role?: string | null }>;
   gigs?: Array<{ id?: number | string; title?: string | null; description?: string | null }>;
   missedConnections?: unknown[];
+  nearby?: {
+    restaurants?: Array<{ name?: string | null; type?: string | null }>;
+    events?: Array<{ id?: number; title?: string | null; venueName?: string | null; dateStart?: string | null }>;
+  } | null;
 };
 
 type WindowFilter = "all" | "tonight" | "week" | "later";
@@ -652,6 +729,9 @@ export default function FlyerBoard({
   );
   const [openListing, setOpenListing] = useState<EventListing | null>(null);
   const [ocardOn, setOcardOn] = useState(false);
+  const [opage, setOpage] = useState(0);
+  const [oday, setOday] = useState(0);
+  const pagesRef = useRef<HTMLDivElement | null>(null);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
@@ -841,9 +921,35 @@ export default function FlyerBoard({
   const later = (fn: () => void, ms: number) => {
     timersRef.current.push(window.setTimeout(fn, ms));
   };
+  const goOpage = (i: number) => {
+    const el = pagesRef.current;
+    if (el) el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
+  };
+  useEffect(() => {
+    if (pagesRef.current) pagesRef.current.scrollLeft = 0;
+  }, [openListing]);
+  const shareOpen = async () => {
+    if (!openListing) return;
+    const url = `https://www.zaylist.com${eventPath(openListing.id, openListing.title, openListing.dayOfWeek)}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: openListing.title, url });
+        return;
+      }
+      throw new Error("no native share");
+    } catch {
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch {
+        /* clipboard unavailable */
+      }
+    }
+  };
   const openCard = (listing: EventListing, el: HTMLElement | null) => {
     clearTimers();
     setFan(null);
+    setOpage(0);
+    setOday(0);
     setOpenListing(listing);
     flipElRef.current = el;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1076,6 +1182,44 @@ export default function FlyerBoard({
     : "";
   const gigs = detailQuery.data?.gigs ?? [];
   const mizzCount = detailQuery.data?.missedConnections?.length;
+  const detailEvent = detailQuery.data?.event ?? null;
+  const detailVenue = detailQuery.data?.venue ?? null;
+  const hosts = detailQuery.data?.hosts ?? [];
+  const talent = detailQuery.data?.talent ?? [];
+  const nearbyR = detailQuery.data?.nearby?.restaurants ?? [];
+  const nearbyE = detailQuery.data?.nearby?.events ?? [];
+  const openAddr = detailVenue?.address || openListing?.address || "";
+  const openDesc = detailEvent?.description || openListing?.description || "";
+  const openTicket = detailEvent?.ticketUrl || openListing?.ticketUrl || "";
+  const openClaimable = detailEvent?.isClaimable ?? openListing?.isClaimable ?? false;
+  const openPending = detailEvent?.hasPendingClaim ?? openListing?.hasPendingClaim ?? false;
+  const openLat = detailVenue?.lat ?? openListing?.lat ?? null;
+  const openLng = detailVenue?.lng ?? openListing?.lng ?? null;
+  const pinX = openLng != null ? Math.min(92, Math.max(8, ((openLng + 122.85) / 0.4) * 100)) : 50;
+  const pinY = openLat != null ? Math.min(88, Math.max(10, ((45.65 - openLat) / 0.2) * 100)) : 50;
+  const dirDest = encodeURIComponent(
+    `${openAddr ? `${openAddr}, ` : ""}${openListing?.venueName ?? ""}, Portland, OR`,
+  );
+  const openCdLabel = openCdText === "ON NOW" ? "HAPPENING" : openCdText.startsWith("ENDS") ? "ENDS IN" : "STARTS IN";
+  const openCdNums = openCdText.replace(/^(STARTS IN|ENDS IN)\s*/, "") || "ON NOW";
+  /* More-at-venue strip: the open event's venue, day by day, for the 7
+   * days starting on the event's own day (same shape as the expanded
+   * card's strip on the event page). */
+  const openStrip = useMemo(() => {
+    type StripDay = { ds: string; dow: string; num: number; items: EventListing[] };
+    if (!openListing) return [] as StripDay[];
+    const start = dateStrOf(openListing);
+    const [sy, sm, sd] = start.split("-").map(Number);
+    const out: StripDay[] = [];
+    for (let i = 0; i < 7; i++) {
+      const ds = new Date(Date.UTC(sy, sm - 1, sd + i)).toISOString().slice(0, 10);
+      const items = events
+        .filter(e2 => e2.id !== openListing.id && e2.venueName === openListing.venueName && dateStrOf(e2) === ds)
+        .sort((a, b) => a.dateStart.localeCompare(b.dateStart));
+      out.push({ ds, dow: weekdayCode(ds), num: Number(ds.slice(8, 10)), items });
+    }
+    return out;
+  }, [openListing, events]);
 
   return (
     <div className="fbx" ref={rootRef}>
@@ -1438,8 +1582,10 @@ export default function FlyerBoard({
           >
             ✕
           </div>
-          <div className="oscroll">
-            <div className="ohero">
+          <button type="button" className="oshare" aria-label={`Share ${openListing.title}`} onClick={shareOpen}>
+            <ShareIcon />
+          </button>
+          <div className="ohero">
               {openPoster ? (
                 <img src={openPoster} alt="" />
               ) : (
@@ -1478,25 +1624,35 @@ export default function FlyerBoard({
               <b>I'M INTERESTED</b>
               <span>{savedIds.has(openListing.id) ? "SAVED TO YOUR SCHEDULE" : "TAP TO SAVE YOUR SPOT"}</span>
             </button>
-            <div className="ocounters">
-              <div className="ocount">
-                <b>{detailQuery.data && gigs.length > 0 ? String(gigs.length) : "–"}</b>
-                <i className="oc-g">GIGZ</i>
-              </div>
-              <div className="ocount">
-                <b>–</b>
-                <i className="oc-c">CARPOOL</i>
-              </div>
-              <div className="ocount">
-                <b>{detailQuery.data && (mizzCount ?? 0) > 0 ? String(mizzCount) : "–"}</b>
-                <i className="oc-m">MIZZED</i>
-              </div>
+            <div className="otabs" role="tablist" aria-label="Event card pages">
+              {OPAGE_NAMES.map((n, i) => (
+                <button
+                  key={n}
+                  type="button"
+                  role="tab"
+                  aria-selected={opage === i}
+                  className={opage === i ? "on" : ""}
+                  onClick={() => goOpage(i)}
+                >
+                  {n}
+                </button>
+              ))}
             </div>
-            <div className="obody">
-              {gigs.length > 0 && (
-                <>
-                  <p className="osec">GIGZ · OPEN CALLS</p>
-                  {gigs.map((g, gi) => (
+            <div
+              className="opages"
+              ref={pagesRef}
+              onScroll={e => {
+                const el = e.currentTarget;
+                const i = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
+                if (i !== opage) setOpage(i);
+              }}
+            >
+              <section className="opage" aria-label="Feed">
+                <p className="osec">
+                  GIGZ AT {openListing.venueName.toUpperCase()} <span className="osec-r">{gigs.length} OPEN</span>
+                </p>
+                {gigs.length > 0 ? (
+                  gigs.map((g, gi) => (
                     <div className="gig" key={g.id ?? gi}>
                       <div className="av" />
                       <div>
@@ -1504,31 +1660,276 @@ export default function FlyerBoard({
                         {g.description ? <p>{g.description}</p> : null}
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <p className="oempty">
+                    No Gigz posted at {openListing.venueName} right now. Gigz the venue posts land here.
+                  </p>
+                )}
+                <button
+                  type="button"
+                  className="addm"
+                  onClick={() => {
+                    const target = openListing;
+                    closeCard();
+                    onOpen(target, null);
+                  }}
+                >
+                  <b>+ ADD A MIZZED CONNECTION</b>
+                  <p>{mizzCount ? `${mizzCount} posted for this event` : "Post during or after the event."}</p>
+                </button>
+              </section>
+              <section className="opage" aria-label="Info">
+                <p className="osec">EVENT DETAILS</p>
+                <div className="ostarts">
+                  <i>{openCdLabel}</i>
+                  <b>{openCdNums}</b>
+                </div>
+                <div className="okv">
+                  <span className="ok">WHEN</span>
+                  <span>
+                    {eventDateLabel(openListing.dateStart)} · {eventTimeLabel(openListing.dateStart)}
+                  </span>
+                </div>
+                <div className="okv">
+                  <span className="ok">WHERE</span>
+                  <span>
+                    {openListing.venueName}
+                    {openAddr ? (
+                      <>
+                        <br />
+                        {openAddr}
+                      </>
+                    ) : null}
+                  </span>
+                </div>
+                {openDesc ? <p className="odesc">{openDesc}</p> : null}
+                <div className="okv">
+                  <span className="ok">ADMISSION</span>
+                  <span>{ADMISSION_FULL[openListing.admission ?? "UNKNOWN"] ?? "Not confirmed"}</span>
+                </div>
+                <div className="okv">
+                  <span className="ok">AGE</span>
+                  <span>{AGE_FULL[openListing.ageRequirement ?? ""] ?? "Not stated"}</span>
+                </div>
+                {openTicket ? (
+                  <a className="olinkbtn accent" href={openTicket} target="_blank" rel="noreferrer">
+                    GET TICKETS <span>↗</span>
+                  </a>
+                ) : null}
+                {openClaimable ? (
+                  <p className="onote">
+                    This event has not been claimed by its organizer. Details were sourced from public listings —
+                    confirm time, venue, and ticketing directly before attending.
+                    {openPending ? " A claim is pending admin review." : ""}
+                  </p>
+                ) : null}
+                <a className="olinkbtn" href={eventPath(openListing.id, openListing.title, openListing.dayOfWeek)}>
+                  REPORT / REQUEST A CHANGE <span>›</span>
+                </a>
+              </section>
+              <section className="opage" aria-label="Maps">
+                <p className="osec">
+                  MAP & DIRECTIONS <span className="osec-r">LOCATION OVERVIEW</span>
+                </p>
+                <div className="omap" aria-hidden="true">
+                  <span className="omap-river" />
+                  <span className="omap-road" style={{ left: 0, right: 0, top: "30%", height: 7 }} />
+                  <span className="omap-road" style={{ top: 0, bottom: 0, left: "38%", width: 7 }} />
+                  <span className="omap-road" style={{ left: 0, right: 0, top: "74%", height: 5 }} />
+                  <span className="omap-tag">REAL LOCATION · NO STREET TILES</span>
+                  <span className="omap-pin" style={{ left: `${pinX}%`, top: `${pinY}%` }} />
+                </div>
+                <div className="okv">
+                  <span className="ok">VENUE</span>
+                  <span>
+                    {openListing.venueName}
+                    {openAddr ? (
+                      <>
+                        <br />
+                        {openAddr}
+                      </>
+                    ) : null}
+                  </span>
+                </div>
+                <div className="odir">
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${dirDest}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    DIRECTIONS · GOOGLE
+                  </a>
+                  <a href={`https://maps.apple.com/?daddr=${dirDest}`} target="_blank" rel="noreferrer">
+                    DIRECTIONS · APPLE
+                  </a>
+                </div>
+              </section>
+              <section className="opage" aria-label="More and nearby">
+                <p className="osec">
+                  MORE AT {openListing.venueName.toUpperCase()} <span className="osec-r">THE SAME WEEK</span>
+                </p>
+                <div className="odays">
+                  {openStrip.map((d, i) => (
+                    <button
+                      key={d.ds}
+                      type="button"
+                      className={`oday${oday === i ? " hot" : ""}`}
+                      onClick={() => setOday(i)}
+                    >
+                      <i>{d.dow}</i>
+                      <b>{d.num}</b>
+                      <span>{d.items.length ? `${d.items.length} event${d.items.length === 1 ? "" : "s"}` : "—"}</span>
+                    </button>
                   ))}
-                </>
-              )}
-              <button
-                type="button"
-                className="addm"
-                onClick={() => {
-                  const target = openListing;
-                  closeCard();
-                  onOpen(target, null);
-                }}
-              >
-                <b>+ ADD A MIZZED CONNECTION</b>
-                <p>Post during or after the event.</p>
-              </button>
+                </div>
+                {openStrip[oday]?.items.length ? (
+                  <div className="orail">
+                    {openStrip[oday].items.map(n => (
+                      <div className="omini" key={n.id}>
+                        <b>{n.title}</b>
+                        <span>{eventTimeLabel(n.dateStart)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="oempty">No other events at {openListing.venueName} on this day.</p>
+                )}
+                <p className="osec" style={{ marginTop: 16 }}>
+                  RESTAURANTS CLOSE BY
+                </p>
+                {nearbyR.length ? (
+                  <div className="orail">
+                    {nearbyR.map((r, i) => (
+                      <div className="omini" key={`${r.name ?? "r"}-${i}`}>
+                        <b>{r.name}</b>
+                        <span>{r.type || "restaurant"}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="oempty">No restaurants listed nearby yet.</p>
+                )}
+                <p className="osec" style={{ marginTop: 16 }}>
+                  EVENTS SAME DAY · CLOSE BY
+                </p>
+                {nearbyE.length ? (
+                  <div className="orail">
+                    {nearbyE.map((n, i) => (
+                      <div className="omini" key={n.id ?? i}>
+                        <b>{n.title}</b>
+                        <span>
+                          {n.venueName}
+                          {n.dateStart ? (
+                            <>
+                              <br />
+                              {eventDateLabel(n.dateStart)}
+                            </>
+                          ) : null}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="oempty">No other events close by on this day.</p>
+                )}
+              </section>
+              <section className="opage" aria-label="People">
+                <p className="osec">{hosts.length === 1 ? "HOST" : "HOSTS"}</p>
+                {hosts.length > 0 ? (
+                  hosts.map((h, i) => {
+                    const name = h.displayName || h.username || "";
+                    const initials =
+                      name
+                        .trim()
+                        .split(/\s+/)
+                        .map(w => w[0])
+                        .slice(0, 2)
+                        .join("")
+                        .toUpperCase() || "?";
+                    return (
+                      <div className="operson" key={h.username ?? i}>
+                        <span className="oavatar">{initials}</span>
+                        <span>
+                          <span className="opn">{name}</span>
+                          {h.role ? (
+                            <span className="opr">{h.role === "PRIMARY" ? "Primary host" : h.role}</span>
+                          ) : null}
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <>
+                    <div className="oclaimbox">
+                      <p className="oct">UNCLAIMED</p>
+                      <p className="ocs">
+                        Most events go unclaimed — no host has claimed this event yet.
+                        {openPending ? " A claim is pending admin review." : ""}
+                      </p>
+                    </div>
+                    {openClaimable && !openPending ? (
+                      <a className="olinkbtn" href={`/submit/claim/${openListing.id}`}>
+                        CLAIM THIS EVENT <span>›</span>
+                      </a>
+                    ) : null}
+                  </>
+                )}
+                {talent.length > 0 && (
+                  <>
+                    <p className="osec" style={{ marginTop: 16 }}>
+                      TALENT · THIS EDITION
+                    </p>
+                    {talent.map((t, i) => {
+                      const name = t.displayName || t.username || "";
+                      const initials =
+                        name
+                          .trim()
+                          .split(/\s+/)
+                          .map(w => w[0])
+                          .slice(0, 2)
+                          .join("")
+                          .toUpperCase() || "?";
+                      return (
+                        <div className="operson" key={t.username ?? i}>
+                          <span className="oavatar">{initials}</span>
+                          <span>
+                            <span className="opn">{name}</span>
+                            {t.role ? <span className="opr">{t.role}</span> : null}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
+                <p className="osec" style={{ marginTop: 16 }}>
+                  PROMOTERS
+                </p>
+                <p className="oempty">No promoters are connected yet.</p>
+              </section>
             </div>
-          </div>
           <div className="ofoot">
-            <div className="dots">
-              <i className="on" />
-              <i />
-              <i />
-              <i />
-              <i />
-            </div>
+            <button
+              type="button"
+              className="oarw"
+              disabled={opage === 0}
+              onClick={() => goOpage(opage - 1)}
+              aria-label="Previous page"
+            >
+              ‹
+            </button>
+            <span className="opg">
+              PAGE {opage + 1} · {OPAGE_LABELS[opage]}
+            </span>
+            <button
+              type="button"
+              className="oarw"
+              disabled={opage === OPAGE_NAMES.length - 1}
+              onClick={() => goOpage(opage + 1)}
+              aria-label="Next page"
+            >
+              ›
+            </button>
             <button
               type="button"
               className="osave"
