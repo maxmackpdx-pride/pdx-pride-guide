@@ -65,3 +65,16 @@ html:has(.placez-fullscreen[open]){scrollbar-gutter:auto;overflow:hidden}
   mask-size: cover;
   -webkit-mask-size: cover;
 }
+
+/* In the mobile directory dialog, pin only the leading phone row in Info.
+   Its remaining contacts and details share the usual panel scroller. */
+.placez-mobile-frame .pz-native-expanded .place-modal-panel__contacts {
+  display: contents;
+}
+.placez-mobile-frame .pz-native-expanded .place-modal-panel__contacts>.place-modal-panel__fact:first-child {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  margin-block: 0;
+  background: var(--pz-glass-ink,var(--places-art-ink-04090d));
+}

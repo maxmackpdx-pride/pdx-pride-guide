@@ -63,7 +63,6 @@ import ResetPassword from "./pages/ResetPassword";
 
 const Events = lazyWithReload(() => import("./pages/Events"));
 const Home = lazyWithReload(() => import("./pages/Home"));
-const Schedule = lazyWithReload(() => import("./pages/Schedule"));
 const Submit = lazyWithReload(() => import("./pages/Submit"));
 const Boards = lazyWithReload(() => import("./pages/Boards"));
 const About = lazyWithReload(() => import("./pages/About"));
@@ -160,7 +159,9 @@ function AppLayout() {
             <Route path="/our-boardz">{() => <Redirect to={`/boardz${window.location.search}${window.location.hash}`} replace />}</Route>
             <Route path="/map-demo" component={UnifiedMap} />
             <Route path="/map" component={UnifiedMap} />
-            <Route path="/schedule">{() => <Schedule />}</Route>
+            {/* My Schedule is the Events drawer's full-screen layer now:
+                /schedule lands on Events with that stage already open. */}
+            <Route path="/schedule">{() => <Redirect to="/events?schedule=1" replace />}</Route>
             <Route path="/submit/claim/:eventId" component={Submit} />
             <Route path="/submit" component={Submit} />
             <Route path="/gigz/new">{() => <BoardComposeEntrance board="gigz" />}</Route>

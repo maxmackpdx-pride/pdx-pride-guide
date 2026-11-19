@@ -22,6 +22,7 @@ import { registerBoardPlacement } from "./boardMapPlacement";
 import { homeCatalogCounts } from "./homeStats";
 import { hasPublicEventFlags } from "@shared/publicEventVisibility";
 import { registerEventPlanning } from "./eventPlanning";
+import { registerZaylist } from "./zaylist";
 import { createEventSaves } from "./eventSaves";
 import { createBoardSaves, isSavedBoard } from "./boardSaves";
 import { publicBoardMapLocations } from './boardMapLocations';
@@ -1359,6 +1360,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   registerProfileLayoutRoutes(app,requireAuth,profileLayouts,eligibleProfileSource);
   const eventSaves = createEventSaves(sqlite);
   const eventPlanning = registerEventPlanning(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate);
+  const zaylist = registerZaylist(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate);
   const boardSaves = createBoardSaves(sqlite);
   assertProductionPersistence();
   assertProductionSecrets();

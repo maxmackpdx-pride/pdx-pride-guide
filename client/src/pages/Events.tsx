@@ -416,6 +416,12 @@ export default function Events() {
   });
 
   /* ---- bottom filter drawer (filters + day picker, locked to the dock) ---- */
+  /* The /schedule deep link (and its legacy ?tab=schedule form) arrives
+     with the drawer already open at the full-screen Your Schedule stage.
+     Captured once at mount: the /schedule redirect unmounts this page
+     before landing here, and the browse-param sync below rewrites the
+     visible URL without the flag. */
+  const [startAtSchedule] = useState(() => readSearchParam("schedule") === "1" || readSearchParam("tab") === "schedule");
   const [drawerH, setDrawerH] = useState(0);
   const [boardCount, setBoardCount] = useState(0);
   const [pickedDay, setPickedDay] = useState<string | null>(null);
@@ -463,6 +469,14 @@ export default function Events() {
     requestAnimationFrame(() => requestAnimationFrame(() => {
       window.dispatchEvent(new CustomEvent("zaylist:board-day", { detail: { date } }));
     }));
+  }, []);
+  const toggleDrawerPast = useCallback(() => {
+    setPickedDay(null);
+    setPastView(prev => !prev);
+  }, []);
+  const pickDrawerWindow = useCallback((key: string) => {
+    setPickedDay(null);
+    setActiveDay(key);
   }, []);
 
   const { data: routeEvent, error: routeError, refetch: refetchRouteEvent } = useQuery<Event>({
@@ -903,7 +917,14 @@ export default function Events() {
         pastView={drawerPast}
         onPickDay={pickDrawerDay}
         onHeightChange={onDrawerHeight}
-        scheduleContent={<Schedule embed />}
+        scheduleContent={<Schedule embed mineOnly />}
+        activeTypes={activeFilters}
+        onToggleType={toggleFilter}
+        onTogglePast={toggleDrawerPast}
+        windowChips={dayChips}
+        activeWindow={activeDay}
+        onPickWindow={pickDrawerWindow}
+        startAtSchedule={startAtSchedule}
       />
 
       {showSaveAuth && <AuthModal onClose={() => setShowSaveAuth(false)} />}
