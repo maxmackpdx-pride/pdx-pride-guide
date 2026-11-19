@@ -818,14 +818,15 @@
     0 14px 30px rgba(0, 0, 0, .6);
 }
 .fbx .ocard.on { opacity: 1; pointer-events: auto; transform: translate(-50%, 0) perspective(1100px) rotateY(0deg) rotateX(0deg) scale(1); }
-.fbx .ohero { position: relative; height: 248px; flex: none; overflow: hidden; background: var(--evz-ink-0a0a0e); }
+.fbx .ohero { position: relative; height: 248px; flex: none; overflow: visible; background: var(--evz-ink-0a0a0e); }
 .fbx .ohero img {
-  width: 100%; height: 100%;
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 380px;
   object-fit: cover;
   object-position: top center;
   display: block;
-  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 46%, transparent 98%);
-  mask-image: linear-gradient(to bottom, var(--z-oled) 46%, transparent 98%);
+  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 40%, transparent 96%);
+  mask-image: linear-gradient(to bottom, var(--z-oled) 40%, transparent 96%);
 }
 .fbx .ohero-typo { position: absolute; inset: 0; }
 .fbx .typo-t {
@@ -866,6 +867,7 @@
 .fbx .oid h2 { font: 800 25px/1.02 "Barlow Condensed", sans-serif; text-transform: uppercase; margin-top: 9px; }
 .fbx .ometa { font: 500 11.5px var(--font-mono); color: var(--evz-mist-cfd8de); margin-top: 6px; line-height: 1.55; white-space: pre-line; }
 .fbx .ointerested {
+  position: relative; z-index: 2;
   margin: 14px 16px 0;
   background: var(--z-oled);
   border: 1px solid color-mix(in srgb, var(--a) 45%, transparent);
@@ -967,7 +969,7 @@
   background: linear-gradient(180deg, transparent, var(--evz-ink-0a0a0e));
   pointer-events: none;
 }
-.fbx .pchunk { background: var(--evz-ink-0a0a0e); padding: 3.4cqw 4cqw 4cqw; }
+.fbx .pchunk { position: relative; z-index: 1; background: var(--evz-ink-0a0a0e); padding: 3.4cqw 4cqw 4cqw; }
 .fbx .pchunk h4 {
   font: 800 6.4cqw/1.05 var(--font-display);
   text-transform: uppercase; color: var(--evz-mist-f4f8fa);
@@ -1165,3 +1167,6 @@
 @media (max-width: 1099px) {
   .fbx { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* Open card: everything below the hero rides above the poster's fade tail. */
+.fbx .otabs, .fbx .opageswrap, .fbx .ofoot { position: relative; z-index: 2; }

@@ -273,11 +273,11 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
 
   return (
     <div ref={dialogRef} data-testid="event-modal" data-card-category="eventz" className="evz-x pdx-glass-rebind" style={{ "--c": accent, "--ac": accent } as CSSProperties} aria-label={`${event.title} details`}>
+      <span className="evz-x__grad" aria-hidden="true" />
       <header className="evz-x__hero">
         {poster
           ? <img {...posterAttributes} alt="" loading="lazy" decoding="async" className="evz-x__flyer" onError={(e) => { restoreOriginalPoster(e.currentTarget, poster); }} />
           : <span className="evz-x__flyer evz-x__flyer--none" aria-hidden="true" />}
-        <span className="evz-x__grad" aria-hidden="true" />
         <div className="evz-x__chrome">
           <button type="button" className="evz-x__iconbtn" onClick={share} aria-label={`Share ${event.title}`}><Share2 size={17} aria-hidden="true" /></button>
           <button type="button" className="evz-x__iconbtn" onClick={requestClose} aria-label={`Close ${event.title}`}><X size={19} aria-hidden="true" /></button>
