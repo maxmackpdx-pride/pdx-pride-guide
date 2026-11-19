@@ -144,3 +144,29 @@ network pattern no longer sits behind the card copy. Tests 441/441 on the
 tagged source; GitHub runs 44406325296 and 44406325471 passed the compiler
 checks, typechecking, map tests and both builds. The v1.0.26 parts remain in
 this folder for rollback.
+
+## v1.0.28: Map cards + hologram flyer unified with the new events cards
+
+Source: `b5e8c7081ef8298978ba4f72305a49d55e2a2e9b` (immutable `v1.0.28`).
+Archive SHA-256: `9ce169c4d0c3f1771ee8c4af44dda9c2f497f979d7453d5d7f16ebd234cf0c1f`.
+The map's event cards and the Tower hologram's flyer are now the events
+page's new card system, fed by the same live API. The events adapter
+carries the full publicEvent record — the old 18-field whitelist dropped
+isSexPositive, isClaimable, hasPendingClaim, lat/lng, venueWebsite and
+source — so map cards render from the same record the board renders
+from. A map tap opens the new FRONT card (variant A: countdown module
+top-left, share icon + price chip top-right, Gigz/Carpool boxes + heart
+in the bottom band, wide posters get the black chunk below the poster)
+centered over a blurred scrim, not locked to the docks; a second tap
+grows it into the new EXPANDED card (Feed / Info / Maps / More + Nearby
+/ People from GET /api/events/:id/detail plus GET /api/placez/:id),
+which alone locks full-screen above the top bar and bottom dock. The
+legacy EventModal snapshot path is gone from production event details,
+and the Mapz drawer footer now reads LIVE EVENTS · ZAYLIST EVENTS API.
+The Tower hologram's flyer face carries the front card's countdown
+module in hologram-law form (IN … / LIVE, no label, no days unit); the
+law's furniture block, spin, far falloff and solver are unchanged, as
+are the v1.0.27 expand-crash fix and its error boundary. Tests 447/447
+on the tagged source; GitHub runs 44457309400 and 44457309352 passed
+the compiler checks, typechecking, map tests and both builds. The
+v1.0.27 parts remain in this folder for rollback.
