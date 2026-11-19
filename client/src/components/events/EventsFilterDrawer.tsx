@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import "./EventsFilterDrawer.css";
 
 export type EventsFilterDay = {
@@ -264,7 +265,10 @@ export default function EventsFilterDrawer({
     onPickDay(date);
   };
 
-  return (
+  if (typeof document === "undefined") return null;
+  // Keep all stages on one stable portal: the route stacking context sits
+  // below mobile chrome and moving only stage 2 would remount the handles.
+  return createPortal(
     <section
       ref={rootRef}
       className={`edrawer${arriving ? " is-arriving" : ""}${settling ? " is-settling" : ""}${dragH != null ? " is-dragging" : ""}${stage === 2 ? " is-full" : ""}`}
@@ -370,6 +374,7 @@ export default function EventsFilterDrawer({
           </div>
         ) : null}
       </div>
-    </section>
+    </section>,
+    document.body,
   );
 }
