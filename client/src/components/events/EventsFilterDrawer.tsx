@@ -91,6 +91,7 @@ export default function EventsFilterDrawer({
         read the dragH state, whose closure can be a render behind when
         pointer events arrive faster than React flushes (a fast flick). */
     h: number;
+    startT: number;
     moved: number;
     lastY: number;
     lastT: number;
@@ -182,6 +183,7 @@ export default function EventsFilterDrawer({
       startY: event.clientY,
       startH: shownH,
       h: shownH,
+      startT: performance.now(),
       moved: 0,
       lastY: event.clientY,
       lastT: performance.now(),
@@ -220,8 +222,13 @@ export default function EventsFilterDrawer({
     }
     if (d.from === 2) {
       /* Two-stage close: a hard/fast drag down skips stage 1 entirely;
-         a normal swipe down stops at stage 1 with a bounce. */
-      if (d.velocity > 0.85) { goStage(0); return; }
+         a normal swipe down stops at stage 1 with a bounce. Speed is the
+         better of the smoothed instantaneous velocity and the gesture's
+         average speed — the instantaneous estimate under-reads when
+         pointermove events arrive sparsely, while the average stays
+         honest for a flick and low for a slow drag or a held pause. */
+      const avgV = Math.abs(d.moved) / Math.max(1, performance.now() - d.startT);
+      if (Math.max(d.velocity, avgV) > 0.85) { goStage(0); return; }
       if (h < fullH - 50) { goStage(1); return; }
       goStage(2);
       return;
