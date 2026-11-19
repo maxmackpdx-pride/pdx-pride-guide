@@ -1,8 +1,10 @@
 import { eventAge, eventPrice } from "@/lib/eventFacts";
-import { EventGoingButton, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
+import { EventGoingButton, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
 import EventPlanning from "./EventPlanning";
 import {useHistoryState} from "wouter/use-browser-location";
 import {useAuth} from "@/context/AuthContext";
+import AuthModal from "@/components/AuthModal";
+import { useHeart } from "@/hooks/useHearts";
 import {useModalA11y} from "@/hooks/useModalA11y";
 import {sharePageLink,shareToastTitle} from "@/lib/shareEvent";
 import {toast} from "@/hooks/use-toast";
@@ -52,9 +54,6 @@ export type FlyerBoardProps = {
   onExitPast: () => void;
   /** Opens the full production expanded card (deep actions: post a Mizzed, etc.). */
   onOpen: (listing: EventListing, originRect: EventModalOriginRect | null) => void;
-  saveDisabled: boolean;
-  savedIds: Set<number>;
-  onToggleSave: (id: number) => void;
   now: number;
   query: string;
   setQuery: (value: string) => void;
@@ -344,9 +343,6 @@ function PosterCell({
   mtop,
   rail = false,
   showDayFlag = false,
-  saveDisabled,
-  saved,
-  onToggleSave,
   onOpenCard,
   tick,
 }: CellCommon & {
@@ -357,9 +353,6 @@ function PosterCell({
    *  height (the 0.8 reference at full rail width) scales down to fit. */
   rail?: boolean;
   showDayFlag?: boolean;
-  saveDisabled: boolean;
-  saved: boolean;
-  onToggleSave: (id: number) => void;
   onOpenCard: (listing: EventListing, el: HTMLElement | null) => void;
 }) {
   const articleRef = useRef<HTMLElement | null>(null);
@@ -372,6 +365,18 @@ function PosterCell({
   const poster = listingPosterUrl(listing);
   const [aspect, setAspect] = useState(() => (poster ? aspectByPosterUrl.get(poster) ?? 0.8 : 0.8));
   const [cellRef, loadPoster] = usePosterLoad<HTMLDivElement>(poster);
+  /* The heart means "you're interested" (Tucker's ruling, Nov 19, 2026):
+   * the same function on the front and the expanded card, driving the
+   * one shared interested (follow) state — never the private save.
+   * Filled = interested. The `.saved` class is the legacy on-state class. */
+  const heart = useHeart("event", String(listing.id), {
+    title: listing.title,
+    subtitle: listing.venueName,
+    image: poster,
+    href: eventPath(listing.id, listing.title, listing.dayOfWeek, dateStr),
+    accent: listing.accentColor ?? null,
+  });
+  const [heartAuth, setHeartAuth] = useState(false);
   const tear = useMemo(() => (pinned ? tearPolygons(key) : null), [pinned, key]);
   useDemoTilt(articleRef, !pinned);
 
@@ -485,12 +490,13 @@ function PosterCell({
                   <span className="pgigz pcarpool"><b>–</b><i>CARPOOL</i></span>
                   <button
                     type="button"
-                    className={`pheart${saved ? " saved" : ""}`}
-                    aria-label={saved ? `Remove ${listing.title} from your private schedule` : `Save ${listing.title} privately`}
-                    disabled={saveDisabled} aria-pressed={saved}
+                    className={`pheart${heart.hearted ? " saved" : ""}`}
+                    aria-label={heart.hearted ? `Remove interest in ${listing.title}` : `Mark interest in ${listing.title}`}
+                    title={heart.hearted ? "Interested" : "Mark interest"}
+                    disabled={heart.pending} aria-pressed={heart.hearted}
                     onClick={ev => {
                       ev.stopPropagation();
-                      onToggleSave(listing.id);
+                      heart.signedIn ? heart.toggle() : setHeartAuth(true);
                     }}
                   >
                     <HeartIcon />
@@ -512,12 +518,13 @@ function PosterCell({
               <span className="pgigz pcarpool"><b>–</b><i>CARPOOL</i></span>
               <button
                 type="button"
-                className={`pheart${saved ? " saved" : ""}`}
-                aria-label={saved ? `Remove ${listing.title} from your private schedule` : `Save ${listing.title} privately`}
-                disabled={saveDisabled} aria-pressed={saved}
+                className={`pheart${heart.hearted ? " saved" : ""}`}
+                aria-label={heart.hearted ? `Remove interest in ${listing.title}` : `Mark interest in ${listing.title}`}
+                title={heart.hearted ? "Interested" : "Mark interest"}
+                disabled={heart.pending} aria-pressed={heart.hearted}
                 onClick={ev => {
                   ev.stopPropagation();
-                  onToggleSave(listing.id);
+                  heart.signedIn ? heart.toggle() : setHeartAuth(true);
                 }}
               >
                 <HeartIcon />
@@ -528,6 +535,7 @@ function PosterCell({
         )}
       </article>
       <Hardware pinned={pinned} seedKey={key} dayColor={dayColor} rot={rot} />
+      {heartAuth && <AuthModal onClose={() => setHeartAuth(false)} />}
     </div>
   );
 }
@@ -697,9 +705,6 @@ export default function FlyerBoard({
   onEnterPast,
   onExitPast,
   onOpen,
-  saveDisabled,
-  savedIds,
-  onToggleSave,
   now, query, setQuery, fday, setFday, tags, setTags, onClear, onVisibleCount,
 }: FlyerBoardProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -1065,9 +1070,6 @@ export default function FlyerBoard({
       index={i}
       mtop={0}
       rail
-      saveDisabled={saveDisabled}
-      saved={savedIds.has(e.id)}
-      onToggleSave={onToggleSave}
       onOpenCard={openCard}
       tick={tick}
     />
@@ -1089,9 +1091,6 @@ export default function FlyerBoard({
         showDayFlag={flowData.flow[i - 1]?.kind === "flag"}
         index={flowPos}
         mtop={mtop}
-        saveDisabled={saveDisabled}
-      saved={savedIds.has(item.e.id)}
-        onToggleSave={onToggleSave}
         onOpenCard={openCard}
         tick={tick}
       />
@@ -1866,6 +1865,17 @@ export default function FlyerBoard({
               ›
             </button>
             <EventPrivateSaveButton eventId={openListing.id} poster />
+            <EventInterestedHeart
+              eventId={openListing.id}
+              variant="poster"
+              snapshot={{
+                title: openListing.title,
+                subtitle: openListing.venueName,
+                image: listingPosterUrl(openListing),
+                href: eventPath(openListing.id, openListing.title, openListing.dayOfWeek, dateStrOf(openListing)),
+                accent: openListing.accentColor ?? null,
+              }}
+            />
           </div>
         </div>
       )}

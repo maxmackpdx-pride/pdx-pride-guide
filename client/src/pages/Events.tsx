@@ -331,7 +331,7 @@ export default function Events() {
     };
   }, [now]);
   const { user } = useAuth();
-  const { savedIds, toggleSave, loading: savesLoading, pending: savesPending } = useSavedEvents();
+  const { savedIds, toggleSave } = useSavedEvents();
   const [showSaveAuth, setShowSaveAuth] = useState(false);
   const isMobile = useIsMobile() || (typeof window !== "undefined" && window.innerWidth < 768);
   const [routeMatch, routeParams] = useRoute("/events/:id/:slug?");
@@ -914,9 +914,6 @@ export default function Events() {
             onEnterPast={() => setPastView(true)}
             onExitPast={() => setPastView(false)}
             onOpen={(listing, rect) => openEvent(listing, rect)}
-            saveDisabled={savesLoading || savesPending}
-            savedIds={savedIds}
-            onToggleSave={(id) => (user ? toggleSave(id) : setShowSaveAuth(true))}
             now={now}
             onVisibleCount={onBoardCount}
           />

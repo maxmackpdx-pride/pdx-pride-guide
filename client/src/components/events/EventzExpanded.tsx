@@ -1,6 +1,6 @@
 import { pacificCalendarDate } from "@shared/missedConnections";
 import { eventAge, eventPrice } from "@/lib/eventFacts";
-import { EventGoingButton, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
+import { EventGoingButton, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
 import EventPlanning from "./EventPlanning";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -524,6 +524,17 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
         </div>
         <div className="evz-x__save">
           <EventPrivateSaveButton eventId={event.id} />
+          <EventInterestedHeart
+            eventId={event.id}
+            variant="expanded"
+            snapshot={{
+              title: event.title,
+              subtitle: event.venueName,
+              image: poster,
+              href: eventPath(event.id, event.title, event.dayOfWeek, pacificCalendarDate(event.dateStart)),
+              accent: flyerAccent,
+            }}
+          />
         </div>
       </footer>
 
