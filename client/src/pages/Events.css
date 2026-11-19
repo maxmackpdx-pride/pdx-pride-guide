@@ -250,21 +250,8 @@ html body .events-page.board-page--makeover .events-card-feed :is(.pdxBoard,.pdx
 .events-page .events-band__head small { color: var(--text-meta); font: 500 13px/1 var(--font-mono, monospace); }
 .events-page .events-band__list { display: flex; flex-direction: column; gap: 8px; }
 
-/* The schedule tab's content clears the filter drawer stacked above the dock. */
-.events-page__body--schedule { padding-bottom: calc(var(--edrawer-h, 0px) + 72px); }
-
-/* My Schedule pill: always one tap to your saved plans. It rides above the
-   filter drawer (whose height the page publishes as --edrawer-h). */
-.events-myschedule-pill {
-  position: fixed; left: 50%; bottom: calc(24px + var(--edrawer-h, 0px) + env(safe-area-inset-bottom)); z-index: 60; transform: translateX(-50%);
-  transition: bottom .35s ease;
-  display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 22px; border-radius: 999px;
-  background: var(--neon-magenta); color: var(--z-black); text-decoration: none;
-  font: 800 16px/1 var(--font-display); letter-spacing: .04em; text-transform: uppercase;
-  box-shadow: 0 0 0 2px var(--z-black), 0 10px 30px -6px color-mix(in srgb, var(--z-black) 90%, transparent), var(--neon-bloom);
-}
-.events-myschedule-pill:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 3px; }
-@media (max-width: 959px) { .events-myschedule-pill { bottom: calc(96px + var(--edrawer-h, 0px) + env(safe-area-inset-bottom)); } }
+/* My Schedule used to live on this page (tab + pill); it now lives in the
+   filter drawer's full-screen second layer, so both are gone. */
 
 /* ── Eventz top bar: compact identity, actions, stat pills (replaces hero + plate + stats band) ── */
 .events-page .events-top { width: min(100%, var(--zl-frame)); margin: 0 auto; padding: 32px var(--zl-gutter) 8px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; }
