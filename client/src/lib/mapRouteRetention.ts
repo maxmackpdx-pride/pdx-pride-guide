@@ -1,6 +1,6 @@
 /** One retained map route, with explicit door/deep links taking precedence. */
 export function isMapzRoute(path: string): boolean {
-  return /^\/map(?:-demo)?\/?$/.test(path.split('?')[0]);
+  return /^\/(?:placez\/map|map(?:-demo)?)\/?$/.test(path.split('?')[0]);
 }
 
 /** A plain Mapz return resumes filters/camera, without reopening a prior composer/card. */

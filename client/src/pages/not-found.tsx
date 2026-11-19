@@ -8,7 +8,7 @@ const ROOMS = [
   { paths: ["z"], section: "Z/ List", href: "/z", label: "Find a community", description: "This community address isn't available. Find your people in Z/ List." },
   { paths: ["my-houz", "houz", "the-hauz", "hausing", "housing"], section: "My Hoüz", href: "/boardz?board=housing", label: "Browse housing", description: "This housing address isn't available. Browse current rooms, roommates, and households on My Hoüz." },
   { paths: ["u", "dashboard", "inbox", "settings"], section: "Your Zaylist", href: "/dashboard", label: "Open your Hub", description: "This account or profile address isn't available. Your Hub is the place to return to your Zaylist." },
-  { paths: ["map", "directory", "gifting", "sellz", "pride-work", "spotted"], section: "Mapz", href: "/map", label: "Explore Mapz", description: "This address isn't on the map. Explore places, posts, and people around Portland on Mapz." },
+  { paths: ["map", "directory", "gifting", "sellz", "pride-work", "spotted"], section: "PlaceZ", href: "/placez/map", label: "Explore PlaceZ", description: "This address isn't on the map. Explore places, posts, and people around Portland on PlaceZ." },
 ];
 
 export default function NotFound() {

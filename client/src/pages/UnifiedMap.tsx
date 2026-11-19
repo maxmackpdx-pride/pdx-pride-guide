@@ -30,7 +30,7 @@ export default function UnifiedMap(){
  const [legacyDetail,setLegacyDetail]=useState<{kind:'event';record:Event}|{kind:'place';record:Business}|null>(null);
  const [legacyError,setLegacyError]=useState('');
  const [authOpen,setAuthOpen]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='login');
- usePageSeo('Mapz · Zaylist','Events, places, outdoor destinations, community boards, Afterz and adult-gated ZayDark.');
+ usePageSeo(`${({mapz:'PlaceZ',outzide:'OutZide',boardz:'Boardz',afterz:'Afterz',zaydark:'ZayDark'})[initialMode()]} · Zaylist`,'Events, places, outdoor destinations, community boards, Afterz and adult-gated ZayDark.');
  useEffect(()=>{if(new URLSearchParams(search).get('auth')==='login')setAuthOpen(true);},[search]);
  useEffect(()=>{
   const request=mapBookmark(new URLSearchParams(search),initialMode()).native;

@@ -731,7 +731,7 @@ export default function Nav() {
 
   return (
     <>
-      <NavShell ref={headerRef} mapSurface={location.startsWith("/map") || location.startsWith("/outzide")} loading={seamLoading}>
+      <NavShell ref={headerRef} mapSurface={location.startsWith("/placez/map") || location.startsWith("/map") || location.startsWith("/outzide")} loading={seamLoading}>
         <div className="site-header-inner">
           {!isHome && <Link href="/" className="site-brand site-brand--desktop" aria-label="Zaylist home" title="Home" onClick={closeMenu}>
             <GlitchLogo

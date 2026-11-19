@@ -1,6 +1,6 @@
 /** Only local Mapz routes may be used as a detail-view return destination. */
 export function mapReturnPath(value: unknown): string | null {
-  if (typeof value !== "string" || !/^\/map(?:-demo)?(?:\?|$)/.test(value)) return null;
+  if (typeof value !== "string" || !/^\/(?:placez\/map|map(?:-demo)?)(?:\?|$)/.test(value)) return null;
   return value;
 }
 export function mapRecordId(value: string | null, allowArchive = false): number | null {

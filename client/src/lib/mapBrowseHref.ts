@@ -13,5 +13,5 @@ export function mapBrowseHref(layer: "places" | "rezources", focus?: { lat: numb
       params.set("zoom", "15");
     } else params.set(layer === "places" ? "places.q" : "resources.q", focus.name);
   }
-  return `/map?${params}`;
+  return `/placez/map?${params}`;
 }

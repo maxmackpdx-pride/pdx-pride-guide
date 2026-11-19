@@ -774,7 +774,7 @@ function PlaceModalInner({
   const nativeDirections = (
 !editing && !multiLoc && (address || displayed.phone) && (
                     <div className="place-modal-panel__quick-actions">
-                      <Link href={mapBrowseHref("places", place)}>View on Mapz</Link>
+                      <Link href={mapBrowseHref("places", place)}>View on PlaceZ</Link>
                       {address && <a href={placeAppleMapsUrl({ address: place.address, name: place.name, lat: place.lat, lng: place.lng })} target="_blank" rel="noopener noreferrer">Directions</a>}
                       {displayed.phone && <a href={telHref(displayed.phone)}>Call</a>}
                     </div>

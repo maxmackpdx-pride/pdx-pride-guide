@@ -110,7 +110,7 @@ export function legacyWorldMapHref(world:MapWorld, search:string, recordId?:stri
   }
   if(old.get("mine")==="1")next.set(`${world}.view`,"mine");
   if(old.has("new")||old.get("compose")==="1"||old.get("add")==="1"||/form|compose/.test(hash))next.set("compose",world);
-  return `/map?${next}`;
+  return `${world === "places" ? "/placez/map" : "/map"}?${next}`;
 }
 
 export function readMapCamera(params:URLSearchParams):{center:[number,number];zoom:number;pitch:number;bearing:number;bounds:MapBounds}|null {

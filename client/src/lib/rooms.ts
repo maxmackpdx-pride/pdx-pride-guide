@@ -24,7 +24,7 @@ export const ROOMS: Record<RoomKey, Room> = {
   sellz: { name: "SELLZ", nav: "Sellz", accent: "var(--room-sellz)", route: "/sellz" },
   mizzed: { name: "MIZZED CONNECTION", nav: "Mizzed", accent: "var(--room-mizzed)", route: "/mizzed" },
   outz: { name: "OUTZIDE", nav: "OutZide", accent: "var(--room-outz)", route: "/outzide" },
-  mapz: { name: "MAPZ", nav: "Mapz", accent: "var(--neon-blue)", route: "/map" },
+  mapz: { name: "PlaceZ", nav: "PlaceZ", accent: "var(--neon-blue)", route: "/placez/map" },
   zlists: { name: "Z/LISTS", nav: "Z/Lists", accent: "var(--neon-violet)", route: "/z" },
 };
 
