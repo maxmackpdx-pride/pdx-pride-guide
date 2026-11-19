@@ -329,6 +329,12 @@
 }
 .fbx .pprice.free { color: var(--green-acid); border-color: color-mix(in srgb, var(--green-acid) 45%, transparent); }
 .fbx .pprice.unk { color: var(--evz-gray-8a8a94); }
+.fbx .pprice-note {
+  margin: 3cqw 0 0;
+  font: 500 2.7cqw/1.35 var(--font-mono);
+  letter-spacing: .02em;
+  color: var(--evz-gray-8a8a94);
+}
 .fbx .pfoot {
   position: absolute;
   left: 0; right: 0; bottom: 0;

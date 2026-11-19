@@ -409,6 +409,10 @@ function PosterCell({
   const meta = `${eventDateLabel(listing.dateStart)} · ${eventTimeLabel(listing.dateStart)} · ${listing.venueName}${age ? ` · ${age}` : ""}`;
   const price = ADMISSION_LABEL[listing.admission ?? "UNKNOWN"] ?? "PRICE NOT CONFIRMED";
   const priceCls = listing.admission === "FREE" ? " free" : !listing.admission || listing.admission === "UNKNOWN" ? " unk" : "";
+  /* An unconfirmed price is not a tag: it demotes to an asterisk
+   * small-print note at the bottom of the card's bottom band (Tucker's
+   * ruling, Nov 18, 2026). Confirmed prices keep the chip. */
+  const priceUnconfirmed = price === "PRICE NOT CONFIRMED";
   /* Wide posters (landscape art) carry their info in a black chunk added
    * below the poster, with a little gradient blending into the poster's
    * bottom edge; tall posters keep the info laid over the poster with a
@@ -477,7 +481,7 @@ function PosterCell({
           <button type="button" className="pshare" aria-label={`Share ${listing.title}`} onClick={share}>
             <ShareIcon />
           </button>
-          <span className={`pprice${priceCls}`}>{price}</span>
+          {!priceUnconfirmed && <span className={`pprice${priceCls}`}>{price}</span>}
           <div className="pcdtop">
             <span className="ps-lab">{countdownLabel}</span>
             {cd && (
@@ -512,6 +516,7 @@ function PosterCell({
                     <HeartIcon />
                   </button>
                 </div>
+                {priceUnconfirmed && <p className="pprice-note">* Price not confirmed</p>}
               </div>
             </>
           )}
@@ -538,6 +543,7 @@ function PosterCell({
                 <HeartIcon />
               </button>
             </div>
+            {priceUnconfirmed && <p className="pprice-note">* Price not confirmed</p>}
           </div>
         )}
       </article>
