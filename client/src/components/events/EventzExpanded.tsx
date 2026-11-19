@@ -242,7 +242,14 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
   const primaryLink = primaryLinkFor(event);
   const age = event.ageRequirement === "21_PLUS" ? "21+" : event.ageRequirement === "18_PLUS" ? "18+" : "All ages";
   const admission = event.admission === "FREE" ? "Free" : event.admission === "SUGGESTED_DONATION" ? "Suggested donation" : event.admission === "DOOR_FEE" ? "Door fee" : "Ticketed";
-  const chips = [...getEventTypeTagsForEvent(event).slice(0, 3), age, ...(event.isSexPositive ? ["Sex-positive"] : [])];
+  const rawChips = [...getEventTypeTagsForEvent(event).slice(0, 3), age, ...(event.isSexPositive ? ["Sex-positive"] : [])];
+  const seenChipKeys = new Set<string>();
+  const chips = rawChips.filter((chip) => {
+    const key = chip.toLowerCase().replace(/-/g, " ").replace(/\s+/g, " ").trim();
+    if (seenChipKeys.has(key)) return false;
+    seenChipKeys.add(key);
+    return true;
+  });
   const whenLine = `${formatPacificDateTime(event.dateStart, { weekday: "long", month: "long", day: "numeric" })} · ${formatCardTime(event)}`;
   const shortWhen = `${formatPacificDateTime(event.dateStart, { weekday: "short", month: "short", day: "numeric" })} · ${formatCardTime(event)}`;
   const directionsDest = event.lat != null && event.lng != null ? `${event.lat},${event.lng}` : (event.address || `${event.venueName}, Portland, OR`);
