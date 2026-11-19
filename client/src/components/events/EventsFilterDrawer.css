@@ -81,7 +81,13 @@
   transition: height .55s cubic-bezier(.34, 1.25, .44, 1);
 }
 .edrawer.is-dragging .edrawer__bodywrap { transition: none; }
-.edrawer__stage1 { padding: 2px 12px 8px; }
+.edrawer__stage1 {
+  max-height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px 12px 8px;
+}
 
 .edrawer__filters {
   display: flex;

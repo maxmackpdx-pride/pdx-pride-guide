@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import "./EventsFilterDrawer.css";
 
 export type EventsFilterDay = {
@@ -82,6 +82,9 @@ export default function EventsFilterDrawer({
   const [stage2Mounted, setStage2Mounted] = useState(false);
   const rootRef = useRef<HTMLElement>(null);
   const stage1Ref = useRef<HTMLDivElement>(null);
+  const lipRef = useRef<HTMLButtonElement>(null);
+  const pullRef = useRef<HTMLButtonElement>(null);
+  const nextFocus = useRef<"lip" | "pull" | null>(null);
   const drag = useRef<{
     source: "lip" | "pull";
     from: Stage;
@@ -110,7 +113,7 @@ export default function EventsFilterDrawer({
     if (!root) return 0;
     /* The sheet's bottom edge is anchored to the dock; full screen means
        the body runs from that edge up to the top of the viewport. */
-    return Math.max(320, root.getBoundingClientRect().bottom - LIP_H);
+    return Math.max(0, Math.floor(root.getBoundingClientRect().bottom - LIP_H - 2));
   };
 
   const goStage = (next: Stage) => {
@@ -135,14 +138,15 @@ export default function EventsFilterDrawer({
     const measure = () => {
       /* While stage 2 shows, stage 1 is display:none and measures 0 —
          keep the last real stage-1 height for the trip back down. */
-      if (!s1.hidden) setBodyH(s1.scrollHeight);
+      if (!s1.hidden) setBodyH(Math.min(s1.scrollHeight, measureFull()));
       onHeightChange?.(root.offsetHeight);
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(s1);
     ro.observe(root);
-    return () => ro.disconnect();
+    window.addEventListener("resize", measure);
+    return () => { ro.disconnect(); window.removeEventListener("resize", measure); };
   }, [onHeightChange]);
 
   /* Keep the full-screen height honest on rotation/resize. */
@@ -224,9 +228,35 @@ export default function EventsFilterDrawer({
     if (h > bodyH / 2) { goStage(1); return; }
     goStage(0);
   };
+  const keyboardStage = (next: Stage, focus: "lip" | "pull" = "lip") => {
+    if (next === stage) return;
+    nextFocus.current = focus;
+    goStage(next);
+  };
+
+  useLayoutEffect(() => {
+    if (!nextFocus.current) return;
+    const target = nextFocus.current === "pull" ? pullRef.current : lipRef.current;
+    nextFocus.current = null;
+    target?.focus({ preventScroll: true });
+  }, [stage]);
+
+  /* Pointer taps already resolve in onPointerUp. Only handle native
+     button activation without a pointer here (keyboard/assistive tech). */
+  const onActivation = (source: "lip" | "pull") => (event: ReactMouseEvent<HTMLButtonElement>) => {
+    if (event.detail !== 0) return;
+    if (source === "pull") { keyboardStage(2); return; }
+    keyboardStage(stage === 0 ? 1 : stage === 1 ? 0 : 1);
+  };
   const onKey = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
-    if (event.key === "ArrowUp") { event.preventDefault(); goStage(Math.min(2, stage + 1) as Stage); }
-    if (event.key === "ArrowDown") { event.preventDefault(); goStage(Math.max(0, stage - 1) as Stage); }
+    if (event.key === "ArrowUp") { event.preventDefault(); keyboardStage(Math.min(2, stage + 1) as Stage); }
+    if (event.key === "ArrowDown") { event.preventDefault(); keyboardStage(Math.max(0, stage - 1) as Stage); }
+  };
+  const onDrawerKey = (event: ReactKeyboardEvent<HTMLElement>) => {
+    if (event.key !== "Escape" || stage === 0 || event.defaultPrevented) return;
+    event.preventDefault();
+    event.stopPropagation();
+    keyboardStage(stage === 2 ? 1 : 0, stage === 2 ? "pull" : "lip");
   };
 
   const pickDay = (date: string) => {
@@ -239,9 +269,11 @@ export default function EventsFilterDrawer({
       ref={rootRef}
       className={`edrawer${arriving ? " is-arriving" : ""}${settling ? " is-settling" : ""}${dragH != null ? " is-dragging" : ""}${stage === 2 ? " is-full" : ""}`}
       aria-label="Event filters"
+      onKeyDown={onDrawerKey}
     >
       <button
         type="button"
+        ref={lipRef}
         className="edrawer__lip"
         aria-expanded={stage > 0}
         aria-label={stage === 0 ? "Open filters" : stage === 1 ? "Close filters" : "Back to filters"}
@@ -250,6 +282,7 @@ export default function EventsFilterDrawer({
         onPointerUp={onUp}
         onPointerCancel={onUp}
         onKeyDown={onKey}
+        onClick={onActivation("lip")}
       >
         <span className="edrawer__lines" aria-hidden="true">
           <i /><i /><i />
@@ -316,8 +349,10 @@ export default function EventsFilterDrawer({
           </div>
           <button
             type="button"
+            ref={pullRef}
             className="edrawer__pull"
             aria-label="Pull up for your schedule"
+            onClick={onActivation("pull")}
             onPointerDown={onDown("pull")}
             onPointerMove={onMove}
             onPointerUp={onUp}
