@@ -6,7 +6,7 @@ export default function RoomBackground({ room }: { room: "placez" | "eventz" | "
     if (document.querySelector('script[data-room-shaders]')) return;
     const script = document.createElement("script");
     script.type = "module";
-    script.src = "/room-shaders/room-background.js?v=20261118-framing3";
+    script.src = "/room-shaders/room-background.js?v=20261118-single4";
     script.dataset.roomShaders = "true";
     document.head.appendChild(script);
     script.addEventListener("error", () => script.remove(), { once: true });
@@ -15,6 +15,6 @@ export default function RoomBackground({ room }: { room: "placez" | "eventz" | "
     room,
     className: "room-shader-background",
     "aria-hidden": true,
-    style: { backgroundImage: `url("/room-shaders/textures/${room}.jpg")` },
+    style: { "--room-fallback-image": `url("/room-shaders/textures/${room}.jpg")` },
   });
 }

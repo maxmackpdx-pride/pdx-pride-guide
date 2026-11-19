@@ -10,7 +10,7 @@ class ZayRoomBackground extends HTMLElement {
   constructor(){
     super();
     const root=this.attachShadow({mode:'open'});
-    root.innerHTML='<style>:host{display:block;position:absolute;inset:0;overflow:hidden;pointer-events:none;background:#000}img,canvas{position:absolute;inset:0;height:100%;width:100%;object-fit:cover}canvas[hidden]{display:none}</style><img alt=""><canvas aria-hidden="true" hidden></canvas>';
+    root.innerHTML='<style>:host{display:block;position:absolute;inset:0;overflow:hidden;pointer-events:none;background:#000}img,canvas{position:absolute;inset:0;height:100%;width:100%;object-fit:cover}img[hidden],canvas[hidden]{display:none}</style><img alt=""><canvas aria-hidden="true" hidden></canvas>';
     this.#canvas=root.querySelector('canvas');
 
   }
@@ -44,6 +44,7 @@ class ZayRoomBackground extends HTMLElement {
     this.dataset.renderer='loading';delete this.dataset.shaderError;
     this.#release(this.#renderer);this.#renderer=null;
     const image=this.shadowRoot.querySelector('img');
+    image.hidden=false;
     image.src=new URL('textures/'+room+'.jpg',import.meta.url);
     image.style.objectPosition=({placez:'50%',eventz:'52%',scenez:'41.5%',outzide:'50.6%'})[room]+' center';
     let renderer;
@@ -55,13 +56,13 @@ class ZayRoomBackground extends HTMLElement {
       const next=this.#canvas.cloneNode(false);
       next.addEventListener('webglcontextlost',ev=>{
         ev.preventDefault();if(next!==this.#canvas||renderer!==this.#renderer)return;
-        this.#generation++;this.#ready=false;next.hidden=true;this.#stop();
+        this.#generation++;this.#ready=false;next.hidden=true;image.hidden=false;this.dataset.renderer='fallback';this.#stop();
       });
       next.addEventListener('webglcontextrestored',()=>{if(next===this.#canvas&&renderer===this.#renderer)this.#load()});
       renderer=new RoomRenderer(next,assets);await renderer.prepare();
       if(generation!==this.#generation){this.#release(renderer);return}
       this.#canvas.replaceWith(next);this.#canvas=next;this.#renderer=renderer;
-      this.#ready=true;this.#refresh();next.hidden=false;this.dataset.renderer='webgl';
+      this.#ready=true;this.#refresh();next.hidden=false;image.hidden=true;this.dataset.renderer='webgl';
     }catch(error){
       this.#release(renderer);if(generation===this.#generation){
         this.dataset.renderer='fallback';this.dataset.shaderError=String(error?.message||error);

@@ -51,7 +51,6 @@ html:has(.outz-native-dialog[open]){scrollbar-gutter:auto;overflow:hidden}.outz-
 .outz-native-page .places-page-switch--compact svg{width:17px;height:17px;flex:none}
 .outz-native-page .places-page-switch--compact a.is-active{color:var(--neon-orange)}
 .outz-native-page .places-page-switch--compact .places-page-switch__active{border:1px solid var(--neon-orange);background:transparent;box-shadow:0 0 5px color-mix(in srgb,var(--neon-orange) 25%,transparent)}
-.outz-native-page .ol-landscape{margin-top:0;aspect-ratio:682/306;background-size:166.42228739% auto;background-position:47.46136865% 25.64814815%}
 .outz-native-page .ol-body{padding-top:12px}
 .outz-native-page .ol-search{padding:6px 7px 6px 14px;gap:12px;border-radius:17px;min-height:50px}
 .outz-native-page .ol-search>svg{width:24px;height:24px;flex:none}

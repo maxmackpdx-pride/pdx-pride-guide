@@ -1227,19 +1227,6 @@ export default function FlyerBoard({
 
   return (
     <div className="fbx" ref={rootRef}>
-      <div className="bgfx" aria-hidden="true">
-        <div className="bgfx-base" />
-        <div className="bgfx-streaks">
-          <i className="s1" />
-          <i className="s2" />
-          <i className="s3" />
-          <i className="s4" />
-          <i className="s5" />
-        </div>
-        <div className="bgfx-dots" />
-      </div>
-      <div className="vig" aria-hidden="true" />
-
       <div className="fbar" role="group" aria-label="Filter the board">
         {(["all", "tonight", "week", "later"] as WindowFilter[]).map(w => (
           <button

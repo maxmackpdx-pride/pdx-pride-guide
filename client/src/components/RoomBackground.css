@@ -15,7 +15,9 @@ html body .room-shader-page > .room-shader-background {
   z-index: 0;
   background-size: cover;
   background-position: center top;
+  background-image: var(--room-fallback-image);
 }
+html body .room-shader-page > .room-shader-background:defined { background-image: none; }
 html body .room-shader-page > header,
 html body .room-shader-page > .pl-body,
 html body .room-shader-page > .new-scenez,
@@ -25,20 +27,6 @@ html body .room-shader-page > .scroll-reveal {
   position: relative;
   z-index: 1;
 }
-html body .room-shader-page .fbx { background: transparent; }
-html body .room-shader-page .fbx > .bgfx,
-html body .room-shader-page .fbx > .vig { display: none; }
-html body .room-shader-page::before,
-html body .room-shader-page::after { content: none; }
-html body .room-shader-page .pl-centered-hero,
-html body .room-shader-page .ns-reference-hero,
-html body .room-shader-page .ol-hero,
-html body .room-shader-page .new-scenez,
-html body .room-shader-page .ns-body,
-html body .room-shader-page .pl-body,
-html body .room-shader-page .ol-body { background: transparent; }
-html body .room-shader-page.scenez-native .ns-xerox-hero .ns-collage,
-html body .room-shader-page .ol-landscape { display: none; }
 html body .room-shader-page .pl-centered-hero__art {
   width: min(76vw, 760px);
   height: auto;

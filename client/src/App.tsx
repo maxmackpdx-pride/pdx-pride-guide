@@ -123,6 +123,7 @@ function AppLayout() {
   }, [pathname]);
   const profile = isProfilePath(location);
   const routePath = pathname.replace(/\/+$/, "") || "/";
+  const roomShaderRoute = ["/directory", "/events", "/scenez", "/outzide/places"].includes(routePath);
   const livingMap = ["/map", "/map-demo"].includes(routePath);
   const unifiedMap = livingMap || routePath === "/outzide" || routePath.startsWith("/outzide/share/");
   const mapSurface = livingMap || routePath === "/outzide" || routePath.startsWith("/outzide/");
@@ -134,7 +135,7 @@ function AppLayout() {
       className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}${livingMap ? " app-shell--mapz-demo" : ""}${mapSurface ? " app-shell--map-surface" : ""}${mobileFooter ? "" : " app-shell--no-mobile-footer"}`}
       style={{ background: "var(--z-black, #050506)" }}
     >
-      <SiteWallpaper />
+      {!roomShaderRoute && <SiteWallpaper />}
       <InboxDailyReminder />
       {!unifiedMap && <PullToRefresh />}
       {!unifiedMap && <Nav />}

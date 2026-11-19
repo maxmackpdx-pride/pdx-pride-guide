@@ -768,7 +768,7 @@ export default function Events() {
   }
 
   return (
-    <div className="zine-page events-page board-page board-page--makeover board-shader-page room-shader-page" data-shader-room="eventz">
+    <div className="zine-page events-page board-page board-page--makeover room-shader-page">
       <RoomBackground room="eventz" />
 
       {activeTab === "schedule" ? (

@@ -5,7 +5,7 @@
 
 .fbx {
   position: relative;
-  background: var(--z-oled);
+  background: transparent;
   color: var(--evz-mist-f4f8fa);
   font-family: "Barlow", sans-serif;
   --pw: 168px;
@@ -19,53 +19,6 @@
 /* Body-portal wrapper for the fan deck + open card: carries the .fbx
    scope without the board root's painted background. */
 .fbx.fbx-overlay { background: none; }
-
-/* ---------- rainbow board background (demo treatment) ---------- */
-.fbx .bgfx {
-  --grad: var(--grad-rainbow);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100dvh;
-  min-height: 560px;
-  overflow: hidden;
-  background: var(--z-oled);
-  z-index: 0;
-  pointer-events: none;
-}
-.fbx .bgfx-base {
-  position: absolute; inset: 0;
-  background: radial-gradient(100% 100% at 0% 0%, rgb(46, 46, 46) 0%, rgb(0, 0, 0) 100%);
-  -webkit-mask-image: radial-gradient(125% 100% at 0% 0%, var(--z-oled) 0%, rgba(0, 0, 0, .224) 88.2883%, transparent 100%);
-  mask-image: radial-gradient(125% 100% at 0% 0%, var(--z-oled) 0%, rgba(0, 0, 0, .224) 88.2883%, transparent 100%);
-}
-.fbx .bgfx-streaks {
-  position: absolute; inset: 0;
-  -webkit-mask-image: linear-gradient(180deg, var(--z-oled) 0%, transparent 88%);
-  mask-image: linear-gradient(180deg, var(--z-oled) 0%, transparent 88%);
-}
-.fbx .bgfx-streaks i {
-  position: absolute; inset: -12% -25%; opacity: .2;
-  background: var(--grad);
-  transform: skewX(45deg);
-}
-.fbx .bgfx-streaks .s1 { -webkit-mask-image: linear-gradient(90deg, transparent 0%, var(--z-oled) 20%, transparent 36%, var(--z-oled) 55%, rgba(0, 0, 0, .13) 67%, var(--z-oled) 78%, transparent 97%); mask-image: linear-gradient(90deg, transparent 0%, var(--z-oled) 20%, transparent 36%, var(--z-oled) 55%, rgba(0, 0, 0, .13) 67%, var(--z-oled) 78%, transparent 97%); }
-.fbx .bgfx-streaks .s2 { -webkit-mask-image: linear-gradient(90deg, transparent 11%, var(--z-oled) 25%, rgba(0, 0, 0, .55) 41%, rgba(0, 0, 0, .13) 67%, var(--z-oled) 78%, transparent 97%); mask-image: linear-gradient(90deg, transparent 11%, var(--z-oled) 25%, rgba(0, 0, 0, .55) 41%, rgba(0, 0, 0, .13) 67%, var(--z-oled) 78%, transparent 97%); }
-.fbx .bgfx-streaks .s3 { -webkit-mask-image: linear-gradient(90deg, transparent 9%, var(--z-oled) 20%, rgba(0, 0, 0, .55) 28%, rgba(0, 0, 0, .424) 40%, var(--z-oled) 48%, rgba(0, 0, 0, .267) 54%, rgba(0, 0, 0, .13) 78%, var(--z-oled) 88%, transparent 97%); mask-image: linear-gradient(90deg, transparent 9%, var(--z-oled) 20%, rgba(0, 0, 0, .55) 28%, rgba(0, 0, 0, .424) 40%, var(--z-oled) 48%, rgba(0, 0, 0, .267) 54%, rgba(0, 0, 0, .13) 78%, var(--z-oled) 88%, transparent 97%); }
-.fbx .bgfx-streaks .s4 { -webkit-mask-image: linear-gradient(90deg, transparent 0%, var(--z-oled) 17%, rgba(0, 0, 0, .55) 26%, var(--z-oled) 35%, transparent 47%, rgba(0, 0, 0, .13) 69%, var(--z-oled) 79%, transparent 97%); mask-image: linear-gradient(90deg, transparent 0%, var(--z-oled) 17%, rgba(0, 0, 0, .55) 26%, var(--z-oled) 35%, transparent 47%, rgba(0, 0, 0, .13) 69%, var(--z-oled) 79%, transparent 97%); }
-.fbx .bgfx-streaks .s5 { -webkit-mask-image: linear-gradient(90deg, transparent 0%, var(--z-oled) 20%, rgba(0, 0, 0, .55) 27%, var(--z-oled) 42%, transparent 48%, rgba(0, 0, 0, .13) 67%, var(--z-oled) 74%, var(--z-oled) 82%, rgba(0, 0, 0, .47) 88%, transparent 97%); mask-image: linear-gradient(90deg, transparent 0%, var(--z-oled) 20%, rgba(0, 0, 0, .55) 27%, var(--z-oled) 42%, transparent 48%, rgba(0, 0, 0, .13) 67%, var(--z-oled) 74%, var(--z-oled) 82%, rgba(0, 0, 0, .47) 88%, transparent 97%); }
-.fbx .bgfx-dots {
-  position: absolute; inset: 0; opacity: .14;
-  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, .5) 1px, transparent 0);
-  background-size: 20px 20px;
-}
-.fbx .vig {
-  position: fixed; inset: 0; pointer-events: none; z-index: 20;
-  background:
-    radial-gradient(125% 95% at 50% 38%, transparent 52%, rgba(0, 0, 0, .42) 100%),
-    radial-gradient(95% 55% at 50% -12%, rgba(255, 214, 150, .12), transparent 60%);
-}
 
 /* ---------- filter bar ---------- */
 .fbx .fbar {
