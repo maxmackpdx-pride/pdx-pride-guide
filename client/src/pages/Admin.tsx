@@ -134,6 +134,7 @@ interface AdminGig {
   isRemote: boolean;
   status: string;
   createdAt: string;
+  userId?: number | null;
   username?: string;
   displayName?: string | null;
   posterPhotoUrl?: string | null;
@@ -2613,6 +2614,11 @@ export default function Admin() {
                             <label className="display text-xs text-white/40 block mb-1">LOCATION</label>
                             <input value={gigEditForm.location || ""} onChange={e => setGigEditForm(f => ({ ...f, location: e.target.value }))}
                               placeholder="Portland / Remote" className={adminFieldClass} />
+                          </div>
+                          <div>
+                            <label className="display text-xs text-white/40 block mb-1">OWNER USER ID</label>
+                            <input type="number" min="1" value={gigEditForm.userId ?? ""} onChange={e => setGigEditForm(f => ({ ...f, userId: e.target.value === "" ? null : Number(e.target.value) }))}
+                              placeholder="Account that posted this gig" className={adminFieldClass} />
                           </div>
                           <div className="md:col-span-2">
                             <label className="display text-xs text-white/40 block mb-1">SKILLS</label>
