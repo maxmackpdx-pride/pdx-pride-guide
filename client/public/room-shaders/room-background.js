@@ -15,6 +15,7 @@ class ZayRoomBackground extends HTMLElement {
 
   }
   get room(){const key=this.getAttribute('room');return rooms.includes(key)?key:'placez'}
+  set room(value){this.setAttribute('room',value)}
   // Optionally pass three normalized FFT levels from the host's audio graph.
   set bands(values){
     this.#levels=[0,1,2].map(i=>Math.max(0,Math.min(1,Number(values?.[i])||0)));
