@@ -62,6 +62,7 @@
 .evz-x__sech:not(:first-child) { margin-top: 16px; }
 .evz-x__sech-r { font: 600 9.5px/1 var(--font-body, sans-serif); color: var(--evz-gray-8a8a94); letter-spacing: .03em; text-transform: none; }
 .evz-x__act--dash { border-style: dashed; margin-top: 14px; }
+.evz-x__act--owner { margin-top: 14px; }
 .evz-x__cnt { background: var(--ac); color: var(--z-black); border-radius: 5px; padding: 1px 7px; font-size: 11px; }
 .evz-x__empty { margin: 0; font: 400 12.5px/1.55 var(--font-body, sans-serif); color: var(--evz-mist-9aa7b0); }
 
