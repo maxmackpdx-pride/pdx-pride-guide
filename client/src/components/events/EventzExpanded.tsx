@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { ArrowUpRight, ChevronLeft, ChevronRight, Clock3, MapPin, Share2, X } from "lucide-react";
 import type { Event } from "@shared/schema";
@@ -31,6 +31,7 @@ import UserAvatar from "@/components/UserAvatar";
 import AuthModal from "@/components/AuthModal";
 import MissedConnectionsPanel from "@/components/MissedConnectionsPanel";
 import EventModal, { type EventModalOriginRect } from "@/components/EventModal";
+import { GigComposer } from "@/pages/PrideWork";
 import ZLineIcon from "@/components/ZLineIcon";
 import "./EventzExpanded.css";
 
@@ -184,11 +185,13 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const saves = useSavedEvents();
   const rsvp = useEventRsvp();
   const [showAuth, setShowAuth] = useState(false);
   const [page, setPage] = useState(0);
   const [mizzedOpen, setMizzedOpen] = useState(false);
+  const [gigOpen, setGigOpen] = useState(false);
   const [venueDay, setVenueDay] = useState<string | null>(null);
   const pagesRef = useRef<HTMLDivElement>(null);
   const { dialogRef, requestClose } = useOpenCardClose(onClose);
@@ -239,6 +242,13 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
   const isPastEvent = endMs != null && endMs < Date.now();
   const hasPendingClaim = Boolean((event as { hasPendingClaim?: boolean }).hasPendingClaim);
   const canManage = Boolean(user?.isAdmin) || Boolean(user && hosts.some((h) => h.userId === user.id));
+  // Owner gig posting (Tucker, Nov 18, 2026): a claimed event's owner posts a
+  // gig FROM the event. The composer is pre-filled with the event's Pacific
+  // date + start time and a description naming the event; the event-linked
+  // back end is coming soon, so the gig posts through the venue-linked fields.
+  const gigPrefillDate = pacificDayKey(event.dateStart) ?? "";
+  const gigStartMs = parsePacificDateTime(event.dateStart);
+  const gigPrefillTime = gigStartMs == null ? "" : new Intl.DateTimeFormat("en-GB", { timeZone: "America/Los_Angeles", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(gigStartMs));
   const primaryLink = primaryLinkFor(event);
   const age = event.ageRequirement === "21_PLUS" ? "21+" : event.ageRequirement === "18_PLUS" ? "18+" : "All ages";
   const admission = event.admission === "FREE" ? "Free" : event.admission === "SUGGESTED_DONATION" ? "Suggested donation" : event.admission === "DOOR_FEE" ? "Door fee" : "Ticketed";
@@ -327,6 +337,15 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
                 {gig.description ? <p className="evz-x__gig-desc">{gig.description}</p> : null}
               </article>
             ))}
+            {canManage ? (
+              <button type="button" className="evz-x__act evz-x__act--owner" onClick={() => setGigOpen(true)}>
+                <span className="evz-x__act-main">
+                  <span className="evz-x__act-t">Post a Gig for this event</span>
+                  <span className="evz-x__act-s">Hiring for this event? Post it to Gigz — pre-filled with this event&apos;s date and venue.</span>
+                </span>
+                <span className="evz-x__act-ar" aria-hidden="true">+</span>
+              </button>
+            ) : null}
             <button type="button" className="evz-x__act evz-x__act--dash" aria-expanded={mizzedOpen} onClick={() => setMizzedOpen((open) => !open)}>
               <span className="evz-x__act-main">
                 <span className="evz-x__act-t">Add a Mizzed Connection</span>
@@ -545,6 +564,24 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
           </button>
         </div>
       </footer>
+
+      {gigOpen ? (
+        <GigComposer
+          initialType="POSTING_GIG"
+          onClose={() => setGigOpen(false)}
+          onPosted={() => {
+            setGigOpen(false);
+            queryClient.invalidateQueries({ queryKey: ["/api/events", event.id, "detail"] });
+          }}
+          venueName={event.venueName}
+          prefill={{
+            description: `Gig for ${event.title} at ${event.venueName}. `,
+            location: event.venueName,
+            gigDate: gigPrefillDate,
+            gigTime: gigPrefillTime,
+          }}
+        />
+      ) : null}
 
       {(showAuth || rsvp.showAuth) && <AuthModal onClose={() => { setShowAuth(false); rsvp.setShowAuth(false); }} />}
     </div>
