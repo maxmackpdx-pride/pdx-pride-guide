@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import Database from "better-sqlite3";
 import express from "express";
 import type { AddressInfo } from "node:net";
 import type { IStorage } from "./storage";
-import { registerEventPlanning } from "./eventPlanning";
+import { registerEventPlanning, validateAdminGigEventLink } from "./eventPlanning";
 
 test("planning is occurrence-, owner-, participant- and host-scoped", async (t) => {
   const db = new Database(":memory:");
@@ -58,7 +59,7 @@ test("planning is occurrence-, owner-, participant- and host-scoped", async (t) 
         .prepare("SELECT 1 FROM event_hosts WHERE event_id=? AND user_id=?")
         .get(id, user),
   } as unknown as IStorage;
-  const { store } = registerEventPlanning(
+  const planning = registerEventPlanning(
     app,
     db,
     storage,
@@ -72,6 +73,7 @@ test("planning is occurrence-, owner-, participant- and host-scoped", async (t) 
     () => true,
     () => false,
   );
+  const { store } = planning;
   store.linkGig(21, 10, "2099-07-02");
   store.linkGig(22, 10, "2099-07-02");
   assert.deepEqual(store.hostedCandidates(2), []);
@@ -120,6 +122,30 @@ test("planning is occurrence-, owner-, participant- and host-scoped", async (t) 
   assert.equal((await request(ride + "/requests/2", 3, "PUT")).status, 403);
   assert.equal((await request(ride + "/requests/2", 1, "PUT")).status, 200);
   assert.equal((await request(ride + "/requests/3", 1, "PUT")).status, 409);
+  const adminLink = { eventId: 10, occurrenceDate: "2099-07-01", ownerId: 1, postType: "POSTING_GIG" };
+  assert.deepEqual(validateAdminGigEventLink(adminLink, planning, storage), {
+    eventId: 10, occurrenceDate: "2099-07-01", ownerId: 1,
+  });
+  for (const change of [
+    { eventId: "10" }, { eventId: 11 }, { occurrenceDate: "2099-07-03" },
+    { occurrenceDate: undefined }, { ownerId: 2 }, { ownerId: null },
+    { postType: "LOOKING_FOR_WORK" },
+  ]) {
+    assert.ok("error" in validateAdminGigEventLink({ ...adminLink, ...change }, planning, storage));
+  }
+  assert.ok("error" in validateAdminGigEventLink(adminLink, { ...planning, acceptsPlanning: () => false }, storage));
+  assert.ok("error" in validateAdminGigEventLink(adminLink, planning, {
+    ...storage, getUserById: () => ({ status: "suspended" }) as ReturnType<IStorage["getUserById"]>,
+  }));
+  store.relinkGig(20, 10, "2099-07-01");
+  assert.deepEqual(store.gigLink(20), { eventId: 10, occurrenceDate: "2099-07-01" });
+  assert.deepEqual((await (await request(first)).json()).gigs.map((gig: { id: number }) => gig.id), [20]);
+  store.relinkGig(20, 10, "2099-07-02");
+  store.relinkGig(20, 10, "2099-07-02");
+  assert.deepEqual(store.gigLink(20), { eventId: 10, occurrenceDate: "2099-07-02" });
+  assert.deepEqual((await (await request(first)).json()).gigs, []);
+  assert.deepEqual((await (await request(second)).json()).gigs.map((gig: { id: number }) => gig.id), [21, 20]);
+  assert.equal((db.prepare("SELECT count(*) AS count FROM gig_posts").get() as {count: number}).count, 3);
   const riderView = await (await request(second, 2)).json();
   assert.equal(riderView.rides[0].myRequest, 1);
   assert.equal(riderView.rides[0].remaining, 0);
@@ -148,4 +174,13 @@ test("planning is occurrence-, owner-, participant- and host-scoped", async (t) 
     ).n,
     0,
   );
+});
+
+test("existing-gig relinking is registered behind the existing admin guard", () => {
+  const routes = readFileSync(new URL("./routes.ts", import.meta.url), "utf8");
+  const adminStart = routes.indexOf('app.put("/api/admin/gigs/:id", requireAdmin,');
+  assert.notEqual(adminStart, -1);
+  const adminEdit = routes.slice(adminStart, routes.indexOf('  // GET admin inbox summary', adminStart));
+  assert.match(adminEdit, /sqlite\.transaction\(\(\) => \{[\s\S]*storage\.adminUpdateGigPost[\s\S]*eventPlanning\.store\.relinkGig/);
+  assert.equal(routes.match(/eventPlanning\.store\.relinkGig\(/g)?.length, 1);
 });
