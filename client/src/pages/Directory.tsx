@@ -548,7 +548,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
 
   const renderBrowsePlace = (biz: Business) => <div key={biz.id} className="eb-original-card">
     {isSpaces ? <DirectoryCard size={compactCards ? "small" : "tall"} biz={biz} onClick={element=>openPlace(biz,element)} onRequireAuth={()=>setShowAuth(true)}/>
-      : hasPlacezArtwork(biz.id) ? <NativePlacezFace place={biz} size={compactCards?"small":"tall"} onOpen={element=>openPlace(biz,element)} onRequireAuth={()=>setShowAuth(true)}/>
+      : hasPlacezArtwork(biz.id) ? <NativePlacezFace mobileFrame place={biz} size={compactCards?"small":"tall"} onOpen={element=>openPlace(biz,element)} onRequireAuth={()=>setShowAuth(true)}/>
       : <RoomDiscoveryCard room="placez" name={biz.name} category={TYPE_LABELS[biz.type] || biz.type} accent={TYPE_COLORS[biz.type] || 'var(--neon-cyan)'}
         logo={serviceArtwork(biz,resolveDirectoryLogo(biz.name,biz.imageUrl),true)} fallback={<ServiceNameMark source={biz} iconOnly/>}
         description={biz.description} tags={[TYPE_LABELS[biz.type] || biz.type,...(biz.queerOwned?['Queer owned']:[])]} meta={biz.neighborhood || biz.address}
@@ -586,7 +586,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
         <path className="placez-shader-contours__magenta" d="M1080 360 C795 165 670 225 470 375 S165 580 -80 370" />
         <path className="placez-shader-contours__yellow" d="M1080 420 C785 225 680 285 470 425 S165 635 -80 430" />
       </svg>}
-      {showAuth && <AuthModal portalTargetSelector=".placez-fullscreen[open]" onClose={() => setShowAuth(false)} defaultTab="register" />}
+      {showAuth && <AuthModal portalTargetSelector=".placez-mobile-dialog, .placez-fullscreen[open]" onClose={() => setShowAuth(false)} defaultTab="register" />}
       {!isSpaces ? <>
         <BrowseHeader title="Placez" logo="/brand/family/our-placez.svg" kicker="Local discovery / Oregon + Vancouver, WA"
           description="Good places. Real connection. A reason to get out.">
@@ -807,6 +807,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
           key={selectedPlace.id}
           place={modalPlace ?? selectedPlace}
           originRect={placeOriginRect}
+          mobileFrame={!isSpaces}
           onClose={closePlace}
           onRequireAuth={() => setShowAuth(true)}
         />

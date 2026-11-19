@@ -219,9 +219,12 @@ function PlaceHours({ hours }: { hours: string }) {
   return <span className="place-modal-panel__hours">{clauses.map((clause, index) => <span className="place-modal-panel__hours-clause" key={`${clause}-${index}`}>{clause}{index < clauses.length - 1 ? "," : ""}</span>)}</span>;
 }
 
-export default function PlaceModal({ documentMeta = true, ...props }: Parameters<typeof PlaceModalInner>[0] & { documentMeta?: boolean }) {
+export default function PlaceModal({ documentMeta = true, mobileFrame = false, ...props }: Parameters<typeof PlaceModalInner>[0] & { documentMeta?: boolean; mobileFrame?: boolean }) {
  const place = props.place;
- if (place) return <FullscreenPlacezDetails key={place.id} label={place.name} onClose={() => closeOpenCard(props.onClose)}>{documentMeta ? <OpenCardMeta title={place.name} description={place.neighborhood || place.address || place.description || ""} /> : null}<NativePlaceModalInner {...props} place={place} onClose={() => closeOpenCard(props.onClose)}/></FullscreenPlacezDetails>;
+ if (place) return <FullscreenPlacezDetails key={place.id} label={place.name} mobileFrame={mobileFrame} onClose={props.onClose}>{requestFrameClose => <>
+  {documentMeta ? <OpenCardMeta title={place.name} description={place.neighborhood || place.address || place.description || ""} /> : null}
+  <NativePlaceModalInner {...props} place={place} onClose={requestFrameClose ? props.onClose : () => closeOpenCard(props.onClose)} requestFrameClose={requestFrameClose}/>
+ </>}</FullscreenPlacezDetails>;
  return null;
 }
 function NativePlaceModalInner(props: Parameters<typeof PlaceModalInner>[0] & {place:Business}) {
@@ -232,8 +235,10 @@ function PlaceModalInner({
   place,
   onClose,
   onRequireAuth,
+  requestFrameClose,
 }: {
   place: Business | null;
+  requestFrameClose?: () => void;
   onClose: () => void;
   onRequireAuth: () => void;
   /** Retained for callers; CardDetails owns source-card anchor geometry. */
@@ -260,7 +265,8 @@ function PlaceModalInner({
   const [detailsOpen, setDetailsOpen] = useState(true);
   const [eventsOpen, setEventsOpen] = useState(true);
   const [open, setOpen] = useState(false);
-  const { dialogRef: panelRef, requestClose: handleClose } = useOpenCardClose(onClose, !!place);
+  const { dialogRef: panelRef, requestClose } = useOpenCardClose(onClose, !!place && !requestFrameClose);
+  const handleClose = requestFrameClose ?? requestClose;
 
   // Fresh tab when opening a different place
   useEffect(() => {
@@ -868,7 +874,7 @@ gigs.length === 0 ? (
 
   return (
     <div onClick={handleClose} role="presentation" className={`event-modal-overlay place-modal-overlay placez-native-overlay${open ? " place-modal-overlay--open" : ""}`}>
-      <div ref={panelRef} onClick={event => event.stopPropagation()} role="dialog" aria-modal="false" aria-label={place.name} tabIndex={-1} className="placez-native-dialog">
+      <div ref={panelRef} onClick={event => event.stopPropagation()} role={requestFrameClose ? undefined : "dialog"} aria-modal={requestFrameClose ? undefined : "false"} aria-label={requestFrameClose ? undefined : place.name} tabIndex={-1} className="placez-native-dialog">
         <NativePlacezExpanded place={displayed} contacts={nativeContacts} info={nativeInfo}
           feed={<><h3>GIGZ</h3>{place.gigs === undefined ? <p>Venue GIGZ have not loaded.</p> : nativeGigs}{nativeMizzed}</>}
           events={place.upcomingEvents === undefined ? <p>Venue events have not loaded.</p> : nativeUpcoming}
