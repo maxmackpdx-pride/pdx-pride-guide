@@ -235,6 +235,7 @@ export default function Admin() {
   const { toast } = useToast();
   const { user, loading: authLoading, logout } = useAuth();
   const { openSheet } = useInboxSheet();
+  const { calmMode, toggleCalmMode } = useTheme();
   const [, navigate] = useLocation();
   const [authenticated, setAuthenticated] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
@@ -1717,7 +1718,6 @@ export default function Admin() {
 
   const viewMeta = ADMIN_VIEW_META[activeTab as AdminViewKey] ?? ADMIN_VIEW_META.overview;
   const pushOk = !!pushStatus?.configured;
-  const { calmMode, toggleCalmMode } = useTheme();
 
   /** Map /admin tabs → hub sections so member/admin share one left rail. */
   const hubSectionFromTab = (tab: AdminTab): HubSection => {
@@ -1894,20 +1894,20 @@ export default function Admin() {
             testPushPending={testPushMutation.isPending}
             breakdown={pendingAdmin.breakdown}
           />
-          <div className="mt-6 p-4 border border-white/10" style={{ background: "#0d0d0d" }} data-testid="admin-activity-log">
-            <p className="display text-sm mb-3" style={{ color: "#B06BFF" }}>ACTIVITY LOG</p>
-            <p className="text-white/40 text-xs mb-3">
+          <section className="staff-reading admin-activity-log" aria-label="Activity log" data-testid="admin-activity-log">
+            <h2 className="admin-shell__section-label">Activity log</h2>
+            <p className="text-xs mb-3">
               Append-only admin actions (approves, denials, claims, guide messages). Open the floating inbox for queue work.
             </p>
             {adminActivityLog.length === 0 ? (
-              <p className="text-white/30 text-xs m-0">No recent actions.</p>
+              <p className="text-xs m-0">No recent actions.</p>
             ) : (
               <ul className="m-0 p-0 list-none space-y-2 max-h-[360px] overflow-y-auto">
                 {adminActivityLog.map(a => (
-                  <li key={a.id} className="text-sm text-white/75 border-t border-white/10 pt-2">
-                    <span style={{ color: "#19E3FF", fontFamily: "var(--font-mono, monospace)", fontSize: 11 }}>{a.action}</span>
+                  <li key={a.id} className="text-sm pt-2">
+                    <span style={{ color: "var(--staff-accent)", fontFamily: "var(--font-mono, monospace)", fontSize: 11 }}>{a.action}</span>
                     {a.targetLabel ? ` · ${a.targetLabel}` : ""}
-                    <div className="text-white/35 text-xs mt-0.5">
+                    <div className="text-xs mt-0.5">
                       {a.actorUsername ? `@${a.actorUsername}` : "admin"}
                       {a.createdAt ? ` · ${new Date(a.createdAt).toLocaleString()}` : ""}
                     </div>
@@ -1917,12 +1917,12 @@ export default function Admin() {
             )}
             <button
               type="button"
-              className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border mt-3"
+              className="admin-shell__ghost-btn"
               onClick={() => openSheet({ view: "inbox", account: "admin" })}
             >
               OPEN QUEUE
             </button>
-          </div>
+          </section>
           </>
         )}
 

@@ -1,0 +1,121 @@
+/* The overview and Stats content share a paper reading surface inside staff chrome. */
+.staff-reading {
+  --staff-paper: color-mix(in srgb, var(--paper) 40%, var(--flag-white));
+  --staff-card: var(--flag-white);
+  --staff-ink: var(--paper-ink);
+  --staff-accent: var(--flag-violet);
+  --staff-blue: color-mix(in srgb, var(--flag-blue) 67%, var(--paper-ink));
+  --staff-berry: color-mix(in srgb, var(--neon-magenta) 48%, var(--paper-ink));
+  --staff-green: color-mix(in srgb, var(--flag-green) 72%, var(--paper-ink));
+  --staff-muted: color-mix(in srgb, var(--staff-ink) 72%, var(--paper));
+  --staff-rule: color-mix(in srgb, var(--staff-ink) 23%, var(--paper));
+  --panel-card: var(--staff-card);
+  --panel-border: var(--staff-rule);
+  --panel-cyan: var(--staff-blue);
+  --cyan: var(--staff-blue);
+  --chrome-focus: var(--staff-blue);
+  --focus-ring-color: var(--staff-blue);
+  box-sizing: border-box;
+  min-width: 0;
+  padding: clamp(16px, 3vw, 28px);
+  border: 1px solid var(--staff-rule);
+  border-radius: 14px;
+  background: var(--staff-paper);
+  color: var(--staff-ink);
+  color-scheme: light;
+}
+
+.staff-reading :is(button, input, textarea, select, a) { min-height: 44px; min-width: 44px; }
+.staff-reading :is(button, input, textarea, select, a):focus-visible {
+  outline: 3px solid var(--staff-blue);
+  outline-offset: 2px;
+}
+.staff-reading :is(button, select, a) { touch-action: manipulation; }
+.staff-reading h2 { margin-block: 0 12px; }
+.staff-reading .admin-shell__section-label { color: var(--staff-ink); margin: 0; }
+.staff-reading .admin-shell__nav-alert { background: var(--staff-accent); color: var(--staff-card); }
+.staff-reading .admin-shell__section-head { align-items: center; }
+.staff-reading :is(.admin-shell__ghost-btn, .admin-kind-pill, .admin-owner-banner__cta, .admin-broadcast__send),
+.staff-reading.inbox-exp-empty button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 15px;
+  border: 1px solid var(--staff-accent);
+  border-radius: 7px;
+  background: var(--staff-card);
+  color: var(--staff-accent);
+  font-weight: 700;
+}
+.staff-reading :is(.admin-shell__ghost-btn, .admin-kind-pill, .admin-owner-banner__cta, .admin-broadcast__send):enabled:hover,
+.staff-reading .inbox-workspace__metrics button:hover {
+  background: color-mix(in srgb, var(--staff-accent) 8%, var(--staff-card));
+}
+.staff-reading .admin-broadcast__send { align-self: start; }
+.staff-reading button:disabled { opacity: .65; cursor: not-allowed; }
+.staff-reading :is(.admin-push-panel,.admin-shell__queue-clear,.admin-health-chip,.admin-attn-card,.admin-owner-banner) {
+  background: var(--staff-card);
+  border: 1px solid var(--staff-rule);
+  border-radius: 8px;
+}
+.staff-reading :is(.admin-attn-card,.admin-owner-banner) { border-inline-start: 4px solid var(--staff-accent); }
+.staff-reading :is(.admin-attn-card__title,.admin-health-chip__label,.admin-owner-banner__body) { color: var(--staff-ink); }
+.staff-reading :is(.admin-attn-card__kind,.admin-owner-banner__kicker,.admin-owner-banner__body strong,.admin-broadcast__owner) {
+  color: var(--staff-accent);
+}
+.staff-reading :is(.admin-attn-card__sub,.admin-health-chip__meta,.admin-push-panel__meta,.admin-shell__queue-clear p) { color: var(--staff-muted); }
+.staff-reading .admin-shell__queue-clear h3 { color: var(--staff-green); }
+.staff-reading .admin-health-chip__dot.is-ok { background: var(--staff-green); box-shadow: none; }
+.staff-reading .admin-health-chip__dot.is-bad { background: var(--staff-berry); box-shadow: none; }
+.staff-reading .admin-broadcast { margin-top: 16px; }
+.staff-reading .admin-broadcast__owner,.staff-reading .admin-broadcast__label { font-size: 12px; font-weight: 700; }
+.staff-reading .admin-broadcast__label { display: block; margin-bottom: 4px; color: var(--staff-muted); }
+.staff-reading .admin-broadcast__field,.staff-growth-window select {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--staff-card);
+  color: var(--staff-ink);
+  border: 1px solid var(--staff-muted);
+  border-radius: 5px;
+  font: inherit;
+}
+.staff-reading textarea { resize: vertical; }
+.admin-activity-log { margin-top: 24px; }
+.admin-activity-log .admin-shell__section-label { margin-bottom: 8px; }
+.admin-activity-log li { border-top: 1px solid var(--staff-rule); }
+.admin-activity-log li div,.admin-activity-log p { color: var(--staff-muted); }
+.admin-activity-log .admin-shell__ghost-btn { margin-top: 12px; }
+
+.inbox-exp-stats.staff-reading { padding: clamp(16px, 3vw, 28px); }
+.inbox-exp-stats.staff-reading .inbox-exp-stats-title { margin: 24px 0 10px; font-size: 21px; }
+.inbox-exp-stats.staff-reading > :first-child,.inbox-exp-stats.staff-reading .inbox-workspace h2 { margin-top: 0; }
+.staff-reading .inbox-workspace { color: var(--staff-ink); padding: 0 0 14px; border-bottom: 1px solid var(--staff-rule); }
+.staff-reading .inbox-workspace__metrics { grid-template-columns: repeat(auto-fit,minmax(min(115px,100%),1fr)); margin-block: 12px; }
+.staff-reading .inbox-workspace__metrics button {
+  min-width: 0;
+  align-items: start;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--staff-card);
+  color: var(--staff-ink);
+  border: 1px solid var(--staff-accent);
+  border-radius: 8px;
+}
+.staff-reading .inbox-workspace__metrics strong { color: var(--staff-accent); }
+.staff-reading .inbox-workspace__note,.staff-reading .admin-stats__insight { color: var(--staff-muted); }
+.staff-reading .inbox-exp-stats-copy a { display: inline-flex; align-items: center; padding-inline: 4px; text-decoration: underline; }
+.staff-reading.inbox-exp-empty { color: var(--staff-muted); }
+.staff-growth-window { display: grid; gap: 5px; margin-top: 10px; color: var(--staff-muted); font-size: 12px; font-weight: 700; }
+.staff-reading .admin-stats__growth-tooltip {
+  left: 0;
+  width: 100%;
+  transform: none;
+  background: var(--staff-paper);
+  border-color: var(--staff-rule);
+}
+.staff-reading .admin-stats__growth-tooltip__grid,.staff-reading .admin-stats__growth-tooltip__grid strong { color: var(--staff-ink); }
+.staff-reading .admin-stats__growth-tooltip__meta { color: var(--staff-muted); }
+.staff-reading .inbox-exp-stats-badge {
+  background: color-mix(in srgb, var(--inbox-exp-badge-color) 8%, var(--staff-card));
+}

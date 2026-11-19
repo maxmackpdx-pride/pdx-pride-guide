@@ -1,3 +1,4 @@
+import "./staff-reading.css";
 import { ArrowRight } from "lucide-react";
 import { Sparkles } from "lucide-react";
 import { useState } from "react";
@@ -135,17 +136,17 @@ function BroadcastPanel({ reach }: { reach: number }) {
   const bodyLeft = 180 - body.length;
 
   return (
-    <section className="admin-push-panel" style={{ marginTop: 16, borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 16 }}>
+    <section className="admin-push-panel admin-broadcast">
       <div className="admin-shell__section-head">
-        <span className="admin-shell__section-label">Broadcast to everyone</span>
-        <span style={{ fontSize: 11, color: "#B06BFF", letterSpacing: "0.08em", textTransform: "uppercase" }}>Owner only</span>
+        <h3 className="admin-shell__section-label">Broadcast to everyone</h3>
+        <span className="admin-broadcast__owner">Owner only</span>
       </div>
       <p className="admin-push-panel__meta" style={{ marginBottom: 12 }}>
         Sends one push to all {reach} subscribed device{reach === 1 ? "" : "s"} (people who muted announcements are skipped).
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 520 }}>
         <label style={{ display: "block" }}>
-          <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>
+          <span className="admin-broadcast__label">
             Title · {titleLeft} left
           </span>
           <input
@@ -153,11 +154,11 @@ function BroadcastPanel({ reach }: { reach: number }) {
             value={title}
             maxLength={80}
             onChange={(e) => setTitle(e.target.value)}
-            style={{ width: "100%", padding: "10px 12px", background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 14 }}
+            className="admin-broadcast__field"
           />
         </label>
         <label style={{ display: "block" }}>
-          <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>
+          <span className="admin-broadcast__label">
             Message · {bodyLeft} left
           </span>
           <textarea
@@ -165,11 +166,11 @@ function BroadcastPanel({ reach }: { reach: number }) {
             maxLength={180}
             rows={3}
             onChange={(e) => setBody(e.target.value)}
-            style={{ width: "100%", padding: "10px 12px", background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 14, resize: "vertical" }}
+            className="admin-broadcast__field"
           />
         </label>
         <label style={{ display: "block" }}>
-          <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>
+          <span className="admin-broadcast__label">
             Opens (path, e.g. /events)
           </span>
           <input
@@ -177,27 +178,14 @@ function BroadcastPanel({ reach }: { reach: number }) {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="/events"
-            style={{ width: "100%", padding: "10px 12px", background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 14 }}
+            className="admin-broadcast__field"
           />
         </label>
         <button
           type="button"
           onClick={() => void send()}
           disabled={sending || reach === 0 || !title.trim()}
-          style={{
-            alignSelf: "flex-start",
-            padding: "12px 22px",
-            background: sending ? "#5a2e8a" : "#B06BFF",
-            color: "#0a0a0a",
-            border: "none",
-            fontFamily: "var(--font-display, sans-serif)",
-            fontWeight: 900,
-            fontSize: 14,
-            letterSpacing: "0.06em",
-            textTransform: "uppercase",
-            cursor: sending || reach === 0 ? "not-allowed" : "pointer",
-            opacity: reach === 0 ? 0.5 : 1,
-          }}
+          className="admin-broadcast__send"
         >
           {sending ? "Sending…" : `Send to ${reach} device${reach === 1 ? "" : "s"}`}
         </button>
@@ -246,7 +234,7 @@ export default function AdminOverview({
   const envLabel = liveHealth?.railwayEnvironment || "";
 
   return (
-    <div className="admin-overview">
+    <div className="admin-overview staff-reading">
       {/* Owner-facing live health / deploy chip */}
       <section className="admin-health-chip" aria-label="Live deploy health" data-testid="admin-health-chip">
         <span
@@ -291,7 +279,7 @@ export default function AdminOverview({
       {/* Needs attention */}
       <section className="admin-attn-section">
         <div className="admin-shell__section-head">
-          <span className="admin-shell__section-label">Needs attention</span>
+          <h2 className="admin-shell__section-label">Needs attention</h2>
           {pendingCount > 0 && (
             <span className="admin-shell__nav-alert" style={{ fontSize: 12, borderRadius: 99, padding: "3px 10px" }}>
               {pendingCount} in the queue
@@ -315,20 +303,7 @@ export default function AdminOverview({
                 type="button"
                 onClick={() => onOpenInbox(String(b.key))}
                 title={`Open the ${b.label} queue`}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "5px 11px",
-                  borderRadius: 99,
-                  border: `1px solid ${b.color}`,
-                  background: "transparent",
-                  color: b.color,
-                  fontSize: 12,
-                  fontWeight: 700,
-                  letterSpacing: "0.02em",
-                  cursor: "pointer",
-                }}
+                className="admin-kind-pill"
               >
                 {b.label}
                 <span style={{ fontFamily: "var(--font-display, sans-serif)", fontWeight: 900 }}>{b.count}</span>
@@ -339,19 +314,7 @@ export default function AdminOverview({
                 type="button"
                 onClick={() => onOpenInbox("guide")}
                 title="Open the guide inbox"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "5px 11px",
-                  borderRadius: 99,
-                  border: "1px solid #D4FF00",
-                  background: "transparent",
-                  color: "#D4FF00",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                }}
+                className="admin-kind-pill"
               >
                 Guide inbox
                 <span style={{ fontFamily: "var(--font-display, sans-serif)", fontWeight: 900 }}>{guideUnread}</span>
@@ -367,7 +330,6 @@ export default function AdminOverview({
                 key={pill.key}
                 type="button"
                 className="admin-kind-pill"
-                style={{ color: pill.color, borderColor: pill.color }}
                 onClick={() => onOpenInbox(pill.key)}
               >
                 {pill.count} {pill.label}
@@ -379,15 +341,15 @@ export default function AdminOverview({
         {pendingCount === 0 ? (
           <div className="admin-shell__queue-clear">
             <h3><Sparkles size={16} aria-hidden="true" /> Queue clear <Sparkles size={16} aria-hidden="true" /></h3>
-            <p>Nothing needs you right now. Go drink some water.</p>
+            <p>No items are waiting for review.</p>
           </div>
         ) : (
           <div className="admin-attn-list">
             {attentionItems.map(item => (
-              <article key={item.key} className="pdx-glass-rebind admin-attn-card" style={{ borderLeftColor: item.color }}>
+              <article key={item.key} className="admin-attn-card">
                 <div className="admin-attn-card__top">
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <span className="admin-attn-card__kind" style={{ color: item.color, borderColor: item.color }}>
+                    <span className="admin-attn-card__kind">
                       {item.kindLabel}
                     </span>
                     <h3 className="admin-attn-card__title">{item.title}</h3>
@@ -398,7 +360,7 @@ export default function AdminOverview({
                   <button
                     type="button"
                     className="admin-shell__ghost-btn"
-                    style={{ borderColor: item.color, color: item.color }}
+                    aria-label={"Review " + item.title}
                     onClick={() => onReviewItem(item.key)}
                   >
                     Review
@@ -427,7 +389,7 @@ export default function AdminOverview({
       {pushStatus != null && (
         <section className="admin-push-panel">
           <div className="admin-shell__section-head">
-            <span className="admin-shell__section-label">Push notifications</span>
+            <h2 className="admin-shell__section-label">Push notifications</h2>
             {onRefreshPush && (
               <button type="button" className="admin-shell__ghost-btn" onClick={onRefreshPush}>
                 Refresh

@@ -1,11 +1,16 @@
 import type { CSSProperties } from "react";
-import { RoomKicker } from "@/components/ds";
 import { useQuery } from "@tanstack/react-query";
 import MemberGrowthChart from "@/components/admin/MemberGrowthChart";
 import { useAuth } from "@/context/AuthContext";
 import "@/components/admin/admin-stats.css";
 import "../inbox.css";
-import { C, hbars } from "./sheet";
+import { hbars } from "./sheet";
+import "@/components/admin/staff-reading.css";
+
+const C = {
+  cyan:"var(--staff-blue)", purple:"var(--staff-accent)", magenta:"var(--staff-berry)",
+  orange:"var(--flag-brown)", green:"var(--staff-green)", limeSoft:"var(--staff-green)", faint:"var(--staff-muted)",
+};
 
 type Traffic = {
   source: "first_party" | "google_analytics";
@@ -241,9 +246,9 @@ export default function StatsView({onOpenQueue}: {onOpenQueue?: (status:string) 
     enabled: isOwner,
   });
 
-  if (isError) return <div className="inbox-exp-empty" role="alert">Metrics could not load. <button type="button" onClick={()=>void refetch()}>Retry</button></div>;
+  if (isError) return <div className="staff-reading inbox-exp-empty" role="alert">Metrics could not load. <button type="button" onClick={()=>void refetch()}>Retry</button></div>;
   if (!m) {
-    return <div className="inbox-exp-empty">LOADING STATS…</div>;
+    return <div className="staff-reading inbox-exp-empty">LOADING STATS…</div>;
   }
 
   const tr = m.traffic;
@@ -288,11 +293,11 @@ export default function StatsView({onOpenQueue}: {onOpenQueue?: (status:string) 
   const rsvpTotal = (m.rsvpsTrend14d ?? []).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="inbox-exp-stats">
-      {onOpenQueue && work?.workSummary && <section className="inbox-workspace" aria-label="Operational insights"><RoomKicker accent={C.cyan} as="div">Work that needs action</RoomKicker><div className="inbox-workspace__metrics">{([['review','Need review'],['waiting','Waiting'],['escalated','Owner decision']] as const).map(([status,label])=><button key={status} type="button" onClick={()=>onOpenQueue(status)}><strong>{work.workSummary[status]}</strong><span>{label}</span></button>)}</div><p className="inbox-workspace__note">Open cases, not messages or people. Select a count to see the work behind it.</p></section>}
+    <section className="inbox-exp-stats staff-reading" aria-label="Administration metrics">
+      {onOpenQueue && work?.workSummary && <section className="inbox-workspace" aria-label="Operational insights"><h2 className="inbox-exp-stats-title">Work that needs action</h2><div className="inbox-workspace__metrics">{([['review','Need review'],['waiting','Waiting'],['escalated','Owner decision']] as const).map(([status,label])=><button key={status} type="button" onClick={()=>onOpenQueue(status)}><strong>{work.workSummary[status]}</strong><span>{label}</span></button>)}</div><p className="inbox-workspace__note">Select a count to review those open cases.</p></section>}
       {fullStats && (
         <>
-          <RoomKicker accent="var(--green-acid)" as="div">Site pulse</RoomKicker>
+          <h2 className="inbox-exp-stats-title">Site pulse</h2>
           <div className="inbox-exp-stats-pulse">
             <div className="inbox-exp-stats-pulse__label">LIVE RIGHT NOW</div>
             <div className="inbox-exp-stats-pulse__row">
@@ -306,10 +311,10 @@ export default function StatsView({onOpenQueue}: {onOpenQueue?: (status:string) 
         </>
       )}
 
-      <div className={`inbox-exp-stats-title${fullStats ? "" : " inbox-exp-stats-title--first"} inbox-exp-stats-title--tight`}>
-        SNAPSHOT
-      </div>
-      <p className="inbox-exp-stats-copy">Live totals across the platform. Today uses Pacific time; the current day is incomplete.</p>
+      <h2 className={`inbox-exp-stats-title${fullStats ? "" : " inbox-exp-stats-title--first"} inbox-exp-stats-title--tight`}>
+        Snapshot
+      </h2>
+      <p className="inbox-exp-stats-copy">Live totals across the platform. Today uses Pacific time and includes activity so far.</p>
       <div className="inbox-exp-stats-stack">
         {[
           ...(fullStats ? [[m.newUsersToday, "NEW USERS TODAY", C.limeSoft]] : []),
@@ -329,7 +334,7 @@ export default function StatsView({onOpenQueue}: {onOpenQueue?: (status:string) 
 
       {isOwner && adStats && (
         <>
-          <div className="inbox-exp-stats-title">ADS</div>
+          <h2 className="inbox-exp-stats-title">ADS</h2>
           <p className="inbox-exp-stats-copy">
             Owner-only rollup from Ad Manager.{" "}
             <a href="/admin?tab=ads" style={{ color: C.cyan }}>
@@ -345,7 +350,7 @@ export default function StatsView({onOpenQueue}: {onOpenQueue?: (status:string) 
         </>
       )}
 
-      <div className="inbox-exp-stats-title">THE COMMUNITY</div>
+      <h2 className="inbox-exp-stats-title">THE COMMUNITY</h2>
       <div className="inbox-exp-stats-grid">
         {community.map(([value, label]) => (
           <Tile key={label} value={value} label={label} />
@@ -354,7 +359,7 @@ export default function StatsView({onOpenQueue}: {onOpenQueue?: (status:string) 
 
       {fullStats && (
         <>
-          <div className="inbox-exp-stats-title">BOARD ACTIVITY</div>
+          <h2 className="inbox-exp-stats-title">BOARD ACTIVITY</h2>
           <HBars rows={board} />
 
           {m.productExperience && (
@@ -363,7 +368,7 @@ export default function StatsView({onOpenQueue}: {onOpenQueue?: (status:string) 
             </>
           )}
 
-          <div className="inbox-exp-stats-title">CLAIMED VS UNCLAIMED</div>
+          <h2 className="inbox-exp-stats-title">CLAIMED VS UNCLAIMED</h2>
           <div className="inbox-exp-stats-donut">
             <div
               className="inbox-exp-stats-donut__ring"
@@ -397,7 +402,7 @@ export default function StatsView({onOpenQueue}: {onOpenQueue?: (status:string) 
 
       {tr && (
         <>
-          <div className="inbox-exp-stats-title">TRAFFIC &amp; AUDIENCE</div>
+          <h2 className="inbox-exp-stats-title">Traffic and audience · Last 7 days</h2>
           {fullStats && (
             <div className="inbox-exp-stats-badges">
               {[
@@ -463,25 +468,25 @@ export default function StatsView({onOpenQueue}: {onOpenQueue?: (status:string) 
 
               {tr.topPages.length > 0 && (
                 <>
-                  <div className="inbox-exp-stats-title">TOP PAGES</div>
+                  <h2 className="inbox-exp-stats-title">TOP PAGES</h2>
                   <HBars rows={hbars(tr.topPages.map((p) => [p.path, p.views] as [string, number]), C.cyan)} />
                 </>
               )}
               {tr.sources.length > 0 && (
                 <>
-                  <div className="inbox-exp-stats-title">WHERE THEY COME FROM</div>
+                  <h2 className="inbox-exp-stats-title">WHERE THEY COME FROM</h2>
                   <HBars rows={hbars(tr.sources.map((s) => [s.label, s.pct] as [string, number]), C.magenta, "%")} />
                 </>
               )}
               {tr.devices.length > 0 && (
                 <>
-                  <div className="inbox-exp-stats-title">DEVICES</div>
+                  <h2 className="inbox-exp-stats-title">DEVICES</h2>
                   <HBars rows={hbars(tr.devices.map((d) => [d.label, d.pct] as [string, number]), C.orange, "%")} />
                 </>
               )}
               {tr.newReturning.length > 0 && (
                 <>
-                  <div className="inbox-exp-stats-title">NEW VS RETURNING</div>
+                  <h2 className="inbox-exp-stats-title">NEW VS RETURNING</h2>
                   <HBars rows={hbars(tr.newReturning.map((n) => [n.label, n.pct] as [string, number]), C.limeSoft, "%")} />
                 </>
               )}
@@ -492,7 +497,7 @@ export default function StatsView({onOpenQueue}: {onOpenQueue?: (status:string) 
 
       {fullStats && (
         <>
-          <div className="inbox-exp-stats-title">MEMBER GROWTH</div>
+          <h2 className="inbox-exp-stats-title">MEMBER GROWTH</h2>
           <p className="inbox-exp-stats-copy">
             Signups and RSVPs in 12-hour buckets over the last 14 days. {signupTotal} signup{signupTotal === 1 ? "" : "s"},{" "}
             {rsvpTotal} RSVP{rsvpTotal === 1 ? "" : "s"} total.
@@ -505,10 +510,10 @@ export default function StatsView({onOpenQueue}: {onOpenQueue?: (status:string) 
                 12-HOUR BUCKETS
               </span>
             </div>
-            <MemberGrowthChart buckets={memberGrowth} />
+            <MemberGrowthChart buckets={memberGrowth} selectWindow />
           </div>
         </>
       )}
-    </div>
+    </section>
   );
 }
