@@ -185,3 +185,17 @@ verified present in the built release CSS. Everything else is v1.0.28
 unchanged. Tests 447/447 on the tagged source; GitHub runs 44461430505
 and 44461430471 passed the compiler checks, typechecking, map tests and
 both builds. The v1.0.28 parts remain in this folder for rollback.
+## v1.0.30: Unconfirmed price demotes to asterisk small print
+
+Source: `a10c93f520adb1ca6e345f9eb4c557a7cd16a32f` (immutable `v1.0.30`).
+Archive SHA-256: `06e8fc48ba4cce78fd90e7f59bb057b99c174df8c0687be36d585acf522d9a41`.
+One-treatment change on top of v1.0.29: PRICE NOT CONFIRMED no longer
+renders as a chip on the map front card. An unconfirmed price is an
+asterisk small-print note ("* Price not confirmed") at the bottom of
+the card's bottom band, in both the overlay band and the wide-poster
+chunk; confirmed prices keep the chip. The events board ships the
+identical change (pdx-pride-guide PR #97) so both surfaces stay one
+card system. Everything else is v1.0.29 unchanged. Tests 447/447 on
+the tagged source; GitHub runs 44475124215 and 44475124204 passed the
+compiler checks, typechecking, map tests and both builds. The v1.0.29
+parts remain in this folder for rollback.
