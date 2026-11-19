@@ -217,3 +217,18 @@ v1.0.30 unchanged. Tests 447/447 on the tagged source; GitHub runs
 44489123636 and 44489123734 passed the compiler checks, typechecking,
 map tests and both builds. The v1.0.30 parts remain in this folder for
 rollback.
+## v1.0.32: Card dialogs rise above the site dock
+
+Source: `1d8c7349f49b85f5689540403a384bce5efa64f6` (immutable `v1.0.32`).
+Archive SHA-256: `c28346bee748d58052743716dd0e0d27ed1471b0f6cf0db919409252820b2670`.
+One-mechanics change on top of v1.0.31: the card dialogs (mapz-map
+and board-map families) rise above the site dock — overlay z-index
+130, dialog 131, against the dock's computed 120. A live geometry
+check after v1.0.31 showed the expanded card's footer at the viewport
+bottom (heart at y785-829 on an 844px phone) covered by the dock
+(y754-836), leaving the heart restored in v1.0.31 — and the whole
+footer row — untappable on the map at phone size. No card behavior
+changes; everything else is v1.0.31 unchanged. Tests 447/447 on the
+tagged source; GitHub runs 44499433303 and 44499433243 passed the
+compiler checks, typechecking, map tests and both builds. The
+v1.0.31 parts remain in this folder for rollback.
