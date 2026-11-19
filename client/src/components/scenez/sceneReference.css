@@ -5,10 +5,10 @@
 .scenez-native .ns-reference-hero>.places-page-switch{width:76%;max-width:none;padding:0;z-index:3}
 .scenez-native .new-scenez .ns-body{padding:24px 16px 70px}
 .scenez-native .ns-search{border:2px solid var(--scene-lime);border-radius:50px;background:var(--places-art-ink-070809);padding:7px 8px 7px 18px;min-height:52px}
-.scenez-native .ns-search>span{color:var(--places-art-ink-ffffff);display:grid;place-items:center}
+.scenez-native .ns-search>span{color:var(--places-art-ink-ffffff);display:grid;place-items:center;flex:none}
 .scenez-native .ns-search input{font:600 clamp(17px,2vw,24px)/1 'Barlow Condensed',sans-serif;letter-spacing:.1em;text-transform:uppercase;font-style:italic}
 .scenez-native .ns-search input::placeholder{color:var(--places-art-ink-f5f2ea);opacity:1}
-.scenez-native .ns-search-go{border:0;border-radius:40px;background:var(--scene-lime);color:var(--places-art-ink-070809);width:55px;height:36px;flex:none;font-size:28px;cursor:pointer}
+.scenez-native .ns-search-go{border:0;border-radius:10px;background:var(--scene-lime);color:var(--places-art-ink-070809);width:42px;height:36px;flex:none;font-size:28px;cursor:pointer}
 .scenez-native .ns-filters{display:grid;grid-template-columns:.85fr 1.25fr 1.15fr;gap:7px;margin:18px 0 28px}
 .scenez-native .ns-filters button{min-height:44px;justify-content:center;text-align:center;border:2px solid var(--scene-lime);border-radius:10px;background:var(--places-art-ink-070809);padding:8px 4px;box-shadow:none}
 .scenez-native .ns-filters strong{font:700 clamp(11px,2.4vw,21px)/1.1 'Barlow Condensed',sans-serif;letter-spacing:.045em}
@@ -23,5 +23,5 @@
    Art has no words or controls; approved logo and selector are independent above it. */
 .scenez-native .ns-xerox-hero{height:auto;aspect-ratio:1;min-height:0;max-height:720px;border:0;display:block;background:transparent}
 .scenez-native .ns-xerox-hero .ns-logo{position:absolute;top:35%;left:50%;transform:translateX(-50%);width:min(84%,690px);height:auto;margin:0}
-.scenez-native .ns-xerox-hero>.places-page-switch{position:absolute;top:62%;left:50%;transform:translateX(-50%);width:78%;max-width:570px}
+.scenez-native .ns-xerox-hero>.places-page-switch{position:absolute;top:62%;left:50%;transform:translateX(-50%);width:76%;max-width:570px}
 @media(min-width:900px){.scenez-native .ns-xerox-hero{height:650px;aspect-ratio:auto}.scenez-native .ns-xerox-hero .ns-logo{top:34%;width:620px}.scenez-native .ns-xerox-hero>.places-page-switch{top:62%}}

@@ -6,7 +6,7 @@
    --places-search-h / insets below are the shared chrome measurements.
    ===================================================================== */
 :root {
-  --places-chrome-inline: 15px;
+  --places-chrome-inline: 22px;
   --places-search-h: 52px;
 }
 
@@ -78,6 +78,10 @@
 .outz-native-page .ol-discover-heading > span { font: 700 10px/1.2 var(--font-body); }
 
 .pl-search button { display: grid; place-items: center; min-width: 44px; min-height: 44px; border: 0; background: transparent; color: inherit; }
+/* Search go-buttons share OutZide's exact geometry on all three pages:
+   42x44, radius 10, filled with the page accent, dark arrow. SceneZ's is
+   sized in sceneReference.css; PlaceZ's paper fill is its white accent. */
+.pl-page.pl-production .pl-body .pl-search button { width: 42px; min-width: 42px; height: 44px; border-radius: 10px; background: var(--paper); color: var(--ink); }
 .places-locked-slot { flex: none; position: relative; }
 .places-locked-slot > div { position: relative; }
 

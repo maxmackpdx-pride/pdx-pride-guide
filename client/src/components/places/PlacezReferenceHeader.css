@@ -1,17 +1,13 @@
 /* Reference-faithful header only. Does not alter card sizes, feeds or filters. */
 .pl-production .pl-hero{max-width:1200px;isolation:isolate;padding-top:0;overflow:hidden}
+/* The page switch is NOT restyled here: it renders the shared Placez-family
+   slider from placesShared.css (OutZide geometry) like the other two pages.
+   (Chrome unification fix, Nov 19 2026.) */
 .pl-production .pl-brand{padding:12px 19% 0;z-index:3}
 .pl-production .pl-brand img{display:block;width:100%;height:auto;max-height:230px;filter:drop-shadow(0 3px 1px var(--places-art-ink-000000))}
-.pl-production .pl-hero>.places-page-switch{position:relative;z-index:5;width:100%;max-width:1000px;margin:clamp(22px,3.5vw,40px) auto 0;padding:8px 5% 0}
-.pl-production .pl-hero>.places-page-switch>div{width:100%;padding:3px;border:2px solid var(--paper);border-radius:50px;background:var(--ink)}
-.pl-production .pl-hero>.places-page-switch a{padding:12px 4px;border-radius:0;color:var(--paper);font:900 italic clamp(20px,4.5vw,40px)/1.1 'Barlow Condensed',sans-serif;text-transform:uppercase}
-.pl-production .pl-hero>.places-page-switch a+a:before{content:'';position:absolute;left:0;top:17%;bottom:17%;border-left:1px solid var(--paper);transform:rotate(8deg)}
-.pl-production .pl-hero>.places-page-switch .places-page-switch__active{inset:auto 7% 0;height:3px;border:0;border-radius:0;background:linear-gradient(90deg,var(--places-art-ink-ff0000),var(--neon-orange),var(--neon-yellow),var(--neon-cyan),var(--places-art-ink-7b00ff));box-shadow:0 0 6px var(--neon-cyan)}
 .pl-production .pl-hero>.places-page-switch a:focus-visible{outline:2px solid var(--neon-cyan);outline-offset:3px;border-radius:22px}
 @media(max-width:600px){
  .pl-production .pl-brand{padding:12px 18% 0}
- .pl-production .pl-hero>.places-page-switch{margin-top:21px;padding-inline:5%}
- .pl-production .pl-hero>.places-page-switch a{padding:10px 3px;font-size:clamp(20px,5vw,28px)}
 }
 
 /* Complete the uploaded PlaceZ header reference without changing card geometry. */
@@ -40,16 +36,12 @@
 .pl-production{--pl-rgb:linear-gradient(90deg,var(--places-art-ink-ff0000) 0%,var(--neon-orange) 18%,var(--neon-yellow) 32%,var(--neon-green) 47%,var(--neon-cyan) 62%,var(--places-art-ink-1600ff) 80%,var(--places-art-ink-7b00ff) 100%)}
 .pl-production .pl-brand{padding:8px 20% 0}
 .pl-production .pl-brand img{max-height:none;object-position:center}
-.pl-production .pl-hero>.places-page-switch{margin:clamp(16px,2.6vw,30px) auto 0;padding:7px 5% 0}
-.pl-production .pl-hero>.places-page-switch .places-page-switch__active{background:var(--pl-rgb);bottom:3px;height:3px}
 .pl-production .pl-search{margin-top:0}
 .pl-production .pl-filters button,.pl-production .pl-filters button:nth-child(odd),.pl-production .pl-filters button:nth-last-child(-n+2){background:none;clip-path:none}
 .pl-production .pl-filters button svg{color:var(--category);border:0;padding:0;box-sizing:border-box;filter:drop-shadow(1px 1px 0 var(--ink))}
 .pl-production .pl-filters button:after{background-color:var(--paper);background-image:radial-gradient(var(--ink) .65px,transparent .9px);background-size:7px 7px}
 @media(max-width:600px){
  .pl-production .pl-brand{padding:4px 19% 0}
- .pl-production .pl-hero>.places-page-switch{margin-top:18px}
- .pl-production .pl-hero>.places-page-switch a{font-size:clamp(20px,5.3vw,28px);padding-block:10px}
  .pl-production .pl-body{padding-top:12px}
  .pl-production .pl-search{min-height:50px;padding:10px 14px}
  .pl-production .pl-search input{font-size:18px}
@@ -60,5 +52,4 @@
 /* Selected direction 2: original zine artwork, centered composition. */
 .pl-production .pl-centered-hero{display:flex;flex-direction:column;max-width:1200px;padding:0;overflow:visible}
 .pl-production .pl-centered-hero__art{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:1672/941;object-fit:contain;position:relative;z-index:1}
-.pl-production .pl-centered-hero>.places-page-switch{margin:0 auto;padding:0 5% 0;position:relative;z-index:2}
-@media(max-width:600px){.pl-production .pl-centered-hero>.places-page-switch{margin:0 auto;padding:0 5%}.pl-production .pl-centered-hero__art{width:100%;height:auto;max-height:none;object-fit:contain}}
+@media(max-width:600px){.pl-production .pl-centered-hero__art{width:100%;height:auto;max-height:none;object-fit:contain}}
