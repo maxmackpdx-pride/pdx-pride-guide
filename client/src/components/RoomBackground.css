@@ -33,3 +33,24 @@ html body .room-shader-page .pl-centered-hero__art {
   object-fit: contain;
   margin: 64px auto 32px;
 }
+
+/* Desktop (Tucker, Nov 18, 2026): the room shader comes down about halfway
+   and stops — it no longer fills the screen to all four corners. The rest of
+   the page is the same black the shader's own bottom ends in (every room
+   texture fades to pure black, and the shader host itself is #000), and the
+   band's lower edge fades into that black so no room shows a hard cut
+   through its art. Portrait/mobile keeps the treatment above. */
+@media (min-width: 721px) {
+  html body .room-shader-page { background: #000; }
+  html body .room-shader-page > .room-shader-background { height: 50dvh; }
+  html body .room-shader-page > .room-shader-background::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 22%;
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent, #000);
+  }
+}
