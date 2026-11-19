@@ -232,3 +232,19 @@ changes; everything else is v1.0.31 unchanged. Tests 447/447 on the
 tagged source; GitHub runs 44499433303 and 44499433243 passed the
 compiler checks, typechecking, map tests and both builds. The
 v1.0.31 parts remain in this folder for rollback.
+
+## v1.0.33: Expanded card receives the Nov 19 fix set
+
+Source: `967451efe7a78e898c1af009c02f5102aca13c7e` (immutable `v1.0.33`).
+Archive SHA-256: `83029e6f97a5e3d9a46d3acbe418ed6a8fdd6bba40bb722fd889484772eacf94`.
+The cross-surface audit (Tucker: "Did anything else get missed like
+that?") found the maps port of the expanded event card had missed the
+site's Nov 19 fix set. This release carries it over: Info is the first
+page; scroll containment with firm snap stops; the page scroller spans
+the full card behind the flyer layer (flyer unchanged); the SOURCE
+LINK button renders only from the server-gated detail payload field
+(admins / promoters / owner); and the Info page connects the event to
+both its venue (linked) and its host group. Everything else is v1.0.32
+unchanged. Tests 448/448 on the tagged source; GitHub runs 44517719943
+and 44517720056 passed the compiler checks, typechecking, map tests
+and both builds. The v1.0.32 parts remain in this folder for rollback.

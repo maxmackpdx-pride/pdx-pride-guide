@@ -11,6 +11,7 @@ import {toast} from "@/hooks/use-toast";
 import type React from "react";
 import {
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -29,6 +30,7 @@ import {
 import { listingPosterUrl } from "@/lib/dsEvent";
 import { eventDateLabel, eventTimeLabel } from "@/lib/eventDisplay";
 import { eventPath } from "@shared/eventSlug";
+import { placePath } from "@shared/placeSlug";
 import type { EventModalOriginRect } from "../EventModal";
 import BoardPushPin from "@/components/board/BoardPushPin";
 import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
@@ -74,8 +76,8 @@ const DAY_MS = 86_400_000;
 const WEEKDAY_CODES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
 const DOW_INDEX: Record<string, number> = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-const OPAGE_NAMES = ["FEED", "INFO", "MAPS", "MORE + NEARBY", "PEOPLE"];
-const OPAGE_LABELS = ["FEED", "INFO", "MAPS", "MORE", "PEOPLE"];
+const OPAGE_NAMES = ["INFO", "FEED", "MAPS", "MORE + NEARBY", "PEOPLE"];
+const OPAGE_LABELS = ["INFO", "FEED", "MAPS", "MORE", "PEOPLE"];
 async function shareEventListing(listing: EventListing) {
   const url = eventPath(listing.id,listing.title,listing.dayOfWeek,dateStrOf(listing));
   try {
@@ -678,6 +680,10 @@ type EventDetailResponse = {
     hasPendingClaim?: boolean;
     ticketUrl?: string | null;
   } | null;
+  /** Only present when the server passes this viewer through the source
+   *  link gate (admins / promoters / owner); absent for everyone else. */
+  sourceLink?: string | null;
+  hostGroup?: { slug?: string | null; name?: string | null } | null;
   venue?: {
     id?: number;
     address?: string | null;
@@ -962,6 +968,33 @@ export default function FlyerBoard({
     openCard(listing, origin ?? null);
   }, [historyState, events, pastEvents, openListing, ocardOn]);
   const posterDialog = useModalA11y({open:ocardOn,onClose:()=>closeCard()});
+  /* Nov 19 fix set (Tucker): the open card's page scroller spans the
+   * full card BEHIND the flyer layer (see FlyerBoard.css); each page
+   * pads down by the measured hero + identity + going + tabs stack and
+   * up by the footer, so the resting layout is unchanged while content
+   * scrolls underneath the flyer. The stack height varies with the
+   * title, so it is measured from the live card (layout values, which
+   * the flip transform cannot distort). */
+  useLayoutEffect(() => {
+    if (!ocardOn) return;
+    const card = posterDialog.current;
+    if (!card) return;
+    const measure = () => {
+      const tabs = card.querySelector<HTMLElement>(".otabs");
+      const foot = card.querySelector<HTMLElement>(".ofoot");
+      if (!tabs || !foot) return;
+      card.style.setProperty("--ocard-top-offset", `${tabs.offsetTop + tabs.offsetHeight}px`);
+      card.style.setProperty("--ocard-bottom-offset", `${foot.offsetHeight}px`);
+    };
+    measure();
+    const t = window.setTimeout(measure, 700);
+    document.fonts?.ready.then(measure).catch(() => {});
+    window.addEventListener("resize", measure);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("resize", measure);
+    };
+  }, [ocardOn, openListing, posterDialog]);
 
   /* ----- fan deck ----- */
   const closeFan = () => {
@@ -1160,6 +1193,11 @@ export default function FlyerBoard({
   const openAddr = detailVenue?.address || openListing?.address || "";
   const openDesc = detailEvent?.description || openListing?.description || "";
   const openTicket = detailEvent?.ticketUrl || openListing?.ticketUrl || "";
+  /* The detail payload carries sourceLink only when the server's gate
+   * passed for this viewer (admins / promoters / owner) — rendering it
+   * here inherits the gate exactly; everyone else never receives it. */
+  const openSourceLink = /^https?:\/\//i.test(detailQuery.data?.sourceLink || "") ? (detailQuery.data?.sourceLink as string) : "";
+  const openHostGroup = detailQuery.data?.hostGroup ?? null;
   const openClaimable = detailEvent?.isClaimable ?? openListing?.isClaimable ?? false;
   const openPending = detailEvent?.hasPendingClaim ?? Boolean((openListing as { hasPendingClaim?: boolean } | null)?.hasPendingClaim);
   const openLat = detailVenue?.lat ?? openListing?.lat ?? null;
@@ -1598,22 +1636,7 @@ export default function FlyerBoard({
                 if (i !== opage) setOpage(i);
               }}
             >
-              <section className="opage" inert={opage!==0} aria-hidden={opage!==0} aria-label="Feed">
-                {openListing.id > 0 && <EventPlanning eventId={openListing.id} occurrenceDate={openListing.dateStart} />}
-                <button
-                  type="button"
-                  className="addm"
-                  onClick={() => {
-                    const target = openListing;
-                    closeCard(true);
-                    onOpen(target, null);
-                  }}
-                >
-                  <b>+ ADD A MIZZED CONNECTION</b>
-                  <p>{mizzCount ? `${mizzCount} posted for this event` : "Post during or after the event."}</p>
-                </button>
-              </section>
-              <section className="opage" inert={opage!==1} aria-hidden={opage!==1} aria-label="Info">
+              <section className="opage" inert={opage!==0} aria-hidden={opage!==0} aria-label="Info">
                 <p className="osec">EVENT DETAILS</p>
                 <div className="ostarts">
                   <i>{openCdLabel}</i>
@@ -1628,7 +1651,13 @@ export default function FlyerBoard({
                 <div className="okv">
                   <span className="ok">WHERE</span>
                   <span>
-                    {openListing.venueName}
+                    {detailVenue?.id ? (
+                      <a className="ovenue" href={placePath(detailVenue.id, openListing.venueName)}>
+                        {openListing.venueName}
+                      </a>
+                    ) : (
+                      openListing.venueName
+                    )}
                     {openAddr ? (
                       <>
                         <br />
@@ -1637,6 +1666,20 @@ export default function FlyerBoard({
                     ) : null}
                   </span>
                 </div>
+                {openHostGroup?.name ? (
+                  <div className="okv">
+                    <span className="ok">HOSTED BY</span>
+                    <span>
+                      {openHostGroup.slug ? (
+                        <a className="ovenue" href={`/z/${openHostGroup.slug}`}>
+                          {openHostGroup.name}
+                        </a>
+                      ) : (
+                        openHostGroup.name
+                      )}
+                    </span>
+                  </div>
+                ) : null}
                 {openDesc ? <p className="odesc">{openDesc}</p> : null}
                 <div className="okv">
                   <span className="ok">ADMISSION</span>
@@ -1651,6 +1694,11 @@ export default function FlyerBoard({
                     GET TICKETS <span>↗</span>
                   </a>
                 ) : null}
+                {openSourceLink ? (
+                  <a className="olinkbtn" href={openSourceLink} target="_blank" rel="noreferrer">
+                    SOURCE LINK <span>↗</span>
+                  </a>
+                ) : null}
                 {openClaimable ? (
                   <p className="onote">
                     This event has not been claimed by its organizer. Details were sourced from public listings —
@@ -1661,6 +1709,21 @@ export default function FlyerBoard({
                 <a className="olinkbtn" href={eventPath(openListing.id, openListing.title, openListing.dayOfWeek, dateStrOf(openListing))}>
                   REPORT / REQUEST A CHANGE <span>›</span>
                 </a>
+              </section>
+              <section className="opage" inert={opage!==1} aria-hidden={opage!==1} aria-label="Feed">
+                {openListing.id > 0 && <EventPlanning eventId={openListing.id} occurrenceDate={openListing.dateStart} />}
+                <button
+                  type="button"
+                  className="addm"
+                  onClick={() => {
+                    const target = openListing;
+                    closeCard(true);
+                    onOpen(target, null);
+                  }}
+                >
+                  <b>+ ADD A MIZZED CONNECTION</b>
+                  <p>{mizzCount ? `${mizzCount} posted for this event` : "Post during or after the event."}</p>
+                </button>
               </section>
               <section className="opage" inert={opage!==2} aria-hidden={opage!==2} aria-label="Maps">
                 <p className="osec">
