@@ -782,8 +782,6 @@ export default function FlyerBoard({
     return true;
   };
 
-  const sorted = useMemo(() => [...events].sort((a, b) => startMs(a) - startMs(b)), [events]);
-
   const weekendSet = useMemo(() => {
     const set = new Set<string>();
     if (todayDow !== 0) {
@@ -801,7 +799,7 @@ export default function FlyerBoard({
     const laterList: EventListing[] = [];
     const weekendList: EventListing[] = [];
     const aheadList: EventListing[] = [];
-    for (const e of sorted) {
+    for (const e of events) {
       const ds = dateStrOf(e);
       const s = startMs(e);
       const running = s <= tick && (endMs(e) > tick || (!e.dateEnd && ds === todayStr));
@@ -811,7 +809,7 @@ export default function FlyerBoard({
       if (ds > todayStr) aheadList.push(e);
     }
     return { nowList, laterList, weekendList, aheadList };
-  }, [sorted, tick, todayStr, weekendSet]);
+  }, [events, tick, todayStr, weekendSet]);
 
   const visibleNow = sections.nowList.filter(passCell);
   const visibleLater = sections.laterList.filter(passCell);

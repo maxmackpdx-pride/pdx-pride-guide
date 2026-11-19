@@ -9,7 +9,7 @@ test('Eventz restores poster history, search paginates and failed sources remain
   try {
     const page = await browser.newPage({baseURL,viewport:{width:900,height:830},reducedMotion:'reduce'});
     const now=Date.now()+3_600_000;
-    const event={id:83420,title:'Portland Fixture Night',venueName:'Fixture Hall',dateStart:new Date(now).toISOString(),dateEnd:new Date(now+86_400_000).toISOString(),dayOfWeek:'FRI',admission:'UNKNOWN',ageRequirement:'UNVERIFIED',description:'Fixture event',address:'12 Test Ave',isPublic:true,isClaimable:true,eventTypes:'[]',status:'LIVE'};
+    const event={id:83420,title:'Portland Fixture Night',venueName:'Fixture Hall',dateStart:new Date(now).toISOString(),dateEnd:new Date(now+86_400_000).toISOString(),dayOfWeek:'FRI',admission:'UNKNOWN',ageRequirement:'UNVERIFIED',description:'Fixture event',address:'12 Test Ave',isPublic:true,isPrivate:false,isClaimable:true,eventTypes:'[]',status:'LIVE'};
     const hit=id=>({type:'event',id,name:`Fixture result ${id}`,url:`/events/${id}`});
     const writes=[],errors=[];
     page.on('pageerror',error=>errors.push(error.message));

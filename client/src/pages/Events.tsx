@@ -664,7 +664,7 @@ export default function Events() {
      sorter's job, applied when a specific day or window is picked. Search is
      global over the board, as designed. Past view keeps the filtered pool. */
   /* The Flyer Board owns filtering now (its own filter row, search and
-     sections), so it always receives the whole upcoming pool, start-sorted,
+     sections), so it receives the upcoming pool in the selected order,
      with ended listings excluded. Past view keeps the page's past pool; the
      board cuts it to the last 7 days itself. */
   const boardEvents = useMemo(() => {
@@ -677,7 +677,7 @@ export default function Events() {
     };
     const pool = pastView
       ? filtered
-      : sortEvents(filterBoardEvents(events, activeDay === DEFAULT_WINDOW ? "ALL" : activeDay, activeFilters, searchQuery.trim(), false, now), "start_time")
+      : sortEvents(filterBoardEvents(events, activeDay === DEFAULT_WINDOW ? "ALL" : activeDay, activeFilters, searchQuery.trim(), false, now), sortMode)
           .filter(e => !boardEnded(e));
     /* Series poster fill: a recurring series often carries its real flyer
        on some instances only. A bare instance of a series that has a flyer
@@ -697,7 +697,7 @@ export default function Events() {
       );
       return fill ? { ...e, posterImageUrl: fill } : e;
     });
-  }, [pastView, filtered, events, now, activeDay, activeFilters, searchQuery]);
+  }, [pastView, filtered, events, now, activeDay, activeFilters, searchQuery, sortMode]);
 
   /* Agent helpers: the board's current scope as schema.org structured data.
      The complete data set stays at /api/events (linked below); this block
