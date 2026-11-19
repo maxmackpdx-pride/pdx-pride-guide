@@ -170,3 +170,18 @@ are the v1.0.27 expand-crash fix and its error boundary. Tests 447/447
 on the tagged source; GitHub runs 44457309400 and 44457309352 passed
 the compiler checks, typechecking, map tests and both builds. The
 v1.0.27 parts remain in this folder for rollback.
+
+## v1.0.29: Card scrim blur survives the CSS pipeline
+
+Source: `5ca82c92ea62c62beb6045eaa6bdb97e17d9b86b` (immutable `v1.0.29`).
+Archive SHA-256: `81d01df85d28bc95eb57407902ee0329bc5d8af9756d8ba8f39c960d26159044`.
+One-line fix on top of v1.0.28: the map card overlay's blur was written
+standard-property-first, and the CSS pipeline drops the standard
+backdrop-filter declaration in that order, leaving only the -webkit-
+form, which Chromium does not apply — the front card's scrim dimmed but
+did not blur there. The overlay rule now writes -webkit-backdrop-filter
+first and the standard backdrop-filter last; both declarations are
+verified present in the built release CSS. Everything else is v1.0.28
+unchanged. Tests 447/447 on the tagged source; GitHub runs 44461430505
+and 44461430471 passed the compiler checks, typechecking, map tests and
+both builds. The v1.0.28 parts remain in this folder for rollback.
