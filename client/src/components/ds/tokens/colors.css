@@ -38,7 +38,8 @@
   --evz-mist-e8f0f5: #E8F0F5;  /* when line on the expanded hero */
   --evz-mist-cfd8de: #CFD8DE;  /* steel meta text */
   --evz-mist-c5d2dc: #C5D2DC;  /* countdown unit labels */
-  --evz-mist-aeb8c3: #AEB8C3;  /* countdown time line */
+  --evz-mist-aeb8c3: #AEB8C3;
+  --evz-mist-aeb7c4: #AEB7C4;  /* countdown time line */
   --evz-mist-9aa7b0: #9AA7B0;  /* muted steel text (sub-lines, keys, notes) */
   --evz-gray-d8d8e0: #D8D8E0;  /* info row values */
   --evz-gray-c6c6cf: #C6C6CF;  /* body copy on the expanded card */
