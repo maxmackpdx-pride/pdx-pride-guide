@@ -6,7 +6,7 @@ export default function RoomBackground({ room }: { room: "placez" | "eventz" | "
     if (document.querySelector('script[data-room-shaders]')) return;
     const script = document.createElement("script");
     script.type = "module";
-    script.src = "/room-shaders/room-background.js?v=20261118-live2";
+    script.src = "/room-shaders/room-background.js?v=20261118-framing3";
     script.dataset.roomShaders = "true";
     document.head.appendChild(script);
     script.addEventListener("error", () => script.remove(), { once: true });

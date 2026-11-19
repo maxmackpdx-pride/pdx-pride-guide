@@ -1,7 +1,7 @@
 // File-based browsers can use the self-contained preview. For application
 // integration serve this module with the adjacent shaders and textures.
 export const rooms = ['placez','eventz','scenez','outzide'];
-const focalX = {placez:.475,eventz:.52,scenez:.415,outzide:.506};
+const focalX = {placez:.5,eventz:.52,scenez:.415,outzide:.506};
 
 export async function loadRoomAssets(base = new URL('./', import.meta.url), selected = rooms) {
   const read = async path => {

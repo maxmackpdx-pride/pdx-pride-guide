@@ -1,18 +1,20 @@
 html body .room-shader-page {
   position: relative;
   isolation: isolate;
-  background: var(--z-black);
+  background: var(--z-oled);
 }
 html body .room-shader-page > .room-shader-background {
   display: block;
   position: fixed;
   inset: 0;
   width: 100%;
-  height: 100dvh;
+  /* Keep the top-heavy art and its dark tail together on portrait screens.
+     Filling the whole tall viewport would magnify the center of the artwork. */
+  height: min(100dvh, 100vw);
   pointer-events: none;
   z-index: 0;
   background-size: cover;
-  background-position: center;
+  background-position: center top;
 }
 html body .room-shader-page > header,
 html body .room-shader-page > .pl-body,
