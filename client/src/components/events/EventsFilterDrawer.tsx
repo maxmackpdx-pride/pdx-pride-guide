@@ -87,6 +87,10 @@ export default function EventsFilterDrawer({
     from: Stage;
     startY: number;
     startH: number;
+    /** Current dragged height, kept on the ref: release decisions must not
+        read the dragH state, whose closure can be a render behind when
+        pointer events arrive faster than React flushes (a fast flick). */
+    h: number;
     moved: number;
     lastY: number;
     lastT: number;
@@ -171,6 +175,7 @@ export default function EventsFilterDrawer({
       from: stage,
       startY: event.clientY,
       startH: shownH,
+      h: shownH,
       moved: 0,
       lastY: event.clientY,
       lastT: performance.now(),
@@ -190,6 +195,7 @@ export default function EventsFilterDrawer({
     d.moved = event.clientY - d.startY;
     const cap = Math.max(fullH, measureFull());
     const h = Math.min(cap, Math.max(0, d.startH - d.moved));
+    d.h = h;
     if (h > bodyH + 40) setStage2Mounted(true);
     setDragH(h);
   };
@@ -197,7 +203,7 @@ export default function EventsFilterDrawer({
     const d = drag.current;
     if (!d) return;
     drag.current = null;
-    const h = dragH ?? shownH;
+    const h = d.h;
     setDragH(null);
     if (Math.abs(d.moved) < 6) {
       /* Tap: the lip cycles down a stage (or opens from closed); the pull
