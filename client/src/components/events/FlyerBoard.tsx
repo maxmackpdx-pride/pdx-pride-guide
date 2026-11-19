@@ -348,6 +348,7 @@ function PosterCell({
   index,
   mtop,
   rail = false,
+  showDayFlag = false,
   saved,
   onToggleSave,
   onOpenCard,
@@ -359,6 +360,7 @@ function PosterCell({
   /** Rails never grow taller: a poster taller than the rail's standard
    *  height (the 0.8 reference at full rail width) scales down to fit. */
   rail?: boolean;
+  showDayFlag?: boolean;
   saved: boolean;
   onToggleSave: (id: number) => void;
   onOpenCard: (listing: EventListing, el: HTMLElement | null) => void;
@@ -431,6 +433,7 @@ function PosterCell({
           : {}),
       }}
     >
+      {showDayFlag && <DayFlag dateStr={dateStr} />}
       <article
         ref={articleRef}
         className={`poster att-${pinned ? "pin" : "tape"}${tear ? " torn" : ""}${poster ? "" : " noart"}${wideChunk ? " chunk" : ""} pdx-glass-rebind`}
@@ -1120,7 +1123,7 @@ export default function FlyerBoard({
   let flowPos = -1;
   const flowCells = flowData.flow.map((item, i) => {
     if (!flowData.vis[i]) return null;
-    if (item.kind === "flag") return <DayFlag key={`flag-${item.dateStr}`} dateStr={item.dateStr} />;
+    if (item.kind === "flag") return null;
     flowPos++;
     const mtop = MTOPS[flowPos % MTOPS.length];
     if (item.kind === "submit") return <SubmitCell key={`submit-${item.n}`} mtop={mtop} />;
@@ -1128,6 +1131,7 @@ export default function FlyerBoard({
       <PosterCell
         key={listingKey(item.e)}
         listing={item.e}
+        showDayFlag={flowData.flow[i - 1]?.kind === "flag"}
         index={flowPos}
         mtop={mtop}
         saved={savedIds.has(item.e.id)}

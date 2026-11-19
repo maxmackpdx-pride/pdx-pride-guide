@@ -185,6 +185,16 @@
   padding-bottom: 6px;
 }
 
+/* Keep the current flyer widths while centering each overlapping row. */
+.fbx .futurezone .lboard { justify-content: center; column-gap: 0; }
+.fbx .futurezone .lboard > .cell { margin-inline: -3px; }
+.fbx .futurezone .lboard .cell.dayflag-cell {
+  position: absolute;
+  inset: 0 auto auto 0;
+  margin: 0;
+  pointer-events: none;
+}
+
 /* ---------- hardware layer ---------- */
 /* Borrow the Boardz pin artwork without introducing its fixed card box. */
 .fbx .boardz-punk-scope { display: contents; }
@@ -578,10 +588,8 @@
   z-index: 5;
   width: var(--mw);
   aspect-ratio: .8;
-  background: var(--neon-magenta);
-  border-radius: 10px;
   margin: 0 auto;
-  box-shadow: 0 0 24px rgba(255, 31, 160, .45), 0 18px 34px rgba(0, 0, 0, .55);
+  text-shadow: 0 1px 3px var(--paper-ink), 0 0 6px var(--paper-ink);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -592,7 +600,7 @@
   transition: transform .35s cubic-bezier(.32, 1.24, .36, 1);
 }
 .fbx .magcard:hover { transform: rotate(0deg) scale(1.03); }
-.fbx .magcard svg { width: 58%; }
+.fbx .magcard svg { width: 58%; filter: drop-shadow(0 1px 3px var(--paper-ink)); }
 .fbx .mag-t { font: 800 21px "Barlow Condensed", sans-serif; letter-spacing: .06em; color: var(--text-hi); }
 .fbx .mag-s { font: 600 8.5px var(--font-mono); color: rgba(255, 255, 255, .85); letter-spacing: .12em; }
 .fbx .pile-cap {
