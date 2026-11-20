@@ -6,8 +6,6 @@ import type Database from "better-sqlite3";
 import type { Express, RequestHandler, Response } from "express";
 import { hasPublicEventFlags } from "@shared/publicEventVisibility";
 import type { Event } from "@shared/schema";
-import { getEventChatWindow } from "@shared/eventChatWindow";
-import { parsePacificDateTime } from "@shared/missedConnections";
 import type { IStorage } from "./storage";
 
 /**
@@ -158,6 +156,12 @@ export function createZaylistStore(db: Database.Database) {
       recipient_count INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
+    CREATE TABLE IF NOT EXISTS zaylist_broadcast_requests (
+      event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+      sender_id INTEGER NOT NULL REFERENCES users(id), request_key TEXT NOT NULL,
+      broadcast_id INTEGER NOT NULL REFERENCES zaylist_broadcasts(id) ON DELETE CASCADE,
+      PRIMARY KEY(event_id,sender_id,request_key)
+    );
     CREATE TABLE IF NOT EXISTS zaylist_drink_grants (
       id INTEGER PRIMARY KEY,
       entry_id INTEGER NOT NULL REFERENCES zaylist_entries(id) ON DELETE CASCADE,
@@ -278,8 +282,7 @@ export function createZaylistStore(db: Database.Database) {
 
   /** Insert a live entry, enforcing pool, one-per-person and (for
    *  allowance-bound adders) the adder's remaining allowance, in one
-   *  transaction. `poolBound` is false only for gifts, which move a spot
-   *  that already counted against the pool. */
+   *  transaction. Gifts transfer an existing spot separately. */
   function insertEntry(input: {
     eventId: number;
     userId: number | null;
@@ -290,13 +293,12 @@ export function createZaylistStore(db: Database.Database) {
     allowance: number | null;
     drawId?: number | null;
     giftedFrom?: number | null;
-    poolBound?: boolean;
   }): { ok: true; id: number } | { ok: false; error: string } {
     return db.transaction(() => {
       const cfg = config(input.eventId);
       if (!cfg || cfg.poolSize <= 0)
         return { ok: false as const, error: "no-pool" };
-      if (input.poolBound !== false && liveCount(input.eventId) >= cfg.poolSize)
+      if (liveCount(input.eventId) >= cfg.poolSize)
         return { ok: false as const, error: "pool-full" };
       if (!input.userId && input.contact && db.prepare(`SELECT 1 FROM zaylist_entries WHERE event_id=? AND user_id IS NULL AND contact=? AND state IN (${livePh})`).get(input.eventId,input.contact,...LIVE_STATES))
         return { ok: false as const, error: "already-on-list" };
@@ -323,7 +325,7 @@ export function createZaylistStore(db: Database.Database) {
           input.giftedFrom ?? null,
         );
       return { ok: true as const, id: Number(info.lastInsertRowid) };
-    })();
+    }).immediate();
   }
 
   return {
@@ -523,7 +525,7 @@ export function createZaylistStore(db: Database.Database) {
           db
             .prepare(
               `SELECT COUNT(DISTINCT a.user_id) AS n FROM attendances a JOIN users u ON u.id=a.user_id
-              WHERE a.event_id=? AND a.is_active=1 AND (a.expires_at IS NULL OR a.expires_at>?)
+              WHERE a.event_id=? AND a.is_active=1 AND (a.expires_at IS NULL OR julianday(a.expires_at)>julianday(?))
               AND u.status='active' AND a.user_id IS NOT NULL
               AND NOT EXISTS (SELECT 1 FROM zaylist_entries e WHERE e.event_id=a.event_id
                 AND e.user_id=a.user_id AND (e.state IN (${livePh}) OR e.state='declined' OR e.draw_id IS NOT NULL))`,
@@ -542,7 +544,7 @@ export function createZaylistStore(db: Database.Database) {
           const winners = db
             .prepare(
               `SELECT DISTINCT a.user_id AS userId FROM attendances a JOIN users u ON u.id=a.user_id
-              WHERE a.event_id=? AND a.is_active=1 AND (a.expires_at IS NULL OR a.expires_at>?)
+              WHERE a.event_id=? AND a.is_active=1 AND (a.expires_at IS NULL OR julianday(a.expires_at)>julianday(?))
               AND u.status='active' AND a.user_id IS NOT NULL
               AND NOT EXISTS (SELECT 1 FROM zaylist_entries e WHERE e.event_id=a.event_id
                 AND e.user_id=a.user_id AND (e.state IN (${livePh}) OR e.state='declined' OR e.draw_id IS NOT NULL))
@@ -562,7 +564,7 @@ export function createZaylistStore(db: Database.Database) {
             });
         }
         return { ok: true as const, drawId, eligible, awarded: want };
-      })();
+      }).immediate();
     },
     setState(id: number, state: EntryState) {
       db.prepare(
@@ -578,7 +580,7 @@ export function createZaylistStore(db: Database.Database) {
         ).run(id);
         revokeTokens(id);
         return issueToken(id);
-      })();
+      }).immediate();
     },
     issueToken,
     activeToken,
@@ -588,7 +590,7 @@ export function createZaylistStore(db: Database.Database) {
       return db.transaction(() => {
         revokeTokens(id);
         return issueToken(id);
-      })();
+      }).immediate();
     },
     gift(
       entry: EntryRow,
@@ -596,12 +598,14 @@ export function createZaylistStore(db: Database.Database) {
       giftedBy: number,
     ): { ok: true; id: number } | { ok: false; error: string } {
       return db.transaction(() => {
+        if (db.prepare("SELECT frozen FROM zaylist_door_freezes WHERE event_id=? ORDER BY id DESC LIMIT 1").pluck().get(entry.event_id)) return {ok:false as const,error:"frozen"};
         if (target.userId ? holderEntry(entry.event_id, target.userId) : db.prepare(`SELECT 1 FROM zaylist_entries
           WHERE event_id=? AND user_id IS NULL AND contact=? AND state IN (${livePh})`).get(entry.event_id,target.contact,...LIVE_STATES))
           return { ok: false as const, error: "already-on-list" };
-        db.prepare(
-          "UPDATE zaylist_entries SET state='gifted', updated_at=CURRENT_TIMESTAMP WHERE id=?",
-        ).run(entry.id);
+        const moved = db.prepare(
+          "UPDATE zaylist_entries SET state='gifted', updated_at=CURRENT_TIMESTAMP WHERE id=? AND user_id=? AND state IN ('pending','accepted')",
+        ).run(entry.id, giftedBy);
+        if (!moved.changes) return {ok:false as const,error:"already-settled"};
         revokeTokens(entry.id);
         const info = db
           .prepare(
@@ -623,7 +627,7 @@ export function createZaylistStore(db: Database.Database) {
           "UPDATE zaylist_drink_grants SET entry_id=? WHERE entry_id=?",
         ).run(newId, entry.id);
         return { ok: true as const, id: newId };
-      })();
+      }).immediate();
     },
     addInvite(
       eventId: number,
@@ -873,51 +877,6 @@ export function createZaylistStore(db: Database.Database) {
 
 export type ZaylistStore = ReturnType<typeof createZaylistStore>;
 
-/** Event chat membership in this codebase is an active attendance row (or
- *  being a host) — see storage.getEventChatMessages. Accepting a Zay'list
- *  spot therefore ensures the guest's attendance, aligned to the chat
- *  window exactly the way storage.upsertAttendance aligns it. */
-export function ensureEventChatMembership(
-  db: Database.Database,
-  event: Pick<Event, "id" | "dateStart" | "dateEnd">,
-  userId: number,
-) {
-  const user = db
-    .prepare("SELECT username, display_name, photo_url FROM users WHERE id=?")
-    .get(userId) as
-    | { username: string; display_name: string | null; photo_url: string | null }
-    | undefined;
-  if (!user) return;
-  const win = getEventChatWindow(event.dateStart, event.dateEnd);
-  const fallbackEnd =
-    (parsePacificDateTime(event.dateEnd || event.dateStart) ?? Date.now()) +
-    8 * 60 * 60 * 1000;
-  const expiresAt = new Date(win ? win.closesAt : fallbackEnd).toISOString();
-  const existing = db
-    .prepare("SELECT id FROM attendances WHERE event_id=? AND user_id=?")
-    .get(event.id, userId) as { id: number } | undefined;
-  if (existing) {
-    db.prepare(
-      "UPDATE attendances SET is_active=1, expires_at=? WHERE id=?",
-    ).run(expiresAt, existing.id);
-    return;
-  }
-  db.prepare(
-    `INSERT INTO attendances(event_id,user_id,handle,message,avatar_seed,photo_url,
-      is_anonymous,visibility,expires_at,is_active,created_at)
-    VALUES(?,?,?,?,?,?,0,'public',?,1,?)`,
-  ).run(
-    event.id,
-    userId,
-    user.display_name || user.username,
-    "",
-    user.username,
-    user.photo_url ?? null,
-    expiresAt,
-    new Date().toISOString(),
-  );
-}
-
 export type ZaylistAccess = {
   userId: number;
   isHost: boolean;
@@ -1040,6 +999,7 @@ export function registerZaylist(
       "no-pool": "The Zay'list pool is not open for this event",
       "pool-full": "The Zay'list pool is full",
       frozen: "The list is frozen at the door. The event owner can reopen it.",
+      "already-settled": "This spot has already been settled.",
       "already-on-list": "That person is already on this Zay'list",
       "allowance-exhausted": "No spots left in your Zay'list allowance",
     };
@@ -1229,22 +1189,15 @@ export function registerZaylist(
       res.status(400).json({ error: "A no-cover pool requires a paid event with a ticket link" });
       return;
     }
-    if (poolSize < store.liveCount(event.id)) {
-      res.status(409).json({ error: "Release existing spots before reducing the pool below its commitments" });
-      return;
-    }
     if (poolSize > maxCap) {
       res.status(400).json({ error: "The pool cannot exceed the max cap" });
       return;
     }
-    res.json(
-      store.setConfig(event.id, viewer.id, {
-        poolSize,
-        maxCap,
-        drawDaysBefore: days,
-        dripPerDay: drip,
-      }),
-    );
+    const config = db.transaction(() => poolSize < store.liveCount(event.id) ? null :
+      store.setConfig(event.id, viewer.id, {poolSize, maxCap, drawDaysBefore: days, dripPerDay: drip})
+    ).immediate();
+    if (!config) return res.status(409).json({ error: "Release existing spots before reducing the pool below its commitments" });
+    res.json(config);
   });
 
   // ---- Random draw from RSVPs: owner / full-access ----
@@ -1333,15 +1286,17 @@ export function registerZaylist(
     }
     if (target.userId && storage.isMemberInteractionBlocked(viewer.id, target.userId)) return res.status(404).json({error:"Member unavailable"});
     const result = db.transaction(() => {
+      const current = accessFor(event.id, viewer.id);
+      if (store.frozen(event.id) && !current.isOwner) return { ok:false as const, error:"frozen" };
       const result = store.addSpot({
-      eventId: event.id,
-      userId: target.userId,
-      contact: target.contact,
-      source: target.userId ? "direct" : "invite",
-      addedBy: viewer.id,
-      authorityUserId: viewer.id,
-      allowance: access.allocator ? null : (access.allowance?.spots ?? 0),
-    });
+        eventId: event.id,
+        userId: target.userId,
+        contact: target.contact,
+        source: target.userId ? "direct" : "invite",
+        addedBy: viewer.id,
+        authorityUserId: viewer.id,
+        allowance: current.allocator ? null : (current.allowance?.spots ?? 0),
+      });
       if (result.ok) {
         if (!target.userId && target.contact && target.kind) {
           store.addInvite(event.id, result.id, target.contact, target.kind, viewer.id);
@@ -1370,16 +1325,19 @@ export function registerZaylist(
         return;
       }
       const access = accessFor(event.id, viewer.id);
-      if (!access.editor && entry.added_by !== viewer.id) {
+      if (!access.editor && (!access.allowance || entry.authority_user_id !== viewer.id)) {
         res.status(403).json({ error: "You cannot remove this name" });
         return;
       }
-      if (!LIVE_STATES.includes(entry.state)) {
+      const removed = db.transaction(() => {
+        const result = db.prepare("UPDATE zaylist_entries SET state='removed',updated_at=CURRENT_TIMESTAMP WHERE id=? AND state IN ('pending','accepted','redeemed')").run(entry.id);
+        if (result.changes) store.revokeTokens(entry.id);
+        return result.changes;
+      }).immediate();
+      if (!removed) {
         res.status(409).json({ error: "That spot is already settled" });
         return;
       }
-      store.setState(entry.id, "removed");
-      store.revokeTokens(entry.id);
       res.json({ ok: true });
     },
   );
@@ -1626,8 +1584,16 @@ export function registerZaylist(
       res.status(400).json({ error: "Enter a message of up to 2,000 characters" });
       return;
     }
+    const key = req.body?.requestKey;
+    if (key != null && (typeof key !== "string" || !/^[a-z\d-]{20,80}$/i.test(key))) return res.sendStatus(400);
     if (moderate(res, "Zay'list message", { body })) return;
     const record = db.transaction(() => {
+      if (key) {
+        const previous = db.prepare(`SELECT b.id,b.body,b.recipient_count AS recipientCount FROM zaylist_broadcast_requests r
+          JOIN zaylist_broadcasts b ON b.id=r.broadcast_id WHERE r.event_id=? AND r.sender_id=? AND r.request_key=?`).get(event.id,viewer.id,key) as
+          {id:number;body:string;recipientCount:number} | undefined;
+        if (previous) return previous.body === body ? {id:previous.id,recipientCount:previous.recipientCount,replayed:true} : null;
+      }
       const record = store.addBroadcast(event.id, viewer.id, body);
       const recipients = db.prepare(`SELECT DISTINCT e.user_id AS id FROM zaylist_entries e JOIN users u ON u.id=e.user_id
         WHERE e.event_id=? AND e.state IN ('accepted','redeemed') AND u.status='active' AND u.id!=?`).all(event.id, viewer.id) as {id: number}[];
@@ -1640,9 +1606,11 @@ export function registerZaylist(
         delivered++;
       }
       db.prepare("UPDATE zaylist_broadcasts SET recipient_count=? WHERE id=?").run(delivered,record.id);
-      return { id: record.id, recipientCount: delivered };
+      if (key) db.prepare("INSERT INTO zaylist_broadcast_requests(event_id,sender_id,request_key,broadcast_id) VALUES(?,?,?,?)").run(event.id,viewer.id,key,record.id);
+      return { id: record.id, recipientCount: delivered, replayed:false };
     }).immediate();
-    res.status(201).json({ ...record, delivery: "inbox" });
+    if (!record) return res.sendStatus(409);
+    res.status(record.replayed ? 200 : 201).json({ id:record.id, recipientCount:record.recipientCount, delivery: "inbox" });
   });
   app.get(eventPath + "/broadcasts", requireAuth, viewerGuard, scope, (req, res) => {
     const viewer = res.locals.viewer;
@@ -1678,23 +1646,22 @@ export function registerZaylist(
   app.post(entryPath + "/accept", requireAuth, viewerGuard, entryScope, holderOnly, (req, res) => {
     const entry = res.locals.entry;
     const userId = res.locals.viewer.id;
-    const token = db.transaction(() => {
-      const token = store.accept(entry.id);
-      if (token) ensureEventChatMembership(db, storage.getEvent(entry.event_id)!, userId);
-      return token;
-    }).immediate();
+    const token = store.accept(entry.id);
     if (!token) return res.status(409).json({ error: "This spot is no longer pending" });
     res.json({ token, ...guestMessages(entry.event_id, userId) });
   });
 
   app.post(entryPath + "/decline", requireAuth, viewerGuard, entryScope, holderOnly, (req, res) => {
     const entry = res.locals.entry;
-    if (entry.state !== "pending" && entry.state !== "accepted") {
+    const declined = db.transaction(() => {
+      const result = db.prepare("UPDATE zaylist_entries SET state='declined',updated_at=CURRENT_TIMESTAMP WHERE id=? AND state IN ('pending','accepted')").run(entry.id);
+      if (result.changes) store.revokeTokens(entry.id);
+      return result.changes;
+    }).immediate();
+    if (!declined) {
       res.status(409).json({ error: "This spot is already settled" });
       return;
     }
-    store.setState(entry.id, "declined");
-    store.revokeTokens(entry.id);
     res.json({ ok: true });
   });
 

@@ -241,7 +241,7 @@ test("accepting a spot ensures event-chat membership; declining frees the pool",
   const attendance = db
     .prepare("SELECT is_active FROM attendances WHERE event_id=10 AND user_id=12")
     .get() as { is_active: number } | undefined;
-  assert.equal(attendance?.is_active, 1);
+  assert.equal(attendance, undefined, "a private guest pass must not create a public Going RSVP");
   const pass = await request(`/api/zaylist/entries/${entryId}/pass`, 12);
   assert.equal(pass.body.token, accept.body.token);
   assert.equal(pass.body.state, "accepted");
@@ -492,6 +492,25 @@ test("acceptance messages: everyone gets the general one, talent gets the saved 
   assert.equal(broadcast.status, 201);
   assert.equal(broadcast.body.recipientCount, 2);
   assert.equal(broadcast.body.delivery, "inbox");
+});
+
+test("VIP broadcasts use accepted guests, honor the editor role, and replay without duplicating messages",async t=>{
+  const {db,request,setConfig}=await setup(t);
+  const path="/api/events/10/zaylist";
+  await setConfig(1,4);
+  for(const id of [6,7,8]) {
+    const add=await request(path+"/entries",1,"POST",{userId:id});
+    if(id!==7) await request(`/api/zaylist/entries/${add.body.entry.id}/${id===8?"accept":"decline"}`,id,"POST");
+  }
+  const body={body:"Doors at eight.",requestKey:crypto.randomUUID()};
+  assert.equal((await request(path+"/broadcasts",8,"POST",body)).status,403);
+  const first=await request(path+"/broadcasts",1,"POST",body);
+  assert.equal(first.status,201);
+  assert.equal(first.body.recipientCount,1);
+  const replay=await request(path+"/broadcasts",1,"POST",body);
+  assert.deepEqual(replay.body,first.body);
+  assert.equal((await request(path+"/broadcasts",1,"POST",{...body,body:"Other update."})).status,409);
+  assert.deepEqual(db.prepare("SELECT recipient FROM fixture_messages WHERE body=?").pluck().all(body.body),[8]);
 });
 
 test("scheduled draws spend a daily drip once per Pacific day and notify the drawn accounts", async t => {
@@ -782,4 +801,20 @@ test("host stages derive from event records; host notes stay private and cannot 
   assert.equal((await request(path,1)).body.stage,"After");
   dbEvent.isPrivate=true;
   assert.equal((await request(path,1)).status,404);
+});
+
+test("a stale concurrent gift cannot split a single guest spot or be revoked by its former holder",async t=>{
+  const {store,request,setConfig,list}=await setup(t);
+  await setConfig(1,1);
+  const added=await request("/api/events/10/zaylist/entries",1,"POST",{userId:8});
+  const original=store.entry(added.body.entry.id)!;
+  const accepted=await request(`/api/zaylist/entries/${original.id}/accept`,8,"POST");
+  assert.equal(accepted.status,200);
+  const gifted=await request(`/api/zaylist/entries/${original.id}/gift`,8,"POST",{userId:12});
+  assert.equal(gifted.status,201);
+  assert.equal(store.gift(original,{userId:6,contact:null},8).ok,false);
+  assert.equal((await list(1)).body.counts.pending,1);
+  assert.equal(store.liveCount(10),1);
+  assert.equal((await request(`/api/events/10/zaylist/entries/${gifted.body.entry.id}`,8,"DELETE")).status,403);
+  assert.equal((await request("/api/events/10/zaylist/draw",1,"POST",{count:1})).status,409);
 });

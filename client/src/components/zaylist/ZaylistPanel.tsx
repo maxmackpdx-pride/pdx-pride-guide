@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   entryName,
@@ -126,6 +126,7 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
   const [savedLabel, setSavedLabel] = useState("");
   const [savedBody, setSavedBody] = useState("");
   const [broadcastBody, setBroadcastBody] = useState("");
+  const broadcastRequest = useRef<{eventId:number;body:string;key:string} | null>(null);
 
   const messagesQuery = useQuery({
     queryKey: ["zaylist-messages", eventId],
@@ -608,10 +609,16 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
               disabled={!broadcastBody.trim()}
               onClick={() =>
                 void run(async () => {
-                  await zaylistApi.broadcast(eventId, broadcastBody.trim());
-                  setBroadcastBody("");
+                  const body = broadcastBody.trim();
+                  if (!broadcastRequest.current || broadcastRequest.current.eventId !== eventId || broadcastRequest.current.body !== body) {
+                    broadcastRequest.current = {eventId,body,key:crypto.randomUUID()};
+                  }
+                  const receipt = await zaylistApi.broadcast(eventId,body,broadcastRequest.current.key);
+                  setBroadcastBody(current => current.trim() === body ? "" : current);
+                  setNotice(receipt.recipientCount ? `Delivered to ${receipt.recipientCount} guest ${receipt.recipientCount === 1 ? "inbox" : "inboxes"}.` : "No eligible guest inboxes.");
+                  if (broadcastRequest.current?.body === body) broadcastRequest.current = null;
                   await queryClient.invalidateQueries({ queryKey: ["zaylist-broadcasts", eventId] });
-                }, "Message delivered to guest inboxes.")
+                })
               }
             >
               Send to the list

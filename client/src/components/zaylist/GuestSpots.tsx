@@ -8,6 +8,7 @@ import {
   type ZaylistPass,
 } from "@/lib/zaylistApi";
 import QrPass from "./QrPass";
+import { useAuth } from "@/context/AuthContext";
 
 function SpotCard({ entry }: { entry: MyZaylistEntry }) {
   const queryClient = useQueryClient();
@@ -100,7 +101,7 @@ function SpotCard({ entry }: { entry: MyZaylistEntry }) {
               onClick={() =>
                 void run(async () => {
                   await zaylistApi.accept(entry.id);
-                  setNotice("You are on the list. Your event chat is open.");
+                  setNotice("You are on the list. Your pass is ready.");
                   const p = await zaylistApi.getPass(entry.id);
                   setPass(p);
                 })
@@ -131,6 +132,9 @@ function SpotCard({ entry }: { entry: MyZaylistEntry }) {
             {pass ? "Refresh pass" : "View pass"}
           </button>
         ) : null}
+        {entry.state === "accepted" || entry.state === "redeemed" ? (
+          <a className="zl-btn zl-btn--small" href={`/events/${entry.eventId}?chat=1`}>Event chat</a>
+        ) : null}
         {live ? (
           <button className="zl-btn zl-btn--small" type="button" onClick={() => setShowGift((v) => !v)}>
             Gift this spot
@@ -159,7 +163,8 @@ function SpotCard({ entry }: { entry: MyZaylistEntry }) {
 /** The guest side of Zay'list: spots held by the signed-in member. */
 export default function GuestSpots() {
   const queryClient = useQueryClient();
-  const query = useQuery({ queryKey: ["/api/me/zaylist"], queryFn: () => zaylistApi.mine() });
+  const { user } = useAuth();
+  const query = useQuery({ queryKey: ["/api/me/zaylist", user?.id], queryFn: zaylistApi.mine, enabled: !!user });
   const [claimNote, setClaimNote] = useState<string | null>(null);
 
   useEffect(() => {

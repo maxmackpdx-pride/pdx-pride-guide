@@ -73,7 +73,7 @@ export function createGuestListOperations(db: Database.Database, store: ZaylistS
         entries.forEach(entry => notifyEntry(entry.id));
       }
       return result;
-    })();
+    }).immediate();
   }
   function dueDraws(now = Date.now()) {
     const today = pacificTodayDate(now);

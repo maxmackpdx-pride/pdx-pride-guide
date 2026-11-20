@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createZaylistStore } from "./zaylist";
 import { runSubmissionIntent } from "./submissionIntent";
 import { pickupPending, reservePickup } from "./pickupReservation";
 
@@ -111,6 +112,19 @@ test("event chat pages start at the newest message, keep stable cursors and hono
   assert.deepEqual(earlier.messages.map((m:any)=>m.body),["Fixture 1","Fixture 2","Fixture 3","Fixture 4","Fixture 5"]);
   assert.equal(earlier.nextBeforeId,null);
   assert.deepEqual(storage.getEventChatMessages(event,member.id).messages,[]);
+  const passes=createZaylistStore(sqlite);
+  passes.setConfig(event,host.id,{poolSize:1,maxCap:1,dripPerDay:null,drawDaysBefore:null});
+  const spot=passes.addSpot({eventId:event,userId:member.id,contact:null,source:"direct",addedBy:host.id,authorityUserId:host.id,allowance:null});
+  assert.ok(spot.ok);
+  assert.ok(passes.accept(spot.id));
+  assert.equal(storage.getEventChatMessages(event,member.id).chatOpen,true);
+  assert.ok(storage.getMyGroupChats(member.id).some(room=>room.kind==="EVENT" && room.id===event));
+  assert.equal(storage.postEventChatMessage(event,member.id,"I have a guest spot").isMine,true);
+  assert.equal(sqlite.prepare("SELECT COUNT(*) FROM attendances WHERE event_id=? AND user_id=?").pluck().get(event,member.id),0);
+  passes.setState(spot.id,"declined");
+  assert.equal(storage.getEventChatMessages(event,member.id).chatOpen,false);
+  assert.ok(!storage.getMyGroupChats(member.id).some(room=>room.kind==="EVENT" && room.id===event));
+  assert.throws(()=>storage.postEventChatMessage(event,member.id,"Should be closed"));
 });
 
 test("a performer can withdraw their own credit and cannot remove another member's credit", () => {

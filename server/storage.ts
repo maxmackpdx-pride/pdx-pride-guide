@@ -9954,6 +9954,16 @@ function maskAttendances(viewerUserId: number | undefined, rows: any[]): any[] {
   return rows.map(r => maskAttendanceRow(viewerUserId, viewerRsvped, r));
 }
 
+/** Guest admission grants private event-chat access independently of a Going RSVP. */
+function guestChatEvents(userId: number, eventId?: number): { eventId: number }[] {
+  if (!sqlite.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='zaylist_entries'").get()) return [];
+  return sqlite.prepare(`SELECT DISTINCT e.event_id AS eventId FROM zaylist_entries e
+    JOIN events v ON v.id=e.event_id
+    WHERE e.user_id=? AND e.state IN ('accepted','redeemed') AND v.status='LIVE'
+    AND v.is_public=1 AND v.is_private=0 ${eventId == null ? "" : "AND v.id=?"}`)
+    .all(...(eventId == null ? [userId] : [userId,eventId])) as {eventId:number}[];
+}
+
 function getActiveAttendanceForUser(eventId: number, userId: number) {
   expireStaleAttendances(eventId);
   return sqlite.prepare(`
@@ -12766,7 +12776,7 @@ export const storage: IStorage = {
     const win = evt ? getEventChatWindow(evt.dateStart, evt.dateEnd) : null;
     const isHost = storage.isUserEventHost(eventId, viewerUserId);
     const mine = getActiveAttendanceForUser(eventId, viewerUserId);
-    const member = Boolean(mine) || isHost;
+    const member = Boolean(mine) || isHost || guestChatEvents(viewerUserId, eventId).length > 0;
     const opensAt = win ? new Date(win.opensAt).toISOString() : null;
     const closesAt = win ? new Date(win.closesAt).toISOString() : (mine?.expiresAt ?? null);
     const windowState = win
@@ -12848,7 +12858,7 @@ export const storage: IStorage = {
     const win = evt ? getEventChatWindow(evt.dateStart, evt.dateEnd) : null;
     const isHost = storage.isUserEventHost(eventId, userId);
     const mine = getActiveAttendanceForUser(eventId, userId);
-    if (!mine && !isHost) throw new Error("Active check-in required");
+    if (!mine && !isHost && !guestChatEvents(userId, eventId).length) throw new Error("Join this event to post in its chat");
     if (win) {
       if (win.state === "BEFORE") throw new Error("Event chat opens 48 hours before doors");
       if (win.state === "CLOSED") throw new Error("Event chat has closed");
@@ -15798,7 +15808,7 @@ export const storage: IStorage = {
       SELECT event_id AS eventId FROM event_hosts WHERE user_id = ?
     `).all(userId) as Array<{ eventId: number }>;
     const seen = new Set<number>();
-    for (const { eventId } of [...attRows, ...hostRows]) {
+    for (const { eventId } of [...attRows, ...hostRows, ...guestChatEvents(userId)]) {
       if (seen.has(eventId)) continue;
       seen.add(eventId);
       const evt = storage.getEvent(eventId);

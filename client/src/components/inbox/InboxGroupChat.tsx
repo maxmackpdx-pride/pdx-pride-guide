@@ -184,7 +184,7 @@ function TimedInboxGroupChat({ target, onBack }: Props) {
         : `You're checked in. Beach chat opens 48h early${opensIn ? ` · ${opensIn}` : ""}.`
       : windowState === "OPEN"
         ? isEvent
-          ? "You're checked in. Say hi. Everyone going can see this."
+          ? "Say hi. Members of this event chat can read your message."
           : isOutz
             ? "You're checked in. Say hi. Everyone heading to this place can see this."
             : "You're checked in. Say hi. Others heading out can see this until 10pm."

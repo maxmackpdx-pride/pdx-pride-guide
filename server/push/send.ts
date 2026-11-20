@@ -102,6 +102,7 @@ export async function sendPushToSubscription(
       JSON.stringify(payload),
       {
         TTL: 60 * 60 * 12,
+        timeout: 30_000,
         urgency: "high",
         // Prefer modern encryption; web-push defaults to aes128gcm.
         contentEncoding: "aes128gcm",

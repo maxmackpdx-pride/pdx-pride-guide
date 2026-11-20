@@ -188,7 +188,7 @@ export default function EventChatPanel({ eventId, onClose }: Props) {
           )}
           {!isLoading && !history.isError && messages.length === 0 && windowState === "OPEN" && (
             <p className="event-chat-panel__empty">
-              You're checked in. Say hi - everyone going can see this until 4 hours after the event ends.
+              Say hi. Members of this event chat can read messages until four hours after the event ends.
             </p>
           )}
           {!isLoading && !history.isError && messages.length === 0 && windowState === "CLOSED" && (

@@ -115,6 +115,7 @@ const PAGES = ["Info", "Feed", "Maps", "More", "People"] as const;
 
 type EventzExpandedProps = {
   openPlanning?: boolean;
+  openChat?: boolean;
   event: Event;
   onClose: () => void;
   onEventUpdated?: (event: Event) => void;
@@ -123,15 +124,15 @@ type EventzExpandedProps = {
   onOpenEvent?: (event: Event) => void;
 };
 
-export default function EventzExpanded({ event, onClose, onEventUpdated, originRect = null, documentMeta = true, onOpenEvent, openPlanning = false }: EventzExpandedProps) {
+export default function EventzExpanded({ event, onClose, onEventUpdated, originRect = null, documentMeta = true, onOpenEvent, openPlanning = false, openChat = false }: EventzExpandedProps) {
   const [expandedKey, setExpandedKey] = useState("");
-  const [manage, setManage] = useState(false);
+  const [manage, setManage] = useState(openChat);
   if (!event || typeof event.id !== "number") return null;
   const key = event.id + "/" + event.dateStart;
-  if (!openPlanning && expandedKey !== key) return <EventFrontStage key={key} listing={event} onClose={onClose} onExpand={() => setExpandedKey(key)} />;
   if (manage) {
-    return <EventModal event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} documentMeta={documentMeta} />;
+    return <EventModal initialSection={openChat ? "attendance" : undefined} event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} documentMeta={documentMeta} />;
   }
+  if (!openPlanning && expandedKey !== key) return <EventFrontStage key={key} listing={event} onClose={onClose} onExpand={() => setExpandedKey(key)} />;
   return (
     <CardStage key={event.id} onClose={onClose}>
       {documentMeta ? <OpenCardMeta title={event.title} description={event.venueName || event.description} /> : null}

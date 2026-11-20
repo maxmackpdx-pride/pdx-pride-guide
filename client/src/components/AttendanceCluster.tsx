@@ -13,6 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import AuthModal from "./AuthModal";
 import AttendanceVibeModal, { type AttendanceVisibility } from "./AttendanceVibeModal";
 import EventChatPanel from "./EventChatPanel";
+import { zaylistApi } from "@/lib/zaylistApi";
 import UserAvatar from "@/components/UserAvatar";
 import { memberProfileHref } from "@/lib/avatarLinks";
 import { spawnRsvpSparks } from "@/components/RsvpSparks";
@@ -193,6 +194,13 @@ export default function AttendanceCluster({
 
 
   const myAttendance = attendees.find(a => a.userId === user?.id);
+  const spots = useQuery({
+    queryKey: ["/api/me/zaylist", user?.id],
+    queryFn: zaylistApi.mine,
+    enabled: !!user && !pastEvent && !myAttendance,
+  });
+  const canEnterChat = Boolean(myAttendance || (user && spots.data?.entries.some(entry =>
+    entry.eventId === eventId && (entry.state === "accepted" || entry.state === "redeemed"))));
   const myPhrase = myAttendance ? resolveAttendancePhrase(myAttendance.message) : null;
 
   const submitVibe = (btnEl?: HTMLElement | null) => {
@@ -228,7 +236,7 @@ export default function AttendanceCluster({
   // event chat once for the modal instance, then strip the param.
   const autoChatRan = useRef(false);
   useEffect(() => {
-    if (!embedded || autoChatRan.current || !myAttendance) return;
+    if (!embedded || autoChatRan.current || !canEnterChat) return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("chat") !== "1") return;
     autoChatRan.current = true;
@@ -236,7 +244,7 @@ export default function AttendanceCluster({
     params.delete("chat");
     const qs = params.toString();
     window.history.replaceState(null, "", `${window.location.pathname}${qs ? `?${qs}` : ""}`);
-  }, [embedded, myAttendance]);
+  }, [embedded, canEnterChat]);
 
   const phrasePicker = (
     <div className="attendance-phrase-list">
@@ -376,29 +384,29 @@ export default function AttendanceCluster({
                   <Check size={14} aria-hidden="true" /> You're going as "{myPhrase.label}"
                 </span>
               )}
+              {canEnterChat && (
+                <button
+                  type="button"
+                  data-testid="button-open-event-chat"
+                  onClick={() => setShowChat(true)}
+                  className="attendance-cluster-cta__chat"
+                >
+                  Open event chat <ArrowRight size={14} aria-hidden="true" />
+                </button>
+              )}
               {myAttendance && (
-                <>
-                  <button
-                    type="button"
-                    data-testid="button-open-event-chat"
-                    onClick={() => setShowChat(true)}
-                    className="attendance-cluster-cta__chat"
-                  >
-                    Open event chat <ArrowRight size={14} aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    data-testid="button-withdraw-rsvp"
-                    onClick={() => {
-                      setShowChat(false);
-                      removeMutation.mutate();
-                    }}
-                    disabled={removeMutation.isPending || mutation.isPending}
-                    className="attendance-cluster-cta__withdraw"
-                  >
-                    {removeMutation.isPending ? "Removing…" : "Withdraw RSVP"}
-                  </button>
-                </>
+                <button
+                  type="button"
+                  data-testid="button-withdraw-rsvp"
+                  onClick={() => {
+                    setShowChat(false);
+                    removeMutation.mutate();
+                  }}
+                  disabled={removeMutation.isPending || mutation.isPending}
+                  className="attendance-cluster-cta__withdraw"
+                >
+                  {removeMutation.isPending ? "Removing…" : "Withdraw RSVP"}
+                </button>
               )}
             </>
           )}
@@ -488,7 +496,7 @@ export default function AttendanceCluster({
         {phrasePicker}
       </AttendanceVibeModal>
       )}
-      {!pastEvent && showChat && myAttendance && (
+      {!pastEvent && showChat && canEnterChat && (
         <EventChatPanel eventId={eventId} onClose={() => setShowChat(false)} />
       )}
       {!pastEvent && messageTarget && (

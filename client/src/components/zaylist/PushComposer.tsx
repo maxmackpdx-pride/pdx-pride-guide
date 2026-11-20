@@ -6,7 +6,7 @@ import { pushCopyIssue, type PushAudience, type PushTier } from "@shared/hostPus
 
 interface Audience { key: PushAudience; remaining: number | null; limit: number | null; windowDays: number; reachable: number }
 type Preview = {allowed:false} | {allowed:true;configured:boolean;tier:PushTier;audiences:Audience[]};
-type Receipt = {id:number;devices:number;sent:number;queued:number;failed:number;skipped:number};
+type Receipt = {id:number;devices:number;sent:number;queued:number;sending:number;unconfirmed:number;failed:number;skipped:number};
 type EventOption = {id:number;title:string};
 
 export default function PushComposer({events = [], selectedEvent}: {events?:EventOption[];selectedEvent?:EventOption}) {
@@ -30,7 +30,7 @@ export default function PushComposer({events = [], selectedEvent}: {events?:Even
   const receipt = useQuery({
     queryKey:["/api/hub/push/receipt",user?.id,receiptId],enabled:!!receiptId,
     queryFn:() => apiRequest("GET",`/api/hub/push/${receiptId}/receipt`).then(r => r.json() as Promise<Receipt>),
-    refetchInterval:q => q.state.data?.queued ? 2000 : false,
+    refetchInterval:q => (q.state.data?.queued || q.state.data?.sending) ? 2000 : false,
   });
   const preview = query.data;
   if (!preview?.allowed) return null;
@@ -82,7 +82,7 @@ export default function PushComposer({events = [], selectedEvent}: {events?:Even
       {error && <p className="zl-error" role="alert">{error}</p>}
       <button type="submit" className="zl-btn zl-btn--primary" disabled={!canSend}>{busy ? "Sending…" : "Send push"}</button>
     </form>}
-    {receipt.data && <p className="zl-note" role="status">Delivered to {receipt.data.sent} of {receipt.data.devices} devices{receipt.data.queued ? ` · ${receipt.data.queued} queued` : ""}{receipt.data.failed ? ` · ${receipt.data.failed} failed` : ""}{receipt.data.skipped ? ` · ${receipt.data.skipped} no longer eligible` : ""}.</p>}
+    {receipt.data && <p className="zl-note" role="status">Push service accepted {receipt.data.sent} of {receipt.data.devices} device requests{receipt.data.queued ? ` · ${receipt.data.queued} queued` : ""}{receipt.data.sending ? ` · ${receipt.data.sending} sending` : ""}{receipt.data.unconfirmed ? ` · ${receipt.data.unconfirmed} unconfirmed` : ""}{receipt.data.failed ? ` · ${receipt.data.failed} failed` : ""}{receipt.data.skipped ? ` · ${receipt.data.skipped} no longer eligible` : ""}.</p>}
   </section>;
 }
 

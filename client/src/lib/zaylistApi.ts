@@ -218,8 +218,8 @@ export const zaylistApi = {
     ),
   deleteSavedMessage: (eventId: number, msgId: number) =>
     apiRequest("DELETE", `/api/events/${eventId}/zaylist/saved-messages/${msgId}`).then((r) => json(r)),
-  broadcast: (eventId: number, body: string) =>
-    apiRequest("POST", `/api/events/${eventId}/zaylist/broadcasts`, { body }).then((r) => json(r)),
+  broadcast: (eventId: number, body: string, requestKey: string) =>
+    apiRequest("POST", `/api/events/${eventId}/zaylist/broadcasts`, { body, requestKey }).then((r) => json<{recipientCount:number}>(r)),
   getBroadcasts: (eventId: number) =>
     apiRequest("GET", `/api/events/${eventId}/zaylist/broadcasts`).then((r) =>
       json<{ broadcasts: { id: number; body: string; recipientCount: number; createdAt: string }[] }>(r),
