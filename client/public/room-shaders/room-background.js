@@ -1,6 +1,6 @@
 // A self-contained background element for a positioned card or page section.
 // Set the room before mounting. Changing the attribute swaps the shader.
-import {loadRoomAssets,RoomRenderer,rooms} from './room-renderer.js?v=20261118-framing3';
+import {loadRoomAssets,RoomRenderer,rooms,roomArtURL} from './room-renderer.js?v=20261120-seven-lights-1';
 
 class ZayRoomBackground extends HTMLElement {
   static observedAttributes=['room','paused','survey'];
@@ -46,7 +46,7 @@ class ZayRoomBackground extends HTMLElement {
     this.#release(this.#renderer);this.#renderer=null;
     const image=this.shadowRoot.querySelector('img');
     image.hidden=false;
-    image.src=new URL('textures/'+room+'.jpg',import.meta.url);
+    image.src=roomArtURL(room);
     image.style.objectPosition=({placez:'50%',eventz:'52%',scenez:'41.5%',outzide:'50.6%'})[room]+' center';
     let renderer;
     try{

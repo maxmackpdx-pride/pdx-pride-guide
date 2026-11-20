@@ -3,6 +3,11 @@
 export const rooms = ['placez','eventz','scenez','outzide'];
 const focalX = {placez:.5,eventz:.52,scenez:.415,outzide:.506};
 
+export function roomArtURL(room,base=new URL('./',import.meta.url)) {
+  const file=room==='placez'?'placez-seven-lights-uhd.webp':room+'.jpg';
+  return new URL('textures/'+file,base).href;
+}
+
 export async function loadRoomAssets(base = new URL('./', import.meta.url), selected = rooms) {
   const read = async path => {
     const response = await fetch(new URL(path, base));
@@ -11,12 +16,12 @@ export async function loadRoomAssets(base = new URL('./', import.meta.url), sele
   };
   const [vertex, common, fragments] = await Promise.all([
     read('shaders/surface.vert'), read('shaders/common.glsl'),
-    Promise.all(selected.map(async key => [key, await read('shaders/'+key+'.frag')]))
+    Promise.all(selected.map(async key => [key, await read('shaders/'+key+'.frag'+(key==='placez'?'?v=20261120-seven-lights-1':''))]))
   ]);
   const url = path => new URL(path,base).href;
   return { vertex, common, fragments:Object.fromEntries(fragments),
-    textures:Object.fromEntries(selected.map(key=>[key,url('textures/'+key+'.jpg')])),
-    materials:Object.fromEntries(selected.filter(key=>key==='placez'||key==='eventz'||key==='outzide').map(key=>[key,url('textures/'+key+'-material.webp')])),
+    textures:Object.fromEntries(selected.map(key=>[key,roomArtURL(key,base)])),
+    materials:Object.fromEntries(selected.filter(key=>key==='eventz'||key==='outzide').map(key=>[key,url('textures/'+key+'-material.webp')])),
     light:url('textures/placez-light.webp') };
 }
 
@@ -57,10 +62,12 @@ export class RoomRenderer {
     gl.deleteShader(vertex);
     const sources={...this.assets.textures};
     for(const [key,path] of Object.entries(this.assets.materials)) sources[key+'Material']=path;
-    if(this.programs.placez) sources.relief=this.assets.light;
+    if(Object.values(this.programs).some(({u})=>u.relief)) sources.relief=this.assets.light;
     await Promise.all(Object.entries(sources).map(async ([key,url])=>{
       const img=new Image();
       img.src=url; await img.decode();
+      if(key==='placez'&&Math.max(img.naturalWidth,img.naturalHeight)>gl.getParameter(gl.MAX_TEXTURE_SIZE))
+        throw Error('UHD texture exceeds WebGL texture limit');
       const target=gl.createTexture();
       gl.bindTexture(gl.TEXTURE_2D,target);
       gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);
