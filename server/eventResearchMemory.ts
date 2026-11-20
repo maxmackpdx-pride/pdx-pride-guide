@@ -1,3 +1,4 @@
+import { hasRegistrationOnlyLocation, REGISTRATION_ADDRESS } from "@shared/registrationOnlyVenue";
 import { winterPrideWatches, winterEventScope, explicitWinterPrideEvent } from '../shared/outzWinterEvents';
 import { INGEST_SOURCES } from "@shared/ingestSources";
 import { eventDedupeKey } from "@shared/eventDedupe";
@@ -344,6 +345,12 @@ function validateEventDateOrder(event: { dateStart?: unknown; dateEnd?: unknown 
 
 function validateEventResearchPublishable(event: Record<string, unknown>) {
   if (event.status !== "LIVE") return { ok: true as const };
+  if (hasRegistrationOnlyLocation(event)) {
+    const address = String(event.address || "").trim();
+    if ((address && !hasRegistrationOnlyLocation({ address })) || event.lat != null || event.lng != null) {
+      return eventResearchError(400, `For this venue, publish "${REGISTRATION_ADDRESS}" and omit the map coordinates`);
+    }
+  }
   const required = [
     "title",
     "venueName",

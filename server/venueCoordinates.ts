@@ -1,3 +1,4 @@
+import { hasRegistrationOnlyLocation, REGISTRATION_ADDRESS } from "@shared/registrationOnlyVenue";
 import type { Business } from "@shared/schema";
 
 export type MapCoordinateFields = {
@@ -159,6 +160,7 @@ export function mergeMapCoordinates<T extends MapCoordinateFields>(
   fields: T,
   businesses: Business[] = [],
 ): T {
+  if (hasRegistrationOnlyLocation(fields)) return { ...fields, address: REGISTRATION_ADDRESS, lat: null, lng: null };
   if (hasUsableMapCoordinates(fields)) return fields;
   const coords = resolveCoordinatesFromDirectory(fields.venueName, fields.address, businesses);
   if (!coords) {
@@ -183,6 +185,7 @@ function portlandQuery(parts: string[]): string {
  * first, then the bare address, then the bare name.
  */
 export function buildGeocodeQueries(address?: string | null, venueName?: string | null): string[] {
+  if (hasRegistrationOnlyLocation({ address, venueName })) return [];
   const street = String(address || "").trim();
   const name = String(venueName || "").trim();
   const queries = [
@@ -238,6 +241,7 @@ export async function resolvePersistedMapCoordinates(
   fields: MapCoordinateFields,
   businesses: Business[] = [],
 ): Promise<MapCoordinates | null> {
+  if (hasRegistrationOnlyLocation(fields)) return null;
   if (hasUsableMapCoordinates(fields)) {
     return { lat: fields.lat!, lng: fields.lng! };
   }

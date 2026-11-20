@@ -91,6 +91,7 @@ import {
   isTuckerHostedArchiveId,
   tuckerHostedArchiveAsEvent,
 } from "@shared/tuckerHostedArchive";
+import { hasRegistrationOnlyLocation, REGISTRATION_ADDRESS } from "@shared/registrationOnlyVenue";
 import { buildVenueWebsiteIndex, resolveVenueWebsite, matchVenueBusinessByName } from "@shared/venueLinks";
 import {
   enrichEventForMap,
@@ -1383,7 +1384,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
     (recipientIds,senderId,title,body,navigate,tag)=>schedulePushForActivity({recipientIds,senderId,title,body,navigate,tag,category:"my_events"}));
   const zaylist = registerZaylist(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate);
   const hostWorkspace = registerHostWorkspace(app, sqlite, storage, requireAuth, zaylist.store, zaylist.accessFor, isPublicEventVisibleUnderPrideCap);
-  const hostPush = registerHostPush(app, sqlite, storage, requireAuth, user => storage.hasOwnerAdminAccess(user) || isMainAdminUser(user), moderationGate);
+  const hostPush = registerHostPush(app, sqlite, storage, requireAuth, user => storage.hasOwnerAdminAccess(user) || isMainAdminUser(user), moderationGate, undefined,
+    (event,user) => {
+      if (!isPublicEventVisibleUnderPrideCap(event)) return false;
+      const access=zaylist.accessFor(event.id,user.id);
+      return access.isHost || access.isOwner;
+    });
   const runGuestListJobs = async () => {
     try {
       zaylist.operations.dueDraws();
@@ -2285,6 +2291,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   const outdoorHosting=registerOutdoorHosting(app,sqlite,storage,requireAuth,{
+    catalog:async ()=>{
+      const {data}=await getOutzSnapshot();
+      return [...data.destinations,...data.catalog,...data.communityStays,...outzMapCatalog];
+    },
     place:async id=>{
       const {data}=await getOutzSnapshot();
       return [...data.destinations,...data.catalog,...data.communityStays].find(p=>p.id===id) ?? outzMapCatalog.find(p=>p.id===id);
@@ -2625,8 +2635,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
     let nearbyRestaurants: any[] = [];
     let nearbyEvents: any[] = [];
-    const lat = (listing as any).lat ?? evt.lat;
-    const lng = (listing as any).lng ?? evt.lng;
+    const lat = event.lat;
+    const lng = event.lng;
     if (typeof lat === "number" && typeof lng === "number") {
       nearbyRestaurants = businesses
         .filter(b => ["restaurant", "cafe"].includes(b.type) && typeof b.lat === "number" && typeof b.lng === "number")
@@ -2637,7 +2647,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         .map(x => slimPlace(x.b, x.d));
       const day = String(evt.dateStart).slice(0, 10);
       nearbyEvents = (storage.getEvents({ status: "LIVE" }) as any[])
-        .filter(e => hasPublicEventFlags(e) && e.id !== evt.id && String(e.dateStart).slice(0, 10) === day && typeof e.lat === "number" && typeof e.lng === "number")
+        .filter(e => hasPublicEventFlags(e) && !hasRegistrationOnlyLocation(e) && e.id !== evt.id && String(e.dateStart).slice(0, 10) === day && typeof e.lat === "number" && typeof e.lng === "number")
         .map(e => ({ e, d: distMi(lat, lng, e.lat, e.lng) }))
         .filter(x => x.d <= 2)
         .sort((a, b) => a.d - b.d)
@@ -2658,7 +2668,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
     res.json({
       event,
-      venue: venue ? slimPlace(venue) : null,
+      venue: venue ? { ...slimPlace(venue), ...(hasRegistrationOnlyLocation(evt) ? { address: REGISTRATION_ADDRESS, lat: null, lng: null } : {}) } : null,
       hosts,
       hostGroup,
       // Platform only (never the URL): drives the posterless fallback

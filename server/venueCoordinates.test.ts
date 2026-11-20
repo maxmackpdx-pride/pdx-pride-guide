@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildGeocodeQueries, eventMatchesBusiness, geocodePortlandLocation } from "./venueCoordinates";
+import { buildGeocodeQueries, eventMatchesBusiness, geocodePortlandLocation, mergeMapCoordinates, resolvePersistedMapCoordinates } from "./venueCoordinates";
 
 test("matches an event on a venue calendar to that exact venue", () => {
   assert.equal(eventMatchesBusiness(
@@ -88,4 +88,13 @@ test("geocode stops on the first Portland hit and never retries a refused reques
   const limited = fakeNominatim({}, 429);
   assert.equal(await geocodePortlandLocation("110 NW Broadway", "Badlands", { fetchImpl: limited.fetchImpl, wait: async () => {} }), null);
   assert.equal(limited.asked.length, 1, "rate limited: do not keep asking");
+});
+
+test("registration-only venues never acquire or display a public pin", async () => {
+  const privatePlace = { venueName: "Sub Rosa PDX", address: "An internal fixture", lat: 45.52, lng: -122.67 };
+  assert.deepEqual(buildGeocodeQueries(privatePlace.address, privatePlace.venueName), []);
+  assert.deepEqual(mergeMapCoordinates(privatePlace), { ...privatePlace, address: "Register for address", lat: null, lng: null });
+  assert.equal(await resolvePersistedMapCoordinates(privatePlace), null);
+  assert.deepEqual(buildGeocodeQueries("Register for address.", "Another private venue"), []);
+  assert.ok(buildGeocodeQueries("123 Example St", "Wayfinder Beer").length > 0);
 });
