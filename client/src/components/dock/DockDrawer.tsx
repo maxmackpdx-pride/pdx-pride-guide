@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import './DockDrawer.css';
 
 export type DockStop = 0 | 1 | 2;
@@ -32,6 +32,16 @@ export default function DockDrawer({
   /** Stop-2 content, rendered below the stop-1 content at full screen. */
   fullChildren?: ReactNode;
 }) {
+  const gripRef = useRef<HTMLButtonElement>(null);
+  const restoreFocus = useRef(false);
+  useLayoutEffect(() => {
+    if (restoreFocus.current) gripRef.current?.focus({ preventScroll: true });
+    restoreFocus.current = false;
+  }, [stop]);
+  const changeStop = (next: DockStop) => {
+    restoreFocus.current = next !== stop && !!gripRef.current?.parentElement?.contains(document.activeElement);
+    onStopChange(next);
+  };
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [bouncing, setBouncing] = useState(false);
@@ -53,17 +63,17 @@ export default function DockDrawer({
   const settle = (dy: number, velocity: number) => {
     if (Math.abs(dy) < 6) {
       // Tap on the grip: cycle stops.
-      if (stop === 0) onStopChange(1);
-      else if (stop === 1 && maxStops === 2) onStopChange(2);
-      else if (stop === 2) onStopChange(1);
-      else onStopChange(0);
+      if (stop === 0) changeStop(1);
+      else if (stop === 1 && maxStops === 2) changeStop(2);
+      else if (stop === 2) changeStop(1);
+      else changeStop(0);
       return;
     }
-    if (dy < -40) { onStopChange(Math.min(maxStops, stop + 1) as DockStop); return; }
+    if (dy < -40) { changeStop(Math.min(maxStops, stop + 1) as DockStop); return; }
     if (dy > 40) {
-      if (velocity > 0.55) { onStopChange(0); return; } // hard/fast drag: close fully
-      if (stop === 2) { setBouncing(true); onStopChange(1); return; } // normal swipe: stop at 1, bounce
-      onStopChange(0);
+      if (velocity > 0.55) { changeStop(0); return; } // hard/fast drag: close fully
+      if (stop === 2) { setBouncing(true); changeStop(1); return; } // normal swipe: stop at 1, bounce
+      changeStop(0);
     }
   };
 
@@ -94,17 +104,17 @@ export default function DockDrawer({
     <button
       type="button"
       className="dock-drawer__grip"
+      ref={gripRef}
       aria-label={stop === 0 ? `Open ${ariaLabel}` : stop === 2 ? 'Drag down to shrink or close' : maxStops === 2 ? 'Drag up for full screen, down to close' : 'Drag down to close'}
       aria-expanded={stop > 0}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
+      onPointerCancel={() => { start.current = null; setDragging(false); setDragY(0); }}
       onClick={event => { if (event.detail === 0) settle(0, 0); }}
       onKeyDown={event => {
-        if (event.key === 'ArrowUp') { event.preventDefault(); onStopChange(Math.min(maxStops, stop + 1) as DockStop); }
-        if (event.key === 'ArrowDown') { event.preventDefault(); if (stop === 2) { setBouncing(true); onStopChange(1); } else onStopChange(0); }
-        if (event.key === 'Escape') { event.preventDefault(); if (stop === 2) onStopChange(1); else onStopChange(0); }
+        if (event.key === 'ArrowUp') { event.preventDefault(); changeStop(Math.min(maxStops, stop + 1) as DockStop); }
+        if (event.key === 'ArrowDown') { event.preventDefault(); if (stop === 2) { setBouncing(true); changeStop(1); } else changeStop(0); }
       }}
     >
       <span className="dock-drawer__lines" aria-hidden="true"><i /><i /><i /></span>
@@ -125,6 +135,12 @@ export default function DockDrawer({
       className={`dock-drawer pdx-glass-rebind is-stop${stop}${dragging ? ' is-dragging' : ''}${bouncing ? ' is-bounce' : ''}`}
       style={{ '--c': accent, transform: dragY !== 0 ? `translateY(${Math.max(-24, dragY)}px)` : undefined } as CSSProperties}
       role="dialog"
+      onKeyDown={event => {
+        if (event.key !== 'Escape' || event.defaultPrevented || !event.currentTarget.contains(event.target as Node)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        changeStop(stop === 2 ? 1 : 0);
+      }}
       aria-modal={stop === 2}
       aria-label={ariaLabel}
     >

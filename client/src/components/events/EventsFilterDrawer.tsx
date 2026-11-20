@@ -108,6 +108,8 @@ export default function EventsFilterDrawer({
   const [fullH, setFullH] = useState(0);
   const [stage2Mounted, setStage2Mounted] = useState(startAtSchedule);
   const rootRef = useRef<HTMLElement>(null);
+  const lipRef = useRef<HTMLButtonElement>(null);
+  const pullRef = useRef<HTMLButtonElement>(null);
   const stage1Ref = useRef<HTMLDivElement>(null);
   const drag = useRef<{
     source: "lip" | "pull";
@@ -156,6 +158,10 @@ export default function EventsFilterDrawer({
       setSettling(true);
       window.clearTimeout(settleTimer.current);
       settleTimer.current = window.setTimeout(() => setSettling(false), 650);
+    }
+    if (rootRef.current?.contains(document.activeElement)) {
+      const nextGrip = next === 1 && stage === 2 ? pullRef : lipRef;
+      requestAnimationFrame(() => nextGrip.current?.focus({ preventScroll: true }));
     }
     setStage(next);
   };
@@ -255,7 +261,7 @@ export default function EventsFilterDrawer({
          pointermove events arrive sparsely, while the average stays
          honest for a flick and low for a slow drag or a held pause. */
       const avgV = Math.abs(d.moved) / Math.max(1, performance.now() - d.startT);
-      if (Math.max(d.velocity, avgV) > 0.85) { goStage(0); return; }
+      if (d.moved > 40 && Math.max(d.velocity, avgV) > 0.85) { goStage(0); return; }
       if (h < fullH - 50) { goStage(1); return; }
       goStage(2);
       return;
@@ -269,6 +275,7 @@ export default function EventsFilterDrawer({
     if (event.key === "ArrowDown") { event.preventDefault(); goStage(Math.max(0, stage - 1) as Stage); }
   };
 
+  const cancelDrag = () => { drag.current = null; setDragH(null); };
   const pickDay = (date: string) => {
     goStage(0);
     onPickDay(date);
@@ -279,16 +286,26 @@ export default function EventsFilterDrawer({
       ref={rootRef}
       className={`edrawer${arriving ? " is-arriving" : ""}${settling ? " is-settling" : ""}${dragH != null ? " is-dragging" : ""}${stage === 2 ? " is-full" : ""}`}
       aria-label="Event filters"
+      onKeyDown={event => {
+        if (event.key === "Escape" && stage > 0 && !event.defaultPrevented &&
+            event.currentTarget.contains(event.target as Node)) {
+          event.preventDefault();
+          event.stopPropagation();
+          goStage(stage === 2 ? 1 : 0);
+        }
+      }}
     >
       <button
         type="button"
         className="edrawer__lip"
+        ref={lipRef}
+        onClick={event => { if (event.detail === 0) goStage(stage === 1 ? 0 : 1); }}
         aria-expanded={stage > 0}
         aria-label={stage === 0 ? "Open filters" : stage === 1 ? "Close filters" : "Back to filters"}
         onPointerDown={onDown("lip")}
         onPointerMove={onMove}
         onPointerUp={onUp}
-        onPointerCancel={onUp}
+        onPointerCancel={cancelDrag}
         onKeyDown={onKey}
       >
         <span className="edrawer__lines" aria-hidden="true">
@@ -400,11 +417,14 @@ export default function EventsFilterDrawer({
           <button
             type="button"
             className="edrawer__pull"
+            ref={pullRef}
+            onClick={event => { if (event.detail === 0) goStage(2); }}
+            onKeyDown={onKey}
             aria-label="Pull up for your schedule"
             onPointerDown={onDown("pull")}
             onPointerMove={onMove}
             onPointerUp={onUp}
-            onPointerCancel={onUp}
+            onPointerCancel={cancelDrag}
           >
             <span className="edrawer__pull-lines" aria-hidden="true"><i /><i /></span>
             <span className="edrawer__pull-label">YOUR SCHEDULE</span>
