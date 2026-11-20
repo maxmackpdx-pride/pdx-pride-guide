@@ -12,7 +12,7 @@ import react,{reactCompilerPreset} from '@vitejs/plugin-react';
 import babel from '@rolldown/plugin-babel';
 import {chromium} from 'playwright';
 import sharp from 'sharp';
-import {cardSourcePatterns,cardCompilerExcludedPatterns,placezCompilerModules} from './react-compiler-card-scope.mjs';
+import {cardCompilerFunction,cardSourcePatterns,cardCompilerExcludedPatterns,placezCompilerModules} from './react-compiler-card-scope.mjs';
 const root=path.resolve(import.meta.dirname,'..'),fixture='script/fixtures/placez-six-compiler.tsx';
 const ids=[30,3,31,5,2,23],names=['Holocene','Stag PDX','Alberta Rose Theatre','Eagle Portland','Darcelle XV','Pizza Thief'];
 const marker=/react(?:\/|_)compiler-runtime|useMemoCache|memo_cache_sentinel/;
@@ -38,20 +38,26 @@ async function prepare(mode,production){
    config.plugins.push({name:'verify-six-production-transforms',enforce:'post',transform:{order:'post',handler(code,id){
     const url='/'+path.relative(root,id.split('?')[0]).split(path.sep).join('/');
     const entry=expectedScope.find(([file])=>file===url);
-    if(entry){const target=placezCompilerModules.find(module=>url===`/client/src/components/${module}.tsx`);const functionProof=target?assertCompiledFunction(code,target.split('/').pop(),mode==='on'):null;seen.set(url,{compiled:marker.test(code),functionProof});}
+    if(entry){const target=placezCompilerModules.find(module=>url===`/client/src/components/${module}.tsx`);const functionProof=target?assertCompiledFunction(code,cardCompilerFunction(target),mode==='on'):null;seen.set(url,{compiled:marker.test(code),functionProof});}
     return null;
    }},generateBundle(){
     for(const [url,expected] of expectedScope){assert.ok(seen.has(url),`Build did not inspect ${url}`);assert.equal(seen.get(url).compiled,expected,`Incorrect optimized build transform ${url}, mode ${mode}`);scope.push({url,...seen.get(url)});}
    }});
    config.mode='production';config.logLevel='error';
-   config.build={target:['chrome107','edge107','firefox104','safari16','ios16'],outDir:path.join(cacheDir,'dist'),emptyOutDir:true,rollupOptions:{input:path.join(root,fixtureHtml)}};
+   config.build={target:['chrome107','edge107','firefox104','safari16','ios16'],outDir:path.join(cacheDir,'dist'),emptyOutDir:true,rollupOptions:{input:[
+    path.join(root,fixtureHtml),
+    // The Placez page does not import the Scenez and Outzide faces. Build the
+    // allowlisted modules as separate entries to retain their transform proof
+    // without mounting them in the six-place timing and pixel comparison.
+    ...placezCompilerModules.map(module=>path.join(root,'client/src/components',module+'.tsx')),
+   ]}};
    await build(config);
    server=await preview({...config,preview:{host:'127.0.0.1',port:0,strictPort:false}});
    const address=server.httpServer.address();assert.ok(address&&typeof address!=='string');
    return {url:'http://127.0.0.1:'+address.port+'/'+fixtureHtml,scope,close:async()=>{await new Promise(resolve=>server.httpServer.close(resolve));await rm(cacheDir,{recursive:true,force:true});}};
   }
   server=await createServer(config);await server.listen();
-  for(const [url,expected] of expectedScope){const result=await server.transformRequest(url);assert.ok(result?.code,`Missing transform: ${url}`);const compiled=marker.test(result.code);assert.equal(compiled,expected,`Unexpected compiler transform: ${url}, mode ${mode}`);const target=placezCompilerModules.find(module=>url===`/client/src/components/${module}.tsx`);const functionProof=target?assertCompiledFunction(result.code,target.split('/').pop(),mode==='on'):null;scope.push({url,compiled,functionProof});}
+  for(const [url,expected] of expectedScope){const result=await server.transformRequest(url);assert.ok(result?.code,`Missing transform: ${url}`);const compiled=marker.test(result.code);assert.equal(compiled,expected,`Unexpected compiler transform: ${url}, mode ${mode}`);const target=placezCompilerModules.find(module=>url===`/client/src/components/${module}.tsx`);const functionProof=target?assertCompiledFunction(result.code,cardCompilerFunction(target),mode==='on'):null;scope.push({url,compiled,functionProof});}
   return {url:server.resolvedUrls.local[0]+'__six-compiler',scope,close:async()=>{await server.close();await rm(cacheDir,{recursive:true,force:true});}};
  }catch(error){if(server?.httpServer)await new Promise(resolve=>server.httpServer.close(resolve));else await server?.close();await rm(cacheDir,{recursive:true,force:true});throw error;}
 }

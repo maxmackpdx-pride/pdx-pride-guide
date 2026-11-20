@@ -31,6 +31,12 @@ export const placezCompilerModules = [
   'outz/native/NativeOutzideFace',
 ];
 
+export function cardCompilerFunction(module) {
+  if (module === 'scenez/SceneCardFace') return 'Closed';
+  if (module === 'outz/native/NativeOutzideFace') return 'OutzClosed';
+  return module.split('/').pop();
+}
+
 export const cardSourcePatterns = [
   /[\\/]client[\\/]src[\\/]components[\\/]scenez[\\/]SceneCardFace\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]outz[\\/]native[\\/]NativeOutzideFace\.tsx$/,
