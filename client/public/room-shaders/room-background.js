@@ -82,13 +82,17 @@ class ZayRoomBackground extends HTMLElement {
     this.#stop();
     if(!this.#ready||document.hidden||!this.#inView)return;
     const w=this.clientWidth,h=this.clientHeight;if(!w||!h)return;
-    const ratio=Math.min(devicePixelRatio||1,1.6,1680/Math.max(w,h));
+    // Render up to 2x CSS size (long edge 2048): at the old 1.6/1680 cap the
+    // shader read soft on retina phones, the reference surface.
+    const ratio=Math.min(devicePixelRatio||1,2,2048/Math.max(w,h));
     this.#canvas.width=Math.max(1,Math.round(w*ratio));this.#canvas.height=Math.max(1,Math.round(h*ratio));
     this.#frame(performance.now());
   };
   #frame=now=>{
     const animate=!this.hasAttribute('paused')&&!this.#media.matches;
-    if(this.#last===null||now-this.#last>=32){
+    // Draw every animation frame while animating (the 32ms gate stepped the
+    // motion at ~30fps); a paused/reduced-motion element still draws once.
+    if(this.#last===null||animate){
       if(this.#last!==null&&animate)this.#seconds+=Math.min(.15,(now-this.#last)/1000);
       this.#last=now;
       this.#renderer.draw(this.room,this.#seconds,undefined,{bands:this.#levels,nightSurvey:this.getAttribute('survey')==='off'?0:1});

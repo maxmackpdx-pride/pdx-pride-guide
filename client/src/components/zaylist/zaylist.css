@@ -38,6 +38,9 @@
   color: var(--zg-12);
   background: var(--zg-2);
   min-height: 100%;
+  /* The light ground fills the viewport: short hub states (signed-out,
+     loading, empty) must not drop into the shell's black below the fold. */
+  min-height: 100dvh;
   padding: max(16px, env(safe-area-inset-top)) 16px 96px;
   box-sizing: border-box;
 }
@@ -116,7 +119,10 @@
 .zl-label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--zg-11); margin: 10px 0 4px; }
 .zl-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; }
 .zl-row > * { flex: 1 1 120px; }
-.zl-row > .zl-btn { flex: 0 0 auto; }
+.zl-row > .zl-btn { display: inline-flex; align-items: center; justify-content: center; text-align: center; }
+/* Header actions share the row evenly instead of sizing to content and
+   wrapping mid-phrase at phone width. */
+.zl-hub-head > .zl-btn { flex: 1 1 140px; display: inline-flex; align-items: center; justify-content: center; text-align: center; }
 
 .zl-chip {
   display: inline-flex; align-items: center; gap: 6px;

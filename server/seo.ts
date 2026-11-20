@@ -619,7 +619,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
   const pageImage = sharedOutz ? `${SITE_URL}/api/og/outzide/${encodeURIComponent(sharedOutz.id)}?v=3` : liveEvent
     ? `${SITE_URL}/api/og/event/${liveEvent.id}?v=2`
     : livePlace
-      ? `${SITE_URL}/api/og/place/${livePlace.id}?v=3`
+      ? `${SITE_URL}/api/og/place/${livePlace.id}?v=4`
       : liveProfile
         // v= query busts crawler caches after OG renderer fixes (remote Google avatars, etc.)
         ? `${SITE_URL}${profileShareImagePath(liveProfile.username)}`
