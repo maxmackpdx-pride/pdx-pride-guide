@@ -25,6 +25,15 @@ export default function HubHelp() {
       <p>Open <strong>Event Mode</strong> for your event. In <strong>Door check-in</strong>, scan the pass or enter its code. The result confirms the guest’s arrival. A repeat scan shows the earlier check-in.</p>
       <p>Select <strong>Bar service</strong> and check the pass to see available offers. Tap the named drink or discount to redeem it. The confirmation shows how many uses remain.</p>
     </section>
+    <details className="zl-section">
+      <summary>Watch the Portland short · Where to tonight?</summary>
+      <video controls playsInline preload="none" width="576" height="1024"
+        style={{ width: "min(100%, 24rem)", height: "auto", display: "block", margin: "1rem auto" }}
+        poster="/guides/zaylist-portland-cover.jpg" aria-label="Where to tonight? A 32-second tour of Zaylist">
+        <source src="/guides/zaylist-portland.mp4" type="video/mp4" />
+        <track kind="captions" default srcLang="en" label="English" src="/guides/zaylist-portland.vtt" />
+      </video>
+    </details>
     <a className="zl-btn zl-btn--primary" href="/hub">Open your hub</a>
   </article></main>;
 }
