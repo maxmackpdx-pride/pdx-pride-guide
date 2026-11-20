@@ -265,3 +265,11 @@ Everything else is v1.0.33 unchanged. Tests 449/449 on the tagged
 source; GitHub runs 44525308761 and 44525308905 passed the compiler
 checks, typechecking, map tests and both builds. The v1.0.33 parts
 remain in this folder for rollback.
+
+## v1.0.35 · PlaceZ, rides and Afterz nights
+
+Tag `v1.0.35` points to `440827f756a7b63b4aedd669afb9f9eb5d87fbb9`. The production archive has SHA-256 `af426c96858062304a1de7c935510ed2416bda91e9387253c961175833279aa1`.
+
+PlaceZ opens at `/placez/map`. The map shows ride and invitation waypoints available to the signed-in member, opens native preview cards on selection, and supports opening and closing map controls on phones. Event interest uses the same heart service as the flyer board.
+
+The [packaging workflow](https://github.com/maxmackpdx-pride/zaylist-maps/actions/runs/44645824243) and [compiler workflow](https://github.com/maxmackpdx-pride/zaylist-maps/actions/runs/44645824328) passed for this tag.
