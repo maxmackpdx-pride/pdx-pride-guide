@@ -22,6 +22,7 @@ import { registerBoardPlacement } from "./boardMapPlacement";
 import { homeCatalogCounts } from "./homeStats";
 import { hasPublicEventFlags } from "@shared/publicEventVisibility";
 import { registerEventPlanning } from "./eventPlanning";
+import { registerHostPush } from "./hostPush";
 import { registerZaylist } from "./zaylist";
 import { createEventSaves } from "./eventSaves";
 import { createBoardSaves, isSavedBoard } from "./boardSaves";
@@ -1366,11 +1367,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
   const eventPlanning = registerEventPlanning(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate,
     (recipientIds,senderId,title,body,navigate,tag)=>schedulePushForActivity({recipientIds,senderId,title,body,navigate,tag,category:"my_events"}));
   const zaylist = registerZaylist(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate);
-  const boardSaves = createBoardSaves(sqlite);
+  const hostPush = registerHostPush(app, sqlite, storage, requireAuth, user => storage.hasOwnerAdminAccess(user) || isMainAdminUser(user), moderationGate);
   const runGuestListJobs = async () => {
     try {
       zaylist.operations.dueDraws();
-      await zaylist.operations.deliverInvites();
+      await Promise.all([zaylist.operations.deliverInvites(), hostPush.drain()]);
     } catch (error) { console.error("[guest-list] background work failed", error instanceof Error ? error.name : "error"); }
   };
   const guestListTimer = setInterval(runGuestListJobs, 60_000);
@@ -1378,6 +1379,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   httpServer.once("listening", runGuestListJobs);
   httpServer.once("close", () => clearInterval(guestListTimer));
 
+  const boardSaves = createBoardSaves(sqlite);
   assertProductionPersistence();
   assertProductionSecrets();
 

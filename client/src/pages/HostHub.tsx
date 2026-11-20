@@ -3,7 +3,7 @@ import AuthModal from "@/components/AuthModal";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
-import PushComposer from "@/components/zaylist/PushComposer";
+import PushComposer, { PushMemberships } from "@/components/zaylist/PushComposer";
 import GuestSpots from "@/components/zaylist/GuestSpots";
 import HostCard, { type HostEvent } from "@/components/zaylist/HostCard";
 import "@/components/zaylist/zaylist.css";
@@ -87,7 +87,7 @@ export default function HostHub() {
           <p className="zl-sub">{user.displayName || user.username}</p>
         </header>
 
-        <PushComposer />
+        <PushComposer events={hostEvents} />
 
         <section className="zl-section" aria-label="Personal">
           <h2>Personal</h2>
@@ -132,6 +132,7 @@ export default function HostHub() {
         {isOwner ? (
           <section className="zl-section" aria-label="Owner">
             <h2>Owner</h2>
+            <PushMemberships />
             <p className="zl-note">
               The push composer at the top of this hub is yours without limit. Site controls live in Admin.
             </p>

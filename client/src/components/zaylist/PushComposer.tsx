@@ -1,164 +1,106 @@
-import { useMemo, useState } from "react";
+import { useId, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
-import {
-  pushAllowance,
-  pushRemaining,
-  pushTierFor,
-  type PushAudience,
-} from "@/lib/zaylistApi";
+import type { PushAudience, PushTier } from "@shared/hostPushPolicy";
 
-const TITLE_LIMIT = 40;
-const BODY_LIMIT = 110;
-const SEND_LOG_KEY = "zl-push-sends";
+interface Audience { key: PushAudience; remaining: number | null; limit: number | null; windowDays: number; reachable: number }
+type Preview = {allowed:false} | {allowed:true;configured:boolean;tier:PushTier;audiences:Audience[]};
+type Receipt = {id:number;devices:number;sent:number;queued:number;failed:number;skipped:number};
+type EventOption = {id:number;title:string};
 
-/**
- * The push composer at the top of the hub. It renders only for users who
- * hold push permission; for everyone else it does not exist.
- *
- * What the back end enforces today: the owner broadcast
- * (POST /api/admin/push/broadcast, primary owner only, no rate limit).
- * Follower and RSVP audiences follow Tucker's rate policy (ask 67) in
- * the allowances shown here, but no sending endpoint enforces them yet,
- * so those audiences are stated, not sendable. Nothing here fakes a send.
- */
-export default function PushComposer() {
-  const { user } = useAuth();
-  const [audience, setAudience] = useState<PushAudience>("everyone");
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [message, setMessage] = useState<string | null>(null);
-  const [log, setLog] = useState<string[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem(SEND_LOG_KEY) ?? "[]") as string[];
-    } catch {
-      return [];
-    }
+export default function PushComposer({events = [], selectedEvent}: {events?:EventOption[];selectedEvent?:EventOption}) {
+  const {user} = useAuth();
+  const qc = useQueryClient();
+  const prefix = useId();
+  const [target,setTarget] = useState<number | null>(null);
+  const eventId = selectedEvent?.id || target || events[0]?.id || null;
+  const [audience,setAudience] = useState<PushAudience>(selectedEvent ? "rsvps" : "followers");
+  const [title,setTitle] = useState("");
+  const [body,setBody] = useState("");
+  const [busy,setBusy] = useState(false);
+  const [error,setError] = useState("");
+  const [receiptId,setReceiptId] = useState<number | null>(null);
+  const request = useRef({payload:"",key:""});
+  const [open,setOpen] = useState(false);
+  const query = useQuery({
+    queryKey:["/api/hub/push",user?.id,eventId],enabled:!!user,
+    queryFn:() => apiRequest("GET","/api/hub/push" + (eventId ? `?eventId=${eventId}` : "")).then(r => r.json() as Promise<Preview>),
   });
-
-  const tier = useMemo(
-    () =>
-      pushTierFor({
-        isPrimaryOwner: !!user?.isPrimaryOwner,
-        // The account payload carries no paid-membership flag today, so no
-        // user is silently promoted to the paid tier here.
-        isPaidMember: false,
-      }),
-    [user],
-  );
-
-  if (!user || !(user.canPush || user.isPrimaryOwner)) return null;
-
-  const isOwner = tier === "owner";
-  const allowance = pushAllowance(tier, audience);
-  const remaining = pushRemaining(tier, audience, log);
-  const sendable = isOwner && audience === "everyone";
-  const overTitle = title.length > TITLE_LIMIT;
-  const overBody = body.length > BODY_LIMIT;
-
-  const allowanceText = (() => {
-    if (isOwner) return "Owner: no limit, every user.";
-    if (audience === "everyone") return "Only the owner sends to everyone.";
-    const per = allowance.limit === 1 ? "1 push" : `${allowance.limit} pushes`;
-    const window = allowance.windowDays === 1 ? "per day" : `per ${allowance.windowDays} days`;
-    return `${tier === "paid" ? "Paid" : "Standard"}: ${per} ${window} to ${audience}. ${remaining} left in this window on this device.`;
-  })();
-
-  const send = async () => {
-    setState("sending");
-    setMessage(null);
+  const receipt = useQuery({
+    queryKey:["/api/hub/push/receipt",user?.id,receiptId],enabled:!!receiptId,
+    queryFn:() => apiRequest("GET",`/api/hub/push/${receiptId}/receipt`).then(r => r.json() as Promise<Receipt>),
+    refetchInterval:q => q.state.data?.queued ? 2000 : false,
+  });
+  const preview = query.data;
+  if (!preview?.allowed) return null;
+  const selected = preview.audiences.find(a => a.key === audience);
+  const options = preview.audiences.filter(a => a.key !== "rsvps" || eventId);
+  const canSend = !!selected && selected.remaining !== 0 && selected.reachable > 0 && title.trim() && !busy && preview.configured;
+  async function send() {
+    if (!canSend) return;
+    const message = {audience,eventId:audience==="rsvps" || selectedEvent ? eventId : null,title:title.trim(),body:body.trim()};
+    const payload=JSON.stringify(message);
+    if (request.current.payload!==payload) request.current={payload,key:crypto.randomUUID()};
+    setBusy(true);setError("");
     try {
-      const res = await apiRequest("POST", "/api/admin/push/broadcast", {
-        title: title.trim(),
-        body: body.trim(),
-        url: "/events",
-      });
-      const data = (await res.json()) as { sent?: number; usersTargeted?: number };
-      const next = [...log, new Date().toISOString()];
-      setLog(next);
-      try {
-        localStorage.setItem(SEND_LOG_KEY, JSON.stringify(next));
-      } catch {
-        /* the log is a readout, not the record */
-      }
-      setState("sent");
-      setMessage(`Sent to ${data.usersTargeted ?? 0} people (${data.sent ?? 0} devices).`);
-      setTitle("");
-      setBody("");
-    } catch (e) {
-      setState("error");
-      setMessage(parseApiError(e, "The push did not send. Try again."));
-    }
-  };
+      const response = await apiRequest("POST","/api/hub/push",{...message,requestKey:request.current.key});
+      const result = await response.json() as Receipt;
+      qc.setQueryData(["/api/hub/push/receipt",user?.id,result.id],result);
+      setReceiptId(result.id); setTitle(""); setBody(""); request.current={payload:"",key:""};
+      await qc.invalidateQueries({queryKey:["/api/hub/push"]});
+    } catch (e) { setError(parseApiError(e,"Could not send this push")); }
+    finally { setBusy(false); }
+  }
+  return <section className="zl-section zl-push" aria-label="Push notification">
+    <button type="button" className="zl-disclosure" aria-expanded={open} onClick={() => setOpen(!open)}>
+      <span>Push notification</span><span aria-hidden="true">{open ? "−" : "+"}</span>
+    </button>
+    {open && <form onSubmit={e => {e.preventDefault();void send();}}>
+      <div className="zl-push-aud" role="group" aria-label="Audience">{options.map(a =>
+        <button className="zl-btn zl-btn--small" key={a.key} type="button" aria-pressed={a.key===audience} onClick={() => {setAudience(a.key);setError("");}}>
+          {a.key==="rsvps" ? "RSVPs" : a.key==="followers" ? "Followers" : "Everyone"}
+        </button>)}</div>
+      {audience==="rsvps" && !selectedEvent && !!events.length && <label className="zl-label">Event
+        <select className="zl-select" value={eventId || ""} onChange={e => setTarget(Number(e.target.value))}>
+          {events.map(event => <option value={event.id} key={event.id}>{event.title}</option>)}
+        </select></label>}
+      {selected && <p className="zl-note" role="status">{selected.reachable} subscribed {selected.reachable===1 ? "person" : "people"} · {selected.remaining===null ? "Unlimited sends" :
+        `${selected.remaining} of ${selected.limit} sends left per ${selected.windowDays===1 ? "day" : selected.windowDays+" days"}`}</p>}
+      <label className="zl-label" htmlFor={prefix+"title"}>Title</label>
+      <input id={prefix+"title"} className="zl-input" maxLength={40} value={title} onChange={e=>setTitle(e.target.value)} required />
+      <span className="zl-charcount">{title.length}/40</span>
+      <label className="zl-label" htmlFor={prefix+"body"}>Message</label>
+      <textarea id={prefix+"body"} className="zl-textarea" maxLength={110} value={body} onChange={e=>setBody(e.target.value)}/>
+      <span className="zl-charcount">{body.length}/110</span>
+      {!preview.configured && <p className="zl-note">Device push is unavailable.</p>}
+      {error && <p className="zl-error" role="alert">{error}</p>}
+      <button type="submit" className="zl-btn zl-btn--primary" disabled={!canSend}>{busy ? "Sending…" : "Send push"}</button>
+    </form>}
+    {receipt.data && <p className="zl-note" role="status">Delivered to {receipt.data.sent} of {receipt.data.devices} devices{receipt.data.queued ? ` · ${receipt.data.queued} queued` : ""}{receipt.data.failed ? ` · ${receipt.data.failed} failed` : ""}{receipt.data.skipped ? ` · ${receipt.data.skipped} no longer eligible` : ""}.</p>}
+  </section>;
+}
 
-  return (
-    <section className="zl-section zl-push" aria-label="Push notification">
-      <h2>Push notification</h2>
-      <div className="zl-push-aud" role="group" aria-label="Audience">
-        {(["everyone", "followers", "rsvps"] as PushAudience[]).map((a) => (
-          <button
-            key={a}
-            className="zl-btn zl-btn--small"
-            type="button"
-            aria-pressed={audience === a}
-            onClick={() => setAudience(a)}
-          >
-            {a === "everyone" ? "Everyone" : a === "followers" ? "Followers" : "RSVPs"}
-          </button>
-        ))}
-      </div>
-      <p className="zl-note">{allowanceText}</p>
-      <label className="zl-label" htmlFor="zl-push-title">Title</label>
-      <input
-        id="zl-push-title"
-        className="zl-input"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        maxLength={TITLE_LIMIT + 20}
-        placeholder="Push title"
-        autoComplete="off"
-      />
-      <div className="zl-charcount" aria-live="polite">
-        {title.length}/{TITLE_LIMIT}
-        {overTitle ? " · over the lock-screen limit" : ""}
-      </div>
-      <label className="zl-label" htmlFor="zl-push-body">Message</label>
-      <textarea
-        id="zl-push-body"
-        className="zl-textarea"
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        maxLength={BODY_LIMIT + 40}
-        placeholder="Push message"
-      />
-      <div className="zl-charcount" aria-live="polite">
-        {body.length}/{BODY_LIMIT}
-        {overBody ? " · over the lock-screen limit" : ""}
-      </div>
-      {message ? (
-        <p className={state === "error" ? "zl-error" : "zl-ok"} role="status">{message}</p>
-      ) : null}
-      {!sendable && !(isOwner && audience !== "everyone") ? (
-        <p className="zl-note">
-          {isOwner
-            ? "The owner broadcast sends to everyone. Follower and RSVP sending is not wired in the back end yet."
-            : "Sending from this account is not wired in the back end yet. The allowance above is the standing policy."}
-        </p>
-      ) : null}
-      {isOwner && audience !== "everyone" ? (
-        <p className="zl-note">The owner broadcast sends to everyone. Follower and RSVP sending is not wired in the back end yet.</p>
-      ) : null}
-      <div className="zl-row" style={{ marginTop: 10 }}>
-        <button
-          className="zl-btn zl-btn--primary"
-          type="button"
-          disabled={!sendable || !title.trim() || overTitle || overBody || state === "sending"}
-          onClick={() => void send()}
-        >
-          {state === "sending" ? "Sending…" : "Send push"}
-        </button>
-      </div>
-    </section>
-  );
+export function PushMemberships() {
+  const [username,setUsername] = useState("");
+  const [tier,setTier] = useState("standard");
+  const [note,setNote] = useState("");
+  const [busy,setBusy] = useState(false);
+  return <details className="zl-access"><summary>Sender access</summary>
+    <form onSubmit={async e => {
+      e.preventDefault();setBusy(true);setNote("");
+      try {
+        const res=await apiRequest("PUT","/api/hub/push/access",{username,tier});
+        const saved=await res.json() as {username:string;tier:PushTier|null};
+        setNote(`@${saved.username} · ${saved.tier || "no"} sender access`);setUsername("");
+      } catch(e){setNote(parseApiError(e,"Could not update access"));}
+      finally{setBusy(false);}
+    }}>
+      <label className="zl-label">Account username<input className="zl-input" value={username} onChange={e=>setUsername(e.target.value)} required/></label>
+      <label className="zl-label">Sender access<select className="zl-select" value={tier} onChange={e=>setTier(e.target.value)}>
+        <option value="standard">Standard</option><option value="paid">Paid member</option><option value="off">Remove membership grant</option>
+      </select></label>
+      <button className="zl-btn" type="submit" disabled={busy || !username.trim()}>Save access</button>
+      {note && <p className="zl-note" role="status">{note}</p>}
+    </form></details>;
 }

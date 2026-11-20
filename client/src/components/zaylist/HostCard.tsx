@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import ZaylistPanel from "./ZaylistPanel";
+import PushComposer from "./PushComposer";
 import EventMode from "./EventMode";
 
 export interface HostEvent {
@@ -257,6 +258,7 @@ export default function HostCard({
                 </div>
               )}
 
+              <PushComposer selectedEvent={event} />
               <section aria-label="Zay'list" style={{ marginTop: 18 }}>
                 <h3 style={{ fontFamily: "var(--font-display)", margin: "0 0 4px" }}>Zay'list</h3>
                 <ZaylistPanel eventId={event.id} />

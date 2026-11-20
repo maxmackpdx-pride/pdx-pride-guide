@@ -282,3 +282,9 @@
   .zl-root { padding-left: 28px; padding-right: 28px; }
   .zl-wide { flex-basis: 380px; }
 }
+
+.zl-disclosure,.zl-access summary { font:600 1.1rem var(--font-display); color:var(--zg-12); cursor:pointer; min-height:44px; }
+.zl-disclosure { display:flex; align-items:center; justify-content:space-between; width:100%; background:none; border:0; text-align:left; padding:0; }
+.zl-access { margin:12px 0; }
+.zl-access form,.zl-push form { display:grid; gap:8px; }
+.zl-access summary { align-content:center; }

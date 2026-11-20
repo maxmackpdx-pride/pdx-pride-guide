@@ -260,68 +260,7 @@ export function zaylistError(err: unknown, fallback: string): string {
   return parseApiError(err, fallback);
 }
 
-/* ------------------------------------------------------------------ */
-/* Push allowance policy (ask 67, Nov 19, 2026)                        */
-/* Owner: push to all users, no cooldown.                              */
-/* Standard senders: followers 1 per 5 days, RSVPs 1 per day.          */
-/* Paid members: followers 1 per 2 days, RSVPs 3 per day.              */
-/* The back end enforces only the owner broadcast today; these numbers */
-/* are the policy the UI states honestly, not a second enforcement.    */
-/* ------------------------------------------------------------------ */
-
-export type PushAudience = "everyone" | "followers" | "rsvps";
-export type PushTier = "owner" | "paid" | "standard";
-
-export interface PushAllowance {
-  /** Max sends inside the window; Infinity for the owner. */
-  limit: number;
-  /** Window length in days. */
-  windowDays: number;
-}
-
-export function pushTierFor(user: {
-  isPrimaryOwner?: boolean;
-  isPaidMember?: boolean;
-}): PushTier {
-  if (user.isPrimaryOwner) return "owner";
-  if (user.isPaidMember) return "paid";
-  return "standard";
-}
-
-export function pushAllowance(tier: PushTier, audience: PushAudience): PushAllowance {
-  if (tier === "owner") return { limit: Number.POSITIVE_INFINITY, windowDays: 0 };
-  if (audience === "everyone") return { limit: 0, windowDays: 0 };
-  if (tier === "paid") {
-    return audience === "followers"
-      ? { limit: 1, windowDays: 2 }
-      : { limit: 3, windowDays: 1 };
-  }
-  return audience === "followers"
-    ? { limit: 1, windowDays: 5 }
-    : { limit: 1, windowDays: 1 };
-}
-
-/**
- * Sends remaining in the current window, given the timestamps of past
- * sends to this audience. Purely a policy readout: the server is the
- * only enforcement, and today it enforces the owner broadcast only.
- */
-export function pushRemaining(
-  tier: PushTier,
-  audience: PushAudience,
-  sentAtIso: string[],
-  now: Date = new Date(),
-): number {
-  const { limit, windowDays } = pushAllowance(tier, audience);
-  if (!Number.isFinite(limit)) return Number.POSITIVE_INFINITY;
-  if (limit === 0) return 0;
-  const cutoff = now.getTime() - windowDays * 24 * 60 * 60 * 1000;
-  const used = sentAtIso.filter((t) => {
-    const ms = Date.parse(t);
-    return Number.isFinite(ms) && ms > cutoff;
-  }).length;
-  return Math.max(0, limit - used);
-}
+export * from "@shared/hostPushPolicy";
 
 export function entryName(e: {
   displayName: string | null;
