@@ -7,6 +7,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { once } from "node:events";
 import Database from "better-sqlite3";
+import { hashPassword } from "../server/passwords.ts";
 
 if (process.env.ALLOW_QSEARCH_TEST_DB !== "1") {
   throw new Error("Run only with ALLOW_QSEARCH_TEST_DB=1 and a disposable database.");
@@ -97,8 +98,8 @@ try {
   assert.equal(run.status, 201);
   const { runId } = run.payload;
   const candidateKey = `candidate:http-smoke:${randomUUID()}`;
-  const event = { title: `Disposable HTTP test ${randomUUID()}`, venueName: "Disposable Test Venue", dateStart: "2027-11-15T19:00:00" };
-  const sourceUrl = "https://example.com/disposable-test-only";
+  const event = { title: `Disposable HTTP test ${randomUUID()}`, venueName: "Eagle Portland", dateStart: "2027-11-15T19:00:00" };
+  const sourceUrl = "https://fetlife.com/events/disposable-test-only";
   const checkedAt = new Date().toISOString();
   for (const [field, observedValue] of Object.entries(event)) {
     const recorded = await call("POST", "/api/admin/event-research/evidence", {
@@ -106,6 +107,20 @@ try {
     }, token);
     assert.equal(recorded.status, 201);
   }
+  async function screening(field, observedValue, excerpt) {
+    const recorded = await call("POST", "/api/admin/event-research/evidence", {
+      runId, entityKey: candidateKey, field, observedValue, sourceUrl, checkedAt, excerpt,
+    }, token);
+    assert.equal(recorded.status, 201);
+  }
+  await screening("artwork-review", "no-official-image", "Checked exact synthetic occurrence.");
+  const unscreened = await call("POST", "/api/admin/event-research/decision-gate", {
+    runId, candidateKey, fields: Object.keys(event), proposedValues: event,
+  }, token);
+  assert.equal(unscreened.payload.publishable, false);
+  assert.equal(unscreened.payload.missingFetlifeEvidence.length, 2);
+  await screening("public-access", "public", "Open to the public.");
+  await screening("lgbtq-relevance", "explicit", "An LGBTQ+ community event.");
   const gate = await call("POST", "/api/admin/event-research/decision-gate", {
     runId, candidateKey, fields: Object.keys(event), proposedValues: event,
   }, token);
@@ -130,6 +145,38 @@ try {
   assert.equal(created.payload.event.admission, "UNKNOWN");
   assert.equal((await call("GET", "/api/admin/event-research/events?from=2027-11-15", undefined, token))
     .payload.events.some((item) => item.id === created.payload.event.id), true);
+  const eventId = created.payload.event.id;
+  const detailUrl = baseUrl + "/api/events/" + eventId + "/detail";
+  const detail = async cookie => {
+    const response = await fetch(detailUrl, { headers: cookie ? { Cookie: cookie } : {} });
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get("cache-control") || "", /private.*no-store/);
+    return response.json();
+  };
+  const anonymous = await detail();
+  assert.equal(anonymous.sourcePlatform, "fetlife");
+  assert.equal(JSON.stringify(anonymous).includes(sourceUrl), false);
+  const dbRoles = new Database(databasePath);
+  try {
+    const password = randomUUID();
+    const passwordHash = hashPassword(password);
+    const addUser = dbRoles.prepare("INSERT INTO users (username, email, password_hash, sub_admin, promoter_status) VALUES (?, ?, ?, ?, ?)");
+    for (const role of ["member", "other_promoter", "host", "claimant", "staff"]) {
+      const name = "test_qsource_" + role;
+      const id = addUser.run(name, name + "@example.invalid", passwordHash, role === "staff" ? 1 : 0, role === "other_promoter" ? "approved" : "none").lastInsertRowid;
+      if (role === "host") dbRoles.prepare("INSERT INTO event_hosts(event_id,user_id,role) VALUES (?,?,'PRIMARY')").run(eventId, id);
+      if (role === "claimant") dbRoles.prepare("UPDATE events SET claimed_by = ? WHERE id = ?").run(name, eventId);
+      const login = await fetch(baseUrl + "/api/auth/login", { method: "POST",
+        headers: { "content-type": "application/json" }, body: JSON.stringify({ email: name, password }) });
+      assert.equal(login.status, 200);
+      const cookie = login.headers.getSetCookie()[0]?.split(";")[0];
+      assert.ok(cookie);
+      const payload = await detail(cookie);
+      if (["host", "claimant", "staff"].includes(role)) assert.equal(payload.sourceLink, sourceUrl);
+      else assert.equal(JSON.stringify(payload).includes(sourceUrl), false);
+    }
+    dbRoles.prepare("UPDATE events SET claimed_by = NULL WHERE id = ?").run(eventId);
+  } finally { dbRoles.close(); }
   const rolledBack = await call("POST", `/api/admin/event-research/changes/${encodeURIComponent(created.payload.rollback.token)}/rollback`, { confirm: true }, token);
   assert.equal(rolledBack.status, 200);
   assert.equal(rolledBack.payload.event.status, "HIDDEN");
@@ -141,7 +188,7 @@ try {
       .run(new Date().toISOString(), credentialId);
   } finally { revokeDb.close(); }
   assert.equal((await call("GET", "/api/admin/event-research/control", undefined, token)).status, 401);
-  console.log("QSearch local HTTP pairing, scoped read, synthetic publish, rollback, and revocation passed.");
+  console.log("QSearch HTTP pairing, publication gates, source-link roles, rollback, and revocation passed.");
 } finally {
   if (child.exitCode === null) {
     child.kill("SIGTERM");

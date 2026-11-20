@@ -190,14 +190,14 @@ const addressUnknownPublish = createEventFromResearch({
   reason: "Publish an event with a verified venue and unverified street address.",
   mistakeTestsPassed: true,
 });
-assert.equal(addressUnknownPublish.ok, true);
+assert.equal(addressUnknownPublish.ok, false, "unknown ordinary locations stay in review");
 
 // The founder's fast path: one official source, three core facts, no poster or
 // optional details. A failed diagnostic is reported but is not a veto.
 const minimalCandidateKey = "candidate:smoke-minimal-official-event";
 const minimalEvent = {
   title: "QSearch Minimal Official Event",
-  venueName: "QSearch Test Venue",
+  venueName: "Eagle Portland",
   dateStart: "2027-01-16T19:00:00",
 };
 assert.equal(upsertMistakeTest({ testKey: "smoke-diagnostic-only", title: "Diagnostic only",

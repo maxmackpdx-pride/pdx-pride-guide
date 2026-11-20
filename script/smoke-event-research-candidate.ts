@@ -6,7 +6,7 @@ if (process.env.ALLOW_QSEARCH_TEST_DB !== "1" || !process.env.DATABASE_PATH) {
 }
 
 const { storage } = await import("../server/storage");
-const { createEventFromResearch, rollbackEventResearchChange } = await import("../server/eventResearchMemory");
+const { applyEventResearchEventChange, createEventFromResearch, rollbackEventResearchChange } = await import("../server/eventResearchMemory");
 const {
   beginResearchRun, finishResearchRun, evaluateDecisionGate, recordFieldEvidence,
   recordConflict, enqueueResearchReview, upsertMistakeTest,
@@ -18,7 +18,7 @@ if (!run.ok) throw Error(run.error);
 const candidateKey = `candidate:publish-simple:${randomUUID()}`;
 const sourceUrl = "https://example.com/current-official-event";
 const title = `Simple publish ${randomUUID()}`;
-const event = { title, venueName: "Verified Test Venue", dateStart: "2027-11-15T19:00:00" };
+const event = { title, venueName: "Eagle Portland", dateStart: "2027-11-15T19:00:00" };
 const fields = Object.keys(event);
 const gate = (proposedValues: Record<string, unknown> = event, key = candidateKey) => {
   const result = evaluateDecisionGate({ candidateKey: key, runId: run.runId, fields: Object.keys(proposedValues), proposedValues, requireIndependentVerification: true });
@@ -68,6 +68,7 @@ assert.equal(preview.ok, true);
 const created = createEventFromResearch({ ...input, dryRun: false });
 assert.equal(created.ok, true);
 if (!created.ok) throw Error(created.error);
+assert.match(String(created.event.address), /835 N Lombard/i, "verified directory location is persisted");
 assert.equal(created.event.description, "Unverified");
 assert.equal(created.event.dateEnd, "");
 assert.equal(created.event.ageRequirement, "UNVERIFIED");
@@ -83,5 +84,74 @@ for (const [field, observedValue] of Object.entries(event)) recordFieldEvidence(
 assert.equal(gate(event, duplicateKey).publishable, false, "exact duplicate stays blocked");
 assert.equal(rollbackEventResearchChange(created.rollback.token).ok, true);
 assert.equal(storage.getEvent(created.event.id)?.status, "HIDDEN");
+// The FetLife exceptions establish relevance; every occurrence still needs public access.
+const listing = "https://fetlife.com/events/disposable-fixture";
+const secondListing = listing + "?occurrence=2";
+const fetKey = "candidate:local-fetlife-review";
+const fetFacts = { ...event, title: "Mixed community test", venueName: "Sample Hall", address: "123 Test St, Portland, OR" };
+const evidence = (field: string, observedValue: unknown, source = listing, excerpt = "", seconds = 0) => {
+  assert.equal(recordFieldEvidence({ runId: run.runId, entityKey: fetKey, field, observedValue,
+    sourceUrl: source, excerpt, checkedAt: later(seconds) }).ok, true);
+};
+for (const [field, value] of Object.entries(fetFacts)) evidence(field, value);
+evidence("artwork-review", "no-official-image");
+assert.equal(gate(fetFacts, fetKey).missingFetlifeEvidence.length, 2);
+evidence("public-access", "public", sourceUrl, "Open to the public.");
+evidence("lgbtq-relevance", "explicit", "https://fetlife.com.example.com/events/disposable-fixture", "A queer community night.");
+assert.equal(gate(fetFacts, fetKey).missingFetlifeEvidence.length, 2, "cross-site receipts cannot establish access or relevance");
+evidence("public-access", "public", listing, "Open to the public.");
+evidence("lgbtq-relevance", "explicit");
+assert.equal(gate(fetFacts, fetKey).missingFetlifeEvidence.length, 1, "a classification without a listing excerpt is incomplete");
+evidence("organizer-credit", "Portland Leather", listing, "Portland Leather night.");
+assert.equal(gate(fetFacts, fetKey).missingFetlifeEvidence.length, 1, "ambiguous leather wording is not PLA credit");
+evidence("organizer-credit", "Portland Leather Alliance", listing, "Portland Leather night.", 1);
+assert.equal(gate(fetFacts, fetKey).missingFetlifeEvidence.length, 1, "the credit must be explicit in the source excerpt");
+evidence("organizer-credit", "Portland Leather Alliance", listing, "Hosted by Portland Leather Alliance.", 2);
+assert.equal(gate(fetFacts, fetKey).missingFetlifeEvidence.length, 0);
+evidence("public-access", "members-only", listing, "Current update: members only.", 3);
+assert.equal(gate(fetFacts, fetKey).missingFetlifeEvidence.length, 1, "PLA relevance cannot override a private audience");
+evidence("public-access", "public", listing, "Anyone may attend.", 4);
+evidence("organizer-credit", "unknown", listing, "Correction: the organizer is unconfirmed.", 4);
+const sanctuaryFacts = { ...fetFacts, venueName: "Sanctuary", address: "33 NW 9th Ave" };
+assert.equal(gate(sanctuaryFacts, fetKey).missingFetlifeEvidence.length, 0);
+assert.equal(gate({ ...sanctuaryFacts, address: "10 SE 3rd Ave" }, fetKey).missingFetlifeEvidence.length, 1);
+assert.equal(gate({ ...sanctuaryFacts, venueName: "The Sanctuary Collective" }, fetKey).missingFetlifeEvidence.length, 1);
+evidence("lgbtq-relevance", "explicit", listing, "A queer community night.", 5);
+evidence("public-access", "public", secondListing, "Open to all.", 5);
+assert.match(gate(fetFacts, fetKey).missingFetlifeEvidence.join(" "), /occurrence=2 lgbtq-relevance/);
+assert.equal(gate({ ...fetFacts, status: "HIDDEN" }, fetKey).missingFetlifeEvidence.length, 0);
+
+const privateKey = "candidate:disposable-private-location";
+const privateFacts = { ...event, title: "Private location example", venueName: "The Meet Rack at Darkroom" };
+for (const [field, observedValue] of Object.entries(privateFacts)) recordFieldEvidence({ runId: run.runId, entityKey: privateKey, field, observedValue, sourceUrl, checkedAt });
+recordFieldEvidence({ runId: run.runId, entityKey: privateKey, field: "artwork-review", observedValue: "no-official-image", sourceUrl, checkedAt });
+const createPrivate = { ...input, candidateKey: privateKey, event: privateFacts, idempotencyKey: randomUUID(),
+  evidenceReceipts: Object.keys(privateFacts).map(field => ({ field, sourceUrl, checkedAt })) };
+const privatePreview = createEventFromResearch({ ...createPrivate, dryRun: true });
+assert.equal(privatePreview.ok, true);
+assert.equal(privatePreview.event.address, "Register for address");
+assert.equal(gate({ ...privateFacts, lat: 45.5, lng: -122.6 }, privateKey).invalidCandidateFields.includes("registrationOnlyAddress"), true);
+assert.equal(gate({ ...privateFacts, address: "123 Test Street" }, privateKey).invalidCandidateFields.includes("registrationOnlyAddress"), true);
+const inlineOnly = createEventFromResearch({ ...createPrivate, dryRun: true,
+  evidenceReceipts: createPrivate.evidenceReceipts.map(row => ({ ...row, sourceUrl: listing })) });
+assert.equal(inlineOnly.ok, false, "adding FetLife only in the final mutation cannot bypass screening");
+
+const oldHidden = storage.createEvent({ ...fetFacts, description: "Synthetic", dateEnd: "", dayOfWeek: "MON",
+  source: "qsearch-3", status: "HIDDEN", ticketUrl: listing, posterImageUrl: "/fixture.png" }, { changeFeed: false });
+const republishInput = { expectedUpdatedAt: oldHidden.updatedAt, patch: { status: "LIVE", ticketUrl: sourceUrl },
+  evidenceReceipts: ["status", "ticketUrl"].map(field => ({ field, sourceUrl, checkedAt })),
+  reason: "Reverify the exact hidden occurrence.", mistakeTestsPassed: true, runId: run.runId };
+assert.equal(applyEventResearchEventChange(oldHidden.id, { ...republishInput, dryRun: true }).ok, false, "replacing the ticket URL cannot erase FetLife provenance");
+assert.equal(evaluateDecisionGate({ eventId: oldHidden.id, runId: run.runId, fields: ["status"], proposedValues: { status: "LIVE" } }).publishable, false);
+for (const [field, observedValue, excerpt] of [["public-access", "public", "Open to all."], ["lgbtq-relevance", "explicit", "A queer night."]]) {
+  recordFieldEvidence({ runId: run.runId, eventId: oldHidden.id, field, observedValue, sourceUrl: listing, excerpt, checkedAt });
+}
+assert.equal(applyEventResearchEventChange(oldHidden.id, { ...republishInput, dryRun: true }).ok, true);
+recordFieldEvidence({ runId: run.runId, eventId: oldHidden.id, field: "public-access", observedValue: "invite-only", sourceUrl: listing, excerpt: "Invitation required.", checkedAt: later(5) });
+assert.equal(applyEventResearchEventChange(oldHidden.id, republishInput).ok, false, "fresh denial between preview and commit wins");
+assert.equal(storage.getEvent(oldHidden.id)?.status, "HIDDEN");
+recordFieldEvidence({ runId: run.runId, eventId: oldHidden.id, field: "public-access", observedValue: "public", sourceUrl: listing, excerpt: "Public event.", checkedAt: later(6) });
+recordFieldEvidence({ runId: run.runId, eventId: oldHidden.id, field: "status", observedValue: "POSTPONED", sourceUrl: listing, checkedAt: later(6) });
+assert.equal(applyEventResearchEventChange(oldHidden.id, republishInput).ok, false, "access and relevance cannot override postponement");
 assert.equal(finishResearchRun({ runId: run.runId }).ok, true);
 console.log("QSearch simple publish: three required facts, unknown optional fields, latest source, cancellation, duplicate, and rollback passed.");

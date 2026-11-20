@@ -124,9 +124,10 @@ archived scraper.
 Event create/change payloads also support `dryRun`, `idempotencyKey`, and
 `runId`. The event write, field-evidence receipts, rollback ledger, and
 idempotency response are one SQLite transaction: partial success rolls back.
-The decision gate blocks on missing field evidence, open material conflicts,
-unpassed active mistake tests, and (when requested) fewer than two independent
-sources per field.
+The decision gate checks current primary field evidence, the publication address,
+FetLife access and relevance, and artwork reviews. One official source can
+support an occurrence. Mistake results and unresolved optional fields remain
+visible to reviewers. See [the candidate gate](QSEARCH_CANDIDATE_GATE.md).
 
 These commands are deployed in product commit `9679555a`; Railway deployment
 `ae309828-0f40-4d40-880a-9606afa91d11` reached `SUCCESS`, and the live scoped
@@ -143,13 +144,13 @@ node script/qsearch-agent-api.mjs rollback ROLLBACK_TOKEN
 ```
 
 Event creation/correction requires current field-level evidence receipts, a
-specific reason, passed mistake tests, and—for corrections—the exact
+specific reason, and—for corrections—the exact
 `updatedAt` value read before the write. Claimed or human-submitted events and
 human-locked fields are rejected. Every accepted mutation receives an
 append-only change record and rollback token. QSearch may revise a lock created
 by its own prior correction, but never a human-owned lock. A `LIVE` event must
-also have its exact address and complete publication fields; incomplete
-candidates stay `HIDDEN` for review.
+have a confirmed or directory-inherited location. Private or vetted locations
+use “Register for address” with no coordinates.
 
 ## Nightly schedule
 

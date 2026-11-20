@@ -169,7 +169,7 @@ const VENUE_IDENTITY_ALIASES: string[][] = [
 ].map(group => group.map(normalizeVenueKey));
 
 /** Exact venue identity (including curated aliases), never token overlap. */
-function venueNamesExplicitlyMatch(
+export function venueNamesExplicitlyMatch(
   a: string | null | undefined,
   b: string | null | undefined,
 ): boolean {

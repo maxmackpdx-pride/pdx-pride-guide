@@ -1,3 +1,4 @@
+import { publicationDefaults, publicationAddressIssue, republishesEvent } from "./qsearch/publication";
 import { hasRegistrationOnlyLocation, REGISTRATION_ADDRESS } from "@shared/registrationOnlyVenue";
 import { winterPrideWatches, winterEventScope, explicitWinterPrideEvent } from '../shared/outzWinterEvents';
 import { INGEST_SOURCES } from "@shared/ingestSources";
@@ -8,7 +9,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
 import { QSEARCH_UNVERIFIED, qsearchCreateDefaults, qsearchFieldNeedsEvidence } from "@shared/qsearchPublishPolicy";
 import { sqlite, storage } from "./storage";
-import { ensureEventResearchControlTables, evaluateDecisionGate, markRunSource, persistMutationEvidence } from "./eventResearchControl";
+import { ensureEventResearchControlTables, evaluateDecisionGate, markRunSource, persistMutationEvidence, reviewExistingPublication } from "./eventResearchControl";
 
 type ArchivedHealthRow = {
   source_id: string;
@@ -525,6 +526,9 @@ export function applyEventResearchEventChange(
     if (!eventValuesEqual(event[field], value)) changed[field] = value;
   }
   if (!Object.keys(changed).length) return eventResearchError(400, "patch makes no changes");
+  const republishing = republishesEvent(event, { ...event, ...changed });
+  const suppliedFields = Object.keys(changed);
+  if (republishing) Object.assign(changed, publicationDefaults({ ...event, ...changed }, false));
   const locked = parseLockedFields(event.lockedFields);
   const lockedChanges = Object.keys(changed).filter(
     field => locked.includes(field) && !qsearchOwnsCurrentLockedValue(eventId, field, event[field]),
@@ -541,13 +545,22 @@ export function applyEventResearchEventChange(
       fields: [...new Set(lockedChanges)],
     });
   }
-  const receipts = normalizeEvidenceReceipts(input.evidenceReceipts, Object.keys(changed));
+  const receipts = normalizeEvidenceReceipts(input.evidenceReceipts, suppliedFields);
   if (!receipts.ok) return receipts;
   const candidate = { ...event, ...changed };
   const dates = validateEventDateOrder(candidate);
   if (!dates.ok) return dates;
   const publishable = validateEventResearchPublishable(candidate);
   if (!publishable.ok) return publishable;
+  const publicationReview = () => {
+    if (!republishing) return null;
+    const addressIssue = publicationAddressIssue(candidate);
+    const reviews = reviewExistingPublication(event, candidate, input.runId, receipts.receipts.map(row => row.sourceUrl));
+    return addressIssue || reviews.eventIssue || reviews.missingFetlifeEvidence.length || reviews.uncheckedArtworkPages.length
+      ? eventResearchError(409, "publication requires current location and source review", { addressIssue, ...reviews }) : null;
+  };
+  const blocked = publicationReview();
+  if (blocked) return blocked;
   if (changed.dateStart !== undefined) {
     const dayOfWeek = derivedDayOfWeek(String(changed.dateStart));
     if (dayOfWeek) changed.dayOfWeek = dayOfWeek;
@@ -567,6 +580,8 @@ export function applyEventResearchEventChange(
   }
   const before = { ...event };
   const response = sqlite.transaction(() => {
+    const blocked = publicationReview();
+    if (blocked) return blocked;
     const after = storage.updateEvent(eventId, changed as any, { source: "human", changeFeed: false }) as
       | Record<string, unknown>
       | undefined;
@@ -618,7 +633,8 @@ export function createEventFromResearch(input: EventResearchCreateInput) {
   if (reason.length < 10) return eventResearchError(400, "a specific create reason is required");
   const sanitized = sanitizeEventResearchPatch(input.event);
   if (!sanitized.ok) return sanitized;
-  const event = qsearchCreateDefaults(sanitized.patch);
+  const supplied = qsearchCreateDefaults(sanitized.patch);
+  const event = { ...supplied, ...publicationDefaults(supplied, true) };
   if (String(input.candidateKey).startsWith('outz-winter-') && !explicitWinterPrideEvent(event)) return eventResearchError(400, 'Winter resort QSearch sources are LGBTQ+ event-only');
   const missing = EVENT_RESEARCH_REQUIRED_CREATE_FIELDS.filter(field => event[field] == null);
   if (missing.length) {
@@ -634,11 +650,11 @@ export function createEventFromResearch(input: EventResearchCreateInput) {
   if (!publishable.ok) return publishable;
   const receipts = normalizeEvidenceReceipts(
     input.evidenceReceipts,
-    Object.keys(event).filter(field => field !== "dayOfWeek" && qsearchFieldNeedsEvidence(field, event[field])),
+    Object.keys(supplied).filter(field => field !== "dayOfWeek" && qsearchFieldNeedsEvidence(field, supplied[field])),
   );
   if (!receipts.ok) return receipts;
   const candidateValues = {
-    ...event,
+    ...supplied,
     ...(event.eventTypes === undefined ? {} : { eventTypes: JSON.parse(String(event.eventTypes)) }),
   };
   const candidateGate = () => evaluateDecisionGate({
@@ -646,6 +662,7 @@ export function createEventFromResearch(input: EventResearchCreateInput) {
     runId: input.runId,
     fields: Object.keys(candidateValues),
     proposedValues: candidateValues,
+    sourceUrls: receipts.receipts.map(row => row.sourceUrl),
     requireIndependentVerification: true,
   });
   const gate = candidateGate();
@@ -1168,7 +1185,8 @@ export function getEventResearchSourceMemory() {
       generalVenues: "require_event_specific_lgbtq_evidence",
       dedicatedGayVenues: "venue_calendar_is_relevance_evidence",
       venueIdentity: "exact_name_and_address_when_available",
-      fetlife: "The listing itself must explicitly establish public access and LGBTQ+ relevance. Verified Sanctuary events and Portland Leather Alliance events have standing relevance approval. Preserve ordinary date, status and access checks.",
+      fetlife: "Record current primary receipts on the exact FetLife occurrence with a quoted excerpt: public-access=public plus lgbtq-relevance=explicit. Verified Portland Sanctuary events have standing relevance approval. Explicitly credited Portland Leather Alliance events can use organizer-credit=Portland Leather Alliance. Both still require public-access.",
+      ordinaryVenueAddress: "Supply the confirmed physical address or inherit one unambiguous physical directory location on publication.",
       privateVenueAddress: "Register for address. Never publish a private or vetted street location.",
       sanctuaryArtwork: "exact_event_only",
       badlandsPlaAttribution: "explicit_event_credit_only",

@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { sqlite, storage } from "./storage";
+import { historicalFetlifeSources, publicationAddressIssue, publicationDefaults, publicationReviews, republishesEvent } from "./qsearch/publication";
 import { eventDedupeKey } from "@shared/eventDedupe";
 import { QSEARCH_REQUIRED_FACTS, qsearchCreateDefaults, qsearchFieldNeedsEvidence } from "@shared/qsearchPublishPolicy";
 import { pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
@@ -652,6 +653,29 @@ export function recordMistakeTestResult(input: { testKey: string; passed: boolea
   return { ok: true as const, testKey, passed: input.passed };
 }
 
+/** A hidden occurrence becoming LIVE goes through the same current-run page
+ * reviews as a new listing, including its historic source provenance. */
+export function reviewExistingPublication(event: JsonObject, proposed: JsonObject, runId?: string | null, sourceUrls: string[] = []) {
+  ensureEventResearchControlTables();
+  const active = runId && sqlite.prepare("SELECT 1 FROM agent_research_runs WHERE id = ? AND status = 'running'").get(runId);
+  const fresh = active ? sqlite.prepare(`
+    SELECT field, source_url, authority_level, observed_value_json, excerpt FROM agent_field_evidence
+    WHERE event_id = ? AND run_id = ? AND checked_at >= ?
+    ORDER BY checked_at DESC, created_at DESC, rowid DESC
+  `).all(event.id, runId, new Date(Date.now() - 30 * 86400_000).toISOString()) as Parameters<typeof publicationReviews>[1] : [];
+  const history = historicalFetlifeSources({ eventId: Number(event.id) });
+  if (event.ticketUrl) history.push(String(event.ticketUrl));
+  const reviews = publicationReviews(proposed, fresh, sourceUrls, history);
+  const end = parsePacificDateTime(String(proposed.dateEnd || ""));
+  const past = end != null ? end <= Date.now() : (pacificCalendarDate(String(proposed.dateStart)) || "") < pacificTodayDate();
+  const status = fresh.find(row => row.field === "status" && row.authority_level === "primary");
+  const canceled = status && ["CANCELED", "CANCELLED", "POSTPONED"].includes(String(parseJson(status.observed_value_json, "")).toUpperCase());
+  const identity = eventDedupeKey({ id: Number(event.id), title: String(proposed.title), venueName: String(proposed.venueName), dateStart: String(proposed.dateStart) });
+  const duplicate = storage.getEvents({ status: "LIVE" }).find(other => other.id !== event.id && eventDedupeKey(other) === identity);
+  const eventIssue = past ? "pastEvent" : canceled ? "canceled" : duplicate ? "duplicate" : null;
+  return { ...reviews, eventIssue };
+}
+
 export function evaluateDecisionGate(input: {
   eventId?: number;
   candidateKey?: string;
@@ -659,6 +683,7 @@ export function evaluateDecisionGate(input: {
   requireIndependentVerification?: boolean;
   runId?: string | null;
   proposedValues?: Record<string, unknown>;
+  sourceUrls?: string[];
 }) {
   ensureEventResearchControlTables();
   if (input.candidateKey !== undefined) return evaluateCandidateDecisionGate(input);
@@ -669,7 +694,7 @@ export function evaluateDecisionGate(input: {
   }
   const cutoff = new Date(Date.now() - 30 * 24 * 3600_000).toISOString();
   const evidence = (sqlite.prepare(`
-    SELECT id, field, source_url, authority_level, checked_at, observed_value_json
+    SELECT id, field, source_url, authority_level, checked_at, observed_value_json, excerpt
     FROM agent_field_evidence
     WHERE event_id = ? AND checked_at >= ?
     ORDER BY checked_at DESC
@@ -694,11 +719,17 @@ export function evaluateDecisionGate(input: {
     SELECT test_key FROM agent_mistake_tests
     WHERE status = 'active' AND (last_result IS NULL OR last_result != 'passed' OR last_run_at < ?)
   `).all(testCutoff || nowIso()) as Array<{ test_key: string }>;
-  const publishable = !missingKnown.length && !mismatched.length;
+  const republishing = republishesEvent(event, expectedValues);
+  const publication = republishing ? { ...expectedValues, ...publicationDefaults(expectedValues, false) } : expectedValues;
+  const addressIssue = republishing ? publicationAddressIssue(publication) : null;
+  const reviews = republishing ? reviewExistingPublication(event, publication, input.runId, Array.isArray(input.sourceUrls) ? input.sourceUrls : [])
+    : { uncheckedArtworkPages: [], missingFetlifeEvidence: [], eventIssue: null };
+  const publishable = !missingKnown.length && !mismatched.length && !addressIssue && !reviews.eventIssue && !reviews.uncheckedArtworkPages.length && !reviews.missingFetlifeEvidence.length;
   return {
     ok: true as const,
     decision: publishable ? "approved" : "blocked",
     publishable,
+    addressIssue, ...reviews,
     missingEvidence: missingKnown,
     mismatchedEvidence: mismatched,
     materialConflicts: conflicted,
@@ -717,6 +748,7 @@ function evaluateCandidateDecisionGate(input: {
   fields: string[];
   runId?: string | null;
   proposedValues?: Record<string, unknown>;
+  sourceUrls?: string[];
 }) {
   const candidateKey = key(input.candidateKey);
   if (!candidateKey || candidateKey !== input.candidateKey || input.eventId !== undefined) {
@@ -735,7 +767,9 @@ function evaluateCandidateDecisionGate(input: {
   const required = [...QSEARCH_REQUIRED_FACTS];
   const fields = [...new Set([...input.fields.map(evidenceField), ...Object.keys(values), ...required].filter(Boolean))];
   const missingRequiredFields = required.filter(field => values[field] == null || String(values[field]).trim() === "");
-  const invalidCandidateFields: string[] = [];
+  const publication = { ...values, ...publicationDefaults(values, true) };
+  const addressIssue = publicationAddressIssue(publication);
+  const invalidCandidateFields: string[] = addressIssue ? [addressIssue] : [];
   if (!["LIVE", "HIDDEN"].includes(String(values.status))) invalidCandidateFields.push("status");
   if (!["ALL_AGES", "18_PLUS", "21_PLUS", "UNVERIFIED"].includes(String(values.ageRequirement))) invalidCandidateFields.push("ageRequirement");
   if (!["FREE", "TICKETED", "DOOR_FEE", "SUGGESTED_DONATION", "UNKNOWN"].includes(String(values.admission))) invalidCandidateFields.push("admission");
@@ -746,7 +780,7 @@ function evaluateCandidateDecisionGate(input: {
   if (values.status === "LIVE" && (end != null ? end <= Date.now() : (pacificCalendarDate(String(values.dateStart)) || "") < pacificTodayDate())) invalidCandidateFields.push("pastEvent");
   const cutoff = new Date(Date.now() - 30 * 24 * 3600_000).toISOString();
   const observations = (sqlite.prepare(`
-    SELECT id, field, source_url, authority_level, checked_at, observed_value_json
+    SELECT id, field, source_url, authority_level, checked_at, observed_value_json, excerpt
     FROM agent_field_evidence
     WHERE entity_key = ? AND event_id IS NULL AND run_id = ? AND checked_at >= ?
     ORDER BY checked_at DESC, created_at DESC, rowid DESC
@@ -757,26 +791,9 @@ function evaluateCandidateDecisionGate(input: {
   for (const observation of observations) {
     if (observation.authority_level === "primary" && !latestByField.has(observation.field)) latestByField.set(observation.field, observation);
   }
-  // A missing image is publishable after each supplied official page has been reviewed.
-  // Track pages individually so a venue receipt cannot silently cover its ticket seller.
-  const artworkPages = new Set<string>();
-  const reviewedArtworkPages = new Set<string>();
-  if (values.status === "LIVE" && !values.posterImageUrl) {
-    const ticket = safeUrl(values.ticketUrl);
-    if (ticket) artworkPages.add(ticket);
-    for (const observation of observations) {
-      if (observation.authority_level !== "primary") continue;
-      const page = safeUrl(observation.source_url);
-      if (!page) continue;
-      if (observation.field === "artwork-review") {
-        const result = parseJson<string>(observation.observed_value_json, "");
-        if (result === "no-official-image") reviewedArtworkPages.add(page);
-      } else if (EVENT_EVIDENCE_FIELDS.some(field => field === observation.field)) {
-        artworkPages.add(page);
-      }
-    }
-  }
-  const uncheckedArtworkPages = [...artworkPages].filter(page => !reviewedArtworkPages.has(page));
+  const { uncheckedArtworkPages, missingFetlifeEvidence } = values.status === "LIVE"
+    ? publicationReviews(publication, observations, Array.isArray(input.sourceUrls) ? input.sourceUrls : [], historicalFetlifeSources({ candidateKey }))
+    : { uncheckedArtworkPages: [], missingFetlifeEvidence: [] };
   const fieldsNeedingEvidence = fields.filter(field => qsearchFieldNeedsEvidence(field, values[field]));
   const missingEvidence = fieldsNeedingEvidence.filter(field => !latestByField.has(field));
   const mismatchedEvidence = fieldsNeedingEvidence.filter(field => latestByField.has(field) && JSON.stringify(parseJson(latestByField.get(field)!.observed_value_json, null)) !== JSON.stringify(values[field]));
@@ -788,10 +805,10 @@ function evaluateCandidateDecisionGate(input: {
   const reviews = sqlite.prepare(`SELECT id FROM agent_review_queue WHERE candidate_key = ? AND status = 'open'`).all(candidateKey) as Array<{ id: string }>;
   const failedTests = sqlite.prepare(`SELECT test_key FROM agent_mistake_tests WHERE status = 'active' AND (last_result IS NULL OR last_result != 'passed' OR last_run_at IS NULL OR last_run_at < ?)`).all(run.started_at) as Array<{ test_key: string }>;
   const duplicate = missingRequiredFields.length ? undefined : storage.getEvents({}).find(event => eventDedupeKey(event) === eventDedupeKey({ id: 0, title: String(values.title), venueName: String(values.venueName), dateStart: String(values.dateStart) }));
-  const publishable = !missingRequiredFields.length && !invalidCandidateFields.length && !missingEvidence.length && !mismatchedEvidence.length && !canceled && !duplicate && !uncheckedArtworkPages.length;
+  const publishable = !missingRequiredFields.length && !invalidCandidateFields.length && !missingEvidence.length && !mismatchedEvidence.length && !canceled && !duplicate && !uncheckedArtworkPages.length && !missingFetlifeEvidence.length;
   return {
     ok: true as const, candidateKey, decision: publishable ? "approved" : "blocked", publishable,
-    missingRequiredFields, invalidCandidateFields, missingEvidence, mismatchedEvidence, conflictingEvidence, uncheckedArtworkPages,
+    missingRequiredFields, invalidCandidateFields, missingEvidence, mismatchedEvidence, conflictingEvidence, uncheckedArtworkPages, missingFetlifeEvidence,
     materialConflicts: conflicts.map(item => item.field), openReviewItems: reviews.map(item => item.id),
     insufficientIndependentVerification, unpassedMistakeTests: failedTests.map(item => item.test_key),
     canceled: Boolean(canceled),

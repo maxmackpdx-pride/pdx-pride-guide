@@ -47,9 +47,9 @@ revoked credential requires new owner pairing. Do not use human admin cookies.
 
 - **Publish as you go.** When an exact occurrence meets the founder's three
   verified facts, LGBTQ+ relevance, and identity/cancellation/duplicate/lock
-  protections, record its evidence and publish it immediately through the
+  protections, complete the location and artwork checks below. Publish it through the
   scoped dry-run/write path. Do not wait for the directory sweep, Z/List
-  sweep, existing-event audit, poster search, a second source, or all mistake
+  sweep, existing-event audit, another occurrence’s poster search, a second source, or all mistake
   tests to pass. Continue those jobs after publication and report their gaps
   separately. The one-time owner pairing grants ongoing event access; do not
   request owner approval for each eligible event.
@@ -78,10 +78,19 @@ revoked credential requires new owner pairing. Do not use human admin cookies.
   source verifies its exact title, venue/location, and start date/time; a
   trusted dedicated venue calendar or event-specific evidence establishes
   LGBTQ+ relevance; and identity, duplicate, cancellation, and ownership
-  protections pass. One official source is enough. For FetLife, require the listing itself to
-  establish LGBTQ+ relevance and public access. Sanctuary and explicitly
-  credited Portland Leather Alliance events have standing relevance approval.
-  Private venues publish “Register for address.” Use the latest official update
+  protections pass. One official source is enough.
+- For a new or hidden FetLife occurrence, record current primary field evidence
+  on its exact FetLife event page. Use `public-access` with value `public`
+  and `lgbtq-relevance` with value `explicit`. Include the listing’s own words
+  in each `excerpt`. A verified Portland Sanctuary location has standing
+  relevance approval. An explicitly credited Portland Leather Alliance event
+  can use `organizer-credit` with the full organization name and a quoted credit.
+  Both exceptions still need the listing’s public-access receipt. Use the
+  candidate key before creation and the event ID for a hidden occurrence.
+- Record the confirmed street address or use the single matching physical
+  directory location. For private/vetted locations use “Register for address”
+  and omit coordinates. Recheck the resolved location on the preview.
+  Use the latest official update
   for each field; differently labeled times are not conflicts. Submit only
   verified optional fields; leave all others Unverified rather than chasing
   them before creating the event.

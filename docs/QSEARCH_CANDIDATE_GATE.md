@@ -13,23 +13,19 @@ authentication. A candidate is not a hidden placeholder event.
 2. Record each field with `record-evidence -`, supplying `entityKey` equal to that
    exact candidate key, the current `runId`, no `eventId`, its exact
    `observedValue`, current `checkedAt`, and a real official `sourceUrl`.
-   `authorityLevel` must be `primary`. Every supplied field needs two distinct
-   sources that actually agree on its value. A duplicate URL, contradictory
-   second source, fabricated URL variant, or another run's receipt does not pass.
-   The newest receipt for each normalized field/source wins (checked date, then
-   creation/insertion order); an old agreement cannot overrule a newer conflict.
-   Any current primary-source disagreement blocks the affected field, even if
-   two other URLs agree and no separate conflict row has yet been recorded.
-   Source identity drops fragments and known tracking parameters (`utm_*`,
-   `fbclid`, `gclid`, `dclid`, `msclkid`) and normalizes query order. Meaningful
-   occurrence selectors such as Eagle's `?date=` are preserved. Different URLs
-   still require real matching evidence; normalization is not permission to
-   manufacture source variants.
-3. Record material candidate conflicts using `record-conflict -` with
-   `candidateKey` and no `eventId`; use the same key on `queue-review -`.
-   All open material candidate conflicts and open candidate review items block
-   creation, including compound-field conflicts. Resolve only with real evidence
-   or explicit founder direction. Do not clear an item merely to pass a gate.
+   Use primary authority and the exact observed value. One official source is
+   sufficient. The latest primary observation for a field determines its
+   current value. Receipts must be within 30 days.
+3. For publication without artwork, inspect each supplied official source URL
+   and the ticket URL. Record a primary `artwork-review` receipt with the
+   value `no-official-image` for each page you inspected. A blocked or failed
+   page requires further review. For FetLife, record `public-access` =
+   `public` and `lgbtq-relevance` = `explicit` on the exact occurrence page
+   with a short excerpt from the listing. Verified Portland Sanctuary events
+   receive standing relevance approval. An explicit `organizer-credit` for
+   `Portland Leather Alliance` with a quoted credit also establishes relevance.
+   The public-access receipt still applies in both cases. Record genuine
+   conflicts and open review items against the same candidate key.
 4. Record actual current-run results for every active permanent mistake test.
 5. Call `decision-gate -` with this shape:
 
@@ -54,18 +50,14 @@ authentication. A candidate is not a hidden placeholder event.
 ```
 
 This illustrates the shape, not researched event facts. Use only evidenced values.
-The gate automatically includes all supplied and required creation fields, so
-omitting a field from `fields` cannot bypass its proof. Every creation contains
-high-risk date/identity/status fields; independent verification cannot be disabled
-in candidate mode. Evidence must be within 30 days, primary, and recorded under
-the active run and exact candidate key. Required facts, matching values, active
-mistake results, conflicts/review, and existing title/venue/date/start-minute
-duplicates are checked. Only `ok:true` plus `publishable:true` is an approval.
-
-`title`, `description`, `venueName`, `dateStart`, `dateEnd`, `ageRequirement`,
-`admission`, and `status` remain required even for HIDDEN records. LIVE also
-requires an exact address. Unknown end time or age is not a reason to invent one.
-All existing creation field validation still applies in the mutation preview.
+The gate checks every submitted fact and the required title, venue and start time.
+A LIVE listing also needs a verified address. It can inherit a single matching
+directory location. A private or vetted location uses “Register for address”
+with no coordinates. The same checks apply when a HIDDEN event is republished.
+Supply the current run ID and use the event ID for republication evidence.
+Unknown end time, age, admission and other optional facts can stay unverified.
+Review any `uncheckedArtworkPages` or `missingFetlifeEvidence` before writing.
+A successful gate returns both `ok:true` and `publishable:true`.
 
 ## Scoped creation
 
@@ -84,7 +76,7 @@ approval does not permit a changed or newly conflicted candidate. No `eventId`,
 
 Successful creation returns the new event, `candidateKey`, evidence receipt IDs,
 and rollback token. Candidate evidence and its conflict/review history are
-associated with the new event atomically. Creation remains `source:qsearch-2`;
+associated with the new event atomically. Creation records `source:qsearch-3`;
 its supplied fields are QSearch-owned locks. Re-read and retain the returned
 rollback token. Idempotency replay needs the exact same payload; a changed
 payload with the same key is rejected. Created-event rollback hides rather than
@@ -95,7 +87,7 @@ deletes the event.
 `script/smoke-event-research-candidate.ts` runs only with
 `ALLOW_QSEARCH_TEST_DB=1` and an explicit disposable `DATABASE_PATH`. It covers
 legacy-column migration, evidence/run/value/key scope, required fields,
-independent proof, conflicts and review, current mistake results, dry-run and
+one-source proof, address inheritance, FetLife screening, poster review, dry-run and
 commit rechecks, array/null values, unchanged lock boundaries, duplicate checks,
 idempotency, evidence association, and atomic rollback. It is included in the
 existing predeploy test sequence. These tests never research or publish events.
