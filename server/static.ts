@@ -11,7 +11,7 @@ const APP_PATHS = new Set([
   "/", "/placez/map", "/mapz", "/map-demo", "/index.html", "/z", "/events", "/map", "/boardz", "/boards", "/all-boards", "/our-boardz", "/all-boards", "/schedule", "/submit", "/gigz", "/giftz", "/sellz",
   "/gigz/new", "/giftz/new", "/sellz/new", "/mizzed/new",
   "/my-houz", "/my-houz/new", "/houz", "/the-hauz", "/the-hauz/new", "/about", "/aboutz", "/resources", "/rezources", "/needz", "/resume", "/contact", "/sponsors", "/access", "/legal",
-  "/admin", "/dashboard", "/settings/notifications", "/reset-password", "/inbox", "/mizzed", "/directory", "/scenez", "/outzide", "/design-preview", "/design-system/specimen", "/next", "/darkroom",
+  "/admin", "/dashboard", "/hub", "/hub/help", "/settings/notifications", "/reset-password", "/inbox", "/mizzed", "/directory", "/scenez", "/outzide", "/design-preview", "/design-system/specimen", "/next", "/darkroom",
 ]);
 function isAppPath(pathname: string) {
   const normalized = pathname.replace(/\/+$/, "").toLowerCase() || "/";
