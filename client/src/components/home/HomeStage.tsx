@@ -3,7 +3,6 @@ import HomeFlight from "@/components/home/HomeFlight";
 import { useTheme } from "@/context/ThemeContext";
 import { prefersStillMotion } from "@/lib/motion";
 import HomeStageCard from "@/components/home/HomeStageCard";
-import TonightPanel from "@/components/home/TonightPanel";
 import { HandwritingText } from "@/components/ui/handwriting-text";
 import {
   useHomeStageSamples,
@@ -24,6 +23,7 @@ const IDENTITY_LINES = [
   "You are not a product",
   "Fuck Meta",
   "Connection over content",
+  "You’re not here for content",
   "Not your daddies Craigslist",
 ] as const;
 
@@ -99,9 +99,6 @@ export default function HomeStage({ afterWelcome }: Props) {
         </div>
         {afterWelcome}
       </div>
-
-      <div className="site-pre-footer-edge" aria-hidden="true" />
-      <TonightPanel />
     </div>
   );
 }
