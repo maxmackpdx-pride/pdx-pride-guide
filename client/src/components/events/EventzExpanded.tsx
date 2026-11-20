@@ -3,7 +3,7 @@ import { eventAge, eventPrice } from "@/lib/eventFacts";
 import { EventGoingButton, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
 import { PosterlessFlyer } from "./PosterlessFlyer";
 import EventPlanning from "./EventPlanning";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { ArrowUpRight, ChevronLeft, ChevronRight, Clock3, MapPin, Share2, X } from "lucide-react";
@@ -113,6 +113,7 @@ type EventDetail = {
 const PAGES = ["Info", "Feed", "Maps", "More", "People"] as const;
 
 type EventzExpandedProps = {
+  openPlanning?: boolean;
   event: Event;
   onClose: () => void;
   onEventUpdated?: (event: Event) => void;
@@ -121,19 +122,19 @@ type EventzExpandedProps = {
   onOpenEvent?: (event: Event) => void;
 };
 
-export default function EventzExpanded({ event, onClose, onEventUpdated, originRect = null, documentMeta = true, onOpenEvent }: EventzExpandedProps) {
+export default function EventzExpanded({ event, onClose, onEventUpdated, originRect = null, documentMeta = true, onOpenEvent, openPlanning = false }: EventzExpandedProps) {
   const [expandedKey, setExpandedKey] = useState("");
   const [manage, setManage] = useState(false);
   if (!event || typeof event.id !== "number") return null;
   const key = event.id + "/" + event.dateStart;
-  if (expandedKey !== key) return <EventFrontStage key={key} listing={event} onClose={onClose} onExpand={() => setExpandedKey(key)} />;
+  if (!openPlanning && expandedKey !== key) return <EventFrontStage key={key} listing={event} onClose={onClose} onExpand={() => setExpandedKey(key)} />;
   if (manage) {
     return <EventModal event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} documentMeta={documentMeta} />;
   }
   return (
     <CardStage key={event.id} onClose={onClose}>
       {documentMeta ? <OpenCardMeta title={event.title} description={event.venueName || event.description} /> : null}
-      <EventzExpandedInner event={event} onClose={() => closeOpenCard(onClose)} onManage={() => setManage(true)} onOpenEvent={onOpenEvent} />
+      <EventzExpandedInner openPlanning={openPlanning} event={event} onClose={() => closeOpenCard(onClose)} onManage={() => setManage(true)} onOpenEvent={onOpenEvent} />
     </CardStage>
   );
 }
@@ -199,7 +200,8 @@ function primaryLinkFor(event: Event): { href: string; label: string } | null {
   return null;
 }
 
-function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
+function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanning }: {
+  openPlanning: boolean;
   event: Event;
   onClose: () => void;
   onManage: () => void;
@@ -209,10 +211,14 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [showAuth, setShowAuth] = useState(false);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(openPlanning ? 1 : 0);
   const [mizzedOpen, setMizzedOpen] = useState(false);
   const [venueDay, setVenueDay] = useState<string | null>(null);
   const pagesRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const pages = pagesRef.current;
+    if (openPlanning && pages) pages.scrollTo({ left: pages.clientWidth, behavior: "instant" });
+  }, [openPlanning]);
   const { dialogRef, requestClose } = useOpenCardClose(onClose);
 
   const detailQuery = useQuery<EventDetail>({

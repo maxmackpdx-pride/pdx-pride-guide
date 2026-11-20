@@ -1,10 +1,11 @@
+import { MapPlacePreview } from '@/components/MapCardPresentation';
 import {useMapPlacezRenderer} from '@/components/placez/MapPlacezBridge';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import type {Event} from '@shared/schema';
 import type {Business} from '@/pages/Directory';
 import {mapBookmark} from '@/lib/mapBookmarks';
 const AfterzInvitations=lazy(()=>import("@/components/afterz/AfterzInvitations"));
-const EventModal=lazy(()=>import('@/components/EventModal'));
+const EventCard=lazy(()=>import('@/components/events/EventzExpanded'));
 const PlaceModal=lazy(()=>import('@/components/PlaceModal'));
 import {useSearch} from 'wouter';
 import {useAuth} from '@/context/AuthContext';
@@ -28,17 +29,20 @@ export default function UnifiedMap(){
  const {user}=useAuth();const search=useSearch();
  const [attempt,setAttempt]=useState(0),[error,setError]=useState('');
  const [legacyDetail,setLegacyDetail]=useState<{kind:'event';record:Event}|{kind:'place';record:Business}|null>(null);
+ const [expandedPlace,setExpandedPlace]=useState(false);
  const [legacyError,setLegacyError]=useState('');
  const [authOpen,setAuthOpen]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='login');
  usePageSeo(`${({mapz:'PlaceZ',outzide:'OutZide',boardz:'Boardz',afterz:'Afterz',zaydark:'ZayDark'})[initialMode()]} · Zaylist`,'Events, places, outdoor destinations, community boards, Afterz and adult-gated ZayDark.');
  useEffect(()=>{if(new URLSearchParams(search).get('auth')==='login')setAuthOpen(true);},[search]);
+ const bookmark=mapBookmark(new URLSearchParams(search),initialMode()).native;
+ const bookmarkKind=bookmark?.kind,bookmarkId=bookmark?.id;
  useEffect(()=>{
-  const request=mapBookmark(new URLSearchParams(search),initialMode()).native;
-  setLegacyDetail(null);setLegacyError('');if(!request)return;
+  const request=bookmarkKind&&bookmarkId?{kind:bookmarkKind,id:bookmarkId}:undefined;
+  setLegacyDetail(null);setExpandedPlace(false);setLegacyError('');if(!request)return;
   const controller=new AbortController();
   void fetch(`/api/${request.kind==='event'?'events':'directory'}/${encodeURIComponent(request.id)}`,{credentials:'same-origin',cache:'no-store',signal:controller.signal}).then(async response=>{if(!response.ok)throw Error('This bookmarked record is unavailable.');const record=await response.json();if(!record||String(record.id)!==request.id)throw Error('The bookmarked source returned an invalid record.');setLegacyDetail(request.kind==='event'?{kind:'event',record}:{kind:'place',record});}).catch(reason=>{if(!controller.signal.aborted)setLegacyError(reason instanceof Error?reason.message:'Bookmarked record could not load.');});
   return()=>controller.abort();
- },[search]);
+ },[bookmarkKind,bookmarkId]);
  const closeLegacy=()=>{setLegacyDetail(null);setLegacyError('');const url=new URL(window.location.href);url.searchParams.delete('event');url.searchParams.delete('place');window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);};
  useEffect(()=>{
   let disposed=false;let cleanup:(()=>void)|undefined;let releaseStyles:(()=>void)|undefined;
@@ -64,7 +68,7 @@ export default function UnifiedMap(){
   {initialMode()==="afterz" && <Suspense fallback={null}><AfterzInvitations signIn={()=>setAuthOpen(true)} signingIn={authOpen && !user}/></Suspense>}
   {error&&<div role="alert" style={{position:'absolute',inset:0,display:'grid',placeContent:'center',padding:24,background:'var(--z-black,#050506)',color:'white',gap:16}}><h1>Map unavailable</h1><p>{error}</p><button type="button" onClick={()=>setAttempt(v=>v+1)}>Retry map</button><a href="/events">Browse events without the map</a><a href="/">Back to Zaylist</a></div>}
   {legacyError&&<div role="alert" style={{position:'absolute',top:80,left:16,right:16,padding:16,background:'var(--z-black)',color:'white',zIndex:300}}>{legacyError} <button onClick={closeLegacy}>Dismiss</button></div>}
-  {legacyDetail&&<Suspense fallback={<p role="status">Loading bookmarked details…</p>}>{legacyDetail.kind==='event'?<EventModal event={legacyDetail.record} onClose={closeLegacy}/>:<PlaceModal place={legacyDetail.record} onClose={closeLegacy} onRequireAuth={()=>setAuthOpen(true)}/>}</Suspense>}
+  {legacyDetail&&<Suspense fallback={<p role="status">Loading bookmarked details…</p>}>{legacyDetail.kind==='event'?<EventCard event={legacyDetail.record} onClose={closeLegacy}/>:!expandedPlace?<MapPlacePreview place={legacyDetail.record} onExpand={()=>setExpandedPlace(true)} onClose={closeLegacy} onRequireAuth={()=>setAuthOpen(true)}/>:<PlaceModal place={legacyDetail.record} onClose={closeLegacy} onRequireAuth={()=>setAuthOpen(true)}/>}</Suspense>}
   {authOpen&&!user&&<AuthModal onClose={()=>{setAuthOpen(false);const url=new URL(window.location.href);url.searchParams.delete('auth');window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);}}/>}
  </section>;
 }

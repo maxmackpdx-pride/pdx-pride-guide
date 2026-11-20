@@ -386,7 +386,13 @@ export default function Events() {
   }, [setLocation, browseQuery]);
   useEffect(() => {
     if (routeMatch) return;
-    const query = browseQuery().toString();
+    const params = browseQuery();
+    const current = new URLSearchParams(window.location.search);
+    for (const key of ["gathering", "invites"]) {
+      const value = current.get(key);
+      if (value) params.set(key, value);
+    }
+    const query = params.toString();
     const target = query ? `/events?${query}` : "/events";
     if (window.location.pathname + window.location.search !== target) {
       window.history.replaceState(window.history.state, "", target);
@@ -931,6 +937,7 @@ export default function Events() {
       {selectedEvent && (
         <EventzExpanded
           event={selectedEvent}
+          openPlanning={selectedEvent.id === routeEventId && ["rides", "safety"].includes(routeSearch.get("night") || "")}
           onClose={closeEvent}
           onEventUpdated={updated => setSelectedEvent(updated)}
           originRect={eventOriginRect}
