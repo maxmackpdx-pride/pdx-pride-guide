@@ -1,3 +1,4 @@
+import { CardStage } from "@/components/cards/CardStage";
 import { eventAge, eventPrice } from "@/lib/eventFacts";
 import { EventGoingButton, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
 import EventPlanning from "./EventPlanning";
@@ -347,6 +348,7 @@ function PosterCell({
   mtop,
   rail = false,
   showDayFlag = false,
+  onAspect,
   onOpenCard,
   tick,
 }: CellCommon & {
@@ -356,6 +358,7 @@ function PosterCell({
   /** Rails never grow taller: a poster taller than the rail's standard
    *  height (the 0.8 reference at full rail width) scales down to fit. */
   rail?: boolean;
+  onAspect?: (aspect: number) => void;
   showDayFlag?: boolean;
   onOpenCard: (listing: EventListing, el: HTMLElement | null) => void;
 }) {
@@ -366,7 +369,9 @@ function PosterCell({
   const dateStr = dateStrOf(listing);
   const dayColor = dayColorVar(dateStr);
   const accent = listing.accentColor || dayColor;
-  const poster = listingPosterUrl(listing);
+  const posterUrl = listingPosterUrl(listing);
+  const [failedPoster, setFailedPoster] = useState<string>();
+  const poster = posterUrl === failedPoster ? undefined : posterUrl;
   const [aspect, setAspect] = useState(() => (poster ? aspectByPosterUrl.get(poster) ?? 0.8 : 0.8));
   const [cellRef, loadPoster] = usePosterLoad<HTMLDivElement>(poster);
   /* The heart means "you're interested" (Tucker's ruling, Nov 19, 2026):
@@ -457,12 +462,14 @@ function PosterCell({
               src={poster}
               alt=""
               decoding="async"
+              onError={() => setFailedPoster(poster)}
               onLoad={ev => {
                 const im = ev.currentTarget;
                 if (im.naturalWidth > 0 && im.naturalHeight > 0) {
                   const ar = im.naturalWidth / im.naturalHeight;
                   if (poster) aspectByPosterUrl.set(poster, ar);
                   setAspect(ar);
+                  onAspect?.(ar);
                 }
               }}
             />
@@ -543,6 +550,29 @@ function PosterCell({
       {heartAuth && <AuthModal onClose={() => setHeartAuth(false)} />}
     </div>
   );
+}
+
+/** The preview uses the board's real flyer face, including its live Interested and Share actions. */
+export function EventFrontStage({ listing, onExpand, onClose }: {
+  listing: EventListing; onExpand: () => void; onClose: () => void;
+}) {
+  const dialog = useModalA11y({ onClose });
+  const [tick, setTick] = useState(Date.now);
+  const [aspect, setAspect] = useState(.8);
+  useEffect(() => {
+    const timer = window.setInterval(() => setTick(Date.now()), 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  return <CardStage front className="fbx" onClose={onClose}>
+    <div className="event-front-dialog" style={{ "--front-aspect": aspect } as CSSProperties}
+      role="dialog" aria-modal="true" aria-label={listing.title} ref={dialog}>
+      <PosterCell listing={listing} index={0} tick={tick} mtop={0} onAspect={setAspect} onOpenCard={onExpand} />
+      <div className="event-front-controls">
+        <button type="button" onClick={onClose}>Close</button>
+        <button type="button" onClick={onExpand}>View details →</button>
+      </div>
+    </div>
+  </CardStage>;
 }
 
 function SubmitCell({ mtop }: { mtop: number }) {
@@ -722,6 +752,7 @@ export default function FlyerBoard({
   const [cols, setCols] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(min-width: 1100px)").matches ? 5 : 3,
   );
+  const [frontShowing, setFrontShowing] = useState(false);
   const [openListing, setOpenListing] = useState<EventListing | null>(null);
   const [ocardOn, setOcardOn] = useState(false);
   const [opage, setOpage] = useState(0);
@@ -929,36 +960,26 @@ export default function FlyerBoard({
       window.history.pushState({ ...window.history.state, flyerPoster: { id: listing.id, date: dateStrOf(listing) } }, "", window.location.href);
     }
     flipElRef.current = el;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("calm-mode");
-    if (el && !reduced) {
-      el.classList.add("flipping");
-      el.style.transition = "transform .2s ease-in";
-      el.style.transform = "perspective(900px) rotateY(88deg)";
-    }
-    later(() => setOcardOn(true), reduced ? 0 : 190);
+    setOcardOn(false);
+    setFrontShowing(true);
+  };
+  const expandFront = () => {
+    setFrontShowing(false);
+    setOcardOn(true);
   };
   const closeCard = (fromHistory = false) => {
     if (!fromHistory && window.history.state?.flyerPoster) { window.history.back(); return; }
+    setFrontShowing(false);
     setOcardOn(false);
     const p = flipElRef.current;
     flipElRef.current = null;
     requestAnimationFrame(() => p?.isConnected && p.focus({ preventScroll: true }));
-    if (p) {
-      later(() => {
-        p.style.transition = "transform .3s cubic-bezier(.32,1.24,.36,1)";
-        p.style.transform = "";
-        later(() => {
-          p.classList.remove("flipping");
-          p.style.transition = "";
-        }, 330);
-      }, 150);
-    }
-    later(() => setOpenListing(null), 580);
+    setOpenListing(null);
   };
   useEffect(() => {
     const selection = historyState?.flyerPoster;
     if (!selection) {
-      if (openListing && ocardOn) closeCard(true);
+      if (openListing) closeCard(true);
       return;
     }
     if (openListing?.id === selection.id && dateStrOf(openListing) === selection.date) return;
@@ -1159,7 +1180,9 @@ export default function FlyerBoard({
   const pileMinis = pastList.filter(e => listingPosterUrl(e)).slice(0, 4);
 
   const openAccent = openListing ? openListing.accentColor || dayColorVar(dateStrOf(openListing)) : "var(--neon-red)";
-  const openPoster = openListing ? listingPosterUrl(openListing) : null;
+  const [failedOpenPoster, setFailedOpenPoster] = useState<string>();
+  const openPosterUrl = openListing ? listingPosterUrl(openListing) : null;
+  const openPoster = openPosterUrl === failedOpenPoster ? null : openPosterUrl;
   const openCd = openListing ? countdownParts(startMs(openListing) - tick) : null;
   const openRunning = openListing
     ? startMs(openListing) <= tick && (endMs(openListing) > tick || (!openListing.dateEnd && dateStrOf(openListing) === todayStr))
@@ -1571,8 +1594,8 @@ export default function FlyerBoard({
       </div>
 
       {/* open card */}
-      <div className={`scrim${ocardOn ? " on" : ""}`} onClick={() => closeCard()} />
-      {openListing && (
+      {openListing && frontShowing && <EventFrontStage listing={openListing} onClose={() => closeCard()} onExpand={expandFront} />}
+      {openListing && ocardOn && <CardStage className="fbx" onClose={() => closeCard()}>
         <div
           className={`ocard${ocardOn ? " on" : ""}`} ref={posterDialog} inert={!ocardOn}
           style={{ "--a": openAccent } as CSSProperties}
@@ -1586,7 +1609,7 @@ export default function FlyerBoard({
           </button>
           <div className="ohero">
               {openPoster ? (
-                <img src={openPoster} alt="" />
+                <img src={openPoster} alt="" onError={() => setFailedOpenPoster(openPoster)} />
               ) : (
                 <div
                   className="ohero-typo"
@@ -1944,7 +1967,7 @@ export default function FlyerBoard({
             />
           </div>
         </div>
-      )}
+      </CardStage>}
           </div>,
           document.body,
         )}

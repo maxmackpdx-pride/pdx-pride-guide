@@ -13,7 +13,8 @@ import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { resolveVenueWebsite } from "@shared/venueLinks";
 import { resolveDirectoryLogo } from "@shared/directoryLogos";
-import { CardDetails } from "@/components/cards/CardAPI";
+import { CardStage } from "@/components/cards/CardStage";
+import { EventFrontStage } from "./FlyerBoard";
 import { OpenCardMeta } from "@/components/cards/react19Card";
 import { closeOpenCard } from "@/components/cards/react19CardModel";
 import { useOpenCardClose } from "@/hooks/useOpenCardClose";
@@ -121,16 +122,19 @@ type EventzExpandedProps = {
 };
 
 export default function EventzExpanded({ event, onClose, onEventUpdated, originRect = null, documentMeta = true, onOpenEvent }: EventzExpandedProps) {
+  const [expandedKey, setExpandedKey] = useState("");
   const [manage, setManage] = useState(false);
   if (!event || typeof event.id !== "number") return null;
+  const key = event.id + "/" + event.dateStart;
+  if (expandedKey !== key) return <EventFrontStage key={key} listing={event} onClose={onClose} onExpand={() => setExpandedKey(key)} />;
   if (manage) {
     return <EventModal event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} documentMeta={documentMeta} />;
   }
   return (
-    <CardDetails navigationWidth key={event.id} onClose={onClose}>
+    <CardStage key={event.id} onClose={onClose}>
       {documentMeta ? <OpenCardMeta title={event.title} description={event.venueName || event.description} /> : null}
       <EventzExpandedInner event={event} onClose={() => closeOpenCard(onClose)} onManage={() => setManage(true)} onOpenEvent={onOpenEvent} />
-    </CardDetails>
+    </CardStage>
   );
 }
 
@@ -262,7 +266,9 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
   const day = listingDay(event);
   const flyerAccent = (event as { accentColor?: string | null }).accentColor || null;
   const accent = flyerAccent ?? dayAccentToken(day);
-  const poster = listingPosterUrl(event);
+  const posterUrl = listingPosterUrl(event);
+  const [failedPoster, setFailedPoster] = useState<string>();
+  const poster = posterUrl === failedPoster ? undefined : posterUrl;
   const posterAttributes = useResponsivePoster(poster, POSTER_DETAIL_SIZES);
   const endMs = parsePacificDateTime(event.dateEnd);
   const isPastEvent = endMs != null && endMs < Date.now();
@@ -308,11 +314,11 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent }: {
   };
 
   return (
-    <div ref={dialogRef} data-testid="event-modal" data-card-category="eventz" className="evz-x pdx-glass-rebind" style={{ "--c": accent, "--ac": accent } as CSSProperties} aria-label={`${event.title} details`}>
+    <div ref={dialogRef} role="dialog" aria-modal="true" tabIndex={-1} data-testid="event-modal" data-card-category="eventz" className="evz-x pdx-glass-rebind" style={{ "--c": accent, "--ac": accent } as CSSProperties} aria-label={`${event.title} details`}>
       <span className="evz-x__grad" aria-hidden="true" />
       <header className="evz-x__hero">
         {poster
-          ? <img {...posterAttributes} alt="" loading="lazy" decoding="async" className="evz-x__flyer" onError={(e) => { restoreOriginalPoster(e.currentTarget, poster); }} />
+          ? <img {...posterAttributes} alt="" loading="lazy" decoding="async" className="evz-x__flyer" onError={(e) => { if (!restoreOriginalPoster(e.currentTarget, poster)) setFailedPoster(poster); }} />
           : (
             <>
               <span className="evz-x__flyer evz-x__flyer--none" aria-hidden="true" />

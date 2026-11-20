@@ -1,0 +1,53 @@
+.zay-card-stage, .zay-card-stage.fbx {
+  position: fixed;
+  inset: var(--card-stage-top, 0px) 0 var(--card-stage-bottom, 0px);
+  z-index: 3010;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  box-sizing: border-box;
+  background: color-mix(in srgb, var(--z-black) 65%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.zay-card-stage--expanded > :is(.evz-x, .scene-native-dialog, .outz-native-dialog, .placez-native-overlay) {
+  position: relative; inset: auto; margin: 0; padding: 0;
+  width: min(620px, 100%); max-width: 100%; height: 100%; max-height: 100%;
+  box-sizing: border-box; min-height: 0; border-radius: 14px; overflow: hidden;
+}
+.zay-card-stage--expanded .placez-native-overlay > .placez-native-dialog,
+.zay-card-stage--expanded .pz-card.pz-native-expanded,
+.zay-card-stage--expanded .scene-native-dialog .pz-card--expanded {
+  width: 100%; height: 100%; max-height: 100%; min-height: 0; margin: 0; box-sizing: border-box;
+}
+.zay-card-stage--expanded > .evz-x { align-self: stretch; }
+.zay-card-stage--expanded .outz-native-expanded { height: 100%; min-height: 0; }
+.zay-card-stage--expanded .outz-native-sections { flex: 1; min-height: 0; overflow-y: auto; }
+.zay-card-stage.fbx .ocard {
+  position: relative; inset: auto; width: min(620px, 100%); height: 100%;
+  opacity: 1; pointer-events: auto; transform: none;
+}
+.zay-card-stage.fbx .ocard.on { transform: none; }
+.zay-card-stage--front .event-front-dialog {
+  width: min(80vw, 350px, calc((100dvh - var(--card-stage-top) - var(--card-stage-bottom) - 102px) * var(--front-aspect, .8)));
+  max-height: 100%; overflow: auto; padding: 16px 10px; scrollbar-width: none; box-sizing: content-box;
+}
+.zay-card-stage--front .event-front-dialog .cell { opacity: 1; transform: none; position: relative; width: 100%; container-type: inline-size; }
+.zay-card-stage--front .event-front-dialog .poster { transform: none; animation: none; }
+.event-front-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 17px; }
+.event-front-controls button {
+  border: 1px solid var(--glass-line-soft, currentColor); background: var(--ink-800); color: var(--text-hi);
+  min-height: 44px; border-radius: 24px; padding-inline: 16px; cursor: pointer; font: 650 15px var(--font-body);
+}
+.event-front-controls button:last-child { margin-left: auto; }
+@media (prefers-reduced-motion: no-preference) {
+  .zay-card-stage--expanded > :is(.evz-x, .scene-native-dialog, .outz-native-dialog, .placez-native-overlay, .ocard) {
+    animation: card-stage-flip .28s cubic-bezier(.16,1,.3,1);
+  }
+  @keyframes card-stage-flip { from { rotate: y -18deg; opacity: .35; } to { rotate: y 0deg; opacity: 1; } }
+}
+
+.zay-card-stage.placez-stage .place-modal-overlay { display: block; padding: 0; backdrop-filter: none; background: transparent; }
+/* The scroll lock pins the body at its saved scroll offset. Keep its sticky
+   header on screen while opening from a poster far down the board. */
+body:has(> .zay-card-stage) .site-header.site-header--glass { position: fixed; inset-inline: 0; margin-inline: auto; margin-block-start: 0; }

@@ -868,7 +868,7 @@ gigs.length === 0 ? (
 
   return (
     <div onClick={handleClose} role="presentation" className={`event-modal-overlay place-modal-overlay placez-native-overlay${open ? " place-modal-overlay--open" : ""}`}>
-      <div ref={panelRef} onClick={event => event.stopPropagation()} role="dialog" aria-modal="false" aria-label={place.name} tabIndex={-1} className="placez-native-dialog">
+      <div ref={panelRef} onClick={event => event.stopPropagation()} role="dialog" aria-modal="true" aria-label={place.name} tabIndex={-1} className="placez-native-dialog">
         <NativePlacezExpanded place={displayed} contacts={nativeContacts} info={nativeInfo}
           feed={<><h3>GIGZ</h3>{place.gigs === undefined ? <p>Venue GIGZ have not loaded.</p> : nativeGigs}{nativeMizzed}</>}
           events={place.upcomingEvents === undefined ? <p>Venue events have not loaded.</p> : nativeUpcoming}

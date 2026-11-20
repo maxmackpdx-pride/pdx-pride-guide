@@ -1,9 +1,9 @@
 import type {ReactNode} from 'react';
-import {CardDetails} from '../cards/CardAPI';
-import '../places/InlinePlacesDetails.css';
+import {CardStage} from '../cards/CardStage';
+import './FullscreenPlacezDetails.css';
 
-/** Place details share EventZ's in-flow expansion and source-card restoration. */
+/** Place cards go straight to their expanded face. */
 export default function FullscreenPlacezDetails({children,onClose}:{children:ReactNode;label:string;onClose:()=>void}){
- return <CardDetails navigationWidth onClose={onClose}>{children}</CardDetails>;
+ return <CardStage className="placez-stage" onClose={onClose}>{children}</CardStage>;
 }
 
