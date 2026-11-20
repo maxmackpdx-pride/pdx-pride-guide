@@ -4297,11 +4297,11 @@ function runBootMigrationsOnce() {
     recordBootMigration("event_data_audit_v2");
   }
   if (!hasBootMigration("sync_site_owner_portfolio_v1")) {
-    syncSiteOwnerPortfolio();
+    syncSiteOwnerPortfolio(true);
     recordBootMigration("sync_site_owner_portfolio_v1");
   }
   if (!hasBootMigration("sync_site_owner_portfolio_v2")) {
-    syncSiteOwnerPortfolio();
+    syncSiteOwnerPortfolio(true);
     recordBootMigration("sync_site_owner_portfolio_v2");
   }
   if (!hasBootMigration("release_site_owner_gifting_v1")) {
@@ -9574,8 +9574,8 @@ function findSiteOwnerEventId(): number | undefined {
   return fuzzy?.id;
 }
 
-/** Keep site owner portfolio limited to Yes Coach + the site-admin gig post. */
-function syncSiteOwnerPortfolio() {
+/** The old portfolio cleanup belongs to its one-time boot migrations. Later host and gig assignments must survive sign-in and restarts. */
+function syncSiteOwnerPortfolio(applyLegacyCleanup = false) {
   ensureSiteAdminGigPost();
   ensureEventHostsSchema();
   const owner = resolveSiteOwner();
@@ -9587,12 +9587,10 @@ function syncSiteOwnerPortfolio() {
   const adminGigId = findSiteAdminGigPostId();
   if (adminGigId != null) {
     sqlite.prepare(`UPDATE gig_posts SET user_id = ? WHERE id = ?`).run(owner.id, adminGigId);
+  }
+  if (applyLegacyCleanup) {
     for (const userId of userIds) {
-      sqlite.prepare(`UPDATE gig_posts SET user_id = NULL WHERE user_id = ? AND id != ?`).run(userId, adminGigId);
-    }
-  } else {
-    for (const userId of userIds) {
-      sqlite.prepare(`UPDATE gig_posts SET user_id = NULL WHERE user_id = ?`).run(userId);
+      sqlite.prepare(`UPDATE gig_posts SET user_id = NULL WHERE user_id = ? AND id != ?`).run(userId, adminGigId ?? -1);
     }
   }
 
@@ -9615,6 +9613,9 @@ function syncSiteOwnerPortfolio() {
     }
     db.update(events).set({ isClaimable: false, claimedBy: owner.username }).where(eq(events.id, yesCoachId)).run();
 
+  }
+
+  if (applyLegacyCleanup && yesCoachId != null) {
     for (const userId of userIds) {
       sqlite.prepare(`DELETE FROM event_hosts WHERE user_id = ? AND event_id != ?`).run(userId, yesCoachId);
       sqlite.prepare(`DELETE FROM event_talent WHERE user_id = ? AND event_id != ?`).run(userId, yesCoachId);
@@ -9640,13 +9641,15 @@ function syncSiteOwnerPortfolio() {
     }
   }
 
-  const clearHistoricalSubmissions = sqlite.prepare(`
-    DELETE FROM submissions
-    WHERE LOWER(TRIM(submitter_email)) = ?
-      AND status IN ('APPROVED', 'REJECTED')
-  `);
-  for (const email of emails) clearHistoricalSubmissions.run(email);
+  if (applyLegacyCleanup) {
+    const clearHistoricalSubmissions = sqlite.prepare(`
+      DELETE FROM submissions
+      WHERE LOWER(TRIM(submitter_email)) = ?
+        AND status IN ('APPROVED', 'REJECTED')
+    `);
+    for (const email of emails) clearHistoricalSubmissions.run(email);
 
+  }
   releaseSiteOwnerPendingGifts(owner.id);
   for (const userId of userIds) {
     if (userId !== owner.id) releaseSiteOwnerPendingGifts(userId);

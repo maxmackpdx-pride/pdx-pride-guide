@@ -22,6 +22,7 @@ import { readBoardMotif, saveBoardMotif, validateBoardMotif } from "./boardMotif
 import { registerBoardPlacement } from "./boardMapPlacement";
 import { homeCatalogCounts } from "./homeStats";
 import { hasPublicEventFlags } from "@shared/publicEventVisibility";
+import { linkAnniversaryOpenCall } from "./seedYesCoachOpenCall";
 import { registerEventPlanning, validateAdminGigEventLink } from "./eventPlanning";
 import { registerHostWorkspace } from "./hostWorkspace";
 import { registerHostPush } from "./hostPush";
@@ -1382,6 +1383,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   const eventSaves = createEventSaves(sqlite);
   const eventPlanning = registerEventPlanning(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate,
     (recipientIds,senderId,title,body,navigate,tag)=>schedulePushForActivity({recipientIds,senderId,title,body,navigate,tag,category:"my_events"}));
+  linkAnniversaryOpenCall(sqlite, (eventId, userId) => storage.setPrimaryEventHost(eventId, userId, null));
   const zaylist = registerZaylist(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate);
   const hostWorkspace = registerHostWorkspace(app, sqlite, storage, requireAuth, zaylist.store, zaylist.accessFor, isPublicEventVisibleUnderPrideCap);
   const hostPush = registerHostPush(app, sqlite, storage, requireAuth, user => storage.hasOwnerAdminAccess(user) || isMainAdminUser(user), moderationGate, undefined,
