@@ -11,15 +11,34 @@ import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
 import "./invitations.css";
 
-import NightOptions, {defaultOptions} from "./NightOptions";
+import NightOptions, { defaultOptions } from "./NightOptions";
 
-type Role = "waitlisted" | "guest" | "host" | "pending" | "accepted" | "declined" | "revoked";
+type Role =
+  | "waitlisted"
+  | "guest"
+  | "host"
+  | "pending"
+  | "accepted"
+  | "declined"
+  | "revoked";
 type Gathering = { id: string; title: string; closesAt: number; role: Role };
 type Details = Gathering & {
   hostName: string;
-  night?: {capacity:number;poster:string|null;eventId:number;occurrence:string;sexPositive:number;nudityOk:number};
-  renewed?:boolean;
-  requests?: { userId: number; name: string; status: "pending" | "accepted" | "waitlisted"; renewed?:number }[];
+  night?: {
+    capacity: number;
+    poster: string | null;
+    eventId: number;
+    occurrence: string;
+    sexPositive: number;
+    nudityOk: number;
+  };
+  renewed?: boolean;
+  requests?: {
+    userId: number;
+    name: string;
+    status: "pending" | "accepted" | "waitlisted";
+    renewed?: number;
+  }[];
 };
 type ChatMessage = { id: number; name: string; body: string };
 const base = "/api/afterz/gatherings";
@@ -213,10 +232,34 @@ function GatheringRoom({
   const details = room.data;
   return (
     <section className="afterz-room">
-      {details.night?.poster&&<img className="afterz-room-poster" src={details.night.poster} alt=""/>}
+      {details.night?.poster && (
+        <img className="afterz-room-poster" src={details.night.poster} alt="" />
+      )}
       <h3>{details.title}</h3>
-      {details.night&&<p>{[details.night.sexPositive && "Sex positive",details.night.nudityOk && "Nudity OK"].filter(Boolean).join(" · ")}</p>}
-      {role==="waitlisted"&&<section><p>Room full. You are on the waitlist.</p><button disabled={working || details.renewed} onClick={()=>void action("/second",{})}>{details.renewed?"Second please sent":"Second please"}</button><button disabled={working} onClick={()=>void action("/leave",{})}>Leave waitlist</button></section>}
+      {details.night && (
+        <p>
+          {[
+            details.night.sexPositive && "Sex positive",
+            details.night.nudityOk && "Nudity OK",
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+      )}
+      {role === "waitlisted" && (
+        <section>
+          <p>Room full. You are on the waitlist.</p>
+          <button
+            disabled={working || details.renewed}
+            onClick={() => void action("/second", {})}
+          >
+            {details.renewed ? "Second please sent" : "Second please"}
+          </button>
+          <button disabled={working} onClick={() => void action("/leave", {})}>
+            Leave waitlist
+          </button>
+        </section>
+      )}
       <p>
         Hosted by {details.hostName} · Closes{" "}
         {new Date(details.closesAt).toLocaleString(undefined, {
@@ -277,13 +320,39 @@ function GatheringRoom({
               />
             </label>
           )}
-          {details.night && <form onSubmit={e=>{e.preventDefault();void action("/capacity",{capacity:Number(new FormData(e.currentTarget).get("capacity"))});}}><label>Guest spots<input key={details.night.capacity} name="capacity" type="number" required min={1} max={500} defaultValue={details.night.capacity}/></label><button disabled={working}>Update room</button></form>}
+          {details.night && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void action("/capacity", {
+                  capacity: Number(
+                    new FormData(e.currentTarget).get("capacity"),
+                  ),
+                });
+              }}
+            >
+              <label>
+                Guest spots
+                <input
+                  key={details.night.capacity}
+                  name="capacity"
+                  type="number"
+                  required
+                  min={1}
+                  max={500}
+                  defaultValue={details.night.capacity}
+                />
+              </label>
+              <button disabled={working}>Update room</button>
+            </form>
+          )}
           <h4>Guest requests</h4>
           {details.requests?.length ? (
             details.requests.map((guest) => (
               <div className="afterz-guest" key={guest.userId}>
                 <span>
-                  {guest.name} · {readableStatus[guest.status]}{guest.renewed ? " · Second please" : ""}
+                  {guest.name} · {readableStatus[guest.status]}
+                  {guest.renewed ? " · Second please" : ""}
                 </span>
                 {guest.status !== "accepted" && (
                   <button
@@ -422,7 +491,8 @@ function GatheringList({
     [confirmed, setConfirmed] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
-  const [options,setOptions]=useState(defaultOptions), [uploading,setUploading]=useState(false);
+  const [options, setOptions] = useState(defaultOptions),
+    [uploading, setUploading] = useState(false);
   const [key, setKey] = useState(() => crypto.randomUUID());
   if (!user)
     return <button onClick={signIn}>Sign in to see or host a gathering</button>;
@@ -462,7 +532,8 @@ function GatheringList({
             setError("");
             try {
               const { id } = await apiRequest("POST", base, {
-                ...options, title,
+                ...options,
+                title,
                 confirmed18: confirmed,
                 requestId: key,
               }).then((r) => r.json());
@@ -491,12 +562,18 @@ function GatheringList({
               }}
             />
           </label>
-          <NightOptions options={options} onChange={setOptions} onUploading={setUploading}/>
-          {!options.eventId && <p>
-            People with your invite link can see the title and your name. Keep
-            addresses out of the title. Guest requests and chat close at 6 AM
-            Pacific.
-          </p>}
+          <NightOptions
+            options={options}
+            onChange={setOptions}
+            onUploading={setUploading}
+          />
+          {!options.eventId && (
+            <p>
+              People with your invite link can see the title and your name. Keep
+              addresses out of the title. Guest requests and chat close at 6 AM
+              Pacific.
+            </p>
+          )}
           <label>
             <input
               type="checkbox"
@@ -518,7 +595,7 @@ function GatheringList({
 export default function AfterzInvitations({
   signIn,
   signingIn,
-  drawer=false,
+  drawer = false,
 }: {
   drawer?: boolean;
   signIn: () => void;
@@ -544,7 +621,7 @@ export default function AfterzInvitations({
       <button
         type="button"
         ref={trigger}
-        className={drawer?"afterz-host-widget":"afterz-invite-trigger"}
+        className={drawer ? "afterz-host-widget" : "afterz-invite-trigger"}
         onClick={() => change("")}
       >
         {drawer ? "Afterz · Host or manage invitations" : "Invitations"}
