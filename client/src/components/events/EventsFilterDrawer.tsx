@@ -147,7 +147,7 @@ export default function EventsFilterDrawer({
        handle — the two-stage close depends on that lip. */
     const header = document.querySelector(".site-hub-mtop, .site-header");
     const headerBottom = header ? Math.max(0, header.getBoundingClientRect().bottom) : 0;
-    return Math.max(320, root.getBoundingClientRect().bottom - headerBottom - LIP_H);
+    return Math.max(0, Math.floor(root.getBoundingClientRect().bottom - headerBottom - LIP_H - 2));
   };
 
   const goStage = (next: Stage) => {
@@ -176,14 +176,18 @@ export default function EventsFilterDrawer({
     const measure = () => {
       /* While stage 2 shows, stage 1 is display:none and measures 0 —
          keep the last real stage-1 height for the trip back down. */
-      if (!s1.hidden) setBodyH(s1.scrollHeight);
+      if (!s1.hidden) setBodyH(Math.min(s1.scrollHeight, measureFull()));
       onHeightChange?.(root.offsetHeight);
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(s1);
     ro.observe(root);
-    return () => ro.disconnect();
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
   }, [onHeightChange]);
 
   /* Keep the full-screen height honest on rotation/resize. */
@@ -290,6 +294,7 @@ export default function EventsFilterDrawer({
       onKeyDown={event => {
         if (event.key === "Escape" && stage > 0 && !event.defaultPrevented &&
             event.currentTarget.contains(event.target as Node)) {
+          if (stage === 2 && rootRef.current?.querySelector(".sch-pop")) return;
           event.preventDefault();
           event.stopPropagation();
           goStage(stage === 2 ? 1 : 0);
