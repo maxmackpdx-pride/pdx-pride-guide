@@ -19,14 +19,20 @@ export function CardStage({ children, front = false, onClose, className = '' }: 
       const viewport = document.documentElement.clientHeight;
       let top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--site-header-sticky-edge')) || 0;
       let bottom = 0;
+      let navMid = 0;
       for (const bar of bars) {
         const rect = bar.getBoundingClientRect();
         if (!rect.width || !rect.height || rect.bottom <= 0 || rect.top >= viewport) continue;
         if (bar.matches('.z-mobile-dock')) bottom = Math.max(bottom, viewport - rect.top);
-        else if (rect.top < viewport / 3) top = Math.max(top, rect.bottom);
+        else if (rect.top < viewport / 3) {
+          top = Math.max(top, rect.bottom);
+          navMid = Math.max(navMid, rect.top + rect.height / 2);
+        }
       }
       frame.current?.style.setProperty('--card-stage-top', top + 'px');
       frame.current?.style.setProperty('--card-stage-bottom', bottom + 'px');
+      // Open event sheets start halfway over the top bar.
+      frame.current?.style.setProperty('--card-stage-nav-mid', (navMid || top) + 'px');
     };
     const observer = new ResizeObserver(measure);
     bars.forEach(bar => observer.observe(bar));

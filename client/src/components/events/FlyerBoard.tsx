@@ -464,8 +464,9 @@ export default function FlyerBoard({
       window.history.pushState({ ...window.history.state, flyerPoster: { id: listing.id, date: dateStrOf(listing) } }, "", window.location.href);
     }
     flipElRef.current = el;
-    setOcardOn(false);
-    setFrontShowing(true);
+    // Tucker, Nov 20: a tapped event opens straight into the sheet, not the centered preview.
+    setFrontShowing(false);
+    setOcardOn(true);
   };
   const expandFront = () => {
     setFrontShowing(false);
@@ -493,33 +494,6 @@ export default function FlyerBoard({
     openCard(listing, origin ?? null);
   }, [historyState, events, pastEvents, openListing, ocardOn]);
   const posterDialog = useModalA11y({open:ocardOn,onClose:()=>closeCard()});
-  /* Nov 19 fix set (Tucker): the open card's page scroller spans the
-   * full card BEHIND the flyer layer (see FlyerBoard.css); each page
-   * pads down by the measured hero + identity + going + tabs stack and
-   * up by the footer, so the resting layout is unchanged while content
-   * scrolls underneath the flyer. The stack height varies with the
-   * title, so it is measured from the live card (layout values, which
-   * the flip transform cannot distort). */
-  useLayoutEffect(() => {
-    if (!ocardOn) return;
-    const card = posterDialog.current;
-    if (!card) return;
-    const measure = () => {
-      const tabs = card.querySelector<HTMLElement>(".otabs");
-      const foot = card.querySelector<HTMLElement>(".ofoot");
-      if (!tabs || !foot) return;
-      card.style.setProperty("--ocard-top-offset", `${tabs.offsetTop + tabs.offsetHeight}px`);
-      card.style.setProperty("--ocard-bottom-offset", `${foot.offsetHeight}px`);
-    };
-    measure();
-    const t = window.setTimeout(measure, 700);
-    document.fonts?.ready.then(measure).catch(() => {});
-    window.addEventListener("resize", measure);
-    return () => {
-      window.clearTimeout(t);
-      window.removeEventListener("resize", measure);
-    };
-  }, [ocardOn, openListing, posterDialog]);
 
   /* ----- fan deck ----- */
   const closeFan = () => {
@@ -1112,6 +1086,7 @@ export default function FlyerBoard({
           <button type="button" className="oshare" aria-label={`Share ${openListing.title}`} onClick={shareOpen}>
             <ShareIcon />
           </button>
+          <div className="oscrollarea">
           <div className="ohero">
               {openPoster ? (
                 <img src={openPoster} alt="" onError={() => setFailedOpenPoster(openPoster)} />
@@ -1437,6 +1412,7 @@ export default function FlyerBoard({
                 ) : <p className="oempty">No public promoters listed for this venue.</p>}
               </section>
             </div>
+          </div>
           <div className="ofoot">
             <button
               type="button"

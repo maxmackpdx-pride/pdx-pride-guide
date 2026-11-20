@@ -666,16 +666,20 @@
 }
 .fbx .otabs button.on { color: var(--evz-mist-f4f8fa); border-bottom-color: var(--a); }
 .fbx .opages {
-  position: absolute; inset: 0; z-index: -1; display: flex; overflow-x: auto;
+  position: relative; z-index: 1; display: flex; align-items: flex-start; overflow-x: auto; overflow-y: hidden;
   scroll-snap-type: x mandatory; scrollbar-width: none;
-  -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
 }
 .fbx .opages::-webkit-scrollbar { display: none; }
 .fbx .opage {
-  flex: 0 0 100%; overflow-y: auto;
-  padding: calc(var(--ocard-top-offset, 480px) + 16px) 16px calc(var(--ocard-bottom-offset, 76px) + 16px);
-  scroll-snap-align: start; scroll-snap-stop: always; scrollbar-width: none; overscroll-behavior: contain;
+  flex: 0 0 100%; min-width: 0; box-sizing: border-box; overflow: visible;
+  padding: 16px 16px 24px;
+  scroll-snap-align: start; scroll-snap-stop: always;
 }
+/* Only the active page sets the pager's height, so a long neighbour never
+   leaves empty scroll under a short page. Inactive pages still paint (clipped
+   to the pager) while swiping; the pager itself never scrolls vertically. */
+.fbx .opage[aria-hidden="true"] { height: 0; overflow: visible; }
 .fbx .opage::-webkit-scrollbar { display: none; }
 .fbx .osec-r { float: right; color: var(--evz-gray-8a8a94); letter-spacing: .05em; }
 .fbx .oempty {
@@ -829,14 +833,46 @@
   .fbx { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 }
 
-/* Open card: everything below the hero rides above the poster's fade tail.
-   Nov 19 fix set (Tucker): the page scroller now spans the full card
-   BEHIND the flyer layer (.opages above) — content scrolls up
-   underneath the flyer + fade, which are unchanged; pages pad by the
-   stack/footer offsets the component measures onto the card
-   (--ocard-top-offset / --ocard-bottom-offset). */
+/* Open event sheet (Tucker, Nov 20): ONE vertical scroller (.oscrollarea)
+   fills the sheet between its top edge and the footer. The poster is a
+   background layer at the top of that scroller and fades into the card
+   surface; title, meta, Going and tabs sit on the fading poster, then the
+   active page flows below. Nothing is layered behind the stack anymore, so
+   scrolled text can never collide with the title. Tabs pin to the top of
+   the scroller on an opaque plate. */
 .fbx .ovenue { color: var(--a); text-decoration: underline; text-underline-offset: 2px; }
-.fbx .otabs, .fbx .opageswrap, .fbx .ofoot { position: relative; z-index: 2; }
+.fbx .opageswrap, .fbx .ofoot { position: relative; z-index: 2; }
+.fbx .oscrollarea {
+  position: relative; flex: 1 1 auto; min-height: 0;
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  container-type: size; isolation: isolate;
+}
+.fbx .oscrollarea::-webkit-scrollbar { display: none; }
+.fbx .oscrollarea > .ohero {
+  position: absolute; inset: 0 0 auto; z-index: 0;
+  height: clamp(320px, 82cqh, 640px); overflow: hidden;
+  background: transparent;
+}
+.fbx .oscrollarea > .ohero img {
+  height: 100%;
+  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 30%, rgba(0, 0, 0, .5) 55%, rgba(0, 0, 0, .1) 72%, transparent 82%);
+  mask-image: linear-gradient(to bottom, var(--z-oled) 30%, rgba(0, 0, 0, .5) 55%, rgba(0, 0, 0, .1) 72%, transparent 82%);
+}
+.fbx .oscrollarea > .ohero .ohero-typo {
+  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 50%, transparent 100%);
+  mask-image: linear-gradient(to bottom, var(--z-oled) 50%, transparent 100%);
+}
+/* Posterless fallback: .oid already carries title and venue on the fade. */
+.fbx .oscrollarea > .ohero :is(.typo-t, .typo-v) { display: none; }
+.fbx .oscrollarea > .oid { margin-top: clamp(150px, 36cqh, 300px); text-shadow: 0 1px 2px var(--z-black), 0 2px 14px rgba(0, 0, 0, .85); }
+.fbx .oscrollarea > .otabs {
+  position: sticky; top: 0; z-index: 3;
+  margin: 14px 0 0; padding: 0 16px;
+  background: var(--fbx-card);
+  box-shadow: 0 1px 0 var(--fbx-line-soft);
+  border-bottom: 0;
+}
 
 .fbx .ocard :is(.oclose,.oshare,.oarw,.osave,.otabs button,.opage button) { min-height:44px; min-width:44px; }
 .fbx .ointerested .evz-x__act-main {display:grid;gap:2px;}
