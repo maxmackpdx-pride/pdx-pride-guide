@@ -49,7 +49,7 @@ export function useEventRsvp() {
     onSettled: (_, __, { eventId, actor }) => {
       pending.current.delete(`${actor}:${eventId}`);
       invalidatePending(n => n + 1);
-      for (const key of [RSVP_CHECKINS_KEY, RSVP_SUMMARIES_KEY, ["profile"], ["/api/hub/feed"], ["/api/hub/feed/head"], ["/api/hearts"], ["/api/events", eventId, "attendance"]]) {
+      for (const key of [RSVP_CHECKINS_KEY, RSVP_SUMMARIES_KEY, ["profile"], ["/api/hub/feed"], ["/api/hub/feed/head"], ["/api/hearts"], ["/api/outz/upcoming"], ["/api/events", eventId, "attendance"]]) {
         void queryClient.invalidateQueries({ queryKey: key });
       }
     },

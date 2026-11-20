@@ -41,7 +41,7 @@ export function useHeart(kind: HeartKind, ref: string, snapshot: HeartSnapshot) 
       return { before };
     },
     onError: (_error, _vars, context) => { if (context) cache.setQueryData(key, context.before); },
-    onSettled: () => { void cache.invalidateQueries({ queryKey: key }); void cache.invalidateQueries({ queryKey: ["/api/outz/follow"] }); },
+    onSettled: () => { void cache.invalidateQueries({ queryKey: key }); if (kind === "event" || kind === "outz") void cache.invalidateQueries({ queryKey: ["/api/outz/upcoming"] }); void cache.invalidateQueries({ queryKey: ["/api/outz/follow"] }); },
   });
   const run = () => {
     const next = !hearted;

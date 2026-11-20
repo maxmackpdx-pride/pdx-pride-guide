@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
+import type { Business } from "@/pages/Directory";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
 import { outzPlaceHref, type OutzPlace } from "@shared/outz";
+import { pacificCalendarDate } from "@shared/missedConnections";
 import type { OutzForecastDay } from "@shared/outzDetails";
 import AuthModal from "@/components/AuthModal";
 import "./buddy-hosting.css";
@@ -16,15 +18,61 @@ type Outing = {
   poster: string | null;
   place: string;
 };
+const PlaceDetails = lazy(() => import("@/components/PlaceModal"));
+function OperatorVenue({
+  id,
+  name,
+  onRequireAuth,
+}: {
+  id: number;
+  name: string;
+  onRequireAuth: () => void;
+}) {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const detail = useQuery<Business>({
+    queryKey: ["/api/directory", id, "outdoor-operator", user?.id],
+    enabled: open,
+    queryFn: () => read("/api/directory/" + id),
+  });
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)}>
+        Venue details · {name}
+      </button>
+      {open && detail.isPending && <p role="status">Loading venue details…</p>}
+      {open && detail.isError && (
+        <p role="status">
+          Venue details are unavailable.{" "}
+          <button onClick={() => void detail.refetch()}>Retry</button>
+        </p>
+      )}
+      {open && detail.data && (
+        <Suspense fallback={<p role="status">Opening venue…</p>}>
+          <PlaceDetails
+            place={detail.data}
+            onClose={() => setOpen(false)}
+            onRequireAuth={onRequireAuth}
+          />
+        </Suspense>
+      )}
+    </>
+  );
+}
 const events = "/api/outz/buddies";
 function read<T>(url: string) {
   return apiRequest("GET", url).then((r) => r.json() as Promise<T>);
 }
-export function UpcomingBuddies({ place }: { place?: string }) {
-  const url = events + (place ? "?place=" + encodeURIComponent(place) : "");
+export function UpcomingOutdoorEvents({ place }: { place?: string }) {
+  const { user } = useAuth();
+  const personal = !place && !!user;
+  const url =
+    "/api/outz/upcoming" +
+    (place ? "?place=" + encodeURIComponent(place) : personal ? "?mine=1" : "");
   const list = useQuery<Outing[]>({
-    queryKey: [events, place ?? null],
+    queryKey: ["/api/outz/upcoming", place ?? null, personal ? user?.id : null],
     queryFn: () => read(url),
+    staleTime: 15_000,
   });
   if (list.isPending) return <p role="status">Loading outings…</p>;
   if (list.isError)
@@ -34,15 +82,29 @@ export function UpcomingBuddies({ place }: { place?: string }) {
       </button>
     );
   if (!list.data.length)
-    return <p>No upcoming Buddies outings{place ? " here" : ""}.</p>;
+    return (
+      <p>
+        {personal
+          ? "No upcoming events at destinations you follow or events you’ve marked Interested or Going."
+          : "No upcoming events" + (place ? " here" : "") + "."}
+      </p>
+    );
   return (
     <div className="buddy-upcoming">
       {list.data.map((e) => (
-        <Link href={"/events/" + e.id} key={e.id}>
+        <Link
+          href={
+            "/events/" +
+            e.id +
+            "?date=" +
+            encodeURIComponent(pacificCalendarDate(e.dateStart) ?? "")
+          }
+          key={e.id + "/" + e.dateStart}
+        >
           {e.poster && <img loading="lazy" src={e.poster} alt="" />}
           <span>
             <small>
-              {e.dateStart.slice(0, 10)} · {e.venueName}
+              {pacificCalendarDate(e.dateStart)} · {e.venueName}
             </small>
             <strong>{e.title}</strong>
           </span>
@@ -82,9 +144,12 @@ export default function BuddyHosting({
         </button>
       </div>
       {operator.data && (
-        <Link href={"/directory/" + operator.data.id}>
-          Visit {operator.data.name} in Placez
-        </Link>
+        <OperatorVenue
+          key={operator.data.id}
+          id={operator.data.id}
+          name={operator.data.name}
+          onRequireAuth={() => setAuth(true)}
+        />
       )}
       {editing && (
         <form
@@ -138,6 +203,9 @@ export default function BuddyHosting({
               setDuplicate([]);
               setKey(crypto.randomUUID());
               void cache.invalidateQueries({ queryKey: [events] });
+              void cache.invalidateQueries({
+                queryKey: ["/api/outz/upcoming"],
+              });
             } catch (e) {
               setError((e as Error).message);
             } finally {
@@ -199,7 +267,7 @@ export default function BuddyHosting({
         </form>
       )}
       {notice && <p role="status">{notice}</p>}
-      <UpcomingBuddies place={place.id} />
+      <UpcomingOutdoorEvents place={place.id} />
       {auth && <AuthModal onClose={() => setAuth(false)} />}
     </section>
   );
@@ -222,6 +290,7 @@ export function BuddyEvent({ id, venue }: { id: number; venue: string }) {
     details = useQuery<Details | null>({
       queryKey: [url, user?.id],
       queryFn: () => read(url),
+    staleTime: 15_000,
     });
   if (!details.data) return null;
   const { place, host, forecast, state, requests, ended } = details.data;
