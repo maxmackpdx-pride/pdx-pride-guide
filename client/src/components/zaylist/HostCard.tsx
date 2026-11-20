@@ -268,7 +268,8 @@ export default function HostCard({
               <EventTeam event={event} otherEvents={otherEvents}/>
               <RosterChat kind="events" id={event.id}/>
               {event.canManageList && <Connections kind="events" id={event.id}/>}
-              {event.canEditEvent && <><EventGig event={event}/><PushComposer selectedEvent={event} /></>}
+              {event.canEditEvent && <EventGig event={event}/>}
+              {(event.canEditEvent || event.canManageTeam) && <PushComposer selectedEvent={event} />}
               <section aria-label="Zay'list" style={{ marginTop: 18 }}>
                 <h3 style={{ fontFamily: "var(--font-display)", margin: "0 0 4px" }}>Zay'list</h3>
                 <ZaylistPanel eventId={event.id} />

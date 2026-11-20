@@ -111,7 +111,7 @@ async function setup(t: { after: (fn: () => unknown) => void }) {
     const text = await res.text();
     return {
       status: res.status,
-      body: text ? (JSON.parse(text) as Record<string, any>) : {},
+      body: text && res.headers.get("content-type")?.includes("json") ? (JSON.parse(text) as Record<string, any>) : {},
     };
   };
   const list = (user: number) => request("/api/events/10/zaylist", user);
@@ -737,4 +737,27 @@ test("paid organizer planning requires verified eligibility, a positive discount
   assert.equal((db.prepare("SELECT COUNT(*) AS n FROM organizer_planning_decisions").get() as {n:number}).n,4);
   dbEvent.isPrivate=true;
   assert.equal((await request(plan,1)).status,404);
+});
+
+test("private member stats use only the current account, its bookmarks and visible conversations",async t=>{
+  const {db,request,dbEvent}=await setup(t);
+  db.exec(`CREATE TABLE event_saves(user_id INTEGER,event_id INTEGER);
+    CREATE TABLE follows(follower_user_id INTEGER,following_user_id INTEGER);
+    CREATE TABLE messages(to_user_id INTEGER,from_user_id INTEGER,thread_id TEXT,context_type TEXT,is_read INTEGER,deleted_by_to INTEGER);
+    INSERT INTO event_saves VALUES(5,10),(6,10),(6,12);
+    INSERT INTO follows VALUES(6,5),(8,5);
+    INSERT INTO member_blocks VALUES(5,8);
+    INSERT INTO messages VALUES(5,6,'gigOne','GIG',0,0),(5,6,'gigOne','GIG',0,0),(5,8,'other','GIG',0,0),(6,5,'gigTwo','GIG',0,0);
+    INSERT INTO card_hearts VALUES(8,'event','10');`);
+  const path="/api/hub/member-stats";
+  assert.equal((await request(path)).status,401);
+  const read=(await request(path+"?userId=6",5)).body;
+  assert.equal(read.privateEventSaves,1);
+  assert.equal(read.interested,0);
+  assert.equal(read.followers,1);
+  assert.equal(read.gigReplies,1);
+  assert.deepEqual(read.going,[{id:10,title:"Paid Night"}]);
+  assert.equal((await request(path,6)).body.privateEventSaves,2);
+  dbEvent.isPrivate=true;
+  assert.deepEqual((await request(path,5)).body.going,[]);
 });

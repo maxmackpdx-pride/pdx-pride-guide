@@ -8,7 +8,7 @@ const InboxOverlay = lazy(() => import("@/components/InboxOverlay"));
 const AuthModal = lazy(() => import("@/components/AuthModal"));
 
 export type InboxSheetOpenOpts = {
-  view?: "inbox" | "posts" | "stats";
+  view?: "inbox" | "chats" | "posts" | "stats";
   account?: "personal" | "admin" | "owner";
   threadId?: string | null;
   queueFolder?: "active" | "inbox";

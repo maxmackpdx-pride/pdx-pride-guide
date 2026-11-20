@@ -37,7 +37,7 @@ export default function HostHub() {
   return <main className="zl-root"><div className="zl-wrap zl-workspace">
     <header className="zl-hub-head"><div><p>{user.displayName||user.username}</p><h1>Your Zay’list</h1></div>
       <button type="button" className="zl-btn" onClick={e=>openSheet({account:"personal",view:"inbox"},e.currentTarget)}>Inbox</button></header>
-    <PushComposer events={events.filter(e=>e.canEditEvent)}/>
+    <PushComposer events={events.filter(e=>e.canEditEvent||e.canManageTeam)}/>
     {workspace.isError&&<p role="alert">Your workspace could not load. <button className="zl-btn" onClick={()=>workspace.refetch()}>Try again</button></p>}
     <section className="zl-section zl-personal" aria-labelledby="zl-pass-title"><h2 id="zl-pass-title">Guest spots &amp; passes</h2>
       <GuestSpots key={user.id}/></section>
@@ -52,7 +52,7 @@ export default function HostHub() {
     {data&&<section className="zl-section"><h2>Your activity</h2><dl className="zl-stat-strip">
       <div><dt>Interested</dt><dd>{data.personal.interested}</dd></div><div><dt>Going</dt><dd>{data.personal.going}</dd></div>
       <div><dt>Door entries</dt><dd>{data.personal.admitted}</dd></div></dl>
-      <div className="zl-row"><a className="zl-btn" href="/schedule">My schedule</a><a className="zl-btn" href="/settings/notifications">Notifications</a></div></section>}
+      <div className="zl-row"><button className="zl-btn" onClick={e=>openSheet({account:"personal",view:"stats"},e.currentTarget)}>My stats</button><button className="zl-btn" onClick={e=>openSheet({account:"personal",view:"chats"},e.currentTarget)}>Chats</button><a className="zl-btn" href="/schedule">My schedule</a><a className="zl-btn" href="/settings/notifications">Notifications</a></div></section>}
     {admin&&<section className="zl-section"><h2>Administration</h2><div className="zl-row">
       <a className="zl-btn" href="/admin">Open admin</a><button className="zl-btn" onClick={e=>openSheet({account:"admin",queueFolder:"active"},e.currentTarget)}>Review approvals</button>
     </div></section>}

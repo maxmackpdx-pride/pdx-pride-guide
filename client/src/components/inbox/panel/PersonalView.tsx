@@ -55,29 +55,24 @@ function groupSub(row: GroupChatRow, now: number): string {
   return `Open now · until ${new Date(row.closesAt || 0).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
 }
 
-export default function PersonalView({
-  folder,
-  filter,
-  query,
-  showTags,
-  tintUnread,
-  onOpenThread,
-  onOpenGroup,
-}: {
-  folder: Folder;
-  filter: string;
-  query: string;
-  showTags: boolean;
-  tintUnread: boolean;
-  onOpenThread: (id: string) => void;
-  onOpenGroup?: (row: GroupChatRow) => void;
-}) {
+const openRow = (fn: () => void) => ({
+    role: "button" as const,
+    tabIndex: 0,
+    onKeyDown: (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        fn();
+      }
+    },
+  });
+
+export function GroupChatsView({onOpen}:{onOpen:(row:GroupChatRow)=>void}) {
   const {user}=useAuth();
-  const { threads, loading, inboxError, sentError, refetchInbox, refetchSent, archiveQuery } = useInboxThreads(null);
+
   const [now, setNow] = useState(() => Date.now());
 
   // Tick while any group chat is waiting to open so the countdown stays fun.
-  const { data: groupChats = [],isError:groupsFailed,refetch:retryGroups } = useQuery<GroupChatRow[]>({
+  const { data: groupChats = [],isPending:groupsLoading,isError:groupsFailed,refetch:retryGroups } = useQuery<GroupChatRow[]>({
     queryKey: ["/api/chats/mine",user?.id],
     enabled:!!user,
     queryFn: () => fetch("/api/chats/mine", { credentials: "include" }).then(r=>{if(!r.ok)throw Error("Could not load group chats");return r.json();}),
@@ -91,29 +86,10 @@ export default function PersonalView({
     return () => window.clearInterval(id);
   }, [hasPreOpen]);
 
-  const q = query.trim().toLowerCase();
-  const rows=visibleThreads(threads,folder,filter,query);
-
-  const showGroups = folder === "inbox" && filter === "all" && !q && groupChats.length > 0;
-  const emptyLabel = folder === "deleted" ? "NO ARCHIVED CONVERSATIONS" : "NO MESSAGES HERE";
-
-  const openRow = (fn: () => void) => ({
-    role: "button" as const,
-    tabIndex: 0,
-    onKeyDown: (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        fn();
-      }
-    },
-  });
-
-  const groupsNotice = folder==="inbox" && filter==="all" && !q && groupsFailed
-    ? <p role="alert">Group chats unavailable. <button onClick={()=>void retryGroups()}>Retry</button></p> : null;
-  if(archiveQuery.isError || (folder!=="sent" && inboxError) || (folder!=="inbox" && sentError))
-    return <p role="alert">Conversations unavailable. <button onClick={()=>{void refetchInbox();void refetchSent();void archiveQuery.refetch();}}>Retry</button></p>;
-  if(loading && !rows.length)return <p role="status">Loading conversations…</p>;
-  const groupStrip = showGroups ? (
+  if (groupsFailed) return <p role="alert">Chats unavailable. <button onClick={()=>void retryGroups()}>Retry</button></p>;
+  if (groupsLoading) return <p role="status">Loading chats…</p>;
+  if (!groupChats.length) return <div className="inbox-exp-empty">No joined chats.</div>;
+  return (
     <div className="inbox-exp-list inbox-exp-list--spaced">
       {groupChats.map((row) => {
         const waiting = row.state === "BEFORE";
@@ -121,8 +97,8 @@ export default function PersonalView({
           <div
             key={`${row.kind}-${row.id}-${row.calendarDate || ""}`}
             className={`inbox-exp-row${waiting ? " inbox-exp-row--waiting" : ""}`}
-            onClick={() => onOpenGroup?.(row)}
-            {...openRow(() => onOpenGroup?.(row))}
+            onClick={() => onOpen(row)}
+            {...openRow(() => onOpen(row))}
           >
             <span className="inbox-exp-group-avatar">{row.kind === "BEACH" ? "RB" : row.kind === "OUTZ" ? "OZ" : row.kind === "COMMUNITY" ? "SZ" : "GC"}</span>
             <div className="inbox-exp-row__body">
@@ -151,20 +127,33 @@ export default function PersonalView({
         );
       })}
     </div>
-  ) : null;
+  );
 
-  if (rows.length === 0) {
-    return (
-      <>
-        {groupsNotice}{groupStrip}
-        {!showGroups && <div className="inbox-exp-empty">{emptyLabel}</div>}
-      </>
-    );
-  }
+}
 
+export default function PersonalView({
+  folder,
+  filter,
+  query,
+  showTags,
+  tintUnread,
+  onOpenThread,
+}: {
+  folder: Folder;
+  filter: string;
+  query: string;
+  showTags: boolean;
+  tintUnread: boolean;
+  onOpenThread: (id: string) => void;
+}) {
+  const { threads, loading, inboxError, sentError, refetchInbox, refetchSent, archiveQuery } = useInboxThreads(null);
+  const rows=visibleThreads(threads,folder,filter,query);
+  if(archiveQuery.isError || (folder!=="sent" && inboxError) || (folder!=="inbox" && sentError))
+    return <p role="alert">Conversations unavailable. <button onClick={()=>{void refetchInbox();void refetchSent();void archiveQuery.refetch();}}>Retry</button></p>;
+  if(loading && !rows.length)return <p role="status">Loading conversations…</p>;
+  if (!rows.length) return <div className="inbox-exp-empty">{folder === "deleted" ? "NO ARCHIVED CONVERSATIONS" : "NO MESSAGES HERE"}</div>;
   return (
     <>
-      {groupsNotice}{groupStrip}
       <div className="inbox-exp-list">
         {rows.map((t) => {
           const tag = tagFor(t.cat);

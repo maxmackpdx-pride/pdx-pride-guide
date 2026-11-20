@@ -36,6 +36,21 @@ export function registerHostWorkspace(app:Express, db:Database.Database, storage
   function numeric(query:string,...args:(number|string)[]) {
     return (db.prepare(query).get(...args) as {n:number}).n;
   }
+  app.get("/api/hub/member-stats",auth,active,(_req,res)=>{
+    const id=res.locals.viewer.id;
+    const ids=(db.prepare("SELECT DISTINCT event_id AS id FROM attendances WHERE user_id=? AND is_active=1 AND (expires_at IS NULL OR julianday(expires_at)>julianday('now'))").all(id) as {id:number}[]);
+    const going=ids.map(row=>storage.getEvent(row.id)).filter((e):e is Event=>!!e && e.status==="LIVE" && visible(e) && hasPublicEventFlags(e));
+    res.json({
+      interested:numeric("SELECT COUNT(*) AS n FROM card_hearts WHERE user_id=? AND kind='event'",id),
+      going:going.map(e=>({id:e.id,title:e.title})),
+      privateEventSaves:numeric("SELECT COUNT(*) AS n FROM event_saves WHERE user_id=?",id),
+      followers:numeric(`SELECT COUNT(*) AS n FROM follows f JOIN users u ON u.id=f.follower_user_id WHERE f.following_user_id=?
+        AND u.status='active' AND NOT EXISTS (SELECT 1 FROM member_blocks b WHERE (b.blocker_user_id=? AND b.blocked_user_id=u.id) OR (b.blocked_user_id=? AND b.blocker_user_id=u.id))`,id,id,id),
+      gigReplies:numeric(`SELECT COUNT(DISTINCT m.thread_id) AS n FROM messages m WHERE m.to_user_id=? AND m.context_type='GIG' AND m.is_read=0 AND m.deleted_by_to=0
+        AND NOT EXISTS (SELECT 1 FROM member_blocks b WHERE (b.blocker_user_id=? AND b.blocked_user_id=m.from_user_id) OR (b.blocked_user_id=? AND b.blocker_user_id=m.from_user_id))`,id,id,id),
+      admitted:numeric("SELECT COUNT(*) AS n FROM zaylist_entries WHERE user_id=? AND state='redeemed'",id),
+    });
+  });
   function stats(id:number) {
     return {
       interested:numeric("SELECT COUNT(*) AS n FROM card_hearts WHERE kind='event' AND ref=?",String(id)),

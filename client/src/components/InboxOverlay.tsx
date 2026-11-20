@@ -17,7 +17,8 @@ import { useAdminGuideThreads } from "@/components/inbox/useAdminGuideThreads";
 import type { Folder, QueueFolder, Thread, LineupDecision } from "@/components/inbox/types";
 import { C } from "@/components/inbox/panel/sheet";
 import ThreadAvatar from "@/components/inbox/ThreadAvatar";
-import PersonalView from "@/components/inbox/panel/PersonalView";
+import MemberStatsView from "@/components/inbox/panel/MemberStatsView";
+import PersonalView, {GroupChatsView} from "@/components/inbox/panel/PersonalView";
 import type { GroupChatRow } from "@/components/inbox/panel/PersonalView";
 import AdminMessagesView from "@/components/inbox/panel/AdminMessagesView";
 import QueueView from "@/components/inbox/panel/QueueView";
@@ -35,7 +36,7 @@ import "@/components/inbox/inbox.css";
 import "@/components/inbox/message-reactions.css";
 import "@/components/inbox/inbox-dropdown.css";
 
-type View = "inbox" | "posts" | "stats";
+type View = "inbox" | "chats" | "posts" | "stats";
 type Account = "personal" | "admin" | "owner";
 
 type InboxOverlayProps = {
@@ -50,7 +51,7 @@ type InboxOverlayProps = {
   initialThreadId?: string | null;
 };
 
-function InboxPanelHeader({ onClose, onRefresh, refreshing = false, guest = false, staff = false }: { staff?:boolean; onClose: () => void; onRefresh?: () => void; refreshing?: boolean; guest?: boolean }) {
+function InboxPanelHeader({ onClose, onRefresh, refreshing = false, guest = false }: { onClose: () => void; onRefresh?: () => void; refreshing?: boolean; guest?: boolean }) {
   return <header className="hub-reader__header">
     <div className="hub-reader__heading">
       <div><h2>INBOX</h2><p>Your conversations.</p></div>
@@ -60,7 +61,7 @@ function InboxPanelHeader({ onClose, onRefresh, refreshing = false, guest = fals
       </div>
     </div>
     <Tabs.List className="hub-reader__tabs inbox-dropdown__tabs" aria-label="Inbox views">
-      {(["inbox", "posts", ...(staff ? ["stats"] : [])]).map(value => <Tabs.Trigger className="hub-reader__tab" value={value} key={value} disabled={guest && value !== "inbox"}>{value}</Tabs.Trigger>)}
+      {(["inbox", "chats", "posts", "stats"]).map(value => <Tabs.Trigger className="hub-reader__tab" value={value} key={value} disabled={guest && value !== "inbox"}>{value}</Tabs.Trigger>)}
     </Tabs.List>
   </header>;
 }
@@ -203,7 +204,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
       setQuery("");
       return;
     }
-    setView(initialView==="stats" && !isAdmin ? "inbox" : initialView ?? "inbox");
+    setView(initialView ?? "inbox");
     if (initialAccount) {
       const permitted = initialAccount === "personal" || (initialAccount === "admin" && isAdmin) || (initialAccount === "owner" && isOwner);
       setAccount(permitted ? initialAccount : "personal");
@@ -237,7 +238,8 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
   }, [account]);
 
   useEffect(() => {
-    if (view !== "inbox") setActiveGroup(null);
+    if (view !== "chats") setActiveGroup(null);
+    if (view !== "inbox") setActiveId(null);
   }, [view]);
 
   if (!open) return null;
@@ -302,7 +304,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
     });
   };
   const closeGroup = () => setActiveGroup(null);
-  const detailOpen = Boolean(activeThread || activeGroup);
+  const detailOpen = Boolean((inboxActive && activeThread) || (view==="chats" && activeGroup));
   const send = async () => {
     const body = reply.trim();
     if (!body || !activeId) return;
@@ -324,7 +326,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
     <>
       <HeaderDropdown open={open} onOpenChange={next => { if (!next) onClose(); }} trigger={trigger} triggerSelector="[data-inbox-open-trigger]" id="inbox-panel" title="Inbox" description={isAdmin ? "Your messages, posts and staff tools." : "Your messages and posts."} className="inbox-overlay inbox-dropdown" actionContext={account === "owner" ? "owner" : account === "admin" ? "admin" : "hub"}>
         <Tabs.Root value={view} onValueChange={value => setView(value as View)} className="inbox-dropdown__reader">
-        <InboxPanelHeader staff={isAdmin} onClose={onClose} refreshing={inboxRefreshing > 0} onRefresh={() => {
+        <InboxPanelHeader onClose={onClose} refreshing={inboxRefreshing > 0} onRefresh={() => {
           for (const key of ["/api/messages/inbox", "/api/messages/sent", "/api/messages/unread-count", "/api/admin/pending-count"]) void queryClient.invalidateQueries({ queryKey: [key] });
         }} />
 
@@ -491,9 +493,9 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
         {/* body */}
         <Tabs.Content value={view} data-view={view} className={`inbox-overlay__scroll${detailOpen ? " inbox-overlay__scroll--detail" : ""}`}>
 
-          {activeGroup ? (
+          {view==="chats" && activeGroup ? (
             <InboxGroupChat target={activeGroup} onBack={closeGroup} />
-          ) : activeThread ? (
+          ) : inboxActive && activeThread ? (
             <>
             {housingThread && housingGateError && <p role="alert">Could not load this housing request. <button type="button" onClick={() => void reloadHousingGate()}>Retry</button></p>}
             <ThreadDetail
@@ -590,7 +592,6 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                   showTags
                   tintUnread
                   onOpenThread={openThread}
-                  onOpenGroup={openGroup}
                 />
               )}
               {inboxActive && account === "admin" && (queueFolder === "inbox" || queueFolder === "sent" || queueFolder === "archived") && (
@@ -636,6 +637,9 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
               {inboxActive && account === "owner" && (
                 <QueueView mode="owner" initialItem={initialQueueItem} queueFolder={queueFolder === "completed" ? "completed" : "active"} />
               )}
+              {view === "chats" && <GroupChatsView onOpen={openGroup}/>}
+              {view === "stats" && !isAdmin && <MemberStatsView/>}
+              {view === "stats" && isAdmin && <details className="inbox-exp-personal-stats"><summary>My activity</summary><MemberStatsView/></details>}
               {view === "posts" && <PostsView onNavigate={navigateFromSheet} />}
               {isAdmin && view === "stats" && <StatsView onOpenQueue={isAdmin ? (status) => {setQueueWorkFilter(status);setView("inbox");setAccount("admin");setQueueFolder("active");} : undefined} />}
             </>

@@ -1,5 +1,6 @@
 import type Database from "better-sqlite3";
 import type { Express, RequestHandler, Response } from "express";
+import type { Event } from "@shared/schema";
 import type { IStorage } from "./storage";
 import { pushAllowance, pushCopyIssue, type PushAudience, type PushTier } from "@shared/hostPushPolicy";
 import { buildDeclarativePayload, sendPushToSubscription } from "./push/send";
@@ -11,7 +12,8 @@ type User = NonNullable<ReturnType<IStorage["getUserById"]>>;
 
 export function registerHostPush(app: Express, db: Database.Database, storage: IStorage, auth: RequestHandler,
   existingPermission: (user: User) => boolean, moderate: (res: Response, board: string, fields: Record<string,string>) => boolean,
-  transport = { configured: isPushConfigured, send: sendPushToSubscription }) {
+  transport = { configured: isPushConfigured, send: sendPushToSubscription },
+  mayAddressEvent = (event:Event,user:User) => storage.isUserEventHost(event.id,user.id)) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS host_push_memberships (
       user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, tier TEXT NOT NULL CHECK(tier IN ('standard','paid')),
@@ -62,7 +64,7 @@ export function registerHostPush(app: Express, db: Database.Database, storage: I
   }
   function eventAllowed(id: number, user: User) {
     const event = storage.getEvent(id);
-    return !!event && event.status === "LIVE" && hasPublicEventFlags(event) && storage.isUserEventHost(id,user.id);
+    return !!event && event.status === "LIVE" && hasPublicEventFlags(event) && mayAddressEvent(event,user);
   }
   const actor: RequestHandler = (req,res,next) => {
     res.set("Cache-Control","private, no-store");
