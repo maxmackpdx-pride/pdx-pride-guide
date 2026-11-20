@@ -762,53 +762,54 @@ export default function FlyerBoard({
   }, [onVisibleCount, pastView, pastList.length, totalCount]);
 
   const jumpRef = useRef<(date: string) => boolean>(() => false);
-  jumpRef.current = (date: string): boolean => {
-    const root = rootRef.current;
-    if (!root) return true;
-    const scrollToEl = (el: HTMLElement) => {
-      const y = el.getBoundingClientRect().top + window.scrollY - 88;
-      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
-    };
-    if (pastView) {
-      const cell = root.querySelector<HTMLElement>(`.pastboard [data-event-date="${date}"]`);
+  useLayoutEffect(() => {
+    jumpRef.current = (date: string): boolean => {
+      const root = rootRef.current;
+      if (!root) return true;
+      const scrollToEl = (el: HTMLElement) => {
+        const y = el.getBoundingClientRect().top + window.scrollY - 88;
+        window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+      };
+      if (pastView) {
+        const cell = root.querySelector<HTMLElement>(`.pastboard [data-event-date="${date}"]`);
+        if (cell) { scrollToEl(cell); return true; }
+        const head = root.querySelector<HTMLElement>(".pasthead");
+        if (head) { scrollToEl(head); return true; }
+        return false;
+      }
+      if (date <= todayStr) {
+        const first = root.querySelector<HTMLElement>(".bandsec, .futurezone");
+        if (first) { scrollToEl(first); return true; }
+        return false;
+      }
+      /* Future date: grow the Plan Ahead budget until that date's group is
+         on the board, then land on its first card (under its day flag). */
+      let slots = 0;
+      let needed = 0;
+      for (const item of flowData.flow) {
+        if (item.kind === "flag") continue;
+        slots++;
+        if (item.kind === "poster" && dateStrOf(item.e) === date) needed = slots;
+      }
+      if (needed === 0) {
+        const zone = root.querySelector<HTMLElement>(".futurezone");
+        if (zone) { scrollToEl(zone); return true; }
+        return false;
+      }
+      const rows = Math.ceil(needed / cols);
+      if (rows > budgetRows) { setBudgetRows(rows); return false; }
+      const cell = root.querySelector<HTMLElement>(`.futurezone [data-event-date="${date}"]`);
       if (cell) { scrollToEl(cell); return true; }
-      const head = root.querySelector<HTMLElement>(".pasthead");
-      if (head) { scrollToEl(head); return true; }
       return false;
-    }
-    if (date <= todayStr) {
-      const first = root.querySelector<HTMLElement>(".bandsec, .futurezone");
-      if (first) { scrollToEl(first); return true; }
-      return false;
-    }
-    /* Future date: grow the Plan Ahead budget until that date's group is
-       on the board, then land on its first card (under its day flag). */
-    let slots = 0;
-    let needed = 0;
-    for (const item of flowData.flow) {
-      if (item.kind === "flag") continue;
-      slots++;
-      if (item.kind === "poster" && dateStrOf(item.e) === date) needed = slots;
-    }
-    if (needed === 0) {
-      const zone = root.querySelector<HTMLElement>(".futurezone");
-      if (zone) { scrollToEl(zone); return true; }
-      return false;
-    }
-    const rows = Math.ceil(needed / cols);
-    if (rows > budgetRows) { setBudgetRows(rows); return false; }
-    const cell = root.querySelector<HTMLElement>(`.futurezone [data-event-date="${date}"]`);
-    if (cell) { scrollToEl(cell); return true; }
-    return false;
-  };
+    };
+  });
   useEffect(() => {
     const onDay = (ev: Event) => {
       const date = (ev as CustomEvent<{ date?: string }>).detail?.date;
       if (!date) return;
-      let tries = 0;
-      const attempt = () => {
+      const attempt = (tries = 0) => {
         if (jumpRef.current(date)) return;
-        if (++tries <= 30) window.setTimeout(attempt, 100);
+        if (tries < 30) window.setTimeout(() => attempt(tries + 1), 100);
       };
       attempt();
     };
