@@ -1,3 +1,4 @@
+import { apiRequest } from "@/lib/queryClient";
 import { ArrowRight } from "lucide-react";
 import { roomToast } from "@/lib/roomToast";
 import { useEffect, useState } from "react";
@@ -222,12 +223,9 @@ function AccountDashboard() {
   const canManageTeam = Boolean(user?.canManageTeam || adminSession?.canManageTeam);
 
   const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number }>({
-    queryKey: ["/api/admin/pending-count"],
-    queryFn: () =>
-      fetch("/api/admin/pending-count", { credentials: "include" }).then((r) =>
-        r.ok ? r.json() : { count: 0, ownerCount: 0 },
-      ),
-    enabled: isAdmin,
+    queryKey: ["/api/admin/pending-count", user?.id],
+      queryFn: async () => (await apiRequest("GET", "/api/admin/pending-count")).json(),
+      enabled: isAdmin,
     refetchInterval: 90_000,
   });
   const pendingCount = pendingAdmin.count || 0;

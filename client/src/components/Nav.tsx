@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Link, useLocation } from "wouter";
 import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, ChevronDown, House, Inbox, Search, Settings, Trash2, UserRound, UsersRound } from "lucide-react";
+import { CalendarDays, ChevronDown, House, Inbox, Ticket, Search, Settings, Trash2, UserRound, UsersRound } from "lucide-react";
 import { MenuCloseIcon } from "@/components/ui/animated-state-icons";
 import { CompactHubLink, CompactInboxLink, CompactNavigation } from "@/components/ui/compact-navigation";
 import GlitchLogo from "@/components/GlitchLogo";
@@ -239,6 +239,7 @@ function HubMemberFolder({
   const profileEditorOpen = location.startsWith("/dashboard") && new URLSearchParams(window.location.search).get("edit") === "profile";
   const items = [
     { label: "Hub", href: "/dashboard", icon: House, active: false },
+    { label: "Zay’list guest passes", href: "/hub", icon: Ticket, active: location === "/hub" },
     { label: "Profile", href: "/dashboard?edit=profile", icon: UserRound, active: profileEditorOpen },
     { label: "Events", href: "/dashboard?section=events", icon: CalendarDays, active: hubActive && hubSection === "events" },
     { label: "People", href: "/dashboard?section=people", icon: UsersRound, active: hubActive && hubSection === "people" },

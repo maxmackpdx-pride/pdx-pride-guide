@@ -1,3 +1,4 @@
+import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import {ReportReceipts} from "./inbox/ReportReceipts";
 import {ImportDeviceArchive} from "./inbox/useThreadArchive";
@@ -44,6 +45,8 @@ type InboxOverlayProps = {
   initialView?: View;
   initialAccount?: Account;
   initialQueueFolder?: "active" | "inbox";
+  initialQueueBucket?: string;
+  initialQueueItem?: string;
   initialThreadId?: string | null;
 };
 
@@ -89,7 +92,7 @@ type HousingThreadGate = {
   canNudge: boolean;
 };
 
-export default function InboxOverlay({ open, trigger, onClose, initialView, initialAccount, initialThreadId, initialQueueFolder }: InboxOverlayProps) {
+export default function InboxOverlay({ open, trigger, onClose, initialView, initialAccount, initialThreadId, initialQueueFolder, initialQueueBucket, initialQueueItem }: InboxOverlayProps) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -172,11 +175,8 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
     adminBadge?: number;
   }>({
     queryKey: ["/api/admin/pending-count", user?.id],
-    queryFn: () =>
-      fetch("/api/admin/pending-count", { credentials: "include" }).then((r) =>
-        r.ok ? r.json() : { count: 0, queueCount: 0, ownerCount: 0, guideUnread: 0, adminBadge: 0 },
-      ),
-    enabled: isAdmin,
+      queryFn: async () => (await apiRequest("GET", "/api/admin/pending-count")).json(),
+      enabled: isAdmin,
     refetchInterval: 90_000,
   });
 
@@ -617,6 +617,8 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                 <QueueView
                   mode="admin"
                   initialWorkFilter={queueWorkFilter}
+                  initialBucket={initialQueueBucket}
+                  initialItem={initialQueueItem}
                   queueFolder={queueFolder}
                   guideUnread={pendingAdmin.guideUnread ?? adminGuideUnread}
                   ownerCount={isOwner ? (pendingAdmin.ownerCount || 0) : 0}
@@ -632,7 +634,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                 />
               )}
               {inboxActive && account === "owner" && (
-                <QueueView mode="owner" queueFolder={queueFolder === "completed" ? "completed" : "active"} />
+                <QueueView mode="owner" initialItem={initialQueueItem} queueFolder={queueFolder === "completed" ? "completed" : "active"} />
               )}
               {view === "posts" && <PostsView onNavigate={navigateFromSheet} />}
               {isAdmin && view === "stats" && <StatsView onOpenQueue={isAdmin ? (status) => {setQueueWorkFilter(status);setView("inbox");setAccount("admin");setQueueFolder("active");} : undefined} />}

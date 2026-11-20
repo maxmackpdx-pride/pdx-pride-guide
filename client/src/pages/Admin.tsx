@@ -27,7 +27,7 @@ import HubV2Shell from "@/components/hub/HubV2Shell";
 import { ADMIN_VIEW_META, type AdminViewKey } from "@/components/hub/HubShell";
 import AdManager from "@/components/admin/ads/AdManager";
 import type { HubSection } from "@/components/hub/types";
-import AdminOverview, { type AttentionItem, type KindPill, type QueueBreakdown } from "@/components/admin/AdminOverview";
+import AdminOverview, { type AttentionItem, type QueueBreakdown } from "@/components/admin/AdminOverview";
 import { useTheme } from "@/context/ThemeContext";
 import { useInboxSheet, type InboxSheetOpenOpts } from "@/context/InboxSheetContext";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
@@ -538,17 +538,14 @@ export default function Admin() {
 
   const ownerDeskCount = ownerDesk.filter(i => i.status === "OPEN").length;
 
-  const { data: pendingAdmin = { count: 0, ownerCount: 0 } } = useQuery<{ count: number; ownerCount?: number; breakdown?: QueueBreakdown }>({
-    queryKey: ["/api/admin/pending-count"],
-    queryFn: () =>
-      fetch("/api/admin/pending-count", { credentials: "include" }).then(r =>
-        r.ok ? r.json() : { count: 0, ownerCount: 0 },
-      ),
+  const { data: pendingAdmin, isError: queueUnavailable, refetch: reloadQueue } = useQuery<{ count: number; ownerCount?: number; breakdown?: QueueBreakdown }>({
+    queryKey: ["/api/admin/pending-count", user?.id],
+    queryFn: () => apiRequest("GET", "/api/admin/pending-count").then(r => r.json()),
     enabled: authenticated,
     refetchInterval: 90_000,
   });
-  const pendingCount = pendingAdmin.count || 0;
-  const ownerCount = isPrimaryOwner ? (pendingAdmin.ownerCount ?? ownerDeskCount) : 0;
+  const pendingCount = pendingAdmin?.count;
+  const ownerCount = isPrimaryOwner ? (pendingAdmin?.ownerCount ?? ownerDeskCount) : 0;
 
   const { data: pushStatus, refetch: refetchPushStatus } = useQuery<{
     configured: boolean;
@@ -1276,7 +1273,7 @@ export default function Admin() {
     const items: AttentionItem[] = [];
     for (const s of pendingSubs.slice(0, 6)) {
       items.push({
-        key: `submission-${s.id}`,
+        key: `sub-${s.id}`,
         title: s.title || "Untitled submission",
         subtitle: `${s.type} · ${s.submitterName || s.submitterEmail}`,
         kindLabel: s.type === "CLAIM" ? "Claim" : s.type === "PROMOTER_APPLICATION" ? "Promoter" : "Submission",
@@ -1285,7 +1282,7 @@ export default function Admin() {
     }
     for (const p of pendingPromoters.slice(0, 4)) {
       items.push({
-        key: `promoter-${p.id}`,
+        key: `promo-${p.id}`,
         title: p.displayName || p.username || p.email || "Promoter request",
         subtitle: p.eventTitle ? `Claiming ${p.eventTitle}` : "Promoter application",
         kindLabel: "Promoter",
@@ -1294,7 +1291,7 @@ export default function Admin() {
     }
     for (const m of pendingMod.slice(0, 4)) {
       items.push({
-        key: `moderation-${m.id}`,
+        key: `mod-${m.id}`,
         title: m.eventTitle || `Moderation ${m.type}`,
         subtitle: `${m.type} · ${m.requesterName || m.requesterEmail}`,
         kindLabel: "Moderation",
@@ -1303,7 +1300,7 @@ export default function Admin() {
     }
     for (const g of pendingGiftingFlagged.slice(0, 3)) {
       items.push({
-        key: `gifting_post-${g.id}`,
+        key: `gp-${g.id}`,
         title: g.title || "GIFTZ post",
         subtitle: `${g.reportCount || 0} report(s)`,
         kindLabel: "GIFTZ report",
@@ -1312,7 +1309,7 @@ export default function Admin() {
     }
     for (const claim of businessClaims.slice(0, 3)) {
       items.push({
-        key: `business-claim-${claim.id}`,
+        key: `bclaim-${claim.id}`,
         title: claim.businessName || "Venue claim",
         subtitle: `@${claim.username || claim.email || "unknown"}: ${claim.claimReason || "Claim request"}`,
         kindLabel: "Venue claim",
@@ -1321,16 +1318,16 @@ export default function Admin() {
     }
     for (const sub of businessSubmissions.slice(0, 2)) {
       items.push({
-        key: `business-submission-${sub.id}`,
+        key: `bsub-${sub.id}`,
         title: sub.name || "New venue",
         subtitle: `${sub.type || "Business"} · ${sub.neighborhood || sub.address || "No location"}`,
         kindLabel: "New venue",
         color: "#FF7B00",
       });
     }
-    for (const req of businessLogoRequests.slice(0, 2)) {
+    for (const req of (isPrimaryOwner ? businessLogoRequests : []).slice(0, 2)) {
       items.push({
-        key: `business-logo-${req.id}`,
+        key: `logo-${req.id}`,
         title: req.businessName || "Logo change",
         subtitle: "Pending logo approval",
         kindLabel: "Logo request",
@@ -1338,18 +1335,7 @@ export default function Admin() {
       });
     }
     return items.slice(0, 8);
-  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, businessClaims, businessSubmissions, businessLogoRequests]);
-
-  const overviewKindPills = useMemo(() => {
-    const pills: KindPill[] = [];
-    if (pendingSubs.length) pills.push({ key: "submissions", label: "Submissions", count: pendingSubs.length, color: "#FF1FA0" });
-    if (pendingPromoters.length) pills.push({ key: "promoters", label: "Promoters", count: pendingPromoters.length, color: "#FF1FA0" });
-    if (pendingMod.length) pills.push({ key: "moderation", label: "Moderation", count: pendingMod.length, color: "#FF8C00" });
-    if (pendingGiftingReports.length) pills.push({ key: "reports", label: "Reports", count: pendingGiftingReports.length, color: "#FF7B00" });
-    if (pendingGiftingFlagged.length) pills.push({ key: "gifting", label: "Flagged gifts", count: pendingGiftingFlagged.length, color: "#9D66FF" });
-    if (venueClaimsPendingCount) pills.push({ key: "venue-claims", label: "Venue claims", count: venueClaimsPendingCount, color: "#19E3FF" });
-    return pills;
-  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, pendingGiftingReports, venueClaimsPendingCount]);
+  }, [pendingSubs, pendingPromoters, pendingMod, pendingGiftingFlagged, businessClaims, businessSubmissions, businessLogoRequests, isPrimaryOwner]);
 
   // Site admins (owner + sub-admin + team grants) appear alongside approved promoters.
   const siteAdminUserIds = useMemo(
@@ -1496,11 +1482,11 @@ export default function Admin() {
     }
   };
 
-  const { data: adminActivityLog = [] } = useQuery<
+  const { data: adminActivityLog, isError: activityUnavailable } = useQuery<
     Array<{ id: number; action: string; targetLabel?: string | null; actorUsername?: string | null; createdAt: string }>
   >({
     queryKey: ["/api/admin/activity", 80],
-    queryFn: () => fetch("/api/admin/activity?limit=80", { credentials: "include" }).then(r => (r.ok ? r.json() : [])),
+    queryFn: () => apiRequest("GET", "/api/admin/activity?limit=80").then(r => r.json()),
     enabled: authenticated && activeTab === "overview",
   });
 
@@ -1670,12 +1656,12 @@ export default function Admin() {
     openSheet(opts);
   };
 
-  const openInboxFromOverview = (filterHint?: string) => {
-    if (filterHint === "venue-claims") {
-      setAdminTab("venue-claims");
-      return;
-    }
-    openAdminSheet({ view: "inbox", account: "admin" });
+  const openInboxFromOverview = (bucket?: string) => {
+    openAdminSheet({
+      view: "inbox", account: "admin",
+      queueFolder: bucket === "guide" ? "inbox" : "active",
+      queueBucket: bucket === "guide" ? undefined : bucket,
+    });
   };
 
   const openStatsFromOverview = () => {
@@ -1782,7 +1768,7 @@ export default function Admin() {
           <>
             <div className="hub-push-status">
               <span className={`dot${pushOk ? "" : " is-bad"}`} />
-              {pushOk ? "Push server healthy" : "Push not configured"}
+              {pushStatus ? (pushOk ? "Push configured" : "Push unavailable") : "Checking push service…"}
             </div>
             <div className="hub-push-meta">
               {pushStatus
@@ -1802,25 +1788,15 @@ export default function Admin() {
       >
         <div className="admin-panel-body">
           <div className="reveal" style={{ marginBottom: 18 }}>
-            <p className="text-white/35 text-[11px] uppercase tracking-wider mb-2" style={{ fontFamily: "var(--font-mono, monospace)" }}>
-              Admin
-              {activeTab !== "overview" ? ` · ${viewMeta.title}` : ""}
-            </p>
-            <div className="kick" style={{ color: viewMeta.kickerColor || "var(--panel-cyan)" }}>
-              {viewMeta.kicker}
-            </div>
-            <h1 className="h1">{viewMeta.title}</h1>
-            {viewMeta.lede && (
-              <p style={{ margin: "10px 0 0", fontSize: 14, color: "var(--board-muted)", maxWidth: 560, lineHeight: 1.5 }}>
-                {viewMeta.lede}
-              </p>
-            )}
+            <p className="admin-workspace-eyebrow">Zaylist administration</p>
+            <h1 className="h1">{activeTab === "overview" ? "Review desk" : viewMeta.title}</h1>
             <div className="flex gap-2 flex-wrap mt-4 items-center">
               <input
                 type="search"
                 value={adminGlobalSearchQ}
                 onChange={e => setAdminGlobalSearchQ(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && void runAdminGlobalSearch()}
+                aria-label="Search users, events and review cases"
                 placeholder="Search users, events, queue…"
                 className={adminFieldClass}
                 style={{ maxWidth: 320, flex: 1, minWidth: 180 }}
@@ -1874,32 +1850,30 @@ export default function Admin() {
           <AdminOverview
             pendingCount={pendingCount}
             attentionItems={overviewAttention}
-            kindPills={overviewKindPills}
+            queueUnavailable={queueUnavailable}
+            onRetryQueue={() => void reloadQueue()}
             showMetrics={false}
             isPrimaryOwner={isPrimaryOwner}
             ownerCount={ownerCount}
             onOpenInbox={openInboxFromOverview}
             onOpenOwner={() => openAdminSheet({ view: "inbox", account: "owner" })}
-            onReviewItem={(key) => {
-              if (key.startsWith("business-")) {
-                setAdminTab("venue-claims");
-                return;
-              }
-              openAdminSheet({ view: "inbox", account: "admin" });
-            }}
+            onReviewItem={key => openAdminSheet({
+              view: "inbox", account: key.startsWith("logo-") ? "owner" : "admin",
+              queueFolder: "active", queueItem: key,
+            })}
             onMetricClick={handleOverviewMetricClick}
             pushStatus={canPush ? pushStatus : null}
             onRefreshPush={canPush ? () => refetchPushStatus() : undefined}
             onSendTestPush={canPush ? () => testPushMutation.mutate() : undefined}
             testPushPending={testPushMutation.isPending}
-            breakdown={pendingAdmin.breakdown}
+            breakdown={pendingAdmin?.breakdown}
           />
           <section className="staff-reading admin-activity-log" aria-label="Activity log" data-testid="admin-activity-log">
             <h2 className="admin-shell__section-label">Activity log</h2>
             <p className="text-xs mb-3">
               Append-only admin actions (approves, denials, claims, guide messages). Open the floating inbox for queue work.
             </p>
-            {adminActivityLog.length === 0 ? (
+            {!adminActivityLog ? <p role="status">{activityUnavailable ? "Activity history is unavailable." : "Loading recent decisions…"}</p> : adminActivityLog.length === 0 ? (
               <p className="text-xs m-0">No recent actions.</p>
             ) : (
               <ul className="m-0 p-0 list-none space-y-2 max-h-[360px] overflow-y-auto">

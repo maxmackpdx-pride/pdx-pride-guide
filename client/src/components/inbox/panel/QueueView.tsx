@@ -483,6 +483,8 @@ export default function QueueView({
   mode,
   queueFolder,
   initialWorkFilter = "all",
+  initialBucket = "all",
+  initialItem,
   guideUnread = 0,
   ownerCount = 0,
   onOpenGuideInbox,
@@ -491,6 +493,8 @@ export default function QueueView({
   mode: "admin" | "owner";
   queueFolder: QueueFolder;
   initialWorkFilter?: string;
+  initialBucket?: string;
+  initialItem?: string;
   /** Shared guide-admin message unread - shown as a jump chip into Admin · Inbox. */
   guideUnread?: number;
   ownerCount?: number;
@@ -508,7 +512,12 @@ export default function QueueView({
   const [search, setSearch] = useState("");
   const [workFilter, setWorkFilter] = useState(initialWorkFilter);
   const [focusedId, setFocusedId] = useState<string | null>(null);
-  useEffect(() => {setWorkFilter(initialWorkFilter);setBucketFilter("all");setSearch("");}, [initialWorkFilter, mode, queueFolder]);
+  useEffect(() => {
+    setWorkFilter(initialWorkFilter);
+    setBucketFilter(initialBucket);
+    setFocusedId(initialItem ?? null);
+    setSearch("");
+  }, [initialWorkFilter, initialBucket, initialItem, mode, queueFolder]);
   const [workReason, setWorkReason] = useState("");
   const [workAction, setWorkAction] = useState<"waiting" | "escalated" | null>(null);
   const accent = mode === "admin" ? C.cyan : C.purple;

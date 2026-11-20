@@ -12,6 +12,8 @@ export type InboxSheetOpenOpts = {
   account?: "personal" | "admin" | "owner";
   threadId?: string | null;
   queueFolder?: "active" | "inbox";
+  queueBucket?: string;
+  queueItem?: string;
 };
 
 type InboxSheetContextValue = {
@@ -150,6 +152,8 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
               initialView={openOpts?.view}
               initialAccount={openOpts?.account}
               initialQueueFolder={openOpts?.queueFolder}
+              initialQueueBucket={openOpts?.queueBucket}
+              initialQueueItem={openOpts?.queueItem}
               initialThreadId={openOpts?.threadId}
             />
           </Suspense>

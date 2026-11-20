@@ -1,3 +1,4 @@
+import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { useUnreadCount } from "@/hooks/useUnreadCount";
@@ -22,13 +23,8 @@ export function useInboxAttentionCount() {
 
   const { data: pendingAdmin = { count: 0, ownerCount: 0, guideUnread: 0, adminBadge: 0 } } =
     useQuery<PendingAdmin>({
-      queryKey: ["/api/admin/pending-count"],
-      queryFn: () =>
-        fetch("/api/admin/pending-count", { credentials: "include" }).then((r) =>
-          r.ok
-            ? r.json()
-            : { count: 0, ownerCount: 0, guideUnread: 0, adminBadge: 0 },
-        ),
+      queryKey: ["/api/admin/pending-count", user?.id],
+      queryFn: async () => (await apiRequest("GET", "/api/admin/pending-count")).json(),
       enabled: !!user && isAdmin,
       refetchInterval: 90_000,
     });

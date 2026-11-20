@@ -119,3 +119,17 @@
 .staff-reading .inbox-exp-stats-badge {
   background: color-mix(in srgb, var(--inbox-exp-badge-color) 8%, var(--staff-card));
 }
+
+.admin-workspace-eyebrow {
+  margin: 0 0 5px;
+  color: var(--board-muted);
+  font: 600 .78rem/1.4 var(--font-body);
+  letter-spacing: .045em;
+}
+.staff-reading .admin-attn-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: .75rem;
+}
+.staff-reading .admin-attn-card { display: flex; flex-direction: column; justify-content: space-between; }
+.staff-reading .admin-health-chip { margin-block: 1rem; }

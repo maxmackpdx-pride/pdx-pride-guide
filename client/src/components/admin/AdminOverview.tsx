@@ -1,6 +1,6 @@
 import "./staff-reading.css";
 import { ArrowRight } from "lucide-react";
-import { Sparkles } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AdminMetricsPanel from "@/components/dashboard/AdminMetricsPanel";
@@ -12,13 +12,6 @@ export type AttentionItem = {
   title: string;
   subtitle: string;
   kindLabel: string;
-  color: string;
-};
-
-export type KindPill = {
-  key: string;
-  label: string;
-  count: number;
   color: string;
 };
 
@@ -43,17 +36,17 @@ export type QueueBreakdown = {
 } | null | undefined;
 
 /** Human labels + colors for each queue bucket (matches QueueView groups). */
-const QUEUE_BUCKETS: Array<{ key: keyof NonNullable<QueueBreakdown>; label: string; color: string }> = [
-  { key: "submissions", label: "Events / claims", color: "#19E3FF" },
-  { key: "promoters", label: "Promoters", color: "#B06BFF" },
-  { key: "businessClaims", label: "Venue claims", color: "#FF8C00" },
-  { key: "businessSubmissions", label: "New venues", color: "#FF8C00" },
-  { key: "moderation", label: "Moderation", color: "#FF1FA0" },
-  { key: "missedConnections", label: "Missed conn.", color: "#FF1FA0" },
-  { key: "giftingReports", label: "GIFTZ reports", color: "#D4FF00" },
-  { key: "giftingFlagged", label: "GIFTZ flagged", color: "#D4FF00" },
-  { key: "riverBrats", label: "River Brats", color: "#FF8C00" },
-  { key: "pendingGigs", label: "GIGZ", color: "#B06BFF" },
+const QUEUE_BUCKETS: Array<{ key: keyof NonNullable<QueueBreakdown>; label: string; color: string; bucket: string }> = [
+  { key: "submissions", bucket: "events", label: "Events / claims", color: "#19E3FF" },
+  { key: "promoters", bucket: "promoters", label: "Promoters", color: "#B06BFF" },
+  { key: "businessClaims", bucket: "venue_claims", label: "Venue claims", color: "#FF8C00" },
+  { key: "businessSubmissions", bucket: "new_venues", label: "New venues", color: "#FF8C00" },
+  { key: "moderation", bucket: "moderation", label: "Moderation", color: "#FF1FA0" },
+  { key: "missedConnections", bucket: "spotted", label: "Missed conn.", color: "#FF1FA0" },
+  { key: "giftingReports", bucket: "gifting", label: "GIFTZ reports", color: "#D4FF00" },
+  { key: "giftingFlagged", bucket: "gifting", label: "GIFTZ flagged", color: "#D4FF00" },
+  { key: "riverBrats", bucket: "river_brats", label: "River Brats", color: "#FF8C00" },
+  { key: "pendingGigs", bucket: "gigs", label: "GIGZ", color: "#B06BFF" },
 ];
 
 type LiveHealth = {
@@ -66,9 +59,10 @@ type LiveHealth = {
 };
 
 type Props = {
-  pendingCount: number;
+  pendingCount?: number;
+  queueUnavailable: boolean;
+  onRetryQueue: () => void;
   attentionItems: AttentionItem[];
-  kindPills: KindPill[];
   /** When true, show metrics inline (legacy). Prefer Stats tab. */
   metricsEnabled?: boolean;
   showMetrics?: boolean;
@@ -92,9 +86,8 @@ function shortSha(sha?: string): string {
   return clean.length > 7 ? clean.slice(0, 7) : clean;
 }
 
-const DEFAULT_BROADCAST_TITLE = "Making weekend plans?";
-const DEFAULT_BROADCAST_BODY =
-  "This weekend's queer events are live — plus fresh updates. Pride Guide is now Zaylist, Portland's queer event hub.";
+const DEFAULT_BROADCAST_TITLE = "";
+const DEFAULT_BROADCAST_BODY = "";
 
 /** Owner-only: compose + send one push announcement to every subscribed device. */
 function BroadcastPanel({ reach }: { reach: number }) {
@@ -184,7 +177,7 @@ function BroadcastPanel({ reach }: { reach: number }) {
         <button
           type="button"
           onClick={() => void send()}
-          disabled={sending || reach === 0 || !title.trim()}
+          disabled={sending || reach === 0 || !title.trim() || !body.trim()}
           className="admin-broadcast__send"
         >
           {sending ? "Sending…" : `Send to ${reach} device${reach === 1 ? "" : "s"}`}
@@ -197,7 +190,8 @@ function BroadcastPanel({ reach }: { reach: number }) {
 export default function AdminOverview({
   pendingCount,
   attentionItems,
-  kindPills,
+  queueUnavailable,
+  onRetryQueue,
   metricsEnabled = false,
   showMetrics = false,
   isPrimaryOwner = false,
@@ -235,39 +229,13 @@ export default function AdminOverview({
 
   return (
     <div className="admin-overview staff-reading">
-      {/* Owner-facing live health / deploy chip */}
-      <section className="admin-health-chip" aria-label="Live deploy health" data-testid="admin-health-chip">
-        <span
-          className={`admin-health-chip__dot${healthOk ? " is-ok" : healthFetching ? "" : " is-bad"}`}
-          aria-hidden="true"
-        />
-        <span className="admin-health-chip__label">
-          {healthFetching && !liveHealth
-            ? "Checking live health…"
-            : healthOk
-              ? "Live /api/health ok"
-              : "Live /api/health down"}
-        </span>
-        {sha ? (
-          <span className="admin-health-chip__meta" title={liveHealth?.gitSha}>
-            {sha}
-          </span>
-        ) : null}
-        {envLabel ? <span className="admin-health-chip__meta">{envLabel}</span> : null}
-        {liveHealth?.ts ? (
-          <span className="admin-health-chip__meta" title={liveHealth.ts}>
-            probed {new Date(liveHealth.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </span>
-        ) : null}
-      </section>
-
       {/* Owner-only banner (design: Hub.dc.html) */}
       {showOwner && (
         <section className="admin-owner-banner" aria-label="Owner only">
           <div className="admin-owner-banner__copy">
             <span className="admin-owner-banner__kicker">Owner only</span>
             <p className="admin-owner-banner__body">
-              <strong>{ownerCount}</strong> item{ownerCount === 1 ? "" : "s"} only you can action.
+              <strong>{ownerCount}</strong> item{ownerCount === 1 ? "" : "s"} waiting for you.
             </p>
           </div>
           <button type="button" className="admin-owner-banner__cta" onClick={onOpenOwner}>
@@ -280,13 +248,13 @@ export default function AdminOverview({
       <section className="admin-attn-section">
         <div className="admin-shell__section-head">
           <h2 className="admin-shell__section-label">Needs attention</h2>
-          {pendingCount > 0 && (
+          {pendingCount != null && pendingCount > 0 && (
             <span className="admin-shell__nav-alert" style={{ fontSize: 12, borderRadius: 99, padding: "3px 10px" }}>
               {pendingCount} in the queue
             </span>
           )}
           <span style={{ flex: 1 }} />
-          {pendingCount > 0 && (
+          {pendingCount != null && pendingCount > 0 && (
             <button type="button" className="admin-shell__ghost-btn" onClick={() => onOpenInbox()}>
               Open queue <ArrowRight size={14} aria-hidden="true" />
             </button>
@@ -301,7 +269,7 @@ export default function AdminOverview({
               <button
                 key={b.key}
                 type="button"
-                onClick={() => onOpenInbox(String(b.key))}
+                onClick={() => onOpenInbox(b.bucket)}
                 title={`Open the ${b.label} queue`}
                 className="admin-kind-pill"
               >
@@ -323,24 +291,14 @@ export default function AdminOverview({
           </div>
         )}
 
-        {kindPills.length > 0 && (
-          <div className="admin-kind-pills">
-            {kindPills.map(pill => (
-              <button
-                key={pill.key}
-                type="button"
-                className="admin-kind-pill"
-                onClick={() => onOpenInbox(pill.key)}
-              >
-                {pill.count} {pill.label}
-              </button>
-            ))}
+        {pendingCount == null ? (
+          <div className="admin-shell__queue-clear" role="status">
+            <p>{queueUnavailable ? "The review queue could not be loaded." : "Loading the review queue…"}</p>
+            {queueUnavailable && <button type="button" className="admin-shell__ghost-btn" onClick={onRetryQueue}>Retry</button>}
           </div>
-        )}
-
-        {pendingCount === 0 ? (
+        ) : pendingCount === 0 ? (
           <div className="admin-shell__queue-clear">
-            <h3><Sparkles size={16} aria-hidden="true" /> Queue clear <Sparkles size={16} aria-hidden="true" /></h3>
+            <h3><CheckCircle size={16} aria-hidden="true" /> Queue clear</h3>
             <p>No items are waiting for review.</p>
           </div>
         ) : (
@@ -368,13 +326,39 @@ export default function AdminOverview({
                 </div>
               </article>
             ))}
-            {pendingCount > attentionItems.length && (
+            {pendingCount != null && pendingCount > attentionItems.length && (
               <button type="button" className="admin-shell__ghost-btn" onClick={() => onOpenInbox()}>
                 View all {pendingCount} in queue <ArrowRight size={14} aria-hidden="true" />
               </button>
             )}
           </div>
         )}
+      </section>
+
+      {/* Owner-facing live health / deploy chip */}
+      <section className="admin-health-chip" aria-label="Live deploy health" data-testid="admin-health-chip">
+        <span
+          className={`admin-health-chip__dot${healthOk ? " is-ok" : healthFetching ? "" : " is-bad"}`}
+          aria-hidden="true"
+        />
+        <span className="admin-health-chip__label">
+          {healthFetching && !liveHealth
+            ? "Checking live health…"
+            : healthOk
+              ? "Live /api/health ok"
+              : "Live /api/health down"}
+        </span>
+        {sha ? (
+          <span className="admin-health-chip__meta" title={liveHealth?.gitSha}>
+            {sha}
+          </span>
+        ) : null}
+        {envLabel ? <span className="admin-health-chip__meta">{envLabel}</span> : null}
+        {liveHealth?.ts ? (
+          <span className="admin-health-chip__meta" title={liveHealth.ts}>
+            probed {new Date(liveHealth.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </span>
+        ) : null}
       </section>
 
       {/* Optional inline metrics (legacy); prefer Stats tab */}
