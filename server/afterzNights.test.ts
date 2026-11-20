@@ -96,6 +96,13 @@ test("event Afterz enforce time, host capacity, one renewed request and opt-in r
   assert.deepEqual(await (await call("nights", 2)).json(), []);
   await call("discovery", 2, "POST", { confirmed18: true });
   assert.equal((await (await call("nights", 2)).json())[0].glow, true);
+  evt.venueName = "Sub Rosa PDX";
+  evt.lat = 45.501;
+  evt.lng = -122.601;
+  const hidden = (await (await call("nights", 2)).json())[0];
+  assert.equal(hidden.lat, null);
+  assert.equal(hidden.lng, null);
+  evt.venueName = "Public theater";
   for (const who of [2, 3])
     await call(room + "/request", who, "POST", { confirmed18: true });
   await call(room + "/guests/2", 1, "POST", { status: "accepted" });

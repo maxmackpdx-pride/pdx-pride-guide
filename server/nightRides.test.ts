@@ -118,6 +118,23 @@ test("ride-home checks attendance, destination, party size, capacity, contact co
   assert.equal(pin.lat, event.lat);
   assert.equal(pin.lng, event.lng);
   assert.deepEqual(pin.faces, []);
+  event.venueName = "Meetrack";
+  assert.deepEqual(await (await call(maps, 1)).json(), []);
+  const privatePlan = await (await call(base, 1)).json();
+  assert.equal(privatePlan.onSiteWindow, false);
+  assert.equal(privatePlan.checked, false);
+  assert.equal(
+    (
+      await call(base + "/presence", 1, "POST", {
+        lat: event.lat,
+        lng: event.lng,
+        accuracy: 10,
+        area: "Kerns",
+      })
+    ).status,
+    409,
+  );
+  event.venueName = "Public hall";
   const path = base + "/rides/" + ride.id;
   assert.equal((await call(path + "/requests", 3, "POST")).status, 404);
   await call(base + "/presence", 3, "POST", {

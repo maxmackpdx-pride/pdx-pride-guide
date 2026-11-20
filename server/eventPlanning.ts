@@ -1,3 +1,4 @@
+import { hasRegistrationOnlyLocation } from "@shared/registrationOnlyVenue";
 import type Database from "better-sqlite3";
 import type { Express, RequestHandler, Response } from "express";
 import { hasPublicEventFlags } from "@shared/publicEventVisibility";
@@ -259,6 +260,7 @@ export function registerEventPlanning(
           !meta ||
           !event ||
           event.isHouseParty ||
+          hasRegistrationOnlyLocation(event) ||
           event.lat == null ||
           event.lng == null ||
           (parsePacificDateTime(event.dateEnd) ?? 0) +
@@ -327,8 +329,9 @@ export function registerEventPlanning(
       title: event.title,
       poster: event.posterImageUrl,
       venue: event.venueName,
-      checked: viewer ? !!night.present(event.id, date, viewer) : false,
+      checked: viewer && !event.isHouseParty && !hasRegistrationOnlyLocation(event) ? !!night.present(event.id, date, viewer) : false,
       onSiteWindow:
+        !event.isHouseParty && !hasRegistrationOnlyLocation(event) &&
         (parsePacificDateTime(event.dateStart) ?? Infinity) - 30 * 60000 <=
           Date.now() &&
         (parsePacificDateTime(event.dateEnd) ?? 0) + 30 * 60000 > Date.now(),

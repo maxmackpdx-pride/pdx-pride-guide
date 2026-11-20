@@ -1,3 +1,4 @@
+import { hasRegistrationOnlyLocation } from "@shared/registrationOnlyVenue";
 import type Database from "better-sqlite3";
 import type { Express, RequestHandler } from "express";
 import type { Event } from "@shared/schema";
@@ -134,6 +135,9 @@ export function registerNightRides(
       const o = offer(id.offer_id),
         m = plan(id.offer_id);
       if (!o || !m) continue;
+      const event = storage.getEvent(o.event_id);
+      if (!event || event.isHouseParty || hasRegistrationOnlyLocation(event))
+        continue;
       const candidates = db
         .prepare(
           `SELECT p.user_id FROM night_venue_presence p JOIN users u ON u.id=p.user_id AND u.status='active'
@@ -272,6 +276,10 @@ export function registerNightRides(
     const now = Date.now(),
       start = parsePacificDateTime(e.dateStart),
       end = parsePacificDateTime(e.dateEnd);
+    if (e.isHouseParty || hasRegistrationOnlyLocation(e))
+      return res
+        .status(409)
+        .json({ error: "GPS check-in is unavailable for this event." });
     if (
       start == null ||
       end == null ||
@@ -388,11 +396,9 @@ export function registerNightRides(
           !storage.isFollowing(person.id, user),
       )
     )
-      return res
-        .status(400)
-        .json({
-          error: "Choose one to three trusted members you mutually follow.",
-        });
+      return res.status(400).json({
+        error: "Choose one to three trusted members you mutually follow.",
+      });
     if (
       !Number.isInteger(minutes) ||
       minutes < 5 ||

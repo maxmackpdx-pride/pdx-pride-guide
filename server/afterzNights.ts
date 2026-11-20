@@ -1,3 +1,4 @@
+import { hasRegistrationOnlyLocation } from "@shared/registrationOnlyVenue";
 import type Database from "better-sqlite3";
 import type { Express, RequestHandler } from "express";
 import type { Event } from "@shared/schema";
@@ -134,8 +135,14 @@ export function afterzNights(
             eventId: event.id,
             eventTitle: event.title,
             venue: event.venueName,
-            lat: event.lat,
-            lng: event.lng,
+            lat:
+              hasRegistrationOnlyLocation(event) || event.isHouseParty
+                ? null
+                : event.lat,
+            lng:
+              hasRegistrationOnlyLocation(event) || event.isHouseParty
+                ? null
+                : event.lng,
             closesAt: n.closesAt,
             poster: n.poster,
             vibe: n.vibe,
