@@ -31,6 +31,11 @@ import SiteWallpaper from "./components/wallpaper/SiteWallpaper";
 import { lazyWithReload } from "./lib/lazyWithReload";
 import { legacyOutzRedirect } from "@shared/outzRoutes";
 
+import { legacyPlacezMapRedirect } from "@shared/placezMapRoutes";
+function LegacyMapEntrance() {
+  const target = legacyPlacezMapRedirect(window.location.pathname + window.location.search + window.location.hash);
+  return target ? <Redirect to={target} replace /> : <UnifiedMap />;
+}
 function LegacyOutzRedirect() {
   const target = legacyOutzRedirect(window.location.pathname + window.location.search + window.location.hash);
   return <Redirect to={target || "/outzide"} replace />;
@@ -127,7 +132,7 @@ function AppLayout() {
   const profile = isProfilePath(location);
   const routePath = pathname.replace(/\/+$/, "") || "/";
   const roomShaderRoute = ["/directory", "/events", "/scenez", "/outzide/places"].includes(routePath);
-  const livingMap = ["/map", "/map-demo"].includes(routePath);
+  const livingMap = ["/placez/map", "/map", "/map-demo", "/mapz"].includes(routePath);
   const unifiedMap = livingMap || routePath === "/outzide" || routePath.startsWith("/outzide/share/");
   const mapSurface = livingMap || routePath === "/outzide" || routePath.startsWith("/outzide/");
   const hideFooter = livingMap || routePath === "/outzide" || routePath.startsWith("/outzide/");
@@ -163,8 +168,10 @@ function AppLayout() {
             <Route path="/boards">{() => <Redirect to={`/boardz${window.location.search}${window.location.hash}`} replace />}</Route>
             <Route path="/all-boards">{() => <Redirect to={`/boardz${window.location.search}${window.location.hash}`} replace />}</Route>
             <Route path="/our-boardz">{() => <Redirect to={`/boardz${window.location.search}${window.location.hash}`} replace />}</Route>
-            <Route path="/map-demo" component={UnifiedMap} />
-            <Route path="/map" component={UnifiedMap} />
+            <Route path="/placez/map" component={UnifiedMap} />
+            <Route path="/map-demo" component={LegacyMapEntrance} />
+            <Route path="/map" component={LegacyMapEntrance} />
+            <Route path="/mapz" component={LegacyMapEntrance} />
             {/* My Schedule is the Events drawer's full-screen layer now:
                 /schedule lands on Events with that stage already open. */}
             <Route path="/schedule">{() => <Redirect to="/events?schedule=1" replace />}</Route>

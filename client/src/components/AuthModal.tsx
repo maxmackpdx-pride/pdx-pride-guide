@@ -69,7 +69,7 @@ function Field({
 
 export default function AuthModal({ onClose, defaultTab = "login", portalTargetSelector }: AuthModalProps) {
   const [portalTarget] = useState(() => (portalTargetSelector ? document.querySelector(portalTargetSelector) : null) || document.body);
-  const googleAuthUrl = window.location.pathname === "/map"
+  const googleAuthUrl = ["/placez/map", "/map"].includes(window.location.pathname)
     ? `/api/auth/google?${new URLSearchParams({ returnTo: `${window.location.pathname}${window.location.search}` })}`
     : "/api/auth/google";
   const [tab, setTab] = useState<"login" | "register">(defaultTab);

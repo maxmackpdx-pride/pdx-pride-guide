@@ -182,7 +182,7 @@ export const WORLDS: WorldSpec[] = [
     eyebrow: "The directory for us",
     body: "Find the places that show up for Portland's queer community.",
     action: "See PlaceZ on the map",
-    href: "/map?layer=places",
+    href: "/placez/map?layer=places",
     accent: "var(--room-placez)",
     mark: "/brand/family/our-placez.svg",
     slot: "promo",

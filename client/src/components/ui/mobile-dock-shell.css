@@ -104,10 +104,10 @@
 
 @media (max-width:959px) {
   /* Mapz keeps the shared baseline, with only a 3px rise at its top edge. */
-  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock .hub-mobile-tab.znav-control[href="/map"] {
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock .hub-mobile-tab.znav-control[href="/placez/map"] {
     top:-3px; height:47px; min-height:47px;
   }
-  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock:has([href="/map"][data-dock-selected="true"]) .z-mobile-dock__indicator {
+  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock:has([href="/placez/map"][data-dock-selected="true"]) .z-mobile-dock__indicator {
     top:3px;
   }
 }

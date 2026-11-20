@@ -19,7 +19,7 @@ export default function MapBootLoader({ map, overlay = false, error, onRetry, on
         {onBrowse && <button type="button" onClick={onBrowse}>Browse destinations</button>}
       </div>
     </> : <>
-      <SpectrumLoader variant="ring" label={`Loading ${map === "mapz" ? "Mapz" : "Outzide"}`} />
+      <SpectrumLoader variant="ring" label={`Loading ${map === "mapz" ? "PlaceZ" : "Outzide"}`} />
       {map === "mapz" && <p className="map-boot-loader__message">yes, you’re weird<br />and we love you for it.</p>}
       {slow && <><p className="map-boot-loader__error">Still loading. You can keep browsing.</p><div className="map-boot-loader__actions">{onRetry && <button type="button" onClick={onRetry}>Reload map</button>}{onBrowse && <button type="button" onClick={onBrowse}>Browse listings</button>}</div></>}
     </>}

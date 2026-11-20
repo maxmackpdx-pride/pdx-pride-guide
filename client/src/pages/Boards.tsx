@@ -440,7 +440,7 @@ export default function Boards() {
                       </button>
                       {selectedCategory.id === "housing" && mineOnly && <button type="button" className="ab-back" onClick={()=>{if(!user){setShowAuth(true);return;}update({type:"PM",compose:"1"});}}>Property managers · Contact Tucker</button>}
                       <BoardFollowButton board={followRoomForCategory(selectedCategory.id)} />
-                      <Link className="ab-back" href={`/map?layer=${selectedCategory.id === "housing" ? "houz" : selectedCategory.id}`}><MapPin size={14} />Explore on Mapz</Link>
+                      <Link className="ab-back" href={`/map?layer=${selectedCategory.id === "housing" ? "houz" : selectedCategory.id}`}><MapPin size={14} />Explore on map</Link>
 
                     </>
                   ) : (

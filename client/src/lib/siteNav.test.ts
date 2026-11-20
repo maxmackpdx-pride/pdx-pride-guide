@@ -16,7 +16,7 @@ test('desktop Maps retains all five map worlds, separately from outdoor browse',
   const maps = PRIMARY_NAV.find(item => item.type === 'dropdown' && item.id === 'maps');
   assert.ok(maps?.type === 'dropdown');
   assert.equal(maps.items, MAPS_NAV);
-  assert.deepEqual(MAPS_NAV.map(item => item.href), ['/map?mode=mapz', '/map?mode=outzide', '/map?mode=boardz', '/map?mode=afterz', '/map?mode=zaydark']);
+  assert.deepEqual(MAPS_NAV.map(item => item.href), ['/placez/map?mode=mapz', '/map?mode=outzide', '/map?mode=boardz', '/map?mode=afterz', '/map?mode=zaydark']);
   assert.equal(MAPS_NAV.some(item => navLinkActive('/outzide/places', item.href)), false);
 });
 
@@ -31,7 +31,7 @@ test('map selection reflects mode and existing map aliases', () => {
 });
 
 test('map world changes reload only the mounted map; browse links remain SPA', () => {
-  for (const current of ['/map', '/outzide', '/map?mode=boardz']) {
+  for (const current of ['/placez/map', '/map', '/outzide', '/map?mode=boardz']) {
     assert.equal(mapWorldNeedsReload(current, '/map?mode=outzide'), true);
     assert.equal(mapWorldNeedsReload(current, '/outzide/places'), false);
     assert.equal(mapWorldNeedsReload(current, '/scenez'), false);

@@ -13,7 +13,14 @@ import { DIRECTORY_TYPE_LABELS } from "@shared/directoryTheme";
 import { isEventResearchAgentRequest } from "./eventResearchAuth";
 import { legacyOutzRedirect } from "@shared/outzRoutes";
 
+import { legacyPlacezMapRedirect } from "@shared/placezMapRoutes";
+
 const app = express();
+app.use((req, res, next) => {
+  const target = legacyPlacezMapRedirect(req.originalUrl);
+  if ((req.method === "GET" || req.method === "HEAD") && target) return res.redirect(308, target);
+  next();
+});
 const httpServer = createServer(app);
 
 // Railway terminates TLS at the edge; required for secure session cookies.

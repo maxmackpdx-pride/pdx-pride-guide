@@ -48,7 +48,7 @@ export default function MobileBottomNav() {
   }, [location, closeFan]);
 
   const eventsActive = EVENTS_NAV.some(item => navLinkActive(location, item.href));
-  const mapActive = navLinkActive(location, "/map") || location === "/outzide";
+  const mapActive = navLinkActive(location, "/placez/map") || navLinkActive(location, "/map") || location === "/outzide";
   const placesActive = PLACES_NAV.some(item => navLinkActive(location, item.href));
   const boardsActive = navLinkActive(location, "/boardz") || BOARDS_MENU.some(item => navLinkActive(location, item.href)) || navLinkActive(location, "/hausing");
   const resourcesActive = navLinkActive(location, "/needz");
@@ -66,7 +66,7 @@ export default function MobileBottomNav() {
   const toggleWorldFan = (event: ReactMouseEvent<HTMLAnchorElement>) => {
     // Pressing MAPZ no longer navigates directly: it fans the five map
     // worlds out of the dock, and a world in the fan is the navigation.
-    // The href stays "/map" so map-intent warming, the dock's MAPZ tab
+    // The canonical map href supports map-intent warming and the dock tab
     // styling and the no-JS fallback all keep working as before.
     event.preventDefault();
     if (fanOpen !== "maps") dismissExcept();
@@ -115,12 +115,12 @@ export default function MobileBottomNav() {
                       </a>
 
           <a
-            href="/map"
+            href="/placez/map"
             className={tabClass(mapActive, "orange")}
             data-accent="orange"
             aria-current={mapActive ? "page" : undefined}
-            aria-label="MAPZ"
-            title="MAPZ"
+            aria-label="PlaceZ map"
+            title="PlaceZ map"
             aria-haspopup="true"
             aria-expanded={fanOpen === "maps"}
             aria-controls="world-fan"

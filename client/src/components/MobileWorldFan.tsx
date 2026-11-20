@@ -32,7 +32,7 @@ type World = {
 const WORLDS: World[] = [
   { mode: "zaydark", label: "ZayDark", descriptor: "ON YOUR TERMS", accent: "var(--neon-red)", Icon: Moon, x: "9%", y: 0, delay: 84 },
   { mode: "boardz", label: "Boardz", descriptor: "MADE OF COMMUNITY", accent: "var(--neon-cyan)", Icon: Pin, x: "29.5%", y: 30, delay: 42 },
-  { mode: "mapz", label: "Mapz", descriptor: "THE CITY AFTER DARK", accent: "var(--neon-magenta)", Icon: Map, x: "50%", y: 54, delay: 0 },
+  { mode: "mapz", href: "/placez/map?mode=mapz", label: "PlaceZ", descriptor: "THE CITY AFTER DARK", accent: "var(--neon-magenta)", Icon: Map, x: "50%", y: 54, delay: 0 },
   { mode: "outzide", label: "Outzide", descriptor: "TAKE THE LONG WAY", accent: "var(--neon-orange)", Icon: Mountain, x: "70.5%", y: 30, delay: 42 },
   { mode: "afterz", label: "Afterz", descriptor: "A LIGHT LEFT ON", accent: "var(--yellow)", Icon: Home, x: "91%", y: 0, delay: 84 },
 ];

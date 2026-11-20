@@ -6,7 +6,7 @@ export function listenForHomeMapIntent() {
     const link = event.target.closest<HTMLAnchorElement>("a[href]");
     if (!link) return;
     const url = new URL(link.href, window.location.href);
-    if (url.origin === window.location.origin && url.pathname === "/map") prefetchMapz();
+    if (url.origin === window.location.origin && ["/placez/map", "/map"].includes(url.pathname)) prefetchMapz();
   };
   const types = ["pointerover", "focusin", "touchstart"] as const;
   for (const type of types) document.addEventListener(type, warm, { passive: true });

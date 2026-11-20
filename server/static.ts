@@ -8,7 +8,7 @@ import { injectSeoIntoHtml } from "./seo";
 import { homeBootLogoHtml } from "../shared/homeBoot";
 
 const APP_PATHS = new Set([
-  "/", "/map-demo", "/index.html", "/z", "/events", "/map", "/boardz", "/boards", "/all-boards", "/our-boardz", "/all-boards", "/schedule", "/submit", "/gigz", "/giftz", "/sellz",
+  "/", "/placez/map", "/mapz", "/map-demo", "/index.html", "/z", "/events", "/map", "/boardz", "/boards", "/all-boards", "/our-boardz", "/all-boards", "/schedule", "/submit", "/gigz", "/giftz", "/sellz",
   "/gigz/new", "/giftz/new", "/sellz/new", "/mizzed/new",
   "/my-houz", "/my-houz/new", "/houz", "/the-hauz", "/the-hauz/new", "/about", "/aboutz", "/resources", "/rezources", "/needz", "/resume", "/contact", "/sponsors", "/access", "/legal",
   "/admin", "/dashboard", "/settings/notifications", "/reset-password", "/inbox", "/mizzed", "/directory", "/scenez", "/outzide", "/design-preview", "/design-system/specimen", "/next", "/darkroom",
@@ -38,7 +38,7 @@ export function serveStatic(app: Express, distPath = path.resolve(__dirname, "pu
     if (requestPath === "/" || requestPath === "/index.html") {
       baseIndexHtml = baseIndexHtml.replace('<div id="root"></div>', `<div id="root">${homeBootLogoHtml}</div>`);
     }
-    const mapEntry=["/map","/map-demo","/outzide"].includes(requestPath)||requestPath.startsWith("/outzide/share/")?"src/pages/UnifiedMap.tsx":null;
+    const mapEntry=["/placez/map","/map","/map-demo","/outzide"].includes(requestPath)||requestPath.startsWith("/outzide/share/")?"src/pages/UnifiedMap.tsx":null;
     if(mapEntry){
       // The homepage globe competes with the map engine on cold map routes.
       baseIndexHtml=baseIndexHtml.replace(/<link[^>]*href="\/home-globe\/portland-city-beam-density\.png"[^>]*>/g, "");
@@ -81,7 +81,7 @@ export function serveStatic(app: Express, distPath = path.resolve(__dirname, "pu
       const query=new URL(req.originalUrl,'https://www.zaylist.com').searchParams;
       if(query.has('guestPlace')&&!query.has('place'))query.set('place',query.get('guestPlace')!);
       query.delete('guestPlace');
-      const target=prefix==='/mapz-map'?'/map':'/outzide';
+      const target=prefix==='/mapz-map'?'/placez/map':'/outzide';
       if(prefix==='/mapz-map'&&!query.has('mode'))query.set('mode','mapz');
       res.redirect(308,target+(query.size?'?'+query.toString():''));
     });

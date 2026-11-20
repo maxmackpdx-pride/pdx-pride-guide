@@ -15,7 +15,7 @@ const FOOTER_FOLDERS: { id: string; title: string; links: FooterLink[] }[] = [
     links: [
       ["/events", "EVENTZ"],
       ["/schedule", "My Schedule"],
-      ["/map", "Mapz"],
+      ["/placez/map", "PlaceZ map"],
       ["/z", "Z/ List · Communities"],
       ["/directory", "PlaceZ directory"],
       ["/outzide", "Outzide"],

@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 const SEEN_PREFIX = "pgpdx:glow-nudge:v1:";
 const CROP_CANVAS = 240;
 const NUDGE_IDLE_MS = 8_000;
-const NUDGE_BROWSE_PATHS = new Set(["/", "/events", "/schedule", "/directory", "/map", "/about", "/access"]);
+const NUDGE_BROWSE_PATHS = new Set(["/", "/events", "/schedule", "/directory", "/placez/map", "/map", "/about", "/access"]);
 
 /** Only offer appearance setup during idle browsing, outside another task. */
 function canOfferAppearanceNudge(): boolean {
