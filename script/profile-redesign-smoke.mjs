@@ -18,7 +18,7 @@ try {
    if(path==='/api/gigs/888')return route.fulfill({json:{id:888,userId:2,name:'Synthetic Poster',username:'viewer_demo',skills:'Community',location:'Portland',compensation:'Volunteer',title:'Synthetic Community Gig',description:'Fictional opportunity',postType:'POSTING_GIG',status:'LIVE',createdAt:'2026-10-13T12:00:00Z',isMine:false}});
    if(path==='/api/events/999/attendance'){rsvpCalls++;return route.fulfill({json:{success:true}});}
    if(path==='/api/events/999')return route.fulfill({json:{id:999,title:'Synthetic Pride Dance',venueName:'Example Venue',dateStart:'2030-10-20T20:00:00Z',dateEnd:'2030-10-21T01:00:00Z',dayOfWeek:'SUN',posterImageUrl:'/brand/family/giftz.png',status:'LIVE'}});
-   if(path==='/api/auth/me')return route.fulfill({json:{id:state==='owner'||state==='collection'?1:2,username:state==='owner'||state==='collection'?'profile_demo':'viewer_demo',displayName:'Test Viewer',avatarChoice:1,avatarRing:'none'}});
+   if(path==='/api/auth/session')return route.fulfill({json:{id:state==='owner'||state==='collection'?1:2,username:state==='owner'||state==='collection'?'profile_demo':'viewer_demo',displayName:'Test Viewer',avatarChoice:1,avatarRing:'none'}});
    if(path.endsWith('/follow')){followCalls++;await new Promise(r=>setTimeout(r,1000));return route.fulfill({json:{success:true}});}
    if(path.startsWith('/api/hub/feed'))return route.fulfill({json:{items:[],nextCursor:null}});
    if(path.includes('attendance-summaries'))return route.fulfill({json:{}});

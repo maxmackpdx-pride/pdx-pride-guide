@@ -70,7 +70,7 @@ async function measure(browser,url,mode,family){
     await context.route('**/api/**',route=>{
       const request=route.request(),pathname=new URL(request.url()).pathname;
       if(request.method()!=='GET')return route.fulfill({status:403,json:{error:'Profiling fixture is read-only'}});
-      if(pathname==='/api/auth/me')return route.fulfill({json:{id:123,username:'profiling',email:'profile@example.invalid'}});
+      if(pathname==='/api/auth/session')return route.fulfill({json:{id:123,username:'profiling',email:'profile@example.invalid'}});
       return route.fulfill({json:[]});
     });
     const page=await context.newPage(),errors=[];

@@ -111,7 +111,7 @@ try {
   // UI: People hub section
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(`${BASE}/dashboard?section=people`, { waitUntil: "domcontentloaded", timeout: 30000 });
-  await page.waitForResponse((r) => r.url().includes("/api/auth/me") && r.ok(), { timeout: 15000 }).catch(() => {});
+  await page.waitForResponse((r) => r.url().includes("/api/auth/session") && r.ok(), { timeout: 15000 }).catch(() => {});
 
   await page.getByRole("heading", { name: "People" }).waitFor({ timeout: 15000 }).catch(() => {});
   const hasPeopleHeading = await page.getByRole("heading", { name: "People" }).isVisible();

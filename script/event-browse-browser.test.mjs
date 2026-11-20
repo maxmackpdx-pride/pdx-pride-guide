@@ -14,7 +14,7 @@ test('Eventz filters return exact mocked records across deep links, history, cle
   await page.route('**/api/**',async route=>{
    const request=route.request(),path=new URL(request.url()).pathname;
    if(!['GET','HEAD'].includes(request.method())){if(!path.startsWith("/api/analytics/"))writes.push(path);return route.fulfill({json:{ok:true}});}
-   if(path==='/api/auth/me')return route.fulfill({json:{id:999999,username:'fixture',displayName:'Fixture',avatarChoice:2,avatarRing:"pride"}});
+   if(path==='/api/auth/session')return route.fulfill({json:{id:999999,username:'fixture',displayName:'Fixture',avatarChoice:2,avatarRing:"pride"}});
    if(path==='/api/hub/feed')return route.fulfill({json:{items:[],nextCursor:null}});
    if(path==='/api/events')return route.fulfill({json:fixtures});
    if(path==='/api/events/mine/saved')return route.fulfill({json:[2,8]});

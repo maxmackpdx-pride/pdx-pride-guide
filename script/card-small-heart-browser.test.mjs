@@ -50,7 +50,7 @@ test('all small card APIs and real Directory share centered heart controls witho
     if(/^\/api\/directory\/\d+\/follow$/.test(p))return route.fulfill({json:{isFollowing:method==='POST',followerCount:method==='POST'?1:0}});
     return route.fulfill({status:400,json:{error:'Unexpected write blocked by browser QA'}});
    }
-   if(p==='/api/auth/me')return route.fulfill({json:{id:777,username:'qa',email:'qa@example.invalid'}});
+   if(p==='/api/auth/session')return route.fulfill({json:{id:777,username:'qa',email:'qa@example.invalid'}});
    if(p==='/api/hearts')return route.fulfill({json:hearts});
    if(p==='/api/directory')return route.fulfill({json:businesses});
    return route.fulfill({json:[]});

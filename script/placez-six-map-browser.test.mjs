@@ -35,7 +35,7 @@ test('immutable map release uses shared read-only PlaceZ portals at phone and de
   await server.listen();browser=await chromium.launch({headless:true});
   const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
   await context.route('**/*',route=>{const req=route.request(),url=new URL(req.url());if(!['GET','HEAD'].includes(req.method())){writes.push(req.method()+' '+url.pathname);return route.abort();}
-   if(url.pathname.startsWith('/api/')){const p=url.pathname;return route.fulfill(p==='/api/auth/me'?{status:401,json:{}}:{json:p==='/api/directory'?Object.keys(names).map(Number).map(place):/^\/api\/directory\/\d+$/.test(p)?place(Number(p.split('/').pop())):p==='/api/outz/closures'?{statuses:[]}:p==='/api/nude-beaches'?{data:{}}:p.includes('/housing')?{posts:[]}:p.includes('/maps/v1/social/')?{profiles:[],gatherings:[],venues:[]}:[]});}
+   if(url.pathname.startsWith('/api/')){const p=url.pathname;return route.fulfill(p==='/api/auth/session'?{contentType:'application/json',body:'null'}:{json:p==='/api/directory'?Object.keys(names).map(Number).map(place):/^\/api\/directory\/\d+$/.test(p)?place(Number(p.split('/').pop())):p==='/api/outz/closures'?{statuses:[]}:p==='/api/nude-beaches'?{data:{}}:p.includes('/housing')?{posts:[]}:p.includes('/maps/v1/social/')?{profiles:[],gatherings:[],venues:[]}:[]});}
    if(url.pathname.startsWith('/outzide-map/'))return route.fulfill({json:url.pathname.endsWith('places.json')?{places:[]}:{}});
    if(!['127.0.0.1','localhost'].includes(url.hostname))return route.abort();return route.continue();
   });

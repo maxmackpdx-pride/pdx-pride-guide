@@ -65,7 +65,7 @@ test('Places preserve clear artwork and opposite-depth parallax across sizes and
     await context.route('**/*',route=>{
      const request=route.request(),url=new URL(request.url());
      if(!['GET','HEAD'].includes(request.method())){writes.push(`${request.method()} ${url.pathname}`);return route.abort('blockedbyclient');}
-     if(url.origin===new URL(server.resolvedUrls.local[0]).origin && url.pathname.startsWith('/api/'))return route.fulfill(url.pathname==='/api/auth/me'?{status:401,json:{}}:{json:[]});
+     if(url.origin===new URL(server.resolvedUrls.local[0]).origin && url.pathname.startsWith('/api/'))return route.fulfill(url.pathname==='/api/auth/session'?{contentType:'application/json',body:'null'}:{json:[]});
      // Hold the production hook on its checked-in snapshot; never replace artwork.
      if(url.pathname==='/api/design/v1/motif-recipes')return route.abort('blockedbyclient');
      return route.continue();

@@ -75,7 +75,7 @@ async function measure(browser,url,mode,kind,round){
   await context.route('**/api/**',route=>{
    const request=route.request(),p=new URL(request.url()).pathname;
    if(request.method()!=='GET')return route.abort('blockedbyclient');
-   if(p==='/api/auth/me')return route.fulfill({status:401,json:{}});
+   if(p==='/api/auth/session')return route.fulfill({contentType:'application/json',body:'null'});
    if(p==='/api/ads/serve')return route.fulfill({json:{ads:[]}});if(p==='/api/events')return route.fulfill({json:events});
    if(/^\/api\/events\/\d+$/.test(p)){const e=events.find(item=>item.id===Number(p.split('/').pop()));return route.fulfill({status:e?200:404,json:e??{error:'Not found'}});}
    if(p==='/api/directory')return route.fulfill({json:businesses});

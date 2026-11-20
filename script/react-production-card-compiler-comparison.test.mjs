@@ -122,7 +122,7 @@ async function sample(browser,mode,t) {
         await context.route('**/api/**',route=>{
           const req=route.request(),pathname=new URL(req.url()).pathname;
           if(req.method()!=='GET')return route.fulfill({status:403,json:{error:'Read-only profiling fixture'}});
-          if(pathname==='/api/auth/me')return route.fulfill({json:{id:123,username:'profiling',email:'profile@example.invalid'}});
+          if(pathname==='/api/auth/session')return route.fulfill({json:{id:123,username:'profiling',email:'profile@example.invalid'}});
           return route.fulfill({json:[]});
         });
         const page=await context.newPage(),errors=[];

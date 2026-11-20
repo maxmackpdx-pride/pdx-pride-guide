@@ -58,7 +58,7 @@ test('profile existing event and board cards under a parent update', { timeout: 
       await context.route('**/api/**', route => {
         const pathname = new URL(route.request().url()).pathname;
         if (route.request().method() !== 'GET') return route.fulfill({ status: 403, json: { error: 'Browser profiler never writes' } });
-        if (pathname === '/api/auth/me') return route.fulfill({ json: { id: 123, username: 'profiling', email: 'profile@example.invalid' } });
+        if (pathname === '/api/auth/session') return route.fulfill({ json: { id: 123, username: 'profiling', email: 'profile@example.invalid' } });
         if (pathname === '/api/hearts') return route.fulfill({ json: [] });
         return route.fulfill({ json: [] });
       });

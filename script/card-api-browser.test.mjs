@@ -62,7 +62,7 @@ test('production cards preserve source geometry across viewport and in-flow pres
  const base=server.resolvedUrls.local[0];
   browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||undefined,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
   const context=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'reduce'});
-  await context.route('**/api/**',route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/me')return route.fulfill({status:401,json:{}});
+  await context.route('**/api/**',route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/session')return route.fulfill({contentType:'application/json',body:'null'});
     if(p.endsWith('/planning'))return route.fulfill({json:{checked:false,onSiteWindow:false,poster:null,venue:'QA venue',title:'QA Event',open:true,canPostGig:false,gigs:[],rides:null}});
     return route.fulfill({json:[]});});
   await context.route('**/outzide-map/index.html?*',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body><h2>Destination detail fixture</h2><p>Map internals intentionally isolated from host geometry tests.</p></body></html>'}));

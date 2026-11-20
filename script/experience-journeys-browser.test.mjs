@@ -16,7 +16,7 @@ test('Eventz restores poster history, search paginates and failed sources remain
     await page.route('**/api/**',async route=>{
       const request=route.request(),url=new URL(request.url()),path=url.pathname;
       if(request.method()!=='GET'&&!path.startsWith('/api/analytics')) writes.push(path);
-      if(path==='/api/auth/me') return route.fulfill({status:401,json:{error:'guest'}});
+      if(path==='/api/auth/session') return route.fulfill({contentType:'application/json',body:'null'});
       if(path==='/api/events') return route.fulfill({json:[event]});
       if(path==='/api/events/83420/detail'||path==='/api/directory') return route.fulfill({status:503,json:{error:'temporarily unavailable'}});
       if(path==='/api/events/83420') return route.fulfill({json:event});

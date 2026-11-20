@@ -57,7 +57,7 @@ export async function prepareSmokeContext(context) {
 export async function waitForAppStable(page) {
   await page.waitForLoadState("networkidle", { timeout: 30000 }).catch(() => {});
   await page
-    .waitForResponse((r) => r.url().includes("/api/auth/me") && r.ok(), { timeout: 15000 })
+    .waitForResponse((r) => r.url().includes("/api/auth/session") && r.ok(), { timeout: 15000 })
     .catch(() => {});
   await page.waitForTimeout(300);
 }
