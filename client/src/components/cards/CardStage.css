@@ -50,6 +50,6 @@
 .zay-card-stage.placez-stage .place-modal-overlay { display: block; padding: 0; backdrop-filter: none; background: transparent; }
 /* The scroll lock pins the body at its saved scroll offset. Keep its sticky
    header on screen while opening from a poster far down the board. */
-body:has(> .zay-card-stage) .site-header.site-header--glass { position: fixed; inset-inline: 0; margin-inline: auto; margin-block-start: 0; }
+body:has(> .zay-card-stage[data-active]) .site-header.site-header--glass { position: fixed; inset-inline: 0; margin-inline: auto; margin-block-start: 0; }
 
 .map-place-preview { width: min(380px, calc(100% - 32px)); }
