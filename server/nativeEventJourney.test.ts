@@ -75,6 +75,7 @@ test("native clients use the real session, private save and public attendance co
     if (session) jars.set(user, session.split(";")[0]);
     return {
       status: response.status,
+      cacheControl: response.headers.get("cache-control"),
       data: await response.json().catch(() => null),
     };
   }
@@ -82,6 +83,10 @@ test("native clients use the real session, private save and public attendance co
   const date = "2099-07-02",
     planning = route + "/occurrences/" + date + "/planning";
   assert.equal((await call(0, "GET", "/api/auth/me")).status, 401);
+  const guestSession = await call(0, "GET", "/api/auth/session");
+  assert.equal(guestSession.status, 200);
+  assert.equal(guestSession.data, null);
+  assert.equal(guestSession.cacheControl, "private, no-store");
   const detail = await call(0, "GET", route + "?date=" + date);
   assert.equal(detail.status, 200);
   assert.equal(detail.data.dateStart.slice(0, 10), date);
@@ -92,7 +97,12 @@ test("native clients use the real session, private save and public attendance co
       password,
     });
     assert.equal(signed.status, 200);
-    assert.equal((await call(user.id, "GET", "/api/auth/me")).data.id, user.id);
+    const me = await call(user.id, "GET", "/api/auth/me");
+    assert.equal(me.data.id, user.id);
+    const session = await call(user.id, "GET", "/api/auth/session");
+    assert.equal(session.status, 200);
+    assert.equal(session.cacheControl, "private, no-store");
+    assert.deepEqual(session.data, me.data);
   }
   assert.equal((await call(member.id, "PUT", route + "/save")).status, 200);
   assert.ok(

@@ -65,6 +65,19 @@ test("session recovers when the network drops before a valid session", async () 
   assert.equal(calls(), 2);
 });
 
+test("the initial public read resolves a signed-out visit without an HTTP error", async () => {
+  let calls = 0;
+  const resolution = await resolveSession(async (url, options) => {
+    calls++;
+    assert.equal(url, "/api/auth/session");
+    assert.equal(options?.credentials, "include");
+    assert.equal(options?.cache, "no-store");
+    return jsonResponse(200, null);
+  }, { sleep: instantly });
+  assert.deepEqual(resolution, { kind: "anonymous" });
+  assert.equal(calls, 1);
+});
+
 test("a 401 is a confirmed sign-out and is never retried", async () => {
   const { request, calls } = scripted([async () => jsonResponse(401)]);
   const resolution = await resolveSession(request, { sleep: instantly, delaysMs: [1, 1, 1] });

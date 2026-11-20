@@ -4506,16 +4506,25 @@ export function registerRoutes(httpServer: Server, app: Express) {
     });
   });
 
-  app.get("/api/auth/me", (req, res) => {
-    if (!req.session?.userId) return res.status(401).json({ error: "Not authenticated" });
-    let user = storage.getUserById(req.session.userId);
-    if (!user) return res.status(401).json({ error: "Not authenticated" });
+  function currentSessionUser(req: express.Request) {
+    if (!req.session?.userId) return null;
+    const user = storage.getUserById(req.session.userId);
+    if (!user) return null;
     if (user.status === "deleted") {
       req.session.destroy(() => {});
-      return res.status(401).json({ error: "Not authenticated" });
+      return null;
     }
-    user = storage.clearExpiredAccountModeration(user.id) || user;
-    res.json(authUserResponse(req, user));
+    return authUserResponse(req, storage.clearExpiredAccountModeration(user.id) || user);
+  }
+
+  app.get("/api/auth/session", (req, res) => {
+    res.set("Cache-Control", "private, no-store").vary("Cookie").json(currentSessionUser(req));
+  });
+
+  app.get("/api/auth/me", (req, res) => {
+    const user = currentSessionUser(req);
+    if (!user) return res.status(401).json({ error: "Not authenticated" });
+    res.json(user);
   });
 
   // Username autocomplete - requires auth, returns up to 8 matches

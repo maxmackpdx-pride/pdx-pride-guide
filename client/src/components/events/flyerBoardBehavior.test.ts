@@ -93,7 +93,7 @@ describe("approved FlyerBoard interactions", {timeout:90_000}, () => {
         refreshSequence++;
         return route.fulfill({json:[...future,past].map(row=>({...row,description:`Refreshed ${refreshSequence}`}))});
       }
-      if(path==="/api/auth/me")return route.fulfill({status:401,json:{error:"guest"}});
+      if(path==="/api/auth/session")return route.fulfill({contentType:"application/json",body:"null"});
       if(path==="/api/missed-connections")return route.fulfill({json:[
         {id:1,eventId:past.id,title:"Old post",body:"An earlier concert message",status:"ACTIVE",createdAt:new Date(today-day).toISOString(),closesAt:new Date(today-1).toISOString()},
         {id:2,eventId:past.id,title:"Second post",body:"Another concert message",status:"ACTIVE",createdAt:new Date(today-day).toISOString()},

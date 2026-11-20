@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { trackPageView } from "@/lib/analytics";
 import { trackGooglePageView } from "@/lib/googleAnalytics";
 
-// Stop waiting on /api/auth/me after this long and record the view anyway, so a
+// Stop waiting for the session after this long and record the view anyway, so a
 // stalled auth request never swallows the page view outright.
 const AUTH_WAIT_MS = 4000;
 

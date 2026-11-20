@@ -19,10 +19,8 @@ const wait = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms
 
 /**
  * Resolve the current session, retrying transient failures with backoff.
- * Only a 401 proves the visitor is signed out. Any other failure — a 503
- * while the server restarts, a dropped connection — leaves the session
- * "unknown", so a still-valid cookie is never mistaken for a sign-out and
- * settled into a signed-out UI with no way back short of a reload.
+ * A null session or a 401 confirms a sign-out. Transient failures leave the
+ * identity unresolved, so a server restart cannot clear an existing account.
  */
 export async function resolveSession<SessionUser>(
   request: typeof fetch = fetch,
@@ -37,8 +35,11 @@ export async function resolveSession<SessionUser>(
   const shouldContinue = options.shouldContinue ?? (() => true);
   for (let attempt = 0; ; attempt++) {
     try {
-      const res = await request("/api/auth/me", { credentials: "include" });
-      if (res.ok) return { kind: "user", user: (await res.json()) as SessionUser };
+      const res = await request("/api/auth/session", { credentials: "include", cache: "no-store" });
+      if (res.ok) {
+        const user = (await res.json()) as SessionUser | null;
+        return user === null ? { kind: "anonymous" } : { kind: "user", user };
+      }
       if (res.status === 401) return { kind: "anonymous" };
     } catch {
       // A network failure is transient until the bounded retries run out.

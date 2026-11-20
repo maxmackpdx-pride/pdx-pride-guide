@@ -83,8 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const version = ++refreshVersion.current;
     try {
       // Transient failures (a 503 during a restart, a dropped connection)
-      // retry with backoff instead of settling into a signed-out state;
-      // only a 401 confirms the session is gone.
+      // retry with backoff before the current identity is reconsidered.
       const resolution = await resolveSession<AuthUser>(fetch, {
         shouldContinue: () => version === refreshVersion.current,
       });
