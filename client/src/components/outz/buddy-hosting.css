@@ -1,0 +1,67 @@
+.buddy-hosting {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1rem;
+  text-align: left;
+  color: var(--text-hi);
+  background: var(--ink-850);
+  border-radius: 12px;
+}
+.buddy-hosting h3 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+.buddy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.buddy-hosting button,
+.buddy-hosting a,
+.buddy-hosting input,
+.buddy-hosting textarea,
+.buddy-hosting select {
+  min-height: 44px;
+  border: 1px solid color-mix(in srgb, var(--neon-orange) 44%, transparent);
+  border-radius: 8px;
+  background: var(--ink-750);
+  color: inherit;
+  padding: 0.5rem 0.7rem;
+}
+.buddy-actions button:first-child {
+  color: var(--neon-orange);
+}
+.buddy-actions button:nth-child(2) {
+  color: var(--neon-green);
+}
+.buddy-hosting form,
+.buddy-hosting label {
+  display: grid;
+  gap: 0.45rem;
+}
+.buddy-upcoming {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+}
+.buddy-upcoming a {
+  display: flex;
+  align-items: center;
+  flex: 0 0 min(15rem, 80vw);
+  gap: 0.5rem;
+  text-decoration: none;
+  border-radius: 10px;
+  background: var(--ink-750);
+  color: var(--text-hi);
+  padding: 0.65rem;
+}
+.buddy-upcoming img {
+  width: 3rem;
+  height: 3rem;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.buddy-upcoming strong,
+.buddy-upcoming small {
+  display: block;
+}

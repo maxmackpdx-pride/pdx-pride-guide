@@ -7,6 +7,7 @@ import { memberProfileHref } from "@/lib/avatarLinks";
 import AuthModal from "@/components/AuthModal";
 import { apiRequest } from "@/lib/queryClient";
 import "./EventPlanning.css";
+import {BuddyEvent} from "../outz/BuddyHosting";
 import {
   AtEventDialog,
   VenueCheck,
@@ -316,6 +317,7 @@ function PlanningPanel({
       >
         At the event
       </button>
+      <BuddyEvent id={eventId} venue={query.data.venue}/>
       {!atEvent && ridesPanel}
       {atEvent && (
         <AtEventDialog
@@ -363,6 +365,7 @@ function PlanningPanel({
           )}
         </AtEventDialog>
       )}
+      <footer>Events are organized by their hosts. Zaylist is not responsible for independently hosted activities. <Link href="/legal">Read the event terms</Link>.</footer>
       {auth && (
         <AuthModal
           defaultTab="login"

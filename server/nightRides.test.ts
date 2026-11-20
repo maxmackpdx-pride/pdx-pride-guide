@@ -111,6 +111,13 @@ test("ride-home checks attendance, destination, party size, capacity, contact co
   assert.deepEqual((await (await call(base, 4)).json()).rides, []);
   night.announce();
   assert.deepEqual(push, [[2]]);
+  const maps = "/api/night/ride-waypoints";
+  assert.equal((await call(maps, 0)).status, 401);
+  assert.deepEqual(await (await call(maps, 3)).json(), []);
+  const pin = (await (await call(maps, 2)).json())[0];
+  assert.equal(pin.lat, event.lat);
+  assert.equal(pin.lng, event.lng);
+  assert.deepEqual(pin.faces, []);
   const path = base + "/rides/" + ride.id;
   assert.equal((await call(path + "/requests", 3, "POST")).status, 404);
   await call(base + "/presence", 3, "POST", {

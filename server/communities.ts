@@ -1,3 +1,4 @@
+import {registerCommunityBoard} from "./communityBoard";
 import { backfillSceneCategories } from './backfillSceneCategories';
 import {readBoardMotif} from './boardMotifs';
 import type { Express, RequestHandler } from "express";
@@ -180,6 +181,7 @@ function validRelationship(type:string,id:string){ if(!TARGETS.has(type))return 
 export function searchCommunities(q:string,viewerId?:number){ const like=`%${q.replace(/[%_]/g,"")}%`; const rows=sqlite.prepare("SELECT * FROM communities WHERE visibility IN ('public','discoverable') AND (name LIKE ? COLLATE NOCASE OR description LIKE ? COLLATE NOCASE OR COALESCE(neighborhood,'') LIKE ? COLLATE NOCASE) ORDER BY name COLLATE NOCASE LIMIT 8").all(like,like,like) as any[]; return rows.map(row=>({id:row.id,name:row.name,subtitle:[row.neighborhood,`${summary(row,viewerId).memberCount} members`].filter(Boolean).join(" · "),href:`/z/${row.slug}`})); }
 
 export function registerCommunityRoutes(app:Express,requireAuth:RequestHandler){
+  registerCommunityBoard(app,sqlite,requireAuth);
   ensureCommunityTables();
   registerCommunityChatRoutes(app,requireAuth);
   app.get("/api/communities",(req:any,res)=>{const rows=sqlite.prepare("SELECT * FROM communities WHERE visibility IN ('public','discoverable') OR id IN (SELECT community_id FROM community_memberships WHERE user_id=? AND status='active') ORDER BY name COLLATE NOCASE").all(req.session?.userId||-1);res.json(rows.map(row=>summary(row,req.session?.userId)));});

@@ -155,7 +155,7 @@ export default function Legal() {
                   listing says otherwise.
                 </li>
                 <li style={{ marginBottom: 8 }}>
-                  Event times, prices, and policies can change. Always confirm with the organizer.
+                  Event times, prices, and policies can change. Always confirm with the organizer. Independent hosts organize and supervise their events, carpools, and outdoor outings. Participants choose whether to attend and should confirm access rules and current conditions with the venue. Zaylist provides the listings and coordination tools.
                 </li>
                 <li style={{ marginBottom: 8 }}>
                   This site is provided as-is without warranties; use at your own discretion.

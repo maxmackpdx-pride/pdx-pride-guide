@@ -220,6 +220,69 @@ export function registerEventPlanning(
     path,
     notifyRiders,
   );
+  app.get("/api/night/ride-waypoints", requireAuth, (req, res) => {
+    res.set("Cache-Control", "private, no-store");
+    res.vary("Cookie");
+    const viewer = req.session.userId!;
+    const candidates = db
+      .prepare(
+        `SELECT o.id,o.driver_id,o.event_id,o.occurrence,o.area,o.seats-(SELECT COUNT(*) FROM event_ride_requests r WHERE r.offer_id=o.id AND r.accepted=1) AS remaining
+      FROM event_ride_offers o JOIN users u ON u.id=o.driver_id AND u.status='active' JOIN night_ride_plans p ON p.offer_id=o.id
+      WHERE p.departed IS NULL AND (p.leave_by IS NULL OR p.leave_by>?) AND o.occurrence>=? ORDER BY o.occurrence,o.id LIMIT 1000`,
+      )
+      .all(
+        Date.now(),
+        pacificCalendarDate(new Date(Date.now() - 86400000).toISOString()),
+      ) as {
+      id: number;
+      driver_id: number;
+      event_id: number;
+      occurrence: string;
+      area: string;
+      remaining: number;
+    }[];
+    res.json(
+      candidates.flatMap((o) => {
+        const event = occurrence(o.event_id, o.occurrence),
+          meta = night.plan(o.id);
+        if (
+          !meta ||
+          !event ||
+          event.isHouseParty ||
+          event.lat == null ||
+          event.lng == null ||
+          (parsePacificDateTime(event.dateEnd) ?? 0) +
+            (meta.kind === "afterz" ? 30 * 60_000 : 0) <=
+            Date.now() ||
+          storage.getMemberBlockStatus(viewer, o.driver_id)
+            .interactionBlocked ||
+          !night.visible(o, meta, viewer)
+        )
+          return [];
+        const participant =
+          o.driver_id === viewer ||
+          !!db
+            .prepare(
+              "SELECT 1 FROM event_ride_requests WHERE offer_id=? AND rider_id=? AND accepted=1",
+            )
+            .get(o.id, viewer);
+        return [
+          {
+            id: o.id,
+            eventId: event.id,
+            occurrence: o.occurrence,
+            title: event.title,
+            lat: event.lat,
+            lng: event.lng,
+            kind: meta.kind,
+            remaining: o.remaining,
+            leaveBy: meta.leave_by,
+            faces: participant ? night.peers(o.id, viewer) : [],
+          },
+        ];
+      }),
+    );
+  });
   app.get(path, scope, (req, res) => {
     const { event, date, open } = res.locals;
     const sessionId = req.session?.userId;

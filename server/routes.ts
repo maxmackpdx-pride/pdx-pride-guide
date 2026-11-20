@@ -1,3 +1,4 @@
+import {registerOutdoorHosting} from "./outdoorHosting";
 import { housingConversationLocked, HOUSING_CONVERSATION_LOCKED } from "./housing/store";
 import {registerDevicePushCheck} from "./devicePushCheck";
 import {registerAfterzInvites} from "./afterzInvites";
@@ -2270,6 +2271,16 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
   });
 
+  const outdoorHosting=registerOutdoorHosting(app,sqlite,storage,requireAuth,{
+    place:async id=>{
+      const {data}=await getOutzSnapshot();
+      return [...data.destinations,...data.catalog,...data.communityStays].find(p=>p.id===id) ?? outzMapCatalog.find(p=>p.id===id);
+    },
+    visible:isPublicEventVisibleUnderPrideCap,
+    details:async id=>getOutzDetails(id,(await getOutzSnapshot()).data),
+    remind:(recipientIds,event,place)=>schedulePushForActivity({recipientIds,senderId:0,title:"How was "+event.venueName+"?",body:"Rate the destination after your outing.",category:"my_events",navigate:"/events/"+event.id+"?rate=1",tag:"outdoor-rating-"+event.id}),
+  });
+
   const knownOutzPlace = async (value: unknown) => {
     const placeId = String(value || "").trim();
     if (!placeId || placeId.length > 180) return null;
@@ -2650,7 +2661,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   // ─── SUBMISSIONS ─────────────────────────────────────────────────────────
-  app.post("/api/submit", requireAuth, (req, res) => {
+  app.post("/api/submit", requireAuth, async (req, res) => {
     try {
       const user = storage.getUserById(req.session.userId!);
       if (!user) return res.status(401).json({ error: "Not authenticated" });
@@ -2668,7 +2679,9 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const promoterStatus = user.promoterStatus || "none";
       const isAdminUser = userIsAdminNow(user);
 
+      const outdoorPlace=type==="NEW_EVENT" && req.body.outzPlaceId ? await outdoorHosting.placeForSubmission(req.body.outzPlaceId):null;
       const result = runSubmissionIntent(sqlite, user.id, req.header("Idempotency-Key"), req.body, () => {
+        if(outdoorPlace)outdoorHosting.checkOverlap(outdoorPlace,req.body.dateStart,req.body.overlapConfirmed);
         // Standalone promoter application - no event fields needed
         if (type === "PROMOTER_APPLICATION") {
           if (promoterStatus === "approved") throw Object.assign(new Error("You already have promoter access."), {status:409});
@@ -2713,7 +2726,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
             throw Object.assign(new Error("This event already has a pending claim."), { status: 409 });
           }
         }
-        const source = type === "CLAIM" && claimEvent ? claimEvent : { ...req.body };
+        const source = type === "CLAIM" && claimEvent ? claimEvent : { ...req.body, ...(outdoorPlace ? {venueName:outdoorPlace.name,lat:outdoorPlace.lat??null,lng:outdoorPlace.lng??null,isPublic:true,isPrivate:false,isHouseParty:false}: {}) };
         if (type === "NEW_EVENT" || type === "SUGGEST") {
           const dateError = eventDatesError({ dateStart: source.dateStart || "", dateEnd: source.dateEnd || "" }) || validateEventDates(source.dateStart, source.dateEnd);
           if (dateError) throw Object.assign(new Error(dateError), { status: 400 });
@@ -2745,6 +2758,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
                 : JSON.stringify(req.body.eventTypes || [])),
         });
         const sub = storage.createSubmission(data);
+        if(outdoorPlace)outdoorHosting.link(sub.id,outdoorPlace.id);
         const potentialMatches = type === "NEW_EVENT" || type === "SUGGEST"
           ? enrichSubmissionMatches(sub)
           : [];
@@ -2792,7 +2806,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       });
       res.json(result);
     } catch (e: any) {
-      res.status(e.status || 400).json({ error: e.message });
+      res.status(e.status || 400).json({ error:e.message, ...(e.matches?{matches:e.matches}:{}) });
     }
   });
 
