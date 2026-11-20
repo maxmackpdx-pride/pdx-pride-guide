@@ -5,7 +5,7 @@ import {QueryClientProvider} from '@tanstack/react-query';
 import {queryClient} from '@/lib/queryClient';
 import {AuthProvider} from '@/context/AuthContext';
 import {ThemeProvider} from '@/context/ThemeContext';
-import EventModal from '@/components/EventModal';
+import EventzExpanded from '@/components/events/EventzExpanded';
 import {ZaylistCard} from '@/components/cards/ZaylistCard';
 const destinationData=await fetch('/outzide-map/places.json').then(response=>response.json());
 import {RESOURCE_CATEGORIES} from '@/lib/resourcesData';
@@ -40,7 +40,7 @@ function Fixture(){
   if(family==='outz')return <ZaylistCard category="outzide" key={id} location={item} size={size as any}/>;
   if(family==='event')return <ZaylistCard category="eventz" key={id} size={size as any} listing={events[i]} rsvped={saved.includes(events[i].id)} onToggleRsvp={save} onOpen={setSelected}/>;
   return <ZaylistCard category="placez" key={id} size={size as any} place={item.place}/>;
- })}</div></React.Profiler>{detail&&<CardDetails key={detail} onClose={()=>setDetail(null)}><section style={{minHeight:500,padding:20,boxSizing:'border-box'}}><button aria-label="Close fixture" onClick={()=>setDetail(null)}>Close</button><h2>{detail}</h2><p>Host-only detail fixture. Category internals are tested on their page routes.</p></section></CardDetails>}{selected&&<EventModal event={selected} onClose={()=>setSelected(null)}/>}<output id="qa-saved-count">{saved.length}</output></>;
+ })}</div></React.Profiler>{detail&&<CardDetails key={detail} onClose={()=>setDetail(null)}><section style={{minHeight:500,padding:20,boxSizing:'border-box'}}><button aria-label="Close fixture" onClick={()=>setDetail(null)}>Close</button><h2>{detail}</h2><p>Host-only detail fixture. Category internals are tested on their page routes.</p></section></CardDetails>}{selected&&<EventzExpanded event={selected} onClose={()=>setSelected(null)}/>}<output id="qa-saved-count">{saved.length}</output></>;
 }
 const app = (<QueryClientProvider client={queryClient}><AuthProvider><ThemeProvider><Fixture/></ThemeProvider></AuthProvider></QueryClientProvider>);
 createRoot(document.getElementById('root')!).render(query.get('strict')==='1'?<React.StrictMode>{app}</React.StrictMode>:app);

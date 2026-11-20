@@ -10,6 +10,7 @@ import {mkdir,mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {createServer} from 'vite';
 import react from '@vitejs/plugin-react';
+import {checkPlaceStage,placeDialog} from './placez-stage-browser-helpers.mjs';
 import {chromium} from 'playwright';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const near=(a,b,message)=>assert.ok(Math.abs(a-b)<=1.1,`${message}: ${a} vs ${b}`);
@@ -31,15 +32,28 @@ async function geometryReady(page){
 }
 async function snapshot(page){await geometryReady(page);return page.locator('#qa-grid').evaluate(grid=>[...grid.children].filter(el=>el.getBoundingClientRect().width>0).map(el=>{const face=el.matches("[data-card-expanded=true],[data-card-size]")?el:el.querySelector("[data-card-size]")||el;const r=face.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};}));}
 async function documentBox(locator){return locator.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});}
+async function openEventDetails(page, trigger) {
+ await trigger.click();
+ const front=page.locator('.event-front-dialog');
+ await front.waitFor();
+ const stage=page.locator('.zay-card-stage--front');
+ const frontBox=await front.boundingBox(), stageBox=await stage.boundingBox();
+ near(frontBox.x+frontBox.width/2,stageBox.x+stageBox.width/2,'event front centered horizontally');
+ near(frontBox.y+frontBox.height/2,stageBox.y+stageBox.height/2,'event front centered vertically');
+ await front.getByRole('button',{name:/View details/}).click();
+ const details=page.locator('.zay-card-stage--expanded .evz-x[role=dialog]');
+ await details.waitFor();await details.locator('[aria-label=Info][aria-hidden=false]').waitFor();
+ return details;
+}
 async function settled(page){await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.waitForTimeout(450);}
 
-test('production cards keep standard dimensions and expand in flow with position-aware anchors',{timeout:600000},async(t)=>{
+test('production cards preserve source geometry across viewport and in-flow presentations',{timeout:600000},async(t)=>{
  // Every invocation starts cold. Suites must never race over Vite's default
  // node_modules/.vite cache, and virtual HTML needs an explicit scanner entry.
  const cacheDir=await mkdtemp(path.join(tmpdir(),'card-api-browser-vite-'));
  t.after(()=>rm(cacheDir,{recursive:true,force:true}));
  const fixture='script/fixtures/card-api-browser.tsx';
- const server=await createServer({configFile:false,root,cacheDir,optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime']},publicDir:path.join(root,'client/public'),plugins:[react(),{name:'card-qa-fixture',configureServer(s){s.middlewares.use(async(req,res,next)=>{if(!req.url?.startsWith('/__card-qa'))return next();const html=await s.transformIndexHtml(req.url,'<!doctype html><html data-zaylist-cards="true"><head><style>body{margin:24px!important}h1{font:16px sans-serif;margin-bottom:24px}@media(max-width:650px){body{margin:12px!important}#qa-grid{grid-template-columns:repeat(auto-fit,var(--qa-card-width))!important;width:100%!important;gap:16px!important}}</style></head><body><div id="root"></div><script type="module" src="/script/fixtures/card-api-browser.tsx"></script></body></html>');res.setHeader('Content-Type','text/html');res.end(html);});}}],resolve:{alias:{'@':path.join(root,'client/src'),'@shared':path.join(root,'shared'),'@assets':path.join(root,'attached_assets')}},server:{host:'127.0.0.1',port:0,hmr:false,watch:null},define:{__OUTZIDE_ASSETS__:JSON.stringify({script:'/outzide-map/app.js',maplibre:'/home-flight/vendor/maplibre-gl-5.6.2.js',maplibreCss:'/home-flight/vendor/maplibre-gl-5.6.2.css'}),__MAPZ_ASSETS__:'{}',__HOME_FLIGHT_BASE__:JSON.stringify('/home-flight')}});
+ const server=await createServer({configFile:false,root,cacheDir,optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime']},publicDir:path.join(root,'client/public'),plugins:[react(),{name:'card-qa-fixture',configureServer(s){s.middlewares.use(async(req,res,next)=>{if(!req.url?.startsWith('/__card-qa'))return next();const html=await s.transformIndexHtml(req.url,'<!doctype html><html data-zaylist-cards="true"><head><style>body{margin:0!important}#root{margin:24px;width:auto}h1{font:16px sans-serif;margin-bottom:24px}@media(max-width:650px){#root{margin:12px}#qa-grid{grid-template-columns:repeat(auto-fit,var(--qa-card-width))!important;width:100%!important;gap:16px!important}}</style></head><body><div id="root"></div><script type="module" src="/script/fixtures/card-api-browser.tsx"></script></body></html>');res.setHeader('Content-Type','text/html');res.end(html);});}}],resolve:{alias:{'@':path.join(root,'client/src'),'@shared':path.join(root,'shared'),'@assets':path.join(root,'attached_assets')}},server:{host:'127.0.0.1',port:0,hmr:false,watch:null},define:{__OUTZIDE_ASSETS__:JSON.stringify({script:'/outzide-map/app.js',maplibre:'/home-flight/vendor/maplibre-gl-5.6.2.js',maplibreCss:'/home-flight/vendor/maplibre-gl-5.6.2.css'}),__MAPZ_ASSETS__:'{}',__HOME_FLIGHT_BASE__:JSON.stringify('/home-flight')}});
  let browser;
  try{
   await server.listen();
@@ -48,7 +62,9 @@ test('production cards keep standard dimensions and expand in flow with position
  const base=server.resolvedUrls.local[0];
   browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||undefined,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
   const context=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'reduce'});
-  await context.route('**/api/**',route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/me')return route.fulfill({status:401,json:{}});return route.fulfill({json:[]});});
+  await context.route('**/api/**',route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/me')return route.fulfill({status:401,json:{}});
+    if(p.endsWith('/planning'))return route.fulfill({json:{checked:false,onSiteWindow:false,poster:null,venue:'QA venue',title:'QA Event',open:true,canPostGig:false,gigs:[],rides:null}});
+    return route.fulfill({json:[]});});
   await context.route('**/outzide-map/index.html?*',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body><h2>Destination detail fixture</h2><p>Map internals intentionally isolated from host geometry tests.</p></body></html>'}));
   const page=await context.newPage();page.setDefaultTimeout(15000);const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error('BROWSER ERROR',e.message);});
   const cases=['outz','place','event','board','needz'].flatMap(family=>['tall','wide','small'].map(size=>[family,size]));
@@ -76,6 +92,24 @@ test('production cards keep standard dimensions and expand in flow with position
    // Exercise every position in a three-column row, including right-anchored expansion.
    for(const index of [0,1,2]){
     const original=await snapshot(page);const originalScroll=await page.evaluate(()=>({x:scrollX,y:scrollY}));const open=page.locator('#qa-grid button[aria-label^="Open "],#qa-grid button[aria-label^="View details for "]').nth(index);
+    if(family==='event'){
+     const details=await openEventDetails(page,open);
+     await details.getByRole('button',{name:/^Close QA Event/}).click();
+     await details.waitFor({state:'hidden'});await settled(page);
+     const restored=await snapshot(page);
+     restored.forEach((r,i)=>{for(const axis of ['x','y','width','height'])near(r[axis],original[i][axis],`event/${size}: restored source ${i} ${axis}`);});
+     continue;
+    }
+    if(family==='place'){
+     await open.click();await settled(page);
+     const dialog=await checkPlaceStage(page);
+     assert.equal(await dialog.getByRole('tab',{name:'Info',exact:true}).getAttribute('aria-selected'),'true');
+     await dialog.getByRole('button',{name:/^Close /}).click();
+     await placeDialog(page).waitFor({state:'hidden'});await settled(page);
+     const restored=await snapshot(page);
+     restored.forEach((r,i)=>{for(const axis of ['x','y','width','height'])near(r[axis],original[i][axis],`place/${size}: restored source ${i} ${axis}`);});
+     continue;
+    }
     if(family==='needz'&&size==='small'&&index===1){await open.focus();await page.keyboard.press('Enter');}else await open.click();await page.locator('.zay-card-expanded').waitFor({state:'visible'});await settled(page);
     const after=await snapshot(page);const expanded=await documentBox(page.locator('[data-card-expanded="true"]'));assert.ok(expanded);
     const openedScroll=await page.evaluate(()=>({x:scrollX,y:scrollY}));near(openedScroll.x,originalScroll.x,`${family}/${size}: no unrequested horizontal scroll`);near(openedScroll.y,originalScroll.y,`${family}/${size}: no unrequested vertical scroll`);
@@ -91,16 +125,25 @@ test('production cards keep standard dimensions and expand in flow with position
     const restored=await snapshot(page);restored.forEach((r,i)=>{near(r.x,original[i].x,'restored x');near(r.y,original[i].y,'restored y');near(r.width,original[i].width,'restored width');near(r.height,original[i].height,'restored height');});
    }
    if(family==='event'){await page.locator('#qa-grid button[aria-label^="Add "]').first().click();assert.equal(await page.locator('#qa-saved-count').textContent(),'1','save action still works');assert.equal(await page.locator('.zay-card-expanded').count(),0,'save does not expand');}
-   console.log(`PASS ${family}/${size}/${layout}/${strict||'normal'}: sizes, all three anchors, reflow/no-overlap, close/reopen, no modal`);
+   console.log(`PASS ${family}/${size}/${layout}/${strict||'normal'}: sizes, ${['place','event'].includes(family)?'centered portal, restored source':'three anchors, reflow without overlap'}, close/reopen`);
   }
   for(const family of ['outz','event']) {
    if(process.env.CARD_QA_CASE_FILTER && process.env.CARD_QA_CASE_FILTER!=='extras')continue;
    await page.setViewportSize({width:390,height:844});
    await page.goto(`${base}__card-qa?family=${family}&size=small`,{waitUntil:'domcontentloaded'});await page.locator('#qa-grid button[aria-label^="Open "]').first().waitFor();await settled(page);
+   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'closed fixture fits the mobile viewport');
    const original=await snapshot(page);const first=page.locator('#qa-grid button[aria-label^="Open "],#qa-grid button[aria-label^="View details for "]').first();
+   if(family==='event'){
+    const details=await openEventDetails(page,first);
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'mobile event has no horizontal overflow');
+    await details.getByRole('button',{name:/^Close QA Event/}).press('Escape');await details.waitFor({state:'hidden'});
+    assert.equal(await first.evaluate(el=>document.activeElement===el),true,'Escape restores event opener focus');
+    await page.setViewportSize({width:1280,height:1000});continue;
+   }
    await first.click();await page.locator('.zay-card-expanded').waitFor({state:'visible'});await settled(page);
    const box=await documentBox(page.locator('[data-card-expanded="true"]'));near(box.x,original[0].x,'mobile left anchor');near(box.y,original[0].y,'mobile top anchor');
-   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'mobile no document horizontal overflow');
+   const overflow=await page.evaluate(()=>({viewport:innerWidth,page:document.documentElement.scrollWidth,items:[...document.querySelectorAll('body *')].map(el=>({className:typeof el.className==='string'?el.className:el.tagName,right:Math.round(el.getBoundingClientRect().right)})).filter(el=>el.right>innerWidth).slice(0,9)}));
+   assert.ok(overflow.page<=overflow.viewport,'mobile no document horizontal overflow '+JSON.stringify(overflow));
    if(shots&&family==='outz')await page.waitForFunction(()=>[...document.querySelectorAll('#qa-grid img')].every(img=>img.complete),undefined,{timeout:10000});
    if(shots)await page.screenshot({path:path.join(shots,`${family}-small-mobile-open.png`),fullPage:true});
    const close=page.locator('.zay-card-expanded button[aria-label*="Close"]').first();await close.focus();await page.keyboard.press('Escape');
@@ -112,6 +155,15 @@ test('production cards keep standard dimensions and expand in flow with position
    if(process.env.CARD_QA_CASE_FILTER && process.env.CARD_QA_CASE_FILTER!=='extras')continue;
    await page.goto(`${base}__card-qa?family=${family}&size=tall`,{waitUntil:'domcontentloaded'});
    const openers=page.locator('#qa-grid button[aria-label^="Open "]:visible');await openers.first().waitFor();await settled(page);
+   if(family==='event'){
+    for(let i=0;i<2;i++){
+     const details=await openEventDetails(page,openers.nth(i));
+     assert.equal(await details.getAttribute('aria-label'),`QA Event ${i+1} details`);
+     assert.equal(await page.locator('.zay-card-stage--expanded .evz-x:visible').count(),1,'only selected event remains open');
+     await details.getByRole('button',{name:/^Close QA Event/}).click();await details.waitFor({state:'hidden'});await settled(page);
+    }
+    continue;
+   }
    await openers.first().click();await page.locator('[data-card-expanded="true"]').waitFor();await settled(page);
    const second=openers.first();const nextName=await second.getAttribute('aria-label');await second.click();await settled(page);
    assert.equal(await page.locator('[data-card-expanded="true"]').count(),1,`${family}: switching keeps one expanded card`);

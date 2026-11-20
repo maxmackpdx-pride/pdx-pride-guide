@@ -1,3 +1,4 @@
+import {checkPlaceStage,placeDialog} from './placez-stage-browser-helpers.mjs';
 /** Real production-card layout checks. Run: node --test script/card-route-browser.test.mjs
  * Uses a local Vite fixture; mocks APIs and the map iframe to avoid network/data writes.
  * This checks host geometry and card actions, not the map iframe's internal controls.
@@ -114,7 +115,7 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
     if(kind==='events')await card.locator('.tonight-card__open').click();
     else if(kind==='boards')await card.locator('.punk-open-target').click();
     else await card.click({position:{x:kind==='resources'?80:60,y:kind==='resources'?90:75}});
-    const expanded=page.locator(kind==='events'?'[data-testid="event-modal"]':'.zay-card-expanded');
+    const expanded=page.locator(kind==='events'?'[data-testid="event-modal"]':kind==='directory'?'.placez-native-dialog':'.zay-card-expanded');
     await expanded.waitFor({state:'visible',timeout:20000});
     await settled(page);
     await page.keyboard.press('Escape');
@@ -188,19 +189,14 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  await cards.first().scrollIntoViewIfNeeded();await settled(page);
  const title=cards.first().locator('.rd-card-copy h3');assert.ok(await title.isVisible(),'Directory title visible');
  const face=await cards.first().boundingBox();const scrollBeforeOpen=await page.evaluate(()=>scrollY);const titleBox=await title.boundingBox();assert.ok(titleBox.y>=face.y&&titleBox.y+titleBox.height<=face.y+face.height,'Directory title stays within face');
- await cards.first().click({position:{x:60,y:75}});await page.locator('.zay-card-expanded').waitFor();await settled(page);
- const host=page.locator('[data-card-expanded="true"]');assert.equal(await host.count(),1);
- await host.getByText('Fresh detail for QA Cafe 1',{exact:true}).waitFor({state:'visible'});await settled(page);
- assert.ok(await host.evaluate(el=>el.classList.contains('eb-original-card')&&el.parentElement.classList.contains('eb-grid')),'Directory expands own grid item');
- const expanded=await host.boundingBox();console.log(JSON.stringify({directoryWidth:width,face,expanded,host:await host.evaluate(el=>({style:el.getAttribute('style'),parentStyle:el.parentElement.getAttribute('style'),parentRect:el.parentElement.getBoundingClientRect().toJSON()}))}));await page.screenshot({path:`/tmp/directory-${width}-expanded.png`});near(expanded.x,face.x,'Directory left anchor');near(expanded.y+(width<768?await page.evaluate(()=>scrollY):0),face.y+(width<768?scrollBeforeOpen:0),'Directory document top anchor (mobile may reveal once)');
- console.log('PANEL',JSON.stringify(await host.evaluate(el=>[el,...el.querySelectorAll('.zay-card-detail-mount,.zay-card-expanded,.place-modal-overlay,.place-modal-panel,[role=dialog]')].map(e=>{const c=getComputedStyle(e);return {className:e.className,rect:e.getBoundingClientRect().toJSON(),width:c.width,minWidth:c.minWidth,maxWidth:c.maxWidth,padding:c.padding,margin:c.margin,boxSizing:c.boxSizing,translate:c.translate,transform:c.transform};}))));
- const panel=await host.locator('[role="dialog"]').boundingBox();assert.ok(panel&&panel.x>=expanded.x-1&&panel.x+panel.width<=expanded.x+expanded.width+1,'Directory detail panel fits expanded host');
- const closeButton=host.getByRole('button',{name:'Close place',exact:true});assert.ok(await closeButton.isVisible(),'Directory close button visible');const closeBox=await closeButton.boundingBox();assert.ok(closeBox.x>=0&&closeBox.x+closeBox.width<=width&&closeBox.y>=0&&closeBox.y+closeBox.height<=1000,'Directory close button stays in viewport');
- const neighborBoxes=await host.evaluate(el=>[...el.parentElement.children].filter(child=>child!==el&&child.getBoundingClientRect().width>0).map(child=>{const r=child.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
- for(const neighbor of neighborBoxes)assert.ok(!overlaps(expanded,neighbor),'Directory expanded host does not cover neighbors');
- assert.equal(await page.locator('[aria-modal="true"]:visible').count(),0);
+ await cards.first().click({position:{x:60,y:75}});await settled(page);
+ const dialog=await checkPlaceStage(page);
+ await dialog.getByText('Fresh detail for QA Cafe 1',{exact:true}).waitFor();
  await page.screenshot({path:`/tmp/directory-${width}-expanded.png`});
- await page.keyboard.press('Escape');await settled(page);assert.equal(await page.locator('.zay-card-expanded:visible').count(),0,'Directory Escape closes');
+ await page.keyboard.press('Escape');await placeDialog(page).waitFor({state:'hidden'});await settled(page);
+ const returned=await cards.first().boundingBox();
+ near(returned.x,face.x,'Directory grid restores source x');
+ near(returned.y+await page.evaluate(()=>scrollY),face.y+scrollBeforeOpen,'Directory grid restores document y');
  await page.close();
  }
  // Default BrowseLane is a distinct production layout, including nested wrappers.
@@ -226,6 +222,15 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  const hiddenBefore=await lane.locator('.events-rail__item').evaluateAll(els=>els.map(el=>getComputedStyle(el).display==='none'));
  if(width===1280)assert.ok(hiddenBefore.slice(4).every(Boolean)&&hiddenBefore.length>4,'Desktop browse keeps fifth+ cards hidden');
  const closedItems=await lane.locator('.events-rail__item:visible').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};}));
+ if(kind==='directory'){
+  await card.click({position:{x:60,y:75}});await settled(page);
+  const dialog=await checkPlaceStage(page);await dialog.getByText(`Fresh detail for QA Cafe ${index+1}`,{exact:true}).waitFor();
+  await page.keyboard.press('Escape');await placeDialog(page).waitFor({state:'hidden'});await settled(page);
+  const restored=await docBox(card);for(const axis of ['x','y','width','height'])near(restored[axis],before[axis],`Directory lane restores ${axis}`);
+  const hiddenAfter=await lane.locator('.events-rail__item').evaluateAll(els=>els.map(el=>getComputedStyle(el).display==='none'));
+  assert.deepEqual(hiddenAfter,hiddenBefore,'Directory lane preserves visibility');
+  continue;
+ }
  await card.click({position:{x:60,y:75}});const host=lane.locator('.events-rail__item[data-card-expanded="true"]');await host.waitFor();
  if(kind==='directory')await host.getByText(`Fresh detail for QA Cafe ${index+1}`,{exact:true}).waitFor();await settled(page);
  assert.deepEqual(await lane.locator('.events-rail__item').evaluateAll(els=>els.map(el=>getComputedStyle(el).display==='none')),hiddenBefore,'Browse hidden fifth+ visibility unchanged while open');
@@ -239,7 +244,8 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
  for(const neighbor of neighbors)assert.ok(!overlaps(expanded,neighbor),`${kind} browse ${width}: expanded card covers neighbor`);
  assert.equal(await page.locator('[aria-modal="true"]:visible').count(),0);
  if(index===1)await page.keyboard.press('Escape');else await host.getByRole('button',{name:kind==='directory'?'Close place':'Close resource',exact:true}).click();await host.waitFor({state:'detached'});await settled(page);
- assert.deepEqual(await lane.locator('.events-rail__item').evaluateAll(els=>els.map(el=>getComputedStyle(el).display==='none')),hiddenBefore,'Browse hidden fifth+ visibility unchanged after close');
+ await lane.locator('.events-rail__item').first().waitFor();
+ assert.deepEqual(await lane.locator('.events-rail__item').evaluateAll(els=>els.map(el=>getComputedStyle(el).display==='none')),hiddenBefore,'Browse hidden fifth+ visibility unchanged after close '+page.url());
  const restored=await docBox(card);if(beforeDiagnostic)console.log('RESTORE_DIAGNOSTIC',JSON.stringify({kind,width,index,before:beforeDiagnostic,after:await diagnose()}));near(restored.x,before.x,'Browse restored x');near(restored.y,before.y,'Browse restored y');
  const restoredItems=await lane.locator('.events-rail__item:visible').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};}));
  restoredItems.forEach((r,i)=>{near(r.x,closedItems[i].x,'Browse neighbor restored x');near(r.y,closedItems[i].y,'Browse neighbor restored y');});
@@ -269,21 +275,13 @@ test('actual NEEDZ, BoardZ and Directory routes expand within their own card lay
   await cards.nth(index).scrollIntoViewIfNeeded();await settled(page);const before=await documentBox(cards.nth(index));
   if(index===0)await page.screenshot({path:`/tmp/placez-gutters-${layout}-${width}-closed.png`});
   await cards.nth(index).locator('.rd-card-open').click();
-  const host=collection.locator('[data-card-expanded="true"]');await host.waitFor();await settled(page);
-  const expanded=await documentBox(host);
-  assert.ok(expanded.x>=-1&&expanded.x+expanded.width<=width+1,'Expanded card fits mobile viewport');
-  near(expanded.y,before.y,'Expanded corner remains document anchored');
-  const anchor=await host.getAttribute('data-card-anchor');
-  if(anchor==='right')near(expanded.x+expanded.width,before.x+before.width,'Right anchor preserved');
-  else near(expanded.x,before.x,'Left anchor preserved');
-  const panel=await documentBox(host.locator('[role="dialog"]'));
-  assert.ok(panel.x>=expanded.x-1&&panel.x+panel.width<=expanded.x+expanded.width+1,'Detail panel fits host');
+  await settled(page);const dialog=await checkPlaceStage(page);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No horizontal overflow');
   if(index===0)await page.screenshot({path:`/tmp/placez-gutters-${layout}-${width}-open.png`});
-  await host.getByRole('button',{name:'Close place',exact:true}).click();await host.waitFor({state:'detached'});await settled(page);
+  await dialog.getByRole('button',{name:/^Close /}).click();await dialog.waitFor({state:'hidden'});await settled(page);
   const restored=await documentBox(cards.nth(index));near(restored.x,before.x,'Close restores x');near(restored.y,before.y,'Close restores y');
  }
- console.log(`PASS Placez ${layout}/${width}: responsive discovery cards, no overlap, inline anchor and reopen`);await page.close();
+ console.log(`PASS Placez ${layout}/${width}: responsive discovery cards, centered portal and source restoration`);await page.close();
  }
  await mobileContext.close();
  }
