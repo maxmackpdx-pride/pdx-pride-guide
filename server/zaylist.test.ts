@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
 import Database from "better-sqlite3";
 import express from "express";
@@ -10,8 +13,8 @@ import { registerZaylist, type ZaylistStore } from "./zaylist";
 
 // Users: 1 owner (PRIMARY host) · 2 promoter (COHOST) · 3 staff · 4 talent
 // 5/6/7 RSVPs · 8 outsider · 9 full-access candidate · 10 barkeep · 12 walk-in
-async function setup(t: { after: (fn: () => unknown) => void }) {
-  const db = new Database(":memory:");
+async function setup(t: { after: (fn: () => unknown) => void }, databasePath = ":memory:") {
+  const db = new Database(databasePath);
   t.after(() => db.close());
   db.exec(`CREATE TABLE users(id INTEGER PRIMARY KEY,username TEXT,email TEXT,display_name TEXT,photo_url TEXT,status TEXT);
     CREATE TABLE events(id INTEGER PRIMARY KEY,title TEXT,venue_name TEXT,address TEXT,lat REAL,lng REAL,date_start TEXT,date_end TEXT,status TEXT,claimed_by TEXT,submitted_by TEXT,source TEXT,is_claimable INTEGER DEFAULT 0,is_public INTEGER DEFAULT 1,is_private INTEGER DEFAULT 0,admission TEXT,ticket_url TEXT);
@@ -817,4 +820,35 @@ test("a stale concurrent gift cannot split a single guest spot or be revoked by 
   assert.equal(store.liveCount(10),1);
   assert.equal((await request(`/api/events/10/zaylist/entries/${gifted.body.entry.id}`,8,"DELETE")).status,403);
   assert.equal((await request("/api/events/10/zaylist/draw",1,"POST",{count:1})).status,409);
+});
+
+test("door and bar scans validate the token while holding the write lock against a second worker", async t => {
+  const folder = mkdtempSync(join(tmpdir(),"zaylist-door-race-"));
+  t.after(() => rmSync(folder,{recursive:true,force:true}));
+  const file = join(folder,"fixture.db");
+  const {storage,request,setConfig} = await setup(t,file);
+  const concurrent = new Database(file,{timeout:0});
+  t.after(() => concurrent.close());
+  await setConfig(1,1);
+  const entry=(await request("/api/events/10/zaylist/entries",1,"POST",{userId:7})).body.entry.id;
+  const token=(await request(`/api/zaylist/entries/${entry}/accept`,7,"POST")).body.token;
+  await request(`/api/zaylist/entries/${entry}/drinks`,1,"POST",{kind:"comp",total:1});
+  const readEvent=storage.getEvent;
+  const revoke=()=>concurrent.prepare("UPDATE zaylist_tokens SET revoked_at=CURRENT_TIMESTAMP WHERE token=?").run(token);
+  let blocked=false;
+  storage.getEvent=id=>{
+    try {revoke();} catch (error) {
+      if ((error as {code?:string}).code !== "SQLITE_BUSY") throw error;
+      blocked=true;
+    }
+    return readEvent(id);
+  };
+  for(const suffix of ["/drink",""]) {
+    blocked=false;
+    assert.equal((await request("/api/zaylist/scan"+suffix,1,"POST",{token})).status,200);
+    assert.ok(blocked,"token validation and the redemption must commit together");
+  }
+  storage.getEvent=readEvent;
+  revoke();
+  assert.equal((await request("/api/zaylist/scan",1,"POST",{token})).status,404);
 });

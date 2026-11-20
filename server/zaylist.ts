@@ -588,6 +588,8 @@ export function createZaylistStore(db: Database.Database) {
     entryByToken,
     regenerateToken(id: number) {
       return db.transaction(() => {
+        const entry = getEntry.get(id) as EntryRow | undefined;
+        if (!entry || (entry.state !== "accepted" && entry.state !== "redeemed")) return null;
         revokeTokens(id);
         return issueToken(id);
       }).immediate();
@@ -1720,11 +1722,12 @@ export function registerZaylist(
         res.status(403).json({ error: "You cannot regenerate this code" });
         return;
       }
-      if (entry.state !== "accepted" && entry.state !== "redeemed") {
+      const token = store.regenerateToken(entry.id);
+      if (!token) {
         res.status(409).json({ error: "Only an accepted spot has a code" });
         return;
       }
-      res.json({ token: store.regenerateToken(entry.id) });
+      res.json({ token });
     },
   );
 
@@ -1861,25 +1864,25 @@ export function registerZaylist(
     if (found) res.json({ state: found.entry.state, ...scanDetails(found.entry) });
   });
   app.post("/api/zaylist/scan", requireAuth, viewerGuard, (req, res) => {
-    const found = scanAccess(req, res);
-    if (!found) return;
-    const result = store.scanEntry(found.entry, found.viewer.id);
-    res.json({ ...result, ...scanDetails(found.entry) });
+    const receipt = db.transaction(() => {
+      const found = scanAccess(req, res);
+      if (!found) return null;
+      const result = store.scanEntry(found.entry, found.viewer.id);
+      return { ...result, ...scanDetails(found.entry) };
+    }).immediate();
+    if (receipt) res.json(receipt);
   });
   app.post("/api/zaylist/scan/drink", requireAuth, viewerGuard, (req, res) => {
-    const found = scanAccess(req, res);
-    if (!found) return;
-    const { viewer, entry } = found;
-
-    const drinkGrantId = Number.isInteger(req.body?.drinkGrantId)
-      ? req.body.drinkGrantId
-      : undefined;
-    const result = store.scanDrink(entry, viewer.id, drinkGrantId);
-    if (!result.ok) {
-      res.status(409).json({ error: "No drinks left on this code" });
-      return;
-    }
-    res.json({ ...result, drinks: serializeDrinks(entry.id) });
+    const receipt = db.transaction(() => {
+      const found = scanAccess(req, res);
+      if (!found) return null;
+      const grantId = Number.isInteger(req.body?.drinkGrantId) ? req.body.drinkGrantId : undefined;
+      const result = store.scanDrink(found.entry, found.viewer.id, grantId);
+      return result.ok ? { ...result, drinks: serializeDrinks(found.entry.id) } : result;
+    }).immediate();
+    if (!receipt) return;
+    if (!receipt.ok) return res.status(409).json({ error: "No drinks left on this code" });
+    res.json(receipt);
   });
 
   // ---- The guest's inbox surface + invite claiming ----
