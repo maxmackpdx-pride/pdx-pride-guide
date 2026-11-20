@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { useOpenCardClose } from "@/hooks/useOpenCardClose";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import type { CSSProperties, ReactNode } from "react";
 import { X } from "lucide-react";
 import { Button, RoomKicker } from "@/components/ds";
@@ -23,10 +23,10 @@ export default function RoomComposer({ id, room, accent, kicker, title, intro, o
   children: ReactNode;
   testId?: string;
 }) {
-  const { dialogRef, requestClose } = useOpenCardClose(onClose);
+  const dialogRef = useModalA11y({ onClose });
   const color = accent ?? (room === "gigz" ? "var(--room-gigz-ink)" : ROOMS[room].accent);
-  return createPortal(<div className="room-composer-backdrop" onClick={requestClose}><section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={`${id}-title`} tabIndex={-1} onClick={event => event.stopPropagation()} id={id} data-testid={testId} className="gifting-form-panel gifting-form-panel--makeover room-composer pdx-glass-rebind" style={{ "--c": color } as CSSProperties}>
-    <button type="button" className="gifting-close" onClick={requestClose} aria-label="Close form"><X size={18} /></button>
+  return createPortal(<div className="room-composer-backdrop" onClick={onClose}><section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={`${id}-title`} tabIndex={-1} onClick={event => event.stopPropagation()} id={id} data-testid={testId} className="gifting-form-panel gifting-form-panel--makeover room-composer pdx-glass-rebind" style={{ "--c": color } as CSSProperties}>
+    <button type="button" className="gifting-close" onClick={onClose} aria-label="Close form"><X size={18} /></button>
     <RoomKicker room={room} accent={accent} as="div">{kicker}</RoomKicker>
     <h2 id={`${id}-title`} className="display section-heading">{title}</h2>
     {intro ? <p className="board-copy-sm">{intro}</p> : null}

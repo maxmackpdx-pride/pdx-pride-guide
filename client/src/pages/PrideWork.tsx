@@ -613,9 +613,14 @@ export function GigComposer({initialType = "POSTING_GIG", onClose, onPosted, pre
 
   const postType = form.watch("postType");
   const formAccent = "var(--room-gigz-ink)";
+  const hasDraft = form.formState.isDirty || acceptRules || mapLocation !== null || motifChoice !== "default"
+    || venueQuery !== (venueName ?? "") || Object.entries(newBusinessForm).some(([key, value]) => key === "type" ? value !== "bar" : Boolean(value));
+  const dismiss = () => {
+    if (!mutation.isPending && (!hasDraft || window.confirm("Discard this gig draft?"))) onClose();
+  };
 
   return (
-          <RoomComposer id="gigs-form" room="gigz" accent={formAccent} testId="form-pride-work" onClose={onClose}
+          <RoomComposer id="gigs-form" room="gigz" accent={formAccent} testId="form-pride-work" onClose={dismiss}
             kicker={postType === "POSTING_GIG" ? "New gig" : "New availability"}
             title={postType === "POSTING_GIG" ? "Post a gig" : "Post your availability"}
             intro={postType === "POSTING_GIG"
