@@ -197,16 +197,3 @@ export default function SiteSearch({ open, onClose }: SiteSearchProps) {
     </div>
   </div>;
 }
-
-export function useSiteSearchHotkey(onOpen: () => void) {
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "k") return;
-      const target = event.target as HTMLElement | null;
-      if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable) return;
-      event.preventDefault(); onOpen();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onOpen]);
-}

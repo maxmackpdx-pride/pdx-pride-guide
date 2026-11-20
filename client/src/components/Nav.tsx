@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Link, useLocation } from "wouter";
 import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ChevronDown, House, Inbox, Ticket, Search, Settings, Trash2, UserRound, UsersRound } from "lucide-react";
@@ -11,7 +11,7 @@ import { useHubPanel } from "@/context/HubPanelContext";
 import AuthModal from "./AuthModal";
 import StankTicketGate from "./StankTicketGate";
 import UserAvatar from "@/components/UserAvatar";
-import SiteSearch, { useSiteSearchHotkey } from "@/components/SiteSearch";
+import { lazyWithReload } from "@/lib/lazyWithReload";
 import { ButtonGlassOptics } from "@/components/ui/button-glass-optics";
 import { NavShell } from "@/components/ui/nav-shell";
 import { counterpartyAvatar } from "@/lib/inboxAvatar";
@@ -24,6 +24,21 @@ import HubAdminFolder from "@/components/hub/HubAdminFolder";
 import { parseHubSection } from "@/components/hub/types";
 import { dismissMobileNavOverlays } from "@/lib/mobileNavDismiss";
 import { isLocalDemo, LOCAL_DEMO_PROFILE_PATH } from "@/lib/localDemo";
+
+const SiteSearch = lazyWithReload(() => import("./SiteSearch"));
+
+function useSiteSearchHotkey(onOpen: () => void) {
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "k") return;
+      const target = event.target as HTMLElement | null;
+      if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable) return;
+      event.preventDefault(); onOpen();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onOpen]);
+}
 
 type NavItem = { href: string; label: string; accent?: NavAccent };
 
@@ -890,7 +905,11 @@ export default function Nav() {
         />
       )}
 
-      <SiteSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
+      {searchOpen && (
+        <Suspense fallback={null}>
+          <SiteSearch open onClose={() => setSearchOpen(false)} />
+        </Suspense>
+      )}
     </>
   );
 }
