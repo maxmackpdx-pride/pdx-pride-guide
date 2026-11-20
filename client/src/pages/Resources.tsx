@@ -53,7 +53,7 @@ import BoardFollowButton from "@/components/BoardFollowButton";
 import { resourceLogoLayout } from "@/components/resources/resourceLogoLayout";
 import { PlaceCard } from "@/components/ds/PlaceCard";
 import { ResourceCardMotif } from "@/components/resources/ResourceCardMotif";
-import "@/components/ui/web-gl-shader.css";
+import { NeedzHeartbeatBackdrop } from "@/components/resources/NeedzHeartbeatBackdrop";
 import "@fontsource/barlow/latin-400.css";
 import "@fontsource/barlow/latin-500.css";
 import "@fontsource/barlow/latin-600.css";
@@ -68,7 +68,6 @@ import { LoadMore, useProgressiveList } from "@/hooks/useProgressiveList";
 
 const CommunityWorkspace = lazy(() => import("./Community"));
 const ResourceDirectoryMap = lazy(() => import("@/components/DirectoryMap"));
-const ResourceBackgroundShader = lazy(() => import("@/components/ui/web-gl-shader").then(({ WebGLShader }) => ({ default: WebGLShader })));
 
 const CATEGORIES = RESOURCE_CATEGORIES;
 const LABELS = [
@@ -635,7 +634,7 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
   return (
     <>
     {!embeddedDetail && <div className="eb-page eb-page--resources rd-page">
-      <Suspense fallback={null}><ResourceBackgroundShader waveSpeed={0.7} lowPower /></Suspense>
+      <NeedzHeartbeatBackdrop />
       <BrowseHeader title="NEEDZ" logo="/brand/family/needz-mobile.webp?v=20261014-late-rent" kicker="Community resources / Oregon + Vancouver, WA"
         description="Real life gets complicated. Finding support shouldn’t.">
         <BoardShareButton title="NEEDZ" path="/needz" card={{ room: "NEEDZ", mark: "/brand/family/needz-mobile.webp?v=20261014-late-rent", line: "All the ways we show up." }} />

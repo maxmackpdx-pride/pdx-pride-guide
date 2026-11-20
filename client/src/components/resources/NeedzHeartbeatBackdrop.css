@@ -1,0 +1,63 @@
+.eb-page--resources > .needz-heartbeat-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--z-oled);
+}
+
+.needz-heartbeat-backdrop__art {
+  position: absolute;
+  inset-block-start: 0;
+  left: 50%;
+  width: max(620px, 100%);
+  aspect-ratio: 1671 / 941;
+  transform: translateX(-50%);
+  opacity: .75;
+}
+
+.needz-heartbeat-backdrop__art img,
+.needz-heartbeat-backdrop__pulse {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.needz-heartbeat-backdrop__pulse path {
+  fill: none;
+  stroke: var(--neon-red);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: .13 1;
+  stroke-dashoffset: .13;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .needz-heartbeat-backdrop__pulse path {
+    animation: needz-heartbeat-trace 8s ease-in-out infinite;
+  }
+  html:is(.calm-mode, [data-calm="true"]) .needz-heartbeat-backdrop__pulse path {
+    animation: none;
+  }
+}
+
+/* A single soft light travels along the already-visible trace, not a full-field flash. */
+@keyframes needz-heartbeat-trace {
+  0%, 18% { opacity: 0; stroke-dashoffset: .13; }
+  27% { opacity: .15; }
+  55% { opacity: .15; }
+  66%, 100% { opacity: 0; stroke-dashoffset: -1; }
+}
+
+/* The artwork supplies its own dark lower half. Keep a separate text-readability veil. */
+.eb-page.eb-page--resources::before {
+  background: linear-gradient(to bottom,
+    color-mix(in srgb, var(--z-oled) 64%, transparent) 0%,
+    color-mix(in srgb, var(--z-oled) 28%, transparent) 25%,
+    color-mix(in srgb, var(--z-oled) 16%, transparent) 46%,
+    transparent 65%);
+}
