@@ -24,7 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useOpenCardClose } from "@/hooks/useOpenCardClose";
 import { Badge } from "@/components/ds";
-import { MapPinned, Share2, ChevronRight, Info } from "lucide-react";
+import { MapPinned, ChevronRight, Info } from "lucide-react";
 import { eventPath } from "@shared/eventSlug";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import {

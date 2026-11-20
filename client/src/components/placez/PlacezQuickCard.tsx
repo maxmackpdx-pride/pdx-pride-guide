@@ -25,7 +25,7 @@ export interface PlacezQuickCardProps {
 }
 export function HeartIcon({filled=false}:{filled?:boolean}){return <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 20 3.5 11.7A5.2 5.2 0 0 1 12 5.8a5.2 5.2 0 0 1 8.5 5.9Z" fill={filled?'currentColor':'none'} stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/></svg>;}
 function Icon({kind}:{kind:'pin'|'phone'|'clock'|'info'|'share'}){
- const paths={pin:<><path d="M19 10c0 5-7 12-7 12S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></>,phone:<path d="m5 3 4 1 1 5-3 2c2 3 3 4 6 6l2-3 5 1 1 4c-1 5-8 1-12-3S1 4 5 3Z"/>,clock:<><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></>,info:<><circle cx="12" cy="12" r="9"/><path d="M12 10v7M12 6v1"/></>,share:<><circle cx="6" cy="12" r="3"/><circle cx="18" cy="5" r="3"/><circle cx="18" cy="19" r="3"/><path d="m9 10 6-4M9 14l6 4"/></>};
+ const paths={pin:<><path d="M19 10c0 5-7 12-7 12S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></>,phone:<path d="m5 3 4 1 1 5-3 2c2 3 3 4 6 6l2-3 5 1 1 4c-1 5-8 1-12-3S1 4 5 3Z"/>,clock:<><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></>,info:<><circle cx="12" cy="12" r="9"/><path d="M12 10v7M12 6v1"/></>,share:<><path d="M12 3.5v11"/><path d="M8.25 7.25 12 3.5l3.75 3.75"/><path d="M8.5 10H7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1.5"/></>};
  return <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">{paths[kind]}</svg>;
 }
 export function Artwork({model:m,wide,sizes="(max-width: 640px) 100vw, 620px"}:{model:PlaceCardModel;wide:boolean;sizes?:string}){

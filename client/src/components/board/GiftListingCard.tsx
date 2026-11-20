@@ -11,7 +11,8 @@ import {
   restoreQueries,
   snapshotQueries,
 } from "@/lib/optimisticCache";
-import { HeartHandshake, RefreshCw, Share2, ShieldAlert, X } from "lucide-react";
+import { HeartHandshake, RefreshCw, ShieldAlert, X } from "lucide-react";
+import { ShareIcon } from "@/components/icons/ShareIcon";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -386,7 +387,7 @@ export default function GiftListingCard({ post, skipLeadPhoto = false, expanded,
           <p>{post.description}</p>
           <div className="gifting-details">{post.category} · {post.pickupPreference}</div>
           <div className="gifting-listing-actions">
-            <button type="button" onClick={handleShare}><Share2 size={14} /> Share listing</button>
+            <button type="button" onClick={handleShare}><ShareIcon size={14} /> Share listing</button>
             {post.viewerSelected ? <span>{post.pickupNoticePending ? "Selected · pickup message pending" : "Selected · check your inbox to coordinate"}</span> : null}
           </div>
           {!post.isMine && !["GIFTED", "FOUND", "EXPIRED", "PENDING"].includes(post.status) && (

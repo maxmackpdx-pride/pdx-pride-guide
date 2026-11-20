@@ -7,7 +7,8 @@ import { EventHostNotice } from "./EventHostNotice";
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { ArrowUpRight, ChevronLeft, ChevronRight, Clock3, MapPin, Share2, X } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Clock3, MapPin, X } from "lucide-react";
+import { ShareIcon } from "@/components/icons/ShareIcon";
 import type { EventListing as Event } from "@shared/multiDayEvents";
 import { EVENT_TALENT_ROLE_COLORS, EVENT_TALENT_ROLE_LABELS, type EventTalentRow } from "@shared/eventTalent";
 import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
@@ -334,7 +335,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
             </>
           )}
         <div className="evz-x__chrome">
-          <button type="button" className="evz-x__iconbtn" onClick={share} aria-label={`Share ${event.title}`}><Share2 size={17} aria-hidden="true" /></button>
+          <button type="button" className="evz-x__iconbtn" onClick={share} aria-label={`Share ${event.title}`}><ShareIcon size={17} aria-hidden="true" /></button>
           <button type="button" className="evz-x__iconbtn" onClick={requestClose} aria-label={`Close ${event.title}`}><X size={19} aria-hidden="true" /></button>
         </div>
         <div className="evz-x__id">

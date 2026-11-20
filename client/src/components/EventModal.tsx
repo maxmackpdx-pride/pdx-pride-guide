@@ -37,7 +37,7 @@ import { formatPacificDateTime } from "@/lib/countdown";
 import { eventPath } from "@shared/eventSlug";
 import { shareEventLink, shareToastTitle } from "@/lib/shareEvent";
 import { timeAgo } from "@/lib/timeAgo";
-import { Bookmark, MessageCircle, CalendarDays, CalendarPlus, ChevronRight, Ellipsis, FileText, Lock, MapPin, Pencil, Share2 } from "lucide-react";
+import { Bookmark, MessageCircle, CalendarDays, CalendarPlus, ChevronRight, Ellipsis, FileText, Lock, MapPin, Pencil } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DashboardEventEditForm } from "@/components/dashboard/DashboardEventEditor";
 import {

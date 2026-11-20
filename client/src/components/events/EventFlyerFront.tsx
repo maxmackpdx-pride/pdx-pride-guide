@@ -158,17 +158,9 @@ function useDemoTilt(ref: React.RefObject<HTMLElement | null>, enabled: boolean)
   }, [ref, enabled]);
 }
 
-export function ShareIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-      <circle cx="18" cy="5" r="3" />
-      <circle cx="6" cy="12" r="3" />
-      <circle cx="18" cy="19" r="3" />
-      <path d="m8.59 13.51 6.83 3.98" />
-      <path d="m15.41 6.51-6.82 3.98" />
-    </svg>
-  );
-}
+/** Universal share glyph; re-exported so FlyerBoard keeps its import. */
+import { ShareIcon } from "@/components/icons/ShareIcon";
+export { ShareIcon };
 
 function HeartIcon() {
   return (

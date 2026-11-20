@@ -4,7 +4,7 @@ import { CardMorph } from "@/components/cards/react19Card";
 import { cardMorphName, preloadCardImage } from "@/components/cards/react19CardModel";
 import React, { useEffect, useState } from "react";
 import { Badge } from "./Badge";
-import { Share2 } from "lucide-react";
+import { ShareIcon } from "@/components/icons/ShareIcon";
 import { placeGoogleMapsUrl, telHref } from "@/lib/placeLinks";
 import { placePath } from "@shared/placeSlug";
 import { sharePageLink } from "@/lib/shareEvent";
@@ -552,7 +552,7 @@ export function PlaceCard({
             />
           )}
           {rest["data-card-size"] !== "small" && <button type="button" className="pdxPlace__share" onClick={handleShare} disabled={sharing} aria-label={`Share ${name}`}>
-            <Share2 size={11} strokeWidth={2.5} /> {sharing ? "…" : "Share"}
+            <ShareIcon size={11} strokeWidth={2.5} /> {sharing ? "…" : "Share"}
           </button>}
         </div>
         <div className="pdxPlace__compactRow">

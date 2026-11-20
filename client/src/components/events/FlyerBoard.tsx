@@ -1083,9 +1083,6 @@ export default function FlyerBoard({
           aria-label={openListing.title}
         >
           <button type="button" className="ox" aria-label="Close event" onClick={()=>closeCard()}>✕</button>
-          <button type="button" className="oshare" aria-label={`Share ${openListing.title}`} onClick={shareOpen}>
-            <ShareIcon />
-          </button>
           <div className="ohead">
           <div className="ohero">
               {openPoster ? (
@@ -1436,6 +1433,9 @@ export default function FlyerBoard({
               aria-label="Next page"
             >
               ›
+            </button>
+            <button type="button" className="oshare" aria-label={`Share ${openListing.title}`} onClick={shareOpen}>
+              <ShareIcon />
             </button>
             <EventPrivateSaveButton eventId={openListing.id} poster />
             <EventInterestedHeart
