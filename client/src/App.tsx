@@ -79,6 +79,7 @@ const Sponsors = lazyWithReload(() => import("./pages/Sponsors"));
 const AccessSafety = lazyWithReload(() => import("./pages/AccessSafety"));
 const Admin = lazyWithReload(() => import("./pages/Admin"));
 const Dashboard = lazyWithReload(() => import("./pages/Dashboard"));
+const HubHelp = lazyWithReload(() => import("./pages/HubHelp"));
 const HostHub = lazyWithReload(() => import("./pages/HostHub"));
 const NotificationSettings = lazyWithReload(() => import("./pages/NotificationSettings"));
 const PlacezBrowse = lazyWithReload(() => import("./pages/PlacezBrowse"));
@@ -243,6 +244,7 @@ function AppLayout() {
             <Route path="/legal" component={Legal} />
             <Route path="/admin" component={Admin} />
             <Route path="/dashboard" component={Dashboard} />
+            <Route path="/hub/help" component={HubHelp} />
             <Route path="/hub" component={HostHub} />
             <Route path="/settings/notifications" component={NotificationSettings} />
             <Route path="/reset-password" component={ResetPassword} />

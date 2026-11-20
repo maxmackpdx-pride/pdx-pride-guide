@@ -32,6 +32,7 @@ export default function HostHub() {
   if(!user) return <main className="zl-root"><div className="zl-wrap"><header className="zl-hub-head"><h1>Your Zay’list</h1>
     <p>Guest spots, passes and the nights you host.</p>
     <button className="zl-btn zl-btn--primary" onClick={()=>setAuth(true)}>Sign in or join</button>
+    <a className="zl-btn" href="/hub/help">How to use your Zay’list</a>
     {auth&&<AuthModal onClose={()=>setAuth(false)}/>}</header></div></main>;
   return <main className="zl-root"><div className="zl-wrap zl-workspace">
     <header className="zl-hub-head"><div><p>{user.displayName||user.username}</p><h1>Your Zay’list</h1></div>
@@ -56,5 +57,6 @@ export default function HostHub() {
       <a className="zl-btn" href="/admin">Open admin</a><button className="zl-btn" onClick={e=>openSheet({account:"admin",queueFolder:"active"},e.currentTarget)}>Review approvals</button>
     </div></section>}
     {owner&&<section className="zl-section"><h2>Owner desk</h2><button className="zl-btn" onClick={e=>openSheet({account:"owner",view:"inbox"},e.currentTarget)}>Open owner inbox</button><PushMemberships/><PlanningOwnerDesk/></section>}
+    <a className="zl-btn" href="/hub/help">How to use your Zay’list</a>
   </div></main>;
 }
