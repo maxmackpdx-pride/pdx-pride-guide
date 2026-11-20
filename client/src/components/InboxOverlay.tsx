@@ -756,6 +756,9 @@ function ThreadDetail({
 
       {thread.subject && <div className="inbox-exp-thread__subject">{thread.subject}</div>}
 
+      {thread.contextType === "ZAYLIST_SPOT" && (
+        <div className="inbox-exp-thread__subject"><a className="inbox-exp-thread__cta" href={`/hub#spot-${thread.contextId}`}>Open guest spot</a></div>
+      )}
       {openEventId != null && onOpenEvent && (
         <div className="inbox-exp-thread__pad">
           <button type="button" className="inbox-exp-thread__cta" onClick={() => onOpenEvent(openEventId)}>

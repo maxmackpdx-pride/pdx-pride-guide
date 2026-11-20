@@ -1,3 +1,4 @@
+import { createGuestListOperations, internationalPhone } from "./guestListOperations";
 import { appleGuestPass, googleGuestPass, guestPassPdf, walletAvailability } from "./guestPass";
 import { randomBytes } from "node:crypto";
 import type Database from "better-sqlite3";
@@ -288,6 +289,8 @@ export function createZaylistStore(db: Database.Database) {
         return { ok: false as const, error: "no-pool" };
       if (input.poolBound !== false && liveCount(input.eventId) >= cfg.poolSize)
         return { ok: false as const, error: "pool-full" };
+      if (!input.userId && input.contact && db.prepare(`SELECT 1 FROM zaylist_entries WHERE event_id=? AND user_id IS NULL AND contact=? AND state IN (${livePh})`).get(input.eventId,input.contact,...LIVE_STATES))
+        return { ok: false as const, error: "already-on-list" };
       if (input.userId && holderEntry(input.eventId, input.userId))
         return { ok: false as const, error: "already-on-list" };
       if (
@@ -417,7 +420,8 @@ export function createZaylistStore(db: Database.Database) {
       return db
         .prepare(
           `SELECT a.user_id AS userId, a.role, a.spots, a.assigned_by AS assignedBy,
-          u.username, u.display_name AS displayName
+          u.username, u.display_name AS displayName,
+          EXISTS(SELECT 1 FROM zaylist_privileges p WHERE p.event_id=a.event_id AND p.user_id=a.user_id AND p.revoked_at IS NULL AND p.kind='drink') AS drinkPrivilege
           FROM zaylist_allowances a JOIN users u ON u.id=a.user_id
           WHERE a.event_id=? ORDER BY a.id`,
         )
@@ -503,7 +507,7 @@ export function createZaylistStore(db: Database.Database) {
         const eligible = (
           db
             .prepare(
-              `SELECT COUNT(*) AS n FROM attendances a JOIN users u ON u.id=a.user_id
+              `SELECT COUNT(DISTINCT a.user_id) AS n FROM attendances a JOIN users u ON u.id=a.user_id
               WHERE a.event_id=? AND a.is_active=1 AND (a.expires_at IS NULL OR a.expires_at>?)
               AND u.status='active' AND a.user_id IS NOT NULL
               AND NOT EXISTS (SELECT 1 FROM zaylist_entries e WHERE e.event_id=a.event_id
@@ -521,7 +525,7 @@ export function createZaylistStore(db: Database.Database) {
         if (want > 0) {
           const winners = db
             .prepare(
-              `SELECT a.user_id AS userId FROM attendances a JOIN users u ON u.id=a.user_id
+              `SELECT DISTINCT a.user_id AS userId FROM attendances a JOIN users u ON u.id=a.user_id
               WHERE a.event_id=? AND a.is_active=1 AND (a.expires_at IS NULL OR a.expires_at>?)
               AND u.status='active' AND a.user_id IS NOT NULL
               AND NOT EXISTS (SELECT 1 FROM zaylist_entries e WHERE e.event_id=a.event_id
@@ -576,10 +580,8 @@ export function createZaylistStore(db: Database.Database) {
       giftedBy: number,
     ): { ok: true; id: number } | { ok: false; error: string } {
       return db.transaction(() => {
-        if (
-          target.userId &&
-          holderEntry(entry.event_id, target.userId)
-        )
+        if (target.userId ? holderEntry(entry.event_id, target.userId) : db.prepare(`SELECT 1 FROM zaylist_entries
+          WHERE event_id=? AND user_id IS NULL AND contact=? AND state IN (${livePh})`).get(entry.event_id,target.contact,...LIVE_STATES))
           return { ok: false as const, error: "already-on-list" };
         db.prepare(
           "UPDATE zaylist_entries SET state='gifted', updated_at=CURRENT_TIMESTAMP WHERE id=?",
@@ -992,6 +994,8 @@ export function registerZaylist(
     };
   }
 
+  const operations = createGuestListOperations(db, store, storage, visible, (id, userId) => accessFor(id, userId).allocator);
+
   const eventPath = "/api/events/:id/zaylist";
   const scope: RequestHandler = (req, res, next) => {
     const id = Number(req.params.id);
@@ -1057,9 +1061,11 @@ export function registerZaylist(
         ? { userId: user.id, contact: email, kind: "email" as const }
         : { userId: null, contact: email, kind: "email" as const };
     }
-    const digits = trimmed.replace(/\D/g, "");
-    if (digits.length >= 7 && digits.length <= 15)
-      return { userId: null, contact: digits, kind: "phone" as const };
+    const phone = internationalPhone(trimmed);
+    if (phone) {
+      const match = db.prepare("SELECT u.id FROM zaylist_verified_phones p JOIN users u ON u.id=p.user_id WHERE p.phone=? AND u.status='active'").get(phone) as {id: number} | undefined;
+      return { userId: match?.id ?? null, contact: phone, kind: "phone" as const };
+    }
     return null;
   }
 
@@ -1148,6 +1154,7 @@ export function registerZaylist(
         team: access.team,
         editor: access.editor,
         allocator: access.allocator,
+        isOwner: access.isOwner,
         canGrantDrinks: access.canGrantDrinks,
         allowance: access.allowance
           ? {
@@ -1188,6 +1195,14 @@ export function registerZaylist(
       res.status(400).json({ error: "Enter a pool size and a max cap" });
       return;
     }
+    if (poolSize && (!event.ticketUrl || event.admission === "FREE")) {
+      res.status(400).json({ error: "A no-cover pool requires a paid event with a ticket link" });
+      return;
+    }
+    if (poolSize < store.liveCount(event.id)) {
+      res.status(409).json({ error: "Release existing spots before reducing the pool below its commitments" });
+      return;
+    }
     if (poolSize > maxCap) {
       res.status(400).json({ error: "The pool cannot exceed the max cap" });
       return;
@@ -1219,11 +1234,11 @@ export function registerZaylist(
       res.status(400).json({ error: "Enter how many spots to draw" });
       return;
     }
-    const result = store.runDraw(
+    const result = operations.draw(
       event.id,
       viewer.id,
       count ?? null,
-      new Date().toISOString(),
+      Date.now(),
     );
     if (!result.ok) {
       spotError(res, result.error);
@@ -1257,14 +1272,13 @@ export function registerZaylist(
       res.json({ results: [] });
       return;
     }
-    const like = `%${q}%`;
-    const results = db
-      .prepare(
-        `SELECT id, username, display_name AS displayName, email FROM users
-        WHERE status='active' AND (lower(email) LIKE lower(?) OR lower(username) LIKE lower(?)
-          OR lower(coalesce(display_name,'')) LIKE lower(?)) ORDER BY id LIMIT 10`,
-      )
-      .all(like, like, like);
+    const like = `%${q.replace(/[\\%_]/g, char => "\\" + char)}%`;
+    const phone = internationalPhone(q);
+    const results = db.prepare(`SELECT u.id,u.username,u.display_name AS displayName
+      FROM users u WHERE u.status='active' AND (lower(u.email)=lower(?) OR u.username LIKE ? ESCAPE '\\'
+      OR u.display_name LIKE ? ESCAPE '\\' OR EXISTS(SELECT 1 FROM zaylist_verified_phones p WHERE p.user_id=u.id AND p.phone=?))
+      AND NOT EXISTS(SELECT 1 FROM member_blocks b WHERE (b.blocker_user_id=? AND b.blocked_user_id=u.id)
+        OR (b.blocked_user_id=? AND b.blocker_user_id=u.id)) ORDER BY u.username LIMIT 10`).all(q, like, like, phone, viewer.id, viewer.id);
     res.json({ results });
   });
 
@@ -1286,7 +1300,9 @@ export function registerZaylist(
       res.status(400).json({ error: "Give a member, an email, or a phone number" });
       return;
     }
-    const result = store.addSpot({
+    if (target.userId && storage.isMemberInteractionBlocked(viewer.id, target.userId)) return res.status(404).json({error:"Member unavailable"});
+    const result = db.transaction(() => {
+      const result = store.addSpot({
       eventId: event.id,
       userId: target.userId,
       contact: target.contact,
@@ -1295,12 +1311,15 @@ export function registerZaylist(
       authorityUserId: viewer.id,
       allowance: access.allocator ? null : (access.allowance?.spots ?? 0),
     });
-    if (!result.ok) {
-      spotError(res, result.error);
-      return;
-    }
-    if (!target.userId && target.contact && target.kind)
-      store.addInvite(event.id, result.id, target.contact, target.kind, viewer.id);
+      if (result.ok) {
+        if (!target.userId && target.contact && target.kind) {
+          store.addInvite(event.id, result.id, target.contact, target.kind, viewer.id);
+          operations.queueInvite(result.id);
+        } else operations.notifyEntry(result.id);
+      }
+      return result;
+    }).immediate();
+    if (!result.ok) return spotError(res, result.error);
     res.status(201).json({ entry: store.entry(result.id) });
   });
 
@@ -1576,8 +1595,22 @@ export function registerZaylist(
       return;
     }
     if (moderate(res, "Zay'list message", { body })) return;
-    const record = store.addBroadcast(event.id, viewer.id, body);
-    res.status(201).json({ ...record, delivery: "recorded" });
+    const record = db.transaction(() => {
+      const record = store.addBroadcast(event.id, viewer.id, body);
+      const recipients = db.prepare(`SELECT DISTINCT e.user_id AS id FROM zaylist_entries e JOIN users u ON u.id=e.user_id
+        WHERE e.event_id=? AND e.state IN ('accepted','redeemed') AND u.status='active' AND u.id!=?`).all(event.id, viewer.id) as {id: number}[];
+      let delivered = 0;
+      for (const person of recipients) {
+        if (storage.isMemberInteractionBlocked(person.id, viewer.id)) continue;
+        storage.sendMessage(viewer.id, person.id, event.title, body, {
+          contextType: "HOST_UPDATE", contextId: event.id, contextLabel: event.title, threadId: `zaylist-updates-${event.id}-${person.id}`,
+        });
+        delivered++;
+      }
+      db.prepare("UPDATE zaylist_broadcasts SET recipient_count=? WHERE id=?").run(delivered,record.id);
+      return { id: record.id, recipientCount: delivered };
+    }).immediate();
+    res.status(201).json({ ...record, delivery: "inbox" });
   });
   app.get(eventPath + "/broadcasts", requireAuth, viewerGuard, scope, (req, res) => {
     const viewer = res.locals.viewer;
@@ -1651,17 +1684,22 @@ export function registerZaylist(
       res.status(400).json({ error: "You cannot gift a spot to yourself" });
       return;
     }
-    const result = store.gift(
+    if (target.userId && storage.isMemberInteractionBlocked(res.locals.viewer.id, target.userId)) return res.status(404).json({error:"Member unavailable"});
+    const result = db.transaction(() => {
+      const result = store.gift(
       entry,
       { userId: target.userId, contact: target.contact },
       res.locals.viewer.id,
     );
-    if (!result.ok) {
-      spotError(res, result.error);
-      return;
-    }
-    if (!target.userId && target.contact && target.kind)
-      store.addInvite(entry.event_id, result.id, target.contact, target.kind, res.locals.viewer.id);
+      if (result.ok) {
+        if (!target.userId && target.contact && target.kind) {
+          store.addInvite(entry.event_id, result.id, target.contact, target.kind, res.locals.viewer.id);
+          operations.queueInvite(result.id);
+        } else operations.notifyEntry(result.id);
+      }
+      return result;
+    }).immediate();
+    if (!result.ok) return spotError(res, result.error);
     res.status(201).json({ entry: store.entry(result.id) });
   });
 
@@ -1851,13 +1889,20 @@ export function registerZaylist(
     res.setHeader("Cache-Control", "private, no-store");
     res.json({
       entries: store.myEntries(viewer.id),
-      claimable: store.claimableInvites(viewer.email),
+      claimable: store.claimableInvites(viewer.email).length,
     });
   });
   app.post("/api/zaylist/invites/claim", requireAuth, viewerGuard, (req, res) => {
     const viewer = res.locals.viewer;
-    res.json({ claimed: store.claimInvites(viewer.id, viewer.email) });
+    const secret = req.body?.token;
+    if (typeof secret === "string") {
+      if (secret.length !== 43 || !operations.claim(secret,viewer)) return res.status(409).json({error:"This invitation is unavailable for this account"});
+      return res.json({ claimed: 1 });
+    }
+    const matches = store.claimableInvites(viewer.email) as {entryId: number}[];
+    for (const invite of matches) operations.queueInvite(invite.entryId);
+    res.json({ claimed: 0, verificationRequested: !!matches.length });
   });
 
-  return { store, accessFor };
+  return { store, accessFor, operations };
 }

@@ -69,6 +69,7 @@ export interface ZaylistAllowance {
   role: "staff" | "promoter" | "talent";
   spots: number;
   assignedBy: number;
+  drinkPrivilege: boolean;
   username: string;
   displayName: string | null;
 }
@@ -91,6 +92,7 @@ export interface ZaylistDraw {
 }
 
 export interface ZaylistPermissions {
+  isOwner: boolean;
   team: boolean;
   editor: boolean;
   allocator: boolean;
@@ -250,8 +252,8 @@ export const zaylistApi = {
     apiRequest("GET", `/api/me/zaylist`).then((r) =>
       json<{ entries: MyZaylistEntry[]; claimable: number }>(r),
     ),
-  claimInvites: () =>
-    apiRequest("POST", `/api/zaylist/invites/claim`, {}).then((r) => json<{ claimed: number }>(r)),
+  claimInvites: (token?: string) =>
+    apiRequest("POST", `/api/zaylist/invites/claim`, {token}).then((r) => json<{ claimed: number; verificationRequested?: boolean }>(r)),
 };
 
 export function zaylistError(err: unknown, fallback: string): string {

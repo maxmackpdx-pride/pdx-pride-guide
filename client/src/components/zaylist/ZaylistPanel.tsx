@@ -104,7 +104,6 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
   const [savedLabel, setSavedLabel] = useState("");
   const [savedBody, setSavedBody] = useState("");
   const [broadcastBody, setBroadcastBody] = useState("");
-  const [drinkPriv, setDrinkPriv] = useState<Record<number, boolean>>({});
 
   const messagesQuery = useQuery({
     queryKey: ["zaylist-messages", eventId],
@@ -248,7 +247,7 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
                   <div className="zl-avatar" aria-hidden="true">{initials(r.displayName || r.username)}</div>
                   <div className="zl-person-main">
                     <div className="zl-person-name">{r.displayName || r.username}</div>
-                    <div className="zl-person-meta">{r.email}</div>
+                    <div className="zl-person-meta">{r.username}</div>
                   </div>
                   <button
                     className="zl-btn zl-btn--small"
@@ -333,7 +332,7 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
             >
               Save allowance
             </button>
-            <button
+            {perms.isOwner && <button
               className="zl-btn"
               type="button"
               onClick={() =>
@@ -344,7 +343,7 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
               }
             >
               Grant full access
-            </button>
+            </button>}
           </div>
         </>
       ) : null}
@@ -364,20 +363,18 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
                   <button
                     className="zl-btn zl-btn--small"
                     type="button"
-                    aria-pressed={!!drinkPriv[a.userId]}
+                    aria-pressed={!!a.drinkPrivilege}
                     onClick={() =>
                       void run(async () => {
-                        if (drinkPriv[a.userId]) {
+                        if (a.drinkPrivilege) {
                           await zaylistApi.deletePrivilege(eventId, a.userId);
-                          setDrinkPriv((s) => ({ ...s, [a.userId]: false }));
                         } else {
                           await zaylistApi.putPrivilege(eventId, a.userId);
-                          setDrinkPriv((s) => ({ ...s, [a.userId]: true }));
                         }
-                      }, drinkPriv[a.userId] ? "Drink privilege removed for this session list." : "Drink privilege granted.")
+                      }, a.drinkPrivilege ? "Drink privilege removed." : "Drink privilege granted.")
                     }
                   >
-                    {drinkPriv[a.userId] ? "Drinks: on" : "Drinks: off"}
+                    {a.drinkPrivilege ? "Drinks: on" : "Drinks: off"}
                   </button>
                   <button
                     className="zl-btn zl-btn--small zl-btn--danger"
@@ -395,7 +392,7 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
         </>
       ) : null}
 
-      {perms.allocator && payload.grants ? (
+      {perms.isOwner && payload.grants ? (
         <>
           <h3>Full access</h3>
           {payload.grants.length ? (
@@ -588,7 +585,7 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
                   await zaylistApi.broadcast(eventId, broadcastBody.trim());
                   setBroadcastBody("");
                   await queryClient.invalidateQueries({ queryKey: ["zaylist-broadcasts", eventId] });
-                }, "Message recorded for the list.")
+                }, "Message delivered to guest inboxes.")
               }
             >
               Send to the list

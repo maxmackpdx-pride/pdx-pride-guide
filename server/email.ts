@@ -8,6 +8,7 @@ type ResendPayload = {
   text: string;
   html?: string;
   replyTo?: string;
+  idempotencyKey?: string;
 };
 
 function htmlEscape(value: string) {
@@ -32,8 +33,10 @@ async function sendResendEmail(payload: ResendPayload) {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
+      ...(payload.idempotencyKey ? { "Idempotency-Key": payload.idempotencyKey } : {}),
       "Content-Type": "application/json",
     },
+    signal: AbortSignal.timeout(15000),
     body: JSON.stringify({
       from: process.env.RESEND_FROM_EMAIL?.trim() || DEFAULT_FROM,
       to: payload.to,
@@ -75,4 +78,24 @@ export async function sendOwnerDeskNotification() {
     subject: "New message in the Zaylist Owner Desk",
     text: "A new contact message is waiting in the Zaylist Owner Desk. Sign in to review it securely.",
   });
+}
+
+export async function sendGuestInvitation(kind: "email" | "phone", contact: string, secret: string, entryId: number) {
+  const base = (process.env.PUBLIC_BASE_URL?.trim() || "https://www.zaylist.com").replace(/\/$/, "");
+  const link = `${base}/hub#invite=${encodeURIComponent(secret)}`;
+  const text = `You have a Zay'list guest spot. Open this private invitation to sign in or join and claim it: ${link}`;
+  if (kind === "email") {
+    const receipt = await sendResendEmail({ to: [contact], subject: "Your Zay'list guest invitation", text,
+      idempotencyKey: `zaylist-invite-${entryId}` });
+    return receipt.sent;
+  }
+  const sid = process.env.TWILIO_ACCOUNT_SID?.trim();
+  const token = process.env.TWILIO_AUTH_TOKEN?.trim();
+  const from = process.env.TWILIO_FROM_NUMBER?.trim();
+  if (!sid || !token || !from) return false;
+  const result = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(sid)}/Messages.json`, {
+    method: "POST", headers: { Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString("base64")}` },
+    body: new URLSearchParams({ From: from, To: contact, Body: text }), signal: AbortSignal.timeout(15000),
+  });
+  return result.ok;
 }

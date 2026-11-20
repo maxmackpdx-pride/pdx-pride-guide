@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   stateLabel,
@@ -32,7 +32,7 @@ function SpotCard({ entry }: { entry: MyZaylistEntry }) {
 
   const live = entry.state === "pending" || entry.state === "accepted";
   return (
-    <div className="zl-person" style={{ alignItems: "flex-start" }}>
+    <div id={`spot-${entry.id}`} className="zl-person" style={{ alignItems: "flex-start" }}>
       <div className="zl-person-main">
         <div className="zl-person-name">{entry.eventTitle}</div>
         <div className="zl-person-meta">
@@ -164,6 +164,18 @@ export default function GuestSpots() {
   const query = useQuery({ queryKey: ["/api/me/zaylist"], queryFn: () => zaylistApi.mine() });
   const [claimNote, setClaimNote] = useState<string | null>(null);
 
+  useEffect(() => {
+    const token = sessionStorage.getItem("guest-list-invitation") || new URLSearchParams(location.hash.slice(1)).get("invite");
+    if (!token) return;
+    let live = true;
+    zaylistApi.claimInvites(token).then(() => {
+      sessionStorage.removeItem("guest-list-invitation");
+      history.replaceState(null, "", location.pathname + location.search);
+      if (live) setClaimNote("Your invitation is ready. Choose your spot below.");
+      void queryClient.invalidateQueries({queryKey:["/api/me/zaylist"]});
+    }).catch(e => {if (live) setClaimNote(zaylistError(e, "Could not claim this invitation."));});
+    return () => {live = false;};
+  }, [queryClient]);
   if (query.isLoading) return <p className="zl-note">Loading your spots…</p>;
   if (query.isError)
     return (
@@ -178,12 +190,13 @@ export default function GuestSpots() {
   const claimable = query.data?.claimable ?? 0;
   return (
     <div>
+      {claimNote && <p className="zl-note" role="status">{claimNote}</p>}
       {claimable > 0 ? (
         <div className="zl-person" style={{ marginBottom: 10 }}>
           <div className="zl-person-main">
             <div className="zl-person-name">{claimable} invite{claimable === 1 ? "" : "s"} waiting</div>
             <div className="zl-person-meta">Spots sent to your email before you had an account</div>
-            {claimNote ? <p className="zl-ok" role="status">{claimNote}</p> : null}
+
           </div>
           <button
             className="zl-btn zl-btn--small zl-btn--primary"
@@ -191,14 +204,14 @@ export default function GuestSpots() {
             onClick={async () => {
               try {
                 const r = await zaylistApi.claimInvites();
-                setClaimNote(r.claimed ? `${r.claimed} spot${r.claimed === 1 ? "" : "s"} claimed.` : "Nothing left to claim.");
+                setClaimNote(r.claimed ? `${r.claimed} spot${r.claimed === 1 ? "" : "s"} claimed.` : r.verificationRequested ? "Check your email for your private invitation link." : "No invitations waiting.");
                 await queryClient.invalidateQueries({ queryKey: ["/api/me/zaylist"] });
               } catch (e) {
                 setClaimNote(zaylistError(e, "Claiming did not go through."));
               }
             }}
           >
-            Claim
+            Email my link
           </button>
         </div>
       ) : null}

@@ -47,6 +47,8 @@ async function setup(t: { after: (fn: () => unknown) => void }) {
     status: "LIVE",
     isPublic: true,
     isPrivate: false,
+    ticketUrl: "https://tickets.example.test/10",
+    admission: "TICKETED",
     title: "Paid Night",
     venueName: "The Club",
     dateStart: "2099-07-01T16:00:00",
@@ -56,12 +58,17 @@ async function setup(t: { after: (fn: () => unknown) => void }) {
     getEvent: (id: number) => (id === 10 ? dbEvent : null),
     getUserById: (id: number) =>
       db.prepare("SELECT * FROM users WHERE id=?").get(id),
+    isMemberInteractionBlocked: (a: number,b: number) => !!db.prepare("SELECT 1 FROM member_blocks WHERE (blocker_user_id=? AND blocked_user_id=?) OR (blocker_user_id=? AND blocked_user_id=?)").get(a,b,b,a),
+    sendMessage: (sender: number, recipient: number, subject: string, body: string) => {
+      db.exec("CREATE TABLE IF NOT EXISTS fixture_messages(sender INTEGER,recipient INTEGER,subject TEXT,body TEXT)");
+      db.prepare("INSERT INTO fixture_messages VALUES(?,?,?,?)").run(sender,recipient,subject,body);
+    },
     isUserEventHost: (eventId: number, userId: number) =>
       !!db
         .prepare("SELECT 1 FROM event_hosts WHERE event_id=? AND user_id=?")
         .get(eventId, userId),
   } as unknown as IStorage;
-  const { store } = registerZaylist(
+  const { store, operations } = registerZaylist(
     app,
     db,
     storage,
@@ -74,7 +81,7 @@ async function setup(t: { after: (fn: () => unknown) => void }) {
     },
     () => true,
     () => false,
-  ) as { store: ZaylistStore };
+  );
   const server = app.listen(0, "127.0.0.1");
   await new Promise<void>((done) => server.once("listening", done));
   t.after(() => new Promise<void>((done) => server.close(() => done())));
@@ -107,7 +114,7 @@ async function setup(t: { after: (fn: () => unknown) => void }) {
       drawDaysBefore: 7,
       dripPerDay: 1,
     });
-  return { db, store, request, list, setConfig };
+  return { db, store, operations, request, list, setConfig };
 }
 
 test("draw respects the pool cap and one-per-person, and persists its record", async (t) => {
@@ -405,8 +412,12 @@ test("an invite by email is claimed at sign-up and then accepted; phone adds inv
     "INSERT INTO users VALUES(11,'newbie','future@example.test','New',NULL,'active')",
   ).run();
   const mine = await request("/api/me/zaylist", 11);
-  assert.equal(mine.body.claimable.length, 1);
-  const claim = await request("/api/zaylist/invites/claim", 11, "POST");
+  assert.equal(mine.body.claimable, 1);
+  const unverified = await request("/api/zaylist/invites/claim", 11, "POST");
+  assert.equal(unverified.body.claimed, 0);
+  const {secret} = db.prepare("SELECT secret FROM zaylist_invite_deliveries WHERE entry_id=?").get(add.body.entry.id) as {secret: string};
+  assert.equal((await request("/api/zaylist/invites/claim", 12, "POST", {token:secret})).status,409);
+  const claim = await request("/api/zaylist/invites/claim", 11, "POST", {token:secret});
   assert.equal(claim.body.claimed, 1);
   const entry = db
     .prepare("SELECT user_id AS userId, state FROM zaylist_entries WHERE id=?")
@@ -472,5 +483,47 @@ test("acceptance messages: everyone gets the general one, talent gets the saved 
   });
   assert.equal(broadcast.status, 201);
   assert.equal(broadcast.body.recipientCount, 2);
-  assert.equal(broadcast.body.delivery, "recorded");
+  assert.equal(broadcast.body.delivery, "inbox");
+});
+
+test("scheduled draws spend a daily drip once per Pacific day and notify the drawn accounts", async t => {
+  const {db,request,list,operations} = await setup(t);
+  await request("/api/events/10/zaylist/config",1,"PUT",{poolSize:3,maxCap:3,drawDaysBefore:2,dripPerDay:1});
+  operations.dueDraws(Date.parse("2099-06-28T18:00:00Z"));
+  assert.equal((await list(1)).body.counts.pending,0);
+  operations.dueDraws(Date.parse("2099-06-29T18:00:00Z"));
+  operations.dueDraws(Date.parse("2099-06-30T01:00:00Z"));
+  assert.equal((await list(1)).body.counts.pending,1);
+  operations.dueDraws(Date.parse("2099-06-30T18:00:00Z"));
+  assert.equal((await list(1)).body.counts.pending,2);
+  assert.equal((db.prepare("SELECT COUNT(*) AS n FROM fixture_messages").get() as {n:number}).n,2);
+});
+
+test("a verified text invitation matches the next add; contact search hides unrelated addresses", async t => {
+  const {db,request,setConfig} = await setup(t);
+  await setConfig(1,5);
+  const phone = await request("/api/events/10/zaylist/entries",1,"POST",{contact:"(503) 555-1111"});
+  assert.equal(phone.status,201);
+  const {secret} = db.prepare("SELECT secret FROM zaylist_invite_deliveries WHERE entry_id=?").get(phone.body.entry.id) as {secret:string};
+  assert.equal((await request("/api/zaylist/invites/claim",12,"POST",{token:secret})).body.claimed,1);
+  assert.equal((await request("/api/zaylist/invites/claim",8,"POST",{token:secret})).status,409);
+  const search = await request("/api/events/10/zaylist/search?q=5035551111",1);
+  assert.equal(search.body.results[0].id,12);
+  assert.equal("email" in search.body.results[0],false);
+  await request(`/api/zaylist/entries/${phone.body.entry.id}/decline`,12,"POST");
+  const direct = await request("/api/events/10/zaylist/entries",1,"POST",{contact:"+1 503 555 1111"});
+  assert.equal(direct.body.entry.user_id,12);
+});
+
+test("drink privilege readback and access control survive refresh",async t => {
+  const {request,list,setConfig} = await setup(t);
+  await setConfig(1,3);
+  await request("/api/events/10/zaylist/allowances/3",1,"PUT",{role:"staff",spots:1});
+  await request("/api/events/10/zaylist/privileges/3",1,"PUT",{});
+  assert.equal((await list(1)).body.allowances[0].drinkPrivilege,1);
+  assert.equal((await list(3)).body.permissions.canGrantDrinks,true);
+  assert.equal((await list(3)).body.grants,undefined);
+  await request("/api/events/10/zaylist/privileges/3",1,"DELETE");
+  assert.equal((await list(1)).body.allowances[0].drinkPrivilege,0);
+  assert.equal((await list(3)).body.permissions.canGrantDrinks,false);
 });

@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import AuthModal from "@/components/AuthModal";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
@@ -14,6 +16,11 @@ import "@/components/zaylist/zaylist.css";
  */
 export default function HostHub() {
   const { user, loading } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
+  useEffect(() => {
+    const token = new URLSearchParams(location.hash.slice(1)).get("invite");
+    if (token && /^[A-Za-z0-9_-]{43}$/.test(token)) sessionStorage.setItem("guest-list-invitation",token);
+  }, []);
 
   const claimed = useQuery({
     queryKey: ["/api/events/mine/claimed"],
@@ -61,9 +68,8 @@ export default function HostHub() {
           <h1 className="zl-h1">Your hub</h1>
           <p className="zl-sub">Sign in to see your spots, your events, and your list.</p>
           <p>
-            <a className="zl-btn zl-btn--primary" href="/events">
-              Go to Events
-            </a>
+            <button className="zl-btn zl-btn--primary" onClick={() => setShowAuth(true)}>Sign in or join</button>
+            {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
           </p>
         </div>
       </div>

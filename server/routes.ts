@@ -1366,6 +1366,17 @@ export function registerRoutes(httpServer: Server, app: Express) {
   const eventPlanning = registerEventPlanning(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate);
   const zaylist = registerZaylist(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate);
   const boardSaves = createBoardSaves(sqlite);
+  const runGuestListJobs = async () => {
+    try {
+      zaylist.operations.dueDraws();
+      await zaylist.operations.deliverInvites();
+    } catch (error) { console.error("[guest-list] background work failed", error instanceof Error ? error.name : "error"); }
+  };
+  const guestListTimer = setInterval(runGuestListJobs, 60_000);
+  guestListTimer.unref();
+  httpServer.once("listening", runGuestListJobs);
+  httpServer.once("close", () => clearInterval(guestListTimer));
+
   assertProductionPersistence();
   assertProductionSecrets();
 
