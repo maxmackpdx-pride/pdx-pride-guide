@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { DEFAULT_ATTENDANCE_PHRASE_KEY, attendancePhraseLabel } from "@shared/attendancePhrases";
 import { RSVP_CHECKINS_KEY, RSVP_SUMMARIES_KEY, type CheckInRow } from "@/lib/optimisticCache";
 
+import {askAfterzConsent} from "@/components/afterz/NightConsent";
+
 export function useEventRsvp() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -40,6 +42,7 @@ export function useEventRsvp() {
           return nextGoing ? [...others, { eventId }] : others;
         });
       }
+      if(nextGoing && viewer.current===actor) askAfterzConsent(eventId,"rsvp");
       if(viewer.current===actor) toast({ title: nextGoing ? "Public attendance recorded" : "Attendance removed" });
     },
     onError: (_, {actor}) => {if(viewer.current===actor) toast({ title: "Attendance could not be updated", description: "Check your connection and try again.", variant: "destructive" });},

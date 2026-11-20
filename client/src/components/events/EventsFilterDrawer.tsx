@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
 import "./EventsFilterDrawer.css";
+import NightDrawer from "../afterz/NightDrawer";
 
 /** A date-window chip (All / Today / Tonight / This week / months…). */
 export type EventsFilterWindowChip = { key: string; label: string };
@@ -314,6 +315,7 @@ export default function EventsFilterDrawer({
       </button>
       <div className="edrawer__bodywrap" style={{ height: shownH }} inert={stage === 0 && dragH == null}>
         <div className="edrawer__stage1" ref={stage1Ref} hidden={showSchedule} inert={showSchedule}>
+          <NightDrawer/>
           <div className="edrawer__filters" role="group" aria-label="Filter the board">
             {WINDOWS.map(([value, label]) => (
               <button

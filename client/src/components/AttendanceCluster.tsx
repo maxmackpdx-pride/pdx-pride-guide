@@ -1,3 +1,4 @@
+import {askAfterzConsent} from "@/components/afterz/NightConsent";
 import { ArrowRight } from "lucide-react";
 import { Check } from "lucide-react";
 import { useState, useEffect, useRef, type CSSProperties } from "react";
@@ -135,6 +136,7 @@ export default function AttendanceCluster({
     onSuccess: (_data, variables) => {
       setShowForm(false);
       if (!pastEvent) {
+        askAfterzConsent(eventId,"checkin");
         setShowChat(true);
         setVisibility(variables.visibility);
       }

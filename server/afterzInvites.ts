@@ -7,7 +7,9 @@ import {
 } from "@shared/missedConnections";
 import { moderateFields, moderationMessage } from "@shared/contentModeration";
 
-type State = "pending" | "accepted" | "declined" | "revoked";
+import { afterzNights, type NightCatalog } from "./afterzNights";
+
+type State = "waitlisted" | "pending" | "accepted" | "declined" | "revoked";
 type Gathering = {
   id: string;
   hostId: number;
@@ -33,6 +35,7 @@ export function registerAfterzInvites(
   db: Database.Database,
   auth: RequestHandler,
   now = Date.now,
+  catalog?: NightCatalog,
 ) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS afterz_gatherings (
@@ -53,8 +56,10 @@ export function registerAfterzInvites(
     );
     CREATE INDEX IF NOT EXISTS idx_afterz_chat_history ON afterz_chat(gathering_id,id);
   `);
+  const nights = afterzNights(app, db, auth, now, catalog);
   // No dependency on the connection's foreign_keys setting for room erasure.
   const erase = db.transaction((id: string) => {
+    nights.erase(id);
     db.prepare("DELETE FROM afterz_chat WHERE gathering_id=?").run(id);
     db.prepare("DELETE FROM afterz_guests WHERE gathering_id=?").run(id);
     db.prepare("DELETE FROM afterz_gatherings WHERE id=?").run(id);
@@ -66,7 +71,7 @@ export function registerAfterzInvites(
       erase(id);
   };
   expire();
-  const expiry = setInterval(expire, 60_000);
+  const expiry = setInterval(() => { expire(); nights.remind(); }, 60_000);
   expiry.unref();
   const route = "/api/afterz/gatherings";
   const projection = `SELECT g.id,g.host_id AS hostId,g.title,g.closes_at AS closesAt,
@@ -160,16 +165,32 @@ export function registerAfterzInvites(
       )
       .get(userId, key) as { id: string } | undefined;
     if (existing) return res.json(existing);
+    const eventId = req.body?.eventId;
+    const date = req.body?.occurrence;
+    let closesAt = afterzClosesAt(now());
+    if (eventId != null) {
+      const event = Number.isSafeInteger(eventId) && catalog?.event(eventId);
+      const times = event && nights.timing(event, date);
+      const { capacity, poster, vibe } = req.body;
+      if (!times || !Number.isSafeInteger(capacity) || capacity < 1 || capacity > 500 ||
+        !["chill","party","social"].includes(vibe) || (poster != null && !/^\/uploads\/[\w.-]+\.(png|jpe?g|gif|webp)$/i.test(poster))) {
+        return res.status(400).json({error:"Choose an event within three days, a vibe, and 1–500 guest spots."});
+      }
+      closesAt = times.closesAt;
+    }
     const id = randomUUID();
-    db.prepare(
+    db.transaction(() => { db.prepare(
       "INSERT INTO afterz_gatherings(id,host_id,title,closes_at,request_key) VALUES(?,?,?,?,?)",
-    ).run(id, userId, title, afterzClosesAt(now()), key);
+    ).run(id, userId, title, closesAt, key);
+      if (eventId != null) nights.save(id,eventId,date,req.body);
+    })();
     res.status(201).json({ id });
   });
   const find: RequestHandler = (req, res, next) => {
     const g = room(String(req.params.id));
     const actor = liveUser(req.session?.userId);
-    if (!g || (actor && blocked(g.hostId, actor)))
+    const night = g && nights.get(g.id);
+    if (!g || (night && !nights.live(night)) || (actor && blocked(g.hostId, actor)))
       return res
         .status(404)
         .json({ error: "This gathering is closed or unavailable." });
@@ -206,8 +227,8 @@ export function registerAfterzInvites(
       role === "host"
         ? db
             .prepare(
-              `SELECT a.user_id AS userId,COALESCE(NULLIF(u.display_name,''),u.username) AS name,a.status
-      FROM afterz_guests a JOIN users u ON u.id=a.user_id WHERE a.gathering_id=? AND a.status IN ('pending','accepted') AND u.status='active' ORDER BY a.rowid`,
+              `SELECT a.user_id AS userId,COALESCE(NULLIF(u.display_name,''),u.username) AS name,a.status,EXISTS(SELECT 1 FROM afterz_seconds s WHERE s.gathering_id=a.gathering_id AND s.user_id=a.user_id) AS renewed
+      FROM afterz_guests a JOIN users u ON u.id=a.user_id WHERE a.gathering_id=? AND a.status IN ('waitlisted','pending','accepted') AND u.status='active' ORDER BY a.rowid`,
             )
             .all(g.id)
             .filter(
@@ -222,6 +243,7 @@ export function registerAfterzInvites(
       closesAt: g.closesAt,
       role,
       requests,
+      ...(nights.get(g.id) && {night: nights.get(g.id), renewed: !!db.prepare("SELECT 1 FROM afterz_seconds WHERE gathering_id=? AND user_id=?").get(g.id,who)}),
     });
   });
   app.post(route + "/:id/request", auth, find, (req, res) => {
@@ -238,10 +260,25 @@ export function registerAfterzInvites(
       return res
         .status(403)
         .json({ error: "The host has closed this request." });
+    const state = nights.full(g.id) ? "waitlisted" : "pending";
     db.prepare(
-      "INSERT OR IGNORE INTO afterz_guests(gathering_id,user_id,status) VALUES(?,?,'pending')",
-    ).run(g.id, who);
-    res.json({ status: previous ?? "pending" });
+      "INSERT OR IGNORE INTO afterz_guests(gathering_id,user_id,status) VALUES(?,?,?)",
+    ).run(g.id, who, state);
+    res.json({ status: previous ?? state });
+  });
+  app.post(route + "/:id/second", auth, find, (_req,res) => {
+    const { room:g,actor } = res.locals;
+    if(status(g.id,actor)!=="waitlisted") return res.status(409).json({error:"Only waitlisted guests can renew a request."});
+    db.prepare("INSERT OR IGNORE INTO afterz_seconds VALUES(?,?)").run(g.id,actor);
+    res.json({renewed:true});
+  });
+  app.post(route + "/:id/capacity", auth, find, host, (req,res)=>{
+    const capacity=req.body.capacity, id=res.locals.room.id;
+    if(!nights.get(id) || !Number.isInteger(capacity) || capacity<1 || capacity>500)
+      return res.status(400).json({error:"Choose 1–500 guest spots."});
+    const changed=db.prepare("UPDATE afterz_nights SET capacity=? WHERE gathering_id=? AND ? >= (SELECT COUNT(*) FROM afterz_guests WHERE gathering_id=? AND status='accepted')").run(capacity,id,capacity,id);
+    if(!changed.changes) return res.status(409).json({error:"Capacity must include confirmed guests."});
+    res.json({capacity});
   });
   app.post(route + "/:id/guests/:userId", auth, find, host, (req, res) => {
     const id = String(req.params.id),
@@ -255,18 +292,23 @@ export function registerAfterzInvites(
       return res.status(400).json({ error: "Guest unavailable." });
     const prev = status(id, who);
     if (prev === next) return res.json({ status: next });
-    if (next === "revoked" ? prev !== "accepted" : prev !== "pending")
+    if (next === "revoked" ? prev !== "accepted" : prev !== "pending" && prev !== "waitlisted")
       return res
         .status(409)
         .json({ error: "Guest status changed. Refresh the gathering." });
+    if (next === "accepted" && nights.full(id)) {
+      db.prepare("UPDATE afterz_guests SET status='waitlisted' WHERE gathering_id=? AND user_id=? AND status='pending'").run(id,who);
+      return res.status(409).json({error:"Room full. This guest is on the waitlist."});
+    }
     db.prepare(
       "UPDATE afterz_guests SET status=? WHERE gathering_id=? AND user_id=? AND status=?",
     ).run(next, id, who, prev);
+    if (next==="accepted" && nights.full(id)) db.prepare("UPDATE afterz_guests SET status='waitlisted' WHERE gathering_id=? AND status='pending'").run(id);
     res.json({ status: next });
   });
   app.post(route + "/:id/leave", auth, find, (_req, res) => {
     db.prepare(
-      "DELETE FROM afterz_guests WHERE gathering_id=? AND user_id=? AND status IN ('pending','accepted')",
+      "DELETE FROM afterz_guests WHERE gathering_id=? AND user_id=? AND status IN ('waitlisted','pending','accepted')",
     ).run(res.locals.room.id, res.locals.actor);
     res.json({ left: true });
   });

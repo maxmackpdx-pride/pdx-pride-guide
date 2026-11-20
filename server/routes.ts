@@ -1339,7 +1339,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.use("/api", sessionMiddleware);
   registerMapSocialRoutes(app,{db:sqlite,getUserById:id=>storage.getUserById(id)});
   registerDevicePushCheck(app,sqlite,requireAuth,storage);
-  const afterzInvites=registerAfterzInvites(app,sqlite,requireAuth);
+  const afterzInvites=registerAfterzInvites(app,sqlite,requireAuth,Date.now,{
+    events:()=>storage.getEvents({status:"LIVE"}).filter(isPublicEventVisibleUnderPrideCap),
+    event:id=>{const e=storage.getEvent(id);return e && isPublicEventVisibleUnderPrideCap(e) ? e : undefined;},
+    notify:(recipientIds,senderId,title,id)=>schedulePushForActivity({recipientIds,senderId,category:"my_events",title:"Your Afterz reminder",body:title,navigate:"/events?gathering="+encodeURIComponent(id),tag:"afterz-"+id}),
+  });
   httpServer.once("close",afterzInvites.dispose);
   const memberInbox=registerMemberInbox(app,sqlite,requireAuth,requireAdmin,requirePrimaryInboxOwner,()=>storage.resolveGuideAdminUser()?.id);
   function guideInboxUnread(reviewerId: number) {

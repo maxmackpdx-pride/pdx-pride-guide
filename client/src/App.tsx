@@ -109,6 +109,8 @@ function isProfilePath(path: string) {
   return path.split("?")[0].startsWith("/u/");
 }
 
+import NightConsent from "@/components/afterz/NightConsent";
+
 function AppLayout() {
   const [location] = useLocation();
   const pathname = location.split("?")[0];
@@ -136,6 +138,7 @@ function AppLayout() {
       style={{ background: "var(--z-black, #050506)" }}
     >
       {!roomShaderRoute && <SiteWallpaper />}
+      <NightConsent/>
       <InboxDailyReminder />
       {!unifiedMap && <PullToRefresh />}
       {!unifiedMap && <Nav />}
