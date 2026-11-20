@@ -1,4 +1,5 @@
-import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
+import type { CSSProperties } from 'react';
+import { useSegmentedControl } from './useSegmentedControl';
 import { MapPin, Layers, Mountain } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { motion, useReducedMotion } from 'motion/react';
@@ -14,7 +15,7 @@ const accentFor: Record<PlacesPageKey, string> = {
   scenez: 'var(--neon-red)',
   outzide: 'var(--neon-orange)',
 };
-const order: PlacesPageKey[] = ['placez', 'scenez', 'outzide'];
+const order: PlacesPageKey[] = ['scenez', 'placez', 'outzide'];
 /**
  * The shared Placez-family slider (Tucker, Nov 19 2026): one geometry on all
  * three pages, taken from OutZide's compact switch — same outer width
@@ -26,32 +27,26 @@ const order: PlacesPageKey[] = ['placez', 'scenez', 'outzide'];
 export default function PlacesPageSwitch({ active }: { active: PlacesPageKey; compact?: boolean }) {
   const reduced = useReducedMotion();
   const [, navigate] = useLocation();
-  const dragX = useRef<number | null>(null);
-  const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => { dragX.current = event.clientX; };
-  const onPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (dragX.current == null) return;
-    const dx = event.clientX - dragX.current;
-    dragX.current = null;
-    if (Math.abs(dx) < 48) return;
-    const index = order.indexOf(active);
-    const next = order[Math.max(0, Math.min(order.length - 1, index + (dx < 0 ? 1 : -1)))];
-    if (next !== active) navigate(hrefFor[next]);
-  };
+  const control = useSegmentedControl(order.indexOf(active), order.length, i => {
+    if (order[i] !== active) navigate(hrefFor[order[i]]);
+  });
   return (
     <nav
       className="places-page-switch places-page-switch--compact"
       aria-label="Explore places"
-      style={{ '--page-accent': accentFor[active] } as CSSProperties}
+      style={{ '--page-accent': accentFor[order[control.preview]] } as CSSProperties}
     >
-      <div onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
-        {PLACES_NAV.map(page => (
+      <div {...control.bindings}>
+        {order.map((key, index) => {
+          const page = PLACES_NAV.find(link => link.href === hrefFor[key])!;
+          return (
           <Link
             key={page.href}
             href={page.href}
             aria-current={hrefFor[active] === page.href ? 'page' : undefined}
             className={hrefFor[active] === page.href ? 'is-active' : ''}
           >
-            {hrefFor[active] === page.href && (
+            {control.preview === index && (
               <motion.span
                 className="places-page-switch__active"
                 layoutId="places-active-page"
@@ -63,7 +58,7 @@ export default function PlacesPageSwitch({ active }: { active: PlacesPageKey; co
               {page.label}
             </span>
           </Link>
-        ))}
+        ); })}
       </div>
     </nav>
   );

@@ -1,10 +1,11 @@
+import { useSegmentedControl } from './useSegmentedControl';
 import { useId, type CSSProperties } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import type { BrowseCardSize } from './CardBrowse';
 
 const OPTIONS = [
-  { id: 'small', label: 'Small cards' },
   { id: 'wide', label: 'Wide cards' },
+  { id: 'small', label: 'Small cards' },
 ] as const;
 
 /**
@@ -26,21 +27,23 @@ export default function CardSizeSlider({
 }) {
   const reduced = useReducedMotion();
   const thumbId = useId();
+  const control = useSegmentedControl(OPTIONS.findIndex(option => option.id === value), OPTIONS.length, i => onChange(OPTIONS[i].id));
   return (
     <div
       className="pz-size-slider"
       role="group"
+      {...control.bindings}
       aria-label="Card size"
       style={{ '--page-accent': accent } as CSSProperties}
     >
-      {OPTIONS.map(option => (
+      {OPTIONS.map((option, index) => (
         <button
           key={option.id}
           type="button"
           aria-pressed={value === option.id}
           onClick={() => onChange(option.id)}
         >
-          {value === option.id && (
+          {control.preview === index && (
             <motion.span
               className="pz-size-slider__thumb"
               layoutId={thumbId}
