@@ -562,7 +562,7 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
     url.searchParams.set("door", mode === "talk" ? "talk" : "find");
     if (categoryIds.length) url.searchParams.set("cat", categoryIds.join(","));
     if (searchQuery.trim()) url.searchParams.set("q", searchQuery.trim());
-    if (browseView !== "browse") url.searchParams.set("layout", browseView);
+    if (browseView !== "grid") url.searchParams.set("layout", browseView);
     window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
   }, [categoryIds, searchQuery, mode, browseView, embeddedDetail]);
   useEffect(() => {
