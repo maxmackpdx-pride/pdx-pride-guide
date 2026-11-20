@@ -3,7 +3,7 @@ import {useMapPlacezRenderer} from '@/components/placez/MapPlacezBridge';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import type {Event} from '@shared/schema';
 import type {Business} from '@/pages/Directory';
-import {mapBookmark} from '@/lib/mapBookmarks';
+import {canonicalBoardBookmark,mapBookmark} from '@/lib/mapBookmarks';
 const AfterzInvitations=lazy(()=>import("@/components/afterz/AfterzInvitations"));
 const EventCard=lazy(()=>import('@/components/events/EventzExpanded'));
 const PlaceModal=lazy(()=>import('@/components/PlaceModal'));
@@ -54,7 +54,10 @@ export default function UnifiedMap(){
    const params=new URLSearchParams(window.location.search);
    const shared=window.location.pathname.match(/^\/outzide\/share\/([^/]+)$/)?.[1];
    const bookmark=mapBookmark(params,initialMode());
-   if(bookmark.mode!==initialMode()){const url=new URL(window.location.href);url.searchParams.set('mode',bookmark.mode);window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);}
+   if(bookmark.mode==='boardz' && bookmark.selectedId && !params.has('item')){
+    const url=new URL(window.location.href);url.search=canonicalBoardBookmark(params,bookmark.selectedId).toString();
+    window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);
+   }else if(bookmark.mode!==initialMode()){const url=new URL(window.location.href);url.searchParams.set('mode',bookmark.mode);window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);}
    const result=module.mount(node.current,{initialMode:bookmark.mode,selectedId:shared?decodeURIComponent(shared):bookmark.selectedId,loginHref:'/map?mode=zaydark&auth=login',placezRenderer});
    cleanup=()=>result.unmount();
    window.dispatchEvent(new CustomEvent('zaylist:map-ready',{detail:{map:'unified',release:release.tag}}));

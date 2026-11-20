@@ -273,3 +273,7 @@ Tag `v1.0.35` points to `440827f756a7b63b4aedd669afb9f9eb5d87fbb9`. The producti
 PlaceZ opens at `/placez/map`. The map shows ride and invitation waypoints available to the signed-in member, opens native preview cards on selection, and supports opening and closing map controls on phones. Event interest uses the same heart service as the flyer board.
 
 The [packaging workflow](https://github.com/maxmackpdx-pride/zaylist-maps/actions/runs/44645824243) and [compiler workflow](https://github.com/maxmackpdx-pride/zaylist-maps/actions/runs/44645824328) passed for this tag.
+
+## v1.0.36 · Boardz bookmark fronts
+
+Opening a Boardz bookmark restores the same two-step card used by a map pin. The release passed 452 tests. Its [packaging workflow](https://github.com/maxmackpdx-pride/zaylist-maps/actions/runs/44648756330) and [compiler workflow](https://github.com/maxmackpdx-pride/zaylist-maps/actions/runs/44648756296) verified source `66b7a2982b8fa7bececb1359f83118e054365bf9`. The archive has SHA-256 `7ea7e4cb451ec0cde51998ca6b66c10de8fa693b4c0d1720f27cf1fd6cb09289`.

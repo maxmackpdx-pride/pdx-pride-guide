@@ -12,3 +12,11 @@ export function mapBookmark(params:URLSearchParams,mode:MapMode){
  }
  return {mode};
 }
+
+export function canonicalBoardBookmark(params:URLSearchParams,selectedId:string) {
+ const next=new URLSearchParams(params);
+ next.set('mode','boardz');
+ next.set('item',selectedId);
+ for(const key of [...Object.keys(boards),'board','post','layer'])next.delete(key);
+ return next;
+}
