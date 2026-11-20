@@ -7,7 +7,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { ArrowUpRight, ChevronLeft, ChevronRight, Clock3, MapPin, Share2, X } from "lucide-react";
-import type { Event } from "@shared/schema";
+import type { EventListing as Event } from "@shared/multiDayEvents";
 import { EVENT_TALENT_ROLE_COLORS, EVENT_TALENT_ROLE_LABELS, type EventTalentRow } from "@shared/eventTalent";
 import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { publicHttpUrl } from "@shared/safeHttpUrl";
@@ -243,7 +243,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
   // Posterless fallback flyer (Tucker, Nov 19, 2026): FetLife-sourced
   // events carry the FetLife mark; everything else carries the venue's
   // directory logo. Neither asset → the typographic face stays.
-  const isFetLife = detail?.sourcePlatform === "fetlife";
+  const isFetLife = (detail?.sourcePlatform ?? event.sourcePlatform) === "fetlife";
   const fallbackLogo = isFetLife ? null : resolveDirectoryLogo(event.venueName, venue?.imageUrl);
   const fallbackWordmark = isFetLife ? "FetLife" : null;
 
@@ -328,7 +328,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
           : (
             <>
               <span className="evz-x__flyer evz-x__flyer--none" aria-hidden="true" />
-              <PosterlessFlyer placeImageUrl={venue?.imageUrl} logoUrl={fallbackLogo} wordmark={fallbackWordmark} />
+              <PosterlessFlyer placeImageUrl={isFetLife ? null : venue?.imageUrl || event.fallbackPlaceImage} logoUrl={fallbackLogo} wordmark={fallbackWordmark} />
             </>
           )}
         <div className="evz-x__chrome">

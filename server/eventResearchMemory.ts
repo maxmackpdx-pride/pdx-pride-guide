@@ -821,6 +821,38 @@ export function listEventResearchChanges(limit = 100) {
   });
 }
 
+function firstReceiptUrl(raw: string): string | null {
+  let receipts: unknown;
+  try { receipts = JSON.parse(raw); } catch { return null; }
+  if (!Array.isArray(receipts)) return null;
+  for (const receipt of receipts) {
+    const url = safeResearchUrl(String(receipt?.sourceUrl || ""));
+    if (url) return url;
+  }
+  return null;
+}
+
+/** Resolve posterless listing attribution in one query before yielding a feed snapshot. */
+export function fetlifePosterlessEvents(ids: number[]): Set<number> {
+  const matches = new Set<number>();
+  if (!ids.length || !sqlite.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'agent_event_change_log'").get()) return matches;
+  const rows = sqlite.prepare(`
+    SELECT event_id, evidence_receipts_json FROM (
+      SELECT event_id, evidence_receipts_json, row_number() OVER (PARTITION BY event_id ORDER BY id DESC) AS rank
+      FROM agent_event_change_log WHERE rolled_back_at IS NULL AND event_id IN (SELECT value FROM json_each(?))
+    ) WHERE rank <= 25 ORDER BY event_id, rank
+  `).all(JSON.stringify(ids)) as Array<{ event_id: number; evidence_receipts_json: string }>;
+  const resolved = new Set<number>();
+  for (const row of rows) {
+    if (resolved.has(row.event_id)) continue;
+    const url = firstReceiptUrl(row.evidence_receipts_json);
+    if (!url) continue;
+    resolved.add(row.event_id);
+    if (/(^|\.)fetlife\.com$/i.test(new URL(url).hostname)) matches.add(row.event_id);
+  }
+  return matches;
+}
+
 /**
  * The most recent source URL recorded for an event, from the evidence
  * receipts QSearch attaches to every agent create/edit
@@ -839,13 +871,8 @@ export function getLatestEventSourceUrl(eventId: number): string | null {
       ORDER BY id DESC LIMIT 25
     `).all(eventId) as Array<{ evidence_receipts_json: string }>;
     for (const row of rows) {
-      let receipts: unknown;
-      try { receipts = JSON.parse(String(row.evidence_receipts_json || "[]")); } catch { continue; }
-      if (!Array.isArray(receipts)) continue;
-      for (const receipt of receipts) {
-        const url = safeResearchUrl(String((receipt as { sourceUrl?: unknown })?.sourceUrl || ""));
-        if (url) return url;
-      }
+      const url = firstReceiptUrl(row.evidence_receipts_json);
+      if (url) return url;
     }
   } catch { /* change log unavailable — no source trail for this event */ }
   return null;

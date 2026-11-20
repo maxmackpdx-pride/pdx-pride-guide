@@ -217,3 +217,23 @@ test('bounded same-dataset legacy/cached HTTP timings', { skip: process.env.EVEN
   assert.deepEqual(await(await fetch(base+'/test-only-legacy-events')).json(),await(await get()).json());
   t.diagnostic(JSON.stringify({legacy,cold,warm,page}));
 });
+
+
+test("posterless cards carry only the approved presentation data", async () => {
+  fixture();
+  const { getLatestEventSourceUrl } = await import("./eventResearchMemory");
+  getLatestEventSourceUrl(900021);
+  sqlite.prepare(`INSERT INTO agent_event_change_log
+    (rollback_token,operation,event_id,after_json,patch_json,evidence_receipts_json,reason,created_at)
+    VALUES ('fallback-source-test','change',900021,'{}','{}',?,'Test attribution',CURRENT_TIMESTAMP)`)
+    .run(JSON.stringify([{ sourceUrl: "https://fetlife.com/events/test-private-source" }]));
+  sqlite.prepare("UPDATE events SET poster_image_url = NULL WHERE id = 900021").run();
+  sqlite.prepare("UPDATE businesses SET image_url = '/uploads/test-place.jpg' WHERE name = 'Fixture Venue'").run();
+  const response = await get();
+  assert.equal(response.status, 200);
+  const body = await response.text();
+  const card = JSON.parse(body).find((item: { id: number }) => item.id === 900021);
+  assert.equal(card.sourcePlatform, "fetlife");
+  assert.equal(card.fallbackPlaceImage, "/uploads/test-place.jpg");
+  assert.ok(!body.includes("test-private-source"));
+});

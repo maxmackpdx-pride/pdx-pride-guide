@@ -285,6 +285,7 @@ export function PosterCell({
   const dateStr = dateStrOf(listing);
   const dayColor = dayColorVar(dateStr);
   const accent = listing.accentColor || dayColor;
+  const isFetLife = listing.sourcePlatform === "fetlife";
   const posterUrl = listingPosterUrl(listing);
   const [failedPoster, setFailedPoster] = useState<string>();
   const poster = posterUrl === failedPoster ? undefined : posterUrl;
@@ -390,7 +391,11 @@ export function PosterCell({
               }}
             />
           ) : null}
-          {!poster ? <PosterlessFlyer logoUrl={resolveDirectoryLogo(listing.venueName)} /> : null}
+          {!poster ? <PosterlessFlyer
+            placeImageUrl={isFetLife ? null : listing.fallbackPlaceImage}
+            logoUrl={isFetLife ? null : resolveDirectoryLogo(listing.venueName, listing.fallbackPlaceImage)}
+            wordmark={isFetLife ? "FetLife" : null}
+          /> : null}
           <button type="button" className="pshare" aria-label={`Share ${listing.title}`} onClick={share}>
             <ShareIcon />
           </button>

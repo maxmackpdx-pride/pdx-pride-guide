@@ -181,6 +181,7 @@ import {
   eventForResearchAgent,
   getEventResearchSourceMemory,
   getLatestEventSourcePlatform,
+  fetlifePosterlessEvents,
   getLatestEventSourceUrl,
   listEventResearchChanges,
   recordEventResearchPath,
@@ -1304,11 +1305,23 @@ export function registerPublicEventFeedRoute(app: Express, httpServer: Server) {
       names.push(row.role, row.username, row.displayName ?? "");
       searchTalent.set(row.eventId, names);
     }
+    const posterless = evts.filter(event => !event.posterImageUrl);
+    const fetlife = fetlifePosterlessEvents([...new Set(posterless.map(event => event.id))]);
+    const fallbackByVenue = new Map(posterless.map(event => [event.venueName, null as string | null]));
+    for (const name of fallbackByVenue.keys()) {
+      fallbackByVenue.set(name, matchVenueBusinessByName(name, mapBusinesses)?.imageUrl || null);
+    }
     const payload = [];
     // Coordinate enrichment is CPU work. Keep documents and asset requests
     // responsive while preserving this catalog snapshot and its row order.
     for (const evt of evts) {
-      payload.push({ ...publicEvent(evt, pendingClaimIds, websites,mapBusinesses), searchTalent: searchTalent.get(evt.id) ?? [] });
+      const event = publicEvent(evt, pendingClaimIds, websites, mapBusinesses);
+      const placeImage = !event.posterImageUrl && fallbackByVenue.get(evt.venueName);
+      payload.push({
+        ...event, searchTalent: searchTalent.get(evt.id) ?? [],
+        ...(placeImage ? { fallbackPlaceImage: placeImage } : {}),
+        ...(fetlife.has(evt.id) ? { sourcePlatform: "fetlife" } : {}),
+      });
       if (payload.length % 8 === 0) await new Promise<void>(resolve => setImmediate(resolve));
     }
     return payload;
