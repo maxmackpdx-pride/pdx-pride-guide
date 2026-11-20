@@ -11861,6 +11861,7 @@ export const storage: IStorage = {
       gigDate: data.gigDate ?? null,
       gigTime: data.gigTime ?? null,
       imageUrl: data.imageUrl ?? null,
+      updateOwner: Number(data.userId !== undefined),
       userId: data.userId ?? null,
     };
     sqlite.prepare(`
@@ -11878,7 +11879,7 @@ export const storage: IStorage = {
           gig_date = COALESCE(@gigDate, gig_date),
           gig_time = COALESCE(@gigTime, gig_time),
           image_url = COALESCE(@imageUrl, image_url),
-          user_id = COALESCE(@userId, user_id)
+          user_id = CASE WHEN @updateOwner THEN @userId ELSE user_id END
       WHERE id = @id
     `).run(params);
     return storage.getGigPosts().find(g => g.id === id);
