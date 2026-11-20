@@ -109,6 +109,7 @@ function isProfilePath(path: string) {
   return path.split("?")[0].startsWith("/u/");
 }
 
+import {RideCheckReminder} from "@/components/events/NightRideTools";
 import NightConsent from "@/components/afterz/NightConsent";
 
 function AppLayout() {
@@ -138,6 +139,7 @@ function AppLayout() {
       style={{ background: "var(--z-black, #050506)" }}
     >
       {!roomShaderRoute && <SiteWallpaper />}
+      <RideCheckReminder/>
       <NightConsent/>
       <InboxDailyReminder />
       {!unifiedMap && <PullToRefresh />}

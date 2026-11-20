@@ -1,0 +1,189 @@
+.at-event-dialog {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  background: var(--z-black);
+  color: var(--text-hi);
+  padding: 0;
+  border: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.at-event-poster {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-position: center;
+  background-size: cover;
+}
+.at-event-content {
+  position: relative;
+  width: min(100%, 42rem);
+  margin: auto;
+  padding: max(1rem, env(safe-area-inset-top)) 1rem
+    max(2rem, env(safe-area-inset-bottom));
+  display: grid;
+  gap: 1rem;
+}
+.at-event-content header h2 {
+  font-size: clamp(2rem, 8vw, 4rem);
+  line-height: 1.02;
+  font-weight: 900;
+}
+.at-event-content button,
+.at-event-content select,
+.at-event-content input:not([type="checkbox"]),
+.at-event-content a {
+  display: block;
+  min-height: 46px;
+  background: var(--ink-850);
+  color: inherit;
+  border: 1px solid color-mix(in srgb, var(--neon-orange) 40%, var(--text-mid));
+  border-radius: 8px;
+  padding: 0.55rem 0.85rem;
+}
+.at-event-content button,
+.at-event-content a {
+  font-weight: 700;
+}
+.at-event-content form,
+.at-event-content label,
+.night-ride-offer,
+.ride-safety form {
+  display: grid;
+  gap: 0.4rem;
+}
+.night-ride-offer input,
+.night-ride-offer select {
+  max-width: 100%;
+  color: white;
+  background: var(--ink-850);
+}
+.at-event-content label:has([type="checkbox"]) {
+  display: block;
+}
+.at-event-content section,
+.at-event-content li {
+  background: color-mix(in srgb, var(--ink-850) 86%, transparent);
+  border-radius: 14px;
+  padding: 0.8rem;
+}
+.ride-holo {
+  display: inline-grid;
+  justify-items: center;
+  gap: 2px;
+  vertical-align: middle;
+  margin-right: 0.65rem;
+  color: var(--neon-orange);
+}
+.ride-seat {
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  color: var(--z-black);
+  background: var(--text-hi);
+  text-align: center;
+  font-weight: 800;
+}
+.ride-car {
+  width: 32px;
+  height: 15px;
+  position: relative;
+  animation: car-orbit 5s infinite linear;
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 2px 5px var(--neon-orange));
+}
+.ride-car i,
+.ride-car b {
+  position: absolute;
+  background: var(--neon-orange);
+  border: 1px solid color-mix(in srgb, var(--neon-orange), var(--text-hi));
+}
+.ride-car i {
+  inset: 6px 0 2px;
+  border-radius: 5px;
+}
+.ride-car b {
+  inset: 1px 6px 7px;
+  border-radius: 5px 6px 0 0;
+  transform: translateZ(2px);
+}
+.ride-car em {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 2px solid var(--neon-orange);
+  background: var(--ink-850);
+  bottom: 0;
+  left: 3px;
+}
+.ride-car em:last-child {
+  left: auto;
+  right: 3px;
+}
+.ride-holo small {
+  font-size: 10px;
+  color: inherit;
+}
+.ride-faces {
+  display: flex;
+}
+.ride-faces span {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  background: color-mix(in srgb, var(--neon-orange) 15%, var(--ink-850));
+  border: 1px solid var(--neon-orange);
+  border-radius: 50%;
+  overflow: hidden;
+  font-size: 10px;
+}
+.ride-faces span + span {
+  margin-left: -5px;
+}
+.ride-faces img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ride-check-banner {
+  position: fixed;
+  top: max(6px, env(safe-area-inset-top));
+  right: 8px;
+  z-index: 11000;
+  background: var(--ink-850);
+  color: white;
+  border: 1px solid var(--neon-orange);
+  border-radius: 12px;
+  padding: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 96vw;
+}
+.ride-check-banner button,
+.ride-check-banner a {
+  padding: 0.4rem;
+  min-height: 44px;
+}
+.ride-safety summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 0.45rem 0;
+}
+@keyframes car-orbit {
+  to {
+    transform: rotateY(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ride-car {
+    animation: none;
+  }
+}

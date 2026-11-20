@@ -7,6 +7,7 @@ import {
   pacificCalendarDate,
   parsePacificDateTime,
 } from "@shared/missedConnections";
+import { registerNightRides, type RideNotice } from "./nightRides";
 import type { IStorage } from "./storage";
 
 export function createPlanningStore(db: Database.Database) {
@@ -172,6 +173,7 @@ export function registerEventPlanning(
     board: string,
     fields: Record<string, string>,
   ) => boolean,
+  notifyRiders?: RideNotice,
 ) {
   const store = createPlanningStore(db);
   function occurrence(id: number, date: unknown) {
@@ -183,7 +185,13 @@ export function registerEventPlanning(
     )
       return undefined;
     const event = storage.getEvent(id);
-    if (!event || event.status !== "LIVE" || !hasPublicEventFlags(event) || !visible(event)) return undefined;
+    if (
+      !event ||
+      event.status !== "LIVE" ||
+      !hasPublicEventFlags(event) ||
+      !visible(event)
+    )
+      return undefined;
     return expandMultiDayEvents([event]).find(
       (e) => pacificCalendarDate(e.dateStart) === date,
     );
@@ -203,6 +211,15 @@ export function registerEventPlanning(
       Date.now();
     next();
   };
+  const night = registerNightRides(
+    app,
+    db,
+    storage,
+    requireAuth,
+    scope,
+    path,
+    notifyRiders,
+  );
   app.get(path, scope, (req, res) => {
     const { event, date, open } = res.locals;
     const sessionId = req.session?.userId;
@@ -210,9 +227,38 @@ export function registerEventPlanning(
       sessionId && storage.getUserById(sessionId)?.status === "active"
         ? sessionId
         : undefined;
-    const rides = viewer ? store.rides(event.id, date, viewer) : null;
+    const rides = viewer
+      ? store.rides(event.id, date, viewer).flatMap((ride) => {
+          const meta = night.plan(ride.id),
+            offer = night.offer(ride.id);
+          if (!offer || !night.visible(offer, meta, viewer)) return [];
+          const joined = ride.mine || ride.myRequest === 1;
+          return [
+            {
+              ...ride,
+              plan: meta
+                ? {
+                    kind: meta.kind,
+                    meeting: meta.meeting,
+                    leaveBy: meta.leave_by,
+                    oneWay: !!meta.one_way,
+                    departed: !!meta.departed,
+                  }
+                : null,
+              faces: joined && meta ? night.peers(ride.id, viewer) : [],
+            },
+          ];
+        })
+      : null;
     res.json({
       title: event.title,
+      poster: event.posterImageUrl,
+      venue: event.venueName,
+      checked: viewer ? !!night.present(event.id, date, viewer) : false,
+      onSiteWindow:
+        (parsePacificDateTime(event.dateStart) ?? Infinity) - 30 * 60000 <=
+          Date.now() &&
+        (parsePacificDateTime(event.dateEnd) ?? 0) + 30 * 60000 > Date.now(),
       canPostGig: !!viewer && open && storage.isUserEventHost(event.id, viewer),
       open,
       gigs: store.gigs(event.id, date),
@@ -221,7 +267,13 @@ export function registerEventPlanning(
   });
   app.post(path + "/rides", requireAuth, scope, (req, res) => {
     const { event, date, open } = res.locals;
-    if (!open) {
+    if (
+      !open &&
+      !(
+        req.body.kind === "afterz" &&
+        (parsePacificDateTime(event.dateEnd) ?? 0) + 30 * 60_000 >= Date.now()
+      )
+    ) {
       res.status(409).json({ error: "This occurrence has passed" });
       return;
     }
@@ -239,8 +291,24 @@ export function registerEventPlanning(
         .json({ error: "Enter a departure neighborhood and 1–8 seats" });
       return;
     }
-    if (moderate(res, "Event carpool", { area })) return;
-    if (!store.offer(event.id, date, req.session.userId!, area, seats)) {
+    const user = req.session.userId!,
+      meta = night.parse(req.body, event, date, user);
+    if (typeof meta === "string") return res.status(400).json({ error: meta });
+    if (moderate(res, "Event carpool", { area, meeting: meta?.meeting ?? "" }))
+      return;
+    const added = db.transaction(() => {
+      if (!store.offer(event.id, date, user, area, seats)) return false;
+      if (meta) {
+        const row = db
+          .prepare(
+            "SELECT id FROM event_ride_offers WHERE event_id=? AND occurrence=? AND driver_id=?",
+          )
+          .get(event.id, date, user) as { id: number };
+        night.save(row.id, meta);
+      }
+      return true;
+    })();
+    if (!added) {
       res.status(409).json({ error: "You already have a ride offer here" });
       return;
     }
@@ -265,12 +333,36 @@ export function registerEventPlanning(
       res.status(404).json({ error: "Ride unavailable" });
       return;
     }
+    const offer = night.offer(ride),
+      meta = night.plan(ride);
+    if (!offer || !night.visible(offer, meta, req.session.userId!))
+      return res.status(404).json({ error: "Ride unavailable" });
+    if (
+      meta &&
+      (meta.departed || (meta.leave_by && meta.leave_by < Date.now())) &&
+      (req.method === "POST" || req.method === "PUT")
+    )
+      return res
+        .status(409)
+        .json({ error: "The ride has left or the leave-by time passed." });
+    if (
+      meta?.kind === "afterz" &&
+      (parsePacificDateTime(res.locals.event.dateEnd) ?? 0) + 30 * 60_000 >=
+        Date.now()
+    )
+      res.locals.open = true;
     res.locals.driver = row.driver_id;
     res.locals.ride = ride;
     next();
   };
   app.delete(ridePath, requireAuth, scope, rideScope, (req, res) => {
-    if (!store.cancel(res.locals.ride, req.session.userId!)) {
+    if (
+      !db.transaction(() => {
+        if (!store.cancel(res.locals.ride, req.session.userId!)) return false;
+        night.erase(res.locals.ride);
+        return true;
+      })()
+    ) {
       res.status(403).json({ error: "Only the driver can remove this offer" });
       return;
     }
@@ -339,6 +431,11 @@ export function registerEventPlanning(
     (req, res) => {
       if (
         !res.locals.open ||
+        !night.visible(
+          night.offer(res.locals.ride)!,
+          night.plan(res.locals.ride),
+          Number(req.params.rider),
+        ) ||
         !store.accept(
           res.locals.ride,
           Number(req.params.rider),
@@ -368,6 +465,7 @@ export function registerEventPlanning(
   });
   return {
     store,
+    night,
     occurrence,
     acceptsPlanning: (event: Event) =>
       (parsePacificDateTime(event.dateEnd || event.dateStart) ?? 0) >=

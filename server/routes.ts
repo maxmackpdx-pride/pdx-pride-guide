@@ -1363,7 +1363,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
   };
   registerProfileLayoutRoutes(app,requireAuth,profileLayouts,eligibleProfileSource);
   const eventSaves = createEventSaves(sqlite);
-  const eventPlanning = registerEventPlanning(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate);
+  const eventPlanning = registerEventPlanning(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate,
+    (recipientIds,senderId,title,body,navigate,tag)=>schedulePushForActivity({recipientIds,senderId,title,body,navigate,tag,category:"my_events"}));
   const zaylist = registerZaylist(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate);
   const boardSaves = createBoardSaves(sqlite);
   const runGuestListJobs = async () => {
