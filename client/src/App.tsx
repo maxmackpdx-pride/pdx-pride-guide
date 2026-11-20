@@ -1,5 +1,3 @@
-import { InboxDailyReminder } from "./components/inbox/InboxDailyReminder";
-
 import { boardBrowseHref } from "@/lib/boardBrowseHref";
 import type { BoardCategory } from "@/lib/allBoards";
 import MapWorldRedirect from "@/components/MapWorldRedirect";
@@ -9,7 +7,6 @@ import { Suspense, useEffect, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import BrowseScrollRestoration from "./components/BrowseScrollRestoration";
-import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./context/AuthContext";
 import { InboxSheetProvider } from "./context/InboxSheetContext";
 import { HubPanelProvider } from "./context/HubPanelContext";
@@ -17,18 +14,27 @@ import { ThemeProvider } from "./context/ThemeContext";
 import CalmAccountSync from "./components/CalmAccountSync";
 import Nav from "./components/Nav";
 import MobileBottomNav from "./components/MobileBottomNav";
-import PullToRefresh from "./components/PullToRefresh";
-import Footer from "./components/Footer";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { routeBoundaryKey } from "./lib/routeBoundaryKey";
-import PushNotificationPrompt from "./components/PushNotificationPrompt";
 import AnalyticsTracker from "./components/AnalyticsTracker";
-import PrideGlowNudge from "./components/PrideGlowNudge";
-import RiverBratsIntroPopup from "./components/river-brats/RiverBratsIntroPopup";
 import SpectrumLoader from "./components/SpectrumLoader";
 import MapBootLoader from "./components/MapBootLoader";
-import SiteWallpaper from "./components/wallpaper/SiteWallpaper";
+import DeferredMount from "./components/DeferredMount";
 import { lazyWithReload } from "./lib/lazyWithReload";
+
+// Shell furniture diet: everything below is code-split out of the entry
+// bundle. Prompts, nudges and reminders additionally mount only at browser
+// idle (DeferredMount), so they never compete with first paint or the
+// route's own data fetch. Gates and the toaster load immediately, just
+// asynchronously. Core chrome (Nav, MobileBottomNav, providers) stays static.
+const PullToRefresh = lazyWithReload(() => import("./components/PullToRefresh"));
+const Footer = lazyWithReload(() => import("./components/Footer"));
+const SiteWallpaper = lazyWithReload(() => import("./components/wallpaper/SiteWallpaper"));
+const RiverBratsIntroPopup = lazyWithReload(() => import("./components/river-brats/RiverBratsIntroPopup"));
+const PushNotificationPrompt = lazyWithReload(() => import("./components/PushNotificationPrompt"));
+const PrideGlowNudge = lazyWithReload(() => import("./components/PrideGlowNudge"));
+const Toaster = lazyWithReload(() => import("@/components/ui/toaster").then((m) => ({ default: m.Toaster })));
+const InboxDailyReminder = lazyWithReload(() => import("./components/inbox/InboxDailyReminder").then((m) => ({ default: m.InboxDailyReminder })));
 import { legacyOutzRedirect } from "@shared/outzRoutes";
 
 import { legacyPlacezMapRedirect } from "@shared/placezMapRoutes";
@@ -50,7 +56,11 @@ function RiverBratsIntroOnBeaches() {
   const [location] = useLocation();
   const path = location.split("?")[0] || "";
   if (!RIVER_BRATS_INTRO_PATHS.has(path)) return null;
-  return <RiverBratsIntroPopup />;
+  return (
+    <Suspense fallback={null}>
+      <RiverBratsIntroPopup />
+    </Suspense>
+  );
 }
 
 function RouteBoundary({ children }: { children: ReactNode }) {
@@ -62,9 +72,9 @@ function RouteBoundary({ children }: { children: ReactNode }) {
 
 
 import { LEGACY_Z_PRODUCT_REDIRECTS } from "@shared/zNamespace";
-import CommunityStandardsGate from "./components/CommunityStandardsGate";
-import SuspendedAccountGate from "./components/SuspendedAccountGate";
-import ResetPassword from "./pages/ResetPassword";
+const CommunityStandardsGate = lazyWithReload(() => import("./components/CommunityStandardsGate"));
+const SuspendedAccountGate = lazyWithReload(() => import("./components/SuspendedAccountGate"));
+const ResetPassword = lazyWithReload(() => import("./pages/ResetPassword"));
 
 const Events = lazyWithReload(() => import("./pages/Events"));
 const Home = lazyWithReload(() => import("./pages/Home"));
@@ -115,8 +125,8 @@ function isProfilePath(path: string) {
   return path.split("?")[0].startsWith("/u/");
 }
 
-import {RideCheckReminder} from "@/components/events/NightRideTools";
-import NightConsent from "@/components/afterz/NightConsent";
+const RideCheckReminder = lazyWithReload(() => import("@/components/events/NightRideTools").then((m) => ({ default: m.RideCheckReminder })));
+const NightConsent = lazyWithReload(() => import("@/components/afterz/NightConsent"));
 
 function AppLayout() {
   const [location] = useLocation();
@@ -144,11 +154,31 @@ function AppLayout() {
       className={`min-h-screen flex flex-col app-shell${hub ? " app-shell--hub" : ""}${profile ? " app-shell--profile" : ""}${livingMap ? " app-shell--mapz-demo" : ""}${mapSurface ? " app-shell--map-surface" : ""}${mobileFooter ? "" : " app-shell--no-mobile-footer"}`}
       style={{ background: "var(--z-black, #050506)" }}
     >
-      {!roomShaderRoute && <SiteWallpaper />}
-      <RideCheckReminder/>
-      <NightConsent/>
-      <InboxDailyReminder />
-      {!unifiedMap && <PullToRefresh />}
+      {!roomShaderRoute && (
+        <Suspense fallback={null}>
+          <SiteWallpaper />
+        </Suspense>
+      )}
+      <DeferredMount>
+        <Suspense fallback={null}>
+          <RideCheckReminder />
+        </Suspense>
+      </DeferredMount>
+      <DeferredMount>
+        <Suspense fallback={null}>
+          <NightConsent />
+        </Suspense>
+      </DeferredMount>
+      <DeferredMount>
+        <Suspense fallback={null}>
+          <InboxDailyReminder />
+        </Suspense>
+      </DeferredMount>
+      {!unifiedMap && (
+        <Suspense fallback={null}>
+          <PullToRefresh />
+        </Suspense>
+      )}
       {!unifiedMap && <Nav />}
       {!unifiedMap && location.split("?")[0] !== "/admin" && <MobileBottomNav />}
       <main className="flex-1">
@@ -286,7 +316,11 @@ function AppLayout() {
         </RouteBoundary>
       </main>
       {!hideFooter && <div className="site-pre-footer-edge" aria-hidden="true" />}
-      {!hideFooter && <Footer />}
+      {!hideFooter && (
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
+      )}
     </div>
   );
 }
@@ -316,18 +350,32 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <CalmAccountSync />
-          <PushNotificationPrompt />
-          <SuspendedAccountGate />
-          <CommunityStandardsGate />
+          <DeferredMount>
+            <Suspense fallback={null}>
+              <PushNotificationPrompt />
+            </Suspense>
+          </DeferredMount>
+          <Suspense fallback={null}>
+            <SuspendedAccountGate />
+          </Suspense>
+          <Suspense fallback={null}>
+            <CommunityStandardsGate />
+          </Suspense>
           <Router>
             <InboxSheetProvider>
               <HubPanelProvider>
               <BrowseScrollRestoration />
               <AnalyticsTracker />
-              <PrideGlowNudge />
+              <DeferredMount>
+                <Suspense fallback={null}>
+                  <PrideGlowNudge />
+                </Suspense>
+              </DeferredMount>
               <RiverBratsIntroOnBeaches />
               <AppLayout />
-              <Toaster />
+              <Suspense fallback={null}>
+                <Toaster />
+              </Suspense>
               </HubPanelProvider>
             </InboxSheetProvider>
           </Router>

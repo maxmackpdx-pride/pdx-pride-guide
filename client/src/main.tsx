@@ -13,7 +13,8 @@ import { installStaleAssetRecovery } from "./lib/lazyWithReload";
 import "./fonts.css";
 import "./index.css";
 import "./layout-end.css";
-import "@/components/hub/hub-shell.css";
+// hub-shell.css is imported by HubShell.tsx itself; importing it here too
+// forced 46KB of hub-only CSS into the entry bundle for every route.
 import "@/components/ds/tokens/index.css";
 import "@/components/ds/adapters/listing-card.css";
 import "./fluent2-m3-cards.css";

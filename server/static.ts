@@ -43,8 +43,9 @@ export function serveStatic(app: Express, distPath = path.resolve(__dirname, "pu
     if (hubPath === "/hub/help") {
       baseIndexHtml = baseIndexHtml.replace("</head>", '<link rel="preload" as="image" type="image/webp" href="/guides/zaylist-walkthrough-cover.webp" fetchpriority="high"></head>');
     }
-    if (mapEntry || hubPath === "/hub" || hubPath === "/hub/help") {
-      // These entries never display the homepage globe.
+    if (requestPath !== "/" && requestPath !== "/index.html") {
+      // Only the homepage displays the globe. Never preload its 271KB PNG on
+      // any other route, where it competes with the route's own first paint.
       baseIndexHtml=baseIndexHtml.replace(/<link[^>]*href="\/home-globe\/portland-city-beam-density\.png"[^>]*>/g, "");
     }
     if(mapEntry){
