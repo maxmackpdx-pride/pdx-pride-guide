@@ -2,7 +2,11 @@
 
 /* =====================================================================
    Placez-family chrome (Tucker, Nov 19 2026): ONE geometry on SceneZ,
-   Placez and Outzide, templated on OutZide's compact switch and body.
+   Placez, Outzide and Needz, templated on Tucker's Slider_Demo.html —
+   the slider spans the full content column (the same 22px inset as the
+   search row), 58px tall, with demo segments (dot + label). Each page's
+   hero gives its art the same 188px logo zone, so the slider lands at
+   the same Y on every page; only the accent color differs per page.
    --places-search-h / insets below are the shared chrome measurements.
    ===================================================================== */
 :root {
@@ -10,10 +14,12 @@
   --places-search-h: 52px;
 }
 
-/* ---- P1a: the slider. OutZide compact outer size on every page:
-   width 76% centered, track padding 2px, links min-height 44px
-   (outer height 50px), radius 28px track / 22px thumb. ---- */
-.places-page-switch { position: relative; z-index: 4; width: 76%; margin: 0 auto; padding: 0; display: flex; justify-content: center; }
+/* ---- P1a: the slider (Slider_Demo.html specimen 1): full content
+   column wide — margin-inline is the shared 22px chrome inset, so the
+   slider's edges align with the search row under it — track padding
+   4px, links min-height 48px (outer height 58px), pill track + thumb,
+   16px above (under the hero's logo zone) and 8px below. ---- */
+.places-page-switch { position: relative; z-index: 4; width: auto; margin: 16px var(--places-chrome-inline) 8px; padding: 0; display: flex; justify-content: center; }
 /* Subtle rainbow (Tucker, Nov 19 2026): the design guide's spectrum
    (--grad-rainbow, the hero-logo order) as a soft blurred glow feathering
    out under the slider track — no hard edges, no bars, just light. */
@@ -22,16 +28,19 @@
   border-radius: 999px; background: var(--grad-rainbow);
   filter: blur(16px); opacity: .16; z-index: -1; pointer-events: none;
 }
-.places-page-switch > div { display: flex; isolation: isolate; width: 100%; padding: 2px; border: var(--glass-card-neutral-border); border-radius: 28px; background: var(--glass-card-neutral-bg); box-shadow: var(--chrome-keyline), var(--chrome-bevel-dark), var(--chrome-floor); -webkit-backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation)); backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation)); touch-action: pan-y; }
-.places-page-switch a { position: relative; flex: 1; min-width: 0; min-height: 44px; box-sizing: border-box; display: grid; place-items: center; padding: 6px 3px; text-align: center; border-radius: 22px; color: var(--places-art-ink-b9bec8); font: 800 14px/1 var(--font-body); letter-spacing: .02em; text-transform: uppercase; text-decoration: none; }
-.places-page-switch a > span:last-child { position: relative; z-index: 1; display: flex; gap: 6px; align-items: center; justify-content: center; white-space: nowrap; }
-.places-page-switch a svg { width: 17px; height: 17px; flex: none; }
-.places-page-switch a.is-active { color: white; }
+.places-page-switch > div { display: flex; isolation: isolate; width: 100%; padding: 4px; border: var(--glass-card-neutral-border); border-radius: 999px; background: var(--glass-card-neutral-bg); box-shadow: var(--chrome-keyline), var(--chrome-bevel-dark), var(--chrome-floor); -webkit-backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation)); backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation)); touch-action: pan-y; }
+.places-page-switch a { position: relative; flex: 1; min-width: 0; min-height: 48px; box-sizing: border-box; display: grid; place-items: center; padding: 6px 3px; text-align: center; border-radius: 999px; color: var(--places-art-ink-b9bec8); font: 600 15.5px/1 var(--font-body); letter-spacing: .01em; text-decoration: none; }
+.places-page-switch a > span:last-child { position: relative; z-index: 1; display: flex; gap: 7px; align-items: center; justify-content: center; white-space: nowrap; }
+/* Demo segment dot: 7px, in the segment's OWN page color (--seg-c),
+   dimmed until its page is the active one. */
+.places-page-switch a .places-page-switch__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--seg-c, var(--text-hi)); box-shadow: 0 0 8px var(--seg-c, var(--text-hi)); opacity: .55; flex: none; transition: opacity .25s ease; }
+.places-page-switch a.is-active .places-page-switch__dot { opacity: 1; }
+.places-page-switch a.is-active { color: white; font-weight: 700; }
 /* Deep-glass thumb: transparent glass over the labels, 1px edge + bloom in
    the active page's token color (Placez card bloom recipe). The bloom
    properties transition so the color cross-fades while the thumb travels. */
 .places-page-switch__active {
-  position: absolute; inset: 0; border-radius: 22px;
+  position: absolute; inset: 0; border-radius: 999px;
   background: linear-gradient(165deg, color-mix(in srgb, var(--page-accent, var(--neon-orange)) 16%, transparent), color-mix(in srgb, var(--z-black) 42%, transparent));
   -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4);
   border: 1px solid color-mix(in srgb, var(--page-accent, var(--neon-orange)) 55%, var(--z-black));
@@ -40,21 +49,20 @@
 }
 @media (min-width: 600px) {
   .places-page-switch a { font-size: 20px; padding: 9px 4px; }
-  .places-page-switch a svg { width: 22px; height: 22px; }
 }
 @media (prefers-reduced-motion: reduce) { .places-page-switch__active { transition: none; } }
 
 /* Page-level switch containers: strip the old per-page sizing so the
    slider above is the only geometry. */
-.pl-page.pl-production .places-page-switch { max-width: none; margin: 18px auto; padding-inline: 0; }
-.scenez-native .places-page-switch { width: 76%; }
+.pl-page.pl-production .places-page-switch { max-width: none; margin: 16px var(--places-chrome-inline) 8px; padding-inline: 0; }
+.scenez-native .places-page-switch { width: auto; }
 
 /* ---- Shared chrome geometry: search, filters, discovery ----
    Heights, top offsets and side insets match OutZide's (.ol-body /
    .ol-search / .ol-filters) on all three pages. Zaylist Barlow
    (var(--font-body)) is the secondary font in these chrome spots. */
-.pl-page.pl-production .pl-body { padding: 22px var(--places-chrome-inline) 30px; }
-.scenez-native .new-scenez main.ns-body { padding: 22px var(--places-chrome-inline) 60px; }
+.pl-page.pl-production .pl-body { padding: 12px var(--places-chrome-inline) 30px; }
+.scenez-native .new-scenez main.ns-body { padding: 12px var(--places-chrome-inline) 60px; }
 
 .pl-page .pl-body .pl-search,
 .outz-native-page .ol-body .ol-search,
@@ -121,10 +129,13 @@
 /* ---- Card-size slider (in the drawer, at the start of the tags):
    the P1a slider recipe at 2 options — glass track, deep-glass thumb,
    accent edge + bloom, Barlow labels. ---- */
-.pz-size-slider { touch-action: pan-y; display: flex; isolation: isolate; width: 100%; box-sizing: border-box; padding: 2px; margin: 0 0 10px; border: var(--glass-card-neutral-border); border-radius: 28px; background: var(--glass-card-neutral-bg); box-shadow: var(--chrome-keyline), var(--chrome-bevel-dark), var(--chrome-floor); -webkit-backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation)); backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation)); }
-.pz-size-slider button { position: relative; flex: 1; min-width: 0; min-height: 44px; box-sizing: border-box; display: grid; place-items: center; padding: 6px 3px; border: 0; border-radius: 22px; background: transparent; color: var(--places-art-ink-b9bec8); font: 800 14px/1 var(--font-body); letter-spacing: .02em; text-transform: uppercase; cursor: pointer; }
-.pz-size-slider button[aria-pressed="true"] { color: white; }
-.pz-size-slider__thumb { position: absolute; inset: 0; border-radius: 22px; background: linear-gradient(165deg, color-mix(in srgb, var(--page-accent, var(--neon-cyan)) 16%, transparent), color-mix(in srgb, var(--z-black) 42%, transparent)); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4); border: 1px solid color-mix(in srgb, var(--page-accent, var(--neon-cyan)) 55%, var(--z-black)); box-shadow: 0 0 0 2px var(--z-black), 0 0 7px 1px color-mix(in srgb, var(--page-accent, var(--neon-cyan)) 36%, transparent), 0 0 14px color-mix(in srgb, var(--page-accent, var(--neon-cyan)) 16%, transparent); transition: border-color .45s ease, box-shadow .45s ease, background .45s ease; }
-.pz-size-slider__label { position: relative; z-index: 1; }
+.pz-size-slider { touch-action: pan-y; display: flex; isolation: isolate; width: 100%; box-sizing: border-box; padding: 4px; margin: 0 0 10px; border: var(--glass-card-neutral-border); border-radius: 999px; background: var(--glass-card-neutral-bg); box-shadow: var(--chrome-keyline), var(--chrome-bevel-dark), var(--chrome-floor); -webkit-backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation)); backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation)); }
+.pz-size-slider button { position: relative; flex: 1; min-width: 0; min-height: 48px; box-sizing: border-box; display: grid; place-items: center; padding: 6px 3px; border: 0; border-radius: 999px; background: transparent; color: var(--places-art-ink-b9bec8); font: 600 15.5px/1 var(--font-body); letter-spacing: .01em; cursor: pointer; }
+.pz-size-slider button[aria-pressed="true"] { color: white; font-weight: 700; }
+.pz-size-slider__thumb { position: absolute; inset: 0; border-radius: 999px; background: linear-gradient(165deg, color-mix(in srgb, var(--page-accent, var(--neon-cyan)) 16%, transparent), color-mix(in srgb, var(--z-black) 42%, transparent)); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4); border: 1px solid color-mix(in srgb, var(--page-accent, var(--neon-cyan)) 55%, var(--z-black)); box-shadow: 0 0 0 2px var(--z-black), 0 0 7px 1px color-mix(in srgb, var(--page-accent, var(--neon-cyan)) 36%, transparent), 0 0 14px color-mix(in srgb, var(--page-accent, var(--neon-cyan)) 16%, transparent); transition: border-color .45s ease, box-shadow .45s ease, background .45s ease; }
+.pz-size-slider__label { position: relative; z-index: 1; display: flex; gap: 7px; align-items: center; justify-content: center; white-space: nowrap; }
+/* Demo specimen 2: both card-size stops carry the white dot. */
+.pz-size-slider__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-hi); box-shadow: 0 0 8px var(--text-hi); opacity: .55; flex: none; transition: opacity .25s ease; }
+.pz-size-slider button[aria-pressed="true"] .pz-size-slider__dot { opacity: 1; }
 .pz-size-slider button:focus-visible { outline: 2px solid var(--page-accent, var(--neon-cyan)); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .pz-size-slider__thumb { transition: none; } }

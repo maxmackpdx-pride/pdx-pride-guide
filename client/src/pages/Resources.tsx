@@ -13,6 +13,7 @@ import type { CommunitySummary } from "@shared/community";
 import {resourceDetailSelection, type EmbeddedResourceDetail} from "@/lib/resourceDetailSelection";
 import { mergeCommunityResources } from "@/lib/communityResources";
 import OregonUrgentHelp from "@/components/resources/OregonUrgentHelp";
+import PlacesPageSwitch from "@/components/places/PlacesPageSwitch";
 import { ServiceNameMark } from "@/components/ServiceNameMark";
 import { serviceArtwork } from "@shared/serviceIdentity";
 import { BrowseHeader, BrowseControls, BrowseLane, type BrowseView } from "@/components/discovery/EventzBrowse";
@@ -640,6 +641,7 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
         <BoardShareButton title="NEEDZ" path="/needz" card={{ room: "NEEDZ", mark: "/brand/family/needz-mobile.webp?v=20261014-late-rent", line: "All the ways we show up." }} />
         <BoardFollowButton board="rezources" />
       </BrowseHeader>
+      <PlacesPageSwitch active="needz" />
       <NeedzDiscoveryIntro quiet={Boolean(quietMotion)} onChoose={id=>{setMode('directory');setBrowseView('grid');setSearchQuery('');setCategoryIds(id==='ALL'?[]:[id]);}} onTalk={()=>{setMode('talk');requestAnimationFrame(()=>document.getElementById('needz-results')?.scrollIntoView({behavior:quietMotion?'instant':'smooth'}));}} onSafety={()=>setSupportOpen(true)} />
       <div className="eb-frame" id="needz-results">
         <BrowseControls title="NEEDZ" categories={[{id:"ALL",label:"All resources",color:"var(--neon-cyan)",count:allRows.length}, ...CATEGORIES.map((c, i) => ({id:c.id,label:LABELS[i],color:c.color,count:allRows.filter(row => categoriesFor(row).some(category => category.id === c.id)).length}))]}

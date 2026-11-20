@@ -44,9 +44,9 @@ html:has(.outz-native-dialog[open]){scrollbar-gutter:auto;overflow:hidden}.outz-
    x=215..897, y=277..583: landscape and slogan only, excluding its baked UI. */
 .outz-native-page .ol-hero{position:relative;padding-top:8px}
 .outz-native-page .ol-full-logo{width:72%;margin-bottom:0}
-.outz-native-page .places-page-switch--compact{position:relative;top:auto;left:auto;width:76%;margin:0 auto 8px;z-index:3;padding:0}
-.outz-native-page .places-page-switch--compact>div{display:flex;padding:2px;border:var(--glass-card-neutral-border);border-radius:28px;background:var(--glass-card-neutral-bg);box-shadow:var(--chrome-keyline),var(--chrome-bevel-dark),var(--chrome-floor);-webkit-backdrop-filter:blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation));backdrop-filter:blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation))}
-.outz-native-page .places-page-switch--compact a{flex:1;min-width:0;padding:6px 3px;border-radius:22px;font:800 14px/1 var(--font-body);text-transform:uppercase;color:var(--ol-paper)}
+.outz-native-page .places-page-switch--compact{position:relative;top:auto;left:auto;width:auto;margin:16px var(--places-chrome-inline) 8px;z-index:3;padding:0}
+.outz-native-page .places-page-switch--compact>div{display:flex;padding:4px;border:var(--glass-card-neutral-border);border-radius:999px;background:var(--glass-card-neutral-bg);box-shadow:var(--chrome-keyline),var(--chrome-bevel-dark),var(--chrome-floor);-webkit-backdrop-filter:blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation));backdrop-filter:blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation))}
+.outz-native-page .places-page-switch--compact a{flex:1;min-width:0;padding:6px 3px;border-radius:999px}
 .outz-native-page .places-page-switch--compact a>span:last-child{display:flex;gap:6px;align-items:center;justify-content:center;white-space:nowrap;position:relative}
 .outz-native-page .places-page-switch--compact svg{width:17px;height:17px;flex:none}
 .outz-native-page .places-page-switch--compact a.is-active{color:white}

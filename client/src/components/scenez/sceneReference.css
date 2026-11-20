@@ -2,7 +2,7 @@
 .scenez-native .ns-reference-hero{height:clamp(360px,62vw,580px);min-height:0;padding:0;display:flex;flex-direction:column;justify-content:center;gap:0;background:transparent;border-top:1px solid var(--scene-lime)}
 .scenez-native .ns-reference-hero .ns-logo{position:relative;z-index:2;width:min(750px,90%);height:auto;overflow:visible;margin-top:9%;mix-blend-mode:screen}
 .scenez-native .ns-reference-hero .ns-logo img{display:block;width:100%}
-.scenez-native .ns-reference-hero>.places-page-switch{width:76%;max-width:none;padding:0;z-index:3}
+.scenez-native .ns-reference-hero>.places-page-switch{width:auto;max-width:none;padding:0;z-index:3}
 .scenez-native .new-scenez .ns-body{padding:24px 16px 70px}
 .scenez-native .ns-search{border:2px solid var(--scene-lime);border-radius:50px;background:var(--places-art-ink-070809);padding:7px 8px 7px 18px;min-height:52px}
 .scenez-native .ns-search>span{color:var(--places-art-ink-ffffff);display:grid;place-items:center;flex:none}
@@ -21,7 +21,13 @@
 @media(min-width:900px){.scenez-native .ns-reference-hero{height:500px}.scenez-native .ns-reference-hero .ns-logo{width:650px;margin-top:0}}
 /* Faithful photographic Xerox collage: replace lower-right record with pup-pride scrap.
    Art has no words or controls; approved logo and selector are independent above it. */
-.scenez-native .ns-xerox-hero{height:auto;aspect-ratio:1;min-height:0;max-height:720px;border:0;display:block;background:transparent}
-.scenez-native .ns-xerox-hero .ns-logo{position:absolute;top:35%;left:50%;transform:translateX(-50%);width:min(84%,690px);height:auto;margin:0}
-.scenez-native .ns-xerox-hero>.places-page-switch{position:absolute;top:62%;left:50%;transform:translateX(-50%);width:76%;max-width:570px}
-@media(min-width:900px){.scenez-native .ns-xerox-hero{height:650px;aspect-ratio:auto}.scenez-native .ns-xerox-hero .ns-logo{top:34%;width:620px}.scenez-native .ns-xerox-hero>.places-page-switch{top:62%}}
+/* Shared Placez-family frame (Tucker, Nov 19 2026 late): the square
+   xerox hero is retired — the wordmark sits in the same 188px logo zone
+   as Placez/Outzide under an 8px top pad, and the page slider flows
+   under it on the shared geometry, so SceneZ's stack matches the other
+   pages exactly. The collage treatment itself is unchanged. */
+.scenez-native .ns-xerox-hero{height:auto;aspect-ratio:auto;min-height:0;max-height:none;border:0;display:flex;flex-direction:column;justify-content:flex-start;padding-top:8px;background:transparent}
+.scenez-native .ns-xerox-hero .ns-logo{position:relative;top:auto;left:auto;transform:none;width:100%;height:188px;margin:0;display:flex;align-items:center;justify-content:center}
+.scenez-native .ns-xerox-hero .ns-logo img{width:min(84%,690px)}
+.scenez-native .ns-xerox-hero>.places-page-switch{position:static;top:auto;left:auto;transform:none;width:auto;max-width:none}
+@media(min-width:900px){.scenez-native .ns-xerox-hero{height:650px;aspect-ratio:auto;justify-content:center}.scenez-native .ns-xerox-hero .ns-logo{top:auto}}

@@ -50,7 +50,7 @@ export default function CardSizeSlider({
               transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 400, damping: 36 }}
             />
           )}
-          <span className="pz-size-slider__label">{option.label}</span>
+          <span className="pz-size-slider__label"><span className="pz-size-slider__dot" aria-hidden="true" />{option.label}</span>
         </button>
       ))}
     </div>

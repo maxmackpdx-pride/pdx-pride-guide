@@ -27,11 +27,25 @@ html body .room-shader-page > .room-shader-background:defined { background-image
 /* Portrait (phone) bands — featured fractions: eventz .682, placez .797,
    scenez .604, outzide .694. Landmarks (Discover / first-section card
    bottoms + ~17px, x1.3): eventz 627, placez 1405, scenez 1348,
-   outzide 793. */
+   outzide 793. SceneZ's 1150px band is the late-Nov-19 exception below:
+   Tucker directed its art back to the top of the page. */
 html body .room-shader-page > .room-shader-background[room="eventz"] { height: 876px; }
 html body .room-shader-page > .room-shader-background[room="placez"] { height: 1679px; }
-html body .room-shader-page > .room-shader-background[room="scenez"] { height: 2126px; }
+html body .room-shader-page > .room-shader-background[room="scenez"] { height: 1150px; }
 html body .room-shader-page > .room-shader-background[room="outzide"] { height: 1088px; }
+/* Tucker, Nov 19 2026 (late): SceneZ back to the top + zoom out ~5%,
+   Outzide zoom out ~5% and stay at the top, Placez zoom out ~15% and
+   stay at the top. SceneZ: its featured art sits low in the texture
+   (heart at v~.31) and the old 2126px band sampled only the top 41% of
+   the texture, stranding the art at the bottom of the screen; the
+   1150px band samples the top 76%, so the art reads at the top again,
+   and scale(1) is the ~5% zoom-out from the shared 1.05. Outzide:
+   scale(1). Placez: scale(.89) on a 112.4%-wide band centered via
+   left -6.2%, so the ~15% zoom-out shows no side bars. Eventz keeps
+   the shared scale(1.05). */
+html body .room-shader-page > .room-shader-background[room="scenez"] { transform: scale(1); }
+html body .room-shader-page > .room-shader-background[room="outzide"] { transform: scale(1); }
+html body .room-shader-page > .room-shader-background[room="placez"] { transform: scale(.89); width: 112.4%; left: -6.2%; }
 html body .room-shader-page > header,
 html body .room-shader-page > .pl-body,
 html body .room-shader-page > .new-scenez,
@@ -45,7 +59,10 @@ html body .room-shader-page .pl-centered-hero__art {
   width: min(76vw, 760px);
   height: auto;
   object-fit: contain;
-  margin: 64px auto 32px;
+  /* Shared Placez-family frame (Nov 19, 2026 late): the art sits in the
+     same 188px logo zone as SceneZ/Outzide — 8px above, 8px below its
+     172px height — under the hero's 8px top pad. */
+  margin: 8px auto;
 }
 
 /* Shader pages sit on pure black all the way out — the page backdrop

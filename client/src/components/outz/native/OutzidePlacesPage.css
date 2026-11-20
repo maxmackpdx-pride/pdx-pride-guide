@@ -28,7 +28,7 @@ main.outz-landing{padding:0;width:min(100%,720px)}
 .ol-nav{height:64px;padding:0 24px}
 .ol-nav b{font-size:34px}.ol-nav a{font-size:28px}
 .ol-hero{padding-top:7px;position:relative}
-.ol-full-logo{width:72%;height:auto;aspect-ratio:1773/501;position:relative;z-index:1;margin:0 auto 5px}
+.ol-full-logo{width:72%;height:188px;aspect-ratio:1773/501;position:relative;z-index:1;margin:0 auto 5px}
 .ol-tabs{width:76%;border-width:2px;box-shadow:none;border-color:var(--places-art-ink-eee8d7)}
 .ol-tabs>*{font-size:clamp(16px,3.8vw,27px);padding:10px 6px}
 .ol-tabs span{border-width:2px;margin:-2px;box-shadow:none}

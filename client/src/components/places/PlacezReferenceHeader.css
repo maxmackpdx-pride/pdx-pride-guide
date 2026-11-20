@@ -1,5 +1,5 @@
 /* Reference-faithful header only. Does not alter card sizes, feeds or filters. */
-.pl-production .pl-hero{max-width:1200px;isolation:isolate;padding-top:0;overflow:hidden}
+.pl-production .pl-hero{max-width:1200px;isolation:isolate;padding-top:8px;overflow:hidden}
 /* The page switch is NOT restyled here: it renders the shared Placez-family
    slider from placesShared.css (OutZide geometry) like the other two pages.
    (Chrome unification fix, Nov 19 2026.) */
@@ -50,6 +50,6 @@
 
 
 /* Selected direction 2: original zine artwork, centered composition. */
-.pl-production .pl-centered-hero{display:flex;flex-direction:column;max-width:1200px;padding:0;overflow:visible}
+.pl-production .pl-centered-hero{display:flex;flex-direction:column;max-width:1200px;padding:8px 0 0;overflow:visible}
 .pl-production .pl-centered-hero__art{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:1672/941;object-fit:contain;position:relative;z-index:1}
 @media(max-width:600px){.pl-production .pl-centered-hero__art{width:100%;height:auto;max-height:none;object-fit:contain}}
