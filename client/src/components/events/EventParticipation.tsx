@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart } from "lucide-react";
+import { CalendarCheck, CalendarPlus, Heart } from "lucide-react";
 import AuthModal from "@/components/AuthModal";
 import { useAuth } from "@/context/AuthContext";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
@@ -23,8 +23,12 @@ export function EventPrivateSaveButton({ eventId, poster = false }: { eventId: n
   const saved = saves.savedIds.has(eventId);
   return <>
     <button type="button" className={poster ? "osave" : "evz-x__savet"} aria-pressed={saved}
+      aria-label={poster ? (saves.pending ? "Saving" : saves.error ? "Retry private saves" : saved ? "Saved privately · Remove from My Schedule" : "Save privately to My Schedule") : undefined}
       disabled={saves.loading || saves.pending} onClick={() => !user ? setAuth(true) : saves.error ? void saves.retry() : saves.toggleSave(eventId)}>
-      {saves.pending ? "Saving…" : saves.error ? "Retry private saves" : saved ? "Saved privately · Remove" : "Save privately to My Schedule"}
+      {poster ? <>
+        {saved ? <CalendarCheck size={19} aria-hidden="true" /> : <CalendarPlus size={19} aria-hidden="true" />}
+        <span>{saves.pending ? "Saving…" : saves.error ? "Retry save" : saved ? "On my schedule" : "Add to schedule"}</span>
+      </> : saves.pending ? "Saving…" : saves.error ? "Retry private saves" : saved ? "Saved privately · Remove" : "Save privately to My Schedule"}
     </button>
     {auth && <AuthModal onClose={() => setAuth(false)} />}
   </>;
