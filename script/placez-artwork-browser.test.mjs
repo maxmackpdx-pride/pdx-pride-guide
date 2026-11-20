@@ -51,7 +51,7 @@ test('Places preserve clear artwork and opposite-depth parallax across sizes and
    plugins:[react(),{name:'placez-artwork-fixture',configureServer(s){s.middlewares.use(async(req,res,next)=>{
     if(!req.url?.startsWith('/__placez-artwork'))return next();
     res.setHeader('Content-Type','text/html');
-    res.end(await s.transformIndexHtml(req.url,`<!doctype html><html data-zaylist-cards="true"><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{margin:12px!important}h1{font:16px sans-serif;margin:0 0 24px}#qa-card{position:relative;max-width:100%}</style></head><body><div id="root"></div><script type="module" src="/${fixture}"></script></body></html>`));
+    res.end(await s.transformIndexHtml(req.url,`<!doctype html><html data-zaylist-cards="true"><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{margin:0!important}#root{width:auto;margin:12px}h1{font:16px sans-serif;margin:0 0 24px}#qa-card{position:relative;max-width:100%}</style></head><body><div id="root"></div><script type="module" src="/${fixture}"></script></body></html>`));
    });}}],resolve:{alias:{'@':path.join(root,'client/src'),'@shared':path.join(root,'shared'),'@assets':path.join(root,'attached_assets')}},
    server:{host:'127.0.0.1',port:0,hmr:false,watch:null},
    define:{__OUTZIDE_ASSETS__:JSON.stringify({script:'/outzide-map/app.js',maplibre:'/home-flight/vendor/maplibre-gl-5.6.2.js',maplibreCss:'/home-flight/vendor/maplibre-gl-5.6.2.css'}),__MAPZ_ASSETS__:'{}',__HOME_FLIGHT_BASE__:JSON.stringify('/home-flight')}});
