@@ -1,3 +1,4 @@
+import { createHash, randomUUID } from "node:crypto";
 import { hasRegistrationOnlyLocation } from "@shared/registrationOnlyVenue";
 import type Database from "better-sqlite3";
 import type { Express, RequestHandler } from "express";
@@ -38,6 +39,8 @@ type Offer = {
   occurrence: string;
 };
 const minute = 60_000;
+const sessionReference = (sessionId: string) =>
+  createHash("sha256").update(sessionId).digest("hex");
 const coordsValid = (lat: unknown, lng: unknown) =>
   typeof lat === "number" &&
   Number.isFinite(lat) &&
@@ -60,6 +63,13 @@ export function registerNightRides(
       kind TEXT NOT NULL,meeting TEXT NOT NULL,leave_by INTEGER,one_way INTEGER NOT NULL,gathering TEXT,departed INTEGER);
     CREATE TABLE IF NOT EXISTS night_venue_presence(event_id INTEGER NOT NULL,occurrence TEXT NOT NULL,user_id INTEGER NOT NULL,
       checked_at INTEGER NOT NULL,home_area TEXT NOT NULL,PRIMARY KEY(event_id,occurrence,user_id));
+    CREATE TABLE IF NOT EXISTS night_foreground_checks(event_id INTEGER NOT NULL,occurrence TEXT NOT NULL,user_id INTEGER NOT NULL,
+      lease TEXT NOT NULL,session_ref TEXT NOT NULL,expires_at INTEGER NOT NULL,checked_at INTEGER,home_area TEXT NOT NULL,PRIMARY KEY(event_id,occurrence,user_id));
+    CREATE VIEW IF NOT EXISTS night_matching_presence AS
+      SELECT event_id,occurrence,user_id,home_area,checked_at,checked_at+1800000 AS valid_until FROM night_venue_presence
+      UNION ALL
+      SELECT event_id,occurrence,user_id,home_area,checked_at,MIN(expires_at,checked_at+90000) AS valid_until
+      FROM night_foreground_checks WHERE checked_at IS NOT NULL;
     CREATE TABLE IF NOT EXISTS night_ride_notices(offer_id INTEGER NOT NULL,user_id INTEGER NOT NULL,PRIMARY KEY(offer_id,user_id));
     CREATE TABLE IF NOT EXISTS night_ride_watches(offer_id INTEGER NOT NULL,user_id INTEGER NOT NULL,contact_id INTEGER NOT NULL,
       due_at INTEGER NOT NULL,stage INTEGER NOT NULL DEFAULT 0,next_at INTEGER NOT NULL,lat REAL,lng REAL,located_at INTEGER,PRIMARY KEY(offer_id,user_id));
@@ -79,11 +89,9 @@ export function registerNightRides(
   const present = (eventId: number, date: string, user: number) =>
     db
       .prepare(
-        "SELECT home_area AS area FROM night_venue_presence WHERE event_id=? AND occurrence=? AND user_id=? AND checked_at>?",
+        "SELECT home_area AS area FROM night_matching_presence WHERE event_id=? AND occurrence=? AND user_id=? AND valid_until>? ORDER BY checked_at DESC LIMIT 1",
       )
-      .get(eventId, date, user, Date.now() - 30 * minute) as
-      | { area: string }
-      | undefined;
+      .get(eventId, date, user, Date.now()) as { area: string } | undefined;
   const afterzMember = (
     gathering: string,
     eventId: number,
@@ -140,16 +148,12 @@ export function registerNightRides(
         continue;
       const candidates = db
         .prepare(
-          `SELECT p.user_id FROM night_venue_presence p JOIN users u ON u.id=p.user_id AND u.status='active'
-        WHERE p.event_id=? AND p.occurrence=? AND p.user_id<>? AND p.checked_at>? AND NOT EXISTS(SELECT 1 FROM night_ride_notices n WHERE n.offer_id=? AND n.user_id=p.user_id)`,
+          `SELECT DISTINCT p.user_id FROM night_matching_presence p JOIN users u ON u.id=p.user_id AND u.status='active'
+        WHERE p.event_id=? AND p.occurrence=? AND p.user_id<>? AND p.valid_until>? AND NOT EXISTS(SELECT 1 FROM night_ride_notices n WHERE n.offer_id=? AND n.user_id=p.user_id)`,
         )
-        .all(
-          o.event_id,
-          o.occurrence,
-          o.driver_id,
-          Date.now() - 30 * minute,
-          o.id,
-        ) as { user_id: number }[];
+        .all(o.event_id, o.occurrence, o.driver_id, Date.now(), o.id) as {
+        user_id: number;
+      }[];
       const ids = candidates
         .map((c) => c.user_id)
         .filter(
@@ -253,6 +257,9 @@ export function registerNightRides(
         })();
       }
     }
+    db.prepare("DELETE FROM night_foreground_checks WHERE expires_at<=?").run(
+      now,
+    );
     db.prepare("DELETE FROM night_venue_presence WHERE checked_at<=?").run(
       now - 30 * minute,
     );
@@ -269,36 +276,119 @@ export function registerNightRides(
     }, 30_000);
     timer.unref();
   }
-  app.post(path + "/presence", auth, scope, (req, res) => {
-    const e = res.locals.event as Event,
-      viewer = req.session.userId!,
-      { lat, lng, accuracy, area } = req.body;
-    const now = Date.now(),
-      start = parsePacificDateTime(e.dateStart),
-      end = parsePacificDateTime(e.dateEnd);
-    if (e.isHouseParty || hasRegistrationOnlyLocation(e))
-      return res
+  const clearManual = db.prepare(
+    "DELETE FROM night_venue_presence WHERE event_id=? AND occurrence=? AND user_id=?",
+  );
+  const clearForeground = db.prepare(
+    "DELETE FROM night_foreground_checks WHERE event_id=? AND occurrence=? AND user_id=?",
+  );
+  const allowCheck: RequestHandler = (req, res, next) => {
+    const event = res.locals.event as Event;
+    const now = Date.now();
+    const start = parsePacificDateTime(event.dateStart);
+    const end = parsePacificDateTime(event.dateEnd);
+    if (
+      event.isHouseParty ||
+      hasRegistrationOnlyLocation(event) ||
+      !coordsValid(event.lat, event.lng)
+    )
+      return void res
         .status(409)
         .json({ error: "GPS check-in is unavailable for this event." });
     if (
       start == null ||
       end == null ||
       now < start - 30 * minute ||
-      now > end + 30 * minute ||
-      !attendance(e.id, viewer)
+      now >= end + 30 * minute ||
+      !attendance(event.id, req.session.userId!)
     )
-      return res
+      return void res
         .status(409)
         .json({ error: "RSVP and check in during this event." });
-    if (
-      !coordsValid(lat, lng) ||
-      !coordsValid(e.lat, e.lng) ||
-      typeof accuracy !== "number" ||
-      !Number.isFinite(accuracy) ||
-      accuracy < 0 ||
-      accuracy > 150 ||
-      haversineMeters({ lat, lng }, { lat: e.lat!, lng: e.lng! }) > 250
-    )
+    res.locals.checkUntil = Math.min(end + 30 * minute, now + 60 * minute);
+    next();
+  };
+  app.post(
+    path + "/presence/foreground",
+    auth,
+    scope,
+    allowCheck,
+    (req, res) => {
+      const { area, consent } = req.body;
+      if (consent !== true || typeof area !== "string" || area.length > 80)
+        return res
+          .status(400)
+          .json({ error: "Choose automatic check-in for this event." });
+      const eventId = res.locals.event.id,
+        date = res.locals.date,
+        user = req.session.userId!;
+      const lease = randomUUID(),
+        expiresAt = res.locals.checkUntil;
+      db.transaction(() => {
+        clearManual.run(eventId, date, user);
+        db.prepare(
+          `INSERT INTO night_foreground_checks(event_id,occurrence,user_id,lease,session_ref,expires_at,home_area)
+        VALUES(?,?,?,?,?,?,?) ON CONFLICT(event_id,occurrence,user_id)
+        DO UPDATE SET lease=excluded.lease,session_ref=excluded.session_ref,expires_at=excluded.expires_at,checked_at=NULL,home_area=excluded.home_area`,
+        ).run(
+          eventId,
+          date,
+          user,
+          lease,
+          sessionReference(req.sessionID),
+          expiresAt,
+          area.trim(),
+        );
+      })();
+      res.json({ lease, expiresAt });
+    },
+  );
+  app.delete(path + "/presence/foreground/:lease", auth, (req, res) => {
+    // Revocation is allowed even if this event subsequently becomes private.
+    db.prepare(
+      "DELETE FROM night_foreground_checks WHERE lease=? AND user_id=? AND session_ref=?",
+    ).run(
+      req.params.lease,
+      req.session.userId!,
+      sessionReference(req.sessionID),
+    );
+    res.json({ removed: true });
+  });
+  app.post(path + "/presence", auth, scope, allowCheck, (req, res) => {
+    const event = res.locals.event as Event,
+      date = res.locals.date,
+      user = req.session.userId!;
+    const { lat, lng, accuracy, area, lease } = req.body;
+    const now = Date.now();
+    const near =
+      coordsValid(lat, lng) &&
+      typeof accuracy === "number" &&
+      Number.isFinite(accuracy) &&
+      accuracy >= 0 &&
+      accuracy <= 150 &&
+      haversineMeters({ lat, lng }, { lat: event.lat!, lng: event.lng! }) <=
+        250;
+    if (lease !== undefined) {
+      if (typeof lease !== "string") return res.sendStatus(400);
+      const check = db
+        .prepare(
+          `UPDATE night_foreground_checks SET checked_at=?
+        WHERE event_id=? AND occurrence=? AND user_id=? AND lease=? AND session_ref=? AND expires_at>?`,
+        )
+        .run(
+          near ? now : null,
+          event.id,
+          date,
+          user,
+          lease,
+          sessionReference(req.sessionID),
+          now,
+        );
+      if (!check.changes)
+        return res.status(410).json({ error: "Automatic check-in has ended." });
+      return res.json({ near });
+    }
+    if (!near)
       return res
         .status(400)
         .json({ error: "An accurate location near the venue is needed." });
@@ -306,15 +396,19 @@ export function registerNightRides(
       return res
         .status(400)
         .json({ error: "Enter your destination neighborhood." });
-    db.prepare(
-      "INSERT INTO night_venue_presence VALUES(?,?,?,?,?) ON CONFLICT(event_id,occurrence,user_id) DO UPDATE SET checked_at=excluded.checked_at,home_area=excluded.home_area",
-    ).run(e.id, res.locals.date, viewer, now, area.trim());
+    db.transaction(() => {
+      clearForeground.run(event.id, date, user);
+      db.prepare(
+        `INSERT INTO night_venue_presence VALUES(?,?,?,?,?) ON CONFLICT(event_id,occurrence,user_id)
+        DO UPDATE SET checked_at=excluded.checked_at,home_area=excluded.home_area`,
+      ).run(event.id, date, user, now, area.trim());
+    })();
     res.json({ expiresAt: now + 30 * minute });
   });
   app.delete(path + "/presence", auth, scope, (req, res) => {
-    db.prepare(
-      "DELETE FROM night_venue_presence WHERE event_id=? AND occurrence=? AND user_id=?",
-    ).run(res.locals.event.id, res.locals.date, req.session.userId!);
+    const args = [res.locals.event.id, res.locals.date, req.session.userId!];
+    clearManual.run(...args);
+    clearForeground.run(...args);
     res.json({ removed: true });
   });
   const ridePath = path + "/rides/:ride";
@@ -472,6 +566,12 @@ export function registerNightRides(
   });
   return {
     dispose: () => clearInterval(timer),
+    endForegroundChecks: (userId: number, sessionId: string) =>
+      db
+        .prepare(
+          "DELETE FROM night_foreground_checks WHERE user_id=? AND session_ref=?",
+        )
+        .run(userId, sessionReference(sessionId)),
     announce,
     watches,
     present,

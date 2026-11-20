@@ -46,6 +46,7 @@ test("ride-home checks attendance, destination, party size, capacity, contact co
       inbox.push(body),
   } as unknown as IStorage;
   app.use(express.json(), (req, _res, next) => {
+    req.sessionID = "browser-" + req.get("u");
     req.session = { userId: Number(req.get("u")) } as typeof req.session;
     next();
   });
@@ -97,6 +98,103 @@ test("ride-home checks attendance, destination, party size, capacity, contact co
       })
     ).status,
     400,
+  );
+  const foreground = base + "/presence/foreground";
+  const here = { lat: 45.5, lng: -122.6, accuracy: 10 };
+  assert.equal(
+    (await call(foreground, 1, "POST", { area: "Kerns" })).status,
+    400,
+  );
+  assert.equal(
+    (await call(foreground, 4, "POST", { area: "Kerns", consent: true }))
+      .status,
+    409,
+  );
+  const start = async () =>
+    (
+      await (
+        await call(foreground, 1, "POST", { area: "Kerns", consent: true })
+      ).json()
+    ).lease as string;
+  const lease = await start();
+  assert.equal(night.present(10, date!, 1), undefined);
+  assert.deepEqual(
+    await (
+      await call(base + "/presence", 1, "POST", { ...here, lease })
+    ).json(),
+    { near: true },
+  );
+  assert.equal(night.present(10, date!, 1)?.area, "Kerns");
+  db.prepare(
+    "UPDATE night_foreground_checks SET checked_at=checked_at-91000",
+  ).run();
+  assert.equal(night.present(10, date!, 1), undefined);
+  assert.deepEqual(
+    await (
+      await call(base + "/presence", 1, "POST", { ...here, lease, lng: 0 })
+    ).json(),
+    { near: false },
+  );
+  assert.equal(night.present(10, date!, 1), undefined);
+  const replacement = await start();
+  await call(foreground + "/" + lease, 1, "DELETE");
+  assert.equal(
+    (await call(base + "/presence", 1, "POST", { ...here, lease })).status,
+    410,
+  );
+  assert.equal(
+    (await call(base + "/presence", 2, "POST", { ...here, lease: replacement }))
+      .status,
+    410,
+  );
+  assert.deepEqual(
+    await (
+      await call(base + "/presence", 1, "POST", { ...here, lease: replacement })
+    ).json(),
+    { near: true },
+  );
+  await call(foreground + "/" + replacement, 1, "DELETE");
+  assert.equal(
+    (await call(base + "/presence", 1, "POST", { ...here, lease: replacement }))
+      .status,
+    410,
+  );
+  assert.equal(night.present(10, date!, 1), undefined);
+  const expired = await start();
+  db.prepare("UPDATE night_foreground_checks SET expires_at=0").run();
+  assert.equal(
+    (await call(base + "/presence", 1, "POST", { ...here, lease: expired }))
+      .status,
+    410,
+  );
+  const signedOut = await start();
+  night.endForegroundChecks(1, "different-browser");
+  assert.equal(
+    (await call(base + "/presence", 1, "POST", { ...here, lease: signedOut }))
+      .status,
+    200,
+  );
+  night.endForegroundChecks(1, "browser-1");
+  assert.equal(
+    (await call(base + "/presence", 1, "POST", { ...here, lease: signedOut }))
+      .status,
+    410,
+  );
+  assert.deepEqual(
+    db
+      .prepare("SELECT name FROM pragma_table_info('night_foreground_checks')")
+      .all()
+      .map((row) => (row as { name: string }).name),
+    [
+      "event_id",
+      "occurrence",
+      "user_id",
+      "lease",
+      "session_ref",
+      "expires_at",
+      "checked_at",
+      "home_area",
+    ],
   );
   for (const u of [1, 2, 3])
     await call(base + "/presence", u, "POST", {

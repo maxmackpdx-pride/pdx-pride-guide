@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import { apiRequest } from "@/lib/queryClient";
 
 type Prompt = { eventId: number; source: "rsvp" | "checkin" };
@@ -15,6 +16,11 @@ export default function NightConsent() {
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const dialog = useRef<HTMLDialogElement>(null);
+  const controls = useModalA11y({
+    open: Boolean(prompt && user),
+    onClose: () => setPrompt(null),
+  });
+  useEffect(() => setPrompt(null), [user?.id]);
   useEffect(() => {
     const receive = (e: Event) => {
       if (!user) return;
@@ -56,7 +62,7 @@ export default function NightConsent() {
           : "Get Afterz notifications here?"}
       </h2>
       <p>Get a reminder if someone hosts Afterz for this event.</p>
-      <div>
+      <div ref={controls}>
         <button disabled={busy} onClick={() => void choose(true)}>
           Yes, remind me
         </button>

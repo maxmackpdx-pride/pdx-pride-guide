@@ -342,26 +342,13 @@ function PlanningPanel({
               </button>
             ))}
           </nav>
-          {tab === "checkin" &&
-            (userId ? (
-              query.data.gpsAvailable === false ? (
-                <p>GPS check-in is unavailable for this venue.</p>
-              ) : query.data.onSiteWindow ? (
-                <VenueCheck
-                  base={base}
-                  eventId={eventId}
-                  checked={query.data.checked}
-                  refresh={() => void query.refetch()}
-                />
-              ) : (
-                <p>
-                  GPS check-in opens 30 minutes before the event and closes 30
-                  minutes after.
-                </p>
-              )
-            ) : (
-              <button onClick={() => setAuth(true)}>Sign in to check in</button>
-            ))}
+          {userId && query.data.onSiteWindow && query.data.gpsAvailable !== false ? (
+            <VenueCheck base={base} eventId={eventId} checked={query.data.checked} visible={tab === "checkin"} refresh={() => void query.refetch()} />
+          ) : tab === "checkin" && (
+            !userId ? <button onClick={() => setAuth(true)}>Sign in to check in</button> :
+            <p>{query.data.gpsAvailable === false ? "GPS check-in is unavailable for this venue." :
+              "GPS check-in opens 30 minutes before the event and closes 30 minutes after."}</p>
+          )}
           {tab === "rides" && ridesPanel}
           {tab === "afterz" && (
             <a href={"/events?invites=1"}>Open Afterz invitations</a>

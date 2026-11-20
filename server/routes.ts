@@ -4492,6 +4492,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/auth/logout", (req, res) => {
+    if (req.session.userId) eventPlanning.night.endForegroundChecks(req.session.userId, req.sessionID);
     req.session.destroy(err => {
       if (err) return res.status(500).json({ error: "Logout failed" });
       // Must match session cookie attributes or Secure cookies will not clear in browsers.

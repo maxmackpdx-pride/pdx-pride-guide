@@ -1,3 +1,4 @@
+import { useForegroundCheck } from "./useForegroundCheck";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -38,16 +39,19 @@ export function VenueCheck({
   base,
   eventId,
   checked,
+  visible,
   refresh,
 }: {
   base: string;
   eventId: number;
   checked: boolean;
+  visible: boolean;
   refresh: () => void;
 }) {
   const [area, setArea] = useState(""),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
+  const automatic = useForegroundCheck(base, eventId, refresh);
   async function check() {
     setBusy(true);
     setError("");
@@ -67,10 +71,26 @@ export function VenueCheck({
       setBusy(false);
     }
   }
+  if (!visible && !automatic.active) return null;
   return (
     <section>
-      <h3>At the venue</h3>
-      {checked ? (
+      <h3>{visible ? "At the venue" : "Automatic check-in"}</h3>
+      {!automatic.active && (
+        <label>
+          Home neighborhood
+          <input
+            value={area}
+            maxLength={80}
+            onChange={(e) => setArea(e.target.value)}
+            placeholder="e.g. Kerns"
+          />
+        </label>
+      )}
+      {automatic.active ? (
+        <button type="button" onClick={automatic.stop}>
+          Stop automatic check-in
+        </button>
+      ) : checked ? (
         <>
           <p>Checked in for ride matching.</p>
           <button
@@ -93,15 +113,6 @@ export function VenueCheck({
             void check();
           }}
         >
-          <label>
-            Home neighborhood
-            <input
-              value={area}
-              maxLength={80}
-              onChange={(e) => setArea(e.target.value)}
-              placeholder="e.g. Kerns"
-            />
-          </label>
           <p>
             Your GPS confirms you are at the venue. Neighborhood matching lasts
             30 minutes. Your coordinates are discarded.
@@ -111,6 +122,23 @@ export function VenueCheck({
           </button>
         </form>
       )}
+      {!automatic.active && (
+        <>
+          <p>
+            For automatic check-in, keep this event open. For up to one hour,
+            Zaylist checks for your arrival and whether you’re still at the
+            venue. Leaving this screen ends automatic matching.
+          </p>
+          <button
+            type="button"
+            onClick={() => automatic.begin(area)}
+            disabled={busy}
+          >
+            Turn on automatic check-in
+          </button>
+        </>
+      )}
+      {automatic.status && <p role="status">{automatic.status}</p>}
       {error && <p role="alert">{error}</p>}
     </section>
   );
