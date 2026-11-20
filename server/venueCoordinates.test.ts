@@ -1,3 +1,5 @@
+import { matchVenueBusinessByName } from "../shared/venueLinks";
+import { hasRegistrationOnlyLocation } from "../shared/registrationOnlyVenue";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildGeocodeQueries, eventMatchesBusiness, geocodePortlandLocation, mergeMapCoordinates, resolvePersistedMapCoordinates } from "./venueCoordinates";
@@ -97,4 +99,14 @@ test("registration-only venues never acquire or display a public pin", async () 
   assert.equal(await resolvePersistedMapCoordinates(privatePlace), null);
   assert.deepEqual(buildGeocodeQueries("Register for address.", "Another private venue"), []);
   assert.ok(buildGeocodeQueries("123 Example St", "Wayfinder Beer").length > 0);
+});
+
+test("a private venue alias opens its directory profile without enabling a geographic pin", () => {
+  const venue = { name: "The Meet Rack at Darkroom" };
+  for (const venueName of ["Meetrack", "The Meet Rack", "Meet Rack at Darkroom"]) {
+    assert.equal(matchVenueBusinessByName(venueName, [venue]), venue);
+    assert.equal(hasRegistrationOnlyLocation({ venueName }), true);
+    assert.deepEqual(buildGeocodeQueries("123 Example St", venueName), []);
+  }
+  assert.equal(matchVenueBusinessByName("The Darkroom Gallery", [venue]), null);
 });

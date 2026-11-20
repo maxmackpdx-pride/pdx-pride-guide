@@ -1,3 +1,5 @@
+import { registrationOnlyVenueKey } from "./registrationOnlyVenue";
+
 /** Normalize venue names for fuzzy directory matching. */
 export function normalizeVenueKey(value: string | null | undefined): string {
   return String(value || "")
@@ -99,6 +101,8 @@ const VENUE_CITY_SUFFIX_TOKENS = new Set(["portland", "pdx", "oregon", "or"]);
 function venueCoreKey(value: string | null | undefined): string {
   const key = normalizeVenueKey(value);
   if (!key) return "";
+  const privateVenue = registrationOnlyVenueKey(key);
+  if (privateVenue) return privateVenue;
   const tokens = key.split(" ").filter(Boolean);
   while (tokens.length > 1 && VENUE_CITY_SUFFIX_TOKENS.has(tokens[tokens.length - 1])) tokens.pop();
   return tokens.join(" ");
