@@ -616,7 +616,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
   // Branded share cards: per-entity dynamic OG, else static board share art, else home fallback.
   const boardShareKey =
     !liveEvent && !livePlace && !liveProfile ? shareCardKeyForPath(pathKey) : null;
-  const pageImage = sharedOutz ? `${SITE_URL}/api/og/outzide/${encodeURIComponent(sharedOutz.id)}?v=2` : liveEvent
+  const pageImage = sharedOutz ? `${SITE_URL}/api/og/outzide/${encodeURIComponent(sharedOutz.id)}?v=3` : liveEvent
     ? `${SITE_URL}/api/og/event/${liveEvent.id}?v=2`
     : livePlace
       ? `${SITE_URL}/api/og/place/${livePlace.id}?v=3`

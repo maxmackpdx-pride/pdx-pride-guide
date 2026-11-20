@@ -24,6 +24,8 @@ export async function renderOutzShareCard(id:string): Promise<Buffer|null> {
   pending.set(id,work);return work;
 }
 async function render(p:SharedOutzPlace) {
-  // Artwork paths come only from the shipped catalog.
-  return renderSocialCardArtwork(fs.readFileSync(asset('outzide-map/'+p.art)));
+  // Artwork paths come only from the shipped catalog. Location photography
+  // fills the art zone (cover), like profile cards; the contained treatment
+  // is for logos and posters.
+  return renderSocialCardArtwork(fs.readFileSync(asset('outzide-map/'+p.art)), "cover");
 }

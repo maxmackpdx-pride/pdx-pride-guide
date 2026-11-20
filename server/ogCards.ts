@@ -156,7 +156,7 @@ export function ogEventCardUrl(eventId: number): string {
 }
 
 export function ogPlaceCardUrl(placeId: number): string {
-  return `${SITE_URL}/api/og/place/${placeId}?v=3`;
+  return `${SITE_URL}/api/og/place/${placeId}?v=4`;
 }
 
 /** Bump when profile card layout/fetch logic changes so scrapers re-pull (not sticky cache). */
