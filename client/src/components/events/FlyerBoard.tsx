@@ -1086,7 +1086,7 @@ export default function FlyerBoard({
           <button type="button" className="oshare" aria-label={`Share ${openListing.title}`} onClick={shareOpen}>
             <ShareIcon />
           </button>
-          <div className="oscrollarea">
+          <div className="ohead">
           <div className="ohero">
               {openPoster ? (
                 <img src={openPoster} alt="" onError={() => setFailedOpenPoster(openPoster)} />
@@ -1115,7 +1115,6 @@ export default function FlyerBoard({
                 {openListing.venueName}
               </p>
             </div>
-            <EventGoingButton eventId={openListing.id} past={!!openListing.dateEnd && endMs(openListing) < tick} poster />
             <div className="otabs" role="tablist" aria-label="Event card pages">
               {OPAGE_NAMES.map((n, i) => (
                 <button
@@ -1130,6 +1129,9 @@ export default function FlyerBoard({
                 </button>
               ))}
             </div>
+            </div>
+          <div className="oscrollarea">
+            <EventGoingButton eventId={openListing.id} past={!!openListing.dateEnd && endMs(openListing) < tick} poster />
             <div
               className="opages"
               ref={pagesRef}

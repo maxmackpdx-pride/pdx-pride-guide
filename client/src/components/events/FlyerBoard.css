@@ -833,46 +833,51 @@
   .fbx { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 }
 
-/* Open event sheet (Tucker, Nov 20): ONE vertical scroller (.oscrollarea)
-   fills the sheet between its top edge and the footer. The poster is a
-   background layer at the top of that scroller and fades into the card
-   surface; title, meta, Going and tabs sit on the fading poster, then the
-   active page flows below. Nothing is layered behind the stack anymore, so
-   scrolled text can never collide with the title. Tabs pin to the top of
-   the scroller on an opaque plate. */
+/* Open event sheet (Tucker, Nov 20). The sheet is two stacked regions:
+   .ohead is LOCKED: poster (fading into the card surface) behind the title,
+   meta and the tab strip, which ends on an opaque plate. .oscrollarea is the
+   only scroller; it fills exactly from the tab strip to the footer and holds
+   Going plus the active page, so scrolled text is clipped at the tabs and can
+   never pass behind or over the title. The title starts just under the
+   share/close row so it sits high on tall portrait flyers. */
 .fbx .ovenue { color: var(--a); text-decoration: underline; text-underline-offset: 2px; }
 .fbx .opageswrap, .fbx .ofoot { position: relative; z-index: 2; }
-.fbx .oscrollarea {
-  position: relative; flex: 1 1 auto; min-height: 0;
-  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
-  scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  container-type: size; isolation: isolate;
+.zay-card-stage.fbx .ocard { container-type: size; }
+.fbx .ohead {
+  position: relative; flex: none; z-index: 1; isolation: isolate;
+  padding-top: clamp(96px, 14cqh, 140px);
+  background: var(--fbx-card);
 }
-.fbx .oscrollarea::-webkit-scrollbar { display: none; }
-.fbx .oscrollarea > .ohero {
-  position: absolute; inset: 0 0 auto; z-index: 0;
-  height: clamp(320px, 82cqh, 640px); overflow: hidden;
-  background: transparent;
+.fbx .ohead > .ohero {
+  position: absolute; inset: 0; z-index: -1;
+  height: auto; overflow: hidden; background: transparent;
 }
-.fbx .oscrollarea > .ohero img {
+.fbx .ohead > .ohero img {
   height: 100%;
-  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 30%, rgba(0, 0, 0, .5) 55%, rgba(0, 0, 0, .1) 72%, transparent 82%);
-  mask-image: linear-gradient(to bottom, var(--z-oled) 30%, rgba(0, 0, 0, .5) 55%, rgba(0, 0, 0, .1) 72%, transparent 82%);
+  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 28%, rgba(0, 0, 0, .55) 58%, rgba(0, 0, 0, .14) 82%, transparent 100%);
+  mask-image: linear-gradient(to bottom, var(--z-oled) 28%, rgba(0, 0, 0, .55) 58%, rgba(0, 0, 0, .14) 82%, transparent 100%);
 }
-.fbx .oscrollarea > .ohero .ohero-typo {
+.fbx .ohead > .ohero .ohero-typo {
   -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 50%, transparent 100%);
   mask-image: linear-gradient(to bottom, var(--z-oled) 50%, transparent 100%);
 }
 /* Posterless fallback: .oid already carries title and venue on the fade. */
-.fbx .oscrollarea > .ohero :is(.typo-t, .typo-v) { display: none; }
-.fbx .oscrollarea > .oid { margin-top: clamp(150px, 36cqh, 300px); text-shadow: 0 1px 2px var(--z-black), 0 2px 14px rgba(0, 0, 0, .85); }
-.fbx .oscrollarea > .otabs {
-  position: sticky; top: 0; z-index: 3;
-  margin: 14px 0 0; padding: 0 16px;
+.fbx .ohead > .ohero :is(.typo-t, .typo-v) { display: none; }
+.fbx .ohead > .oid { margin-top: 0; text-shadow: 0 1px 2px var(--z-black), 0 2px 14px rgba(0, 0, 0, .85); }
+.fbx .ohead > .otabs {
+  position: relative; z-index: 1;
+  margin: 12px 0 0; padding: 0 16px;
   background: var(--fbx-card);
-  box-shadow: 0 1px 0 var(--fbx-line-soft);
   border-bottom: 0;
+  box-shadow: 0 1px 0 var(--fbx-line-soft), 0 12px 18px -14px rgba(0, 0, 0, .9);
 }
+.fbx .oscrollarea {
+  position: relative; flex: 1 1 auto; min-height: 0;
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.fbx .oscrollarea::-webkit-scrollbar { display: none; }
+.fbx .oscrollarea > .ointerested { margin-top: 14px; }
 
 .fbx .ocard :is(.oclose,.oshare,.oarw,.osave,.otabs button,.opage button) { min-height:44px; min-width:44px; }
 .fbx .ointerested .evz-x__act-main {display:grid;gap:2px;}
