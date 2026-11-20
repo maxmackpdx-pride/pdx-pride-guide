@@ -1,3 +1,4 @@
+import RosterChat, { RosterInvitations } from "@/components/zaylist/RosterChat";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AuthModal from "@/components/AuthModal";
@@ -43,8 +44,9 @@ export default function HostHub() {
     </section>}
     {!!data?.venues.length&&<section className="zl-section"><h2>Your venues</h2>
       <Suspense fallback={<p>Loading venues…</p>}><VenueSection open={venuesOpen} onToggle={()=>setVenuesOpen(!venuesOpen)}/></Suspense>
-      {data.venues.map(v=><details className="zl-tool" key={v.id}><summary>{v.name}</summary><a href={`/directory?place=${v.id}`} className="zl-btn">View venue</a><Connections kind="places" id={v.id}/></details>)}
+      {data.venues.map(v=><details className="zl-tool" key={v.id}><summary>{v.name}</summary><a href={`/directory?place=${v.id}`} className="zl-btn">View venue</a><Connections kind="places" id={v.id}/><RosterChat kind="places" id={v.id}/></details>)}
     </section>}
+    <RosterInvitations/>
     {data&&<section className="zl-section"><h2>Your activity</h2><dl className="zl-stat-strip">
       <div><dt>Interested</dt><dd>{data.personal.interested}</dd></div><div><dt>Going</dt><dd>{data.personal.going}</dd></div>
       <div><dt>Door entries</dt><dd>{data.personal.admitted}</dd></div></dl>

@@ -1,3 +1,4 @@
+import RosterChat from "./RosterChat";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
@@ -262,6 +263,7 @@ export default function HostCard({
                 <p className="zl-note">Interested counts event follows. Going counts active RSVPs. Checked in and drinks served come from door scans.</p>
               </details>
               <EventTeam event={event} otherEvents={otherEvents}/>
+              <RosterChat kind="events" id={event.id}/>
               {event.canManageList && <Connections kind="events" id={event.id}/>}
               {event.canEditEvent && <><EventGig event={event}/><PushComposer selectedEvent={event} /></>}
               <section aria-label="Zay'list" style={{ marginTop: 18 }}>
