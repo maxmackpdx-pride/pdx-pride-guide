@@ -65,20 +65,33 @@
 @media(max-width:600px){
  .ns{padding-top:16px}.ns-location{margin-bottom:20px}.ns h2{font-size:36px}.ns-choices button{gap:14px;min-height:80px;padding-block:16px}.ns-choices strong{font-size:21px}.ns-talk{font-size:16px}.nf{padding-top:24px}.nf-search button{padding:10px 12px}.nf-search button svg{display:none}.nf-result-title h3{font-size:23px}
 }
-/* Keep the existing share/follow controls without the former tall hero header. */
-.eb-page.eb-page--resources.rd-page .eb-header{padding-top:12px!important;padding-bottom:0!important}
-.eb-page.eb-page--resources.rd-page .eb-header__row{display:flex!important;align-items:center;justify-content:space-between;gap:12px}
-.eb-page.eb-page--resources.rd-page .eb-header__identity{min-width:0}
-.eb-page.eb-page--resources.rd-page .eb-header h1{width:150px!important;height:64px!important;min-height:0!important;margin:0!important}
+/* Needz family frame (Tucker, Nov 19 2026 late): the header is the shared
+   Placez-family hero — 8px top pad + a fixed 188px logo zone presenting
+   the Needz logo centered at the family's 172px logo height, the way
+   SceneZ/Placez/Outzide present theirs — so the shared slider under it
+   lands at the same Y as on the other three pages. This replaces the
+   former compact bar; the share/follow controls keep their place at
+   the zone's right edge, and the kicker/lede stay hidden as they were. */
+.eb-page.eb-page--resources.rd-page .eb-header{padding-top:8px!important;padding-bottom:0!important}
+.eb-page.eb-page--resources.rd-page .eb-header__row{position:relative;display:flex!important;align-items:center;justify-content:center;height:188px;gap:12px}
+.eb-page.eb-page--resources.rd-page .eb-header__identity{min-width:0;display:flex;flex-direction:column;align-items:center;text-align:center}
+.eb-page.eb-page--resources.rd-page .eb-header h1{width:auto!important;height:172px!important;min-height:0!important;margin:0!important;justify-content:center}
+.eb-page.eb-page--resources.rd-page .eb-header h1 img{width:auto!important;height:100%!important;max-width:76vw;object-fit:contain;object-position:center}
 .eb-page.eb-page--resources.rd-page .eb-header .eb-kicker,
 .eb-page.eb-page--resources.rd-page .eb-header .eb-lede{display:none!important}
-.eb-page.eb-page--resources.rd-page .eb-header__actions{display:flex;flex:none;margin:0;gap:8px}
+.eb-page.eb-page--resources.rd-page .eb-header__actions{position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;flex:none;margin:0;gap:8px}
 @media(max-width:600px){
- .eb-page.eb-page--resources.rd-page .eb-header{padding-top:8px!important}
- .eb-page.eb-page--resources.rd-page .eb-header h1{width:100px!important;height:44px!important}
  .ns{padding-top:8px}.ns-location{margin-bottom:12px}.ns h2{font-size:34px}
  .ns-lede{margin-bottom:16px!important}
  .ns-choices button{min-height:66px;padding-block:10px}
  .ns-choices button>span{gap:4px}.ns-choices strong{font-size:20px}.ns-choices small{font-size:13px;line-height:1.35}
  .ns-talk{margin-top:20px;min-height:50px;font-size:15px}.ns-browse{margin-top:8px}
 }
+/* Needz options in two columns (Tucker, Nov 19 2026 late): the same six
+   choices, same content and behavior — only the layout changes, from one
+   stacked list to a two-column grid of cells. Icon stays at the top,
+   the arrow keeps the top-right corner, name and description stack
+   under the icon. The talk/browse actions below stay full width. */
+.rd-intro--needz .ns-choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rd-intro--needz .ns-choices button{position:relative;flex-direction:column;align-items:flex-start;gap:10px;min-height:0;padding:16px 14px;border:1px solid var(--ink-border);border-radius:14px}
+.rd-intro--needz .ns-choices button>svg:last-child{position:absolute;top:14px;right:12px;margin:0}

@@ -139,3 +139,31 @@
 .pz-size-slider button[aria-pressed="true"] .pz-size-slider__dot { opacity: 1; }
 .pz-size-slider button:focus-visible { outline: 2px solid var(--page-accent, var(--neon-cyan)); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .pz-size-slider__thumb { transition: none; } }
+
+/* ---- Placez category tiles, deep glass (Tucker, Nov 19 2026 late):
+   "Placez needs new category buttons" — same five categories, labels
+   and routing; the torn-paper tiles are rebuilt in the page's house
+   language: deep-glass panels (the slider track's glass recipe) with
+   the Placez card edge — a 1px line and bloom in each category's own
+   token color (--category). The torn paper layers (::before/::after
+   in PlacezReferenceHeader.css) and the paper fill are retired. ---- */
+.pl-page.pl-production .pl-filters button {
+  background: var(--glass-card-neutral-bg);
+  -webkit-backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation));
+  backdrop-filter: blur(var(--glass-card-blur)) saturate(var(--glass-card-saturation));
+  border: 1px solid color-mix(in srgb, var(--category) 55%, var(--z-black)) !important;
+  border-radius: 16px;
+  box-shadow: 0 0 0 2px var(--z-black), 0 0 7px 1px color-mix(in srgb, var(--category) 36%, transparent), 0 0 14px color-mix(in srgb, var(--category) 16%, transparent);
+  color: var(--text-hi);
+  clip-path: none;
+}
+.pl-page.pl-production .pl-filters button::before,
+.pl-page.pl-production .pl-filters button::after { display: none; }
+.pl-page.pl-production .pl-filters button > span { border-left-color: color-mix(in srgb, var(--category) 55%, var(--z-black)); }
+.pl-page.pl-production .pl-filters button svg { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--category) 25%, transparent)); }
+.pl-page.pl-production .pl-filters button[aria-pressed="true"] {
+  background: linear-gradient(165deg, color-mix(in srgb, var(--category) 16%, transparent), color-mix(in srgb, var(--z-black) 42%, transparent));
+  border-color: var(--category) !important;
+  box-shadow: 0 0 0 2px var(--z-black), 0 0 7px 1px color-mix(in srgb, var(--category) 36%, transparent), 0 0 14px color-mix(in srgb, var(--category) 16%, transparent);
+  transform: none;
+}

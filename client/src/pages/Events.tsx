@@ -837,6 +837,17 @@ export default function Events() {
     >
       <RoomBackground room="eventz" />
 
+      {/* Family header (Tucker, Nov 19 2026 late): "Events just needs its
+          header" — the shared Placez-family frame, 8px top pad + a fixed
+          188px logo zone presenting the EVENTZ logo like the other pages
+          present theirs. No slider here; the board below is untouched. */}
+      <header className="events-hero">
+        <div className="events-hero__zone">
+          <h1 className="sr-only">Eventz — Portland events</h1>
+          <EventzNeonLogo ready={!isLoading} />
+        </div>
+      </header>
+
       <section className="events-board-feed board-active-feed diag">
         <div className="board-active-feed__inner">
           <link rel="alternate" type="application/json" href="/api/events" title="Zaylist events — full JSON feed" />

@@ -16,3 +16,12 @@
 @keyframes eventz-letter-flicker { 0%,72%,73.2%,100% { filter:blur(4px) brightness(1); } 72.35%,72.85% { filter:blur(4px) brightness(.3); } 72.6% { filter:blur(4px) brightness(.85); } }
 @media (prefers-reduced-motion:reduce) { .eventz-neon-logo__bloom { animation:none; opacity:.14; } }
 html.calm-mode .eventz-neon-logo__bloom { animation:none; opacity:.14; }
+
+/* Events family header (Tucker, Nov 19 2026 late): the board page takes
+   the shared Placez-family frame — 8px top pad + a fixed 188px logo zone
+   presenting the EVENTZ logo like SceneZ/Placez/Outzide present theirs.
+   The board feed below it is untouched. */
+.events-hero { position: relative; z-index: 1; padding-top: 8px; }
+.events-hero__zone { height: 188px; display: grid; place-items: center; padding-inline: 22px; box-sizing: border-box; }
+.events-hero .eventz-neon-logo { width: min(80vw, 600px); }
+.events-hero .board-hero__brand-logo--eventz { display: block; width: 100%; height: auto; }

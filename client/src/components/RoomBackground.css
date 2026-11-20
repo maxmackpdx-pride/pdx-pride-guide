@@ -43,9 +43,17 @@ html body .room-shader-page > .room-shader-background[room="outzide"] { height: 
    scale(1). Placez: scale(.89) on a 112.4%-wide band centered via
    left -6.2%, so the ~15% zoom-out shows no side bars. Eventz keeps
    the shared scale(1.05). */
-html body .room-shader-page > .room-shader-background[room="scenez"] { transform: scale(1); }
-html body .room-shader-page > .room-shader-background[room="outzide"] { transform: scale(1); }
-html body .room-shader-page > .room-shader-background[room="placez"] { transform: scale(.89); width: 112.4%; left: -6.2%; }
+/* Correction round (Tucker, Nov 19 2026, later): fragments untouched;
+   band math only. SceneZ: the heart (texture v~.30) landed straddling
+   the slider's bottom edge, half-hidden — a -88px band offset lifts it
+   whole into the open band between the wordmark and the slider. Outzide:
+   the main peak (texture v~.185) sat behind the UTZIDE wordmark — a
+   -76px offset puts the summit just above the logo zone. Placez: zoom
+   out further, still edge-to-edge and top-anchored — scale(.80) on a
+   125%-wide band centered via left -12.5%. */
+html body .room-shader-page > .room-shader-background[room="scenez"] { transform: scale(1); top: -88px; }
+html body .room-shader-page > .room-shader-background[room="outzide"] { transform: scale(1); top: -76px; }
+html body .room-shader-page > .room-shader-background[room="placez"] { transform: scale(.80); width: 125%; left: -12.5%; }
 html body .room-shader-page > header,
 html body .room-shader-page > .pl-body,
 html body .room-shader-page > .new-scenez,
