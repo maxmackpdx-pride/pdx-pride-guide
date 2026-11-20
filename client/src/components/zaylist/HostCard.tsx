@@ -1,3 +1,4 @@
+import { OrganizerPlanning } from "./OrganizerPlanning";
 import RosterChat from "./RosterChat";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -263,6 +264,7 @@ export default function HostCard({
                 <p className="zl-note">Interested counts event follows. Going counts active RSVPs. Checked in and drinks served come from door scans.</p>
               </details>
               {event.canManageList && <ScanLedger eventId={event.id}/>}
+              {(event.canEditEvent || event.canManageTeam) && <OrganizerPlanning eventId={event.id}/>}
               <EventTeam event={event} otherEvents={otherEvents}/>
               <RosterChat kind="events" id={event.id}/>
               {event.canManageList && <Connections kind="events" id={event.id}/>}

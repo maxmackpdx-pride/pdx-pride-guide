@@ -324,3 +324,9 @@
 .zl-scan-ledger { list-style: none; padding: 0; margin: .5rem 0; }
 .zl-scan-ledger li { padding: .5rem 0; border-bottom: 1px solid var(--zg-5); }
 .zl-scan-ledger span { display: block; font-size: .8rem; color: var(--zg-11); }
+
+.zl-plan-items { padding: 0; list-style: none; }
+.zl-plan-items li { padding: .5rem 0; border-bottom: 1px solid var(--zg-5); }
+.zl-plan-items label { display: flex; align-items: flex-start; gap: .6rem; }
+.zl-plan-items input { margin-top: .3rem; }
+.zl-plan-items small { display: block; color: var(--zg-11); }

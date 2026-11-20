@@ -60,6 +60,7 @@ async function setup(t: { after: (fn: () => unknown) => void }) {
   };
   const venueOwners = new Set<number>();
   const storage = {
+    isPrimarySiteOwner:(user:{id:number})=>user.id===12,
     getUserOwnedBusinesses: (id:number) => venueOwners.has(id) ? [{id:77,name:"Eastbank Hall",ownerId:id,active:true}] : [],
     getEvent: (id: number) => (id === 10 ? dbEvent : null),
     getUserById: (id: number) =>
@@ -686,4 +687,54 @@ test("an empty scheduled draw waits for an RSVP and a gifted winner cannot redra
   assert.equal((await request(`/api/zaylist/entries/${winner.id}/gift`,5,"POST",{userId:8})).status,201);
   const again=operations.draw(10,1,1,now+120000);
   assert.ok(again.ok && again.awarded===0);
+});
+
+test("paid organizer planning requires verified eligibility, a positive discount, settled payment and current event authority",async t=>{
+  const {request,db,dbEvent}=await setup(t);
+  const plan="/api/events/10/organizer-plan",desk="/api/hub/planning-owner",review=desk+"/requests/10";
+  const task={title:"Soundcheck",scheduledAt:"2099-07-01T16:30",requestKey:crypto.randomUUID()};
+  const state=await request(plan,1);
+  assert.equal(state.body.prices,null);
+  assert.equal((await request(plan,8)).status,403);
+  assert.equal((await request(plan+"/items",2,"POST",task)).status,403);
+  assert.equal((await request(desk,1)).status,403);
+  assert.equal((await request(desk+"/prices",1,"PUT",{standard:5000,nonprofit:2500})).status,403);
+  assert.equal((await request(desk+"/prices",12,"PUT",{standard:5000,nonprofit:0})).status,400);
+  assert.equal((await request(desk+"/prices",12,"PUT",{standard:5000,nonprofit:5000})).status,400);
+  assert.equal((await request(desk+"/prices",12,"PUT",{standard:5000,nonprofit:2500})).status,200);
+  assert.equal((await request(plan+"/request",1,"POST",{organization:"Fixture group",ein:"bogus"})).status,400);
+  const application={organization:"Fixture group",ein:"12-3456789"};
+  assert.equal((await request(plan+"/request",1,"POST",application)).status,201);
+  assert.equal((await request(plan+"/request",1,"POST",application)).status,200);
+  assert.equal((await request(plan+"/request",1,"POST",{})).status,409);
+  assert.equal((await request(plan,2)).body.application.ein,undefined);
+  assert.equal((await request(desk,12)).body.applications[0].ein,"123456789");
+  const payment={action:"activate",reference:"local-test-invoice",amount:2500};
+  assert.equal((await request(review,12,"PUT",payment)).status,409);
+  assert.equal((await request(review,1,"PUT",{action:"verify",note:"Fake member approval"})).status,403);
+  assert.equal((await request(review,12,"PUT",{action:"verify",note:"Local fixture decision"})).status,200);
+  assert.equal((await request(plan,1)).body.application.quote,2500);
+  assert.equal((await request(review,12,"PUT",{...payment,amount:0})).status,400);
+  assert.equal((await request(review,12,"PUT",{...payment,amount:5000})).status,409);
+  assert.equal((await request(plan+"/request",2,"POST",{organization:"Corrected local name",ein:"123456789"})).status,403);
+  assert.equal((await request(plan+"/request",1,"POST",{organization:"Corrected local name",ein:"123456789"})).status,200);
+  assert.equal((await request(plan,1)).body.application.verification,"pending");
+  assert.equal((await request(review,12,"PUT",payment)).status,409);
+  assert.equal((await request(review,12,"PUT",{action:"verify",note:"Corrected name confirmed"})).status,200);
+  assert.equal((await request(review,12,"PUT",payment)).status,200);
+  assert.equal((await request(review,12,"PUT",payment)).status,200);
+  assert.equal((await request(plan+"/items",2,"POST",task)).status,201);
+  assert.equal((await request(plan+"/items",2,"POST",task)).status,200);
+  assert.equal((await request(plan+"/items",2,"POST",{...task,title:"Other title"})).status,409);
+  assert.equal((await request(plan+"/items",2,"POST",{...task,requestKey:crypto.randomUUID(),scheduledAt:"2099-02-30T11:00"})).status,400);
+  const items=(await request(plan,1)).body.items;
+  assert.equal(items.length,1);
+  assert.equal((await request(plan+"/items/"+items[0].id,1,"PATCH",{completed:true})).status,200);
+  assert.equal((await request(plan,2)).body.items[0].completed,1);
+  assert.equal((await request(review,12,"PUT",{action:"revoke"})).status,200);
+  assert.deepEqual((await request(plan,2)).body.items,[]);
+  assert.equal((await request(plan+"/items/"+items[0].id,2,"PATCH",{completed:false})).status,403);
+  assert.equal((db.prepare("SELECT COUNT(*) AS n FROM organizer_planning_decisions").get() as {n:number}).n,4);
+  dbEvent.isPrivate=true;
+  assert.equal((await request(plan,1)).status,404);
 });

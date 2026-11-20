@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useInboxSheet } from "@/context/InboxSheetContext";
 import { apiRequest } from "@/lib/queryClient";
 import PushComposer, { PushMemberships } from "@/components/zaylist/PushComposer";
+import { PlanningOwnerDesk } from "@/components/zaylist/OrganizerPlanning";
 import GuestSpots from "@/components/zaylist/GuestSpots";
 import HostCard, { type HostEvent } from "@/components/zaylist/HostCard";
 import { Connections } from "@/components/zaylist/HostOperations";
@@ -54,6 +55,6 @@ export default function HostHub() {
     {admin&&<section className="zl-section"><h2>Administration</h2><div className="zl-row">
       <a className="zl-btn" href="/admin">Open admin</a><button className="zl-btn" onClick={e=>openSheet({account:"admin",queueFolder:"active"},e.currentTarget)}>Review approvals</button>
     </div></section>}
-    {owner&&<section className="zl-section"><h2>Owner desk</h2><button className="zl-btn" onClick={e=>openSheet({account:"owner",view:"inbox"},e.currentTarget)}>Open owner inbox</button><PushMemberships/></section>}
+    {owner&&<section className="zl-section"><h2>Owner desk</h2><button className="zl-btn" onClick={e=>openSheet({account:"owner",view:"inbox"},e.currentTarget)}>Open owner inbox</button><PushMemberships/><PlanningOwnerDesk/></section>}
   </div></main>;
 }

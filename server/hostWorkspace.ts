@@ -1,4 +1,5 @@
 import { registerRosterChats } from "./rosterChats";
+import { registerOrganizerPlanning } from "./organizerPlanning";
 import type Database from "better-sqlite3";
 import type { Express, RequestHandler } from "express";
 import type { Business, Event, MissedConnection } from "@shared/schema";
@@ -24,6 +25,7 @@ export function registerHostWorkspace(app:Express, db:Database.Database, storage
     post_id INTEGER PRIMARY KEY REFERENCES missed_connections(id), actor INTEGER NOT NULL REFERENCES users(id),
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );`);
+  registerOrganizerPlanning(app,db,storage,auth,accessFor,visible);
   registerRosterChats(app, db, storage, auth, accessFor);
   const base="/api/hub/workspace";
   const active:RequestHandler=(req,res,next)=>{
