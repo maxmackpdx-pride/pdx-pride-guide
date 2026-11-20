@@ -1,0 +1,284 @@
+/* ---------- hardware layer ---------- */
+/* Borrow the Boardz pin artwork without introducing its fixed card box. */
+.fbx .boardz-punk-scope { display: contents; }
+.fbx .hw { position: absolute; left: 0; right: 0; top: 0; height: 0; z-index: 20; pointer-events: none; }
+.fbx .cell:hover .hw { z-index: 20; }
+.fbx .hw-pin { transform-origin: 50% -1cqw; }
+.fbx .hw-tape { transform-origin: 50% 0; }
+.fbx .tape {
+  position: absolute;
+  top: -2.9cqw;
+  left: 50%;
+  transform: translateX(-50%) rotate(-3deg);
+  width: 33cqw;
+  height: 8.3cqw;
+  z-index: 6;
+}
+.fbx .tape i { position: absolute; inset: 0; display: block; }
+.fbx .tape-solid {
+  background:
+    linear-gradient(100deg, color-mix(in srgb, var(--tc) 60%, transparent), color-mix(in srgb, var(--tc) 42%, transparent) 55%, color-mix(in srgb, var(--tc) 55%, transparent)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .13) 0 1px, transparent 1px 6px);
+  clip-path: polygon(0 14%, 3% 0, 97% 5%, 100% 86%, 96% 100%, 4% 95%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .35);
+  animation: tape-mat-solid var(--tape-cycle, 8.6s) steps(1, end) var(--tape-phase, 0s) infinite;
+}
+.fbx .tape-wire {
+  opacity: 0;
+  border: 1px solid var(--tc);
+  background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--tc) 50%, transparent) 0 1px, transparent 1px 5px);
+  animation: tape-mat-wire var(--tape-cycle, 8.6s) steps(1, end) var(--tape-phase, 0s) infinite;
+}
+.fbx .tape-slice {
+  opacity: 0;
+  background: linear-gradient(100deg, color-mix(in srgb, var(--tc) 60%, transparent), color-mix(in srgb, var(--tc) 42%, transparent) 55%, color-mix(in srgb, var(--tc) 55%, transparent));
+}
+.fbx .tape-sa { clip-path: inset(16% 0 70% 0); animation: tape-glitch 6.7s steps(1, end) var(--tape-glitch-phase, 0s) infinite; }
+.fbx .tape-sb { clip-path: inset(62% 0 24% 0); animation: tape-glitch-b 6.7s steps(1, end) var(--tape-glitch-phase, 0s) infinite; }
+@keyframes tape-mat-solid { 0%, 63%, 81%, 100% { opacity: 1; } 60%, 66% { opacity: 0; } }
+@keyframes tape-mat-wire { 0%, 63%, 81%, 100% { opacity: 0; } 60%, 66% { opacity: 1; } }
+@keyframes tape-glitch {
+  0%, 89.9%, 92.1%, 100% { opacity: 0; transform: none; filter: none; }
+  90% { opacity: .9; transform: translateX(-1cqw); filter: drop-shadow(.7cqw 0 0 var(--neon-cyan)) drop-shadow(-.7cqw 0 0 var(--tc)); }
+  91% { opacity: .9; transform: translateX(1cqw); filter: drop-shadow(-.7cqw 0 0 var(--neon-cyan)) drop-shadow(.7cqw 0 0 var(--tc)); }
+  92% { opacity: .55; transform: translateX(-.4cqw); filter: none; }
+}
+@keyframes tape-glitch-b {
+  0%, 90.9%, 93.1%, 100% { opacity: 0; transform: none; filter: none; }
+  91% { opacity: .8; transform: translateX(1.1cqw); filter: drop-shadow(.7cqw 0 0 var(--neon-cyan)); }
+  92% { opacity: .8; transform: translateX(-.9cqw); filter: drop-shadow(-.7cqw 0 0 var(--tc)); }
+  93% { opacity: .5; transform: translateX(.3cqw); filter: none; }
+}
+@media (prefers-reduced-motion: reduce) { .fbx .tape i { animation: none; } }
+
+/* ---------- posters ---------- */
+.fbx .poster {
+  position: relative;
+  background: var(--fbx-poster-paper);
+  border-radius: .7cqw;
+  cursor: pointer;
+  width: 100%;
+  transform: rotate(var(--rot, 0deg));
+  border: 1px solid color-mix(in srgb, var(--a) 55%, var(--evz-line-17171d));
+  box-shadow:
+    0 0 0 2px var(--z-black),
+    0 0 2.4cqw .35cqw color-mix(in srgb, var(--a) 36%, transparent),
+    0 0 4.8cqw color-mix(in srgb, var(--a) 16%, transparent),
+    0 1px 2px rgba(0, 0, 0, .55),
+    0 5.5cqw 11cqw rgba(0, 0, 0, .55);
+  transition: transform .45s cubic-bezier(.32, 1.24, .36, 1), box-shadow .45s, border-color .45s;
+}
+.fbx .poster:hover {
+  transform: rotate(0deg) translateY(-5px) scale(1.012);
+  z-index: 8;
+  border-color: color-mix(in srgb, var(--a) 63%, var(--evz-line-17171d));
+  box-shadow:
+    0 0 0 2px var(--z-black),
+    0 0 3.1cqw .35cqw color-mix(in srgb, var(--a) 41%, transparent),
+    0 0 6.2cqw color-mix(in srgb, var(--a) 18%, transparent),
+    0 2px 3px rgba(0, 0, 0, .5),
+    0 7.6cqw 15cqw rgba(0, 0, 0, .6);
+}
+.fbx .poster:active { transform: rotate(0deg) translateY(-3px) scale(1.01); }
+.fbx .poster .trim { display: none; }
+.fbx .poster.torn .trim {
+  display: block;
+  position: absolute;
+  inset: 0;
+  background: var(--fbx-trim-paper);
+  clip-path: polygon(var(--clip2));
+  border-radius: 3px;
+}
+.fbx .poster.torn .pc { clip-path: polygon(var(--clip)); }
+.fbx .poster.flipping { animation: none !important; }
+@keyframes fbx-rock {
+  0%, 100% { transform: rotate(calc(var(--rot) - 1.6deg)); }
+  50% { transform: rotate(calc(var(--rot) + 1.6deg)); }
+}
+@media (hover: hover) and (pointer: fine) {
+  .fbx .poster.att-pin { transform-origin: 50% -1cqw; }
+  .fbx .poster.att-pin:hover { animation: fbx-rock 1.5s ease-in-out infinite; }
+  .fbx .poster.att-tape { transform-origin: 50% 0; transition: transform .18s ease-out, box-shadow .45s; }
+  .fbx .poster.att-tape:hover {
+    box-shadow:
+      0 0 0 2px var(--z-black),
+      0 0 7px 1px color-mix(in srgb, var(--a) 36%, transparent),
+      0 0 14px color-mix(in srgb, var(--a) 16%, transparent),
+      0 5cqw 6cqw rgba(0, 0, 0, .55);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fbx .poster.att-pin:hover { animation: none; }
+  .fbx .poster.att-tape:hover { transform: none; }
+}
+.fbx .tilting { transition: box-shadow .45s, border-color .45s; }
+.fbx .pc {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: .7cqw;
+  background: linear-gradient(160deg, var(--fbx-pc-hi), var(--evz-ink-0a0a0e));
+}
+.fbx .pc img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+.fbx .pc::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18), inset 0 -6cqw 10cqw rgba(0, 0, 0, .10);
+  pointer-events: none;
+}
+.fbx .pshade { pointer-events: none; color: var(--evz-mist-f4f8fa); margin-bottom: 2cqw; }
+/* Posterless events: the title block IS the flyer. It sits as a designed
+   text face — clear of the pin/tape zone and the SHARE / price row —
+   over an accent-tinted ground (the demo only ever showed this block
+   behind real flyer art, so the port gives it the open card's typo
+   treatment). */
+.fbx .poster.noart .pc { background: linear-gradient(160deg, color-mix(in srgb, var(--a) 24%, var(--fbx-pc-hi)), var(--evz-ink-0a0a0e) 74%); }
+.fbx .poster.noart .pshade { position: relative; z-index: 2; padding: 36cqw 4cqw 0; }
+.fbx .pshade h4 { font: 800 6.4cqw/1 "Barlow Condensed", sans-serif; text-transform: uppercase; }
+.fbx .pshade p { font: 500 3.6cqw var(--font-mono); color: var(--evz-mist-cfd8de); margin-top: 2cqw; }
+.fbx .pshare {
+  position: absolute;
+  top: 4cqw; right: 4cqw;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 2cqw;
+  background: rgba(5, 5, 6, .85);
+  border: 1px solid rgba(244, 248, 250, .28);
+  color: var(--evz-mist-f4f8fa);
+  border-radius: 1cqw;
+  font: 700 3.6cqw/1 "Barlow Condensed", sans-serif;
+  letter-spacing: .09em;
+  padding: 2cqw 2.4cqw;
+  cursor: pointer;
+}
+.fbx .pshare svg { width: 3.6cqw; height: 3.6cqw; }
+.fbx .pprice {
+  position: absolute;
+  top: 12.8cqw; right: 4cqw;
+  z-index: 5;
+  background: rgba(5, 5, 6, .85);
+  border: 1px solid var(--evz-line-2c2c35);
+  border-radius: 1cqw;
+  padding: 2cqw 4cqw;
+  max-width: 40cqw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: 700 3.6cqw/1 "Barlow Condensed", sans-serif;
+  letter-spacing: .09em;
+  color: var(--evz-mist-f4f8fa);
+}
+.fbx .pprice.free { color: var(--green-acid); border-color: color-mix(in srgb, var(--green-acid) 45%, transparent); }
+.fbx .pprice.unk { color: var(--evz-gray-8a8a94); }
+.fbx .pprice-note {
+  margin: 3cqw 0 0;
+  font: 500 2.7cqw/1.35 var(--font-mono);
+  letter-spacing: .02em;
+  color: var(--evz-gray-8a8a94);
+}
+.fbx .pfoot {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 3;
+  /* The heart sits 6cqw in from the bottom and right edges (Tucker,
+   * Nov 19, 2026); the rest of the band keeps the 4cqw face margin. */
+  padding: 4cqw 6cqw 6cqw 4cqw;
+  /* Finish the fade within the top padding so the actions row has a solid backing. */
+  background: linear-gradient(to bottom, transparent, var(--z-black) 4cqw);
+}
+.fbx .pcdtop {
+  position: absolute;
+  top: 11.5cqw; left: 4cqw;
+  z-index: 5;
+  background: rgba(4, 4, 6, .55);
+  border: 1px solid rgba(244, 248, 250, .09);
+  border-radius: 2.4cqw;
+  padding: 2.6cqw 3.4cqw;
+  text-shadow: 0 1px 7px rgba(0, 0, 0, .6), 0 0 2px rgba(0, 0, 0, .5);
+  pointer-events: none;
+}
+.fbx .pcdtop .ps-lab { display: block; margin-bottom: 1.6cqw; }
+.fbx .pcdtop .ps-nums { gap: 5cqw; }
+.fbx .poster.noart .pcdtop { top: 13.5cqw; }
+.fbx .ps-lab { font: 800 3.6cqw/1 "Barlow Condensed", sans-serif; letter-spacing: .14em; color: var(--a); }
+.fbx .ps-nums { display: flex; gap: 6cqw; }
+.fbx .ps-nums span { text-align: center; }
+.fbx .ps-nums b { font: 800 6.4cqw/1 "Barlow Condensed", sans-serif; display: block; color: var(--evz-mist-f4f8fa); }
+.fbx .ps-nums i {
+  font: 700 3.6cqw/1 "Barlow Condensed", sans-serif;
+  color: var(--evz-gray-8a8a94);
+  letter-spacing: .14em;
+  font-style: normal;
+  display: block;
+  margin-top: 1cqw;
+}
+.fbx .pactions { display: flex; gap: 4cqw; align-items: center; margin-top: 4cqw; }
+.fbx .pgigz {
+  background: var(--fbx-chip-bg);
+  border: 1px solid var(--fbx-line-soft);
+  border-radius: 2cqw;
+  padding: 2cqw 4cqw;
+  text-align: center;
+  flex: none;
+}
+.fbx .pgigz b {
+  font: 700 6.4cqw/1 "Barlow Condensed", sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: var(--evz-mist-f4f8fa);
+  display: block;
+}
+.fbx .pgigz i {
+  font: 700 3.6cqw "Barlow Condensed", sans-serif;
+  color: var(--neon-violet);
+  letter-spacing: .1em;
+  font-style: normal;
+  display: block;
+  margin-top: 1cqw;
+}
+.fbx .pcarpool i { color: var(--neon-orange); }
+.fbx .pheart {
+  width: 15.6cqw;
+  height: 15.6cqw;
+  margin-left: auto;
+  flex: none;
+  border: 1.5px solid var(--a);
+  border-radius: 50%;
+  color: var(--a);
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.fbx .pheart svg { width: 6.4cqw; height: 6.4cqw; }
+.fbx .pheart.saved { background: color-mix(in srgb, var(--a) 24%, transparent); }
+.fbx .pheart.saved svg { fill: currentColor; }
+
+
+/* ---------- wide-poster chunk + expanded pages (Nov 18, 2026) ---------- */
+.fbx .pblend {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 7.5cqw; z-index: 3;
+  background: linear-gradient(180deg, transparent, var(--evz-ink-0a0a0e));
+  pointer-events: none;
+}
+.fbx .pchunk { position: relative; z-index: 1; background: var(--evz-ink-0a0a0e); padding: 3.4cqw 6cqw 6cqw 4cqw; }
+.fbx .pchunk h4 {
+  font: 800 6.4cqw/1.05 var(--font-display);
+  text-transform: uppercase; color: var(--evz-mist-f4f8fa);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fbx .pchunk-meta {
+  font: 500 3.6cqw var(--font-mono); color: var(--evz-mist-cfd8de); margin-top: 2cqw;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fbx .pchunk-row { display: flex; align-items: center; gap: 3cqw; margin-top: 3.2cqw; }

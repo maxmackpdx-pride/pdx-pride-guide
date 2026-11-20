@@ -14,7 +14,7 @@ import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { resolveVenueWebsite } from "@shared/venueLinks";
 import { resolveDirectoryLogo } from "@shared/directoryLogos";
 import { CardStage } from "@/components/cards/CardStage";
-import { EventFrontStage } from "./FlyerBoard";
+import { EventFrontStage } from "./EventFlyerFront";
 import { OpenCardMeta } from "@/components/cards/react19Card";
 import { closeOpenCard } from "@/components/cards/react19CardModel";
 import { useOpenCardClose } from "@/hooks/useOpenCardClose";

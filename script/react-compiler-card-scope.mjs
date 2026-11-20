@@ -9,6 +9,7 @@
  */
 export const cardFaceModules = [
   'events/FlyerBoard',
+  'events/EventFlyerFront',
   'events/EventRailCard',
   'events/EventFlyerArt',
   'home/TonightEventCard',
@@ -36,7 +37,7 @@ export const cardSourcePatterns = [
   /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/]PlaceCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]placez[\\/](?:NativePlacezFace|PlacezQuickCard|NativePlacezExpanded|ExpandedPager)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/](?:EventCard|BoardCard)\.tsx$/,
-  /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]FlyerBoard\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]events[\\/](?:FlyerBoard|EventFlyerFront)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]EventRailCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]EventFlyerArt\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]home[\\/]TonightEventCard\.tsx$/,

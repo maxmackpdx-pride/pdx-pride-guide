@@ -71,8 +71,8 @@ try{
    assert.equal(compiled,expected,`Incorrect real-app React Compiler scope: ${url}`);
    const target=placezCompilerModules.find(module=>file===`components/${module}.tsx`);
    const functionProof=target?assertCompiledFunction(transformed.code,({'scenez/SceneCardFace':'Closed','outz/native/NativeOutzideFace':'OutzClosed'}[target]||target.split('/').pop()),expected):null;
-   if(file==='components/events/FlyerBoard.tsx'){
-    for(const name of ['FlyerBoard','PosterCell','PastCell']){
+   if(file==='components/events/FlyerBoard.tsx'||file==='components/events/EventFlyerFront.tsx'){
+    for(const name of (file.endsWith('/FlyerBoard.tsx')?['FlyerBoard','PastCell']:['PosterCell'])){
      inspected.push({url,compiled,functionProof:assertCompiledFunction(transformed.code,name,true)});
     }
    }else inspected.push({url,compiled,functionProof});
