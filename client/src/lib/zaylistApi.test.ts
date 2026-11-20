@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import jsQR from "jsqr";
 import { pushAllowance, pushRemaining, pushTierFor } from "./zaylistApi";
 import { qrMatrix } from "../components/zaylist/qr";
 
@@ -29,18 +30,18 @@ test("push remaining counts sends inside the window only", () => {
   assert.equal(pushRemaining("owner", "everyone", [recent, recent, recent], now), Number.POSITIVE_INFINITY);
 });
 
-test("qr matrix encodes a guest token at a plausible size", () => {
-  const token = "Ab3dEf6hIjKlMnOpQrStUvWxYz012345"; // 32 chars, like a real token
-  const m = qrMatrix(token);
-  const n = m.length;
-  assert.ok(n >= 21 && (n - 17) % 4 === 0, `size ${n}`);
-  // Finder patterns: dark corners of the top-left finder.
-  assert.equal(m[0][0], true);
-  assert.equal(m[0][6], true);
-  assert.equal(m[6][0], true);
-  assert.equal(m[0][n - 1], true);
-  assert.equal(m[n - 1][0], true);
-  // Deterministic.
-  assert.deepEqual(qrMatrix(token), m);
-  assert.throws(() => qrMatrix("x".repeat(400)));
+test("a second QR implementation decodes the actual guest token", () => {
+  const token = "Ab3dEf6hIjKlMnOpQrStUvWxYz012345";
+  const modules = qrMatrix(token);
+  const side = (modules.length + 8) * 5;
+  const pixels = new Uint8ClampedArray(side * side * 4).fill(255);
+  for (let y = 0; y < side; y++) {
+    for (let x = 0; x < side; x++) {
+      if (modules[Math.floor(y / 5) - 4]?.[Math.floor(x / 5) - 4]) {
+        const offset = (y * side + x) * 4;
+        pixels.fill(0, offset, offset + 3);
+      }
+    }
+  }
+  assert.equal(jsQR(pixels, side, side)?.data, token);
 });

@@ -1,3 +1,4 @@
+import { appleGuestPass, googleGuestPass, guestPassPdf, walletAvailability } from "./guestPass";
 import { randomBytes } from "node:crypto";
 import type Database from "better-sqlite3";
 import type { Express, RequestHandler, Response } from "express";
@@ -1693,6 +1694,7 @@ export function registerZaylist(
     const event = storage.getEvent(entry.event_id);
     res.json({
       entryId: entry.id,
+      wallets: walletAvailability(),
       state: entry.state,
       event: event
         ? { id: event.id, title: event.title, dateStart: event.dateStart, venueName: event.venueName }
@@ -1703,6 +1705,29 @@ export function registerZaylist(
           : null,
       drinks: serializeDrinks(entry.id),
     });
+  });
+
+  app.get(entryPath + "/pass/:format", requireAuth, viewerGuard, entryScope, holderOnly, async (req, res) => {
+    const entry = res.locals.entry;
+    const token = store.activeToken(entry.id)?.token;
+    const event = storage.getEvent(entry.event_id);
+    if (!event || !token || !["accepted", "redeemed"].includes(entry.state)) {
+      return res.status(409).json({ error: "This entry has no active pass" });
+    }
+    const pass = { entryId: entry.id, token, title: event.title, venue: event.venueName || "", dateStart: event.dateStart };
+    const wallets = walletAvailability();
+    res.setHeader("Referrer-Policy", "no-referrer");
+    switch (req.params.format) {
+      case "pdf": return res.attachment("zaylist-guest-pass.pdf").type("application/pdf").send(await guestPassPdf(pass));
+      case "apple":
+        if (wallets.apple) return res.attachment("zaylist.pkpass").type("application/vnd.apple.pkpass").send(await appleGuestPass(pass));
+        break;
+      case "google":
+        if (wallets.google) return res.redirect(303, googleGuestPass(pass));
+        break;
+      default: return res.sendStatus(404);
+    }
+    return res.status(503).json({ error: "This wallet issuer is not configured" });
   });
 
   // ---- Drink comps on a guest's code: privilege-gated ----
@@ -1767,12 +1792,12 @@ export function registerZaylist(
   });
 
   // ---- The door: scanning (whole team) ----
-  function scanAccess(req: { body?: { token?: unknown } }, res: Response) {
+  function scanAccess(req: { body?: { token?: unknown; eventId?: unknown } }, res: Response) {
     const viewer = res.locals.viewer;
     const token = typeof req.body?.token === "string" ? req.body.token.trim() : "";
     const entry = token ? store.entryByToken(token) : undefined;
-    if (!entry) {
-      res.status(404).json({ error: "Code not recognized" });
+    if (!entry || (req.body?.eventId !== undefined && req.body.eventId !== entry.event_id)) {
+      res.status(404).json({ error: "Code not recognized for this event" });
       return undefined;
     }
     if (!accessFor(entry.event_id, viewer.id).team) {

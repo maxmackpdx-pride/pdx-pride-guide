@@ -132,6 +132,7 @@ export interface MyZaylistEntry {
 }
 
 export interface ZaylistPass {
+  wallets: { apple: boolean; google: boolean };
   entryId: number;
   state: ZaylistEntryState;
   event: {
@@ -233,16 +234,16 @@ export const zaylistApi = {
     apiRequest("POST", `/api/zaylist/entries/${entryId}/drinks`, body).then((r) => json(r)),
   revokeDrink: (drinkId: number) =>
     apiRequest("DELETE", `/api/zaylist/drinks/${drinkId}`).then((r) => json(r)),
-  scan: (token: string) =>
-    apiRequest("POST", `/api/zaylist/scan`, { token }).then((r) =>
+  scan: (token: string, eventId: number) =>
+    apiRequest("POST", `/api/zaylist/scan`, { token, eventId }).then((r) =>
       json<{
         result: "admitted" | "already-in";
         firstScan?: { by: string; at: string };
         guest: { username: string | null; displayName: string | null };
       }>(r),
     ),
-  scanDrink: (token: string, drinkGrantId?: number) =>
-    apiRequest("POST", `/api/zaylist/scan/drink`, drinkGrantId ? { token, drinkGrantId } : { token }).then((r) =>
+  scanDrink: (token: string, eventId: number, drinkGrantId?: number) =>
+    apiRequest("POST", `/api/zaylist/scan/drink`, { token, eventId, drinkGrantId }).then((r) =>
       json<{ ok: boolean; kind?: string; remaining?: number }>(r),
     ),
   mine: () =>

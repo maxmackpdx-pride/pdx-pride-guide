@@ -61,7 +61,7 @@ export default function EventMode({
   const handleToken = async (token: string) => {
     setFeedback(null);
     try {
-      const r = await zaylistApi.scan(token);
+      const r = await zaylistApi.scan(token, eventId);
       setLastToken(token);
       const name = r.guest.displayName || r.guest.username || "Guest";
       if (r.result === "admitted") {
@@ -86,7 +86,7 @@ export default function EventMode({
     if (!lastToken) return;
     setDrinkBusy(true);
     try {
-      const r = await zaylistApi.scanDrink(lastToken);
+      const r = await zaylistApi.scanDrink(lastToken, eventId);
       setFeedback({
         kind: "in",
         text: r.remaining != null ? `Drink served. ${r.remaining} left on the code.` : "Drink served.",

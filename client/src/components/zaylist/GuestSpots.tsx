@@ -45,6 +45,11 @@ function SpotCard({ entry }: { entry: MyZaylistEntry }) {
           <div className="zl-pass" style={{ marginTop: 10 }}>
             <QrPass token={pass.token} label={`Entry code for ${entry.eventTitle}`} />
             <div className="zl-pass-token">{pass.token}</div>
+            <div className="zl-row">
+              <a className="zl-btn" href={`/api/zaylist/entries/${entry.id}/pass/pdf`} download>Download PDF</a>
+              {pass.wallets.apple && <a className="zl-btn" href={`/api/zaylist/entries/${entry.id}/pass/apple`}>Add to Apple Wallet</a>}
+              {pass.wallets.google && <a className="zl-btn" href={`/api/zaylist/entries/${entry.id}/pass/google`} rel="noreferrer">Add to Google Wallet</a>}
+            </div>
             {pass.drinks.filter((d) => !d.revoked).length ? (
               <p className="zl-note">
                 On this code:{" "}

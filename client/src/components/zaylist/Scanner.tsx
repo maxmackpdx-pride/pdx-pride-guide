@@ -32,12 +32,8 @@ export default function Scanner({
     let stream: MediaStream | null = null;
     let raf = 0;
     let stopped = false;
-    const detector =
-      typeof window !== "undefined" && window.BarcodeDetector
-        ? new window.BarcodeDetector({ formats: ["qr_code"] })
-        : null;
     async function start() {
-      if (!detector || !navigator.mediaDevices?.getUserMedia) {
+      if (!navigator.mediaDevices?.getUserMedia) {
         setCameraState("unavailable");
         return;
       }
@@ -54,13 +50,31 @@ export default function Scanner({
         if (!video) return;
         video.srcObject = stream;
         await video.play();
+        if (stopped) return;
+        let detector: BarcodeDetectorLike | null = null;
+        try {
+          if (window.BarcodeDetector) detector = new window.BarcodeDetector({ formats: ["qr_code"] });
+        } catch { /* Some browsers expose a detector without QR support. */ }
+        const decode = detector ? null : (await import("jsqr")).default;
+        const canvas = document.createElement("canvas");
+        const ctx = decode ? canvas.getContext("2d", { willReadFrequently: true }) : null;
+        if (!detector && !ctx) throw new Error("Camera decoder unavailable");
+        if (stopped) return;
         setCameraState("on");
         const tick = async () => {
           if (stopped) return;
           try {
-            const codes = await detector.detect(video);
-            const raw = codes?.[0]?.rawValue?.trim();
-            if (raw) {
+            let raw: string | undefined;
+            if (detector) {
+              raw = (await detector.detect(video))[0]?.rawValue?.trim();
+            } else if (decode && ctx && video.videoWidth && video.videoHeight) {
+              const ratio = Math.min(1, 640 / Math.max(video.videoWidth, video.videoHeight));
+              canvas.width = Math.round(video.videoWidth * ratio);
+              canvas.height = Math.round(video.videoHeight * ratio);
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              raw = decode(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height)?.data;
+            }
+            if (raw && !stopped) {
               const now = Date.now();
               if (raw !== lastRef.current.value || now - lastRef.current.at > 4000) {
                 lastRef.current = { value: raw, at: now };
@@ -74,7 +88,8 @@ export default function Scanner({
         };
         tick();
       } catch {
-        setCameraState("unavailable");
+        stream?.getTracks().forEach(track => track.stop());
+        if (!stopped) setCameraState("unavailable");
       }
     }
     start();

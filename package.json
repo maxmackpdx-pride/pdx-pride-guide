@@ -38,6 +38,7 @@
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@maplibre/maplibre-gl-leaflet": "^0.1.4",
+    "@pdf-lib/fontkit": "^1.1.1",
     "@radix-ui/react-accordion": "^1.2.4",
     "@radix-ui/react-alert-dialog": "^1.1.7",
     "@radix-ui/react-aspect-ratio": "^1.1.3",
@@ -71,6 +72,7 @@
     "@types/leaflet": "^1.9.21",
     "@types/multer": "^2.1.0",
     "@types/opentype.js": "^1.3.10",
+    "@types/qrcode": "^1.5.6",
     "better-sqlite3": "12.11.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -87,6 +89,7 @@
     "helmet": "^8.2.0",
     "html2canvas": "^1.4.1",
     "input-otp": "^1.4.2",
+    "jsqr": "^1.4.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.453.0",
     "maplibre-contour": "^0.1.0",
@@ -96,8 +99,11 @@
     "multer": "^2.2.0",
     "next-themes": "^0.4.6",
     "opentype.js": "^2.0.0",
+    "passkit-generator": "^3.7.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.4",
     "react": "19.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "19.3.1",
@@ -120,8 +126,11 @@
     "zod-validation-error": "^3.4.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.0",
+    "@rolldown/plugin-babel": "^0.2.4",
     "@tailwindcss/typography": "^0.5.15",
     "@tailwindcss/vite": "^4.1.18",
+    "@types/babel__core": "^7.20.5",
     "@types/better-sqlite3": "^7.6.12",
     "@types/express": "^5.0.0",
     "@types/express-session": "^1.18.0",
@@ -135,6 +144,7 @@
     "@types/ws": "^8.5.13",
     "@vitejs/plugin-react": "6.2.1",
     "autoprefixer": "^10.4.20",
+    "babel-plugin-react-compiler": "^1.0.0",
     "drizzle-kit": "^0.31.8",
     "esbuild": "0.28.2",
     "playwright": "^1.52.0",
@@ -146,11 +156,7 @@
     "vite-plugin-pwa": "^1.3.0",
     "workbox-precaching": "^7.4.1",
     "workbox-routing": "^7.4.1",
-    "workbox-strategies": "^7.4.1",
-    "babel-plugin-react-compiler": "^1.0.0",
-    "@rolldown/plugin-babel": "^0.2.4",
-    "@babel/core": "^7.28.0",
-    "@types/babel__core": "^7.20.5"
+    "workbox-strategies": "^7.4.1"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
