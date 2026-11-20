@@ -290,6 +290,7 @@
 .zl-access summary { align-content:center; }
 .zl-hub-head {display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;padding:24px 0 18px;border-bottom:2px solid var(--zg-12);}
 .zl-hub-head h1 {font:800 clamp(2.7rem,8vw,5rem)/.97 var(--font-display);letter-spacing:-.045em;margin:4px 0 0;color:var(--zg-12);}
+.zl-hub-head .zl-help-back {color:var(--zg-12);text-decoration:underline;text-underline-offset:.2em;}
 .zl-hub-head p {margin:0;color:var(--zg-11);}
 .zl-stat-strip {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:14px 0;gap:8px;}
 .zl-stat-strip>div {display:flex;flex-direction:column-reverse;align-items:flex-start;padding:12px 8px;background:var(--zg-3);border-radius:10px;}

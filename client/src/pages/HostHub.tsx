@@ -29,13 +29,13 @@ export default function HostHub() {
   const data=workspace.data, events=data?.events||[];
   const admin=!!(user?.isAdmin||user?.isSuperAdmin);
   const owner=!!user?.isPrimaryOwner;
-  if(loading) return <main className="zl-root"><p role="status">Loading your hub…</p></main>;
-  if(!user) return <main className="zl-root"><div className="zl-wrap"><header className="zl-hub-head"><h1>Your Zay’list</h1>
+  if(loading) return <div className="zl-root"><div className="zl-wrap"><header className="zl-hub-head"><h1>Your Zay’list</h1><p role="status">Loading your hub…</p></header></div></div>;
+  if(!user) return <div className="zl-root"><div className="zl-wrap"><header className="zl-hub-head"><h1>Your Zay’list</h1>
     <p>Guest spots, passes and the nights you host.</p>
     <button className="zl-btn zl-btn--primary" onClick={()=>setAuth(true)}>Sign in or join</button>
     <a className="zl-btn" href="/hub/help">How to use your Zay’list</a>
-    {auth&&<AuthModal onClose={()=>setAuth(false)}/>}</header></div></main>;
-  return <main className="zl-root"><div className="zl-wrap zl-workspace">
+    {auth&&<AuthModal onClose={()=>setAuth(false)}/>}</header></div></div>;
+  return <div className="zl-root"><div className="zl-wrap zl-workspace">
     <header className="zl-hub-head"><div><p>{user.displayName||user.username}</p><h1>Your Zay’list</h1></div>
       <button type="button" className="zl-btn" onClick={e=>openSheet({account:"personal",view:"inbox"},e.currentTarget)}>Inbox</button></header>
     <PushComposer events={events.filter(e=>e.canEditEvent||e.canManageTeam)}/>
@@ -59,5 +59,5 @@ export default function HostHub() {
     </div></section>}
     {owner&&<section className="zl-section"><h2>Owner desk</h2><button className="zl-btn" onClick={e=>openSheet({account:"owner",view:"inbox"},e.currentTarget)}>Open owner inbox</button><PushMemberships/><PlanningOwnerDesk/></section>}
     <a className="zl-btn" href="/hub/help">How to use your Zay’list</a>
-  </div></main>;
+  </div></div>;
 }

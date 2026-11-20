@@ -1,3 +1,4 @@
+import dockCompass from "@/assets/dock-compass.svg";
 import { useCallback, useEffect, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
@@ -127,18 +128,7 @@ export default function MobileBottomNav() {
             onClick={toggleWorldFan}
           >
             <span className="znav-icon-row">
-              <svg width="28" height="32" style={{ width: 28, height: 32, flexShrink: 0 }} viewBox="0 0 36 42" fill="none" aria-hidden="true" focusable="false">
-                <circle cx="18" cy="21" r="11.5" stroke="#fff" strokeWidth="2.2" />
-                <circle cx="18" cy="21" r="7.5" stroke="#fff" strokeWidth="1.2" opacity=".72" />
-                <path d="M18 7.5 20 11h-4l2-3.5ZM31.5 21 28 23v-4l3.5 2ZM18 34.5 16 31h4l-2 3.5ZM4.5 21 8 19v4l-3.5-2Z" fill="#fff" />
-                <path d="m14.5 14.5 10 6.5-10 6.5v-13Z" fill="#fff" />
-                <g fill="#fff" fontFamily="Arial Narrow, Arial, sans-serif" fontSize="5.4" fontWeight="900" textAnchor="middle">
-                  <text x="18" y="5.5">N</text>
-                  <text x="33.5" y="22.9">E</text>
-                  <text x="18" y="41">S</text>
-                  <text x="2.5" y="22.9">W</text>
-                </g>
-              </svg>
+              <img src={dockCompass} alt="" width={28} height={32} style={{width:28,height:32,flexShrink:0}} />
             </span>
                       </a>
 

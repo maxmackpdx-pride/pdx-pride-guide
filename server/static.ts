@@ -39,9 +39,15 @@ export function serveStatic(app: Express, distPath = path.resolve(__dirname, "pu
       baseIndexHtml = baseIndexHtml.replace('<div id="root"></div>', `<div id="root">${homeBootLogoHtml}</div>`);
     }
     const mapEntry=["/placez/map","/map","/map-demo","/outzide"].includes(requestPath)||requestPath.startsWith("/outzide/share/")?"src/pages/UnifiedMap.tsx":null;
-    if(mapEntry){
-      // The homepage globe competes with the map engine on cold map routes.
+    const hubPath = requestPath.replace(/\/+$/, "").toLowerCase();
+    if (hubPath === "/hub/help") {
+      baseIndexHtml = baseIndexHtml.replace("</head>", '<link rel="preload" as="image" type="image/webp" href="/guides/zaylist-walkthrough-cover.webp" fetchpriority="high"></head>');
+    }
+    if (mapEntry || hubPath === "/hub" || hubPath === "/hub/help") {
+      // These entries never display the homepage globe.
       baseIndexHtml=baseIndexHtml.replace(/<link[^>]*href="\/home-globe\/portland-city-beam-density\.png"[^>]*>/g, "");
+    }
+    if(mapEntry){
       const manifest=JSON.parse(fs.readFileSync(path.join(distPath,".vite/manifest.json"),"utf8"));
       const entry=manifest[mapEntry];
       if(entry){

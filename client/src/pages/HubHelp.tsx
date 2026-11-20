@@ -1,12 +1,14 @@
+import {useState} from "react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import "../components/zaylist/zaylist.css";
 
 export default function HubHelp() {
+  const [shortOpen, setShortOpen] = useState(false);
   usePageSeo("How to use your Zay’list", "Find a guest pass, run your event list, check in guests and redeem drinks.");
-  return <main className="zl-root"><article className="zl-wrap">
-    <header className="zl-hub-head"><div><a href="/hub">Your hub</a><h1>How to use your Zay’list</h1></div></header>
+  return <div className="zl-root"><article className="zl-wrap">
+    <header className="zl-hub-head"><div><a className="zl-help-back" href="/hub">Your hub</a><h1>How to use your Zay’list</h1></div></header>
     <section className="zl-section" aria-label="Walkthrough">
-      <video controls playsInline preload="none" width="960" height="720" style={{width:"100%",height:"auto",background:"#121314",display:"block"}} poster="/guides/zaylist-walkthrough-cover.jpg">
+      <video controls playsInline preload="none" width="960" height="720" style={{width:"100%",height:"auto",background:"var(--zg-12)",display:"block"}} aria-label="How to use your Zay’list" poster="/guides/zaylist-walkthrough-cover.webp">
         <source src="/guides/zaylist-walkthrough.mp4" type="video/mp4" />
         <track default kind="captions" srcLang="en" label="English" src="/guides/zaylist-walkthrough.vtt" />
       </video>
@@ -25,15 +27,15 @@ export default function HubHelp() {
       <p>Open <strong>Event Mode</strong> for your event. In <strong>Door check-in</strong>, scan the pass or enter its code. The result confirms the guest’s arrival. A repeat scan shows the earlier check-in.</p>
       <p>Select <strong>Bar service</strong> and check the pass to see available offers. Tap the named drink or discount to redeem it. The confirmation shows how many uses remain.</p>
     </section>
-    <details className="zl-section">
+    <details className="zl-section" onToggle={event => setShortOpen(event.currentTarget.open)}>
       <summary>Watch the Portland short · Where to tonight?</summary>
-      <video controls playsInline preload="none" width="576" height="1024"
+      {shortOpen && <video controls playsInline preload="none" width="576" height="1024"
         style={{ width: "min(100%, 24rem)", height: "auto", display: "block", margin: "1rem auto" }}
         poster="/guides/zaylist-portland-cover.jpg" aria-label="Where to tonight? A 32-second tour of Zaylist">
         <source src="/guides/zaylist-portland.mp4" type="video/mp4" />
         <track kind="captions" default srcLang="en" label="English" src="/guides/zaylist-portland.vtt" />
-      </video>
+      </video>}
     </details>
     <a className="zl-btn zl-btn--primary" href="/hub">Open your hub</a>
-  </article></main>;
+  </article></div>;
 }
