@@ -64,9 +64,10 @@ export function createGuestListOperations(db: Database.Database, store: ZaylistS
         WHERE entry_id=? AND sent_at IS NOT NULL AND unixepoch(sent_at)*1000<=?`).run(entryId, now - 600000);
     }
   }
-  function draw(eventId: number, by: number, count: number | null, now: number) {
+  function draw(eventId: number, by: number, count: number | null, now: number, recordEmpty = true) {
     return db.transaction(() => {
-      const result = store.runDraw(eventId, by, count, new Date(now).toISOString());
+      if (store.frozen(eventId)) return {ok:false as const,error:"frozen"};
+      const result = store.runDraw(eventId, by, count, new Date(now).toISOString(), recordEmpty);
       if (result.ok) {
         const entries = db.prepare("SELECT id FROM zaylist_entries WHERE draw_id=?").all(result.drawId) as {id: number}[];
         entries.forEach(entry => notifyEntry(entry.id));
@@ -87,7 +88,7 @@ export function createGuestListOperations(db: Database.Database, store: ZaylistS
       db.transaction(() => {
         const slot = cfg.dripPerDay ? today : "allocation";
         if (db.prepare("SELECT 1 FROM zaylist_draw_schedule_receipts WHERE event_id=? AND slot=?").get(id, slot)) return;
-        const result = draw(id, cfg.updatedBy!, cfg.dripPerDay || null, now);
+        const result = draw(id, cfg.updatedBy!, cfg.dripPerDay || null, now, false);
         if (!result.ok) return;
         db.prepare("INSERT INTO zaylist_draw_schedule_receipts VALUES(?,?,?)").run(id, slot, result.drawId);
       }).immediate();

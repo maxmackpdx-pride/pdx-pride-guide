@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import UsernameAutocomplete from "@/components/UsernameAutocomplete";
@@ -81,4 +81,31 @@ export function EventGig({event}:{event:HostEvent}){
     {link>0&&<a className="zl-btn" href={`/gigz?gig=${link}`}>View posted gig</a>}
     {open&&<Suspense fallback={<p>Loading composer…</p>}><GigComposer eventLink={{eventId:event.id,occurrenceDate:day}} venueName={event.venueName||undefined}
       onClose={()=>setOpen(false)} onPosted={id=>{setLink(id);setOpen(false);}}/></Suspense>}</>;
+}
+
+type ScanRecord = {id:number;kind:"entry"|"drink";at:string;guest:string;scanner:string;offer:"comp"|"discount"|null;percent:number|null};
+type ScanPage = {items:ScanRecord[];next:number|null};
+
+export function ScanLedger({eventId}:{eventId:number}) {
+  const [open,setOpen] = useState(false);
+  const {user}=useAuth();
+  const path = `/api/events/${eventId}/zaylist/scans`;
+  const ledger = useInfiniteQuery({
+    queryKey:[path,user?.id],enabled:open,initialPageParam:null as number|null,
+    queryFn:({pageParam}) => apiRequest("GET",pageParam ? `${path}?before=${pageParam}` : path).then(r=>r.json() as Promise<ScanPage>),
+    getNextPageParam:page=>page.next ?? undefined,
+  });
+  const records = ledger.data?.pages.flatMap(p=>p.items) || [];
+  return <details className="zl-tool" onToggle={e=>setOpen(e.currentTarget.open)}><summary>Door &amp; bar records</summary>
+    {open && <>
+      {ledger.isPending && <p className="zl-note">Loading scans…</p>}
+      {ledger.isError && <button type="button" className="zl-btn" onClick={()=>ledger.refetch()}>Retry scans</button>}
+      {ledger.isSuccess && !records.length && <p className="zl-note">No passes have been scanned yet.</p>}
+      <ol className="zl-scan-ledger">{records.map(row=><li key={row.id}>
+        <strong>{row.guest}</strong> · {row.kind === "entry" ? "Checked in" : row.offer === "comp" ? "Comped drink" : row.percent + "% discount"}
+        <span>{row.scanner} · {new Date(row.at.replace(" ","T")+"Z").toLocaleString(undefined,{dateStyle:"short",timeStyle:"short",timeZone:"America/Los_Angeles"})} PT</span>
+      </li>)}</ol>
+      {ledger.hasNextPage && <button className="zl-btn" type="button" disabled={ledger.isFetchingNextPage} onClick={()=>ledger.fetchNextPage()}>Earlier scans</button>}
+    </>}
+  </details>;
 }

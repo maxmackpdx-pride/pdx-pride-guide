@@ -49,6 +49,7 @@ function PersonRow({
         <div className="zl-person-meta">
           {stateLabel(entry.state)}
           {entry.important ? " · Talent" : ""}
+          {entry.giftedFromName ? " · Gift from " + entry.giftedFromName : entry.addedByName ? " · Added by " + entry.addedByName : ""}
           {entry.source === "draw" ? " · Draw" : entry.source === "invite" ? " · Invite" : ""}
           {drinks.length
             ? " · " +
@@ -167,7 +168,7 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
     drawDaysBefore: cfg?.drawDaysBefore != null ? String(cfg.drawDaysBefore) : "",
     dripPerDay: cfg?.dripPerDay != null ? String(cfg.dripPerDay) : "",
   };
-  const canAdd = perms.editor || !!perms.allowance;
+  const canAdd = (!payload.frozen || perms.isOwner) && (perms.editor || !!perms.allowance);
 
   const doSearch = async (q: string) => {
     setSearchQ(q);
@@ -214,6 +215,7 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
         <div className="zl-count"><b>{payload.counts.poolSize}</b><span>Pool</span></div>
         <div className="zl-count"><b>{payload.counts.drinksOutstanding}</b><span>Drinks out</span></div>
       </div>
+      {payload.frozen && <p className="zl-note" role="status">The list is frozen. Only the owner can add guests.</p>}
       {perms.allowance ? (
         <p className="zl-note">
           Your allowance: {perms.allowance.used} of {perms.allowance.spots} used ({perms.allowance.role}).
@@ -494,6 +496,7 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
             <button
               className="zl-btn"
               type="button"
+              disabled={payload.frozen}
               onClick={() =>
                 void run(
                   () => zaylistApi.runDraw(eventId, drawCount ? Number(drawCount) : undefined),

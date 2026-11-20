@@ -36,6 +36,8 @@ export interface ZaylistEntry {
   authorityUserId: number;
   drawId: number | null;
   giftedFrom: number | null;
+  addedByName?: string;
+  giftedFromName?: string;
   createdAt: string;
   acceptedAt: string | null;
   username: string | null;
@@ -102,6 +104,7 @@ export interface ZaylistPermissions {
 }
 
 export interface ZaylistEventPayload {
+  frozen: boolean;
   config: ZaylistConfig | null;
   counts: ZaylistCounts;
   entries: ZaylistEntry[];

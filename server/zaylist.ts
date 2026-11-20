@@ -60,6 +60,14 @@ export function createZaylistStore(db: Database.Database) {
       updated_by INTEGER REFERENCES users(id),
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
+    CREATE TABLE IF NOT EXISTS zaylist_door_freezes (
+      id INTEGER PRIMARY KEY,
+      event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+      actor_id INTEGER NOT NULL REFERENCES users(id),
+      frozen INTEGER NOT NULL CHECK(frozen IN (0,1)),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_zaylist_door_freezes ON zaylist_door_freezes(event_id,id DESC);
     CREATE TABLE IF NOT EXISTS zaylist_allowances (
       id INTEGER PRIMARY KEY,
       event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
@@ -320,6 +328,11 @@ export function createZaylistStore(db: Database.Database) {
 
   return {
     config,
+    frozen(eventId: number) {
+      const state = db.prepare("SELECT frozen FROM zaylist_door_freezes WHERE event_id=? ORDER BY id DESC LIMIT 1")
+        .get(eventId) as {frozen:number} | undefined;
+      return state?.frozen === 1;
+    },
     setConfig(
       eventId: number,
       by: number,
@@ -359,8 +372,13 @@ export function createZaylistStore(db: Database.Database) {
           e.added_by AS addedBy, e.authority_user_id AS authorityUserId,
           e.draw_id AS drawId, e.gifted_from AS giftedFrom,
           e.created_at AS createdAt, e.accepted_at AS acceptedAt,
-          u.username, u.display_name AS displayName
+          u.username, u.display_name AS displayName,
+          COALESCE(adder.display_name,adder.username) AS addedByName,
+          COALESCE(prior.display_name,prior.username) AS giftedFromName
           FROM zaylist_entries e LEFT JOIN users u ON u.id=e.user_id
+          LEFT JOIN users adder ON adder.id=e.added_by
+          LEFT JOIN zaylist_entries parent ON parent.id=e.gifted_from
+          LEFT JOIN users prior ON prior.id=parent.user_id
           WHERE e.event_id=? ORDER BY e.id`,
         )
         .all(eventId);
@@ -494,7 +512,7 @@ export function createZaylistStore(db: Database.Database) {
         .get(eventId, userId);
     },
     addSpot: insertEntry,
-    runDraw(eventId: number, runBy: number, requested: number | null, nowIso: string) {
+    runDraw(eventId: number, runBy: number, requested: number | null, nowIso: string, recordEmpty = true) {
       return db.transaction(() => {
         const cfg = config(eventId);
         if (!cfg || cfg.poolSize <= 0)
@@ -508,10 +526,11 @@ export function createZaylistStore(db: Database.Database) {
               WHERE a.event_id=? AND a.is_active=1 AND (a.expires_at IS NULL OR a.expires_at>?)
               AND u.status='active' AND a.user_id IS NOT NULL
               AND NOT EXISTS (SELECT 1 FROM zaylist_entries e WHERE e.event_id=a.event_id
-                AND e.user_id=a.user_id AND (e.state IN (${livePh}) OR e.state='declined'))`,
+                AND e.user_id=a.user_id AND (e.state IN (${livePh}) OR e.state='declined' OR e.draw_id IS NOT NULL))`,
             )
             .get(eventId, nowIso, ...LIVE_STATES) as { n: number }
         ).n;
+        if (!recordEmpty && !eligible) return {ok:false as const,error:"no-eligible-rsvps"};
         const want = Math.min(requested ?? remaining, remaining, eligible);
         const drawInfo = db
           .prepare(
@@ -526,7 +545,7 @@ export function createZaylistStore(db: Database.Database) {
               WHERE a.event_id=? AND a.is_active=1 AND (a.expires_at IS NULL OR a.expires_at>?)
               AND u.status='active' AND a.user_id IS NOT NULL
               AND NOT EXISTS (SELECT 1 FROM zaylist_entries e WHERE e.event_id=a.event_id
-                AND e.user_id=a.user_id AND (e.state IN (${livePh}) OR e.state='declined'))
+                AND e.user_id=a.user_id AND (e.state IN (${livePh}) OR e.state='declined' OR e.draw_id IS NOT NULL))
               ORDER BY RANDOM() LIMIT ?`,
             )
             .all(eventId, nowIso, ...LIVE_STATES, want) as { userId: number }[];
@@ -1020,6 +1039,7 @@ export function registerZaylist(
     const messages: Record<string, string> = {
       "no-pool": "The Zay'list pool is not open for this event",
       "pool-full": "The Zay'list pool is full",
+      frozen: "The list is frozen at the door. The event owner can reopen it.",
       "already-on-list": "That person is already on this Zay'list",
       "allowance-exhausted": "No spots left in your Zay'list allowance",
     };
@@ -1123,6 +1143,7 @@ export function registerZaylist(
     }));
     res.json({
       config: store.config(event.id) ?? null,
+      frozen: store.frozen(event.id),
       counts: store.counts(event.id),
       entries,
       allowances: access.editor ? store.allowances(event.id) : undefined,
@@ -1143,6 +1164,37 @@ export function registerZaylist(
           : null,
       },
     });
+  });
+
+  app.put(eventPath + "/freeze", requireAuth, viewerGuard, scope, (req, res) => {
+    const event = res.locals.event as Event;
+    const viewer = res.locals.viewer;
+    if (!accessFor(event.id, viewer.id).isOwner) return res.status(403).json({error:"Only the event owner can freeze or reopen the list"});
+    if (typeof req.body?.frozen !== "boolean") return res.status(400).json({error:"Choose a door state"});
+    const {frozen} = req.body;
+    db.transaction(() => {
+      if (store.frozen(event.id) !== frozen) {
+        db.prepare("INSERT INTO zaylist_door_freezes(event_id,actor_id,frozen) VALUES(?,?,?)").run(event.id,viewer.id,Number(frozen));
+      }
+    }).immediate();
+    res.json({frozen});
+  });
+
+  app.get(eventPath + "/scans", requireAuth, viewerGuard, scope, (req, res) => {
+    const event = res.locals.event as Event;
+    if (!accessFor(event.id, res.locals.viewer.id).editor) return res.status(403).json({error:"Only list editors can review scan records"});
+    const cursor = req.query.before === undefined ? Number.MAX_SAFE_INTEGER : Number(req.query.before);
+    if (!Number.isSafeInteger(cursor) || cursor < 1) return res.status(400).json({error:"Invalid scan cursor"});
+    const rows = db.prepare(`SELECT r.id, r.kind, r.created_at AS at,
+      COALESCE(guest.display_name,guest.username,'Guest') AS guest,
+      COALESCE(scanner.display_name,scanner.username) AS scanner,
+      grant_info.kind AS offer,grant_info.percent
+      FROM zaylist_redemptions r JOIN zaylist_entries e ON e.id=r.entry_id
+      LEFT JOIN users guest ON guest.id=e.user_id JOIN users scanner ON scanner.id=r.scanned_by
+      LEFT JOIN zaylist_drink_grants grant_info ON grant_info.id=r.drink_grant_id
+      WHERE r.event_id=? AND r.id<? ORDER BY r.id DESC LIMIT 51`).all(event.id,cursor) as {id:number}[];
+    const items = rows.slice(0,50);
+    res.json({ items, next: rows.length>50 ? items.at(-1)!.id : null });
   });
 
   // ---- Allocation config: owner / full-access ----
@@ -1269,6 +1321,7 @@ export function registerZaylist(
       res.status(403).json({ error: "You cannot add people to this Zay'list" });
       return;
     }
+    if (store.frozen(event.id) && !access.isOwner) return spotError(res,"frozen");
     const target = resolveTarget(req.body ?? {});
     if (target === undefined) {
       res.status(404).json({ error: "Member unavailable" });
@@ -1651,6 +1704,7 @@ export function registerZaylist(
       res.status(409).json({ error: "Only a live spot can be gifted" });
       return;
     }
+    if (store.frozen(entry.event_id)) return spotError(res,"frozen");
     const target = resolveTarget(req.body ?? {});
     if (target === undefined) {
       res.status(404).json({ error: "Member unavailable" });

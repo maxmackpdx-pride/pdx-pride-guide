@@ -1,4 +1,6 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { apiRequest } from "@/lib/queryClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   entryName,
@@ -45,7 +47,25 @@ export default function EventMode({
   const [scanning, setScanning] = useState(false);
   const [drinkBusy, setDrinkBusy] = useState(false);
 
+  const layerRef = useRef<HTMLDialogElement>(null);
   const dialogRef = useModalA11y({onClose});
+  const [changingFreeze,setChangingFreeze] = useState(false);
+  useEffect(() => {
+    const layer = layerRef.current;
+    layer?.showModal();
+    return () => layer?.close();
+  }, []);
+
+  async function changeFreeze() {
+    if (!payload?.permissions.isOwner || changingFreeze) return;
+    setChangingFreeze(true);
+    try {
+      await apiRequest("PUT", `/api/events/${eventId}/zaylist/freeze`, {frozen:!payload.frozen});
+      await queryClient.invalidateQueries({queryKey:key});
+    } catch (err) {
+      setFeedback({kind:"error",text:zaylistError(err,"Could not change the door state.")});
+    } finally {setChangingFreeze(false);}
+  }
 
   const { pinned, rest } = useMemo(() => {
     const entries = (payload?.entries ?? []).filter(
@@ -134,8 +154,9 @@ export default function EventMode({
     </div>
   );
 
-  return (
-    <div className="zl-door" ref={dialogRef} role="dialog" aria-modal="true" aria-label={`Event Mode for ${eventTitle}`}>
+  return createPortal(
+    <dialog className="zl-door-layer" ref={layerRef} aria-label={`Event Mode for ${eventTitle}`} onCancel={e=>{e.preventDefault();onClose();}}>
+    <div className="zl-root zl-door" ref={dialogRef}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <h2>{eventTitle}</h2>
@@ -151,6 +172,11 @@ export default function EventMode({
         </button>
       </div>
 
+      {payload && (payload.permissions.isOwner || payload.frozen) && <div className="zl-door-freeze">
+        <span>{payload.frozen ? "List frozen · owner adds only" : "Guest list open"}</span>
+        {payload.permissions.isOwner && <button className="zl-btn zl-btn--small" type="button" disabled={changingFreeze}
+          aria-pressed={payload.frozen} onClick={()=>void changeFreeze()}>{payload.frozen ? "Reopen list" : "Freeze list"}</button>}
+      </div>}
       {counterOn ? (
         <div className="zl-counter">
           <button className="zl-counter-btn zl-counter-btn--minus" type="button" onClick={() => setCount((c) => Math.max(0, c - 1))} aria-label="Count down">
@@ -207,5 +233,6 @@ export default function EventMode({
         ) : null}
       </div>
     </div>
+    </dialog>, document.body,
   );
 }

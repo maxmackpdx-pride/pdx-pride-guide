@@ -638,3 +638,52 @@ test("bar inspection and serving preserve admission, separate grant limits, and 
   assert.equal((await request(`/api/zaylist/entries/${entry}/pass`,7)).status,404);
   assert.equal((await request("/api/me/zaylist",7)).body.entries.length,0);
 });
+
+test("an owner can freeze and reopen the list; admitted guests retain bar service and the scan ledger stays scoped",async t=>{
+  const {db,request,setConfig,operations,store}=await setup(t);
+  const base="/api/events/10/zaylist";
+  await setConfig(1,5);
+  await request(base+"/allowances/3",1,"PUT",{role:"staff",spots:2});
+  await request(base+"/grants/9",1,"PUT",{});
+  const id=(await request(base+"/entries",1,"POST",{userId:5})).body.entry.id;
+  await request(`/api/zaylist/entries/${id}/drinks`,1,"POST",{kind:"discount",total:1,percent:25});
+  const freeze=(actor:number,frozen:boolean)=>request(base+"/freeze",actor,"PUT",{frozen});
+  assert.equal((await freeze(9,true)).status,403);
+  assert.equal((await freeze(1,true)).status,200);
+  assert.equal((await freeze(1,true)).status,200);
+  assert.equal((db.prepare("SELECT COUNT(*) AS n FROM zaylist_door_freezes").get() as {n:number}).n,1);
+  assert.equal((await request(base,3)).body.frozen,true);
+  assert.equal((await request(base+"/entries",3,"POST",{userId:6})).status,409);
+  assert.equal((await request(base+"/entries",1,"POST",{userId:7})).status,201);
+  assert.equal((await request(`/api/zaylist/entries/${id}/gift`,5,"POST",{userId:8})).status,409);
+  assert.equal(operations.draw(10,1,1,Date.now()).ok,false);
+  const token=(await request(`/api/zaylist/entries/${id}/accept`,5,"POST")).body.token;
+  const scan=(suffix:string)=>request("/api/zaylist/scan"+suffix,3,"POST",{token,eventId:10});
+  await scan("");await scan("/drink");
+  assert.equal((await request(base+"/scans",3)).status,403);
+  assert.equal((await request(base+"/scans",5)).status,403);
+  const rows=(await request(base+"/scans",2)).body.items;
+  assert.deepEqual(rows.map((r:{kind:string;scanner:string})=>[r.kind,r.scanner]),[["drink","Staff"],["entry","Staff"]]);
+  assert.equal(rows[0].percent,25);
+  assert.equal((await request(base+"/scans?before="+rows[0].id,1)).body.items.length,1);
+  assert.equal((await request(base+"/scans?before=-2",1)).status,400);
+  await freeze(1,false);
+  assert.equal(store.frozen(10),false);
+  assert.equal((await request(base+"/entries",3,"POST",{userId:6})).status,201);
+});
+
+test("an empty scheduled draw waits for an RSVP and a gifted winner cannot redraw",async t=>{
+  const {db,request,operations,store}=await setup(t);
+  await request("/api/events/10/zaylist/config",1,"PUT",{poolSize:4,maxCap:4,drawDaysBefore:2,dripPerDay:1});
+  db.prepare("UPDATE attendances SET is_active=0").run();
+  const now = Date.parse("2099-06-29T18:00:00Z");
+  operations.dueDraws(now);
+  assert.equal(store.draws(10).length,0);
+  db.prepare("UPDATE attendances SET is_active=1 WHERE user_id=5").run();
+  operations.dueDraws(now+60000);
+  assert.equal(store.draws(10).length,1);
+  const winner = store.holderEntry(10,5)!;
+  assert.equal((await request(`/api/zaylist/entries/${winner.id}/gift`,5,"POST",{userId:8})).status,201);
+  const again=operations.draw(10,1,1,now+120000);
+  assert.ok(again.ok && again.awarded===0);
+});

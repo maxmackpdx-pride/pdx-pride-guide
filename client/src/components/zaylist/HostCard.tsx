@@ -5,7 +5,7 @@ import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import ZaylistPanel from "./ZaylistPanel";
-import { EventTeam, Connections, EventGig } from "./HostOperations";
+import { EventTeam, Connections, EventGig, ScanLedger } from "./HostOperations";
 import PushComposer from "./PushComposer";
 import EventMode from "./EventMode";
 
@@ -262,6 +262,7 @@ export default function HostCard({
                 ].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
                 <p className="zl-note">Interested counts event follows. Going counts active RSVPs. Checked in and drinks served come from door scans.</p>
               </details>
+              {event.canManageList && <ScanLedger eventId={event.id}/>}
               <EventTeam event={event} otherEvents={otherEvents}/>
               <RosterChat kind="events" id={event.id}/>
               {event.canManageList && <Connections kind="events" id={event.id}/>}
