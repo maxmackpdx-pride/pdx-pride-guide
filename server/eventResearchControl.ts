@@ -757,6 +757,26 @@ function evaluateCandidateDecisionGate(input: {
   for (const observation of observations) {
     if (observation.authority_level === "primary" && !latestByField.has(observation.field)) latestByField.set(observation.field, observation);
   }
+  // A missing image is publishable after each supplied official page has been reviewed.
+  // Track pages individually so a venue receipt cannot silently cover its ticket seller.
+  const artworkPages = new Set<string>();
+  const reviewedArtworkPages = new Set<string>();
+  if (values.status === "LIVE" && !values.posterImageUrl) {
+    const ticket = safeUrl(values.ticketUrl);
+    if (ticket) artworkPages.add(ticket);
+    for (const observation of observations) {
+      if (observation.authority_level !== "primary") continue;
+      const page = safeUrl(observation.source_url);
+      if (!page) continue;
+      if (observation.field === "artwork-review") {
+        const result = parseJson<string>(observation.observed_value_json, "");
+        if (result === "no-official-image") reviewedArtworkPages.add(page);
+      } else if (EVENT_EVIDENCE_FIELDS.some(field => field === observation.field)) {
+        artworkPages.add(page);
+      }
+    }
+  }
+  const uncheckedArtworkPages = [...artworkPages].filter(page => !reviewedArtworkPages.has(page));
   const fieldsNeedingEvidence = fields.filter(field => qsearchFieldNeedsEvidence(field, values[field]));
   const missingEvidence = fieldsNeedingEvidence.filter(field => !latestByField.has(field));
   const mismatchedEvidence = fieldsNeedingEvidence.filter(field => latestByField.has(field) && JSON.stringify(parseJson(latestByField.get(field)!.observed_value_json, null)) !== JSON.stringify(values[field]));
@@ -768,10 +788,10 @@ function evaluateCandidateDecisionGate(input: {
   const reviews = sqlite.prepare(`SELECT id FROM agent_review_queue WHERE candidate_key = ? AND status = 'open'`).all(candidateKey) as Array<{ id: string }>;
   const failedTests = sqlite.prepare(`SELECT test_key FROM agent_mistake_tests WHERE status = 'active' AND (last_result IS NULL OR last_result != 'passed' OR last_run_at IS NULL OR last_run_at < ?)`).all(run.started_at) as Array<{ test_key: string }>;
   const duplicate = missingRequiredFields.length ? undefined : storage.getEvents({}).find(event => eventDedupeKey(event) === eventDedupeKey({ id: 0, title: String(values.title), venueName: String(values.venueName), dateStart: String(values.dateStart) }));
-  const publishable = !missingRequiredFields.length && !invalidCandidateFields.length && !missingEvidence.length && !mismatchedEvidence.length && !canceled && !duplicate;
+  const publishable = !missingRequiredFields.length && !invalidCandidateFields.length && !missingEvidence.length && !mismatchedEvidence.length && !canceled && !duplicate && !uncheckedArtworkPages.length;
   return {
     ok: true as const, candidateKey, decision: publishable ? "approved" : "blocked", publishable,
-    missingRequiredFields, invalidCandidateFields, missingEvidence, mismatchedEvidence, conflictingEvidence,
+    missingRequiredFields, invalidCandidateFields, missingEvidence, mismatchedEvidence, conflictingEvidence, uncheckedArtworkPages,
     materialConflicts: conflicts.map(item => item.field), openReviewItems: reviews.map(item => item.id),
     insufficientIndependentVerification, unpassedMistakeTests: failedTests.map(item => item.test_key),
     canceled: Boolean(canceled),

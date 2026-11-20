@@ -1134,6 +1134,8 @@ export function getEventResearchSourceMemory() {
       generalVenues: "require_event_specific_lgbtq_evidence",
       dedicatedGayVenues: "venue_calendar_is_relevance_evidence",
       venueIdentity: "exact_name_and_address_when_available",
+      fetlife: "The listing itself must explicitly establish public access and LGBTQ+ relevance. Verified Sanctuary events and Portland Leather Alliance events have standing relevance approval. Preserve ordinary date, status and access checks.",
+      privateVenueAddress: "Register for address. Never publish a private or vetted street location.",
       sanctuaryArtwork: "exact_event_only",
       badlandsPlaAttribution: "explicit_event_credit_only",
       unknownValues: "preserve_unknown_never_guess",
@@ -1151,6 +1153,8 @@ export function getEventResearchSourceMemory() {
         "admission or ticket price",
       ],
       exactEventRequired: true,
+      portraitPreference: "Choose the tall image when the organizer provides both tall and wide posters for the occurrence.",
+      posterlessPublication: "Review every supplied official source and ticket page. Record primary artwork-review evidence with observedValue no-official-image on each page that you inspected and found empty of event art. A blocked fetch is unresolved.",
       rejectAsEventArtwork: [
         "venue logo",
         "site-wide calendar hero",

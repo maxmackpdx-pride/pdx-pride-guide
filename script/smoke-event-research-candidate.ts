@@ -31,6 +31,16 @@ const checkedAt = new Date().toISOString();
 for (const [field, observedValue] of Object.entries(event)) {
   assert.equal(recordFieldEvidence({ runId: run.runId, entityKey: candidateKey, field, observedValue, sourceUrl, checkedAt }).ok, true);
 }
+assert.deepEqual(gate().uncheckedArtworkPages, [sourceUrl]);
+const reviewArtwork = (url: string) => recordFieldEvidence({
+  runId: run.runId, entityKey: candidateKey, field: "artwork-review",
+  observedValue: "no-official-image", sourceUrl: url, checkedAt,
+});
+reviewArtwork(sourceUrl);
+const ticketUrl = "https://tickets.example.org/venue/event";
+assert.deepEqual(gate({ ...event, ticketUrl }).uncheckedArtworkPages, [ticketUrl]);
+reviewArtwork(ticketUrl);
+assert.deepEqual(gate({ ...event, ticketUrl }).uncheckedArtworkPages, []);
 assert.equal(gate().publishable, true, "one official source is enough for title, location, and start time");
 assert.deepEqual(gate().insufficientIndependentVerification, []);
 

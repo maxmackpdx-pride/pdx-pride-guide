@@ -156,6 +156,10 @@ for (const [field, observedValue] of Object.entries(createEvent)) {
     assert.equal(recordFieldEvidence({ runId: createRun.runId, entityKey: createCandidateKey, field, observedValue, sourceUrl: url, checkedAt }).ok, true);
   }
 }
+for (const page of [sourceUrl, "https://example.com/official-qsearch-test-tickets"]) {
+  assert.equal(recordFieldEvidence({ runId: createRun.runId, entityKey: createCandidateKey, field: "artwork-review",
+    observedValue: "no-official-image", sourceUrl: page, checkedAt }).ok, true);
+}
 const created = createEventFromResearch({
   runId: createRun.runId,
   candidateKey: createCandidateKey,
@@ -173,6 +177,10 @@ const { address: _omittedAddress, ...withoutAddress } = createEvent;
 const missingAddress = { ...withoutAddress, title: "QSearch Missing Address" };
 for (const [field, observedValue] of Object.entries(missingAddress)) {
   assert.equal(recordFieldEvidence({ runId: createRun.runId, entityKey: "candidate:smoke-missing-address", field, observedValue, sourceUrl, checkedAt }).ok, true);
+}
+for (const page of [sourceUrl]) {
+  assert.equal(recordFieldEvidence({ runId: createRun.runId, entityKey: "candidate:smoke-missing-address", field: "artwork-review",
+    observedValue: "no-official-image", sourceUrl: page, checkedAt }).ok, true);
 }
 const addressUnknownPublish = createEventFromResearch({
   runId: createRun.runId,
@@ -198,6 +206,10 @@ assert.equal(recordMistakeTestResult({ testKey: "smoke-diagnostic-only", passed:
 for (const [field, observedValue] of Object.entries(minimalEvent)) {
   assert.equal(recordFieldEvidence({ runId: createRun.runId, entityKey: minimalCandidateKey,
     field, observedValue, sourceUrl, checkedAt }).ok, true);
+}
+for (const page of [sourceUrl]) {
+  assert.equal(recordFieldEvidence({ runId: createRun.runId, entityKey: minimalCandidateKey, field: "artwork-review",
+    observedValue: "no-official-image", sourceUrl: page, checkedAt }).ok, true);
 }
 const minimalPublished = createEventFromResearch({
   runId: createRun.runId,

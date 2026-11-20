@@ -68,14 +68,20 @@ revoked credential requires new owner pairing. Do not use human admin cookies.
   claimed, human-submitted, or human-locked values.
 - Capture the image the venue or host actually provides for the exact event,
   including a text-free photo when that is their event image. A designed flyer
-  is not required. After publishing an event without artwork, follow up within
-  the run and revisit existing posterless events under the same rule.
+  is optional. Prefer the tall version when two official orientations exist.
+  Before publishing without artwork, inspect every official event, organizer and
+  ticket link. Record primary field evidence named `artwork-review` with the
+  exact source URL and observed value `no-official-image` for each verified
+  negative. Resolve blocked pages through authorized browser access or leave
+  the candidate in review. Revisit published posterless events on future runs.
 - Publish a current occurrence automatically only when a current official
   source verifies its exact title, venue/location, and start date/time; a
   trusted dedicated venue calendar or event-specific evidence establishes
   LGBTQ+ relevance; and identity, duplicate, cancellation, and ownership
-  protections pass. One official source is enough. Optional missing facts and
-  poster artwork are not publication blockers. Use the latest official update
+  protections pass. One official source is enough. For FetLife, require the listing itself to
+  establish LGBTQ+ relevance and public access. Sanctuary and explicitly
+  credited Portland Leather Alliance events have standing relevance approval.
+  Private venues publish “Register for address.” Use the latest official update
   for each field; differently labeled times are not conflicts. Submit only
   verified optional fields; leave all others Unverified rather than chasing
   them before creating the event.
