@@ -22,7 +22,7 @@ import { readBoardMotif, saveBoardMotif, validateBoardMotif } from "./boardMotif
 import { registerBoardPlacement } from "./boardMapPlacement";
 import { homeCatalogCounts } from "./homeStats";
 import { hasPublicEventFlags } from "@shared/publicEventVisibility";
-import { registerEventPlanning } from "./eventPlanning";
+import { registerEventPlanning, validateAdminGigEventLink } from "./eventPlanning";
 import { registerHostWorkspace } from "./hostWorkspace";
 import { registerHostPush } from "./hostPush";
 import { registerZaylist } from "./zaylist";
@@ -8297,6 +8297,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       const user = gig.userId ? storage.getUserById(gig.userId) : null;
       return {
         ...gig,
+        eventLink: eventPlanning.store.gigLink(gig.id) ?? null,
         username: user?.username,
         displayName: user?.displayName,
         posterPhotoUrl: user?.photoUrl ?? null,
@@ -8394,6 +8395,33 @@ export function registerRoutes(httpServer: Server, app: Express) {
         return res.status(400).json({ error: "Unknown owner user" });
       }
       patch.userId = uid;
+    }
+    const linking = req.body.eventId !== undefined || req.body.occurrenceDate !== undefined;
+    if (linking) {
+      const existing = sqlite.prepare(
+        "SELECT user_id AS userId, post_type AS postType FROM gig_posts WHERE id=?",
+      ).get(id) as { userId: number | null; postType: string } | undefined;
+      if (!existing) return res.status(404).json({ error: "Not found" });
+      const link = validateAdminGigEventLink({
+        eventId: req.body.eventId,
+        occurrenceDate: req.body.occurrenceDate,
+        ownerId: patch.userId === undefined ? existing.userId : patch.userId,
+        postType: patch.postType ?? existing.postType,
+      }, eventPlanning, storage);
+      if ("error" in link) return res.status(400).json(link);
+      const updated = sqlite.transaction(() => {
+        const gig = storage.adminUpdateGigPost(id, patch as any);
+        if (!gig) return undefined;
+        eventPlanning.store.relinkGig(id, link.eventId, link.occurrenceDate);
+        auditAdmin(req, "link_gig_event_occurrence", {
+          type: "gig", id, detail: {
+            eventId: link.eventId, occurrenceDate: link.occurrenceDate, ownerId: link.ownerId,
+          },
+        });
+        return gig;
+      })();
+      if (!updated) return res.status(404).json({ error: "Not found" });
+      return res.json(updated);
     }
     const updated = storage.adminUpdateGigPost(id, patch as any);
     if (!updated) return res.status(404).json({ error: "Not found" });

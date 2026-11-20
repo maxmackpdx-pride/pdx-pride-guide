@@ -135,6 +135,7 @@ interface AdminGig {
   status: string;
   createdAt: string;
   userId?: number | null;
+  eventLink?: { eventId: number; occurrenceDate: string } | null;
   username?: string;
   displayName?: string | null;
   posterPhotoUrl?: string | null;
@@ -257,6 +258,7 @@ export default function Admin() {
   const [directoryOwnerFilter, setDirectoryOwnerFilter] = useState<"all" | "owned" | "unowned">("all");
   const [editingGigId, setEditingGigId] = useState<number | null>(null);
   const [gigEditForm, setGigEditForm] = useState<Partial<AdminGig>>({});
+  const [gigEventLinkEdit, setGigEventLinkEdit] = useState({ eventId: "", occurrenceDate: "" });
   const [eventSearch, setEventSearch] = useState("");
   const [eventStatusFilter, setEventStatusFilter] = useState<EventStatusFilter>("all");
   const [eventSort, setEventSort] = useState<EventSort>("day_time");
@@ -905,7 +907,7 @@ export default function Admin() {
   });
 
   const editGigMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<AdminGig> }) =>
+    mutationFn: ({ id, data }: { id: number; data: Partial<AdminGig> & { eventId?: number; occurrenceDate?: string } }) =>
       apiRequest("PUT", `/api/admin/gigs/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/gigs"] });
@@ -914,8 +916,8 @@ export default function Admin() {
       setGigEditForm({});
       toast({ title: "Gig post updated", description: "Changes are live on GIGZ." });
     },
-    onError: () => {
-      toast(roomToast("admin", "didn't save", "Could not save gig post."));
+    onError: (error: unknown) => {
+      toast(roomToast("admin", "didn't save", parseApiError(error, "Could not save gig post.")));
     },
   });
 
@@ -1252,12 +1254,22 @@ export default function Admin() {
   const startGigEdit = (gig: AdminGig) => {
     setEditingGigId(gig.id);
     setGigEditForm({ ...gig });
+    setGigEventLinkEdit({ eventId: "", occurrenceDate: "" });
   };
 
   const handleGigEditSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingGigId) return;
-    editGigMutation.mutate({ id: editingGigId, data: gigEditForm });
+    const { eventId, occurrenceDate } = gigEventLinkEdit;
+    if (eventId || occurrenceDate) {
+      if (!eventId || !occurrenceDate) {
+        toast(roomToast("admin", "didn't save", "Enter both the event ID and Pacific date."));
+        return;
+      }
+      editGigMutation.mutate({ id: editingGigId, data: { ...gigEditForm, eventId: Number(eventId), occurrenceDate } });
+    } else {
+      editGigMutation.mutate({ id: editingGigId, data: gigEditForm });
+    }
   };
 
   const pendingSubs = submissions.filter(s => s.status.toUpperCase() === "PENDING");
@@ -2594,6 +2606,22 @@ export default function Admin() {
                             <input type="number" min="1" value={gigEditForm.userId ?? ""} onChange={e => setGigEditForm(f => ({ ...f, userId: e.target.value === "" ? null : Number(e.target.value) }))}
                               placeholder="Account that posted this gig" className={adminFieldClass} />
                           </div>
+                          <fieldset className="md:col-span-2">
+                            <legend className="display text-xs text-white/60 mb-1">LINK TO AN EVENT OCCURRENCE</legend>
+                            <p className="text-xs text-white/60 mb-2">
+                              {gigEditForm.eventLink
+                                ? `Linked to event #${gigEditForm.eventLink.eventId} on ${gigEditForm.eventLink.occurrenceDate} Pacific.`
+                                : "Not linked to an event."} Leave both fields blank to keep the current link. The gig owner must host the event.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <label className="text-xs text-white/60">Event ID
+                                <input type="number" min="1" step="1" value={gigEventLinkEdit.eventId} onChange={e => setGigEventLinkEdit(f => ({ ...f, eventId: e.target.value }))} className={adminFieldClass} />
+                              </label>
+                              <label className="text-xs text-white/60">Occurrence date (Pacific)
+                                <input type="date" value={gigEventLinkEdit.occurrenceDate} onChange={e => setGigEventLinkEdit(f => ({ ...f, occurrenceDate: e.target.value }))} className={adminFieldClass} />
+                              </label>
+                            </div>
+                          </fieldset>
                           <div className="md:col-span-2">
                             <label className="display text-xs text-white/40 block mb-1">SKILLS</label>
                             <input value={gigEditForm.skills || ""} onChange={e => setGigEditForm(f => ({ ...f, skills: e.target.value }))}

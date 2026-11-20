@@ -38,6 +38,16 @@ export function createPlanningStore(db: Database.Database) {
         "INSERT INTO event_gig_links(gig_id,event_id,occurrence) VALUES(?,?,?)",
       ).run(gigId, eventId, date);
     },
+    gigLink(gigId: number) {
+      return db.prepare(
+        "SELECT event_id AS eventId, occurrence AS occurrenceDate FROM event_gig_links WHERE gig_id=?",
+      ).get(gigId) as { eventId: number; occurrenceDate: string } | undefined;
+    },
+    relinkGig(gigId: number, eventId: number, occurrenceDate: string) {
+      db.prepare(`INSERT INTO event_gig_links(gig_id,event_id,occurrence) VALUES(?,?,?)
+        ON CONFLICT(gig_id) DO UPDATE SET event_id=excluded.event_id, occurrence=excluded.occurrence`)
+        .run(gigId, eventId, occurrenceDate);
+    },
     gigs(eventId: number, date: string) {
       return db
         .prepare(
@@ -534,4 +544,29 @@ export function registerEventPlanning(
       (parsePacificDateTime(event.dateEnd || event.dateStart) ?? 0) >=
       Date.now(),
   };
+}
+
+/** Existing record assignment only. Call from the authenticated admin edit route. */
+export function validateAdminGigEventLink(
+  input: { eventId: unknown; occurrenceDate: unknown; ownerId: unknown; postType: unknown },
+  planning: Pick<ReturnType<typeof registerEventPlanning>, "occurrence" | "acceptsPlanning">,
+  storage: Pick<IStorage, "getUserById" | "isUserEventHost">,
+): { eventId: number; occurrenceDate: string; ownerId: number } | { error: string } {
+  const { eventId, occurrenceDate, ownerId, postType } = input;
+  if (typeof eventId !== "number" || !Number.isSafeInteger(eventId) || eventId <= 0 ||
+      typeof occurrenceDate !== "string") {
+    return { error: "Enter both the event ID and its Pacific occurrence date." };
+  }
+  const event = planning.occurrence(eventId, occurrenceDate);
+  if (!event || !planning.acceptsPlanning(event)) {
+    return { error: "Choose an available public event occurrence." };
+  }
+  if (postType !== "POSTING_GIG") {
+    return { error: "Only an offered gig can be linked to an event." };
+  }
+  if (typeof ownerId !== "number" || !Number.isSafeInteger(ownerId) || ownerId <= 0 ||
+      storage.getUserById(ownerId)?.status !== "active" || !storage.isUserEventHost(eventId, ownerId)) {
+    return { error: "The gig owner must be an active host of the selected event." };
+  }
+  return { eventId, occurrenceDate, ownerId };
 }
