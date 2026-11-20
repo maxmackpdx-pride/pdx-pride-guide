@@ -1,3 +1,4 @@
+import {checkPlaceStage} from './placez-stage-browser-helpers.mjs';
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import path from 'node:path';
@@ -40,8 +41,18 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
    const ring=await heart.evaluate(el=>{const s=getComputedStyle(el,'::before');return {w:parseFloat(s.width),h:parseFloat(s.height),right:getComputedStyle(el.parentElement).right};});near(ring.w,32,'ring width');near(ring.h,32,'ring height');
    const ringRight=actual.x+actual.width-(bounds.x+6+32);near(ringRight,12,'visible right inset');
    assert.equal(await card.locator('[data-corner-control=heart]').count(),1);
-   const mask=await card.locator('.pz-art').evaluate(el=>getComputedStyle(el).maskImage);assert.ok(mask.includes('header-cutout.svg'),'approved torn alpha mask');
-   const maskUrl=mask.match(/url\(["']?(.*?)["']?\)/)?.[1];assert.ok(maskUrl);assert.equal((await page.request.get(maskUrl)).ok(),true,'mask asset loads');
+   const artwork=card.locator('.pz-art');
+   const mask=await artwork.evaluate(el=>getComputedStyle(el).maskImage);
+   if(size==='small'||size==='square'){
+    assert.equal(mask,'none','compact artwork remains full bleed');
+    const photo=await artwork.boundingBox();
+    near(photo.width,await card.evaluate(el=>el.clientWidth),'full bleed width');
+    near(photo.height,await card.evaluate(el=>el.clientHeight),'full bleed height');
+   }else{
+    assert.ok(mask.includes('header-cutout.svg'),'header retains approved torn alpha mask');
+    const maskUrl=mask.match(/url\(["']?(.*?)["']?\)/)?.[1];
+    assert.ok(maskUrl);assert.equal((await page.request.get(maskUrl)).ok(),true,'mask asset loads');
+   }
    assert.equal(await card.locator('a[href^="https://www.zaylist.com"]').count(),0);
    if(size!=='square'){assert.equal(await card.locator('button[data-card-heart]').count(),1);await heart.click();await page.getByText('Authentication requested').waitFor();}
    await checkpoint(`closed:${id}:${size}:screenshot`);
@@ -77,7 +88,7 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   }
   await page.emulateMedia({reducedMotion:'reduce'});
   for(const width of [320,390,1280]){
-   await page.setViewportSize({width,height:844});await page.goto(`${server.resolvedUrls.local[0]}__placez-six?id=23&size=tall`,{waitUntil:'networkidle'});await page.getByRole('button',{name:/View details for Pizza/}).click();const expanded=page.locator('.pz-native-expanded');await expanded.waitFor();const bounds=await expanded.boundingBox();assert.ok(bounds.width<=width,`Expanded fits ${width}`);assert.ok(bounds.width>200,`Expanded uses available width at ${width}`);if(width<768)assert.ok(bounds.height<=720,'Expanded respects native mobile safe viewport');
+   await page.setViewportSize({width,height:844});await page.goto(`${server.resolvedUrls.local[0]}__placez-six?id=23&size=tall`,{waitUntil:'networkidle'});await page.getByRole('button',{name:/View details for Pizza/}).click();const expanded=page.locator('.pz-native-expanded');await expanded.waitFor();const bounds=await expanded.boundingBox();assert.ok(bounds.width<=width,`Expanded fits ${width}`);assert.ok(bounds.width>200,`Expanded uses available width at ${width}`);await checkPlaceStage(page);
    await page.screenshot({path:path.join(shots,`expanded-${width}.png`),fullPage:true});await expanded.getByRole('button',{name:/Close /}).click();
   }
   await page.setViewportSize({width:1280,height:1000});await page.emulateMedia({reducedMotion:'no-preference'});await page.addInitScript(()=>localStorage.setItem('pdx-calm-mode','true'));await page.goto(`${server.resolvedUrls.local[0]}__placez-six?id=30&size=tall`,{waitUntil:'networkidle'});assert.equal(await page.locator('.pz-card').getAttribute('data-calm'),'true');assert.equal(await page.locator('.pz-art__moving img').evaluate(el=>getComputedStyle(el).animationName),'none');
@@ -89,7 +100,7 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   await directoryFace.getByRole('button',{name:`View details for ${names[directoryId]}`,exact:true}).click();await page.locator('.pz-native-expanded').waitFor();assert.ok(new URL(page.url()).pathname.startsWith(`/directory/${directoryId}`));
   await checkpoint(`directory:${directoryId}:${directoryWidth}:opened`);
   const directoryExpanded=page.locator('.pz-native-expanded');
-  await page.waitForFunction(()=>document.querySelector('.pz-native-expanded')?.closest('[data-card-expanded=true]')?.querySelector('[data-card-morph]')?.getAttribute('data-card-morph-phase')==='open');
+  await page.waitForFunction(name=>Array.from(document.querySelectorAll('[data-card-morph][data-card-morph-phase=open]')).some(el=>Array.from(el.querySelectorAll('button')).some(b=>b.getAttribute('aria-label')==='View details for '+name)),names[directoryId]);
   await checkpoint(`directory:${directoryId}:${directoryWidth}:phase-open`);
   await page.waitForFunction(()=>!document.getAnimations().some(a=>a.animationName?.includes('view-transition')&&a.playState==='running'));
   await checkpoint(`directory:${directoryId}:${directoryWidth}:animations-settled`);
@@ -101,7 +112,7 @@ test('six PlaceZ native faces, controls, data and expanded continuity',{timeout:
   if(directoryWidth>768)assert.ok(artBounds.height>=artBounds.width*.45,'Desktop header retains approved near-2:1 composition');
   await checkpoint(`directory:${directoryId}:${directoryWidth}:screenshot`);
   await page.screenshot({path:path.join(shots,`directory-${directoryId}-viewport-${directoryWidth}.png`)});
-  const directoryBounds=await directoryExpanded.boundingBox();assert.ok(directoryBounds.width>200&&directoryBounds.width<=directoryWidth,'Directory uses expanded grid width');assert.ok(directoryBounds.height>=320&&directoryBounds.height<=(directoryWidth<768?720:960),'Directory respects expanded height');const disclosureStyle=await directoryExpanded.locator('summary').first().evaluate(el=>({display:getComputedStyle(el).display,listStyle:getComputedStyle(el).listStyleType}));assert.equal(disclosureStyle.display,'flex');assert.equal(disclosureStyle.listStyle,'none');await page.screenshot({path:path.join(shots,`directory-${directoryId}-expanded-${directoryWidth}.png`),fullPage:true});evidence.push({surface:'actual-directory',id:directoryId,viewport:directoryWidth,expanded:directoryBounds});
+  const directoryBounds=await directoryExpanded.boundingBox();assert.ok(directoryBounds.width>200&&directoryBounds.width<=directoryWidth,'Directory uses expanded grid width');await checkPlaceStage(page);const disclosureStyle=await directoryExpanded.locator('summary').first().evaluate(el=>({display:getComputedStyle(el).display,listStyle:getComputedStyle(el).listStyleType}));assert.equal(disclosureStyle.display,'flex');assert.equal(disclosureStyle.listStyle,'none');await page.screenshot({path:path.join(shots,`directory-${directoryId}-expanded-${directoryWidth}.png`),fullPage:true});evidence.push({surface:'actual-directory',id:directoryId,viewport:directoryWidth,expanded:directoryBounds});
   await page.getByRole('button',{name:`Close ${names[directoryId]}`,exact:true}).click();await page.locator('.pz-native-expanded').waitFor({state:'hidden'});assert.equal(new URL(page.url()).pathname,'/directory');
   }
   for(const [width,height] of [[1280,700],[740,390]]){

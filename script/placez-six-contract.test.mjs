@@ -15,7 +15,9 @@ test('one internal six-ID registry without changing public PlaceCard or director
 });
 test('native expanded preserves tools, five pages and unavailable states',()=>{
  const modal=read('client/src/components/PlaceModal.tsx');
- for(const marker of ['apiRequest("PATCH",','/claim','canEditVenue','isOwner','sharePageLink','resolveBusinessLocations','DirectoryMap','NativePlacezExpanded'])assert.ok(modal.includes(marker),marker);
+ for(const marker of ['apiRequest("PATCH",','<VenueClaimForm','canEditVenue','isOwner','sharePageLink','resolveBusinessLocations','DirectoryMap','NativePlacezExpanded'])assert.ok(modal.includes(marker),marker);
+ const claim=read('client/src/components/placez/VenueClaimForm.tsx');
+ assert.ok(claim.includes('apiRequest("POST",`/api/directory/${placeId}/claim`'));
  const expanded=read('client/src/components/placez/NativePlacezExpanded.tsx');
  for(const key of ['feed','info','events','maps','people'])assert.ok(expanded.includes(`key="${key}"`));
  assert.match(expanded,/resetKey=\{selection.request\}/);assert.match(expanded,/selectedPlacezPage\(place.id\)/);assert.match(expanded,/CC BY-SA 4.0/);

@@ -31,7 +31,7 @@
 .pz-native-expanded .pz-page-tabs{flex:none;padding:0 8px}
 .pz-native-expanded .pz-page-tabs button{min-height:44px;font-size:10px;white-space:normal}
 .pz-native-expanded .pz-page-viewport{flex:1;min-height:var(--pz-native-detail-min);height:auto}
-.pz-native-expanded .pz-page-panel{height:100%;padding:0 16px 12px;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.pz-native-expanded .pz-page-panel{height:100%;padding:0 16px 12px;overflow-y:auto;overscroll-behavior-y:contain;overscroll-behavior-x:auto;scrollbar-gutter:stable}
 .pz-native-expanded .pz-page-controls{flex:none;min-height:44px;padding:0 12px}
 .pz-native-page{min-width:0;font:400 13px/1.5 var(--font-body,Barlow,sans-serif);color:var(--pz-color-d5e0e7)}
 .pz-native-page section{margin:0 0 20px}
@@ -60,3 +60,19 @@ html .pz-native-expanded .pz-heart button[data-card-heart=true][aria-pressed=tru
 .pz-native-page .event-modal__disclosure>summary>svg{width:22px;height:22px;flex:none}
 .pz-native-page .event-modal__disclosure>summary>svg:last-child{margin-left:auto}
 .pz-native-page .event-modal__disclosure[open]>summary>svg:last-child{transform:rotate(90deg)}
+
+@media (max-width: 959px) {
+  .zay-card-stage.placez-stage > .placez-native-overlay {
+    width: min(620px, calc(100% - 20px));
+  }
+  .placez-stage .pz-native-page .place-modal-panel__contacts {
+    display: contents;
+  }
+  .placez-stage .place-modal-panel__contacts > .place-modal-panel__fact:first-child {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 1;
+    margin-block: 0;
+    background: var(--pz-glass-ink);
+  }
+}
