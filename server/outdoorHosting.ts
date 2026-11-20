@@ -2,6 +2,9 @@ import type Database from "better-sqlite3";
 import type { Express, RequestHandler } from "express";
 import type { IStorage } from "./storage";
 import type { Event } from "@shared/schema";
+import { normalizeVenueKey } from "./venueCoordinates";
+import { expandMultiDayEvents } from "@shared/multiDayEvents";
+import { resortForPrideEvent, winterPrideWatches } from "@shared/outzWinterEvents";
 import type { OutzDetails } from "@shared/outzDetails";
 import { hasPublicEventFlags } from "@shared/publicEventVisibility";
 import {
@@ -11,6 +14,7 @@ import {
 
 type Place = { id: string; name: string; lat?: number; lng?: number };
 type Deps = {
+  catalog: () => Promise<Place[]>;
   place: (id: string) => Promise<Place | undefined>;
   details: (id: string) => Promise<OutzDetails | null>;
   visible: (e: Event) => boolean;
@@ -75,6 +79,52 @@ export function registerOutdoorHosting(
         .slice(0, 150)
         .map((r) => ({ ...compact(r.event), place: r.place })),
     );
+  });
+  app.get("/api/outz/upcoming", async (req, res) => {
+    const viewer = req.session.userId;
+    const place = typeof req.query.place === "string" ? req.query.place : undefined;
+    const personal = req.query.mine === "1";
+    res.set("Cache-Control", "private, no-store");
+    if (personal && !viewer) return res.json([]);
+    const interested = personal ? new Set((db.prepare(
+      "SELECT kind || ':' || ref AS key FROM card_hearts WHERE user_id=? AND kind IN ('outz','event')",
+    ).all(viewer) as {key:string}[]).map(row => row.key)) : null;
+    const going = personal ? new Set((db.prepare(
+      "SELECT DISTINCT event_id AS id FROM attendances WHERE user_id=? AND is_active=1 AND (expires_at IS NULL OR julianday(expires_at)>julianday('now'))",
+    ).all(viewer) as {id:number}[]).map(row => row.id)) : null;
+    const catalog = await deps.catalog();
+    const placesByName = new Map<string, Set<string>>();
+    for (const p of catalog) {
+      const name = normalizeVenueKey(p.name);
+      if (!name) continue;
+      const matches = placesByName.get(name) ?? new Set<string>();
+      matches.add(p.id);
+      placesByName.set(name, matches);
+    }
+    const submissions = db.prepare(
+      "SELECT s.event_id AS id, p.place_id AS place, s.status FROM outdoor_event_submissions p JOIN submissions s ON s.id=p.submission_id WHERE s.event_id IS NOT NULL ORDER BY (s.status='APPROVED')",
+    ).all() as {id:number;place:string;status:string}[];
+    const links = new Map(submissions.map(row => [row.id, row]));
+    const winter = new Set(winterPrideWatches.map(item => item.placeId));
+    const now = Date.now();
+    const rows = storage.getEvents({status:"LIVE"}).flatMap(event => {
+      if (!hasPublicEventFlags(event) || event.isHouseParty || !deps.visible(event)) return [];
+      const linked = links.get(event.id);
+      if (linked && linked.status !== "APPROVED") return [];
+      const known = linked?.place || resortForPrideEvent(event);
+      const exact = placesByName.get(normalizeVenueKey(event.venueName));
+      const unique = exact?.size === 1 ? [...exact][0] : undefined;
+      const destination = known || (unique && !winter.has(unique) ? unique : undefined);
+      if (!destination || (place && destination !== place)) return [];
+      if (interested && !interested.has("outz:" + destination) && !interested.has("event:" + event.id) && !going?.has(event.id)) return [];
+      return expandMultiDayEvents([event]).flatMap(occurrence => {
+        const start = parsePacificDateTime(occurrence.dateStart);
+        const end = parsePacificDateTime(occurrence.dateEnd) ?? start;
+        return start != null && end != null && end >= now
+          ? [{...compact(occurrence), place:destination, start}] : [];
+      });
+    });
+    res.json(rows.sort((a,b) => a.start-b.start || a.id-b.id).slice(0,150));
   });
   app.get("/api/outz/buddies/operator/:place", async (req, res) => {
     try {
