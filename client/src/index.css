@@ -1,6 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "tw-animate-css";
+@config "../../tailwind.config.ts";
+@plugin "@tailwindcss/typography";
+/* tw-animate-css accepts integer slide distances only; v3 generated this
+   fractional utility used by ui/animated-drawer.tsx. Restored verbatim. */
+@layer utilities {
+  .slide-in-from-bottom-2\.5 {
+    --tw-enter-translate-y: 0.625rem;
+  }
+}
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    border-color: rgb(229 231 235);
+  }
+}
 
 :root {
   --background: 0 0% 0%;

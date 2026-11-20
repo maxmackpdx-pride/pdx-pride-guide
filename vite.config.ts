@@ -1,5 +1,6 @@
 import { defineConfig, type UserConfig } from "vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import babel from "@rolldown/plugin-babel";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
@@ -23,6 +24,7 @@ const flightBase = `/assets/home-flight-${flightHash.digest("hex").slice(0, 16)}
 export default defineConfig(({ command }):UserConfig => {
  return ({
   plugins: [
+    tailwindcss(),
     react(),
     // Exact compiler scope: Eventz/Boardz and the reviewed six-PlaceZ presentation
     // cohort. The shared scope also drives optimized off/on comparison builds.
