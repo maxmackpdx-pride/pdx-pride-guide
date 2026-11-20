@@ -91,3 +91,15 @@
   @media(prefers-reduced-transparency:reduce) { .site-header > .z-mobile-glass-lite, .z-mobile-dock > .z-mobile-glass-lite { background:#080c12;backdrop-filter:none;-webkit-backdrop-filter:none; } }
   @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { .site-header > .z-mobile-glass-lite, .z-mobile-dock > .z-mobile-glass-lite { background:#080c12; } }
 }
+
+/* Light surfaces: the hub family (.zl-root) sits near-white behind the
+   dock, and the shared 27% host tint was tuned over dark pages — over a
+   light page the composite washes to gray and the white tab icons wash
+   out with it. Deepen the dock's host tint only while a light surface is
+   in the page; dark pages keep the recipe above, unchanged. The top nav
+   bar is not touched. */
+@media (max-width:959px) {
+  body:has(.zl-root) nav.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock {
+    background:rgba(1,4,8,.88);
+  }
+}
