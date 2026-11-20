@@ -80,13 +80,13 @@ export async function sendOwnerDeskNotification() {
   });
 }
 
-export async function sendGuestInvitation(kind: "email" | "phone", contact: string, secret: string, entryId: number) {
+export async function sendGuestInvitation(kind: "email" | "phone", contact: string, secret: string, entryId: number, version = 1) {
   const base = (process.env.PUBLIC_BASE_URL?.trim() || "https://www.zaylist.com").replace(/\/$/, "");
   const link = `${base}/hub#invite=${encodeURIComponent(secret)}`;
   const text = `You have a Zay'list guest spot. Open this private invitation to sign in or join and claim it: ${link}`;
   if (kind === "email") {
     const receipt = await sendResendEmail({ to: [contact], subject: "Your Zay'list guest invitation", text,
-      idempotencyKey: `zaylist-invite-${entryId}` });
+      idempotencyKey: version === 1 ? `zaylist-invite-${entryId}` : `zaylist-invite-${entryId}-${version}` });
     return receipt.sent;
   }
   const sid = process.env.TWILIO_ACCOUNT_SID?.trim();

@@ -50,3 +50,12 @@ export function pushRemaining(
   }).length;
   return Math.max(0, limit - used);
 }
+
+export function pushCopyIssue(title: string, body: string) {
+  const text = (title + " " + body).toLowerCase().replace(/[’‘]/g, "'");
+  if (text.includes("!")) return "Remove the exclamation mark before sending.";
+  if (/cancel|postpon|called off|no longer happening|won'?t be happening|will not be happening|not happening tonight|off for tonight|scrapped/.test(text)) {
+    return "Describe the current time, place or plan for this notification.";
+  }
+  return "";
+}

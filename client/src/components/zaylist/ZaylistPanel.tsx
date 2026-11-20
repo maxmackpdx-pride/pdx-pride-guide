@@ -21,13 +21,24 @@ function PersonRow({
   canDrinks,
   onRemove,
   onDrink,
+  onRevoke,
 }: {
   entry: ZaylistEntry;
   canRemove: boolean;
   canDrinks: boolean;
   onRemove: () => void;
-  onDrink: (kind: "comp" | "discount") => void;
+  onDrink?: (body: {kind: "comp" | "discount"; total: number; percent?: number}) => Promise<void>;
+  onRevoke?: (id: number) => Promise<void>;
 }) {
+  const [kind,setKind] = useState<"comp" | "discount">("comp");
+  const [total,setTotal] = useState("1");
+  const [percent,setPercent] = useState("25");
+  const [busy,setBusy] = useState(false);
+  async function change(action: () => Promise<void>) {
+    if (busy) return;
+    setBusy(true);
+    try { await action(); } finally { setBusy(false); }
+  }
   const name = entryName(entry);
   const drinks = entry.drinks.filter((d) => !d.revoked);
   return (
@@ -50,14 +61,24 @@ function PersonRow({
                 .join(", ")
             : ""}
         </div>
+        {canDrinks && onDrink && onRevoke && ["pending","accepted","redeemed"].includes(entry.state) && (
+          <details className="zl-drink-editor">
+            <summary>Drink privileges</summary>
+            <form onSubmit={e => {e.preventDefault(); void change(() => onDrink({kind,total:Number(total),percent:kind==="discount" ? Number(percent) : undefined}));}}>
+              <label className="zl-label">Offer
+                <select className="zl-select" value={kind} onChange={e => setKind(e.target.value as typeof kind)}>
+                  <option value="comp">Comped drink</option><option value="discount">Discount</option>
+                </select>
+              </label>
+              <label className="zl-label">Uses<input className="zl-input" type="number" min="1" max="100" value={total} onChange={e => setTotal(e.target.value)} required /></label>
+              {kind==="discount" && <label className="zl-label">Percent off<input className="zl-input" type="number" min="1" max="100" value={percent} onChange={e => setPercent(e.target.value)} required /></label>}
+              <button type="submit" className="zl-btn zl-btn--small" disabled={busy}>Add offer</button>
+            </form>
+            {drinks.filter(d => d.remaining > 0).map(d => <button key={d.id} className="zl-btn zl-btn--small" type="button" disabled={busy}
+              onClick={() => void change(() => onRevoke(d.id))}>Revoke {d.kind === "comp" ? "comp" : d.percent + "% discount"} · {d.remaining} left</button>)}
+          </details>
+        )}
       </div>
-      {canDrinks && (entry.state === "pending" || entry.state === "accepted" || entry.state === "redeemed") ? (
-        <>
-          <button className="zl-btn zl-btn--small" type="button" onClick={() => onDrink("comp")}>
-            Add drink
-          </button>
-        </>
-      ) : null}
       {canRemove ? (
         <button className="zl-btn zl-btn--small zl-btn--danger" type="button" onClick={onRemove}>
           Remove
@@ -176,12 +197,8 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
               canRemove={perms.editor}
               canDrinks={perms.canGrantDrinks}
               onRemove={() => void run(() => zaylistApi.removeEntry(eventId, entry.id), "Removed from the list.")}
-              onDrink={() =>
-                void run(
-                  () => zaylistApi.addDrink(entry.id, { kind: "comp", total: 1 }),
-                  "Drink comp added to their code.",
-                )
-              }
+              onDrink={body => run(() => zaylistApi.addDrink(entry.id, body), "Drink offer added to the pass.")}
+              onRevoke={id => run(() => zaylistApi.revokeDrink(id), "Drink offer revoked.")}
             />
           ))}
         </div>
@@ -221,7 +238,6 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
                 canRemove={false}
                 canDrinks={false}
                 onRemove={() => undefined}
-                onDrink={() => undefined}
               />
             ))}
           </div>
@@ -237,7 +253,7 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
             className="zl-input"
             value={searchQ}
             onChange={(e) => void doSearch(e.target.value)}
-            placeholder="Name, username, or email"
+            placeholder="Name, username, email or phone"
             autoComplete="off"
           />
           {results.length ? (
@@ -350,10 +366,12 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
 
       {perms.allocator && payload.allowances ? (
         <>
-          <h3>Allowances</h3>
           {payload.allowances.length ? (
-            <div className="zl-list">
-              {payload.allowances.map((a) => (
+            <>
+              {["Team allowances", "Upcoming talent"].map(section => {
+                const rows = payload.allowances!.filter(a => (a.role === "talent" && !a.onLineup) === (section === "Upcoming talent"));
+                return rows.length > 0 && <section key={section}><h3>{section}</h3><div className="zl-list">
+                  {rows.map((a) => (
                 <div className="zl-person" key={a.userId}>
                   <div className="zl-avatar" aria-hidden="true">{initials(a.displayName || a.username)}</div>
                   <div className="zl-person-main">
@@ -384,8 +402,10 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
                     Remove
                   </button>
                 </div>
-              ))}
-            </div>
+                  ))}
+                </div></section>;
+              })}
+            </>
           ) : (
             <p className="zl-note">No allowances yet. Search a member above and choose Allowance.</p>
           )}

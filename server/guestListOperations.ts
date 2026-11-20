@@ -15,7 +15,7 @@ export function internationalPhone(value: string) {
     ? `+${digits}` : null;
 }
 
-type InviteDelivery = { entryId: number; contact: string; kind: "phone" | "email"; secret: string; attempts: number };
+type InviteDelivery = { entryId: number; contact: string; kind: "phone" | "email"; secret: string; attempts: number; version: number };
 export function createGuestListOperations(db: Database.Database, store: ZaylistStore, storage: IStorage,
   visible: (event: Event) => boolean, allocator: (eventId: number, userId: number) => boolean,
   sendInvite = sendGuestInvitation) {
@@ -36,6 +36,11 @@ export function createGuestListOperations(db: Database.Database, store: ZaylistS
     );
   `);
 
+  const deliveryColumns = db.pragma("table_info(zaylist_invite_deliveries)") as {name:string}[];
+  if (!deliveryColumns.some(c => c.name === "version")) {
+    db.exec("ALTER TABLE zaylist_invite_deliveries ADD COLUMN version INTEGER NOT NULL DEFAULT 1");
+  }
+
   const available = (event: Event | undefined, now: number) =>
     event && event.status === "LIVE" && hasPublicEventFlags(event) && visible(event) &&
     (parsePacificDateTime(event.dateEnd || event.dateStart) ?? 0) >= now;
@@ -51,8 +56,13 @@ export function createGuestListOperations(db: Database.Database, store: ZaylistS
       threadId: `zaylist-entry-${entryId}`, contextType: "ZAYLIST_SPOT", contextId: entryId, contextLabel: title,
     });
   }
-  function queueInvite(entryId: number) {
+  function queueInvite(entryId: number, resend = false, now = Date.now()) {
     db.prepare("INSERT OR IGNORE INTO zaylist_invite_deliveries(entry_id,secret) VALUES(?,?)").run(entryId, randomBytes(32).toString("base64url"));
+    if (resend) {
+      // Explicitly requested links reuse the claim secret. Automatic retries keep their provider key.
+      db.prepare(`UPDATE zaylist_invite_deliveries SET version=version+1,attempts=0,sent_at=NULL,next_try=0
+        WHERE entry_id=? AND sent_at IS NOT NULL AND unixepoch(sent_at)*1000<=?`).run(entryId, now - 600000);
+    }
   }
   function draw(eventId: number, by: number, count: number | null, now: number) {
     return db.transaction(() => {
@@ -84,7 +94,7 @@ export function createGuestListOperations(db: Database.Database, store: ZaylistS
     }
   }
   async function deliverInvites(now = Date.now()) {
-    const rows = db.prepare(`SELECT d.entry_id AS entryId,d.secret,d.attempts,i.contact,i.contact_kind AS kind
+    const rows = db.prepare(`SELECT d.entry_id AS entryId,d.secret,d.attempts,d.version,i.contact,i.contact_kind AS kind
       FROM zaylist_invite_deliveries d JOIN zaylist_invites i ON i.entry_id=d.entry_id
       JOIN zaylist_entries e ON e.id=d.entry_id WHERE d.sent_at IS NULL AND d.next_try<=? AND i.status='sent'
       AND e.user_id IS NULL AND e.state='pending' ORDER BY d.next_try,d.entry_id LIMIT 30`).all(now) as InviteDelivery[];
@@ -98,11 +108,11 @@ export function createGuestListOperations(db: Database.Database, store: ZaylistS
         .run(now + 120000, row.entryId, now).changes;
       if (!locked) continue;
       let sent = false;
-      try { sent = await sendInvite(row.kind, row.contact, row.secret, row.entryId); }
+      try { sent = await sendInvite(row.kind, row.contact, row.secret, row.entryId, row.version); }
       catch { /* Retry using the same invitation. Never log the recipient or the link. */ }
-      if (sent) db.prepare("UPDATE zaylist_invite_deliveries SET sent_at=CURRENT_TIMESTAMP WHERE entry_id=?").run(row.entryId);
-      else db.prepare("UPDATE zaylist_invite_deliveries SET next_try=? WHERE entry_id=? AND sent_at IS NULL")
-        .run(now + Math.min(6 * 3600000, 60000 * 2 ** Math.min(row.attempts, 8)), row.entryId);
+      if (sent) db.prepare("UPDATE zaylist_invite_deliveries SET sent_at=? WHERE entry_id=? AND version=?").run(new Date(now).toISOString(), row.entryId, row.version);
+      else db.prepare("UPDATE zaylist_invite_deliveries SET next_try=? WHERE entry_id=? AND version=? AND sent_at IS NULL")
+        .run(now + Math.min(6 * 3600000, 60000 * 2 ** Math.min(row.attempts, 8)), row.entryId, row.version);
     }
   }
   function claim(secret: string, user: { id: number; email: string }) {

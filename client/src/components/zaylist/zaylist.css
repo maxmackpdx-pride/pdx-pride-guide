@@ -305,3 +305,14 @@
 .zl-sheet-poster {max-height:min(40dvh,340px);object-fit:contain;background:var(--zg-12);}
 @media(min-width:840px){.zl-workspace {max-width:1120px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;}.zl-workspace>.zl-hub-head,.zl-workspace>.zl-push,.zl-workspace>.zl-work-rail {grid-column:1/-1;}.zl-work-rail {min-width:0;}}
 @media(prefers-reduced-motion:reduce){.zl-sheet {animation:none;}}
+
+.zl-drink-editor { margin-block-start: .5rem; }
+.zl-drink-editor summary { cursor: pointer; font-weight: 650; }
+.zl-drink-editor form { display: grid; gap: .5rem; margin-block: .5rem; }
+.zl-lock-preview { display: grid; gap: .3rem; padding: .9rem; margin: .75rem 0; border-radius: 18px; color: var(--zg-12); background: var(--zg-4); }
+.zl-lock-preview span { font-size: .75rem; }
+.zl-lock-preview p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.zl-sheet.zl-root h3 { color: var(--zg-12); text-shadow: none; }
+.zl-door .zl-btn[aria-pressed="true"] { outline: 2px solid var(--neon-yellow); }
+.zl-sheet .zl-lineup { color: white; background: var(--zg-12); padding: .75rem; border-radius: 14px; }

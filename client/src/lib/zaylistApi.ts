@@ -70,6 +70,7 @@ export interface ZaylistAllowance {
   spots: number;
   assignedBy: number;
   drinkPrivilege: boolean;
+  onLineup: boolean;
   username: string;
   displayName: string | null;
 }
@@ -134,6 +135,8 @@ export interface MyZaylistEntry {
 }
 
 export interface ZaylistPass {
+  message?: string | null;
+  talentMessage?: string | null;
   wallets: { apple: boolean; google: boolean };
   entryId: number;
   state: ZaylistEntryState;
@@ -236,17 +239,21 @@ export const zaylistApi = {
     apiRequest("POST", `/api/zaylist/entries/${entryId}/drinks`, body).then((r) => json(r)),
   revokeDrink: (drinkId: number) =>
     apiRequest("DELETE", `/api/zaylist/drinks/${drinkId}`).then((r) => json(r)),
+  inspectPass: (token: string, eventId: number) =>
+    apiRequest("POST", "/api/zaylist/scan/inspect", {token, eventId}).then(r =>
+      json<{ state: "accepted" | "redeemed"; guest: {username: string | null; displayName: string | null}; drinks: ZaylistDrink[] }>(r)),
   scan: (token: string, eventId: number) =>
     apiRequest("POST", `/api/zaylist/scan`, { token, eventId }).then((r) =>
       json<{
         result: "admitted" | "already-in";
         firstScan?: { by: string; at: string };
+        drinks: ZaylistDrink[];
         guest: { username: string | null; displayName: string | null };
       }>(r),
     ),
   scanDrink: (token: string, eventId: number, drinkGrantId?: number) =>
     apiRequest("POST", `/api/zaylist/scan/drink`, { token, eventId, drinkGrantId }).then((r) =>
-      json<{ ok: boolean; kind?: string; remaining?: number }>(r),
+      json<{ ok: boolean; kind?: string; remaining?: number; drinks: ZaylistDrink[] }>(r),
     ),
   mine: () =>
     apiRequest("GET", `/api/me/zaylist`).then((r) =>

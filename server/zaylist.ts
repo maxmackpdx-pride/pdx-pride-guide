@@ -386,16 +386,11 @@ export function createZaylistStore(db: Database.Database) {
         ).n;
       const drinks = db
         .prepare(
-          `SELECT COALESCE(SUM(g.total),0) AS granted FROM zaylist_drink_grants g
-          JOIN zaylist_entries e ON e.id=g.entry_id
+          `SELECT COALESCE(SUM(g.total - (SELECT COUNT(*) FROM zaylist_redemptions r WHERE r.kind='drink' AND r.drink_grant_id=g.id)),0) AS outstanding
+          FROM zaylist_drink_grants g JOIN zaylist_entries e ON e.id=g.entry_id
           WHERE e.event_id=? AND g.revoked_at IS NULL AND e.state IN (${livePh})`,
         )
-        .get(eventId, ...LIVE_STATES) as { granted: number };
-      const drinksUsed = db
-        .prepare(
-          "SELECT COUNT(*) AS n FROM zaylist_redemptions WHERE event_id=? AND kind='drink'",
-        )
-        .get(eventId) as { n: number };
+        .get(eventId, ...LIVE_STATES) as { outstanding: number };
       const cfg = config(eventId);
       return {
         poolSize: cfg?.poolSize ?? 0,
@@ -404,7 +399,7 @@ export function createZaylistStore(db: Database.Database) {
         accepted: by("accepted"),
         arrived: by("redeemed"),
         declined: by("declined"),
-        drinksOutstanding: Math.max(0, drinks.granted - drinksUsed.n),
+        drinksOutstanding: drinks.outstanding,
       };
     },
     allowance(eventId: number, userId: number) {
@@ -422,6 +417,7 @@ export function createZaylistStore(db: Database.Database) {
         .prepare(
           `SELECT a.user_id AS userId, a.role, a.spots, a.assigned_by AS assignedBy,
           u.username, u.display_name AS displayName,
+          EXISTS(SELECT 1 FROM event_talent t WHERE t.event_id=a.event_id AND t.user_id=a.user_id AND t.status='LIVE') AS onLineup,
           EXISTS(SELECT 1 FROM zaylist_privileges p WHERE p.event_id=a.event_id AND p.user_id=a.user_id AND p.revoked_at IS NULL AND p.kind='drink') AS drinkPrivilege
           FROM zaylist_allowances a JOIN users u ON u.id=a.user_id
           WHERE a.event_id=? ORDER BY a.id`,
@@ -620,27 +616,6 @@ export function createZaylistStore(db: Database.Database) {
       db.prepare(
         "INSERT INTO zaylist_invites(event_id,entry_id,contact,contact_kind,invited_by) VALUES(?,?,?,?,?)",
       ).run(eventId, entryId, contact, kind, invitedBy);
-    },
-    claimInvites(userId: number, email: string) {
-      return db.transaction(() => {
-        const rows = db
-          .prepare(
-            `SELECT i.id, i.entry_id AS entryId FROM zaylist_invites i
-            JOIN zaylist_entries e ON e.id=i.entry_id
-            WHERE i.status='sent' AND i.contact_kind='email' AND lower(i.contact)=lower(?)
-            AND e.user_id IS NULL AND e.state='pending'`,
-          )
-          .all(email) as { id: number; entryId: number }[];
-        for (const row of rows) {
-          db.prepare(
-            "UPDATE zaylist_entries SET user_id=?, updated_at=CURRENT_TIMESTAMP WHERE id=?",
-          ).run(userId, row.entryId);
-          db.prepare(
-            "UPDATE zaylist_invites SET status='claimed', claimed_by=?, claimed_at=CURRENT_TIMESTAMP WHERE id=?",
-          ).run(userId, row.id);
-        }
-        return rows.length;
-      })();
     },
     claimableInvites(email: string) {
       return db
@@ -992,7 +967,7 @@ export function registerZaylist(
         ? { role: allowance.role, spots: allowance.spots }
         : undefined,
       canGrantDrinks:
-        allocator || store.hasDrinkPrivilege(eventId, userId),
+        allocator || (team && store.hasDrinkPrivilege(eventId, userId)),
     };
   }
 
@@ -1021,7 +996,8 @@ export function registerZaylist(
     const id = Number(req.params.entryId);
     const entry =
       Number.isSafeInteger(id) && id > 0 ? store.entry(id) : undefined;
-    if (!entry) {
+    const event = entry && storage.getEvent(entry.event_id);
+    if (!entry || !event || event.status !== "LIVE" || !hasPublicEventFlags(event) || !visible(event)) {
       res.status(404).json({ error: "Zay'list entry unavailable" });
       return;
     }
@@ -1142,7 +1118,7 @@ export function registerZaylist(
       }[]
     ).map((row) => ({
       ...row,
-      important: row.userId ? store.isTalent(event.id, row.userId) : false,
+      important: row.userId ? isTalentGuest(event.id, row.userId) : false,
       drinks: serializeDrinks(row.id),
     }));
     res.json({
@@ -1464,6 +1440,7 @@ export function registerZaylist(
         res.status(404).json({ error: "Member unavailable" });
         return;
       }
+      if (!accessFor(event.id, target.id).team) return res.status(409).json({error:"Assign this member to the event team first"});
       if (!store.hasDrinkPrivilege(event.id, target.id))
         store.setDrinkPrivilege(event.id, target.id, viewer.id);
       res.json({ ok: true });
@@ -1634,26 +1611,27 @@ export function registerZaylist(
   };
   const entryPath = "/api/zaylist/entries/:entryId";
 
+  function isTalentGuest(eventId: number, userId: number) {
+    return store.isTalent(eventId, userId) || store.allowance(eventId, userId)?.role === "talent";
+  }
+
+  function guestMessages(eventId: number, userId: number) {
+    const messages = store.messages(eventId);
+    const talentMessage = messages?.talentMessageId && isTalentGuest(eventId, userId)
+      ? store.savedMessage(messages.talentMessageId)?.body : null;
+    return { message: messages?.generalBody || null, talentMessage: talentMessage || null };
+  }
+
   app.post(entryPath + "/accept", requireAuth, viewerGuard, entryScope, holderOnly, (req, res) => {
     const entry = res.locals.entry;
-    const token = store.accept(entry.id);
-    if (!token) {
-      res.status(409).json({ error: "This spot is no longer pending" });
-      return;
-    }
-    const event = storage.getEvent(entry.event_id);
-    if (event) ensureEventChatMembership(db, event, res.locals.viewer.id);
-    const messages = store.messages(entry.event_id);
-    const isTalent = store.isTalent(entry.event_id, res.locals.viewer.id);
-    const talentBody =
-      isTalent && messages?.talentMessageId
-        ? (store.savedMessage(messages.talentMessageId)?.body ?? null)
-        : null;
-    res.json({
-      token,
-      message: messages?.generalBody || null,
-      talentMessage: talentBody,
-    });
+    const userId = res.locals.viewer.id;
+    const token = db.transaction(() => {
+      const token = store.accept(entry.id);
+      if (token) ensureEventChatMembership(db, storage.getEvent(entry.event_id)!, userId);
+      return token;
+    }).immediate();
+    if (!token) return res.status(409).json({ error: "This spot is no longer pending" });
+    res.json({ token, ...guestMessages(entry.event_id, userId) });
   });
 
   app.post(entryPath + "/decline", requireAuth, viewerGuard, entryScope, holderOnly, (req, res) => {
@@ -1735,6 +1713,7 @@ export function registerZaylist(
     res.json({
       entryId: entry.id,
       wallets: walletAvailability(),
+      ...(["accepted","redeemed"].includes(entry.state) ? guestMessages(entry.event_id, res.locals.viewer.id) : {}),
       state: entry.state,
       event: event
         ? { id: event.id, title: event.title, dateStart: event.dateStart, venueName: event.venueName }
@@ -1821,7 +1800,6 @@ export function registerZaylist(
       return;
     }
     if (
-      grant.grantedBy !== viewer.id &&
       !accessFor(grant.eventId, viewer.id).canGrantDrinks
     ) {
       res.status(403).json({ error: "You cannot revoke this drink comp" });
@@ -1836,7 +1814,8 @@ export function registerZaylist(
     const viewer = res.locals.viewer;
     const token = typeof req.body?.token === "string" ? req.body.token.trim() : "";
     const entry = token ? store.entryByToken(token) : undefined;
-    if (!entry || (req.body?.eventId !== undefined && req.body.eventId !== entry.event_id)) {
+    const event = entry && storage.getEvent(entry.event_id);
+    if (!entry || !event || event.status !== "LIVE" || !hasPublicEventFlags(event) || !visible(event) || (req.body?.eventId !== undefined && req.body.eventId !== entry.event_id)) {
       res.status(404).json({ error: "Code not recognized for this event" });
       return undefined;
     }
@@ -1844,36 +1823,33 @@ export function registerZaylist(
       res.status(403).json({ error: "You are not on this event's team" });
       return undefined;
     }
+    if (entry.state !== "accepted" && entry.state !== "redeemed") {
+      res.status(409).json({ error: "This spot has no active pass" });
+      return undefined;
+    }
     return { viewer, entry };
   }
+  function scanDetails(entry: NonNullable<ReturnType<ZaylistStore["entry"]>>) {
+    const guest = entry.user_id
+      ? db.prepare("SELECT username, display_name AS displayName FROM users WHERE id=?").get(entry.user_id)
+      : { username: entry.contact, displayName: entry.contact };
+    return { guest, drinks: serializeDrinks(entry.id) };
+  }
+  app.post("/api/zaylist/scan/inspect", requireAuth, viewerGuard, (req, res) => {
+    const found = scanAccess(req, res);
+    if (found) res.json({ state: found.entry.state, ...scanDetails(found.entry) });
+  });
   app.post("/api/zaylist/scan", requireAuth, viewerGuard, (req, res) => {
     const found = scanAccess(req, res);
     if (!found) return;
-    const { viewer, entry } = found;
-    if (entry.state === "pending") {
-      res.status(409).json({ error: "This guest has not accepted their spot yet" });
-      return;
-    }
-    if (entry.state !== "accepted" && entry.state !== "redeemed") {
-      res.status(409).json({ error: "This spot is no longer valid" });
-      return;
-    }
-    const result = store.scanEntry(entry, viewer.id);
-    const guest = entry.user_id
-      ? db
-          .prepare("SELECT username, display_name AS displayName FROM users WHERE id=?")
-          .get(entry.user_id)
-      : { username: entry.contact, displayName: entry.contact };
-    res.json({ ...result, guest });
+    const result = store.scanEntry(found.entry, found.viewer.id);
+    res.json({ ...result, ...scanDetails(found.entry) });
   });
   app.post("/api/zaylist/scan/drink", requireAuth, viewerGuard, (req, res) => {
     const found = scanAccess(req, res);
     if (!found) return;
     const { viewer, entry } = found;
-    if (entry.state !== "accepted" && entry.state !== "redeemed") {
-      res.status(409).json({ error: "Drinks ride an accepted spot" });
-      return;
-    }
+
     const drinkGrantId = Number.isInteger(req.body?.drinkGrantId)
       ? req.body.drinkGrantId
       : undefined;
@@ -1882,7 +1858,7 @@ export function registerZaylist(
       res.status(409).json({ error: "No drinks left on this code" });
       return;
     }
-    res.json(result);
+    res.json({ ...result, drinks: serializeDrinks(entry.id) });
   });
 
   // ---- The guest's inbox surface + invite claiming ----
@@ -1890,7 +1866,10 @@ export function registerZaylist(
     const viewer = res.locals.viewer;
     res.setHeader("Cache-Control", "private, no-store");
     res.json({
-      entries: store.myEntries(viewer.id),
+      entries: (store.myEntries(viewer.id) as {eventId:number}[]).filter(row => {
+        const event = storage.getEvent(row.eventId);
+        return event && event.status === "LIVE" && hasPublicEventFlags(event) && visible(event);
+      }),
       claimable: store.claimableInvites(viewer.email).length,
     });
   });
@@ -1902,7 +1881,7 @@ export function registerZaylist(
       return res.json({ claimed: 1 });
     }
     const matches = store.claimableInvites(viewer.email) as {entryId: number}[];
-    for (const invite of matches) operations.queueInvite(invite.entryId);
+    for (const invite of matches) operations.queueInvite(invite.entryId, true);
     res.json({ claimed: 0, verificationRequested: !!matches.length });
   });
 

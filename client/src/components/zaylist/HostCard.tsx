@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
+import { useModalA11y } from "@/hooks/useModalA11y";
+import { parsePacificDateTime } from "@shared/missedConnections";
 import ZaylistPanel from "./ZaylistPanel";
 import { EventTeam, Connections, EventGig } from "./HostOperations";
 import PushComposer from "./PushComposer";
@@ -26,17 +28,21 @@ export interface HostEvent {
 }
 
 function fmtWhen(iso: string) {
-  const d = new Date(iso);
-  return Number.isNaN(d.getTime())
-    ? iso
-    : d.toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  const time = parsePacificDateTime(iso);
+  return time === null ? iso : new Intl.DateTimeFormat(undefined, {
+    weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZone:"America/Los_Angeles",
+  }).format(time);
 }
 
 function toLocalInput(iso: string) {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const time = parsePacificDateTime(iso);
+  if (time === null) return "";
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit",
+    hour:"2-digit",minute:"2-digit",hourCycle:"h23",
+  }).formatToParts(time);
+  const value = (type:string) => parts.find(p=>p.type===type)?.value;
+  return `${value("year")}-${value("month")}-${value("day")}T${value("hour")}:${value("minute")}`;
 }
 
 /**
@@ -56,6 +62,7 @@ export default function HostCard({
 }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const dialogRef = useModalA11y({open,onClose:()=>setOpen(false)});
   const [door, setDoor] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
@@ -85,7 +92,7 @@ export default function HostCard({
       await apiRequest("PUT", `/api/events/${event.id}/edit`, {
         title: form.title.trim(),
         venueName: form.venueName.trim(),
-        dateStart: form.dateStart ? new Date(form.dateStart).toISOString() : event.dateStart,
+        dateStart: form.dateStart === toLocalInput(event.dateStart) ? event.dateStart : form.dateStart,
         admission: form.admission.trim(),
         ticketUrl: form.ticketUrl.trim(),
         description: form.description,
@@ -173,7 +180,7 @@ export default function HostCard({
       {open ? (
         <>
           <div className="zl-overlay-backdrop" onClick={() => setOpen(false)} />
-          <div className="zl-overlay" role="dialog" aria-modal="true" aria-label={`Owner view for ${event.title}`}>
+          <div className="zl-overlay" ref={dialogRef} role="dialog" aria-modal="true" aria-label={`Owner view for ${event.title}`}>
             <div className="zl-sheet zl-root" style={{ padding: 18 }}>
               <div className="zl-sheet-head">
                 <div className="zl-sheet-head-main">
@@ -200,7 +207,7 @@ export default function HostCard({
                   <input id={`hc-title-${event.id}`} className="zl-input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
                   <label className="zl-label" htmlFor={`hc-venue-${event.id}`}>Venue</label>
                   <input id={`hc-venue-${event.id}`} className="zl-input" value={form.venueName} onChange={(e) => setForm({ ...form, venueName: e.target.value })} />
-                  <label className="zl-label" htmlFor={`hc-date-${event.id}`}>Starts</label>
+                  <label className="zl-label" htmlFor={`hc-date-${event.id}`}>Starts · Pacific time</label>
                   <input id={`hc-date-${event.id}`} className="zl-input" type="datetime-local" value={form.dateStart} onChange={(e) => setForm({ ...form, dateStart: e.target.value })} />
                   <label className="zl-label" htmlFor={`hc-adm-${event.id}`}>Admission</label>
                   <input id={`hc-adm-${event.id}`} className="zl-input" value={form.admission} onChange={(e) => setForm({ ...form, admission: e.target.value })} />

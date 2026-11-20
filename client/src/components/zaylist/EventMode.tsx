@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   entryName,
@@ -6,8 +6,10 @@ import {
   zaylistApi,
   zaylistError,
   type ZaylistEventPayload,
+  type ZaylistDrink,
 } from "@/lib/zaylistApi";
 import Scanner from "./Scanner";
+import { useModalA11y } from "@/hooks/useModalA11y";
 
 type ScanFeedback =
   | { kind: "in"; text: string }
@@ -37,16 +39,13 @@ export default function EventMode({
   const [counterOn, setCounterOn] = useState(false);
   const [count, setCount] = useState(0);
   const [feedback, setFeedback] = useState<ScanFeedback>(null);
-  const [lastToken, setLastToken] = useState<string | null>(null);
+  const [mode, setMode] = useState<"door" | "bar">("door");
+  const [currentPass, setCurrentPass] = useState<{token: string; drinks: ZaylistDrink[]} | null>(null);
+  const processing = useRef(false);
+  const [scanning, setScanning] = useState(false);
   const [drinkBusy, setDrinkBusy] = useState(false);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  const dialogRef = useModalA11y({onClose});
 
   const { pinned, rest } = useMemo(() => {
     const entries = (payload?.entries ?? []).filter(
@@ -59,42 +58,53 @@ export default function EventMode({
   }, [payload]);
 
   const handleToken = async (token: string) => {
+    if (processing.current) return;
+    processing.current = true;
+    setScanning(true);
     setFeedback(null);
+    setCurrentPass(null);
     try {
-      const r = await zaylistApi.scan(token, eventId);
-      setLastToken(token);
-      const name = r.guest.displayName || r.guest.username || "Guest";
-      if (r.result === "admitted") {
-        setFeedback({ kind: "in", text: `${name} is in.` });
-        setCount((c) => c + 1);
+      if (mode === "bar") {
+        const pass = await zaylistApi.inspectPass(token, eventId);
+        const name = pass.guest.displayName || pass.guest.username || "Guest";
+        setCurrentPass({ token, drinks: pass.drinks });
+        setFeedback({ kind: "in", text: `${name} · ${pass.drinks.some(d => !d.revoked && d.remaining > 0) ? "Bar pass" : "No drinks remaining"}` });
       } else {
-        setFeedback({
-          kind: "already",
-          text: `${name} already checked in by ${r.firstScan?.by ?? "the door"} at ${
-            r.firstScan ? new Date(r.firstScan.at).toLocaleTimeString() : ""
-          }.`,
-        });
+        const pass = await zaylistApi.scan(token, eventId);
+        const name = pass.guest.displayName || pass.guest.username || "Guest";
+        setCurrentPass({ token, drinks: pass.drinks });
+        if (pass.result === "admitted") {
+          setFeedback({ kind: "in", text: `${name} is in.` });
+          setCount(c => c + 1);
+        } else {
+          const at = pass.firstScan?.at;
+          const time = at && new Date(/^\d{4}-\d{2}-\d{2} /.test(at) ? at.replace(" ", "T") + "Z" : at).toLocaleTimeString();
+          setFeedback({ kind: "already", text: `${name} already checked in by ${pass.firstScan?.by || "the door"}${time ? " at " + time : ""}.` });
+        }
+        await Promise.all([queryClient.invalidateQueries({ queryKey: key }), queryClient.invalidateQueries({queryKey:["/api/hub/workspace"]})]);
       }
-      await queryClient.invalidateQueries({ queryKey: key });
     } catch (e) {
-      setLastToken(null);
-      setFeedback({ kind: "error", text: zaylistError(e, "That code did not check in.") });
+      setFeedback({ kind: "error", text: zaylistError(e, "That pass could not be read.") });
+    } finally {
+      processing.current = false;
+      setScanning(false);
     }
   };
 
-  const handleDrink = async () => {
-    if (!lastToken) return;
+  const handleDrink = async (drink: ZaylistDrink) => {
+    if (!currentPass || processing.current) return;
+    processing.current = true;
     setDrinkBusy(true);
     try {
-      const r = await zaylistApi.scanDrink(lastToken, eventId);
-      setFeedback({
-        kind: "in",
-        text: r.remaining != null ? `Drink served. ${r.remaining} left on the code.` : "Drink served.",
-      });
-      await queryClient.invalidateQueries({ queryKey: key });
+      const r = await zaylistApi.scanDrink(currentPass.token, eventId, drink.id);
+      setCurrentPass({token:currentPass.token, drinks:r.drinks});
+      setFeedback({kind:"in",text:`${drink.kind === "comp" ? "Comp" : drink.percent + "% discount"} redeemed. ${r.remaining} left.`});
+      await Promise.all([queryClient.invalidateQueries({ queryKey: key }), queryClient.invalidateQueries({queryKey:["/api/hub/workspace"]})]);
     } catch (e) {
-      setFeedback({ kind: "error", text: zaylistError(e, "No drinks left on this code.") });
+      setFeedback({ kind: "error", text: zaylistError(e, "That drink could not be redeemed. Scan the pass again.") });
+      setCurrentPass(null);
     } finally {
+      processing.current = false;
       setDrinkBusy(false);
     }
   };
@@ -125,7 +135,7 @@ export default function EventMode({
   );
 
   return (
-    <div className="zl-door" role="dialog" aria-modal="true" aria-label={`Event Mode for ${eventTitle}`}>
+    <div className="zl-door" ref={dialogRef} role="dialog" aria-modal="true" aria-label={`Event Mode for ${eventTitle}`}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <h2>{eventTitle}</h2>
@@ -154,18 +164,24 @@ export default function EventMode({
       ) : null}
 
       <div style={{ marginTop: 12 }}>
-        {payload?.permissions.team && <Scanner dark onToken={(t) => void handleToken(t)} />}
+        {payload?.permissions.team && <>
+          <div className="zl-row" role="group" aria-label="Scanner mode">
+            {(["door","bar"] as const).map(value => <button key={value} className="zl-btn" type="button" aria-pressed={mode === value}
+              disabled={scanning || drinkBusy} onClick={() => {setMode(value); setCurrentPass(null); setFeedback(null);}}>
+              {value === "door" ? "Door check-in" : "Bar service"}
+            </button>)}
+          </div>
+          <Scanner dark onToken={handleToken} />
+        </>}
       </div>
       {feedback ? (
         <div className={`zl-scan-result zl-scan-result--${feedback.kind}`} role="status">
           {feedback.text}
-          {feedback.kind === "in" && lastToken ? (
-            <div style={{ marginTop: 10 }}>
-              <button className="zl-btn" type="button" disabled={drinkBusy} onClick={() => void handleDrink()}>
-                Serve a drink on this code
-              </button>
-            </div>
-          ) : null}
+          {currentPass?.drinks.filter(d => !d.revoked && d.remaining > 0).map(drink =>
+            <button key={drink.id} className="zl-btn" style={{margin: "8px 8px 0 0"}} type="button"
+              disabled={scanning || drinkBusy} onClick={() => void handleDrink(drink)}>
+              {drink.kind === "comp" ? "Serve comp" : `Apply ${drink.percent}% discount`} · {drink.remaining} left
+            </button>)}
         </div>
       ) : null}
 

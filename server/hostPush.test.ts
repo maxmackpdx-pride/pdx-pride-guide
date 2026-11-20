@@ -49,6 +49,9 @@ test("host push enforces audience, consent, permissions, tier, cooldown and requ
   assert.equal(before.audiences.find((a:{key:string})=>a.key==="rsvps").reachable,1);
   assert.equal((await req(2,"POST","",message("everyone"))).status,403);
   assert.equal((await req(2,"POST","",message("rsvps",11))).status,403);
+  for (const body of ["Doors at nine!", "The night is called off", "   "]) {
+    assert.equal((await req(2,"POST","",{...message("followers"),body})).status,400);
+  }
   const first=message("followers");
   const result=await req(2,"POST","",first);
   assert.equal(result.status,202);

@@ -3,6 +3,7 @@ import { test } from "node:test";
 import Database from "better-sqlite3";
 import express from "express";
 import type { AddressInfo } from "node:net";
+import { createGuestListOperations } from "./guestListOperations";
 import { registerHostWorkspace } from "./hostWorkspace";
 import type { IStorage } from "./storage";
 import { registerZaylist, type ZaylistStore } from "./zaylist";
@@ -120,7 +121,7 @@ async function setup(t: { after: (fn: () => unknown) => void }) {
       drawDaysBefore: 7,
       dripPerDay: 1,
     });
-  return { db, store, operations, request, list, setConfig, venueOwners };
+  return { db, store, storage, dbEvent, operations, request, list, setConfig, venueOwners };
 }
 
 test("draw respects the pool cap and one-per-person, and persists its record", async (t) => {
@@ -570,4 +571,70 @@ test("a host can moderate the linked event without seeing the author or affectin
   await request(path+"/90",1,"DELETE");
   assert.deepEqual((await request(path,1)).body.items,[]);
   assert.equal((db.prepare("SELECT status FROM missed_connections WHERE id=91").get() as {status:string}).status,"ACTIVE");
+});
+
+test("invites preserve proof across retries and bounded resends, with no historical delivery sweep", async t => {
+  const { db, store, storage, request, setConfig } = await setup(t);
+  await setConfig(1,4);
+  const add = (contact:string) => request("/api/events/10/zaylist/entries",1,"POST",{contact});
+  const legacy = await add("old@example.test");
+  db.prepare("DELETE FROM zaylist_invite_deliveries WHERE entry_id=?").run(legacy.body.entry.id);
+  const queued = await add("new@example.test");
+  assert.equal((await add("NEW@example.test")).status,409);
+  const id = queued.body.entry.id;
+  const attempts:{contact:string;token:string;version:number}[] = [];
+  const queue = createGuestListOperations(db,store,storage,()=>true,()=>true,async (_kind,contact,token,_id,version=1) => {
+    attempts.push({contact,token,version});
+    return attempts.length > 1;
+  });
+  const now = Date.UTC(2026,9,1);
+  await Promise.all([queue.deliverInvites(now),queue.deliverInvites(now)]);
+  await queue.deliverInvites(now+30000);
+  assert.equal(attempts.length,1);
+  await queue.deliverInvites(now+60000);
+  queue.queueInvite(id,true,now+120000);
+  await queue.deliverInvites(now+120000);
+  assert.equal(attempts.length,2);
+  queue.queueInvite(id,true,now+660000);
+  queue.queueInvite(id,true,now+660000);
+  await queue.deliverInvites(now+660000);
+  await queue.deliverInvites(now+999000);
+  assert.deepEqual(attempts.map(a=>a.version),[1,1,2]);
+  assert.equal(new Set(attempts.map(a=>a.token)).size,1);
+  assert.ok(attempts.every(a=>a.contact==="new@example.test"));
+});
+
+test("bar inspection and serving preserve admission, separate grant limits, and reject revoked access",async t=>{
+  const {request,setConfig,dbEvent} = await setup(t);
+  await setConfig(1,4);
+  const base="/api/events/10/zaylist";
+  await request(base+"/allowances/10",1,"PUT",{role:"staff",spots:0});
+  await request(base+"/privileges/10",1,"PUT");
+  assert.equal((await request(base+"/privileges/8",1,"PUT")).status,409);
+  const entry=(await request(base+"/entries",1,"POST",{userId:7})).body.entry.id;
+  const add=(body:object)=>request(`/api/zaylist/entries/${entry}/drinks`,10,"POST",body);
+  const a=(await add({kind:"comp",total:2})).body.id;
+  const b=(await add({kind:"discount",total:1,percent:20})).body.id;
+  const token=(await request(`/api/zaylist/entries/${entry}/accept`,7,"POST")).body.token;
+  const scan=(suffix:string,user=10,more={})=>request("/api/zaylist/scan"+suffix,user,"POST",{token,eventId:10,...more});
+  assert.equal((await scan("/inspect",7)).status,403);
+  assert.equal((await scan("/inspect",10,{eventId:11})).status,404);
+  assert.equal((await scan("/inspect")).body.state,"accepted");
+  const served=await scan("/drink",10,{drinkGrantId:b});
+  assert.deepEqual(served.body.drinks.map((d:{remaining:number})=>d.remaining),[2,0]);
+  assert.equal((await scan("/inspect")).body.state,"accepted");
+  assert.equal((await scan("/drink",10,{drinkGrantId:b})).status,409);
+  assert.equal((await scan("")).body.result,"admitted");
+  assert.equal((await scan("/inspect")).body.state,"redeemed");
+  assert.equal((await scan("/drink",10,{drinkGrantId:a})).body.remaining,1);
+  await request(base+"/privileges/10",1,"DELETE");
+  assert.equal((await request(`/api/zaylist/drinks/${a}`,10,"DELETE")).status,403);
+  assert.equal((await request(`/api/zaylist/drinks/${a}`,1,"DELETE")).status,200);
+  assert.equal((await scan("/drink",10,{drinkGrantId:a})).status,409);
+  await request(`/api/zaylist/entries/${entry}/drinks`,1,"POST",{kind:"comp",total:4});
+  assert.equal((await request(base,1)).body.counts.drinksOutstanding,4);
+  dbEvent.isPublic=false;
+  assert.equal((await scan("/inspect")).status,404);
+  assert.equal((await request(`/api/zaylist/entries/${entry}/pass`,7)).status,404);
+  assert.equal((await request("/api/me/zaylist",7)).body.entries.length,0);
 });

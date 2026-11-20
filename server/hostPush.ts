@@ -1,7 +1,7 @@
 import type Database from "better-sqlite3";
 import type { Express, RequestHandler, Response } from "express";
 import type { IStorage } from "./storage";
-import { pushAllowance, type PushAudience, type PushTier } from "@shared/hostPushPolicy";
+import { pushAllowance, pushCopyIssue, type PushAudience, type PushTier } from "@shared/hostPushPolicy";
 import { buildDeclarativePayload, sendPushToSubscription } from "./push/send";
 import { isPushConfigured } from "./push/vapid";
 import { hasPublicEventFlags } from "@shared/publicEventVisibility";
@@ -97,7 +97,9 @@ export function registerHostPush(app: Express, db: Database.Database, storage: I
     const eventId = Number(req.body?.eventId) || null;
     if (!tier || audience === "everyone" && tier !== "owner") return res.sendStatus(403);
     if (!["followers","rsvps","everyone"].includes(audience) || typeof title !== "string" || !title.trim() || title.length>40 ||
-      typeof body !== "string" || body.length>110 || typeof requestKey !== "string" || !/^[a-z\d-]{20,80}$/i.test(requestKey)) return res.status(400).json({error:"Choose an audience, title and message within the limits"});
+      typeof body !== "string" || !body.trim() || body.length>110 || typeof requestKey !== "string" || !/^[a-z\d-]{20,80}$/i.test(requestKey)) return res.status(400).json({error:"Choose an audience, title and message within the limits"});
+    const copyIssue = pushCopyIssue(title, body);
+    if (copyIssue) return res.status(400).json({error:copyIssue});
     if ((audience === "rsvps" && !eventId) || eventId && !eventAllowed(eventId,user)) return res.status(403).json({error:"Choose one of your hosted events"});
     const previous = db.prepare("SELECT * FROM host_push_campaigns WHERE sender=? AND request_key=?").get(user.id,requestKey) as Campaign | undefined;
     if (previous) {

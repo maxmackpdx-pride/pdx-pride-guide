@@ -2,7 +2,7 @@ import { useId, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
-import type { PushAudience, PushTier } from "@shared/hostPushPolicy";
+import { pushCopyIssue, type PushAudience, type PushTier } from "@shared/hostPushPolicy";
 
 interface Audience { key: PushAudience; remaining: number | null; limit: number | null; windowDays: number; reachable: number }
 type Preview = {allowed:false} | {allowed:true;configured:boolean;tier:PushTier;audiences:Audience[]};
@@ -36,7 +36,8 @@ export default function PushComposer({events = [], selectedEvent}: {events?:Even
   if (!preview?.allowed) return null;
   const selected = preview.audiences.find(a => a.key === audience);
   const options = preview.audiences.filter(a => a.key !== "rsvps" || eventId);
-  const canSend = !!selected && selected.remaining !== 0 && selected.reachable > 0 && title.trim() && !busy && preview.configured;
+  const copyIssue = pushCopyIssue(title,body);
+  const canSend = !!selected && selected.remaining !== 0 && selected.reachable > 0 && title.trim() && body.trim() && !copyIssue && !busy && preview.configured;
   async function send() {
     if (!canSend) return;
     const message = {audience,eventId:audience==="rsvps" || selectedEvent ? eventId : null,title:title.trim(),body:body.trim()};
@@ -71,8 +72,12 @@ export default function PushComposer({events = [], selectedEvent}: {events?:Even
       <input id={prefix+"title"} className="zl-input" maxLength={40} value={title} onChange={e=>setTitle(e.target.value)} required />
       <span className="zl-charcount">{title.length}/40</span>
       <label className="zl-label" htmlFor={prefix+"body"}>Message</label>
-      <textarea id={prefix+"body"} className="zl-textarea" maxLength={110} value={body} onChange={e=>setBody(e.target.value)}/>
+      <textarea id={prefix+"body"} className="zl-textarea" maxLength={110} required value={body} onChange={e=>setBody(e.target.value)}/>
       <span className="zl-charcount">{body.length}/110</span>
+      {(title.trim() || body.trim()) && <div className="zl-lock-preview" aria-label="Lock screen preview">
+        <span>Lock screen preview · Zaylist</span><strong>{title}</strong><p>{body}</p>
+      </div>}
+      {copyIssue && <p className="zl-error" role="status">{copyIssue}</p>}
       {!preview.configured && <p className="zl-note">Device push is unavailable.</p>}
       {error && <p className="zl-error" role="alert">{error}</p>}
       <button type="submit" className="zl-btn zl-btn--primary" disabled={!canSend}>{busy ? "Sending…" : "Send push"}</button>

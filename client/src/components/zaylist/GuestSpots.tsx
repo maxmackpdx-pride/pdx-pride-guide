@@ -43,6 +43,8 @@ function SpotCard({ entry }: { entry: MyZaylistEntry }) {
         {notice ? <p className="zl-ok" role="status">{notice}</p> : null}
         {pass?.token ? (
           <div className="zl-pass" style={{ marginTop: 10 }}>
+            {pass.message && <p className="zl-note">{pass.message}</p>}
+            {pass.talentMessage && <p className="zl-note"><strong>Talent briefing</strong><br />{pass.talentMessage}</p>}
             <QrPass token={pass.token} label={`Entry code for ${entry.eventTitle}`} />
             <div className="zl-pass-token">{pass.token}</div>
             <div className="zl-row">
@@ -55,7 +57,7 @@ function SpotCard({ entry }: { entry: MyZaylistEntry }) {
                 On this code:{" "}
                 {pass.drinks
                   .filter((d) => !d.revoked)
-                  .map((d) => (d.kind === "comp" ? `${d.remaining} drink${d.remaining === 1 ? "" : "s"}` : `${d.percent}% off drinks`))
+                  .map((d) => (d.kind === "comp" ? `${d.remaining} drink${d.remaining === 1 ? "" : "s"}` : `${d.percent}% off · ${d.remaining} remaining`))
                   .join(", ")}
               </p>
             ) : null}
@@ -97,12 +99,8 @@ function SpotCard({ entry }: { entry: MyZaylistEntry }) {
               type="button"
               onClick={() =>
                 void run(async () => {
-                  const r = await zaylistApi.accept(entry.id);
-                  setNotice(
-                    r.message
-                      ? `You are on the list. ${r.message}`
-                      : "You are on the list. Accepting also joins the event chat.",
-                  );
+                  await zaylistApi.accept(entry.id);
+                  setNotice("You are on the list. Your event chat is open.");
                   const p = await zaylistApi.getPass(entry.id);
                   setPass(p);
                 })

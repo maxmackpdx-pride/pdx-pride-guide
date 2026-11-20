@@ -66,7 +66,7 @@ export function EventTeam({event,otherEvents}:{event:HostEvent;otherEvents:HostE
       {event.canEditEvent&&<>
         <form className="zl-row" onSubmit={e=>{e.preventDefault();void action("POST",hostsPath,{username},"Co-host added.");}}>
           <UsernameAutocomplete value={username} onChange={setUsername} placeholder="Find a co-host"/><button className="zl-btn" disabled={busy||!username.trim()}>Add co-host</button></form>
-        <Suspense fallback={<p>Loading lineup…</p>}><Talent eventId={event.id} eventTitle={event.title} mode="manage" hideSelfTag/></Suspense>
+        <div className="zl-lineup"><Suspense fallback={<p>Loading lineup…</p>}><Talent eventId={event.id} eventTitle={event.title} mode="manage" hideSelfTag/></Suspense></div>
       </>}
       {note&&<p className="zl-note" role="status">{note}</p>}
     </>}
