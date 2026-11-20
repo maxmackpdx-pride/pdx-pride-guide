@@ -3,7 +3,7 @@ import { initPickupNotices } from "./pickupReservation";
 import { pacificDayStart } from "./inboxReportingTime";
 import { withoutArchivedPosts } from "./boardArchive";
 import { seedResearchedProviderCards20261013 } from "./seedResearchedProviderCards20261013";
-import { seedOwnerRequestedPlaces20261013 } from "./seedOwnerRequestedPlaces20261013";
+import { seedOwnerRequestedPlaces20261013, seedOwnerRequestedPlaces, SUB_ROSA_PDX } from "./seedOwnerRequestedPlaces20261013";
 import outzMapCatalog from "@shared/outzMapCatalog";
 import { seedDiscoveredQueerEvents20260928 } from "./seedDiscoveredQueerEvents20260928";
 import { seedPosterAudit20260928 } from "./seedPosterAudit20260928";
@@ -7600,6 +7600,13 @@ WHERE id = 53 AND lower(trim(name)) = 'bowery bagels'
   if (!hasBootMigration("seed_owner_requested_places_20261013_v1")) {
     seedOwnerRequestedPlaces20261013(sqlite);
     recordBootMigration("seed_owner_requested_places_20261013_v1");
+  }
+
+  if (!hasBootMigration("seed_sub_rosa_pdx_20261119")) {
+    sqlite.transaction(() => {
+      seedOwnerRequestedPlaces(sqlite, [SUB_ROSA_PDX]);
+      recordBootMigration("seed_sub_rosa_pdx_20261119");
+    })();
   }
 
   /**

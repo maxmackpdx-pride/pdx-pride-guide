@@ -1,7 +1,22 @@
 import type Database from "better-sqlite3";
 
 /** Tucker-requested additions. Contacts and services checked against first-party pages on 2026-10-13. */
-export const OWNER_REQUESTED_PLACES_20261013 = [
+type DirectoryAddition = {
+  name: string;
+  aliases: string[];
+  type: string;
+  description: string;
+  address: string | null;
+  neighborhood: string;
+  website: string;
+  phone: string | null;
+  hours: string | null;
+  imageUrl: string | null;
+  sourceUrls: string[];
+  locations: { label: string; address: string; phone: string; hours: string }[];
+};
+
+export const OWNER_REQUESTED_PLACES_20261013: DirectoryAddition[] = [
   {
     name: "Black Hole Body Piercing & Tattoo",
     aliases: ["Black Hole", "Black Hole Tattoo and Piercing", "Black Hole Body Piercing", "Black Hole Body Piercing and Tattoo"],
@@ -36,11 +51,26 @@ export const OWNER_REQUESTED_PLACES_20261013 = [
   },
 ];
 
+export const SUB_ROSA_PDX: DirectoryAddition = {
+  name: "Sub Rosa PDX",
+  aliases: ["Sub Rosa", "Sub Rosa Portland"],
+  type: "venue",
+  description: "An appointment-only Portland venue for kink education, classes and small events. Register for address. Ticket holders receive the location from the organizer before the event.",
+  address: null,
+  neighborhood: "Portland",
+  website: "https://subrosapdx.com/",
+  phone: null,
+  hours: null,
+  imageUrl: null,
+  sourceUrls: ["https://subrosapdx.com/welcome/", "https://subrosapdx.com/events/"],
+  locations: [],
+};
+
 const normalizedName = (value: string) => value.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "");
 const normalizedWebsite = (value: string | null) => (value || "").toLowerCase().replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
 /** Insert missing identities only. Re-running preserves existing owner-edited records. */
-export function seedOwnerRequestedPlaces20261013(sqlite: Database.Database): string[] {
+export function seedOwnerRequestedPlaces(sqlite: Database.Database, places: DirectoryAddition[]): string[] {
   return sqlite.transaction(() => {
     const existing = sqlite.prepare("SELECT name, website FROM businesses").all() as { name: string; website: string | null }[];
     const insert = sqlite.prepare(`INSERT INTO businesses
@@ -48,7 +78,7 @@ export function seedOwnerRequestedPlaces20261013(sqlite: Database.Database): str
        queer_owned, queer_friendly, active, ingest_events, status, is_new, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 1, 0, 'OPEN', 0, ?)`);
     const added: string[] = [];
-    for (const place of OWNER_REQUESTED_PLACES_20261013) {
+    for (const place of places) {
       const names = new Set([place.name, ...place.aliases].map(normalizedName));
       if (existing.some(row => names.has(normalizedName(row.name)) || normalizedWebsite(row.website) === normalizedWebsite(place.website))) continue;
       insert.run(place.name, place.type, place.description, place.address, place.neighborhood, place.website,
@@ -58,4 +88,8 @@ export function seedOwnerRequestedPlaces20261013(sqlite: Database.Database): str
     }
     return added;
   })();
+}
+
+export function seedOwnerRequestedPlaces20261013(sqlite: Database.Database): string[] {
+  return seedOwnerRequestedPlaces(sqlite, OWNER_REQUESTED_PLACES_20261013);
 }

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import Database from "better-sqlite3";
-import { seedOwnerRequestedPlaces20261013 } from "./seedOwnerRequestedPlaces20261013";
+import { seedOwnerRequestedPlaces20261013, seedOwnerRequestedPlaces, SUB_ROSA_PDX } from "./seedOwnerRequestedPlaces20261013";
 function fixture() {
   const db = new Database(":memory:");
   db.exec(`CREATE TABLE businesses (
@@ -37,5 +37,20 @@ test("rolls back all insertions if a database constraint rejects a record", () =
   db.exec("CREATE TRIGGER reject_cockeye BEFORE INSERT ON businesses WHEN NEW.name = 'Cockeye Kink' BEGIN SELECT RAISE(ABORT, 'fixture rejection'); END");
   assert.throws(()=>seedOwnerRequestedPlaces20261013(db),/fixture rejection/);
   assert.equal((db.prepare("SELECT COUNT(*) AS n FROM businesses").get() as {n:number}).n,0);
+  db.close();
+});
+
+test("Sub Rosa publishes registration instructions without a street address or map location", () => {
+  const db = fixture();
+  assert.deepEqual(seedOwnerRequestedPlaces(db, [SUB_ROSA_PDX]), ["Sub Rosa PDX"]);
+  const row = db.prepare("SELECT address, locations, description FROM businesses WHERE name = ?").get("Sub Rosa PDX") as {
+    address: string | null; locations: string; description: string;
+  };
+  assert.equal(row.address, null);
+  assert.deepEqual(JSON.parse(row.locations), []);
+  assert.match(row.description, /Register for address/);
+  db.prepare("UPDATE businesses SET description = ?, active = 0").run("Operator edit");
+  assert.deepEqual(seedOwnerRequestedPlaces(db, [SUB_ROSA_PDX]), []);
+  assert.equal(db.prepare("SELECT description FROM businesses").pluck().get(), "Operator edit");
   db.close();
 });
