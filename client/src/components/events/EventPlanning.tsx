@@ -34,6 +34,7 @@ type Ride = {
 type Planning = {
   checked: boolean;
   onSiteWindow: boolean;
+  gpsAvailable?: boolean;
   poster: string | null;
   venue: string;
   title: string;
@@ -343,7 +344,9 @@ function PlanningPanel({
           </nav>
           {tab === "checkin" &&
             (userId ? (
-              query.data.onSiteWindow ? (
+              query.data.gpsAvailable === false ? (
+                <p>GPS check-in is unavailable for this venue.</p>
+              ) : query.data.onSiteWindow ? (
                 <VenueCheck
                   base={base}
                   eventId={eventId}

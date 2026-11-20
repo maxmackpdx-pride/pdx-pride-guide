@@ -122,6 +122,7 @@ test("ride-home checks attendance, destination, party size, capacity, contact co
   assert.deepEqual(await (await call(maps, 1)).json(), []);
   const privatePlan = await (await call(base, 1)).json();
   assert.equal(privatePlan.onSiteWindow, false);
+  assert.equal(privatePlan.gpsAvailable, false);
   assert.equal(privatePlan.checked, false);
   assert.equal(
     (

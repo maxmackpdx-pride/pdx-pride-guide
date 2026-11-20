@@ -325,14 +325,15 @@ export function registerEventPlanning(
           ];
         })
       : null;
+    const allowGps = !event.isHouseParty && !hasRegistrationOnlyLocation(event) && event.lat != null && event.lng != null;
     res.json({
       title: event.title,
       poster: event.posterImageUrl,
       venue: event.venueName,
-      checked: viewer && !event.isHouseParty && !hasRegistrationOnlyLocation(event) ? !!night.present(event.id, date, viewer) : false,
+      gpsAvailable: allowGps,
+      checked: viewer && allowGps ? !!night.present(event.id, date, viewer) : false,
       onSiteWindow:
-        !event.isHouseParty && !hasRegistrationOnlyLocation(event) &&
-        (parsePacificDateTime(event.dateStart) ?? Infinity) - 30 * 60000 <=
+        allowGps && (parsePacificDateTime(event.dateStart) ?? Infinity) - 30 * 60000 <=
           Date.now() &&
         (parsePacificDateTime(event.dateEnd) ?? 0) + 30 * 60000 > Date.now(),
       canPostGig: !!viewer && open && storage.isUserEventHost(event.id, viewer),
