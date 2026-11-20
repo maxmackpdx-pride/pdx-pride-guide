@@ -136,7 +136,7 @@ export default function Legal() {
                 </ul>
               </article>
             ))}
-            <article className="pdx-glass-rebind about-mission-card about-mission-card--orange">
+            <article id="event-terms" className="pdx-glass-rebind about-mission-card about-mission-card--orange">
               <div className="about-mission-card__icon" aria-hidden="true">
                 <Shield size={18} />
               </div>

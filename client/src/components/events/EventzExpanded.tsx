@@ -3,6 +3,7 @@ import { eventAge, eventPrice } from "@/lib/eventFacts";
 import { EventGoingButton, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
 import { PosterlessFlyer } from "./PosterlessFlyer";
 import EventPlanning from "./EventPlanning";
+import { EventHostNotice } from "./EventHostNotice";
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
@@ -384,6 +385,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
               {canManage ? <button type="button" className="evz-x__managebtn" onClick={onManage}>Manage event</button> : null}
               <button type="button" className="evz-x__managebtn" onClick={onManage}>Report / request a change</button>
             </div>
+            <EventHostNotice className="evz-x__note" />
           </section>
 
           <section className="evz-x__page" inert={page!==1} aria-hidden={page!==1} aria-label="Feed — Gigz">

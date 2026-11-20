@@ -3,6 +3,7 @@ import { CardStage } from "@/components/cards/CardStage";
 import { eventAge, eventPrice } from "@/lib/eventFacts";
 import { EventGoingButton, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
 import EventPlanning from "./EventPlanning";
+import { EventHostNotice } from "./EventHostNotice";
 import {useHistoryState} from "wouter/use-browser-location";
 import {useAuth} from "@/context/AuthContext";
 import {useModalA11y} from "@/hooks/useModalA11y";
@@ -1236,6 +1237,7 @@ export default function FlyerBoard({
                 <a className="olinkbtn" href={eventPath(openListing.id, openListing.title, openListing.dayOfWeek, dateStrOf(openListing))}>
                   REPORT / REQUEST A CHANGE <span>›</span>
                 </a>
+                <EventHostNotice className="onote" />
               </section>
               <section className="opage" inert={opage!==1} aria-hidden={opage!==1} aria-label="Feed">
                 {openListing.id > 0 && <EventPlanning eventId={openListing.id} occurrenceDate={openListing.dateStart} />}

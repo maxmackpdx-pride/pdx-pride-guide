@@ -1,3 +1,4 @@
+import { EventHostNotice } from "./events/EventHostNotice";
 import {pacificCalendarDate} from '@shared/missedConnections';
 import { useResponsivePoster } from "@/lib/useResponsivePoster";
 import { restoreOriginalPoster, POSTER_DETAIL_SIZES } from "@/lib/responsivePoster";
@@ -1216,6 +1217,8 @@ function EventModalInner({
               </button>
             </div>
           )}
+
+          <EventHostNotice className="event-modal__drawer-copy" />
 
           <div className="event-modal__footer">
             {hasPendingClaim && (

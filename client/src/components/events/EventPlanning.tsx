@@ -368,7 +368,6 @@ function PlanningPanel({
           )}
         </AtEventDialog>
       )}
-      <footer>Events are organized by their hosts. Zaylist is not responsible for independently hosted activities. <Link href="/legal">Read the event terms</Link>.</footer>
       {auth && (
         <AuthModal
           defaultTab="login"
