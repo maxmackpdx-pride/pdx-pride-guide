@@ -36,6 +36,7 @@ test('Eventz restores poster history, search paginates and failed sources remain
     await page.waitForURL(/q=Portland/);
     await poster.click();
     const dialog=page.getByRole('dialog',{name:event.title});
+    await dialog.getByRole('button',{name:/View details/}).click();
     await dialog.getByRole('button',{name:/Going · Public/}).waitFor();
     await dialog.getByRole('button',{name:/Save privately/}).waitFor();
     await dialog.getByRole('tab',{name:'PEOPLE'}).click();
@@ -45,7 +46,7 @@ test('Eventz restores poster history, search paginates and failed sources remain
     await dialog.waitFor({state:'hidden'});
     assert.match(page.url(),/q=Portland/);
     await page.goForward();
-    await dialog.getByRole('button',{name:'Close event'}).click();
+    await dialog.getByRole('button',{name:'Close',exact:true}).click();
     await dialog.waitFor({state:'hidden'});
 
     await page.keyboard.press('Control+k');
