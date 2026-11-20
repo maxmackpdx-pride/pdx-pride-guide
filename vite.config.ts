@@ -38,7 +38,7 @@ export default defineConfig(({ command }):UserConfig => {
     // mutation controllers stay outside compiler scope unless separately reviewed.
     babel({
       presets: [reactCompilerPreset({ compilationMode: "annotation" })],
-      include: /[\\/]client[\\/]src[\\/]pages[\\/](?:Events|PlacezBrowse|Scenez|OutzidePlacesPage)\.tsx$/,
+      include: /[\\/]client[\\/]src[\\/]pages[\\/](?:Events|PlacezBrowse|Scenez|OutzidePlacesPage|HostHub)\.tsx$/,
     }),
     {
       name: "version-home-flight-assets",

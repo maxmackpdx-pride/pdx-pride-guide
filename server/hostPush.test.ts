@@ -16,6 +16,7 @@ test("host push enforces audience, consent, permissions, tier, cooldown and requ
     CREATE TABLE attendances(event_id INTEGER,user_id INTEGER,is_active INTEGER,expires_at TEXT);
     INSERT INTO attendances VALUES(10,3,1,NULL),(10,4,1,NULL),(10,5,1,NULL),(10,6,0,NULL);
   `);
+  let visible=true, simulateOffline=false;
   const users=[1,2,3,4,5,6,7].map(id=>({id,username:`member${id}`,status:"active"}));
   const push = [3,4,5,6,7].map(id => ({id,userId:id,endpoint:"fixture",auth:"test",p256dh:"test"}));
   const sent:number[]=[];
@@ -25,13 +26,13 @@ test("host push enforces audience, consent, permissions, tier, cooldown and requ
     isMemberInteractionBlocked:(_:number,id:number)=>id===5,getFollowerUserIds:()=>[3,4,5],
     getNotificationPrefs:(id:number)=>({my_events:id!==4,account:true}),
     isUserEventHost:(event:number,user:number)=>event===10 && user===2,
-    getEvent:(id:number)=>({id,status:"LIVE",isPublic:true,isPrivate:false}),
+    getEvent:(id:number)=>({id,status:"LIVE",isPublic:visible,isPrivate:false}),
     touchPushSubscription:()=>{},deactivatePushSubscription:()=>{},
   } as unknown as IStorage;
   const app=express();app.use(express.json());
   const ops=registerHostPush(app,db,storage,(req,res,next)=>{
     req.session={userId:Number(req.header("fixture-viewer"))} as typeof req.session;next();
-  },()=>false,()=>false,{configured:()=>true,send:async sub=>{sent.push((sub as {id:number}).id);return {ok:true,gone:false};}});
+  },()=>false,()=>false,{configured:()=>true,send:async sub=>{if(simulateOffline) return {ok:false,gone:false};sent.push((sub as {id:number}).id);return {ok:true,gone:false};}});
   const http=app.listen(0,"127.0.0.1");await new Promise(resolve=>http.once("listening",resolve));
   t.after(()=>new Promise<void>(resolve=>http.close(()=>resolve())));
   const url=`http://127.0.0.1:${(http.address() as AddressInfo).port}/api/hub/push`;
@@ -68,4 +69,16 @@ test("host push enforces audience, consent, permissions, tier, cooldown and requ
   await ops.drain();
   assert.deepEqual(sent,[3,3,3,3]);
   assert.equal((await req(2,"GET",`/${result.data.id}/receipt`)).data.sent,1);
+  assert.equal((await req(1,"POST","",message("everyone"))).status,202);
+  assert.equal((await req(1,"POST","",message("everyone"))).status,202);
+  db.prepare("UPDATE host_push_campaigns SET created=created-? WHERE sender=?").run(86400000*3,2);
+  assert.equal((await req(2,"POST","",message("followers"))).status,202);
+  simulateOffline=true;
+  const eventPush=await req(2,"POST","",message("rsvps",10));
+  assert.equal(eventPush.status,202);
+  visible=false;
+  db.prepare("UPDATE host_push_deliveries SET lease=0 WHERE campaign=?").run(eventPush.data.id);
+  assert.equal((await req(2,"GET","?eventId=10")).status,403);
+  await ops.drain();
+  assert.equal((await req(2,"GET",`/${eventPush.data.id}/receipt`)).data.skipped,1);
 });

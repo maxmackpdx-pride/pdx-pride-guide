@@ -16,6 +16,7 @@ const VenueSection = lazy(() => import("@/components/dashboard/DashboardVenueSec
 type Workspace = {events:HostEvent[];venues:{id:number;name:string;logoImageUrl:string|null}[];personal:{interested:number;going:number;admitted:number}};
 
 export default function HostHub() {
+  "use memo";
   const {user,loading}=useAuth();
   const {openSheet}=useInboxSheet();
   const [auth,setAuth]=useState(false),[venuesOpen,setVenuesOpen]=useState(false);

@@ -761,3 +761,25 @@ test("private member stats use only the current account, its bookmarks and visib
   dbEvent.isPrivate=true;
   assert.deepEqual((await request(path,5)).body.going,[]);
 });
+
+test("host stages derive from event records; host notes stay private and cannot silently overwrite a newer draft",async t=>{
+  const {db,request,dbEvent}=await setup(t);
+  db.exec("CREATE TABLE event_gig_links(gig_id INTEGER,event_id INTEGER); CREATE TABLE gig_posts(id INTEGER,status TEXT); INSERT INTO gig_posts VALUES(1,'LIVE'),(2,'HIDDEN'); INSERT INTO event_gig_links VALUES(1,10),(2,10)");
+  const path="/api/events/10/host-signal";
+  assert.equal((await request(path,5)).status,403);
+  const read=await request(path,1);
+  assert.equal(read.body.openGigs,1);
+  assert.equal(read.body.stage,"Commitment");
+  assert.equal(read.body.repeatGuests,0);
+  const draft={stage:"Interest",body:"Doors briefing",revision:0};
+  assert.equal((await request(path+"/note",1,"PUT",draft)).body.revision,1);
+  assert.equal((await request(path+"/note",1,"PUT",draft)).body.revision,1);
+  assert.equal((await request(path+"/note",1,"PUT",{...draft,body:"Stale"})).status,409);
+  assert.deepEqual((await request(path,2)).body.notes,[]);
+  assert.equal((await request(path,1)).body.notes[0].body,"Doors briefing");
+  assert.equal((await request(path+"/note",1,"PUT",{...draft,body:"Final briefing",revision:1})).body.revision,2);
+  dbEvent.dateStart="2024-01-01T18:00:00";dbEvent.dateEnd="2024-01-02T02:00:00";
+  assert.equal((await request(path,1)).body.stage,"After");
+  dbEvent.isPrivate=true;
+  assert.equal((await request(path,1)).status,404);
+});

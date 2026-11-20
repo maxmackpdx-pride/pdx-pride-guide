@@ -1,3 +1,4 @@
+import { parsePacificDateTime } from "@shared/missedConnections";
 import { registerRosterChats } from "./rosterChats";
 import { registerOrganizerPlanning } from "./organizerPlanning";
 import type Database from "better-sqlite3";
@@ -25,6 +26,10 @@ export function registerHostWorkspace(app:Express, db:Database.Database, storage
     post_id INTEGER PRIMARY KEY REFERENCES missed_connections(id), actor INTEGER NOT NULL REFERENCES users(id),
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );`);
+  db.exec(`CREATE TABLE IF NOT EXISTS event_host_notes (
+    event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id),stage TEXT NOT NULL CHECK(stage IN ('Interest','Commitment')),
+    body TEXT NOT NULL,revision INTEGER NOT NULL DEFAULT 1,PRIMARY KEY(event_id,user_id,stage))`);
   registerOrganizerPlanning(app,db,storage,auth,accessFor,visible);
   registerRosterChats(app, db, storage, auth, accessFor);
   const base="/api/hub/workspace";
@@ -60,6 +65,44 @@ export function registerHostWorkspace(app:Express, db:Database.Database, storage
       gifted:numeric("SELECT COUNT(*) AS n FROM zaylist_entries WHERE event_id=? AND state='gifted'",id),
     };
   }
+  const signal="/api/events/:id/host-signal";
+  const editor:RequestHandler=(req,res,next)=>{
+    const id=Number(req.params.id), event=Number.isSafeInteger(id) && id>0 ? storage.getEvent(id) : undefined;
+    if(!event || event.status!=="LIVE" || !hasPublicEventFlags(event) || !visible(event)) return res.status(404).json({error:"Event unavailable"});
+    if(!accessFor(id,res.locals.viewer.id).editor) return res.status(403).json({error:"Only this event’s editors can view its stages"});
+    res.locals.event=event;next();
+  };
+  app.get(signal,auth,active,editor,(_req,res)=>{
+    const event=res.locals.event as Event,id=event.id;
+    const m=stats(id),now=Date.now(),start=parsePacificDateTime(event.dateStart),end=parsePacificDateTime(event.dateEnd);
+    const finish=end ?? (start===null ? null : start+86400000);
+    const stage=finish!==null&&finish<now ? "After" : start!==null&&start<=now ? "Night of" : m.going||m.accepted ? "Commitment" : m.interested ? "Interest" : "Listed";
+    const latest=db.prepare("SELECT MAX(created_at) AS at FROM attendances WHERE event_id=? AND is_active=1 AND (expires_at IS NULL OR julianday(expires_at)>julianday('now'))").get(id) as {at:string|null};
+    const repeatGuests=numeric(`SELECT COUNT(DISTINCT current.user_id) AS n FROM zaylist_entries current
+      JOIN zaylist_redemptions arrival ON arrival.entry_id=current.id AND arrival.kind='entry'
+      WHERE current.event_id=? AND EXISTS(SELECT 1 FROM zaylist_entries prior
+        JOIN zaylist_redemptions earlier ON earlier.entry_id=prior.id AND earlier.kind='entry'
+        JOIN event_hosts h ON h.event_id=prior.event_id JOIN event_hosts co ON co.event_id=current.event_id AND co.user_id=h.user_id
+        WHERE prior.user_id=current.user_id AND prior.event_id!=current.event_id AND earlier.id<arrival.id)`,id);
+    const notes=db.prepare("SELECT stage,body,revision FROM event_host_notes WHERE event_id=? AND user_id=?").all(id,res.locals.viewer.id);
+    res.json({stage,notes,age:event.ageRequirement,latestGoing:latest.at,repeatGuests,
+      openGigs:numeric("SELECT COUNT(*) AS n FROM event_gig_links l JOIN gig_posts g ON g.id=l.gig_id WHERE l.event_id=? AND g.status='LIVE'",id),
+      lineupPending:numeric("SELECT COUNT(*) AS n FROM event_talent WHERE event_id=? AND status='PENDING'",id)});
+  });
+  app.put(signal+"/note",auth,active,editor,(req,res)=>{
+    const id=res.locals.event.id,user=res.locals.viewer.id,{stage,body,revision}=req.body||{};
+    if(!["Interest","Commitment"].includes(stage) || typeof body!=="string" || body.length>800 || !Number.isSafeInteger(revision) || revision<0) return res.status(400).json({error:"Invalid stage or note"});
+    const result = db.transaction(()=>{
+      const current=db.prepare("SELECT body,revision FROM event_host_notes WHERE event_id=? AND user_id=? AND stage=?").get(id,user,stage) as {body:string;revision:number}|undefined;
+      if(current?.body===body) return current.revision;
+      if((current?.revision??0)!==revision) return null;
+      db.prepare(`INSERT INTO event_host_notes(event_id,user_id,stage,body,revision) VALUES(?,?,?,?,1)
+        ON CONFLICT(event_id,user_id,stage) DO UPDATE SET body=excluded.body,revision=event_host_notes.revision+1`).run(id,user,stage,body);
+      return revision+1;
+    }).immediate();
+    if(result===null) return res.status(409).json({error:"This note changed in another session. Load the saved version before editing."});
+    res.json({revision:result});
+  });
   app.get(base,auth,active,(req,res)=>{
     const viewer=res.locals.viewer;
     const mine=storage.getUserOwnedBusinesses(viewer.id);

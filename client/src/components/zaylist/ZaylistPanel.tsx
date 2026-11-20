@@ -122,7 +122,7 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
   const [allowRole, setAllowRole] = useState("staff");
   const [allowSpots, setAllowSpots] = useState("2");
   const [generalBody, setGeneralBody] = useState<string | null>(null);
-  const [talentPick, setTalentPick] = useState<string>("");
+  const [talentPick, setTalentPick] = useState<string|null>(null);
   const [savedLabel, setSavedLabel] = useState("");
   const [savedBody, setSavedBody] = useState("");
   const [broadcastBody, setBroadcastBody] = useState("");
@@ -544,7 +544,7 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
           <select
             id="zl-talent-pick"
             className="zl-select"
-            value={talentPick || (messagesQuery.data?.talentMessageId ? String(messagesQuery.data.talentMessageId) : "")}
+            value={talentPick ?? (messagesQuery.data?.talentMessageId ? String(messagesQuery.data.talentMessageId) : "")}
             onChange={(e) => setTalentPick(e.target.value)}
           >
             <option value="">None</option>
@@ -556,12 +556,15 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
             <button
               className="zl-btn zl-btn--primary"
               type="button"
+              disabled={generalBody===null && talentPick===null}
               onClick={() =>
                 void run(async () => {
                   await zaylistApi.putMessages(eventId, {
-                    generalBody: generalBody ?? messagesQuery.data?.generalBody ?? "",
-                    talentMessageId: talentPick === "" ? null : Number(talentPick),
+                    generalBody: generalBody ?? undefined,
+                    talentMessageId: talentPick === null ? undefined : talentPick === "" ? null : Number(talentPick),
                   });
+                  setGeneralBody(null);
+                  setTalentPick(null);
                   await queryClient.invalidateQueries({ queryKey: ["zaylist-messages", eventId] });
                 }, "Messages saved.")
               }

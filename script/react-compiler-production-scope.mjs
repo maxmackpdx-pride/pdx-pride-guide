@@ -18,7 +18,7 @@ const inScope=[
  ...placezCompilerModules.map(module=>'components/'+module+'.tsx'),
  ...cardFaceModules.map(face=>'components/'+face+(face.startsWith('board/punk/')?'.jsx':'.tsx')),
 ];
-const pageFunctions=['Events','PlacezBrowse','Scenez','OutzidePlacesPage'];
+const pageFunctions=['Events','PlacezBrowse','Scenez','OutzidePlacesPage','HostHub'];
 const outOfScope=[
  'components/discovery/PlaceDiscoveryCard.tsx',
  'components/home/TodayLocationCard.tsx',
@@ -35,6 +35,9 @@ const outOfScope=[
  'components/placez/nativeData.ts',
  'components/placez/nativeModel.ts',
  // Never let exact-card Compiler selection cross into Mapz or adult-access boundaries.
+ 'components/zaylist/EventMode.tsx',
+ 'components/zaylist/OrganizerPlanning.tsx',
+ 'components/zaylist/PushComposer.tsx',
  'components/AdultContentGate.tsx',
  'components/AuthModal.tsx',
  'components/EventModal.tsx',

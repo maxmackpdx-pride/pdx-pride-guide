@@ -1,4 +1,5 @@
 import { OrganizerPlanning } from "./OrganizerPlanning";
+import HostSignal from "./HostSignal";
 import RosterChat from "./RosterChat";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -256,6 +257,7 @@ export default function HostCard({
                 </div>
               )}
 
+              {event.canManageList && <HostSignal event={event} onEdit={()=>{setEditing(true);dialogRef.current?.scrollTo({top:0});}} onDoor={()=>setDoor(true)}/>}
               <details className="zl-tool"><summary>Night in numbers</summary>
                 <dl className="zl-stat-strip">{[
                   ["Interested",counts.interested],["Going",counts.going],["Expected",counts.accepted],

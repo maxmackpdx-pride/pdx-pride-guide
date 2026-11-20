@@ -330,3 +330,9 @@
 .zl-plan-items label { display: flex; align-items: flex-start; gap: .6rem; }
 .zl-plan-items input { margin-top: .3rem; }
 .zl-plan-items small { display: block; color: var(--zg-11); }
+
+.zl-stage-picks { display: flex; flex-wrap: wrap; gap: .35rem; margin-block: .7rem; }
+.zl-stage-picks button[aria-pressed=true] { color: var(--zg-1); background: var(--zg-12); }
+.zl-listing-facts { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.zl-listing-facts dt { color: var(--zg-11); font-size: .8rem; }
+.zl-listing-facts dd { margin: 0; }
