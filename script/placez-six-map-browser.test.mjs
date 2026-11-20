@@ -52,7 +52,13 @@ test('immutable map release uses shared read-only PlaceZ portals at phone and de
    const artwork=await expanded.locator('.pz-art').boundingBox();assert.ok(artwork.height>=artwork.width*.5,'Map expanded retains full source artwork composition');
    assert.equal(await expanded.getByRole('tab',{name:'Info',exact:true}).getAttribute('aria-selected'),'true');assert.equal(await page.locator('.mapz-map-details').evaluate(el=>getComputedStyle(el).overflow),'visible','Outer wrapper preserves outward glow');assert.notEqual(await expanded.evaluate(el=>getComputedStyle(el).boxShadow),'none','Approved static glow is present');
    await expanded.getByRole('tab',{name:'Maps',exact:true}).click();await expanded.locator('.placez-map-tools').waitFor();await expanded.locator('.getting-there-card').waitFor();assert.ok(await expanded.getByRole('button',{name:'Show on map',exact:true}).count());
-   await page.waitForFunction(()=>{const v=document.querySelector('.host-placez-card .pz-card--expanded .pz-page-viewport');return v&&Math.abs(v.scrollLeft-3*v.clientWidth)<1;});
+   await page.waitForFunction(()=>{
+    const card=document.querySelector('.host-placez-card .pz-card--expanded');
+    const tab=Array.from(card?.querySelectorAll('[role=tab]')||[]).find(element=>element.textContent.trim()==='Maps');
+    const panel=tab&&document.getElementById(tab.getAttribute('aria-controls'));
+    const viewport=card?.querySelector('.pz-page-viewport');
+    return tab?.getAttribute('aria-selected')==='true'&&panel?.getAttribute('aria-hidden')==='false'&&viewport&&Math.abs(panel.getBoundingClientRect().left-viewport.getBoundingClientRect().left)<1;
+   });
    await page.waitForTimeout(120);
    for(const selector of ['.pz-close','.pz-heart button'])assert.equal(await expanded.locator(selector).evaluate(el=>{const b=el.getBoundingClientRect(),hit=document.elementFromPoint(b.x+b.width/2,b.y+b.height/2);return !!hit&&(el===hit||el.contains(hit));}),true,`Map ${selector} clear of fixed dock`);
    await page.screenshot({path:path.join(shots,`${width}-${mode}-maps.png`),fullPage:true});
