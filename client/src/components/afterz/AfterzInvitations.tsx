@@ -1,3 +1,4 @@
+import AfterzPrivateLocation from "./AfterzPrivateLocation";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -387,6 +388,7 @@ function GatheringRoom({
       {inside && (
         <>
           <h4>Private group chat</h4>
+          <AfterzPrivateLocation path={path} host={role==="host"} userId={user!.id}/>
           <p>
             Visible to the host and accepted guests until the gathering closes.
           </p>

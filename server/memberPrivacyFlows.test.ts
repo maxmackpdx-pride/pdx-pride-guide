@@ -216,6 +216,57 @@ test("private gathering, mailbox, receipt and device flows use the current accou
           .status,
         200,
       );
+      const privateLocation = room + "/chat/location";
+      const address = {
+        address: "Fixture private entrance",
+        lat: 45.5,
+        lng: -122.6,
+        confirm: true,
+      };
+      assert.equal(
+        (await call(privateLocation, 1, "PUT", { ...address, confirm: false }))
+          .status,
+        400,
+      );
+      assert.equal(
+        (await call(privateLocation, 2, "PUT", address)).status,
+        403,
+      );
+      assert.equal(
+        (await call(privateLocation, 1, "PUT", address)).status,
+        200,
+      );
+      assert.equal((await call(privateLocation, 3)).status, 403);
+      assert.equal(
+        (await call(privateLocation + "/directions", 3)).status,
+        403,
+      );
+      assert.equal(
+        (await (await call(privateLocation, 2)).json()).location.address,
+        address.address,
+      );
+      assert.equal(
+        JSON.stringify(await (await call(room, 3)).json()).includes(
+          address.address,
+        ),
+        false,
+      );
+      assert.equal(
+        JSON.stringify(await (await call(path, 2)).json()).includes(
+          address.address,
+        ),
+        false,
+      );
+      const directions = await fetch(base + privateLocation + "/directions", {
+        redirect: "manual",
+        headers: { "fixture-account": "2" },
+      });
+      assert.equal(directions.status, 302);
+      assert.equal(
+        new URL(directions.headers.get("Location")!).searchParams.get("daddr"),
+        "45.5,-122.6",
+      );
+      assert.equal(directions.headers.get("Referrer-Policy"), "no-referrer");
       const chat = { body: "Meet at the entrance", requestId: randomUUID() };
       await call(room + "/chat", 2, "POST", chat);
       await call(room + "/chat", 2, "POST", chat);
@@ -228,6 +279,11 @@ test("private gathering, mailbox, receipt and device flows use the current accou
       assert.equal((await call(room + "/chat", 3)).status, 403);
       await call(room + "/guests/2", 1, "POST", { status: "revoked" });
       assert.equal((await call(room + "/chat", 2)).status, 403);
+      assert.equal((await call(privateLocation, 2)).status, 403);
+      assert.equal(
+        (await call(privateLocation + "/directions", 2)).status,
+        403,
+      );
       assert.equal(
         (await call(room + "/request", 2, "POST", { confirmed18: true }))
           .status,
@@ -237,6 +293,11 @@ test("private gathering, mailbox, receipt and device flows use the current accou
       assert.equal((await call(room, 1)).status, 404);
       assert.equal(
         db.prepare("SELECT COUNT(*) AS n FROM afterz_chat").get()!.n,
+        0,
+      );
+      assert.equal(
+        db.prepare("SELECT COUNT(*) AS n FROM afterz_private_locations").get()!
+          .n,
         0,
       );
       const another = await (

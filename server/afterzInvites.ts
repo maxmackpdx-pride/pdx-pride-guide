@@ -54,12 +54,19 @@ export function registerAfterzInvites(
       sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, body TEXT NOT NULL, created_at INTEGER NOT NULL,
       request_key TEXT NOT NULL, UNIQUE(gathering_id,sender_id,request_key)
     );
+    CREATE TABLE IF NOT EXISTS afterz_private_locations (
+      gathering_id TEXT PRIMARY KEY REFERENCES afterz_gatherings(id) ON DELETE CASCADE,
+      address TEXT NOT NULL, lat REAL, lng REAL
+    );
     CREATE INDEX IF NOT EXISTS idx_afterz_chat_history ON afterz_chat(gathering_id,id);
   `);
   const nights = afterzNights(app, db, auth, now, catalog);
   // No dependency on the connection's foreign_keys setting for room erasure.
   const erase = db.transaction((id: string) => {
     nights.erase(id);
+    db.prepare("DELETE FROM afterz_private_locations WHERE gathering_id=?").run(
+      id,
+    );
     db.prepare("DELETE FROM afterz_chat WHERE gathering_id=?").run(id);
     db.prepare("DELETE FROM afterz_guests WHERE gathering_id=?").run(id);
     db.prepare("DELETE FROM afterz_gatherings WHERE id=?").run(id);
@@ -180,12 +187,10 @@ export function registerAfterzInvites(
         (poster != null &&
           !/^\/uploads\/[\w.-]+\.(png|jpe?g|gif|webp)$/i.test(poster))
       ) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "Choose an event within three days, a vibe, and 1–500 guest spots.",
-          });
+        return res.status(400).json({
+          error:
+            "Choose an event within three days, a vibe, and 1–500 guest spots.",
+        });
       }
       closesAt = times.closesAt;
     }
@@ -370,6 +375,64 @@ export function registerAfterzInvites(
   app.post(route + "/:id/close", auth, find, host, (_req, res) => {
     erase(res.locals.room.id);
     res.json({ closed: true });
+  });
+  const privatePin = route + "/:id/chat/location";
+  const readLocation = (id: string) =>
+    db
+      .prepare(
+        "SELECT address, lat, lng FROM afterz_private_locations WHERE gathering_id=?",
+      )
+      .get(id) as
+      | { address: string; lat: number | null; lng: number | null }
+      | undefined;
+  app.get(privatePin, auth, find, participant, (_req, res) => {
+    res.json({
+      location: readLocation(res.locals.room.id) ?? null,
+      expiresAt: res.locals.room.closesAt,
+    });
+  });
+  app.get(privatePin + "/directions", auth, find, participant, (_req, res) => {
+    const location = readLocation(res.locals.room.id);
+    if (!location) return res.sendStatus(404);
+    const url = new URL("https://maps.apple.com/");
+    url.searchParams.set(
+      "daddr",
+      location.lat !== null && location.lng !== null
+        ? [location.lat, location.lng].join(",")
+        : location.address,
+    );
+    res.set("Referrer-Policy", "no-referrer").redirect(302, url.href);
+  });
+  app.put(privatePin, auth, find, host, (req, res) => {
+    const address =
+      typeof req.body.address === "string" ? req.body.address.trim() : "";
+    const { lat = null, lng = null } = req.body;
+    const coordinates = lat !== null || lng !== null;
+    if (
+      req.body.confirm !== true ||
+      address.length > 240 ||
+      (!address && !coordinates) ||
+      (coordinates &&
+        (!Number.isFinite(lat) ||
+          !Number.isFinite(lng) ||
+          Math.abs(lat) > 90 ||
+          Math.abs(lng) > 180))
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Confirm a private address or a complete map pin." });
+    }
+    db.prepare(
+      `INSERT INTO afterz_private_locations VALUES(?,?,?,?) ON CONFLICT(gathering_id)
+      DO UPDATE SET address=excluded.address,lat=excluded.lat,lng=excluded.lng`,
+    ).run(res.locals.room.id, address, lat, lng);
+    res.json({ saved: true });
+  });
+  app.delete(privatePin, auth, find, host, (_req, res) => {
+    db.prepare("DELETE FROM afterz_private_locations WHERE gathering_id=?").run(
+      res.locals.room.id,
+    );
+    res.json({ removed: true });
   });
   app.get(route + "/:id/chat", auth, find, participant, (_req, res) => {
     const rows = db
