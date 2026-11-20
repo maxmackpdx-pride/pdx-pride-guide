@@ -22,6 +22,7 @@ import { registerBoardPlacement } from "./boardMapPlacement";
 import { homeCatalogCounts } from "./homeStats";
 import { hasPublicEventFlags } from "@shared/publicEventVisibility";
 import { registerEventPlanning } from "./eventPlanning";
+import { registerHostWorkspace } from "./hostWorkspace";
 import { registerHostPush } from "./hostPush";
 import { registerZaylist } from "./zaylist";
 import { createEventSaves } from "./eventSaves";
@@ -1367,6 +1368,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   const eventPlanning = registerEventPlanning(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate,
     (recipientIds,senderId,title,body,navigate,tag)=>schedulePushForActivity({recipientIds,senderId,title,body,navigate,tag,category:"my_events"}));
   const zaylist = registerZaylist(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate);
+  const hostWorkspace = registerHostWorkspace(app, sqlite, storage, requireAuth, zaylist.store, zaylist.accessFor, isPublicEventVisibleUnderPrideCap);
   const hostPush = registerHostPush(app, sqlite, storage, requireAuth, user => storage.hasOwnerAdminAccess(user) || isMainAdminUser(user), moderationGate);
   const runGuestListJobs = async () => {
     try {
@@ -5110,6 +5112,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       if (data.body.length > 500) return res.status(400).json({ error: "body max is 500 characters" });
       const created = storage.createMissedConnection(data);
       saveBoardMapLocation("mizzed", created.id, validatedMapPoint);
+      try { hostWorkspace.notifyConnection(created); } catch { console.warn("[host-workspace] connection notice unavailable"); }
       res.json({
         ...created,
         eventTitle: eventMeta?.title ?? null,

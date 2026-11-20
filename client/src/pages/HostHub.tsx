@@ -1,148 +1,57 @@
-import { useEffect, useState } from "react";
-import AuthModal from "@/components/AuthModal";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import AuthModal from "@/components/AuthModal";
 import { useAuth } from "@/context/AuthContext";
+import { useInboxSheet } from "@/context/InboxSheetContext";
 import { apiRequest } from "@/lib/queryClient";
 import PushComposer, { PushMemberships } from "@/components/zaylist/PushComposer";
 import GuestSpots from "@/components/zaylist/GuestSpots";
 import HostCard, { type HostEvent } from "@/components/zaylist/HostCard";
+import { Connections } from "@/components/zaylist/HostOperations";
 import "@/components/zaylist/zaylist.css";
 
-/**
- * The back-end hub. Everyone signed in gets the hub; what is inside it
- * follows their role. Personal is for everyone. Admin and Owner sections
- * do not exist for users without those roles, and no count shown here
- * ever includes work the signed-in user cannot see.
- */
+const VenueSection = lazy(() => import("@/components/dashboard/DashboardVenueSection"));
+type Workspace = {events:HostEvent[];venues:{id:number;name:string;logoImageUrl:string|null}[];personal:{interested:number;going:number;admitted:number}};
+
 export default function HostHub() {
-  const { user, loading } = useAuth();
-  const [showAuth, setShowAuth] = useState(false);
-  useEffect(() => {
-    const token = new URLSearchParams(location.hash.slice(1)).get("invite");
-    if (token && /^[A-Za-z0-9_-]{43}$/.test(token)) sessionStorage.setItem("guest-list-invitation",token);
-  }, []);
-
-  const claimed = useQuery({
-    queryKey: ["/api/events/mine/claimed"],
-    queryFn: () => apiRequest("GET", "/api/events/mine/claimed").then((r) => r.json() as Promise<HostEvent[]>),
-    enabled: !!user,
-  });
-  const metrics = useQuery({
-    queryKey: ["/api/organizer/events/metrics"],
-    queryFn: () =>
-      apiRequest("GET", "/api/organizer/events/metrics").then(
-        (r) => r.json() as Promise<{ events: { id: number; title: string; activeGoing: number }[] }>,
-      ),
-    enabled: !!user,
-  });
-  const isAdmin = !!(user?.isAdmin || user?.isSuperAdmin);
-  const isOwner = !!user?.isPrimaryOwner;
-  const pushStatus = useQuery({
-    queryKey: ["/api/admin/push-status"],
-    queryFn: () =>
-      apiRequest("GET", "/api/admin/push-status").then(
-        (r) =>
-          r.json() as Promise<{
-            configured: boolean;
-            totalActiveSubscriptions: number;
-            myDeviceSubscriptions: number;
-          }>,
-      ),
-    enabled: isAdmin || isOwner,
-  });
-
-  if (loading) {
-    return (
-      <div className="zl-root">
-        <div className="zl-wrap">
-          <p className="zl-note">Loading your hub…</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="zl-root">
-        <div className="zl-wrap">
-          <h1 className="zl-h1">Your hub</h1>
-          <p className="zl-sub">Sign in to see your spots, your events, and your list.</p>
-          <p>
-            <button className="zl-btn zl-btn--primary" onClick={() => setShowAuth(true)}>Sign in or join</button>
-            {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const goingById = new Map((metrics.data?.events ?? []).map((e) => [e.id, e.activeGoing]));
-  const hostEvents = claimed.data ?? [];
-
-  return (
-    <div className="zl-root">
-      <div className="zl-wrap">
-        <header>
-          <h1 className="zl-h1">Your hub</h1>
-          <p className="zl-sub">{user.displayName || user.username}</p>
-        </header>
-
-        <PushComposer events={hostEvents} />
-
-        <section className="zl-section" aria-label="Personal">
-          <h2>Personal</h2>
-          <h3>Your Zay'list spots</h3>
-          <GuestSpots />
-          <h3>Yours</h3>
-          <div className="zl-row">
-            <a className="zl-btn" href="/dashboard">My schedule and posts</a>
-            <a className="zl-btn" href="/settings/notifications">Notification settings</a>
-          </div>
-        </section>
-
-        {hostEvents.length ? (
-          <section className="zl-section" aria-label="Hosting">
-            <h2>Hosting</h2>
-            <p className="zl-note">Your events. Press a card for the owner view.</p>
-            <div className="zl-rail">
-              {hostEvents.map((event) => (
-                <HostCard key={event.id} event={event} going={goingById.get(event.id)} />
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {isAdmin ? (
-          <section className="zl-section" aria-label="Admin">
-            <h2>Admin</h2>
-            {pushStatus.data ? (
-              <p className="zl-note">
-                Push is {pushStatus.data.configured ? "configured" : "not configured"} ·{" "}
-                {pushStatus.data.totalActiveSubscriptions} subscribed devices across the site.
-              </p>
-            ) : (
-              <p className="zl-note">Push status is unavailable.</p>
-            )}
-            <div className="zl-row">
-              <a className="zl-btn" href="/admin">Open Admin</a>
-            </div>
-          </section>
-        ) : null}
-
-        {isOwner ? (
-          <section className="zl-section" aria-label="Owner">
-            <h2>Owner</h2>
-            <PushMemberships />
-            <p className="zl-note">
-              The push composer at the top of this hub is yours without limit. Site controls live in Admin.
-            </p>
-            <div className="zl-row">
-              <a className="zl-btn" href="/admin">Open Admin</a>
-              <a className="zl-btn" href="/dashboard">Open the member hub</a>
-            </div>
-          </section>
-        ) : null}
-      </div>
-    </div>
-  );
+  const {user,loading}=useAuth();
+  const {openSheet}=useInboxSheet();
+  const [auth,setAuth]=useState(false),[venuesOpen,setVenuesOpen]=useState(false);
+  useEffect(()=>{
+    const token=new URLSearchParams(location.hash.slice(1)).get("invite");
+    if(token && /^[A-Za-z0-9_-]{43}$/.test(token)) sessionStorage.setItem("guest-list-invitation",token);
+  },[]);
+  const workspace=useQuery({queryKey:["/api/hub/workspace",user?.id],enabled:!!user,
+    queryFn:()=>apiRequest("GET","/api/hub/workspace").then(r=>r.json() as Promise<Workspace>)});
+  const data=workspace.data, events=data?.events||[];
+  const admin=!!(user?.isAdmin||user?.isSuperAdmin);
+  const owner=!!user?.isPrimaryOwner;
+  if(loading) return <main className="zl-root"><p role="status">Loading your hub…</p></main>;
+  if(!user) return <main className="zl-root"><div className="zl-wrap"><header className="zl-hub-head"><h1>Your Zay’list</h1>
+    <p>Guest spots, passes and the nights you host.</p>
+    <button className="zl-btn zl-btn--primary" onClick={()=>setAuth(true)}>Sign in or join</button>
+    {auth&&<AuthModal onClose={()=>setAuth(false)}/>}</header></div></main>;
+  return <main className="zl-root"><div className="zl-wrap zl-workspace">
+    <header className="zl-hub-head"><div><p>{user.displayName||user.username}</p><h1>Your Zay’list</h1></div>
+      <button type="button" className="zl-btn" onClick={e=>openSheet({account:"personal",view:"inbox"},e.currentTarget)}>Inbox</button></header>
+    <PushComposer events={events.filter(e=>e.canEditEvent)}/>
+    {workspace.isError&&<p role="alert">Your workspace could not load. <button className="zl-btn" onClick={()=>workspace.refetch()}>Try again</button></p>}
+    <section className="zl-section zl-personal" aria-labelledby="zl-pass-title"><h2 id="zl-pass-title">Guest spots &amp; passes</h2>
+      <GuestSpots key={user.id}/></section>
+    {events.length>0&&<section className="zl-section zl-work-rail"><h2>Working the night</h2>
+      <div className="zl-rail">{events.map(e=><HostCard key={e.id} event={e} otherEvents={events}/>)}</div>
+    </section>}
+    {!!data?.venues.length&&<section className="zl-section"><h2>Your venues</h2>
+      <Suspense fallback={<p>Loading venues…</p>}><VenueSection open={venuesOpen} onToggle={()=>setVenuesOpen(!venuesOpen)}/></Suspense>
+      {data.venues.map(v=><details className="zl-tool" key={v.id}><summary>{v.name}</summary><a href={`/directory?place=${v.id}`} className="zl-btn">View venue</a><Connections kind="places" id={v.id}/></details>)}
+    </section>}
+    {data&&<section className="zl-section"><h2>Your activity</h2><dl className="zl-stat-strip">
+      <div><dt>Interested</dt><dd>{data.personal.interested}</dd></div><div><dt>Going</dt><dd>{data.personal.going}</dd></div>
+      <div><dt>Door entries</dt><dd>{data.personal.admitted}</dd></div></dl>
+      <div className="zl-row"><a className="zl-btn" href="/schedule">My schedule</a><a className="zl-btn" href="/settings/notifications">Notifications</a></div></section>}
+    {admin&&<section className="zl-section"><h2>Administration</h2><div className="zl-row">
+      <a className="zl-btn" href="/admin">Open admin</a><button className="zl-btn" onClick={e=>openSheet({account:"admin",queueFolder:"active"},e.currentTarget)}>Review approvals</button>
+    </div></section>}
+    {owner&&<section className="zl-section"><h2>Owner desk</h2><button className="zl-btn" onClick={e=>openSheet({account:"owner",view:"inbox"},e.currentTarget)}>Open owner inbox</button><PushMemberships/></section>}
+  </div></main>;
 }

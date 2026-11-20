@@ -2,11 +2,17 @@ import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import ZaylistPanel from "./ZaylistPanel";
+import { EventTeam, Connections, EventGig } from "./HostOperations";
 import PushComposer from "./PushComposer";
 import EventMode from "./EventMode";
 
 export interface HostEvent {
   id: number;
+  role: string;
+  canEditEvent: boolean;
+  canManageTeam: boolean;
+  canManageList: boolean;
+  metrics: { interested:number; going:number; accepted:number; arrived:number; pending:number; drinksServed:number; gifted:number };
   title: string;
   venueName: string | null;
   address: string | null;
@@ -41,11 +47,11 @@ function toLocalInput(iso: string) {
  */
 export default function HostCard({
   event,
-  going,
+  otherEvents,
   startInEdit = false,
 }: {
   event: HostEvent;
-  going?: number;
+  otherEvents: HostEvent[];
   startInEdit?: boolean;
 }) {
   const queryClient = useQueryClient();
@@ -62,32 +68,11 @@ export default function HostCard({
   });
   const [error, setError] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(null);
-  const [counts, setCounts] = useState<{ pending: number; accepted: number; arrived: number } | null>(null);
-
+  const counts = event.metrics;
+  const going = counts.going;
   useEffect(() => {
-    if (startInEdit) {
-      setOpen(true);
-      setEditing(true);
-    }
-  }, [startInEdit]);
-
-  useEffect(() => {
-    let live = true;
-    import("@/lib/zaylistApi")
-      .then(({ zaylistApi }) => zaylistApi.getEvent(event.id))
-      .then((data) => {
-        if (!live || "guest" in data) return;
-        setCounts({
-          pending: data.counts.pending,
-          accepted: data.counts.accepted,
-          arrived: data.counts.arrived,
-        });
-      })
-      .catch(() => undefined);
-    return () => {
-      live = false;
-    };
-  }, [event.id]);
+    if (startInEdit && event.canEditEvent) {setEditing(true);setOpen(true);}
+  }, [startInEdit,event.canEditEvent]);
 
   const openOwner = (edit: boolean) => {
     setEditing(edit);
@@ -107,7 +92,11 @@ export default function HostCard({
       });
       setEditing(false);
       setSavedAt(new Date().toLocaleTimeString());
-      await queryClient.invalidateQueries({ queryKey: ["/api/events/mine/claimed"] });
+      await Promise.all([
+        queryClient.invalidateQueries({queryKey:["/api/hub/workspace"]}),
+        queryClient.invalidateQueries({queryKey:["/api/events/mine/claimed"]}),
+        queryClient.invalidateQueries({predicate:query=>String(query.queryKey[0]).startsWith("/api/events")}),
+      ]);
     } catch (e) {
       setError(parseApiError(e, "Saving did not go through. Try again."));
     }
@@ -119,11 +108,11 @@ export default function HostCard({
         className="zl-wide"
         onClick={() => openOwner(false)}
         onKeyDown={(e) => {
-          if (e.key === "Enter") openOwner(false);
+          if (e.currentTarget === e.target && (e.key === "Enter" || e.key === " ")) {e.preventDefault();openOwner(false);}
         }}
         tabIndex={0}
         role="button"
-        aria-label={`Open owner view for ${event.title}`}
+        aria-label={`Open host tools for ${event.title}`}
       >
         {event.posterImageUrl ? (
           <img src={event.posterImageUrl} alt="" />
@@ -134,7 +123,7 @@ export default function HostCard({
         <div className="zl-wide-body">
           <h3 className="zl-wide-title">{event.title}</h3>
           <p className="zl-wide-meta">
-            {fmtWhen(event.dateStart)}
+            {event.role} · {fmtWhen(event.dateStart)}
             {event.venueName ? ` · ${event.venueName}` : ""}
           </p>
           <div className="zl-wide-stats">
@@ -157,7 +146,7 @@ export default function HostCard({
             >
               View live card
             </a>
-            <button
+            {event.canEditEvent && <button
               className="zl-btn zl-btn--small"
               type="button"
               onClick={(e) => {
@@ -166,7 +155,7 @@ export default function HostCard({
               }}
             >
               Edit details
-            </button>
+            </button>}
             <button
               className="zl-btn zl-btn--small"
               type="button"
@@ -246,9 +235,9 @@ export default function HostCard({
                 </div>
               ) : (
                 <div className="zl-row" style={{ marginTop: 14 }}>
-                  <button className="zl-btn" type="button" onClick={() => setEditing(true)}>
+                  {event.canEditEvent && <button className="zl-btn" type="button" onClick={() => setEditing(true)}>
                     Edit details
-                  </button>
+                  </button>}
                   <a className="zl-btn" href={`/events/${event.id}`}>
                     View live card
                   </a>
@@ -258,7 +247,16 @@ export default function HostCard({
                 </div>
               )}
 
-              <PushComposer selectedEvent={event} />
+              <details className="zl-tool"><summary>Night in numbers</summary>
+                <dl className="zl-stat-strip">{[
+                  ["Interested",counts.interested],["Going",counts.going],["Expected",counts.accepted],
+                  ["Checked in",counts.arrived],["Drinks served",counts.drinksServed],["Gifted spots",counts.gifted],
+                ].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+                <p className="zl-note">Interested counts event follows. Going counts active RSVPs. Checked in and drinks served come from door scans.</p>
+              </details>
+              <EventTeam event={event} otherEvents={otherEvents}/>
+              {event.canManageList && <Connections kind="events" id={event.id}/>}
+              {event.canEditEvent && <><EventGig event={event}/><PushComposer selectedEvent={event} /></>}
               <section aria-label="Zay'list" style={{ marginTop: 18 }}>
                 <h3 style={{ fontFamily: "var(--font-display)", margin: "0 0 4px" }}>Zay'list</h3>
                 <ZaylistPanel eventId={event.id} />

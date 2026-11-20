@@ -3,6 +3,7 @@ import { test } from "node:test";
 import Database from "better-sqlite3";
 import express from "express";
 import type { AddressInfo } from "node:net";
+import { registerHostWorkspace } from "./hostWorkspace";
 import type { IStorage } from "./storage";
 import { registerZaylist, type ZaylistStore } from "./zaylist";
 
@@ -12,10 +13,12 @@ async function setup(t: { after: (fn: () => unknown) => void }) {
   const db = new Database(":memory:");
   t.after(() => db.close());
   db.exec(`CREATE TABLE users(id INTEGER PRIMARY KEY,username TEXT,email TEXT,display_name TEXT,photo_url TEXT,status TEXT);
-    CREATE TABLE events(id INTEGER PRIMARY KEY,title TEXT,venue_name TEXT,date_start TEXT,date_end TEXT,status TEXT,claimed_by TEXT,submitted_by TEXT,source TEXT,is_claimable INTEGER DEFAULT 0,is_public INTEGER DEFAULT 1,is_private INTEGER DEFAULT 0,admission TEXT,ticket_url TEXT);
+    CREATE TABLE events(id INTEGER PRIMARY KEY,title TEXT,venue_name TEXT,address TEXT,lat REAL,lng REAL,date_start TEXT,date_end TEXT,status TEXT,claimed_by TEXT,submitted_by TEXT,source TEXT,is_claimable INTEGER DEFAULT 0,is_public INTEGER DEFAULT 1,is_private INTEGER DEFAULT 0,admission TEXT,ticket_url TEXT);
     CREATE TABLE event_hosts(event_id INTEGER,user_id INTEGER,role TEXT);
     CREATE TABLE event_talent(id INTEGER PRIMARY KEY,event_id INTEGER,user_id INTEGER,role TEXT,status TEXT);
     CREATE TABLE attendances(id INTEGER PRIMARY KEY,event_id INTEGER,user_id INTEGER,handle TEXT,message TEXT,avatar_seed TEXT,photo_url TEXT,is_anonymous INTEGER DEFAULT 0,visibility TEXT DEFAULT 'public',expires_at TEXT,is_active INTEGER DEFAULT 1,created_at TEXT);
+    CREATE TABLE card_hearts(user_id INTEGER,kind TEXT,ref TEXT);
+    CREATE TABLE missed_connections(id INTEGER PRIMARY KEY,user_id INTEGER,event_id INTEGER,place_id INTEGER,title TEXT,body TEXT,status TEXT,created_at TEXT);
     CREATE TABLE member_blocks(blocker_user_id INTEGER,blocked_user_id INTEGER);
     INSERT INTO users VALUES
       (1,'owner','owner@example.test','Owner',NULL,'active'),
@@ -30,7 +33,7 @@ async function setup(t: { after: (fn: () => unknown) => void }) {
       (10,'barkeep','bar@example.test','Bar',NULL,'active'),
       (12,'walkin','walk@example.test','Walk',NULL,'active');
     INSERT INTO events(id,title,venue_name,date_start,date_end,status,admission,ticket_url)
-      VALUES(10,'Paid Night','The Club','2099-07-01T16:00:00','2099-07-02T02:00:00','LIVE','TICKETED','https://tickets.example.test/10');
+      VALUES(10,'Paid Night','Eastbank Hall','2099-07-01T16:00:00','2099-07-02T02:00:00','LIVE','TICKETED','https://tickets.example.test/10');
     INSERT INTO event_hosts VALUES(10,1,'PRIMARY'),(10,2,'COHOST');
     INSERT INTO event_talent(event_id,user_id,role,status) VALUES(10,4,'DJ','LIVE');
     INSERT INTO attendances(event_id,user_id,handle,message,avatar_seed) VALUES(10,5,'A','', 'a'),(10,6,'B','','b'),(10,7,'C','','c');`);
@@ -50,11 +53,13 @@ async function setup(t: { after: (fn: () => unknown) => void }) {
     ticketUrl: "https://tickets.example.test/10",
     admission: "TICKETED",
     title: "Paid Night",
-    venueName: "The Club",
+    venueName: "Eastbank Hall",
     dateStart: "2099-07-01T16:00:00",
     dateEnd: "2099-07-02T02:00:00",
   };
+  const venueOwners = new Set<number>();
   const storage = {
+    getUserOwnedBusinesses: (id:number) => venueOwners.has(id) ? [{id:77,name:"Eastbank Hall",ownerId:id,active:true}] : [],
     getEvent: (id: number) => (id === 10 ? dbEvent : null),
     getUserById: (id: number) =>
       db.prepare("SELECT * FROM users WHERE id=?").get(id),
@@ -68,7 +73,7 @@ async function setup(t: { after: (fn: () => unknown) => void }) {
         .prepare("SELECT 1 FROM event_hosts WHERE event_id=? AND user_id=?")
         .get(eventId, userId),
   } as unknown as IStorage;
-  const { store, operations } = registerZaylist(
+  const { store, operations, accessFor } = registerZaylist(
     app,
     db,
     storage,
@@ -82,6 +87,7 @@ async function setup(t: { after: (fn: () => unknown) => void }) {
     () => true,
     () => false,
   );
+  registerHostWorkspace(app,db,storage,(req,res,next)=>req.session.userId ? next() : res.sendStatus(401),store,accessFor,()=>true);
   const server = app.listen(0, "127.0.0.1");
   await new Promise<void>((done) => server.once("listening", done));
   t.after(() => new Promise<void>((done) => server.close(() => done())));
@@ -114,7 +120,7 @@ async function setup(t: { after: (fn: () => unknown) => void }) {
       drawDaysBefore: 7,
       dripPerDay: 1,
     });
-  return { db, store, operations, request, list, setConfig };
+  return { db, store, operations, request, list, setConfig, venueOwners };
 }
 
 test("draw respects the pool cap and one-per-person, and persists its record", async (t) => {
@@ -526,4 +532,42 @@ test("drink privilege readback and access control survive refresh",async t => {
   await request("/api/events/10/zaylist/privileges/3",1,"DELETE");
   assert.equal((await list(1)).body.allowances[0].drinkPrivilege,0);
   assert.equal((await list(3)).body.permissions.canGrantDrinks,false);
+});
+
+test("host workspace separates interest, going and private saves, and shows only authorized team work",async t=>{
+  const {db,request,list,setConfig,venueOwners}=await setup(t);
+  db.exec("INSERT INTO card_hearts VALUES(5,'event','10'),(12,'event','10'),(8,'place','10'); CREATE TABLE event_saves(user_id INTEGER,event_id INTEGER); INSERT INTO event_saves VALUES(8,10)");
+  const owner=await request("/api/hub/workspace",1);
+  assert.equal(owner.body.events[0].metrics.interested,2);
+  assert.equal(owner.body.events[0].metrics.going,3);
+  assert.equal(owner.body.events[0].metrics.saves,undefined);
+  const stranger=await request("/api/hub/workspace",8);
+  assert.deepEqual(stranger.body.events,[]);
+  assert.equal(stranger.body.personal.interested,0);
+  await setConfig(1,5);
+  await request("/api/events/10/zaylist/allowances/3",1,"PUT",{role:"staff",spots:1});
+  const staff=await request("/api/hub/workspace",3);
+  assert.equal(staff.body.events[0].canEditEvent,false);
+  assert.equal(staff.body.events[0].role,"staff");
+  venueOwners.add(9);
+  assert.equal((await list(9)).body.permissions.allocator,true);
+  assert.equal((await request("/api/hub/workspace",9)).body.events[0].role,"Owner");
+  assert.equal((await request("/api/hub/workspace",9)).body.events[0].canEditEvent,false);
+  assert.equal((await request("/api/events/10/zaylist/allowances/3",1,"DELETE")).status,200);
+  assert.deepEqual((await request("/api/hub/workspace",3)).body.events,[]);
+});
+
+test("a host can moderate the linked event without seeing the author or affecting another event",async t=>{
+  const {db,request}=await setup(t);
+  db.exec("INSERT INTO missed_connections VALUES(90,5,10,NULL,'A title','A post','ACTIVE','2099-07-01'),(91,8,11,NULL,'Other','Other post','ACTIVE','2099-07-01')");
+  const path="/api/hub/workspace/events/10/connections";
+  const view=await request(path,1);
+  assert.equal(view.body.items.length,1);
+  assert.equal(view.body.items[0].user_id,undefined);
+  assert.equal(view.body.alerts,true);
+  await request(path+"/alerts",1,"PUT",{enabled:false});
+  assert.equal((await request(path,1)).body.alerts,false);
+  await request(path+"/90",1,"DELETE");
+  assert.deepEqual((await request(path,1)).body.items,[]);
+  assert.equal((db.prepare("SELECT status FROM missed_connections WHERE id=91").get() as {status:string}).status,"ACTIVE");
 });

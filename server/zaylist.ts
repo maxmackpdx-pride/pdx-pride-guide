@@ -1,3 +1,4 @@
+import { ownedVenueMatch } from "./hostWorkspace";
 import { createGuestListOperations, internationalPhone } from "./guestListOperations";
 import { appleGuestPass, googleGuestPass, guestPassPdf, walletAvailability } from "./guestPass";
 import { randomBytes } from "node:crypto";
@@ -965,15 +966,16 @@ export function registerZaylist(
         "SELECT user_id AS userId FROM event_hosts WHERE event_id=? AND role='PRIMARY'",
       )
       .all(eventId) as { userId: number }[];
-    const isOwner =
-      primaries.some((r) => r.userId === userId) ||
-      (isHost && primaries.length === 0);
+    const event = storage.getEvent(eventId);
+    const ownsVenue = !!event && storage.getUserOwnedBusinesses(userId).some(place => ownedVenueMatch(event,place));
+    const isOwner = ownsVenue || primaries.some(r => r.userId === userId) ||
+      (isHost && primaries.length === 0 && !!event?.claimedBy && storage.resolveUserByIdentifier(event.claimedBy)?.id === userId);
     const fullAccess = store.hasFullAccess(eventId, userId);
     const allowance = store.allowance(eventId, userId);
     const talent =
       store.isTalent(eventId, userId) || allowance?.role === "talent";
     const promoter = allowance?.role === "promoter" || (isHost && !isOwner);
-    const team = isHost || fullAccess || !!allowance || talent;
+    const team = isOwner || isHost || fullAccess || !!allowance || talent;
     const editor = isOwner || fullAccess || promoter;
     const allocator = isOwner || fullAccess;
     return {

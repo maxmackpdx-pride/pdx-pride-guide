@@ -154,7 +154,7 @@ export default function EventMode({
       ) : null}
 
       <div style={{ marginTop: 12 }}>
-        <Scanner dark onToken={(t) => void handleToken(t)} />
+        {payload?.permissions.team && <Scanner dark onToken={(t) => void handleToken(t)} />}
       </div>
       {feedback ? (
         <div className={`zl-scan-result zl-scan-result--${feedback.kind}`} role="status">
