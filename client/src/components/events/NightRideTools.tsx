@@ -1,3 +1,4 @@
+import { useModalA11y } from "@/hooks/useModalA11y";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -512,6 +513,7 @@ export function AtEventDialog({
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const contentRef = useModalA11y({ onClose });
   useEffect(() => {
     const d = ref.current;
     d?.showModal();
@@ -537,14 +539,14 @@ export function AtEventDialog({
           poster
             ? {
                 backgroundImage:
-                  "linear-gradient(#0b0a0b99,#0b0a0bf8),url(" +
+                  "linear-gradient(color-mix(in srgb, var(--z-black) 60%, transparent), color-mix(in srgb, var(--z-black) 97%, transparent)),url(" +
                   JSON.stringify(poster) +
                   ")",
               }
             : undefined
         }
       />
-      <div className="at-event-content">
+      <div ref={contentRef} className="at-event-content">
         <header>
           <small>At the event</small>
           <h2>{title}</h2>

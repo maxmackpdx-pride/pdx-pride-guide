@@ -136,6 +136,23 @@ test('production cards preserve source geometry across viewport and in-flow pres
    if(family==='event'){
     const details=await openEventDetails(page,first);
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'mobile event has no horizontal overflow');
+    await details.getByRole('button',{name:'Next page',exact:true}).click();
+    const launch=details.getByRole('button',{name:'At the event',exact:true});
+    await launch.click();
+    const atEvent=page.locator('dialog.at-event-dialog[open]');
+    await atEvent.getByRole('button',{name:'Carpools & rides home'}).click();
+    await atEvent.getByRole('button',{name:'Sign in to coordinate a ride'}).click();
+    const login=atEvent.getByRole('dialog');
+    await login.waitFor();
+    await page.keyboard.press('Escape');
+    await login.waitFor({state:'hidden'});
+    assert.ok(await atEvent.isVisible(),'Closing sign-in returns to the at-event screen');
+    await page.keyboard.press('Escape');
+    await atEvent.waitFor({state:'hidden'});
+    await launch.click();
+    await atEvent.getByRole('button',{name:'Sign in to coordinate a ride'}).waitFor();
+    await atEvent.getByRole('button',{name:'Back to event'}).click();
+    assert.ok(await details.isVisible(),'Closing at-event preserves the event and its selected tab');
     await details.getByRole('button',{name:/^Close QA Event/}).press('Escape');await details.waitFor({state:'hidden'});
     assert.equal(await first.evaluate(el=>document.activeElement===el),true,'Escape restores event opener focus');
     await page.setViewportSize({width:1280,height:1000});continue;

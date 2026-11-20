@@ -372,7 +372,7 @@ function PlanningPanel({
       {auth && (
         <AuthModal
           defaultTab="login"
-          portalTargetSelector="dialog[open]"
+          portalTargetSelector={atEvent ? ".at-event-dialog[open]" : "dialog[open]"}
           onClose={() => setAuth(false)}
         />
       )}
