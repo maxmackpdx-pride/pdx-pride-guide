@@ -1,3 +1,4 @@
+import { TERMINAL_GIFTING } from "@shared/boardModeration";
 /**
  * Admin-only operations for the floating inbox + /admin tools.
  * Not used by public member surfaces.
@@ -332,7 +333,6 @@ export function getAdminQueueAggregate(primaryOwner = false) {
   const breakdown = storage.getAdminQueueBreakdown();
   const claims = listAdminQueueClaims();
 
-  const terminal = new Set(["REJECTED", "REMOVED", "GIFTED", "FOUND", "EXPIRED"]);
   const submissionsPending = storage
     .getSubmissions("PENDING")
     .filter((s) => s.type !== "PROMOTER_APPLICATION");
@@ -344,7 +344,7 @@ export function getAdminQueueAggregate(primaryOwner = false) {
   const giftingReports = storage.getGiftingReports("PENDING");
   const giftingPostsAll = storage.getGiftingPosts({ includeInactive: true });
   const giftingFlagged = giftingPostsAll.filter(
-    (p: any) => !terminal.has(String(p.status || "").toUpperCase()) && Number(p.reportCount || 0) > 0,
+    (p: any) => !TERMINAL_GIFTING.has(String(p.status || "").toUpperCase()) && Number(p.reportCount || 0) > 0,
   );
   const riverBrats = storage.getRiverBratsReports("PENDING");
   const gigsAll = storage.getGigPosts();

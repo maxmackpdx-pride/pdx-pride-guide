@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
 import AdminBoardReject from "@/components/admin/AdminBoardReject";
 import { DIRECTORY_TYPES, DIRECTORY_TYPE_ADMIN_LABELS } from "@shared/directoryTheme";
+import { TERMINAL_GIFTING } from "@shared/boardModeration";
 import { publicHttpUrl } from "@shared/safeHttpUrl";
 import type { QueueFolder } from "../types";
 import { C, MONO } from "./sheet";
@@ -102,7 +103,7 @@ const TYPE_TAG: Record<string, { label: string; color: string }> = {
   BUSINESS: { label: "PLACE", color: C.orange },
 };
 
-const TERMINAL_GIFTING = new Set(["REJECTED", "REMOVED", "GIFTED", "FOUND", "EXPIRED"]);
+
 
 function ts(v: unknown): string {
   if (!v) return "";
@@ -508,10 +509,10 @@ export default function QueueView({
   /** NEW PLACE rows: typed @handle when the owner isn't the submitter. */
   const [ownerInputs, setOwnerInputs] = useState<Record<string, string>>({});
   /** "all" | "mine" | bucket id from ADMIN_QUEUE_BUCKETS */
-  const [bucketFilter, setBucketFilter] = useState<string>("all");
+  const [bucketFilter, setBucketFilter] = useState<string>(initialBucket);
   const [search, setSearch] = useState("");
   const [workFilter, setWorkFilter] = useState(initialWorkFilter);
-  const [focusedId, setFocusedId] = useState<string | null>(null);
+  const [focusedId, setFocusedId] = useState<string | null>(initialItem ?? null);
   useEffect(() => {
     setWorkFilter(initialWorkFilter);
     setBucketFilter(initialBucket);
@@ -856,7 +857,8 @@ export default function QueueView({
     if (["waiting", "escalated", "review"].includes(workFilter) && (workflowFor(row)?.status || "review") !== workFilter) return false;
     return `${row.title} ${row.meta} ${row.tag}`.toLowerCase().includes(search.toLowerCase());
   });
-  const focused = rowsFiltered.find(row => row.id === focusedId) || rowsFiltered[0];
+  const requestedCaseMissing = !!initialItem && focusedId === initialItem && !rows.some(row => row.id === initialItem);
+  const focused = requestedCaseMissing ? undefined : rowsFiltered.find(row => row.id === focusedId) || rowsFiltered[0];
   useEffect(() => {setWorkAction(null);setWorkReason("");}, [focused?.id]);
   const workflowMutation = useMutation({
     mutationFn: async ({row, status, reason}: {row: QueueRow; status: string; reason: string}) => apiRequest("POST", `/api/admin/inbox-workflow/${claimKindFor(row.kind)}/${row.entityId}`, {status, reason, version: workflowFor(row)?.version || 0}),
@@ -1408,7 +1410,7 @@ export default function QueueView({
 
   const loading = useAggregate ? aggregateQuery.isPending || (mode === "owner" && (ownerQuery.isPending || logoQuery.isPending)) : mode === "owner" ? ownerQuery.isPending || logoQuery.isPending : [subsQuery, giftingQuery, spottedQuery, riverBratsQuery, moderationQuery, claimsQuery, bizSubsQuery, gigsQuery].some(q => q.isPending && q.fetchStatus === "fetching");
   const workCount = (status: string) => rows.filter(r => (workflowFor(r)?.status || "review") === status).length;
-  const resetFilters = () => {setSearch(""); setBucketFilter("all"); setWorkFilter("all");};
+  const resetFilters = () => {setFocusedId(null); setSearch(""); setBucketFilter("all"); setWorkFilter("all");};
   return (
     <div className={`${queueScopeClass} inbox-workspace`}>
       <header className="inbox-workspace__intro">
@@ -1429,7 +1431,12 @@ export default function QueueView({
       {mode === "admin" && !completed && <div className="inbox-workspace__jumps">{onOpenGuideInbox && <button type="button" onClick={onOpenGuideInbox}>Guide messages · {guideUnread} unread</button>}{onOpenOwnerDesk && <button type="button" onClick={onOpenOwnerDesk}>Owner briefing · {ownerCount}</button>}</div>}
       {failedSources.length > 0 && <div role="alert" className="inbox-exp-alert inbox-exp-alert--error">Could not load {failedSources.join(", ")}. This is not an empty queue. <button type="button" onClick={()=>{void qc.refetchQueries({type:"active"});}}>Retry</button></div>}
       {mutationError && <div role="alert" className="inbox-exp-alert inbox-exp-alert--error">{mutationError instanceof Error ? mutationError.message : "The action could not be saved. Please retry."}</div>}
-      {loading ? <div className="inbox-exp-empty" role="status">Loading your workspace…</div> : rowsFiltered.length === 0 ? <div className="inbox-workspace__empty"><h3>{failedSources.length ? "Some work is unavailable." : rows.length ? "No matching cases." : completed ? "No recent decisions." : "You're caught up."}</h3><p>{rows.length ? "Try another category or status." : "New work will appear here. No empty categories to work through."}</p>{rows.length > 0 && <button type="button" onClick={resetFilters}>Clear filters</button>}</div> : <div className="inbox-workspace__split">
+      {loading ? <div className="inbox-exp-empty" role="status">Loading your workspace…</div> : requestedCaseMissing && !failedSources.length ? (
+        <div className="inbox-workspace__empty" role="status">
+          <h3>This case is no longer in this queue.</h3>
+          <button type="button" onClick={resetFilters}>Show open cases</button>
+        </div>
+      ) : rowsFiltered.length === 0 ? <div className="inbox-workspace__empty"><h3>{failedSources.length ? "Some work is unavailable." : rows.length ? "No matching cases." : completed ? "No recent decisions." : "You're caught up."}</h3><p>{rows.length ? "Try another category or status." : "New work will appear here. No empty categories to work through."}</p>{rows.length > 0 && <button type="button" onClick={resetFilters}>Clear filters</button>}</div> : <div className="inbox-workspace__split">
         <section className="inbox-workspace__queue" aria-label="Case list"><div className="inbox-workspace__queue-heading">{rowsFiltered.length} {completed ? "recent decisions" : "open cases"}</div>{rowsFiltered.map(row=><button key={row.id} type="button" aria-pressed={focused?.id===row.id} className={focused?.id===row.id ? "is-selected" : ""} onClick={()=>{setFocusedId(row.id); setWorkAction(null); setWorkReason("");}}><span className="inbox-workspace__case-kind">{row.tag}<small>{row.outcome || workflowFor(row)?.status || "Review"}</small></span><strong>{row.title}</strong><span>{row.meta}</span><small>{claimFor(row.kind,row.entityId)?.assigneeUsername ? `Assigned to @${claimFor(row.kind,row.entityId)?.assigneeUsername}` : row.kind === "owner_desk" || row.kind === "logo_request" ? "Primary owner" : "Unassigned"}</small></button>)}</section>
         {focused && <section className="inbox-workspace__detail" aria-label="Selected case">
           {renderQueueRow(focused)}

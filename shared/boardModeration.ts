@@ -114,3 +114,5 @@ export function validateGigPostContent(fields: {
 
   return null;
 }
+/** GIFTZ posts in these states belong to decision history. */
+export const TERMINAL_GIFTING = new Set(["REJECTED", "REMOVED", "GIFTED", "FOUND", "EXPIRED"]);

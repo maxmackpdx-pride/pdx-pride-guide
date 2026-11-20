@@ -217,11 +217,12 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
     }
     setFolder("inbox");
     setQueueFolder(initialQueueFolder ?? "active");
+    setQueueWorkFilter("all");
     setFilter("all");
     setFilterOpen(false);
     setQuery("");
   // Counts select a starting account only when opening; polling must never reset a draft.
-  }, [open, initialView, initialAccount, initialQueueFolder, isAdmin, isOwner]);
+  }, [open, initialView, initialAccount, initialQueueFolder, initialQueueBucket, initialQueueItem, isAdmin, isOwner]);
 
   // After the reset above, so a thread passed in (the /inbox?thread= door, a
   // notification row) is the one that opens.
@@ -618,8 +619,8 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                 <QueueView
                   mode="admin"
                   initialWorkFilter={queueWorkFilter}
-                  initialBucket={initialQueueBucket}
-                  initialItem={initialQueueItem}
+                  initialBucket={initialAccount === account && queueFolder === initialQueueFolder ? initialQueueBucket : undefined}
+                  initialItem={initialAccount === account && queueFolder === initialQueueFolder ? initialQueueItem : undefined}
                   queueFolder={queueFolder}
                   guideUnread={pendingAdmin.guideUnread ?? adminGuideUnread}
                   ownerCount={isOwner ? (pendingAdmin.ownerCount || 0) : 0}
@@ -635,7 +636,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                 />
               )}
               {inboxActive && account === "owner" && (
-                <QueueView mode="owner" initialItem={initialQueueItem} queueFolder={queueFolder === "completed" ? "completed" : "active"} />
+                <QueueView mode="owner" initialItem={initialAccount === account && queueFolder === initialQueueFolder ? initialQueueItem : undefined} queueFolder={queueFolder === "completed" ? "completed" : "active"} />
               )}
               {view === "chats" && <GroupChatsView onOpen={openGroup}/>}
               {view === "stats" && !isAdmin && <MemberStatsView/>}

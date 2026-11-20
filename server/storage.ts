@@ -30,7 +30,7 @@ import {
 import { EVENT_TALENT_ROLE_LABELS, isEventTalentRole, type EventTalentRole } from "@shared/eventTalent";
 import { SYNC_WRITABLE_FIELDS } from "./ingest";
 import { normalizeUsername, usernameChangeEligibility } from "@shared/username";
-import { formatBoardRejectMessage, formatProfilePhotoRejectMessage } from "@shared/boardModeration";
+import { formatBoardRejectMessage, formatProfilePhotoRejectMessage, TERMINAL_GIFTING } from "@shared/boardModeration";
 import {
   filterHubFeedItems,
   filterHubFeedPinned,
@@ -11931,9 +11931,8 @@ export const storage: IStorage = {
     return runDismissStaleTestModerationRequests();
   },
   countAdminGiftingFlagged() {
-    const terminal = new Set(["REJECTED", "REMOVED", "GIFTED", "FOUND", "EXPIRED"]);
     return storage.getGiftingPosts({ includeInactive: true })
-      .filter((p: any) => !terminal.has(String(p.status || "").toUpperCase()) && Number(p.reportCount || 0) > 0)
+      .filter((p: any) => !TERMINAL_GIFTING.has(String(p.status || "").toUpperCase()) && Number(p.reportCount || 0) > 0)
       .length;
   },
   getAdminQueueBreakdown() {
@@ -12094,7 +12093,7 @@ export const storage: IStorage = {
     }));
 
     const queue: Array<{ kind: string; id: number; title: string; meta: string }> = [];
-    for (const s of storage.getSubmissions("PENDING").slice(0, 80)) {
+    for (const s of storage.getSubmissions("PENDING").filter(s => s.type !== "PROMOTER_APPLICATION").slice(0, 80)) {
       const hay = `${s.title} ${s.submitterEmail} ${s.venueName || ""}`.toLowerCase();
       if (!hay.includes(q)) continue;
       queue.push({
@@ -14452,7 +14451,7 @@ export const storage: IStorage = {
       params.push(opts.userId);
     }
     return withoutArchivedPosts(sqlite,"giftz",sqlite.prepare(`
-      SELECT p.*,
+      SELECT p.*, p.report_count AS reportCount, p.post_type AS postType,
              u.username,
              u.display_name AS displayName,
              u.photo_url AS posterPhotoUrl,
@@ -14472,7 +14471,7 @@ export const storage: IStorage = {
   getGiftingPost(id) {
     expireGiftingPosts();
     const post = sqlite.prepare(`
-      SELECT p.*,
+      SELECT p.*, p.report_count AS reportCount, p.post_type AS postType,
              u.username,
              u.display_name AS displayName,
              u.photo_url AS posterPhotoUrl,

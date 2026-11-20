@@ -1,3 +1,4 @@
+import { TERMINAL_GIFTING } from "@shared/boardModeration";
 // Consolidated "everything that's piling up" backlog report for admins/owner.
 // Aggregates every pending admin-queue category plus the Owner Desk into one
 // structured payload (JSON) and a clean, printable HTML document.
@@ -71,9 +72,8 @@ export function buildAdminReport(storage: any, includeOwnerDesk: boolean) {
   const gifting: any[] = (storage.getGiftingReports("PENDING") || []).filter(
     (r: any) => String(r.status || "").toUpperCase() === "PENDING",
   );
-  const giftingTerminal = new Set(["REJECTED", "REMOVED", "GIFTED", "FOUND", "EXPIRED"]);
   const giftingFlagged: any[] = (storage.getGiftingPosts({ includeInactive: true }) || []).filter(
-    (p: any) => !giftingTerminal.has(String(p.status || "").toUpperCase()) && Number(p.reportCount || 0) > 0,
+    (p: any) => !TERMINAL_GIFTING.has(String(p.status || "").toUpperCase()) && Number(p.reportCount || 0) > 0,
   );
 
   const categories: Category[] = [

@@ -1,3 +1,4 @@
+import { TERMINAL_GIFTING } from "@shared/boardModeration";
 import { Sprout } from "lucide-react";
 import { roomToast } from "@/lib/roomToast";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -614,7 +615,7 @@ export default function Admin() {
   const { data: businessLogoRequests = [], isLoading: businessLogoRequestsLoading, isError: businessLogoRequestsError, refetch: refetchBusinessLogoRequests } = useQuery<any[]>({
     queryKey: ["/api/admin/business-logo-requests"],
     queryFn: () => apiRequest("GET", "/api/admin/business-logo-requests").then(r => r.json()),
-    enabled: authenticated,
+    enabled: authenticated && isPrimaryOwner,
   });
 
   type AdminDirectoryBusiness = {
@@ -1272,11 +1273,11 @@ export default function Admin() {
     }
   };
 
-  const pendingSubs = submissions.filter(s => s.status.toUpperCase() === "PENDING");
+  const pendingSubs = submissions.filter(s => s.status.toUpperCase() === "PENDING" && s.type !== "PROMOTER_APPLICATION");
   const pendingMod = modRequests.filter(r => r.status.toUpperCase() === "PENDING");
   // Talent / gigs / gifting posts go live without admin approval.
   // Only gifting *reports* (and flagged posts with reportCount) need eyes.
-  const pendingGiftingFlagged = (giftingAdmin.posts || []).filter((p: any) => Number(p.reportCount || 0) > 0);
+  const pendingGiftingFlagged = (giftingAdmin.posts || []).filter((p: any) => Number(p.reportCount || 0) > 0 && !TERMINAL_GIFTING.has(String(p.status).toUpperCase()));
   const pendingGiftingReports = (giftingAdmin.reports || []).filter((r: any) => r.status === "PENDING");
   const pendingPromoters = promoterRequests;
   const venueClaimsPendingCount = businessClaims.length + businessSubmissions.length + businessLogoRequests.length;
@@ -1286,15 +1287,17 @@ export default function Admin() {
     for (const s of pendingSubs.slice(0, 6)) {
       items.push({
         key: `sub-${s.id}`,
+        bucket: "events",
         title: s.title || "Untitled submission",
         subtitle: `${s.type} · ${s.submitterName || s.submitterEmail}`,
-        kindLabel: s.type === "CLAIM" ? "Claim" : s.type === "PROMOTER_APPLICATION" ? "Promoter" : "Submission",
+        kindLabel: s.type === "CLAIM" ? "Claim" : "Submission",
         color: "#FF1FA0",
       });
     }
     for (const p of pendingPromoters.slice(0, 4)) {
       items.push({
         key: `promo-${p.id}`,
+        bucket: "promoters",
         title: p.displayName || p.username || p.email || "Promoter request",
         subtitle: p.eventTitle ? `Claiming ${p.eventTitle}` : "Promoter application",
         kindLabel: "Promoter",
@@ -1304,6 +1307,7 @@ export default function Admin() {
     for (const m of pendingMod.slice(0, 4)) {
       items.push({
         key: `mod-${m.id}`,
+        bucket: "moderation",
         title: m.eventTitle || `Moderation ${m.type}`,
         subtitle: `${m.type} · ${m.requesterName || m.requesterEmail}`,
         kindLabel: "Moderation",
@@ -1313,6 +1317,7 @@ export default function Admin() {
     for (const g of pendingGiftingFlagged.slice(0, 3)) {
       items.push({
         key: `gp-${g.id}`,
+        bucket: "gifting",
         title: g.title || "GIFTZ post",
         subtitle: `${g.reportCount || 0} report(s)`,
         kindLabel: "GIFTZ report",
@@ -1322,6 +1327,7 @@ export default function Admin() {
     for (const claim of businessClaims.slice(0, 3)) {
       items.push({
         key: `bclaim-${claim.id}`,
+        bucket: "venue_claims",
         title: claim.businessName || "Venue claim",
         subtitle: `@${claim.username || claim.email || "unknown"}: ${claim.claimReason || "Claim request"}`,
         kindLabel: "Venue claim",
@@ -1331,6 +1337,7 @@ export default function Admin() {
     for (const sub of businessSubmissions.slice(0, 2)) {
       items.push({
         key: `bsub-${sub.id}`,
+        bucket: "new_venues",
         title: sub.name || "New venue",
         subtitle: `${sub.type || "Business"} · ${sub.neighborhood || sub.address || "No location"}`,
         kindLabel: "New venue",
@@ -1340,6 +1347,7 @@ export default function Admin() {
     for (const req of (isPrimaryOwner ? businessLogoRequests : []).slice(0, 2)) {
       items.push({
         key: `logo-${req.id}`,
+        bucket: "owner",
         title: req.businessName || "Logo change",
         subtitle: "Pending logo approval",
         kindLabel: "Logo request",
@@ -1845,7 +1853,10 @@ export default function Admin() {
                     key={`q-${q.kind}-${q.id}-${i}`}
                     type="button"
                     className="block w-full text-left text-sm text-white/70 hover:text-white"
-                    onClick={() => openSheet({ view: "inbox", account: "admin" })}
+                    onClick={() => openAdminSheet({ view: "inbox", account: "admin", queueFolder: "active",
+                      queueBucket: q.kind === "promoter" ? "promoters" : "events",
+                      queueItem: (q.kind === "promoter" ? "promo-" : "sub-") + q.id,
+                    })}
                   >
                     Queue · {q.kind}: {q.title}
                   </button>
@@ -1869,9 +1880,9 @@ export default function Admin() {
             ownerCount={ownerCount}
             onOpenInbox={openInboxFromOverview}
             onOpenOwner={() => openAdminSheet({ view: "inbox", account: "owner" })}
-            onReviewItem={key => openAdminSheet({
-              view: "inbox", account: key.startsWith("logo-") ? "owner" : "admin",
-              queueFolder: "active", queueItem: key,
+            onReviewItem={item => openAdminSheet({
+              view: "inbox", account: item.bucket === "owner" ? "owner" : "admin",
+              queueFolder: "active", queueBucket: item.bucket === "owner" ? undefined : item.bucket, queueItem: item.key,
             })}
             onMetricClick={handleOverviewMetricClick}
             pushStatus={canPush ? pushStatus : null}

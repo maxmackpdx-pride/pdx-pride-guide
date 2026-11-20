@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export type AttentionItem = {
   key: string;
+  bucket: "events" | "promoters" | "moderation" | "gifting" | "venue_claims" | "new_venues" | "owner";
   title: string;
   subtitle: string;
   kindLabel: string;
@@ -70,7 +71,7 @@ type Props = {
   ownerCount?: number;
   onOpenInbox: (filterHint?: string) => void;
   onOpenOwner?: () => void;
-  onReviewItem: (key: string) => void;
+  onReviewItem: (item: AttentionItem) => void;
   onMetricClick: (tab: string, metricKey: string) => void;
   pushStatus?: PushStatus;
   onRefreshPush?: () => void;
@@ -296,7 +297,7 @@ export default function AdminOverview({
             <p>{queueUnavailable ? "The review queue could not be loaded." : "Loading the review queue…"}</p>
             {queueUnavailable && <button type="button" className="admin-shell__ghost-btn" onClick={onRetryQueue}>Retry</button>}
           </div>
-        ) : pendingCount === 0 ? (
+        ) : pendingCount === 0 && attentionItems.length === 0 ? (
           <div className="admin-shell__queue-clear">
             <h3><CheckCircle size={16} aria-hidden="true" /> Queue clear</h3>
             <p>No items are waiting for review.</p>
@@ -319,7 +320,7 @@ export default function AdminOverview({
                     type="button"
                     className="admin-shell__ghost-btn"
                     aria-label={"Review " + item.title}
-                    onClick={() => onReviewItem(item.key)}
+                    onClick={() => onReviewItem(item)}
                   >
                     Review
                   </button>
