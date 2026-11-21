@@ -21,7 +21,7 @@ import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import { EventSharePopup, GigInvitePopup, ShareJoinPrompt, shareUrlFor, useShareJoinGate } from "./OpenCardShare";
 import { EventGoingButton, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
 import EventPlanning from "./EventPlanning";
-import { useInboxSheet } from "@/context/InboxSheetContext";
+import { useOptionalInboxSheet } from "@/context/InboxSheetContext";
 import AuthModal from "@/components/AuthModal";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import { EventHostNotice } from "./EventHostNotice";
@@ -169,7 +169,7 @@ function afterRouteSettles(fn: () => void) { window.setTimeout(fn, 120); }
 function EventFeedChat({ listing, onLeave }: { listing: EventListing; onLeave: (after: () => void) => void }) {
   const { user } = useAuth();
   const rsvp = useEventRsvp();
-  const inbox = useInboxSheet();
+  const inbox = useOptionalInboxSheet();
   const joined = rsvp.myEventIds.has(listing.id);
   const pending = rsvp.isRsvpPending(listing.id);
   const member = joined && !!user;
@@ -183,7 +183,7 @@ function EventFeedChat({ listing, onLeave }: { listing: EventListing; onLeave: (
   const target = { kind: "EVENT" as const, id: listing.id, title: listing.title, calendarDate: dateStrOf(listing) };
   /* The inbox is a header sheet, so the card closes first and the inbox opens on
      the event's group chat (no second chat UI inside the card). */
-  const openRoom = (el?: HTMLElement) => { void el; onLeave(() => inbox.openSheet({ view: "chats", group: target })); };
+  const openRoom = (el?: HTMLElement) => { void el; onLeave(() => inbox?.openSheet({ view: "chats", group: target })); };
   const join = (el: HTMLElement) => {
     if (member) { openRoom(el); return; }
     if (!user) { rsvp.toggleRsvp(listing.id); return; }

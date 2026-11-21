@@ -177,3 +177,8 @@ export function useInboxSheet() {
   if (!ctx) throw new Error("useInboxSheet must be used within InboxSheetProvider");
   return ctx;
 }
+
+/** Same as useInboxSheet, but null outside the provider (isolated card fixtures). */
+export function useOptionalInboxSheet() {
+  return useContext(InboxSheetContext);
+}

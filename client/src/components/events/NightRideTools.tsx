@@ -158,7 +158,7 @@ export function RideOfferForm({
   checked: boolean;
   send: (body: RideFields & { area: string; seats: number }) => void;
 }) {
-  const [kind, setKind] = useState<RideFields["kind"]>(initialKind),
+  const [kind, setKind] = useState<RideFields["kind"]>(initialKind === "home" && !checked ? "carpool" : initialKind),
     [oneWay, setOneWay] = useState(false),
     rooms = useAfterzNights();
   const joined = (rooms.data ?? []).filter(
@@ -191,7 +191,11 @@ export function RideOfferForm({
           onChange={(e) => setKind(e.target.value as RideFields["kind"])}
         >
           <option value="carpool">Arriving: carpool to the event</option>
-          <option value="home">Departing: ride home</option>
+          {/* Ride-home offers keep the server's safety rule: verified presence at the
+              venue (foreground checks + missed-check escalation). */}
+          <option value="home" disabled={!checked}>
+            {checked ? "Departing: ride home" : "Departing: ride home (check in at the venue first)"}
+          </option>
           <option value="afterz" disabled={!checked || !joined.length}>
             Ride to Afterz
           </option>
