@@ -5051,7 +5051,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/events/:id/missed-connections", (req: any, res) => {
     const evt = storage.getEvent(Number(req.params.id));
-    if (!evt || evt.status !== "LIVE") return res.status(404).json({ error: "Not found" });
+    if (!evt || !mayReadEventDetail(req, evt)) return res.status(404).json({ error: "Not found" });
     res.json(storage.getMissedConnectionsByEvent(evt.id, req.session?.userId));
   });
 
@@ -5119,7 +5119,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
         };
       } else if (eventId != null) {
         const evt = storage.getEvent(eventId);
-        if (!evt || evt.status !== "LIVE") return res.status(400).json({ error: "Invalid event" });
+        if (!evt || !canSharePublicEvent(evt)) return res.status(400).json({ error: "Invalid event" });
 
         const requireToday = !boardScope && scope === "today";
         const window = isMissedConnectionPostable(evt.dateStart, evt.dateEnd, { requireToday });

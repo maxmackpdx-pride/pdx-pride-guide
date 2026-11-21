@@ -31,3 +31,24 @@ export function eventTicketFacts(description: string | null | undefined) {
     prices: { presale: pair[1], door: pair[2] },
   };
 }
+
+/** Only surface a performer explicitly credited in listing copy. A genre or
+ * unfilled DJ call is not a performance credit. Structured lineup wins. */
+export function listingDjCredit(description: string | null | undefined): string | null {
+  if (!description) return null;
+  const credit = /(?:^|[.!?]\s+|\n)(DJ\s+[\p{Lu}\d][\p{L}\d’'&.-]*(?:[ \t]+[\p{Lu}\d][\p{L}\d’'&.-]*){0,4})\s+(?:plays|spins|takes the decks|calls the plays|will spin)\b/u.exec(description);
+  return credit?.[1] ?? null;
+}
+
+
+/** A scheduled duration is a fixed fact, so omit empty units. */
+export function eventRuntime(startsAt: number | null, endsAt: number | null): string | null {
+  if (startsAt == null || endsAt == null || endsAt <= startsAt) return null;
+  const minutes = Math.round((endsAt - startsAt) / 60_000);
+  if (!minutes) return null;
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  if (!hours) return remainder + " min";
+  if (!remainder) return hours + (hours === 1 ? " hour" : " hours");
+  return hours + "h " + remainder + "m";
+}

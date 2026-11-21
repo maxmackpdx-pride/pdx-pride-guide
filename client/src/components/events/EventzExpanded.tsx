@@ -1,9 +1,10 @@
 import { EventMapSurface } from "@/components/EventLocationMap";
+import EventMizzedBlock from "./EventMizzedBlock";
 import { EventReport } from "./EventReport";
 import { EventShare } from "./EventShare";
 import { canSharePublicEvent } from "@shared/publicEventVisibility";
 import { pacificCalendarDate } from "@shared/missedConnections";
-import { eventAge, eventPrice, eventTicketFacts } from "@/lib/eventFacts";
+import { eventAge, eventPrice, eventTicketFacts, eventRuntime, listingDjCredit } from "@/lib/eventFacts";
 import { EventGoingButton, EventRemoveAttendance, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
 import { PosterlessFlyer } from "./PosterlessFlyer";
 import EventPlanning from "./EventPlanning";
@@ -146,14 +147,15 @@ function StartsInBox({ event, hostName }: { event: Event; hostName?: string }) {
   if (startMs == null || startMs - now <= 0) return null;
   const venueMark = resolveDirectoryLogo(event.venueName);
   const hostMark = hostName ? resolveDirectoryLogo(hostName) : null;
-  return <div className="evz-x__starts" role="timer">
+  return <><h3 className="evz-x__sech">Event details</h3>
+  <div className="evz-x__starts" role="timer">
     <span className="evz-timer-mark" aria-hidden="true">{venueMark && <img src={venueMark} alt="" />}</span>
     <div className="evz-timer-value">
       <span className="evz-x__starts-l">Starts in</span>
       <strong>{formatCardCountdown(startMs - now)}</strong>
     </div>
     <span className="evz-timer-mark" aria-hidden="true">{hostMark && hostMark !== venueMark && <img src={hostMark} alt="" />}</span>
-  </div>;
+  </div></>;
 }
 
 function EventPersonRow({ username, children }: { username?: string | null; children: ReactNode }) {
@@ -179,17 +181,6 @@ function dayKeyLabel(key: string): { dow: string; num: number } {
   return { dow, num: d };
 }
 
-function primaryLinkFor(event: Event): { href: string; label: string } | null {
-  const links = event as Event & { ticketUrl?: string | null; venueWebsite?: string | null; sourceUrl?: string | null; source?: string | null };
-  const ticket = publicHttpUrl(links.ticketUrl);
-  if (ticket) return { href: ticket, label: "Tickets" };
-  const site = publicHttpUrl(links.venueWebsite) || publicHttpUrl(resolveVenueWebsite(event.venueName));
-  if (site) return { href: site, label: "Venue site" };
-  const source = publicHttpUrl(links.sourceUrl) || publicHttpUrl(links.source);
-  if (source) return { href: source, label: "Event page" };
-  return null;
-}
-
 function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanning, origin }: {
   origin: EventModalOriginRect | null;
   openPlanning: boolean;
@@ -202,6 +193,11 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
   const [, setLocation] = useLocation();
   const [showAuth, setShowAuth] = useState(false);
   const [page, setPage] = useState(openPlanning ? 0 : 1);
+  const [visited, setVisited] = useState<number[]>([]);
+  function selectPage(index: number) {
+    setPage(index);
+    if (index >= 3) setVisited(previous => previous.includes(index) ? previous : [...previous, index]);
+  }
   const [mizzedOpen, setMizzedOpen] = useState(false);
   const [venueDay, setVenueDay] = useState<string | null>(null);
   const pagesRef = useRef<HTMLDivElement>(null);
@@ -280,14 +276,14 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
   const placeQuery = useQuery<{ upcomingEvents?: PlaceUpcomingEvent[]; promoters?: PlacePromoter[] }>({
     queryKey: ["/api/placez", venue?.id, "card-extras"],
     queryFn: () => apiRequest("GET", `/api/placez/${venue!.id}`).then((r) => r.json()),
-    enabled: Boolean(venue?.id),
+    enabled: Boolean(venue?.id) && (visited.includes(3) || visited.includes(4)),
     staleTime: 300_000,
   });
   const placeData = placeQuery.data;
   const venueUpcoming: PlaceUpcomingEvent[] = Array.isArray(placeData?.upcomingEvents) ? placeData.upcomingEvents : [];
   const promoters: PlacePromoter[] = Array.isArray(placeData?.promoters) ? placeData.promoters : [];
   const eventDayKey = pacificDayKey(event.dateStart);
-  const stripDays = eventDayKey
+  const stripDays = eventDayKey && visited.includes(4)
     ? Array.from({ length: 7 }, (_, i) => {
         const key = shiftDayKey(eventDayKey, i);
         const dayEvents = venueUpcoming.filter((e) => e.id !== event.id && pacificDayKey(e.dateStart) === key);
@@ -309,7 +305,14 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
   const claimed = (detail?.event ?? event).isClaimed ?? Boolean((detail?.event ?? event).claimedBy);
   const claimable = (detail?.event ?? event).isClaimable && !(detail?.event ?? event).claimedBy;
   const canManage = Boolean(user?.isAdmin) || Boolean(user && hosts.some((h) => h.userId === user.id));
-  const primaryLink = primaryLinkFor(event);
+  const ticketUrl = publicHttpUrl(event.ticketUrl);
+  const ticketHost = ticketUrl && !ticketUrl.startsWith("/") ? new URL(ticketUrl).hostname : null;
+  const startsAt = parsePacificDateTime(event.dateStart);
+  const endsAt = parsePacificDateTime(event.dateEnd);
+  const music = talent.length ? null : listingDjCredit(event.description);
+  // Imported listings may carry an estimated end. Publish a duration only
+  // when the event's owning record marks its end as a reviewed field.
+  const runtime = event.lockedFields?.includes('"dateEnd"') ? eventRuntime(startsAt, endsAt) : null;
   const age = eventAge(event.ageRequirement);
   const admission = eventPrice(event.admission);
   const ticketFacts = eventTicketFacts(event.description);
@@ -326,7 +329,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
 
   const goTo = (index: number) => {
     const next = (index + PAGES.length) % PAGES.length;
-    setPage(next);
+    selectPage(next);
     const el = pagesRef.current;
     if (el) el.scrollTo({ left: next * el.clientWidth, behavior: "instant" });
   };
@@ -334,7 +337,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
     const el = pagesRef.current;
     if (!el || el.clientWidth === 0) return;
     const index = Math.round(el.scrollLeft / el.clientWidth);
-    if (index !== page && index >= 0 && index < PAGES.length) setPage(index);
+    if (index !== page && index >= 0 && index < PAGES.length) selectPage(index);
   };
 
   return (
@@ -383,30 +386,34 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
             <StartsInBox event={event} hostName={hostGroup?.name} />
             <h3 className="evz-x__sech">Night at a glance</h3>
             <dl className="evz-glance">
+              {music && <div><dt>Music</dt><dd>{music}</dd></div>}
               {event.dateEnd && <div><dt>Ends</dt><dd>{eventTimeLabel(event.dateEnd)}</dd></div>}
+              {runtime && <div><dt>Runs</dt><dd>{runtime}</dd></div>}
               {hostGroup && <div className="evz-glance-host">
                 <dt>Host</dt>
                 <dd><Link href={`/z/${hostGroup.slug}`}>{hostGroup.name} <ArrowUpRight size={12} aria-hidden="true" /></Link></dd>
               </div>}
               {talent.length > 0 && <div><dt>Lineup</dt><dd>{talent.map(person => person.displayName || person.username).filter(Boolean).join(", ")}</dd></div>}
-              {!hostGroup && !talent.length && !event.dateEnd && <div><dt>Event</dt><dd>{admission}</dd></div>}
+              {!hostGroup && !talent.length && !music && !event.dateEnd && <div><dt>Event</dt><dd>{admission}</dd></div>}
             </dl>
             {event.description && <h3 className="evz-x__sech">About this night</h3>}
             {ticketFacts.description && <p className="evz-x__desc">{ticketFacts.description}</p>}
-            {ticketFacts.prices && <dl className="evz-ticket-prices" aria-label="Ticket prices">
-              <div><dt>Presale</dt><dd>{ticketFacts.prices.presale}</dd></div>
-              <div><dt>Door</dt><dd>{ticketFacts.prices.door}</dd></div>
-            </dl>}
-            {(primaryLink?.label === "Tickets" || sourceUrl) ? (
-              <div className="evz-x__linkrow">
-                {primaryLink?.label === "Tickets" ? (
-                  <a className="evz-x__link" href={primaryLink.href} target="_blank" rel="noopener noreferrer">{primaryLink.label} <ArrowUpRight size={16} aria-hidden="true" /></a>
-                ) : null}
-                {sourceUrl ? (
-                  <a className="evz-x__link" href={sourceUrl} target="_blank" rel="noopener noreferrer">Source link <ArrowUpRight size={16} aria-hidden="true" /></a>
-                ) : null}
-              </div>
-            ) : null}
+            {(ticketFacts.prices || ticketUrl) && <section className="evz-tickets" aria-label="Tickets">
+              <h3 className="evz-x__sech">Tickets</h3>
+              {ticketFacts.prices && <dl className="evz-ticket-prices" aria-label="Ticket prices">
+                <div><dt>Presale{ticketUrl && <small>Online</small>}</dt><dd>{ticketFacts.prices.presale}</dd></div>
+                <div><dt>Door<small>At {event.venueName}</small></dt><dd>{ticketFacts.prices.door}</dd></div>
+              </dl>}
+              {ticketUrl && <>
+                <a className="evz-ticket-action" href={ticketUrl} target="_blank" rel="noopener noreferrer">
+                  Tickets <ArrowUpRight size={17} aria-hidden="true" />
+                </a>
+                {ticketHost && <small className="evz-ticket-domain">{ticketHost}</small>}
+              </>}
+            </section>}
+            {sourceUrl && <a className="evz-x__link" href={sourceUrl} target="_blank" rel="noopener noreferrer">
+              Source link <ArrowUpRight size={16} aria-hidden="true" />
+            </a>}
             {claimable ? (
               <p className="evz-x__note">This event has not been claimed by its organizer. Details were sourced from public listings. Please confirm time, venue, and ticketing directly before attending.{hasPendingClaim ? " A claim is pending admin review." : ""}</p>
             ) : null}
@@ -427,6 +434,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
           </section>
 
           <section className="evz-x__page" inert={page !== 3} aria-hidden={page !== 3} aria-label="People">
+            {visited.includes(3) && <>
             <div className="evz-x__sech"><span>{hosts.length === 1 ? "Host" : "Hosts"}</span></div>
             {!Array.isArray(detail?.hosts) ? detailStatus : hosts.length > 0 ? (
               <div className="evz-x__people">
@@ -489,9 +497,11 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
             ) : (
               <p className="evz-x__empty-block">No public promoters listed for this venue.</p>
             )}
+            </>}
           </section>
 
           <section className="evz-x__page" inert={page !== 4} aria-hidden={page !== 4} aria-label="More">
+            {visited.includes(4) && <>
             {venue && !Array.isArray(placeData?.upcomingEvents) && <EventReadStatus label="More at this venue" query={placeQuery} />}
             {venue && stripDays.some((d) => d.events.length > 0) ? (
               <>
@@ -526,17 +536,13 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
                 )}
               </>
             ) : null}
-            <button type="button" className="evz-x__act evz-x__act--dash" aria-expanded={mizzedOpen} onClick={() => setMizzedOpen((open) => !open)}>
-              <span className="evz-x__act-main">
-                <span className="evz-x__act-t">Add a Mizzed Connection</span>
-                <span className="evz-x__act-s">{missedCount > 0 ? `${missedCount} posted for this event` : "Met someone at this event? Post it during or after."}</span>
-              </span>
-              <span className="evz-x__act-ar" aria-hidden="true">+</span>
-            </button>
+            <EventMizzedBlock event={event} hasNotes={missedCount > 0} onOpen={() => setMizzedOpen(true)}/>
             {page === 4 && <EventPlanning section="gigs" eventId={event.id} occurrenceDate={event.dateStart}/>}
+            </>}
           </section>
 
           <section className="evz-x__page" inert={page !== 5} aria-hidden={page !== 5} aria-label="Nearby">
+            {visited.includes(5) && <>
             <div className="evz-x__sech"><span>Restaurants close by</span></div>
             {!Array.isArray(detail?.nearby?.restaurants) ? detailStatus : restaurants.length === 0 ? (
               <p className="evz-x__empty">No restaurants mapped close by yet.</p>
@@ -579,6 +585,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
                 })}
               </div>
             )}
+            </>}
           </section>
         </div>
 
