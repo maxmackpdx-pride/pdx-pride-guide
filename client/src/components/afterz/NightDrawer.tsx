@@ -38,8 +38,8 @@ function useAfterzWindow(previewNow?: number) {
   return clock.open;
 }
 
-export default function NightDrawer({ roomId, onRoomChange, eventId, occurrenceDate, previewNow, showWordmark = true }: {
-  eventId?: number; occurrenceDate?: string; showWordmark?: boolean; previewNow?: number;
+export default function NightDrawer({ roomId, onRoomChange, eventId, occurrenceDate, previewNow, sharePath, showWordmark = true }: {
+  eventId?: number; occurrenceDate?: string; showWordmark?: boolean; previewNow?: number; sharePath?: string;
   roomId?: string | null; onRoomChange?: (id: string | null) => void;
 } = {}) {
   const { user } = useAuth();
@@ -95,7 +95,7 @@ export default function NightDrawer({ roomId, onRoomChange, eventId, occurrenceD
     {id ? <div className="afterz-invite-sheet">
       <button type="button" onClick={() => pick(null)}>Back to Afterz</button>
       <h3 ref={roomTitle} tabIndex={-1}>Afterz invitation</h3>
-      <GatheringRoom key={id + ":" + user?.id} id={id} signIn={() => setShowAuth(true)} done={() => pick(null)}/>
+      <GatheringRoom key={id + ":" + user?.id} id={id} sharePath={sharePath} signIn={() => setShowAuth(true)} done={() => pick(null)}/>
     </div> : <>
       {user ? <button type="button" className="afterz-host-button" aria-expanded={hostForm} aria-controls={formId}
         onClick={() => setHostForm(!hostForm)}>Host an Afterz</button> :

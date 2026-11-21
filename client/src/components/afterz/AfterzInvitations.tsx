@@ -135,10 +135,12 @@ export function GatheringRoom({
   id,
   signIn,
   done,
+  sharePath = "/map",
 }: {
   id: string;
   signIn: () => void;
   done: () => void;
+  sharePath?: string;
 }) {
   const { user } = useAuth(),
     client = useQueryClient(),
@@ -199,7 +201,7 @@ export function GatheringRoom({
   };
   const [shareLink, setShareLink] = useState("");
   const share = async () => {
-    const url = new URL("/map", window.location.origin);
+    const url = new URL(sharePath, window.location.origin);
     url.search = new URLSearchParams({
       mode: "afterz",
       gathering: id,
