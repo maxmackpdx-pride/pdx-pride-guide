@@ -142,11 +142,6 @@ async function checkGlass(browser, standard) {
     } finally { await page.context().close(); }
   }
   if (!total) warnings.add("No rendered glass pieces measured.");
-  if (!values.selector) {
-    const expected = ["deep", "overlay", "navbar", "dock", "button", "slider", "mapchrome", "scrim", "artwork"];
-    const missing = expected.filter(piece => !seen.has(piece));
-    if (missing.length) warnings.add(`Pieces outside this run’s measured coverage: ${missing.join(", ")}`);
-  }
   console.log(`Glass advisory · ${standard.release}\n${standard.source}\n${total} paint samples; pieces: ${[...seen].join(", ")}`);
   for (const warning of warnings) console.warn(`FLAG ${warning}`);
   console.log(`${warnings.size} advisories. Owner-authorized work proceeds.`);

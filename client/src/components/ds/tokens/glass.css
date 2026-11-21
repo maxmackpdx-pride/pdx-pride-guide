@@ -105,7 +105,7 @@
      Default = near-black translucent fill + 2px black ring + accent hairline
      + soft bloom + top sheen. Solid = filled accent CTA. Outline = secondary. */
   --glass-btn-radius: 22px;
-  --glass-btn-bg: var(--glass-dark-fill);
+  --glass-btn-bg: var(--z-black);
   --glass-btn-border: 1px solid var(--c);
   --glass-btn-color: #fff;
   /* Buttons: thin black outline + inward sheen only - no outer neon bloom */
@@ -183,7 +183,7 @@
     inset 0 2px 3px rgba(0, 0, 0, 0.6);
 
   /* ── Legacy lite-glass aliases → deep (do not reintroduce lite) ─ */
-  --pdx-glass-fill: var(--glass-dark-fill);
+  --pdx-glass-fill: var(--z-black);
   --pdx-glass-fill-hot: #0a0a0e;
   --pdx-glass-fill-dense: #030304;
   --pdx-glass-edge: var(--c);

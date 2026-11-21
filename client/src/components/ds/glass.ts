@@ -33,7 +33,7 @@ export function glassBtn(accent: GlassAccent): string {
   return `--piece:${accent}; color:var(--text-inverse); background:var(--piece); border:1px solid var(--piece); box-shadow:var(--glass-btn-shadow)`;
 }
 export function glassBtnOutline(accent: GlassAccent): string {
-  return `--piece:${accent}; color:var(--piece); background:var(--glass-dark-fill); border:1px solid var(--piece); box-shadow:var(--glass-btn-shadow); backdrop-filter:var(--glass-filter)`;
+  return `--piece:${accent}; color:var(--piece); background:var(--glass-dark-fill); border:1px solid var(--piece); box-shadow:var(--glass-btn-shadow)`;
 }
 
 /** React-friendly style objects (same recipes). */
