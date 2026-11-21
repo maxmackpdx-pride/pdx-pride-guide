@@ -454,7 +454,10 @@ export default function Schedule({
     const weekEvents = scheduleEvents.filter(e => e.calendarDate && dates.has(e.calendarDate));
     const mine = weekEvents.filter(e => myScheduleIds.has(e.id) || isBeachScheduleEvent(e));
     const list = mine.length ? mine : weekEvents.filter(e => e.feat);
-    list.sort((a, b) => (a.calendarDate ?? "").localeCompare(b.calendarDate ?? "") || a.s - b.s);
+    list.sort((a, b) => {
+      const dayOrder = String(a.calendarDate).localeCompare(String(b.calendarDate));
+      return dayOrder || a.s - b.s;
+    });
     setExporting(true);
     try {
       await downloadScheduleStory(list, mine.length, activeWeekStart);
