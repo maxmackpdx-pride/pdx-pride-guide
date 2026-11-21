@@ -1,0 +1,133 @@
+/* The nine materials from Tucker's operated November 21 playground. The
+   host supplies its semantic token and keeps its own production geometry.
+   Foundation's frost and exact edge lock apply to every painted surface. */
+:root {
+  --glass-bevel: 58px;
+  --glass-refraction: 72;
+  --glass-lens-radius: 71px;
+  --glass-frost: 0px;
+  --glass-saturation: 180%;
+  --glass-tint: 88%;
+  --glass-dark-fill: color-mix(in srgb, var(--z-black) var(--glass-tint), transparent);
+  --glass-filter: blur(var(--glass-frost)) saturate(var(--glass-saturation));
+}
+
+/* No inherited lens references: each measured shell owns its geometry. */
+[data-glass-piece] {
+  --glass-lens: ;
+  --glass-piece-tone: var(--piece, var(--c, var(--neon-cyan)));
+  --glass-outer: 9%;
+  --glass-inner: 4.5%;
+  --glass-spread: 10px;
+  --glass-keyline: 0 0 0 2px color-mix(in srgb, var(--z-black) 82%, transparent);
+  --glass-highlight: inset 0 1px 0 color-mix(in srgb, var(--text-hi) 51%, transparent);
+  --glass-bloom-stack:
+    0 0 var(--glass-spread) color-mix(in srgb, var(--glass-piece-tone) calc(var(--glass-outer) * .55), transparent),
+    inset 0 0 calc(var(--glass-spread) * .8) color-mix(in srgb, var(--glass-piece-tone) var(--glass-inner), transparent);
+  --glass-piece-shadow: var(--glass-keyline), var(--glass-highlight), var(--glass-bloom-stack);
+  background-color: var(--glass-dark-fill) !important;
+  background-image: none !important;
+  border: 1px solid var(--glass-piece-tone) !important;
+  box-shadow: var(--glass-piece-shadow) !important;
+  -webkit-backdrop-filter: var(--glass-lens) var(--glass-filter) !important;
+  backdrop-filter: var(--glass-lens) var(--glass-filter) !important;
+}
+[data-glass-piece="deep"] {
+  --glass-outer: 34%;
+  --glass-inner: 17%;
+  --glass-spread: 35px;
+  --glass-piece-shadow: var(--glass-keyline), var(--glass-highlight), var(--glass-bloom-stack),
+    0 30px 57px color-mix(in srgb, var(--z-oled) 54%, transparent),
+    inset 0 2px 3px color-mix(in srgb, var(--text-hi) 18%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--text-hi) 16%, transparent);
+  border-radius: var(--glass-lens-radius);
+}
+[data-glass-piece="overlay"] {
+  /* Overlay sheen 70%, accent wash 9%. Keep the wash above the tint layer. */
+  --glass-piece-shadow: var(--glass-keyline), var(--glass-bloom-stack),
+    inset 0 1px 0 color-mix(in srgb, var(--text-hi) 70%, transparent),
+    inset 0 0 0 100vmax color-mix(in srgb, var(--glass-piece-tone) 9%, transparent);
+}
+[data-glass-piece="navbar"] {
+  --glass-seam: 55%;
+  --glass-piece-shadow: var(--glass-keyline), var(--glass-highlight),
+    0 1px 14px color-mix(in srgb, var(--glass-piece-tone) calc(var(--glass-seam) * .8), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--glass-piece-tone) calc(var(--glass-seam) * .9), transparent);
+}
+[data-glass-piece="dock"] {
+  border-radius: 28px;
+}
+[data-glass-piece="button"] {
+  /* Playground derives press depth/scale from .55 and specular from .80. */
+  --glass-piece-shadow: var(--glass-keyline), var(--glass-highlight), var(--glass-bloom-stack);
+}
+[data-glass-piece="button"]:is(:active,[aria-pressed="true"]),
+button:active > [data-glass-piece="button"] {
+  --glass-piece-shadow: var(--glass-keyline), inset 0 4px 8px color-mix(in srgb, var(--z-oled) 52.5%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--text-hi) 68%, transparent),
+    0 0 3px color-mix(in srgb, var(--glass-piece-tone) 6.75%, transparent);
+  scale: .981;
+}
+[data-glass-piece="slider"] {
+  --glass-thumb-size: 38px;
+  /* Spring 65, overshoot 35, thumb bloom 9%. Never frost the reading plane. */
+  --glass-spring: cubic-bezier(.2, .65, .3, 1.35);
+}
+[data-glass-piece="slider"] [data-slider-thumb] {
+  min-width: var(--glass-thumb-size);
+  border: 1px solid var(--glass-piece-tone);
+  background: var(--glass-dark-fill);
+  box-shadow: var(--glass-highlight), 0 0 4px color-mix(in srgb, var(--glass-piece-tone) 7.2%, transparent);
+}
+input[type="range"][data-glass-piece="slider"] {
+  appearance: none;
+  -webkit-appearance: none;
+  min-height: 44px;
+  border-radius: 999px;
+  padding-inline: 3px;
+  cursor: pointer;
+}
+input[type="range"][data-glass-piece="slider"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: var(--glass-thumb-size);
+  height: var(--glass-thumb-size);
+  border-radius: 50%;
+  border: 1px solid var(--glass-piece-tone);
+  background: var(--glass-dark-fill);
+  box-shadow: var(--glass-highlight), 0 0 4px color-mix(in srgb, var(--glass-piece-tone) 7.2%, transparent);
+  transition: transform .2s var(--glass-spring);
+}
+input[type="range"][data-glass-piece="slider"]::-moz-range-thumb {
+  width: var(--glass-thumb-size);
+  height: var(--glass-thumb-size);
+  border-radius: 50%;
+  border: 1px solid var(--glass-piece-tone);
+  background: var(--glass-dark-fill);
+  box-shadow: var(--glass-highlight), 0 0 4px color-mix(in srgb, var(--glass-piece-tone) 7.2%, transparent);
+  transition: transform .2s var(--glass-spring);
+}
+input[type="range"][data-glass-piece="slider"]:active::-webkit-slider-thumb { transform: scale(.96); }
+input[type="range"][data-glass-piece="slider"]:active::-moz-range-thumb { transform: scale(.96); }
+[data-glass-piece="mapchrome"] {
+  /* The playground's 45% mode tint uses half that strength as a fill.
+     The guide locks its hairline to the full local token. */
+  --glass-piece-shadow: var(--glass-keyline), var(--glass-highlight),
+    inset 0 0 0 100vmax color-mix(in srgb, var(--glass-piece-tone) 22.5%, transparent);
+}
+[data-glass-piece="scrim"] {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+[data-glass-piece="artwork"] {
+  --glass-piece-shadow: inset 0 1px .45px color-mix(in srgb, var(--text-hi) 30%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-glass-piece="button"]:active, button:active > [data-glass-piece="button"] { scale: 1; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  [data-glass-piece] {
+    background-color: var(--z-black) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}

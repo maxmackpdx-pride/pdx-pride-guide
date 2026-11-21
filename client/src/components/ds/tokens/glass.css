@@ -1,7 +1,7 @@
 /* ============================================================
-   Zaylist - DEEP GLASS / OLED-NEON (canonical LIVE chrome)
+   Zaylist glass tokens and compatibility utilities
 
-   Source of truth: THIS FILE + production components on master / live site.
+   Material authority: Foundation Library, One glass in production.
    Rulebook: docs/LIVE_DESIGN_STANDARD.md
    Migration archive (not open work): docs/handoffs/deep-glass-2026-07-16/
 
@@ -15,7 +15,7 @@
 
 :root {
   /* Fixed artwork glass gently softens moving mesh without blurring content. */
-  --glass-artwork-blur: .45px;
+  --glass-artwork-blur: var(--glass-frost);
   /* ── Accent contract: set --c (or --_c / --dc) per instance ─
      Recipes below use var(--c). Because custom props compute on the
      element where they are defined, any node that sets a local --c MUST
@@ -30,39 +30,21 @@
      the fill and backdrop treatment. Existing semantic accents, edges, seams,
      radii, and shadow stacks continue to be owned by their host surfaces. */
   --glass-bloom: 18%;
-  --glass-card-radius: 14px;
-  --glass-card-blur: 18px;
-  --glass-card-saturation: 1.22;
-  --glass-card-bg:
-    linear-gradient(133deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.0175) 14%, transparent 38%),
-    radial-gradient(80% 62% at 108% 112%, rgba(255, 255, 255, 0.055), color-mix(in srgb, var(--c) 4.5%, transparent) 42%, transparent 72%),
-    radial-gradient(115% 90% at 50% -18%, color-mix(in srgb, var(--c) 8%, transparent), transparent 58%),
-    rgba(5, 5, 8, 0.72);
-  --glass-card-border: 1px solid color-mix(in srgb, var(--c) 55%, #101014);
-  --glass-card-shadow:
-    0 0 0 2px #000,
-    0 34px 66px -24px rgba(0, 0, 0, 0.95),
-    0 0 26px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
-    0 0 13px -5px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
-    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent);
+  --glass-card-radius: var(--glass-lens-radius);
+  --glass-card-blur: var(--glass-frost);
+  --glass-card-saturation: var(--glass-saturation);
+  --glass-card-bg: var(--glass-dark-fill);
+  --glass-card-border: 1px solid var(--c);
+  --glass-card-shadow: 0 0 0 2px var(--z-black), inset 0 1px 0 color-mix(in srgb, var(--text-hi) 51%, transparent),
+    0 0 35px color-mix(in srgb, var(--c) 18.7%, transparent), inset 0 0 30px color-mix(in srgb, var(--c) 17%, transparent);
 
   /* ── 1.1b Neutral card (no semantic accent) ─────────────── */
   --glass-neutral-c1: #4a4a52;
   --glass-neutral-c2: #b8b8c2;
-  --glass-card-neutral-bg:
-    linear-gradient(133deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.0175) 14%, transparent 38%),
-    radial-gradient(80% 62% at 108% 112%, rgba(255, 255, 255, 0.055), color-mix(in srgb, var(--glass-neutral-c2) 4.5%, transparent) 42%, transparent 72%),
-    radial-gradient(115% 90% at 50% -18%, color-mix(in srgb, var(--glass-neutral-c1) 8%, transparent), transparent 58%),
-    rgba(5, 5, 8, 0.72);
-  --glass-card-neutral-border: 1px solid color-mix(in srgb, var(--glass-neutral-c2) 50%, #101014);
-  --glass-card-neutral-shadow:
-    0 0 0 2px #000,
-    0 34px 66px -24px rgba(0, 0, 0, 0.95),
-    0 0 26px -8px color-mix(in srgb, var(--glass-neutral-c2) calc(var(--dir-gm, 60) * 1.15%), transparent),
-    0 0 13px -5px color-mix(in srgb, var(--glass-neutral-c2) calc(var(--dir-gm, 60) * 1.15%), transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--glass-neutral-c2) 55%, rgba(255, 255, 255, 0.12)),
-    inset 0 0 34px -26px color-mix(in srgb, var(--glass-neutral-c1) 45%, transparent);
+  --glass-card-neutral-bg: var(--glass-dark-fill);
+  --glass-card-neutral-border: 1px solid var(--glass-neutral-c2);
+  --glass-card-neutral-shadow: 0 0 0 2px var(--z-black), inset 0 1px 0 color-mix(in srgb, var(--text-hi) 51%, transparent),
+    0 0 35px color-mix(in srgb, var(--glass-neutral-c2) 18.7%, transparent), inset 0 0 30px color-mix(in srgb, var(--glass-neutral-c2) 17%, transparent);
 
   /* ── 1.2 Sheen overlays ─────────────────────────────────── */
   --glass-sheen: linear-gradient(
@@ -83,21 +65,13 @@
      This recipe changes fill, blur and internal light. It deliberately does
      not set border or box-shadow, so every surface keeps its existing rim,
      accent and bloom. */
-  --liquid-overlay-bg:
-    linear-gradient(133deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.035) 14%, transparent 38%),
-    radial-gradient(80% 62% at 108% 112%, rgba(255, 255, 255, 0.11), color-mix(in srgb, var(--c) 9%, transparent) 42%, transparent 72%),
-    radial-gradient(115% 90% at 50% -18%, color-mix(in srgb, var(--c) 8%, transparent), transparent 58%),
-    rgba(5, 5, 8, 0.72);
+  --liquid-overlay-bg: var(--glass-dark-fill);
   /* Safari 15 and older reject a whole computed background when color-mix()
      is unresolved inside a custom property. Keep the same optical structure
      with a stable cyan tint, then enhance it with the surface accent below. */
-  --liquid-overlay-bg-fallback:
-    linear-gradient(133deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.035) 14%, transparent 38%),
-    radial-gradient(80% 62% at 108% 112%, rgba(255, 255, 255, 0.11), rgba(25, 227, 255, 0.08) 42%, transparent 72%),
-    radial-gradient(115% 90% at 50% -18%, rgba(25, 227, 255, 0.06), transparent 58%),
-    rgba(5, 5, 8, 0.76);
-  --liquid-overlay-blur: 18px;
-  --liquid-overlay-saturation: 1.22;
+  --liquid-overlay-bg-fallback: var(--glass-dark-fill);
+  --liquid-overlay-blur: var(--glass-frost);
+  --liquid-overlay-saturation: var(--glass-saturation);
 
   /* ── 1.3 Refract seam (presentation; engine = pdx-rainbow-rule) ─ */
   --refract-seam-height: 2px;
@@ -131,15 +105,8 @@
      Default = near-black translucent fill + 2px black ring + accent hairline
      + soft bloom + top sheen. Solid = filled accent CTA. Outline = secondary. */
   --glass-btn-radius: 22px;
-  --glass-btn-bg:
-    radial-gradient(
-      120% 100% at 50% 0%,
-      color-mix(in srgb, var(--c) 15%, #0b0b0d),
-      #060608
-    )
-    padding-box,
-    linear-gradient(#000, #000) border-box;
-  --glass-btn-border: 2px solid #000;
+  --glass-btn-bg: var(--glass-dark-fill);
+  --glass-btn-border: 1px solid var(--c);
   --glass-btn-color: #fff;
   /* Buttons: thin black outline + inward sheen only - no outer neon bloom */
   --glass-btn-shadow:
@@ -172,13 +139,13 @@
   /* Solid primary CTA (filled accent) */
   --glass-btn-solid-bg: var(--c);
   --glass-btn-solid-color: #050506;
-  --glass-btn-solid-border: 2px solid #000;
+  --glass-btn-solid-border: 1px solid var(--c);
   --glass-btn-solid-shadow:
     0 0 0 1px #000,
     inset 0 1px 0 rgba(255, 255, 255, 0.65),
     inset 0 -6px 12px -6px rgba(0, 0, 0, 0.28);
   /* Outline secondary */
-  --glass-btn-outline-border: 1px solid #000;
+  --glass-btn-outline-border: 1px solid var(--c);
   --glass-btn-outline-bg: rgba(0, 0, 0, 0.5);
   --glass-btn-outline-color: var(--c);
   --glass-btn-outline-shadow:
@@ -216,14 +183,14 @@
     inset 0 2px 3px rgba(0, 0, 0, 0.6);
 
   /* ── Legacy lite-glass aliases → deep (do not reintroduce lite) ─ */
-  --pdx-glass-fill: #050506;
+  --pdx-glass-fill: var(--glass-dark-fill);
   --pdx-glass-fill-hot: #0a0a0e;
   --pdx-glass-fill-dense: #030304;
-  --pdx-glass-edge: color-mix(in srgb, var(--c) 55%, #101014);
-  --pdx-glass-edge-hi: color-mix(in srgb, var(--c) 70%, #101014);
+  --pdx-glass-edge: var(--c);
+  --pdx-glass-edge-hi: var(--c);
   --pdx-glass-blur: var(--glass-card-blur);
-  --pdx-glass-blur-sm: 10px;
-  --pdx-glass-sat: 1.12;
+  --pdx-glass-blur-sm: var(--glass-frost);
+  --pdx-glass-sat: var(--glass-saturation);
   --pdx-glass-specular: var(--glass-sheen);
   --pdx-glass-shadow: var(--glass-card-shadow);
 }
@@ -278,19 +245,10 @@
   --sticker-bloom: 0 12px 26px -14px color-mix(in srgb, var(--c) 90%, transparent);
   --sticker-lit: var(--chrome-keyline), var(--chrome-bevel), var(--sticker-bloom), var(--neon-bloom);
   --chrome-bloom: 0 10px 26px -13px color-mix(in srgb, var(--c) 75%, transparent);
-  --glass-card-bg:
-    linear-gradient(133deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.0175) 14%, transparent 38%),
-    radial-gradient(80% 62% at 108% 112%, rgba(255, 255, 255, 0.055), color-mix(in srgb, var(--c) 4.5%, transparent) 42%, transparent 72%),
-    radial-gradient(115% 90% at 50% -18%, color-mix(in srgb, var(--c) 8%, transparent), transparent 58%),
-    rgba(5, 5, 8, 0.72);
-  --glass-card-border: 1px solid color-mix(in srgb, var(--c) 55%, #101014);
-  --glass-card-shadow:
-    0 0 0 2px #000,
-    0 34px 66px -24px rgba(0, 0, 0, 0.95),
-    0 0 26px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
-    0 0 13px -5px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
-    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent);
+  --glass-card-bg: var(--glass-dark-fill);
+  --glass-card-border: 1px solid var(--c);
+  --glass-card-shadow: 0 0 0 2px var(--z-black), inset 0 1px 0 color-mix(in srgb, var(--text-hi) 51%, transparent),
+    0 0 35px color-mix(in srgb, var(--c) 18.7%, transparent), inset 0 0 30px color-mix(in srgb, var(--c) 17%, transparent);
   --poster-well-bg: radial-gradient(
     130% 130% at 50% 14%,
     color-mix(in srgb, var(--c) 32%, #050506),
@@ -300,7 +258,7 @@
   /* rebind solid/outline only - default glass btn stays dark translucent */
   --glass-btn-solid-bg: var(--c);
   --glass-btn-outline-color: var(--c);
-  --glass-btn-outline-border: 1px solid #000;
+  --glass-btn-outline-border: 1px solid var(--c);
   --glass-btn-outline-bg: linear-gradient(
       150deg,
       color-mix(in srgb, var(--c) 16%, transparent),
@@ -317,7 +275,7 @@
     color-mix(in srgb, var(--c) 6%, transparent) 40%,
     transparent 70%
   );
-  --pdx-glass-edge: color-mix(in srgb, var(--c) 55%, #101014);
+  --pdx-glass-edge: var(--c);
   --pdx-glass-shadow: var(--glass-card-shadow);
 }
 
@@ -621,10 +579,10 @@ html.calm-mode .pdxLegend,
 .card.fitem.fitem--glow,
 .fitem--glow {
   background: var(--glass-card-bg) !important;
-  border-color: color-mix(in srgb, var(--c, var(--_c, var(--dc, #19e3ff))) 55%, #101014);
+  border-color: var(--c, var(--_c, var(--dc, var(--neon-cyan))));
   box-shadow: var(--glass-card-shadow);
-  backdrop-filter: blur(var(--glass-card-blur));
-  -webkit-backdrop-filter: blur(var(--glass-card-blur));
+  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: var(--glass-filter);
 }
 
 /* Keep-alive panel: neutral glass (Agent 12) - not accented */
@@ -634,8 +592,8 @@ html.calm-mode .pdxLegend,
   background: var(--glass-card-neutral-bg) !important;
   border: var(--glass-card-neutral-border) !important;
   box-shadow: var(--glass-card-neutral-shadow) !important;
-  backdrop-filter: blur(var(--glass-card-blur));
-  -webkit-backdrop-filter: blur(var(--glass-card-blur));
+  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: var(--glass-filter);
 }
 
 /* Board cards: listing accent → --c (MC #FF1FA0 · Gifting #D4FF00 · Gigs #7B00FF)
@@ -645,7 +603,7 @@ html.calm-mode .pdxLegend,
 .board-listing-card--makeover {
   --c: var(--listing-accent, var(--_c, #D4FF00));
   border-radius: 14px !important;
-  border: 1.5px solid color-mix(in srgb, var(--c) 70%, #101014) !important;
+  border: 1.5px solid var(--c) !important;
   border-left: 4px solid var(--c) !important;
   box-shadow:
     0 0 0 2px #000,
@@ -662,8 +620,8 @@ html.calm-mode .pdxLegend,
 .board-listing-card--makeover.is-dashed,
 .board-listing-card--makeover.is-iso,
 .board-listing-card--makeover.is-looking {
-  border: 2px dashed color-mix(in srgb, var(--c) 75%, #101014) !important;
-  border-left: 2px dashed color-mix(in srgb, var(--c) 75%, #101014) !important;
+  border: 2px dashed var(--c) !important;
+  border-left: 2px dashed var(--c) !important;
   box-shadow:
     0 0 0 1px #000,
     0 28px 56px -22px rgba(0, 0, 0, 0.92),
@@ -675,7 +633,7 @@ html.calm-mode .pdxLegend,
 .spotted-card,
 .board-detail-modal--spotted {
   --c: var(--spotted-accent, var(--listing-accent, #FF1FA0));
-  border: 1px solid color-mix(in srgb, var(--c) 55%, #101014) !important;
+  border: 1px solid var(--c) !important;
   box-shadow:
     0 0 0 2px #000,
     0 34px 66px -24px rgba(0, 0, 0, 0.95),
@@ -688,7 +646,7 @@ html.calm-mode .pdxLegend,
 .board-detail-modal,
 .board-post-overlay {
   --c: var(--listing-accent, var(--_c, #FF1FA0));
-  border: 1px solid color-mix(in srgb, var(--c) 55%, #101014) !important;
+  border: 1px solid var(--c) !important;
   border-radius: 14px !important;
   box-shadow:
     0 0 0 2px #000,
@@ -901,7 +859,7 @@ a.pdxBoard:hover,
 .ds-listing-card:hover .pdxBoard {
   transform: translateY(-4px) !important;
   filter: brightness(1.06) saturate(1.08);
-  border-color: color-mix(in srgb, var(--c, var(--_day)) 70%, #101014) !important;
+  border-color: var(--c, var(--_day)) !important;
   box-shadow:
     0 0 0 2px #000,
     0 40px 70px -22px rgba(0, 0, 0, 0.92),
@@ -918,7 +876,7 @@ a.pdxRow:hover,
 .ds-listing-card--list:hover .pdxRow {
   transform: translateY(-2px) !important;
   filter: brightness(1.06) saturate(1.08);
-  border-color: color-mix(in srgb, var(--c, var(--_day)) 55%, #101014) !important;
+  border-color: var(--c, var(--_day)) !important;
   border-left-color: var(--_day, var(--c)) !important;
   box-shadow:
     0 0 0 2px #000,
@@ -957,7 +915,7 @@ html.calm-mode .pdxRow::before,
 
 .zine-filter-bar {
   background: var(--glass-card-neutral-bg) !important;
-  border-bottom-color: color-mix(in srgb, var(--glass-neutral-c2) 40%, #101014) !important;
+  border-bottom-color: var(--glass-neutral-c2) !important;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.8);
@@ -981,7 +939,7 @@ a.pdxRow:hover,
     0 0 16px -4px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.55%), transparent),
     inset 0 1px 0 color-mix(in srgb, var(--c) 60%, rgba(255, 255, 255, 0.14)),
     inset 0 0 34px -22px color-mix(in srgb, var(--c) 48%, transparent) !important;
-  border-color: color-mix(in srgb, var(--c) 70%, #101014) !important;
+  border-color: var(--c) !important;
 }
 
 /* ── Calm: zero bloom multiplier, solid fill, no blur ───── */

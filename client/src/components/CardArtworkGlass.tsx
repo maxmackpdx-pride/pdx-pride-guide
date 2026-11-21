@@ -25,5 +25,5 @@ export function CardArtworkGlass() {
     sync();
     return () => observer.disconnect();
   }, []);
-  return <span ref={ref} className="card-artwork-glass" aria-hidden="true" />;
+  return <span ref={ref} data-glass-piece="artwork" className="card-artwork-glass" aria-hidden="true" />;
 }
