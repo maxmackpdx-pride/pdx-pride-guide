@@ -1,6 +1,8 @@
 import { MapPlacePreview } from '@/components/MapCardPresentation';
 import {useMapPlacezRenderer} from '@/components/placez/MapPlacezBridge';
 import PlacezMapDrawer from '@/components/places/PlacezMapDrawer';
+import OutzideDrawer from '@/components/outz/OutzideDrawer';
+import AfterzDrawer from '@/components/afterz/AfterzDrawer';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import type {Event} from '@shared/schema';
 import type {Business} from '@/pages/Directory';
@@ -29,6 +31,17 @@ function isPlacezMapMode(){
  if(path==='/mapz') return !mode || mode==='mapz';
  return path==='/map' || path==='/map-demo' ? mode==='mapz' : false;
 }
+function isOutzideMapMode(){
+ const path=window.location.pathname.replace(/\/+$/, '') || '/';
+ const mode=new URLSearchParams(window.location.search).get('mode');
+ if(path==='/outzide' || path.startsWith('/outzide/share/')) return !mode || mode==='outzide';
+ return path==='/map' || path==='/map-demo' ? mode==='outzide' : false;
+}
+function isAfterzMapMode(){
+ const path=window.location.pathname.replace(/\/+$/, '') || '/';
+ const mode=new URLSearchParams(window.location.search).get('mode');
+ return path==='/map' || path==='/map-demo' ? mode==='afterz' : false;
+}
 
 /** One native engine loaded from a checksum-verified, pinned release artifact.
  * The component owns its styles/root and tears both down when leaving maps. */
@@ -37,6 +50,9 @@ export default function UnifiedMap(){
  const {renderer:placezRenderer,portals:placezPortals}=useMapPlacezRenderer();
  const {user}=useAuth();const search=useSearch();
  const placezMode=isPlacezMapMode();
+ const outzideMode=isOutzideMapMode();
+ const afterzMode=isAfterzMapMode();
+ const afterzDeepLink=new URLSearchParams(search).has('gathering')||new URLSearchParams(search).get('invites')==='1';
  useEffect(()=>{
   const root=document.querySelector('.zaylist-unified-map');
   if(root instanceof HTMLElement) root.dataset.placezHostDrawer=placezMode?'on':'off';
@@ -84,7 +100,9 @@ export default function UnifiedMap(){
   <div ref={node} style={{width:'100%',height:'100%',position:'relative'}}/>
   {placezPortals}
   {placezMode&&<PlacezMapDrawer/>}
-  {initialMode()==="afterz" && <Suspense fallback={null}><AfterzInvitations signIn={()=>setAuthOpen(true)} signingIn={authOpen && !user}/></Suspense>}
+  {outzideMode&&<OutzideDrawer/>}
+  {afterzMode&&<AfterzDrawer/>}
+  {afterzMode&&afterzDeepLink && <Suspense fallback={null}><AfterzInvitations signIn={()=>setAuthOpen(true)} signingIn={authOpen && !user}/></Suspense>}
   {error&&<div role="alert" style={{position:'absolute',inset:0,display:'grid',placeContent:'center',padding:24,background:'var(--z-black,#050506)',color:'white',gap:16}}><h1>Map unavailable</h1><p>{error}</p><button type="button" onClick={()=>setAttempt(v=>v+1)}>Retry map</button><a href="/events">Browse events without the map</a><a href="/">Back to Zaylist</a></div>}
   {legacyError&&<div role="alert" style={{position:'absolute',top:80,left:16,right:16,padding:16,background:'var(--z-black)',color:'white',zIndex:300}}>{legacyError} <button onClick={closeLegacy}>Dismiss</button></div>}
   {legacyDetail&&<Suspense fallback={<p role="status">Loading bookmarked details…</p>}>{legacyDetail.kind==='event'?<EventCard event={legacyDetail.record} onClose={closeLegacy}/>:!expandedPlace?<MapPlacePreview place={legacyDetail.record} onExpand={()=>setExpandedPlace(true)} onClose={closeLegacy} onRequireAuth={()=>setAuthOpen(true)}/>:<PlaceModal place={legacyDetail.record} onClose={closeLegacy} onRequireAuth={()=>setAuthOpen(true)}/>}</Suspense>}

@@ -8,6 +8,7 @@ import {
   pacificCalendarDate,
   parsePacificDateTime,
 } from "@shared/missedConnections";
+import { afterzWindowState } from "@shared/afterzWindow";
 
 export type NightCatalog = {
   events: () => Event[];
@@ -97,6 +98,10 @@ export function afterzNights(
     confirm(req.session.userId!);
     res.json({ confirmed: true });
   });
+  app.get("/api/afterz/window", (_req, res) => {
+    res.set("Cache-Control", "no-store");
+    res.json(afterzWindowState(now()));
+  });
   app.get("/api/afterz/nights", auth, (req, res) => {
     res.set("Cache-Control", "private, no-store");
     const viewer = req.session.userId!;
@@ -104,6 +109,7 @@ export function afterzNights(
     const nights = db
       .prepare(
         `SELECT n.*,g.title,g.host_id AS host,g.closes_at AS closesAt,g.id,
+      COALESCE(NULLIF(u.display_name,''),u.username) AS hostName,
       COALESCE(a.status,'guest') AS role FROM afterz_nights n JOIN afterz_gatherings g ON n.gathering_id=g.id
       JOIN users u ON u.id=g.host_id AND u.status='active'
       LEFT JOIN afterz_guests a ON a.gathering_id=g.id AND a.user_id=?
@@ -119,6 +125,7 @@ export function afterzNights(
       closesAt: number;
       role: string;
       host: number;
+      hostName: string;
       poster: string | null;
       vibe: string;
       glow: number;
@@ -135,6 +142,7 @@ export function afterzNights(
             eventId: event.id,
             eventTitle: event.title,
             venue: event.venueName,
+            hostName: n.hostName,
             lat:
               hasRegistrationOnlyLocation(event) || event.isHouseParty
                 ? null

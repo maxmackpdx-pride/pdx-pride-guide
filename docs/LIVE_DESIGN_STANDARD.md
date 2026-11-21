@@ -174,6 +174,8 @@ Type: Barlow Condensed (`--font-display`) for titles and labels, Barlow (`--font
 
 - Debossed OLED frame; keys = OLED panel chrome, pin **shapes** preserved.
 - No sitewide outer map bloom.
+- Room drawers (Placez, Events, Outzide, Afterz) share one untitled DrawerTop: Placez calendar or a `lead` replacement, a wide short hologram countdown of the next three names, then Placez-style filters on a two-row rail, with a dark top gradient and a line before the next titled section. See `docs/DRAWER_TOP.md` and `docs/OUTZIDE_AFTERZ_DRAWERS.md`. Outzide replaces the calendar with in-view full-bleed mini cards and mixes buddy events and offered carpools into the countdown. Outzide titles use the ransom-note style (exactly one whole word inverted). Afterz cards are wide and short with a `--yellow` bloom, RSVP Yes / No, the host name and the Afterz type, under a wide Host an Afterz button. Off hours (9 PM to 6 AM Pacific is the open window) blur the Afterz map, open the drawer, and offer hosting in advance. Hearts mean interested (save to the stack plus notifications). Share uses the Apple-style ShareIcon. No attendee counts.
+
 
 ## Motion
 

@@ -1,13 +1,12 @@
 import { randomUUID } from "node:crypto";
 import type Database from "better-sqlite3";
 import type { Express, RequestHandler } from "express";
-import {
-  pacificTodayDate,
-  parsePacificDateTime,
-} from "@shared/missedConnections";
 import { moderateFields, moderationMessage } from "@shared/contentModeration";
+import { afterzClosesAt } from "@shared/afterzWindow";
 
 import { afterzNights, type NightCatalog } from "./afterzNights";
+
+export { afterzClosesAt } from "@shared/afterzWindow";
 
 type State = "waitlisted" | "pending" | "accepted" | "declined" | "revoked";
 type Gathering = {
@@ -19,16 +18,6 @@ type Gathering = {
 };
 const requestKey = (value: unknown): value is string =>
   typeof value === "string" && /^[a-zA-Z0-9-]{16,80}$/.test(value);
-
-export function afterzClosesAt(now: number) {
-  const today = pacificTodayDate(now);
-  const todayClose = parsePacificDateTime(today + "T06:00:00")!;
-  if (now < todayClose) return todayClose;
-  const tomorrow = new Date(Date.parse(today + "T12:00:00Z") + 86_400_000)
-    .toISOString()
-    .slice(0, 10);
-  return parsePacificDateTime(tomorrow + "T06:00:00")!;
-}
 
 export function registerAfterzInvites(
   app: Express,

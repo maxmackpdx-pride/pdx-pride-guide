@@ -26,13 +26,24 @@ export const drawerCompilerModules = [
   'places/PlacezMapDrawer',
   'places/PlacezEventsRails',
   'places/EventPlanExtension',
+<<<<<<< HEAD
   'places/PlacezInViewRail',
+=======
+>>>>>>> f197d32 (Add Outzide and Afterz map drawers on the shared DrawerTop)
   'drawers/DrawerTop',
   'drawers/DrawerCountdownCard',
   'drawers/DrawerFilterRail',
   'drawers/DrawerMiniCard',
   'drawers/PlacezCalendarFilter',
+<<<<<<< HEAD
   'filters/DrawerFilterChips',
+=======
+  'outz/OutzideDrawer',
+  'outz/OutzideInViewRail',
+  'afterz/AfterzDrawer',
+  'afterz/AfterzNightCard',
+  'afterz/AfterzHostForm',
+>>>>>>> f197d32 (Add Outzide and Afterz map drawers on the shared DrawerTop)
 ];
 
 export const placezCompilerModules = [
