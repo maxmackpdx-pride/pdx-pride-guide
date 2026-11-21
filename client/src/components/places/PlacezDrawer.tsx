@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import DockDrawer, { type DockStop } from '@/components/dock/DockDrawer';
 import PlacezEventsRails from '@/components/places/PlacezEventsRails';
+import { DiscoveryWordmark } from '@/components/drawers/DiscoveryWordmark';
 import './PlacezEventsDrawer.css';
 
 /**
@@ -13,6 +14,7 @@ import './PlacezEventsDrawer.css';
 export default function PlacezDrawer({
   accent,
   title = 'Placez',
+  brand,
   top,
   inView,
   filterTags,
@@ -23,6 +25,7 @@ export default function PlacezDrawer({
 }: {
   accent: string;
   title?: string;
+  brand?: ReactNode;
   /** Shared untitled DrawerTop. */
   top?: ReactNode;
   /** Live small cards for places currently in view on the map. */
@@ -43,6 +46,7 @@ export default function PlacezDrawer({
   return (
     <DockDrawer
       accent={accent}
+      brand={brand === undefined ? <DiscoveryWordmark rooms={['placez']}/> : brand}
       ariaLabel={`${title} filters, events, upcoming and saved`}
       lipLabel={`${title} · Events · Filters`}
       stop={stop}
@@ -50,9 +54,7 @@ export default function PlacezDrawer({
       maxStops={1}
     >
       {top}
-      <header className="pz-events-section">
-        <h2 className="pz-events-section__title">{title}</h2>
-      </header>
+
       {inView ? (
         <section aria-label="In view" data-testid="placez-in-view-rail">
           <h3 className="pz-events-section__label">In view</h3>

@@ -10,11 +10,12 @@ export type OutdoorDestination = OutzBrowseCatalogRow & {
   region?: string;
 };
 
-export default function OutzideInViewRail({ destinations, onOpen }: {
+export default function OutzideInViewRail({ destinations, onOpen, emptyMessage = "No destinations in view." }: {
   destinations: OutdoorDestination[];
+  emptyMessage?: string;
   onOpen?: (place: OutdoorDestination) => void;
 }) {
-  if (!destinations.length) return <p className="outz-drawer-status">No destinations in view.</p>;
+  if (!destinations.length) return <p className="outz-drawer-status" role="status" tabIndex={-1}>{emptyMessage}</p>;
   return <div className="outz-drawer-lead" data-testid="outzide-in-view-rail" aria-label="Outdoor destinations">
     {destinations.map(place => {
       const art = place.photo?.src || place.art;

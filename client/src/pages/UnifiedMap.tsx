@@ -92,7 +92,7 @@ export default function UnifiedMap(){
   {placezPortals}
   {!error && !legacyDetail && !nativeDetail && <Suspense fallback={null}>
     {mode === "afterz" && <AfterzMapDrawer/>}
-    {mode === "outzide" && <OutzideDrawer/>}
+    {mode === "outzide" && <OutzideDrawer mapRoot={node}/>}
     {mode === "mapz" && <PlacezMapDrawer/>}
   </Suspense>}
   {error&&<div role="alert" style={{position:'absolute',inset:0,display:'grid',placeContent:'center',padding:24,background:'var(--z-black,#050506)',color:'white',gap:16}}><h1>Map unavailable</h1><p>{error}</p><button type="button" onClick={()=>setAttempt(v=>v+1)}>Retry map</button><a href="/events">Browse events without the map</a><a href="/">Back to Zaylist</a></div>}

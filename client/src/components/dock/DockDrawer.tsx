@@ -15,6 +15,7 @@ export default function DockDrawer({
   accent = 'var(--neon-cyan)',
   ariaLabel,
   lipLabel,
+  brand,
   stop,
   onStopChange,
   maxStops = 1,
@@ -24,6 +25,7 @@ export default function DockDrawer({
   accent?: string;
   ariaLabel: string;
   lipLabel: string;
+  brand?: ReactNode;
   stop: DockStop;
   onStopChange: (stop: DockStop) => void;
   maxStops?: 1 | 2;
@@ -117,6 +119,7 @@ export default function DockDrawer({
         if (event.key === 'ArrowDown') { event.preventDefault(); if (stop === 2) { setBouncing(true); changeStop(1); } else changeStop(0); }
       }}
     >
+      {brand && stop === 0 && <span className="dock-drawer__lip-brand" aria-hidden="true">{brand}</span>}
       <span className="dock-drawer__lines" aria-hidden="true"><i /><i /><i /></span>
     </button>
   );
@@ -125,7 +128,7 @@ export default function DockDrawer({
     return (
       <div className="dock-drawer-lip pdx-glass-rebind" data-glass-piece="mapchrome" style={{ '--piece': accent, '--c': accent } as CSSProperties}>
         {grip}
-        <span className="dock-drawer-lip__label" aria-hidden="true">{lipLabel}</span>
+        {!brand && <span className="dock-drawer-lip__label" aria-hidden="true">{lipLabel}</span>}
       </div>
     );
   }
@@ -147,6 +150,7 @@ export default function DockDrawer({
     >
       {grip}
       <div className="dock-drawer__body">
+        {brand && <div className="dock-drawer__brand">{brand}</div>}
         {children}
         {stop === 2 && fullChildren}
       </div>

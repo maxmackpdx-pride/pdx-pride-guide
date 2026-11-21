@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { DiscoveryWordmark } from "@/components/drawers/DiscoveryWordmark";
 import PlacezDrawer from '@/components/places/PlacezDrawer';
 import PlacezEventsRails, { DrawerRail } from '@/components/places/PlacezEventsRails';
 import PlacezInViewRail from '@/components/places/PlacezInViewRail';
@@ -34,6 +35,7 @@ export default function PlacezMapDrawer() {
     <PlacezDrawer
         accent="var(--neon-cyan)"
         title="Events + Placez"
+        brand={<DiscoveryWordmark rooms={["eventz", "placez"]}/>}
         top={
           <DrawerTop
             events={filtered}

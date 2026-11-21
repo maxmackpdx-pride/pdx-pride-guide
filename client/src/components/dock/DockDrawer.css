@@ -104,9 +104,19 @@
 
 /* The host drawer replaces discovery only while browsing. The pinned map
    presents its own expanded waypoint details as soon as an item is selected. */
-.zaylist-unified-map[data-host-discovery] :is(#discovery-drawer, .drawer-toggle) { display: none !important; }
+.zaylist-unified-map:is([data-host-discovery="mapz"],[data-host-discovery="afterz"]) :is(#discovery-drawer, .drawer-toggle) { display: none !important; }
 
 @media (min-width:960px) {
   .zaylist-unified-map[data-host-discovery] .dock-drawer,
   .zaylist-unified-map[data-host-discovery] .dock-drawer-lip { display: flex; width: min(420px, 40vw); margin: 0; left: 16px; right: auto; bottom: 16px; }
 }
+
+.discovery-wordmark { display: inline-flex; align-items: center; gap: 10px; }
+.discovery-wordmark img { display: block; width: auto; height: 42px; max-width: 130px; object-fit: contain; }
+.dock-drawer__brand { display: flex; align-items: center; justify-content: center; }
+.dock-drawer__lip-brand { position: absolute; inset-inline-start: 12px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; pointer-events: none; }
+.dock-drawer__lip-brand .discovery-wordmark { gap: 6px; }
+.dock-drawer__lip-brand .discovery-wordmark img { height: 23px; max-width: 66px; }
+
+/* The map's first-visit world chooser takes focus before discovery begins. */
+.zaylist-unified-map:has(.worlds-dial[aria-modal="true"]) :is(.dock-drawer, .dock-drawer-lip) { display: none; }

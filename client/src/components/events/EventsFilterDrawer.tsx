@@ -7,6 +7,7 @@ import {
 } from "@shared/drawerFilters";
 import { DrawerTop } from "@/components/drawers";
 import type { DrawerTopEvent } from "@shared/drawerTop";
+import { DiscoveryWordmark } from "@/components/drawers/DiscoveryWordmark";
 import "./EventsFilterDrawer.css";
 import NightDrawer from "../afterz/NightDrawer";
 
@@ -334,12 +335,14 @@ export default function EventsFilterDrawer({
         onPointerCancel={cancelDrag}
         onKeyDown={onKey}
       >
+        {stage === 0 && <span className="dock-drawer__lip-brand" aria-hidden="true"><DiscoveryWordmark rooms={["eventz"]}/></span>}
         <span className="edrawer__lines" aria-hidden="true">
           <i /><i /><i />
         </span>
       </button>
       <div className="edrawer__bodywrap" style={{ height: shownH }} inert={stage === 0 && dragH == null}>
         <div className="edrawer__stage1" ref={stage1Ref} hidden={showSchedule} inert={showSchedule}>
+          <div className="dock-drawer__brand"><DiscoveryWordmark rooms={["eventz"]}/></div>
           <DrawerTop
             events={upcomingEvents}
             filterGroups={["time", "tag"]}
@@ -404,6 +407,7 @@ export default function EventsFilterDrawer({
         </div>
         {stage2Mounted && scheduleContent ? (
           <div className="edrawer__stage2" hidden={!showSchedule} inert={!showSchedule}>
+            <div className="dock-drawer__brand"><DiscoveryWordmark rooms={["eventz"]}/></div>
             <div className="edrawer__stage2-head" aria-hidden="true">YOUR SCHEDULE</div>
             {scheduleContent}
           </div>

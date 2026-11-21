@@ -284,3 +284,5 @@
 }
 html.calm-mode .edrawer.is-arriving, html[data-calm="true"] .edrawer.is-arriving,
 html.calm-mode .edrawer.is-settling, html[data-calm="true"] .edrawer.is-settling { animation: none; }
+
+.edrawer__lip { position: relative; }

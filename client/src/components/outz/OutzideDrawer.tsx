@@ -1,7 +1,8 @@
 import { useDrawerClock } from "@/components/drawers/useDrawerClock";
-import { useState } from "react";
+import { useEffect, useState, type RefObject } from "react";
+import { createPortal } from "react-dom";
+import { DiscoveryWordmark } from "@/components/drawers/DiscoveryWordmark";
 import { useQuery } from "@tanstack/react-query";
-import DockDrawer, { type DockStop } from "@/components/dock/DockDrawer";
 import { DrawerTop } from "@/components/drawers";
 import { RansomTitle } from "@/components/xerox/Overlays";
 import { useAuth } from "@/context/AuthContext";
@@ -15,18 +16,19 @@ import type { DrawerTopEvent } from "@shared/drawerTop";
 import OutzideInViewRail, { type OutdoorDestination } from "./OutzideInViewRail";
 import "./OutzideDrawer.css";
 
-export function OutzideDrawerContent({ browse, onOpen }: {
+export function OutzideDrawerContent({ browse, onOpen, showDestinations = true }: {
+  showDestinations?: boolean;
   browse?: OutdoorDestination[];
   onOpen?: (place: OutdoorDestination) => void;
 }) {
   const { user } = useAuth();
   const [filters, setFilters] = useState<DrawerFilterState>(EMPTY_DRAWER_FILTERS);
   const now = useDrawerClock();
-  const bounds = useMapBounds(browse === undefined);
+  const bounds = useMapBounds(showDestinations && browse === undefined);
   const catalog = useQuery<{ places: OutdoorDestination[] }>({
     queryKey: ["/outzide-map/places.json"],
     queryFn: () => apiRequest("GET", "/outzide-map/places.json").then(r => r.json()),
-    enabled: browse === undefined,
+    enabled: showDestinations && browse === undefined,
   });
   const events = useQuery<DrawerTopEvent[]>({ queryKey: ["/api/events"] });
   const featured = useQuery({
@@ -43,10 +45,10 @@ export function OutzideDrawerContent({ browse, onOpen }: {
     <DrawerTop events={upcoming} countdownEvents={upcoming} filters={filters} onFiltersChange={setFilters}
       filterGroups={["time"]} now={now} onOpenEvent={openOutzideCountdownItem}
       upcomingTitle={<RansomTitle text="Up next" seed="outz-up-next"/>}
-      filtersTitle={<RansomTitle text={browse ? "Destinations" : "In view"} seed="outz-in-view"/>}
-      lead={catalog.isError && browse === undefined ? <p role="alert">Destinations could not load. <button onClick={() => void catalog.refetch()}>Retry</button></p>
+      filtersTitle={<RansomTitle text={showDestinations ? (browse ? "Destinations" : "In view") : "Plan dates"} seed="outz-in-view"/>}
+      lead={!showDestinations ? null : catalog.isError && browse === undefined ? <p role="alert">Destinations could not load. <button onClick={() => void catalog.refetch()}>Retry</button></p>
         : catalog.isPending && browse === undefined ? <p role="status">Loading destinations…</p>
-        : <OutzideInViewRail destinations={destinations} onOpen={onOpen}/>}
+        : <OutzideInViewRail destinations={destinations} onOpen={onOpen} emptyMessage={browse ? "No destinations match these filters." : undefined}/>}
     />
     <section aria-label="Next up, buddies and carpools">
       <h2 className="outz-drawer-title"><RansomTitle text="Buddies & carpools" seed="outz-plans"/></h2>
@@ -62,9 +64,49 @@ export function OutzideDrawerContent({ browse, onOpen }: {
   </div>;
 }
 
-export default function OutzideDrawer() {
-  const [stop, setStop] = useState<DockStop>(0);
-  return <DockDrawer accent="var(--neon-orange)" ariaLabel="Outzide plans and destinations" lipLabel="Outzide · Plans" stop={stop} onStopChange={setStop} maxStops={1}>
-    <OutzideDrawerContent/>
-  </DockDrawer>;
+type DiscoveryAnchors = {
+  heading: HTMLElement | null;
+  grip: HTMLButtonElement;
+  scroll: HTMLElement | null;
+  onAreaStep: boolean;
+};
+
+/** The pinned map owns the area, activity, search, result list and pins.
+ * Attach the room sign and public plans to its existing drawer, preserving its
+ * gestures and filter state across every step. */
+export default function OutzideDrawer({ mapRoot }: { mapRoot: RefObject<HTMLDivElement | null> }) {
+  const [anchors, setAnchors] = useState<DiscoveryAnchors | null>(null);
+  useEffect(() => {
+    const root = mapRoot.current;
+    if (!root) return;
+    let shell: HTMLElement | null = null;
+    const sync = () => {
+      const drawer = root.querySelector<HTMLElement>("#discovery-drawer");
+      const heading = drawer?.querySelector<HTMLElement>(".outdoor-flow-heading") ?? null;
+      const grip = root.querySelector<HTMLButtonElement>('button[aria-controls="discovery-drawer"]');
+      const scroll = heading?.closest<HTMLElement>(".drawer-scroll") ?? null;
+      if (shell !== drawer || !heading) shell?.removeAttribute("data-glass-piece");
+      shell = heading ? drawer : null;
+      if (!grip) {
+        setAnchors(null);
+        return;
+      }
+      if (shell) shell.dataset.glassPiece = "overlay";
+      const onAreaStep = !!scroll?.querySelector(".outdoor-area-list");
+      setAnchors(previous => previous?.heading === heading && previous.grip === grip && previous.scroll === scroll
+        && previous.onAreaStep === onAreaStep ? previous : { heading, grip, scroll, onAreaStep });
+    };
+    sync();
+    const observer = new MutationObserver(records => {
+      if (records.some(({target}) => !(target instanceof Element && target.closest(".maplibregl-map,.outz-drawer,.discovery-wordmark")))) sync();
+    });
+    observer.observe(root, {childList: true, subtree: true});
+    return () => { observer.disconnect(); shell?.removeAttribute("data-glass-piece"); };
+  }, [mapRoot]);
+  if (!anchors) return null;
+  return <>
+    {anchors.heading && createPortal(<DiscoveryWordmark rooms={["outz"]}/>, anchors.heading)}
+    {createPortal(<span className="native-outz-lip-brand" aria-hidden="true"><DiscoveryWordmark rooms={["outz"]}/></span>, anchors.grip)}
+    {anchors.scroll && createPortal(<OutzideDrawerContent showDestinations={anchors.onAreaStep}/>, anchors.scroll)}
+  </>;
 }

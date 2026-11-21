@@ -41,3 +41,22 @@
 .outz-plan-row { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 10px 14px; margin-block: 8px; background: var(--z-black); border: 1px solid var(--neon-orange); border-radius: 12px; color: var(--text-hi); text-decoration: none; }
 .outz-plan-row small { display: block; color: var(--text-meta); font: 600 11px/1.4 var(--font-mono); }
 .outz-plan-kind { color: var(--neon-orange); font: 700 11px/1 var(--font-mono); text-transform: uppercase; }
+
+.zaylist-unified-map[data-host-discovery="outzide"] #discovery-drawer { --piece: var(--room-outz); }
+.zaylist-unified-map .outdoor-discovery .outdoor-flow-heading { display: flex; align-items: center; justify-content: space-between; }
+.zaylist-unified-map .outdoor-flow-heading:has(.discovery-wordmark) > strong { display: none; }
+.zaylist-unified-map .outdoor-flow-heading .discovery-wordmark { order: -1; }
+.zaylist-unified-map .outdoor-flow-heading .discovery-wordmark img { height: 45px; }
+.zaylist-unified-map .drawer-toggle .native-outz-lip-brand { display: none; pointer-events: none; }
+.zaylist-unified-map .drawer-toggle[aria-expanded="false"] .native-outz-lip-brand { display: inline-flex; }
+.zaylist-unified-map .drawer-toggle[aria-expanded="false"] .native-outz-lip-brand img { height: 23px; }
+.zaylist-unified-map .drawer-toggle:has(.native-outz-lip-brand)[aria-expanded="false"] > span:nth-child(2) { display: none; }
+.zaylist-unified-map .drawer-scroll > .outz-drawer { order: 1; grid-column: 1/-1; min-width: 0; padding-block: 16px; }
+.zaylist-unified-map .outdoor-discovery,
+.zaylist-unified-map .outdoor-discovery :is(.outdoor-area-list button,.outdoor-activity-strip button,.outdoor-flow-actions button,.outdoor-search input) {
+  border-color: var(--room-outz);
+}
+.zaylist-unified-map .outdoor-discovery .outdoor-flow-steps button { border-color: var(--border-strong); }
+.zaylist-unified-map .outdoor-discovery .outdoor-flow-steps button[aria-current="step"] { border-color: var(--room-outz); }
+.zaylist-unified-map .outdoor-activity-strip button[aria-pressed="true"] { outline: 2px solid var(--room-outz); outline-offset: -3px; }
+.outz-drawer-browse-filters { display: grid; gap: var(--space-3); }
