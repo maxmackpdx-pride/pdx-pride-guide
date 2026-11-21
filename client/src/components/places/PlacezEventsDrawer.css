@@ -89,6 +89,7 @@
   color: var(--text-hi);
 }
 .pz-plan-ext.is-open .pz-plan-ext__body { display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+.pz-plan-ext.is-left .pz-plan-ext__body { min-width: 148px; }
 .pz-plan-ext__kicker {
   margin: 0;
   color: var(--c);
