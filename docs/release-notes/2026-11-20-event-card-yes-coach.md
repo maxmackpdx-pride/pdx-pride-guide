@@ -16,8 +16,14 @@
   haptic, Directions distance + travel time when location is already permitted.
 - **Ridez panel:** wide-short carpool cards (avatar, neighborhood, origin, departure time, seats
   left, ARRIVING / DEPARTING label). The dashed `+` is gone; the leading rail area opens a clearly
-  marked "Expanded carpool card · design coming" stub (with POST ARRIVING / POST DEPARTING). Lyft,
+  marked "Expanded carpool card · design coming" stub; posting is OFFER A RIDE / I NEED A RIDE. Lyft,
   Uber and TriMet tiles open their websites in a new tab.
+- **Ridez section (shared with the #117 drawer):** OFFER A RIDE and I NEED A RIDE open the expanded
+  Ridez form with the event preselected (mode preset, Arriving/Departing kept). A compact
+  Everybody / Friends / Friends of friends toggle (top right, persisted) filters the rail. A divider
+  separates the controls from the list. NEEDS A RIDE cards join the rail: people going to this event
+  plus anyone within 2 miles who needs a ride right now; a slow `--yellow` bloom marks someone going
+  to your Afterz, `--neon-orange` someone going to this event (static in reduced motion / Calm Mode).
 - **Directions panel:** venue + address with COPY, distance/time chips, and large tiles: Zaylist
   Mapz (first, in-app), Google Maps, Apple Maps, Waze, Citymapper (new tab).
 - **Countdown box:** fixed size, dead center; venue mark directly left, collective/host mark
@@ -29,8 +35,10 @@
 
 ## API
 
-- `GET /api/events/:id/occurrences/:date/planning`: each ride now includes `driverPhotoUrl`
-  (members-only payload, same as before). No new endpoints.
+- `GET /api/events/:id/occurrences/:date/planning`: each ride now includes `driverPhotoUrl` and
+  `circle` (you / friend / fof / everybody); new `needs[]` (members only, no coordinates).
+- New: `POST` / `DELETE {planning}/needs(/me)` for I NEED A RIDE, and `POST` / `GET` / `DELETE
+  /api/ridez/needs` for location-only needs within 2 miles (the #117 drawer). New table `ride_needs`.
 
 ## Fixes behind CI
 

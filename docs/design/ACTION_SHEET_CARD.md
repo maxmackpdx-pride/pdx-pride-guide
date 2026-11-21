@@ -203,7 +203,7 @@ Errors are `{error: string}` with HTTP 400/401/403/404/409. No new endpoints wer
 - Every action carries a stable `data-action` attribute:
   - tiles: `carpool`, `afterz`, `maps`, `rides`
   - card buttons: `share`, `heart`, `claim`, `report`, `post-gig`, `post-mizzed`, `join-chat`, `close`
-  - panel and sheet actions: the slugified label; Ridez panel: `open-carpool`, `ride-lyft`, `ride-uber`, `ride-trimet`; the carpool stub: `post-arriving`, `post-departing`
+  - panel and sheet actions: the slugified label; Ridez panel: `open-carpool`, `ride-lyft`, `ride-uber`, `ride-trimet`; Ridez section: `ridez-offer`, `ridez-need`, `ridez-circle-everybody|friends|fof`
   - forms: `data-form` on the form and `data-action="submit"` on the submit button
 - The card root has `data-zay-card="event" data-event-id data-occurrence`.
 - Every swipe has a button (✕ / Close), and no action is hover-only.
@@ -276,9 +276,8 @@ and opens the content inline between them; the tabs and page below slide down wi
    (`data-action="open-carpool"`, aria-label "Open the expanded carpool card…"). There is no dashed
    `+`. It opens the **expanded carpool card**, which is not designed yet: a clearly marked stub
    ("EXPANDED CARPOOL CARD · DESIGN COMING", `data-stub="expanded-carpool"`) over the blurred
-   backdrop with flip-and-grow and the site ✕. The stub keeps POST ARRIVING / POST DEPARTING, which
-   open the existing offer form (`AtEventDialog` / `EventPlanning`,
-   `POST /api/events/:id/occurrences/:date/planning/rides`) preselected.
+   backdrop with flip-and-grow and the site ✕. Posting moved out of the stub to OFFER A RIDE /
+   I NEED A RIDE (see "Ridez section" below); carpool cards still open the at-event ride flow.
 2. Carpool cards are **wide and short** (248×124, 2:1, Afterz-style proportions): the standard
    small-card chrome with the Boardz torn edge (`torn-card-wide.svg`) in `--neon-orange`. Each card
    shows only real planning-API fields:
@@ -308,6 +307,43 @@ only on those buttons, from `ds/tokens/brand-third-party.css` (`--brand-lyft #FF
 `--brand-uber #FFFFFF` (Uber's reverse mark, since black disappears on black), `--brand-trimet
 #0E68B0`). Marks are simplified wordmarks in `cards/rideBrands.tsx` until the official logo files
 are dropped in.
+
+## Ridez section: shared `RidezRail` (owner, Nov 20)
+
+`client/src/components/ridez/` holds the Ridez pieces shared by the event card Ridez panel (#115)
+and the Afterz/Ridez drawer (#117):
+
+| Component | What it is |
+|---|---|
+| `RidezRail` | OFFER A RIDE / I NEED A RIDE (expanded-card `.obtn`, Ridez `--neon-orange`), the circle toggle top-right, a divider (`hr.zridez-div`), then one wide-short rail of NEEDS A RIDE cards and carpool offers. |
+| `RidezCircleToggle` + `useRidezCircle` | Compact 3-way segmented radiogroup: Everybody / Friends / Friends of friends. Default Everybody, persisted (`localStorage zaylist:ridez-circle`), arrow/Home/End keys, roving tabindex. Filters offers and needs. |
+| `RideNeedCard` | The carpool card chrome with the label NEEDS A RIDE: avatar, neighborhood, @user, "Going to this event" or "0.3 mi away · right now". |
+| `RidezFormCard` | The expanded Ridez form (FormCard). From an event card the event is preselected (no picker). Mode preset offer vs need; Arriving/Departing kept. |
+
+**Circle buckets** come from the server on every ride and need: `circle: "you" | "friend" | "fof" | "everybody"`.
+Friend = mutual follow (the same rule as ride-check trusted members). Friends of friends = mutually follows
+one of your friends (scan bounded to 500 friends). Only the bucket is returned, never the linking friend.
+Note: during the follow-all soft launch (`FOLLOW_ALL_DEFAULT`, on by default) nearly everyone is a "friend".
+
+**Bloom:** a NEEDS A RIDE card pulses slowly in `--yellow` when the person is going to the same Afterz as
+you (host or accepted guest of the same open gathering), else `--neon-orange` when they're going to the same
+event. Static under reduced motion and Calm Mode. Afterz cards sort first, then same event.
+
+**The leading rail area** still opens the marked expanded-carpool stub; posting moved to the two buttons.
+Tapping a NEEDS A RIDE card opens OFFER A RIDE.
+
+### Ridez API
+
+| Call | Purpose |
+|---|---|
+| `GET {planning}` | `rides[].circle`, `needs[]` (members only): same occurrence + anyone within 2 mi of the venue who posted in the last 3 h. Fields: `id, user, photoUrl, area, direction, mine, sameEvent, sameAfterz, circle, distanceMi` (no coordinates). |
+| `POST {planning}/rides` | OFFER A RIDE: `{area, seats 2–8, kind carpool|home, meeting, leaveBy, oneWay}` (existing). |
+| `POST {planning}/needs` | I NEED A RIDE: `{direction arriving|departing, area}`; one per person per occurrence (upsert); located at the public venue; expires 30 min after the event. |
+| `DELETE {planning}/needs/me` | Withdraw it. |
+| `POST {planning}/rides/:ride/requests` | Optional seat request from the need form (existing). |
+| `POST /api/ridez/needs` | Location-only need for the drawer: `{lat, lng, area}`; 3 h. |
+| `GET /api/ridez/needs?lat&lng` | Needs within 2 mi right now (drawer). |
+| `DELETE /api/ridez/needs/me` | Withdraw the location-only need. |
 
 ## Design notes: future Afterz cards (NOT in this version)
 

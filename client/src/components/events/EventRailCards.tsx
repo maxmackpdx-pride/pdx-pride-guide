@@ -17,7 +17,7 @@ import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
    Saving uses the Boardz save API (PUT/DELETE /api/boards/:category/posts/:id/save). */
 
 export type PlanGig = { id: number; title: string; description?: string | null };
-export type PlanRide = { id: number; area?: string; driver?: string; driverPhotoUrl?: string | null; remaining?: number; mine?: boolean; plan?: { kind?: string; meeting?: string | null; leaveBy?: number | null; oneWay?: boolean; departed?: boolean } | null };
+export type PlanRide = { id: number; circle?: "you" | "friend" | "fof" | "everybody"; area?: string; driver?: string; driverPhotoUrl?: string | null; remaining?: number; mine?: boolean; plan?: { kind?: string; meeting?: string | null; leaveBy?: number | null; oneWay?: boolean; departed?: boolean } | null };
 
 export function mizzBoardPosts(rows: MissedConnectionPost[]): BoardPost[] {
   return toBoardPosts("mizzed", rows as never, true);

@@ -37,7 +37,7 @@
 /* The card button (one class, t303u): the open card's ADD TO SCHEDULE pill.
    Neutral = white rim on black with an accent glow; .obtn--accent = accent rim
    (the one primary action, like GET TICKETS). */
-:is(.fbx .ocard, .zas, .zxp, .zform) .obtn {
+:is(.fbx .ocard, .zas, .zxp, .zform, .zridez) .obtn {
   --obtn-c: var(--tile, var(--a, var(--text-hi)));
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   min-height: 44px; min-width: 44px; padding: 0 16px; box-sizing: border-box;
@@ -55,10 +55,10 @@
   color: var(--evz-mist-f4f8fa, var(--text-hi)); text-decoration: none; cursor: pointer;
   font: 800 15px/1 var(--font-display); letter-spacing: .05em; text-transform: uppercase; white-space: nowrap;
 }
-:is(.fbx .ocard, .zas, .zxp, .zform) .obtn:disabled { opacity: .6; cursor: progress; }
-:is(.fbx .ocard, .zas, .zxp, .zform) .obtn:hover { filter: brightness(1.12); }
-:is(.fbx .ocard, .zas, .zxp, .zform) .obtn:focus-visible { outline: 2px solid var(--obtn-c); outline-offset: 2px; }
-:is(.fbx .ocard, .zas, .zxp, .zform) .obtn--accent { border-color: var(--obtn-c); }
+:is(.fbx .ocard, .zas, .zxp, .zform, .zridez) .obtn:disabled { opacity: .6; cursor: progress; }
+:is(.fbx .ocard, .zas, .zxp, .zform, .zridez) .obtn:hover { filter: brightness(1.12); }
+:is(.fbx .ocard, .zas, .zxp, .zform, .zridez) .obtn:focus-visible { outline: 2px solid var(--obtn-c); outline-offset: 2px; }
+:is(.fbx .ocard, .zas, .zxp, .zform, .zridez) .obtn--accent { border-color: var(--obtn-c); }
 
 @media (prefers-reduced-motion: reduce) { .zas-scrim { animation: none; } }
 

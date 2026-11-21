@@ -62,7 +62,7 @@ test('production cards preserve source geometry across viewport and in-flow pres
   browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||undefined,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
   const context=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'reduce'});
   await context.route('**/api/**',route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/session')return route.fulfill({contentType:'application/json',body:'null'});
-    if(p.endsWith('/planning'))return route.fulfill({json:{checked:false,onSiteWindow:false,poster:null,venue:'QA venue',title:'QA Event',open:true,canPostGig:false,gigs:[],rides:null}});
+    if(p.endsWith('/planning'))return route.fulfill({json:{checked:false,onSiteWindow:false,poster:null,venue:'QA venue',title:'QA Event',open:true,canPostGig:false,gigs:[],rides:[{id:7,area:'North Portland',driver:'qa_driver',driverPhotoUrl:null,remaining:2,mine:false,myRequest:null,requests:[],circle:'everybody',plan:{kind:'carpool',meeting:'NE 15th & Alberta',leaveBy:null,oneWay:true,departed:false},faces:[]}],needs:[{id:1,user:'qa_needs',photoUrl:null,area:'Pearl',direction:'departing',mine:false,sameEvent:true,sameAfterz:false,circle:'everybody',distanceMi:null},{id:2,user:'qa_afterz',photoUrl:null,area:'Alberta',direction:'now',mine:false,sameEvent:false,sameAfterz:true,circle:'friend',distanceMi:0.1}]}});
     return route.fulfill({json:[]});});
   await context.route('**/outzide-map/index.html?*',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body><h2>Destination detail fixture</h2><p>Map internals intentionally isolated from host geometry tests.</p></body></html>'}));
   const page=await context.newPage();page.setDefaultTimeout(15000);const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error('BROWSER ERROR',e.message);});
@@ -136,7 +136,7 @@ test('production cards preserve source geometry across viewport and in-flow pres
     const details=await openEventDetails(page,first);
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'mobile event has no horizontal overflow');
     // RIDEZ tile -> in-card Ridez panel (t345u). The leading rail area opens the expanded carpool
-    // card stub (design pending); its POST ARRIVING opens the existing at-event carpool flow.
+    // card stub (design pending); a carpool card opens the existing at-event carpool flow.
     const ridezTile=details.locator('[data-action=rides]');
     const openRidez=async()=>{if(await ridezTile.getAttribute('aria-expanded')!=='true')await ridezTile.click();const ridez=details.locator('.zxp[aria-label=Ridez].is-open');await ridez.waitFor();return ridez;};
     {
@@ -156,10 +156,55 @@ test('production cards preserve source geometry across viewport and in-flow pres
      const lead=ridez.locator('button[data-action=open-carpool]');
      assert.match(await lead.getAttribute('aria-label'),/expanded carpool card/i,'leading carpool area is a labelled button');
      assert.equal(await ridez.locator('[data-action=post-carpool]').count(),0,'no dashed plus slot');
+     // OFFER A RIDE / I NEED A RIDE (owner, Nov 20): expanded-card buttons in Ridez orange that open
+     // the shared RidezFormCard with the event preselected (signed out: the sign-in gate).
+     for(const [action,kicker] of [['ridez-offer','OFFER A RIDE'],['ridez-need','I NEED A RIDE']]){
+      const btn=ridez.locator(`button[data-action=${action}]`);
+      assert.equal((await btn.textContent()).trim(),kicker);
+      assert.ok((await btn.getAttribute('class')).split(/\s+/).includes('obtn'),'Ridez buttons use the expanded card action style');
+      await btn.click();
+      const form=page.locator(`.zform[role=dialog][aria-label^="${kicker}: "]`);await form.waitFor();
+      assert.match(await form.getAttribute('aria-label'),/QA EVENT/,'the event is preselected (no event picker)');
+      assert.equal(await form.locator('select[name=event],[data-field=event]').count(),0,'no event picker step');
+      await page.keyboard.press('Escape');await form.waitFor({state:'detached'});
+     }
+     // Circle toggle (owner, Nov 20): top-right radiogroup, default Everybody, persisted, filters the rail.
+     const circle=ridez.getByRole('radiogroup',{name:'Show carpools from'});
+     const radios=circle.getByRole('radio');
+     assert.equal(await radios.count(),3);
+     assert.equal(await circle.getByRole('radio',{name:'Everybody'}).getAttribute('aria-checked'),'true','default Everybody');
+     const offers=ridez.locator('[data-card-category=carpool] button.ocarpool'),needCards=ridez.locator('[data-card-category=carpool-need]');
+     assert.equal(await offers.count(),1,'Everybody shows every carpool');
+     assert.equal(await needCards.count(),2,'NEEDS A RIDE cards share the rail');
+     // Divider between the buttons + toggle and the list; NEEDS A RIDE label; blooms (afterz yellow first).
+     assert.equal(await ridez.locator('.zridez > hr.zridez-div').count(),1,'divider above the card list');
+     assert.equal(await needCards.first().locator('.orailcard-tag').textContent(),'NEEDS A RIDE');
+     assert.equal(await needCards.first().getAttribute('data-bloom'),'afterz','same Afterz blooms first (yellow)');
+     assert.equal(await needCards.nth(1).getAttribute('data-bloom'),'event','same event blooms orange');
+     const bloom=await needCards.first().evaluate(el=>{const b=getComputedStyle(el,'::before');return {content:b.content,anim:b.animationName,reduced:matchMedia('(prefers-reduced-motion: reduce)').matches};});
+     assert.notEqual(bloom.content,'none','bloom layer renders');
+     assert.equal(bloom.anim==='none',bloom.reduced,'bloom pulses, static under reduced motion');
+     await circle.getByRole('radio',{name:'Friends',exact:true}).click();
+     assert.equal(await offers.count(),0,'Friends hides a ride outside your circle');
+     assert.equal(await needCards.count(),1,'Friends keeps only needs from friends');
+     assert.equal(await page.evaluate(()=>localStorage.getItem('zaylist:ridez-circle')),'friends','choice persists');
+     await page.keyboard.press('ArrowRight');
+     assert.equal(await circle.getByRole('radio',{name:'Friends of friends'}).getAttribute('aria-checked'),'true','arrow keys move the choice');
+     assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('aria-label')),'Friends of friends','focus follows the choice');
+     await circle.getByRole('radio',{name:'Everybody'}).click();
+     assert.equal(await offers.count(),1);
      await ridezTile.click();await details.locator('.zxp').waitFor({state:'detached'});
      assert.equal(await ridezTile.getAttribute('aria-expanded'),'false','tapping the same tile closes the panel');
     }
-    const launch=async()=>{const ridez=await openRidez();await ridez.locator('[data-action=open-carpool]').click();const stub=page.locator('.zas[aria-label^="Expanded carpool card"]');await stub.waitFor();await stub.locator('[data-stub=expanded-carpool]').waitFor();await stub.locator('[data-action=post-arriving]').click();};
+    {
+     // The leading rail area opens the marked expanded-carpool stub (no posting from it any more).
+     const ridez=await openRidez();await ridez.locator('[data-action=open-carpool]').click();
+     const stub=page.locator('.zas[aria-label^="Expanded carpool card"]');await stub.waitFor();await stub.locator('[data-stub=expanded-carpool]').waitFor();
+     assert.equal(await stub.locator('[data-action^=post-]').count(),0,'posting moved to OFFER A RIDE / I NEED A RIDE');
+     await page.keyboard.press('Escape');await stub.waitFor({state:'detached'});
+    }
+    // A carpool card opens the existing at-event ride flow.
+    const launch=async()=>{const ridez=await openRidez();await ridez.locator('[data-card-category=carpool] button.ocarpool').first().click();};
     await launch();
     const atEvent=page.locator('dialog.at-event-dialog[open]');
     await atEvent.getByRole('button',{name:'Carpools & rides home'}).click();

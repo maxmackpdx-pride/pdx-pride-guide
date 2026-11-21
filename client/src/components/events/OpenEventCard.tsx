@@ -38,6 +38,8 @@ import { ActionSheetCard } from "@/components/cards/ActionSheetCard";
 import { ExpandingActionPanel, usePermittedTravel } from "@/components/cards/ExpandingActionPanel";
 import { FAMILY_LOGOS } from "@/components/cards/cardLogo";
 import { EventFormCard, type EventFormKind } from "./EventFormCards";
+import { RidezFormCard, type RidezMode } from "@/components/ridez/RidezFormCard";
+import { RidezRail, type RideNeed } from "@/components/ridez/RidezRail";
 import { getAfterzWindow } from "@shared/afterzWindow";
 import { FLIP_MS, flipIn, flipOut, haptic, rectOf, type OriginRect } from "@/components/cards/flipCard";
 import "./FlyerBoard.css";
@@ -244,6 +246,8 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   const [panel, setPanel] = useState<null | { kind: "maps" | "rides" | "afterz"; el?: HTMLElement; closing?: boolean }>(null);
   /* Expanded carpool card: design pending, so a marked stub (owner, Nov 20). */
   const [carpoolStub, setCarpoolStub] = useState<null | { origin: OriginRect | null; el?: HTMLElement }>(null);
+  /* OFFER A RIDE / I NEED A RIDE (owner, Nov 20): the shared Ridez form, event preselected. */
+  const [ridezForm, setRidezForm] = useState<null | { mode: RidezMode; origin: OriginRect | null }>(null);
   const [item, setItem] = useState<null | { kind: "gig" | "mizz"; id: number; title: string; body?: string | null; origin: OriginRect | null }>(null);
   const [popOrigin, setPopOrigin] = useState<OriginRect | null>(null);
   const [night, setNight] = useState<undefined | "rides" | "afterz">(undefined);
@@ -358,7 +362,7 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   const mizzPosts = (detailQuery.data?.missedConnections ?? []) as MissedConnectionPost[];
   const planningDate = dateStrOf(openListing);
   const planningBase = `/api/events/${openListing.id}/occurrences/${planningDate}/planning`;
-  const planning = useQuery<{ canPostGig?: boolean; gigs?: { id: number; title: string; description?: string | null }[]; rides?: PlanRide[] | null }>({
+  const planning = useQuery<{ canPostGig?: boolean; gigs?: { id: number; title: string; description?: string | null }[]; rides?: PlanRide[] | null; needs?: RideNeed[] | null }>({
     queryKey: [planningBase, viewer?.id ?? null],
     queryFn: () => apiRequest("GET", planningBase).then(r => r.json()),
     enabled: openListing.id > 0,
@@ -647,15 +651,12 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
                     label="Ridez" accent="var(--neon-orange)" title={`TO ${openListing.venueName.toUpperCase()}`} logo="ridez-pending" centered>
                     {live ? (
                       <>
-                        <p className="zas-sec">CARPOOLS <span>{planning.data?.rides == null ? "SIGN IN TO SEE RIDES" : rideCards.length ? "" : "BE THE FIRST"}</span></p>
-                        <div className="zas-rail orail--cards orail--carpool" data-rail="carpool">
-                          <button type="button" data-action="open-carpool" className="ocarpool-lead"
-                            aria-label="Open the expanded carpool card (post an arriving or departing ride)"
-                            onClick={e => setCarpoolStub({ origin: rectOf(e.currentTarget), el: e.currentTarget })} />
-                          {(planning.data?.rides ?? []).map(r => (
-                            <CarpoolRailCard key={r.id} ride={r} onOpen={el => { setCarpoolStub(null); setPanel(null); openNight("rides", el); }} />
-                          ))}
-                        </div>
+                        <RidezRail rides={planning.data?.rides} needs={planning.data?.needs} signedOut={planning.data?.rides == null}
+                          onOffer={e => setRidezForm({ mode: "offer", origin: rectOf(e.currentTarget) })}
+                          onNeed={e => setRidezForm({ mode: "need", origin: rectOf(e.currentTarget) })}
+                          onLead={el => setCarpoolStub({ origin: rectOf(el), el })}
+                          onOpenRide={(_r, el) => { setCarpoolStub(null); setPanel(null); openNight("rides", el); }}
+                          onOpenNeed={(_n, el) => setRidezForm({ mode: "offer", origin: rectOf(el) })} />
                       </>
                     ) : null}
                     {hasPlace ? (
@@ -1037,15 +1038,16 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
           </div>
         {carpoolStub ? (
           /* Expanded carpool card: the design does not exist yet (owner, Nov 20). A clearly marked
-             stub over the blurred backdrop with flip-and-grow; posting Arriving / Departing stays here. */
+             stub over the blurred backdrop with flip-and-grow. Posting moved to OFFER A RIDE / I NEED A RIDE. */
           <ActionSheetCard label="Expanded carpool card (design coming)" accent="var(--neon-orange)" kicker="CARPOOL" title="EXPANDED CARPOOL CARD · DESIGN COMING"
-            logo="ridez-pending" origin={carpoolStub.origin} onDismiss={() => setCarpoolStub(null)}
-            actions={[
-              { label: "POST ARRIVING", primary: true, onClick: () => { const el = carpoolStub.el; setCarpoolStub(null); setPanel(null); openNight("rides", el, "carpool"); } },
-              { label: "POST DEPARTING", onClick: () => { const el = carpoolStub.el; setCarpoolStub(null); setPanel(null); openNight("rides", el, "home"); } },
-            ]}>
-            <p className="zas-note" data-stub="expanded-carpool">Placeholder: the expanded carpool card is being designed. You can still post a ride to or from the event.</p>
+            logo="ridez-pending" origin={carpoolStub.origin} onDismiss={() => setCarpoolStub(null)}>
+            <p className="zas-note" data-stub="expanded-carpool">Placeholder: the expanded carpool card is being designed. To post, use OFFER A RIDE or I NEED A RIDE in Ridez.</p>
           </ActionSheetCard>
+        ) : null}
+        {ridezForm ? (
+          <RidezFormCard mode={ridezForm.mode} direction={startMs(openListing) <= Date.now() ? "departing" : "arriving"} eventId={openListing.id} eventTitle={openListing.title} occurrenceDate={planningDate} eventStart={openListing.dateStart}
+            venueName={openListing.venueName} rides={planning.data?.rides ?? null} origin={ridezForm.origin}
+            onClose={() => setRidezForm(null)} onDone={() => void planning.refetch()} />
         ) : null}
         {railAuth ? <AuthModal onClose={() => setRailAuth(false)} /> : null}
         {form ? (
