@@ -65,7 +65,10 @@
 .pz-plan-ext {
   display: flex;
   align-items: stretch;
-  max-width: 160px;
+  max-width: none;
+}
+.pz-plan-ext.is-open {
+  max-width: 220px;
 }
 .pz-plan-ext.is-right { margin-left: -2px; }
 .pz-plan-ext.is-left { margin-right: -2px; flex-direction: row-reverse; }
