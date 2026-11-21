@@ -12,6 +12,7 @@ export type OutzFeedItem = {
   href: string;
   createdAt: string;
   tripDate?: string;
+  dateStart?: string;
   author?: string;
   authorAvatarUrl?: string | null;
   endsAt?: string;

@@ -123,7 +123,7 @@ export default function DockDrawer({
 
   if (stop === 0) {
     return (
-      <div className="dock-drawer-lip pdx-glass-rebind" style={{ '--c': accent } as CSSProperties}>
+      <div className="dock-drawer-lip pdx-glass-rebind" data-glass-piece="mapchrome" style={{ '--piece': accent, '--c': accent } as CSSProperties}>
         {grip}
         <span className="dock-drawer-lip__label" aria-hidden="true">{lipLabel}</span>
       </div>
@@ -132,8 +132,9 @@ export default function DockDrawer({
 
   return (
     <section
+      data-glass-piece="overlay"
       className={`dock-drawer pdx-glass-rebind is-stop${stop}${dragging ? ' is-dragging' : ''}${bouncing ? ' is-bounce' : ''}`}
-      style={{ '--c': accent, transform: dragY !== 0 ? `translateY(${Math.max(-24, dragY)}px)` : undefined } as CSSProperties}
+      style={{ '--piece': accent, '--c': accent, transform: dragY !== 0 ? `translateY(${Math.max(-24, dragY)}px)` : undefined } as CSSProperties}
       role="dialog"
       onKeyDown={event => {
         if (event.key !== 'Escape' || event.defaultPrevented || !event.currentTarget.contains(event.target as Node)) return;

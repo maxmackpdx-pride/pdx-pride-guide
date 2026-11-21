@@ -1,4 +1,5 @@
 import RoomBackground from "@/components/RoomBackground";
+import { eventMatchesTimeFilter } from "@shared/drawerFilters";
 import { eventsTonightWindow } from "@shared/eventsTonight";
 import { createEventSearch, extractAgeIntent } from "@shared/eventSearch";
 import BrowseToolbar from "@/components/BrowseToolbar";
@@ -729,7 +730,7 @@ export default function Events() {
     const pool = pastView
       ? filtered
       : sortEvents(filterBoardEvents(events, activeDay === DEFAULT_WINDOW ? "ALL" : activeDay, activeFilters, searchQuery.trim(), false, now), sortMode)
-          .filter(e => !boardEnded(e));
+          .filter(e => !boardEnded(e) && (!(boardWindow === "today" || boardWindow === "tomorrow") || eventMatchesTimeFilter(e, boardWindow, now)));
     /* Series poster fill: a recurring series often carries its real flyer
        on some instances only. A bare instance of a series that has a flyer
        shows that flyer; a series with no flyer anywhere stays bare. */
@@ -748,7 +749,7 @@ export default function Events() {
       );
       return fill ? { ...e, posterImageUrl: fill } : e;
     });
-  }, [pastView, filtered, events, now, activeDay, activeFilters, searchQuery, sortMode]);
+  }, [pastView, filtered, events, now, activeDay, activeFilters, searchQuery, sortMode, boardWindow]);
 
   /* Agent helpers: the board's current scope as schema.org structured data.
      The complete data set stays at /api/events (linked below); this block
@@ -903,7 +904,7 @@ export default function Events() {
           <FlyerBoard
             events={boardEvents}
             query={searchQuery} setQuery={setSearchQuery}
-            fday={boardWindow} setFday={setBoardWindow} tags={boardTags} setTags={setBoardTags}
+            fday={boardWindow === "today" || boardWindow === "tomorrow" ? "all" : boardWindow} setFday={setBoardWindow} tags={boardTags} setTags={setBoardTags}
             onClear={() => { setActiveDay(DEFAULT_WINDOW); setActiveFilters([]); }}
             pastEvents={pastView ? boardEvents : pastEvents}
             pastView={pastView}
@@ -942,6 +943,9 @@ export default function Events() {
         activeWindow={activeDay}
         onPickWindow={pickDrawerWindow}
         startAtSchedule={startAtSchedule}
+        upcomingEvents={boardEvents}
+        selectedDate={pickedDay}
+        onSelectDate={(date) => { if (date) pickDrawerDay(date); else setPickedDay(null); }}
       />
 
       {showSaveAuth && <AuthModal onClose={() => setShowSaveAuth(false)} />}

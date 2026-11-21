@@ -69,7 +69,7 @@
 .dock-drawer .pz-drawer-filters { display: flex; flex-wrap: wrap; gap: 8px; }
 .dock-drawer .pz-drawer-filters button {
   min-height: 44px; padding: 10px 14px; border-radius: 999px; cursor: pointer;
-  border: 1px solid color-mix(in srgb, var(--category, var(--c)) 55%, transparent);
+  border: 1px solid var(--category, var(--c));
   background: color-mix(in srgb, var(--category, var(--c)) 10%, transparent);
   color: var(--text-hi); font: 700 13px/1.1 var(--font-body);
   display: inline-flex; align-items: center; gap: 8px;
@@ -95,9 +95,18 @@
 .dock-drawer .pz-drawer-empty { margin: 0; font: 400 13px/1.5 var(--font-body); color: var(--text-body); }
 /* Upcoming rail cards carry NO buttons: every control inside the face is
    hidden in this rail only; the card's own open surface is the tap target. */
-.dock-drawer .pz-drawer-bare button:not(.pz-open-surface):not(.oz-hit) { visibility: hidden; }
+.dock-drawer .pz-drawer-bare button:not(.pz-open-surface):not(.oz-hit):not(.drawer-mini__open) { visibility: hidden; }
 .dock-drawer .pz-drawer-bare .pz-heart,
 .dock-drawer .pz-drawer-bare .oz-closed-actions { visibility: hidden; }
 
 /* The bottom dock itself is mobile-only (<=959px); the drawer follows it. */
 @media (min-width:960px){.dock-drawer,.dock-drawer-lip{display:none}}
+
+/* The host drawer replaces discovery only while browsing. The pinned map
+   presents its own expanded waypoint details as soon as an item is selected. */
+.zaylist-unified-map[data-host-discovery] :is(#discovery-drawer, .drawer-toggle) { display: none !important; }
+
+@media (min-width:960px) {
+  .zaylist-unified-map[data-host-discovery] .dock-drawer,
+  .zaylist-unified-map[data-host-discovery] .dock-drawer-lip { display: flex; width: min(420px, 40vw); margin: 0; left: 16px; right: auto; bottom: 16px; }
+}

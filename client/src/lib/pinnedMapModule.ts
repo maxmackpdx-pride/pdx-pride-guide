@@ -21,7 +21,8 @@ export async function acquirePinnedMapModule(){
    styles.push(style);document.head.appendChild(style);
   })));
   restoreTokens=normalizeMapHostTokens();
-  const entry=release.base+release.entry;
+  // The pinned ESM must run as served; the dev server adds transform queries to root-relative dynamic imports.
+  const entry=new URL(release.base+release.entry,window.location.origin).href;
   return await import(/* @vite-ignore */ entry) as PinnedMapModule;
  })();
  try{return {module:await loaded,release:releaseOwner};}catch(error){releaseOwner();throw error;}

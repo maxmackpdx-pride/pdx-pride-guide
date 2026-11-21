@@ -1,0 +1,43 @@
+/* Outzide map drawer. Token colors only. Ransom titles are for Outzide headings. */
+.outz-drawer-lead {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  overscroll-behavior-inline: contain;
+}
+.outz-drawer-lead::-webkit-scrollbar { display: none; }
+.outz-drawer-lead__item { flex: none; scroll-snap-align: start; }
+.outz-mini-place.pdx-glass-rebind {
+  --c: var(--room-outz, var(--neon-orange));
+}
+.outz-drawer-title {
+  margin: 0 0 10px;
+  font: 900 28px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  text-transform: uppercase;
+  color: var(--text-hi);
+  letter-spacing: 0.02em;
+}
+.outz-drawer-status {
+  margin: 0 0 8px;
+  font: 500 13px/1.4 var(--font-body);
+  color: var(--text-body);
+}
+.outz-drawer-status button {
+  min-height: 44px;
+  margin-left: 8px;
+  padding: 0 12px;
+  cursor: pointer;
+}
+.outz-drawer section[aria-label="Upcoming"] {
+  padding: 4px 0 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .outz-drawer-lead { scroll-behavior: auto; }
+}
+.outz-plan-row { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 10px 14px; margin-block: 8px; background: var(--z-black); border: 1px solid var(--neon-orange); border-radius: 12px; color: var(--text-hi); text-decoration: none; }
+.outz-plan-row small { display: block; color: var(--text-meta); font: 600 11px/1.4 var(--font-mono); }
+.outz-plan-kind { color: var(--neon-orange); font: 700 11px/1 var(--font-mono); text-transform: uppercase; }

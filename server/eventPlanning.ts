@@ -11,6 +11,10 @@ import {
 import { registerNightRides, type RideNotice } from "./nightRides";
 import type { IStorage } from "./storage";
 
+export const RIDE_DRIVER_VISIBLE_TO_VIEWER = `u.status='active' AND NOT EXISTS (SELECT 1 FROM member_blocks b WHERE
+    (b.blocker_user_id=@viewer AND b.blocked_user_id=o.driver_id) OR
+    (b.blocked_user_id=@viewer AND b.blocker_user_id=o.driver_id))`;
+
 export function createPlanningStore(db: Database.Database) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS event_gig_links (
@@ -24,15 +28,18 @@ export function createPlanningStore(db: Database.Database) {
       area TEXT NOT NULL, seats INTEGER NOT NULL CHECK(seats BETWEEN 1 AND 8),
       UNIQUE(event_id,occurrence,driver_id)
     );
+    CREATE TABLE IF NOT EXISTS event_ride_needs (
+      event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE, occurrence TEXT NOT NULL,
+      rider_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      direction TEXT NOT NULL CHECK(direction IN ('arriving','departing')), area TEXT NOT NULL,
+      PRIMARY KEY(event_id,occurrence,rider_id,direction)
+    );
     CREATE TABLE IF NOT EXISTS event_ride_requests (
       offer_id INTEGER NOT NULL REFERENCES event_ride_offers(id) ON DELETE CASCADE,
       rider_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       accepted INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(offer_id,rider_id)
     )
   `);
-  const visibleTo = `NOT EXISTS (SELECT 1 FROM member_blocks b WHERE
-    (b.blocker_user_id=@viewer AND b.blocked_user_id=o.driver_id) OR
-    (b.blocked_user_id=@viewer AND b.blocker_user_id=o.driver_id))`;
   return {
     linkGig(gigId: number, eventId: number, date: string) {
       db.prepare(
@@ -66,7 +73,7 @@ export function createPlanningStore(db: Database.Database) {
         o.seats-(SELECT COUNT(*) FROM event_ride_requests WHERE offer_id=o.id AND accepted=1) AS remaining,
         (SELECT accepted FROM event_ride_requests WHERE offer_id=o.id AND rider_id=@viewer) AS myRequest
         FROM event_ride_offers o JOIN users u ON u.id=o.driver_id WHERE o.event_id=@eventId AND o.occurrence=@date
-        AND u.status='active' AND ${visibleTo} ORDER BY o.id DESC`,
+        AND ${RIDE_DRIVER_VISIBLE_TO_VIEWER} ORDER BY o.id DESC`,
         )
         .all({ eventId, date, viewer }) as Array<{
         id: number;
@@ -122,7 +129,7 @@ export function createPlanningStore(db: Database.Database) {
         db
           .prepare(
             `INSERT INTO event_ride_requests(offer_id,rider_id)
-        SELECT o.id,@viewer FROM event_ride_offers o WHERE o.id=@id AND o.driver_id<>@viewer AND ${visibleTo}
+        SELECT o.id,@viewer FROM event_ride_offers o JOIN users u ON u.id=o.driver_id WHERE o.id=@id AND o.driver_id<>@viewer AND ${RIDE_DRIVER_VISIBLE_TO_VIEWER}
         AND o.seats>(SELECT COUNT(*) FROM event_ride_requests WHERE offer_id=o.id AND accepted=1)
         ON CONFLICT DO NOTHING`,
           )
@@ -325,12 +332,27 @@ export function registerEventPlanning(
           ];
         })
       : null;
+    const attending = !!viewer && night.attendance(event.id, viewer);
+    const homeArea = attending ? night.present(event.id, date, viewer)?.area : null;
+    const needs = viewer ? db.prepare(`SELECT u.username,n.direction,n.area,n.rider_id=@viewer AS mine
+      FROM event_ride_needs n JOIN users u ON u.id=n.rider_id AND u.status='active'
+      WHERE n.event_id=@eventId AND n.occurrence=@date
+      AND NOT EXISTS(SELECT 1 FROM member_blocks b WHERE (b.blocker_user_id=@viewer AND b.blocked_user_id=n.rider_id)
+        OR (b.blocked_user_id=@viewer AND b.blocker_user_id=n.rider_id))
+      AND (n.rider_id=@viewer OR (@open AND (n.direction='arriving' OR
+        (lower(n.area)=lower(@homeArea) AND EXISTS(SELECT 1 FROM night_matching_presence p JOIN attendances a ON a.event_id=p.event_id AND a.user_id=p.user_id
+          WHERE p.event_id=n.event_id AND p.occurrence=n.occurrence AND p.user_id=n.rider_id AND p.valid_until>@now
+          AND lower(trim(p.home_area))=lower(n.area) AND a.is_active=1 AND (a.expires_at IS NULL OR a.expires_at>@nowIso))))))
+      ORDER BY mine DESC,n.rowid DESC`).all({viewer,eventId:event.id,date,open:Number(res.locals.open),homeArea:homeArea?.trim() || null,now:Date.now(),nowIso:new Date().toISOString()}) : null;
     const allowGps = !event.isHouseParty && !hasRegistrationOnlyLocation(event) && event.lat != null && event.lng != null;
     res.json({
       title: event.title,
       poster: event.posterImageUrl,
       venue: event.venueName,
       gpsAvailable: allowGps,
+      attending,
+      homeArea,
+      needs,
       checked: viewer && allowGps ? !!night.present(event.id, date, viewer) : false,
       onSiteWindow:
         allowGps && (parsePacificDateTime(event.dateStart) ?? Infinity) - 30 * 60000 <=
@@ -341,6 +363,27 @@ export function registerEventPlanning(
       gigs: store.gigs(event.id, date),
       rides,
     });
+  });
+  app.put(path + "/needs/:direction", requireAuth, scope, (req, res) => {
+    const { event, date, open } = res.locals;
+    const direction = req.params.direction;
+    const viewer = req.session.userId!;
+    if (direction !== "arriving" && direction !== "departing") return res.status(400).json({ error: "Choose going or departing." });
+    if (!open) return res.status(409).json({ error: "This occurrence has passed." });
+    const area = direction === "departing"
+      ? (night.attendance(event.id, viewer) && night.present(event.id,date,viewer)?.area.trim())
+      : (typeof req.body.area === "string" && req.body.area.trim());
+    if (!area || area.length < 2 || area.length > 80)
+      return res.status(400).json({ error: direction === "departing" ? "Check in at the venue with your destination neighborhood." : "Enter a neighborhood of 2 to 80 characters." });
+    if (moderate(res, "Event ride request", { area })) return;
+    db.prepare(`INSERT INTO event_ride_needs(event_id,occurrence,rider_id,direction,area) VALUES(?,?,?,?,?)
+      ON CONFLICT(event_id,occurrence,rider_id,direction) DO UPDATE SET area=excluded.area`).run(event.id,date,viewer,direction,area);
+    res.json({ ok:true });
+  });
+  app.delete(path + "/needs/:direction", requireAuth, scope, (req, res) => {
+    db.prepare("DELETE FROM event_ride_needs WHERE event_id=? AND occurrence=? AND rider_id=? AND direction=?")
+      .run(res.locals.event.id,res.locals.date,req.session.userId!,String(req.params.direction));
+    res.json({ ok:true });
   });
   app.post(path + "/rides", requireAuth, scope, (req, res) => {
     const { event, date, open } = res.locals;

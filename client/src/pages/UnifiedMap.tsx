@@ -4,7 +4,9 @@ import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import type {Event} from '@shared/schema';
 import type {Business} from '@/pages/Directory';
 import {canonicalBoardBookmark,mapBookmark} from '@/lib/mapBookmarks';
-const AfterzInvitations=lazy(()=>import("@/components/afterz/AfterzInvitations"));
+const AfterzMapDrawer = lazy(() => import("@/components/afterz/NightDrawer").then(module => ({default: module.AfterzMapDrawer})));
+const OutzideDrawer = lazy(() => import("@/components/outz/OutzideDrawer"));
+const PlacezMapDrawer = lazy(() => import("@/components/places/PlacezMapDrawer"));
 const EventCard=lazy(()=>import('@/components/events/EventzExpanded'));
 const PlaceModal=lazy(()=>import('@/components/PlaceModal'));
 import {useSearch} from 'wouter';
@@ -13,6 +15,7 @@ import AuthModal from '@/components/AuthModal';
 import {usePageSeo} from '@/hooks/usePageSeo';
 import release from '@shared/mapReleaseLock.json';
 import {acquirePinnedMapModule} from '@/lib/pinnedMapModule';
+import "@/components/ui/mobile-dock-shell.css";
 
 type Mode='mapz'|'outzide'|'boardz'|'afterz'|'zaydark';
 function initialMode():Mode {
@@ -34,7 +37,10 @@ export default function UnifiedMap(){
  const [authOpen,setAuthOpen]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='login');
  usePageSeo(`${({mapz:'PlaceZ',outzide:'OutZide',boardz:'Boardz',afterz:'Afterz',zaydark:'ZayDark'})[initialMode()]} · Zaylist`,'Events, places, outdoor destinations, community boards, Afterz and adult-gated ZayDark.');
  useEffect(()=>{if(new URLSearchParams(search).get('auth')==='login')setAuthOpen(true);},[search]);
- const bookmark=mapBookmark(new URLSearchParams(search),initialMode()).native;
+ const params=new URLSearchParams(search);
+ const mode=mapBookmark(params,initialMode()).mode;
+ const nativeDetail=params.has('item') || (mode==='outzide' && (params.has('place') || params.has('guestPlace'))) || window.location.pathname.startsWith('/outzide/share/');
+ const bookmark=mapBookmark(params,initialMode()).native;
  const bookmarkKind=bookmark?.kind,bookmarkId=bookmark?.id;
  useEffect(()=>{
   const request=bookmarkKind&&bookmarkId?{kind:bookmarkKind,id:bookmarkId}:undefined;
@@ -43,6 +49,22 @@ export default function UnifiedMap(){
   void fetch(`/api/${request.kind==='event'?'events':'directory'}/${encodeURIComponent(request.id)}`,{credentials:'same-origin',cache:'no-store',signal:controller.signal}).then(async response=>{if(!response.ok)throw Error('This bookmarked record is unavailable.');const record=await response.json();if(!record||String(record.id)!==request.id)throw Error('The bookmarked source returned an invalid record.');setLegacyDetail(request.kind==='event'?{kind:'event',record}:{kind:'place',record});}).catch(reason=>{if(!controller.signal.aborted)setLegacyError(reason instanceof Error?reason.message:'Bookmarked record could not load.');});
   return()=>controller.abort();
  },[bookmarkKind,bookmarkId]);
+ // The pinned release portals its mobile navigation outside the map mount.
+ useEffect(() => {
+   const applyMaterial = () => {
+     const dock = document.querySelector<HTMLElement>('nav.z-mobile-dock');
+     if (!dock || dock.dataset.glassPiece) return;
+     dock.dataset.glassPiece = 'dock';
+     dock.style.setProperty('--piece', 'var(--neon-cyan)');
+   };
+   applyMaterial();
+   const observer = new MutationObserver(records => {
+     if (records.some(record => Array.from(record.addedNodes).some(node => node instanceof Element &&
+       (node.matches('nav.z-mobile-dock') || node.querySelector('nav.z-mobile-dock'))))) applyMaterial();
+   });
+   observer.observe(document.body, {childList:true,subtree:true});
+   return () => observer.disconnect();
+ }, []);
  const closeLegacy=()=>{setLegacyDetail(null);setLegacyError('');const url=new URL(window.location.href);url.searchParams.delete('event');url.searchParams.delete('place');window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);};
  useEffect(()=>{
   let disposed=false;let cleanup:(()=>void)|undefined;let releaseStyles:(()=>void)|undefined;
@@ -65,10 +87,14 @@ export default function UnifiedMap(){
   void load().catch(reason=>{if(!disposed)setError(reason instanceof Error?reason.message:'Map could not load.');});
   return()=>{disposed=true;cleanup?.();releaseStyles?.();};
  },[attempt,user?.id,placezRenderer]);
- return <section className="zaylist-unified-map" aria-label="Zaylist five-mode map" data-map-release={release.tag} data-map-commit={release.commit} style={{position:'fixed',inset:0,zIndex:45,background:'var(--z-black,#050506)'}}>
-  <div ref={node} style={{width:'100%',height:'100%',position:'relative'}}/>
+ return <section className="zaylist-unified-map" aria-label="Zaylist five-mode map" data-host-discovery={!nativeDetail && ['mapz','outzide','afterz'].includes(mode) ? mode : undefined} data-map-release={release.tag} data-map-commit={release.commit} style={{position:'fixed',inset:0,zIndex:45,background:'var(--z-black,#050506)'}}>
+  <div ref={node} style={{width:'100%',height:'100%',position:'relative',isolation:'isolate'}}/>
   {placezPortals}
-  {initialMode()==="afterz" && <Suspense fallback={null}><AfterzInvitations signIn={()=>setAuthOpen(true)} signingIn={authOpen && !user}/></Suspense>}
+  {!error && !legacyDetail && !nativeDetail && <Suspense fallback={null}>
+    {mode === "afterz" && <AfterzMapDrawer/>}
+    {mode === "outzide" && <OutzideDrawer/>}
+    {mode === "mapz" && <PlacezMapDrawer/>}
+  </Suspense>}
   {error&&<div role="alert" style={{position:'absolute',inset:0,display:'grid',placeContent:'center',padding:24,background:'var(--z-black,#050506)',color:'white',gap:16}}><h1>Map unavailable</h1><p>{error}</p><button type="button" onClick={()=>setAttempt(v=>v+1)}>Retry map</button><a href="/events">Browse events without the map</a><a href="/">Back to Zaylist</a></div>}
   {legacyError&&<div role="alert" style={{position:'absolute',top:80,left:16,right:16,padding:16,background:'var(--z-black)',color:'white',zIndex:300}}>{legacyError} <button onClick={closeLegacy}>Dismiss</button></div>}
   {legacyDetail&&<Suspense fallback={<p role="status">Loading bookmarked details…</p>}>{legacyDetail.kind==='event'?<EventCard event={legacyDetail.record} onClose={closeLegacy}/>:!expandedPlace?<MapPlacePreview place={legacyDetail.record} onExpand={()=>setExpandedPlace(true)} onClose={closeLegacy} onRequireAuth={()=>setAuthOpen(true)}/>:<PlaceModal place={legacyDetail.record} onClose={closeLegacy} onRequireAuth={()=>setAuthOpen(true)}/>}</Suspense>}

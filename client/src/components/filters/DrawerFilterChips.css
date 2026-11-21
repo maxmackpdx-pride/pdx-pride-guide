@@ -1,0 +1,6 @@
+.drawer-filters { display: grid; gap: 5px; min-width: 0; }
+.drawer-filters__row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 3px 1px; }
+.drawer-filters__chip { display: inline-flex; flex: none; min-height: 32px; align-items: center; gap: 5px; border: 1px solid var(--piece); border-radius: 999px; padding: 5px 9px; color: var(--text-hi); background: var(--z-black); font: 700 12px/1 var(--font-body); cursor: pointer; }
+.drawer-filters__chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--piece); }
+.drawer-filters__chip[aria-pressed="true"] { background: color-mix(in srgb, var(--piece) 28%, var(--z-black)); box-shadow: inset 0 0 0 1px var(--piece); }
+.drawer-filters__chip:focus-visible { outline: 2px solid var(--piece); outline-offset: 1px; }

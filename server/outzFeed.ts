@@ -54,7 +54,7 @@ export function getOutzCommunityFeed(snapshot: OutzSnapshot, viewerUserId?: numb
     for (const p of storage.getBeachCarpoolPosts(beach.id, date, viewerUserId)) {
       items.push({ id: `beach-carpool:${p.id}`, kind: "carpool", title: p.post_type === "OFFERING_RIDE" ? "Offering a ride" : "Looking for a ride",
         body: [p.direction === "FROM_BEACH" ? "From the beach" : "To the beach", p.departure_area, formatRiverBratsHour(p.leave_hour), p.note].filter(Boolean).join(" · "),
-        author: p.displayName || p.username, authorAvatarUrl:avatarUrl(p), placeName: beach.name, href: href(beach.id), tripDate: date, createdAt: p.created_at });
+        author: p.displayName || p.username, authorAvatarUrl:avatarUrl(p), placeName: beach.name, href: href(beach.id), tripDate: date, dateStart: `${date}T${String(p.leave_hour).padStart(2,"0")}:00:00`, createdAt: p.created_at });
     }
   }
   return items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));

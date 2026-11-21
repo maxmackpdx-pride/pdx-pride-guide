@@ -24,3 +24,7 @@ script/smoke-output*/
 
 # Generated responsive posters on the local persistent runtime path
 /poster-variants/
+
+# The pinned map is unpacked from the versioned release archive for local browser previews.
+/client/public/map-assets/
+/client/public/map-release.json
