@@ -5,12 +5,13 @@ import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import DockDrawer, { type DockStop } from "@/components/dock/DockDrawer";
 import { apiRequest } from "@/lib/queryClient";
+import { pacificCalendarDate } from "@shared/missedConnections";
 import { afterzWindowState } from "@shared/afterzWindow";
 import { base, GatheringRoom, HostForm, privateRead, type Gathering } from "./AfterzInvitations";
 import AfterzNightCard, { type AfterzListing } from "./AfterzNightCard";
 
 export type AfterzCard = AfterzListing & {
-  eventId: number; eventTitle: string; venue: string; poster: string | null; vibe: string;
+  eventId: number; occurrence: string; eventTitle: string; venue: string; poster: string | null; vibe: string;
   glow: boolean; sexPositive: boolean; lat: number | null; lng: number | null;
 };
 const nightPath = "/api/afterz/nights";
@@ -35,15 +36,17 @@ function useAfterzWindow() {
   return clock.open;
 }
 
-export default function NightDrawer({ roomId, onRoomChange }: {
+export default function NightDrawer({ roomId, onRoomChange, eventId, occurrenceDate }: {
+  eventId?: number; occurrenceDate?: string;
   roomId?: string | null; onRoomChange?: (id: string | null) => void;
 } = {}) {
   const { user } = useAuth();
   const client = useQueryClient();
   const open = useAfterzWindow();
+  const occurrence = occurrenceDate ? pacificCalendarDate(occurrenceDate) : null;
   const nights = useAfterzNights();
   const mine = useQuery<Gathering[]>({ queryKey: [base, "mine", user?.id],
-    queryFn: ({ signal }) => privateRead(base, signal), enabled: !!user, retry: false, refetchInterval: 15_000, gcTime: 0 });
+    queryFn: ({ signal }) => privateRead(base, signal), enabled: !!user && !eventId, retry: false, refetchInterval: 15_000, gcTime: 0 });
   const discovery = useQuery<{ confirmed: boolean }>({ queryKey: [discoveryPath, user?.id],
     queryFn: ({ signal }) => privateRead(discoveryPath, signal), enabled: !!user, retry: false, gcTime: 0 });
   const [showAuth, setShowAuth] = useState(false);
@@ -65,9 +68,11 @@ export default function NightDrawer({ roomId, onRoomChange }: {
     if (!next) requestAnimationFrame(() => lastTrigger.current?.focus());
   };
   const list = new Map<string, AfterzListing>();
-  if (mine.isSuccess) for (const item of mine.data) list.set(item.id, item);
-  if (nights.isSuccess) for (const item of nights.data) list.set(item.id, item);
-  const refresh = () => Promise.all([mine.refetch(), nights.refetch(), discovery.refetch()]);
+  if (!eventId && mine.isSuccess) for (const item of mine.data) list.set(item.id, item);
+  if (nights.isSuccess) for (const item of nights.data) {
+    if (!eventId || (item.eventId === eventId && item.occurrence === occurrence)) list.set(item.id, item);
+  }
+  const refresh = () => Promise.all([eventId ? undefined : mine.refetch(), nights.refetch(), discovery.refetch()]);
   const respond = async (night: AfterzListing, yes: boolean) => {
     if (busy) return;
     if (yes && night.role !== "guest" && night.role !== "passed") { pick(night.id); return; }
@@ -93,9 +98,9 @@ export default function NightDrawer({ roomId, onRoomChange }: {
         onClick={() => setHostForm(!hostForm)}>Host an Afterz</button> :
         <button type="button" className="afterz-host-button" onClick={() => setShowAuth(true)}>Sign in for Afterz</button>}
       <p className="afterz-window">Window {open ? "open" : "closed"} · 9 PM to 6 AM Pacific</p>
-      {user && hostForm && <div id={formId} key={user.id}><HostForm select={pick}/></div>}
+      {user && hostForm && <div id={formId} key={user.id}><HostForm select={pick} eventId={eventId} occurrence={occurrence}/></div>}
       {user && <>
-        {(nights.isError || mine.isError || discovery.isError) && <p role="alert">Could not load your invitations. <button type="button" onClick={() => void refresh()}>Retry</button></p>}
+        {(nights.isError || (!eventId && mine.isError) || discovery.isError) && <p role="alert">Could not load your invitations. <button type="button" onClick={() => void refresh()}>Retry</button></p>}
         {discovery.data?.confirmed === false && <button type="button" className="afterz-discovery" disabled={busy === "discovery"} onClick={async () => {
           setBusy("discovery"); setProblem("");
           try { await apiRequest("POST", discoveryPath, { confirmed18: true }); await refresh(); }
@@ -104,7 +109,7 @@ export default function NightDrawer({ roomId, onRoomChange }: {
         }}>I’m 18 or older · Show event invites</button>}
         {problem && <p role="alert">{problem}</p>}
         {(nights.isLoading || mine.isLoading) && <p role="status">Loading invites…</p>}
-        {!list.size && mine.isSuccess && nights.isSuccess && <p className="afterz-empty">No invitations yet. Open a host’s invite link to ask to join.</p>}
+        {!list.size && (eventId || mine.isSuccess) && nights.isSuccess && <p className="afterz-empty">{eventId ? "No Afterz invites for this event yet." : "No invitations yet. Open a host’s invite link to ask to join."}</p>}
         {[...list.values()].map(night => <AfterzNightCard key={night.id} night={night} busy={busy !== null} open={open}
           select={() => pick(night.id)} respond={yes => void respond(night, yes)}/>)}
       </>}

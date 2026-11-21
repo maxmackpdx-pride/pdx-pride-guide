@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
 import "./invitations.css";
 
-import NightOptions, { defaultOptions } from "./NightOptions";
+import NightOptions, { defaultOptions, useEligibleAfterzEvents, type EligibleAfterzEvent } from "./NightOptions";
 
 export type Role =
   | "passed"
@@ -468,13 +468,20 @@ export function GatheringRoom({
     </section>
   );
 }
-export function HostForm({ select }: { select: (id: string) => void }) {
+export function HostForm({ select, eventId, occurrence }: { select: (id: string) => void; eventId?: number; occurrence?: string | null }) {
+  const events = useEligibleAfterzEvents();
+  if (eventId && events.isPending) return <p role="status">Opening host form…</p>;
+  if (eventId && events.isError) return <p role="alert">Could not check this event. <button onClick={() => void events.refetch()}>Retry</button></p>;
+  const event = eventId ? events.data?.find(item => item.id === eventId && item.date === occurrence) ?? null : undefined;
+  return <GatheringForm select={select} event={event}/>;
+}
+function GatheringForm({ select, event }: { select: (id: string) => void; event?: EligibleAfterzEvent | null }) {
   const client = useQueryClient();
   const [title, setTitle] = useState(""),
     [confirmed, setConfirmed] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
-  const [options, setOptions] = useState(defaultOptions),
+  const [options, setOptions] = useState(() => event ? { ...defaultOptions, eventId: event.id, occurrence: event.date } : defaultOptions),
     [uploading, setUploading] = useState(false);
   const [key, setKey] = useState(() => crypto.randomUUID());
   return (
@@ -516,6 +523,7 @@ export function HostForm({ select }: { select: (id: string) => void }) {
             />
           </label>
           <NightOptions
+            scopedTitle={event === undefined ? undefined : event?.title ?? null}
             options={options}
             onChange={setOptions}
             onUploading={setUploading}

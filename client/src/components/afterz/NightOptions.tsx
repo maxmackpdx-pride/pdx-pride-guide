@@ -24,25 +24,31 @@ async function uploadPoster(data: FormData): Promise<string> {
   if (!response.ok) throw Error("Upload failed. Choose a JPG, PNG, GIF or WebP under 8 MB.");
   return (await response.json()).url;
 }
-export default function NightOptions({
-  options,
-  onChange,
-  onUploading,
-}: {
-  options: Options;
-  onChange: Dispatch<SetStateAction<Options>>;
-  onUploading: (v: boolean) => void;
-}) {
-  const events = useQuery<{ id: number; title: string; date: string }[]>({
+export type EligibleAfterzEvent = { id: number; title: string; date: string };
+export function useEligibleAfterzEvents() {
+  return useQuery<EligibleAfterzEvent[]>({
     queryKey: ["/api/afterz/eligible-events"],
     queryFn: () =>
       apiRequest("GET", "/api/afterz/eligible-events").then((r) => r.json()),
     staleTime: 0,
   });
+}
+export default function NightOptions({
+  options,
+  scopedTitle,
+  onChange,
+  onUploading,
+}: {
+  options: Options;
+  scopedTitle?: string | null;
+  onChange: Dispatch<SetStateAction<Options>>;
+  onUploading: (v: boolean) => void;
+}) {
+  const events = useEligibleAfterzEvents();
   const [error, setError] = useState("");
   return (
     <>
-      <label>
+      {scopedTitle !== undefined ? <p>{scopedTitle ? `After ${scopedTitle}` : "This event is unavailable for a linked invite. Your gathering uses a private invite link."}</p> : <label>
         Main event
         <select
           value={
@@ -64,8 +70,8 @@ export default function NightOptions({
             </option>
           ))}
         </select>
-      </label>
-      {events.isError && (
+      </label>}
+      {scopedTitle === undefined && events.isError && (
         <button type="button" onClick={() => void events.refetch()}>
           Retry upcoming events
         </button>
