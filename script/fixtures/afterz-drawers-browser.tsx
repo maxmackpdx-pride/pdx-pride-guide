@@ -31,7 +31,7 @@ const events: DrawerTopEvent[] = [
 ];
 
 const featured: OutzideCountdownItem[] = [
-  { id: 80, title: "Rooster Rock hang", dateStart: "2026-11-20T16:00:00", venueName: "Rooster Rock", posterImageUrl: "/posters/tucker-archive/yes-coach-apr-2026.jpg", kind: "buddy", href: "/events?event=80" },
+  { id: 80, title: "Rooster Rock hang", dateStart: "2026-11-20T16:00:00", venueName: "Rooster Rock", posterImageUrl: "/outzide-map/assets/photos/v3/rooster-rock-640.webp", kind: "buddy", href: "/events?event=80" },
   { id: 1_000_000_009, title: "Offering a ride", dateStart: "2026-11-20T18:00:00", venueName: "Rooster Rock", kind: "carpool", href: "/outzide/rooster-rock" },
 ];
 
@@ -83,16 +83,13 @@ function MapField() {
     <div
       className="zaylist-unified-map"
       data-testid="fixture-map"
-      style={{
-        minHeight: "100dvh",
-        background:
-          "radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--neon-green) 35%, transparent), transparent 42%), radial-gradient(circle at 70% 60%, color-mix(in srgb, var(--neon-orange) 28%, transparent), transparent 50%), linear-gradient(160deg, #16321c, #0b1a22 55%, #142033)",
-        position: "relative",
-      }}
+      style={{ minHeight: "100dvh", position: "relative", overflow: "hidden", background: "var(--z-black)" }}
     >
-      <p style={{ position: "absolute", top: 16, left: 16, margin: 0, color: "var(--text-meta)", font: "700 11px/1 var(--font-mono, monospace)", letterSpacing: ".12em", textTransform: "uppercase", zIndex: 2 }}>
-        Example data
-      </p>
+      <img
+        src="/outzide-map/assets/photos/v3/rooster-rock-1280.webp"
+        alt=""
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 40%" }}
+      />
     </div>
   );
 }
@@ -101,7 +98,10 @@ function Fixture() {
   return (
     <>
       <NavShell>
-        <div className="site-hub-mtop"><span>Navigation fixture</span></div>
+        <div className="site-hub-mtop" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, paddingInline: 16 }}>
+          <span>Navigation fixture</span>
+          <span data-testid="example-data-label" style={{ font: "700 11px/1 var(--font-mono, monospace)", letterSpacing: ".12em", textTransform: "uppercase" }}>Example data</span>
+        </div>
       </NavShell>
       <MapField />
       {scene === "outzide" && (

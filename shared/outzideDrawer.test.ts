@@ -5,6 +5,7 @@ import {
   featuredFromFeeds,
   isOfferedCarpool,
   nextOutzideCountdown,
+  outzidePlaceArtUrl,
   type OutzideCountdownItem,
 } from "./outzideDrawer";
 
@@ -48,4 +49,17 @@ test("a buddy event that is also in the event list keeps the featured kind", () 
   assert.equal(next[0].kind, "buddy");
   assert.equal(next[0].title, "Yes Coach");
   assert.equal(next.length, 3);
+});
+
+test("Outzide mini cards use a real destination photo, not an empty box", () => {
+  assert.equal(
+    outzidePlaceArtUrl({ name: "Rooster Rock" }),
+    "/outzide-map/assets/photos/v3/rooster-rock-640.webp",
+  );
+  assert.equal(
+    outzidePlaceArtUrl({ name: "Sauvie Island" }),
+    "/outzide-map/assets/photos/v3/sauvie-island-640.webp",
+  );
+  assert.equal(outzidePlaceArtUrl({ name: "Unknown bluff", imageUrl: "/custom.jpg" }), "/custom.jpg");
+  assert.equal(outzidePlaceArtUrl({ name: "Unknown bluff" }), null);
 });

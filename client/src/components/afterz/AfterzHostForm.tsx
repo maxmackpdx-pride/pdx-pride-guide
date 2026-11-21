@@ -9,11 +9,13 @@ export default function AfterzHostForm({
   inAdvance = false,
   onCreated,
   onRequireAuth,
+  onCancel,
   signedIn,
 }: {
   inAdvance?: boolean;
   onCreated?: (id: string) => void;
   onRequireAuth?: () => void;
+  onCancel?: () => void;
   signedIn: boolean;
 }) {
   "use memo";
@@ -75,11 +77,7 @@ export default function AfterzHostForm({
         />
       </label>
       <NightOptions options={options} onChange={setOptions} onUploading={setUploading} />
-      <p>
-        {inAdvance
-          ? "Host an Afterz in advance. Invite friends anytime. People in the area can request to join only once the window opens at 9 PM Pacific. It will not show on the map before then. Guest requests and chat close at 6 AM Pacific."
-          : "Invite friends anytime. People in the area can request to join while Afterz is open, from 9 PM to 6 AM Pacific. Guest requests and chat close at 6 AM Pacific."}
-      </p>
+      <p className="afterz-host-form__hint">Guest requests and chat close at 6 AM Pacific.</p>
       <label className="afterz-host-form__check">
         <input
           type="checkbox"
@@ -92,6 +90,11 @@ export default function AfterzHostForm({
       <button type="submit" disabled={busy || uploading || !confirmed || !title.trim()}>
         {busy ? "Creating…" : inAdvance ? "Host an Afterz in advance" : "Host an Afterz"}
       </button>
+      {onCancel && (
+        <button type="button" className="afterz-host-form__cancel" onClick={onCancel}>
+          Cancel
+        </button>
+      )}
       {notice && <p role="status">{notice}</p>}
       {error && <p role="alert">{error}</p>}
     </form>

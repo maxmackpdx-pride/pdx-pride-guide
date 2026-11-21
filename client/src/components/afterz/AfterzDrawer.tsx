@@ -114,23 +114,26 @@ export default function AfterzDrawer({
             onFiltersChange={setFilters}
             now={at}
           />
-          <button
-            type="button"
-            className="afterz-host-btn"
-            aria-expanded={hostOpen}
-            data-testid="afterz-host-button"
-            onClick={() => {
-              if (!user) { setAuth(true); return; }
-              setHostOpen(value => !value);
-            }}
-          >
-            {open ? "Host an Afterz" : "Host an Afterz in advance"}
-          </button>
+          {!hostOpen && (
+            <button
+              type="button"
+              className="afterz-host-btn"
+              aria-expanded={false}
+              data-testid="afterz-host-button"
+              onClick={() => {
+                if (!user) { setAuth(true); return; }
+                setHostOpen(true);
+              }}
+            >
+              {open ? "Host an Afterz" : "Host an Afterz in advance"}
+            </button>
+          )}
           {hostOpen && (
             <AfterzHostForm
               inAdvance={!open}
               signedIn={!!user}
               onRequireAuth={() => setAuth(true)}
+              onCancel={() => setHostOpen(false)}
             />
           )}
           {nightsQuery.isError && nights == null && (

@@ -41,7 +41,8 @@
   background: var(--z-black);
   color: var(--text-hi);
   box-shadow: var(--neon-bloom, 0 0 18px color-mix(in srgb, var(--yellow) 8%, transparent)),
-    0 0 28px color-mix(in srgb, var(--yellow) 22%, transparent);
+    0 0 22px color-mix(in srgb, var(--yellow) 40%, transparent),
+    0 0 48px color-mix(in srgb, var(--yellow) 32%, transparent);
 }
 .afterz-wide-card__art {
   position: absolute;
@@ -62,10 +63,15 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px;
-  background: linear-gradient(to top, color-mix(in srgb, var(--z-black) 88%, transparent) 0%, color-mix(in srgb, var(--z-black) 30%, transparent) 70%, transparent);
+  padding: 10px 12px 12px;
+  background: linear-gradient(to top, color-mix(in srgb, var(--z-black) 94%, transparent) 0%, color-mix(in srgb, var(--z-black) 70%, transparent) 45%, color-mix(in srgb, var(--z-black) 20%, transparent) 100%);
 }
-.afterz-wide-card__meta { min-width: 0; }
+.afterz-wide-card__meta {
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--z-black) 78%, transparent);
+}
 .afterz-wide-card__type {
   display: block;
   margin: 0 0 2px;
@@ -179,9 +185,9 @@
   align-items: flex-start;
   justify-content: center;
   padding: 72px 18px 180px;
-  background: color-mix(in srgb, var(--z-black) 42%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: color-mix(in srgb, var(--z-black) 28%, transparent);
+  backdrop-filter: blur(18px) saturate(0.85);
+  -webkit-backdrop-filter: blur(18px) saturate(0.85);
 }
 .afterz-map-blur__copy {
   pointer-events: auto;
@@ -207,3 +213,20 @@
 @media (prefers-reduced-motion: reduce) {
   .afterz-map-blur { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 }
+
+.afterz-host-form__hint { margin: 0; font: 500 13px/1.4 var(--font-body); color: var(--text-body); }
+.afterz-host-form__cancel {
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-body);
+  cursor: pointer;
+  font: 700 13px/1 var(--font-body);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.afterz-host-form__cancel:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
+/* Keep the calendar and the first Afterz card on the first screen. */
+.dock-drawer:has(.afterz-drawer).is-stop1 { max-height: 76dvh; }

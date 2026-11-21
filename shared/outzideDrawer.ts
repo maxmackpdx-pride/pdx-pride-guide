@@ -104,3 +104,28 @@ export function featuredFromFeeds(buddies: OutzideBuddy[], feed: OutzideFeedItem
     ...feed.map(carpoolToCountdown).filter((item): item is OutzideCountdownItem => item != null),
   ];
 }
+
+const OUTZIDE_PLACE_PHOTOS: Record<string, string> = {
+  "rooster-rock": "/outzide-map/assets/photos/v3/rooster-rock-640.webp",
+  "sauvie-island": "/outzide-map/assets/photos/v3/sauvie-island-640.webp",
+};
+
+const OUTZIDE_PLACE_MOTIFS: Record<string, string> = {
+  "rooster-rock": "/outzide-map/assets/motifs/places/rooster-rock.svg",
+  "sauvie-island": "/outzide-map/assets/motifs/places/sauvie-island.svg",
+};
+
+export function outzidePlaceSlug(name?: string | null): string {
+  return (name || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+/**
+ * Art for an Outzide mini card. Prefer a provided photo, then a known
+ * destination photo, then the destination motif. Returns null when the
+ * card should use the standard DayMotif placeholder instead of a black box.
+ */
+export function outzidePlaceArtUrl(place: { name?: string | null; imageUrl?: string | null }): string | null {
+  if (place.imageUrl) return place.imageUrl;
+  const slug = outzidePlaceSlug(place.name);
+  return OUTZIDE_PLACE_PHOTOS[slug] || OUTZIDE_PLACE_MOTIFS[slug] || null;
+}

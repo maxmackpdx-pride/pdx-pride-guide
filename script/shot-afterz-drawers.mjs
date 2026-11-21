@@ -46,10 +46,10 @@ await context.route("**/api/**", route => {
 });
 
 const shotsToTake = [
-  { scene: "outzide", file: "v1-outzide-drawer.png", wait: "[data-testid='outzide-drawer']" },
-  { scene: "afterz-open", file: "v1-afterz-drawer-in-window.png", wait: "[data-testid='afterz-drawer']" },
-  { scene: "afterz-off", file: "v1-afterz-off-hours-blur.png", wait: "[data-testid='afterz-map-blur']" },
-  { scene: "afterz-host", file: "v1-afterz-host-form.png", wait: "[data-testid='afterz-host-form']", clickHost: true },
+  { scene: "outzide", file: "v2-outzide-drawer.png", wait: "[data-testid='outzide-drawer']" },
+  { scene: "afterz-open", file: "v2-afterz-drawer-in-window.png", wait: "[data-testid='afterz-drawer']" },
+  { scene: "afterz-off", file: "v2-afterz-off-hours-blur.png", wait: "[data-testid='afterz-map-blur']" },
+  { scene: "afterz-host", file: "v2-afterz-host-form.png", wait: "[data-testid='afterz-host-form']", clickHost: true },
 ];
 
 for (const shot of shotsToTake) {
@@ -64,14 +64,13 @@ for (const shot of shotsToTake) {
     }
   }
   await page.waitForSelector(shot.wait, { timeout: 20_000 });
-  const scrollTarget = shot.scene === "afterz-host"
-    ? "[data-testid='afterz-host-form']"
-    : shot.scene === "afterz-open"
-      ? "[data-testid='afterz-night-card']"
-      : null;
-  if (scrollTarget) {
-    const node = page.locator(scrollTarget).first();
-    if (await node.count()) await node.scrollIntoViewIfNeeded();
+  // In-window and off-hours stay at scroll 0 so the calendar is fully visible.
+  if (shot.scene === "afterz-host") {
+    const form = page.locator("[data-testid='afterz-host-form']");
+    if (await form.count()) await form.evaluate(node => { node.closest(".dock-drawer__body")?.scrollTo(0, 0); });
+  }
+  if (shot.scene === "afterz-open") {
+    await page.locator(".dock-drawer__body").evaluate(node => { node.scrollTop = 0; });
   }
   await page.waitForTimeout(400);
   await page.screenshot({ path: path.join(shots, shot.file), fullPage: false });

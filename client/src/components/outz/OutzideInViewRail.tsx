@@ -2,8 +2,10 @@ import { type CSSProperties } from "react";
 import { CardHeartButton } from "@/components/CardHeartButton";
 import RailShareButton from "@/components/home/RailShareButton";
 import DrawerMiniCard from "@/components/drawers/DrawerMiniCard";
+import EventFlyerArt from "@/components/events/EventFlyerArt";
 import { openOutzideCountdownItem } from "@/lib/outzideDrawerApi";
 import { outzPlaceHref } from "@shared/outz";
+import { outzidePlaceArtUrl } from "@shared/outzideDrawer";
 import type { InViewItem } from "@shared/drawerFilters";
 import type { DrawerTopEvent } from "@shared/drawerTop";
 import "./OutzideDrawer.css";
@@ -11,7 +13,8 @@ import "@/components/drawers/DrawerTop.css";
 
 /**
  * Full-bleed mini cards for whatever is in view on the Outzide map:
- * events use DrawerMiniCard, places use the same geometry.
+ * events use DrawerMiniCard, places use the same geometry. Places without
+ * a photo use a known destination image or the standard DayMotif art.
  */
 export default function OutzideInViewRail({
   items,
@@ -44,11 +47,11 @@ export default function OutzideInViewRail({
           ) : (
             <OutzidePlaceMini
               id={item.place.id}
-              name={item.place.name}
+              name={item.place.name || "Destination"}
               imageUrl={item.place.imageUrl}
               saved={savedIds?.has(item.place.id)}
               onToggleSave={onToggleSave ? () => onToggleSave("place", item.place.id) : undefined}
-              onOpen={() => onOpenPlace?.(item.place.id, item.place.name)}
+              onOpen={() => onOpenPlace?.(item.place.id, item.place.name || "Destination")}
             />
           )}
         </div>
@@ -74,6 +77,7 @@ function OutzidePlaceMini({
 }) {
   "use memo";
   const href = outzPlaceHref({ id: String(id), name });
+  const art = outzidePlaceArtUrl({ name, imageUrl });
   return (
     <article
       data-card-size="small"
@@ -83,7 +87,7 @@ function OutzidePlaceMini({
       style={{ "--c": "var(--room-outz, var(--neon-orange))" } as CSSProperties}
     >
       <div className="drawer-mini__art" aria-hidden="true">
-        {imageUrl ? <img src={imageUrl} alt="" /> : <div className="day-motif" />}
+        {art ? <img src={art} alt="" /> : <EventFlyerArt src={null} day="SAT" showDay={false} title={name} venueName="" />}
       </div>
       <button type="button" className="drawer-mini__open" onClick={onOpen} aria-label={`Open ${name}`}>
         <span className="drawer-mini__meta">
