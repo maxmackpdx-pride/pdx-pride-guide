@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { driveMinutes } from "@/lib/ridezForm";
 import { haptic } from "./flipCard";
 import { CardLogoMark, type CardLogo } from "./cardLogo";
 import type { ActionSheetAction } from "./ActionSheetCard";
@@ -115,7 +116,7 @@ export function travelEstimate(from: { lat: number; lng: number }, to: { lat: nu
   const s = Math.sin(dLat / 2) ** 2 + Math.cos(from.lat * rad) * Math.cos(to.lat * rad) * Math.sin(dLng / 2) ** 2;
   const miles = 2 * R * Math.asin(Math.sqrt(s));
   if (miles < 1.2) return { miles, minutes: Math.max(1, Math.round(miles * 1.25 * 20)), mode: "WALK" };
-  return { miles, minutes: Math.max(3, Math.round(miles * 1.3 / 22 * 60 + 3)), mode: "DRIVE" };
+  return { miles, minutes: driveMinutes(miles), mode: "DRIVE" };
 }
 
 /** Distance + time to a point, only when location is already permitted (never prompts). */

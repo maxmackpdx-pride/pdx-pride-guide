@@ -747,8 +747,11 @@
 .fbx .oday i { display: block; font: 700 10px var(--font-display); font-style: normal; letter-spacing: .12em; color: var(--evz-gray-8a8a94); }
 .fbx .oday b { display: block; font: 800 18px/1.15 var(--font-display); }
 .fbx .oday span { display: block; font-size: 9px; color: var(--evz-gray-8a8a94); }
-.fbx .oday.hot { border-color: var(--a); }
-.fbx .oday.hot i { color: var(--a); }
+/* Day-of-week tokens on calendar day cells (owner, Nov 20): soft day border, full when selected. */
+.fbx .oday { border-color: color-mix(in srgb, var(--day-c, var(--fbx-line-soft)) 45%, transparent); }
+.fbx .oday i { color: var(--day-c, var(--evz-gray-8a8a94)); }
+.fbx .oday.hot { border-color: var(--day-c, var(--a)); box-shadow: 0 0 10px -3px var(--day-c, var(--a)); }
+.fbx .oday.hot i { color: var(--day-c, var(--a)); }
 .fbx .orail { display: flex; gap: 9px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
 .fbx .orail::-webkit-scrollbar { display: none; }
 .fbx .omini { flex: 0 0 128px; border: 1px solid var(--fbx-line-soft); border-radius: 9px; padding: 9px 10px; background: var(--fbx-chip-bg); }
@@ -1443,3 +1446,14 @@ html.calm-mode .fbx .ocard .otile.is-pressed .otile-face { transform: none; }
    area (the stage is their containing block), not to the card's scroll origin. */
 .fbx .ocard.ocard--panel :is(.zas-scrim, .zform) { position: fixed; }
 .fbx .ocard .ogoing > * { margin-inline: 0; width: 100%; box-sizing: border-box; }
+
+/* ---- Tile row (owner, Nov 20): TICKETS · RIDEZ · AFTERZ · DIRECTIONS · WEBSITE ---------- */
+/* Equal grid columns centered on the card; labels offset their trailing letter-spacing so the
+   visible text (not the box) sits on each column's center. Five fit 390px. */
+.fbx .ocard .ohead > .otiles {
+  display: grid; grid-template-columns: repeat(var(--tiles, 3), minmax(0, 1fr)); justify-items: center;
+  gap: 4px; padding-inline: 10px; max-width: 520px; margin-inline: auto;
+}
+.fbx .ocard .ohead > .otiles > .otile { flex: none; width: 100%; min-width: 0; }
+.fbx .ocard .otile-l { padding-left: .12em; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.fbx .ocard .ohead > .otiles[data-tiles="5"] .otile-l { font-size: 9.5px; letter-spacing: .08em; padding-left: .08em; }

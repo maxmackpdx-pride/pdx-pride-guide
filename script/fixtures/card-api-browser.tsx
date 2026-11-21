@@ -22,7 +22,7 @@ const size = query.get('size') || 'tall';
 const layout = query.get('layout') || 'grid';
 const width = size === 'small' ? 136 : size === 'wide' ? 360 : 200;
 const places = ['rooster-rock','silver-falls','bc-garibaldi','memaloose','cape-lookout','sauvie-island'];
-const events = places.map((_,i)=>({id:90000+i,title:`QA Event ${i+1}`,venueName:'QA venue',neighborhood:'Portland',dateStart:'2026-12-04T20:00:00-08:00',dateEnd:'2026-12-04T23:00:00-08:00',dayOfWeek:'Friday',admission:'FREE',ageRequirement:'21_PLUS',description:'Browser regression fixture',eventType:'PARTY',status:'LIVE'} as any));
+const events = places.map((_,i)=>({id:90000+i,title:`QA Event ${i+1}`,venueName:'QA venue',neighborhood:'Portland',dateStart:'2026-12-04T20:00:00-08:00',dateEnd:'2026-12-04T23:00:00-08:00',dayOfWeek:'Friday',admission:'FREE',ageRequirement:'21_PLUS',description:'Browser regression fixture',eventType:'PARTY',status:'LIVE',...(i===0?{ticketUrl:'https://tickets.example.test/qa-event',venueWebsite:'https://venue.example.test/'}:{})} as any));
 function Fixture(){
  const [selected,setSelected] = useState<any>(null);
  const [detail,setDetail] = useState<string|null>(null);

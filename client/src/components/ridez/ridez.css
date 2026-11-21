@@ -87,7 +87,7 @@
   opacity: .7; animation: zridez-bloom 2.8s ease-in-out infinite;
 }
 .zridez .orailcard[data-bloom] .ocarpool { --carpool-c: var(--bloom-c); }
-.zridez .orailcard[data-bloom] > :not(.orailcard-tag) { position: relative; z-index: 1; }
+.zridez .orailcard[data-bloom] > .ocarpool { position: relative; z-index: 1; }
 @keyframes zridez-bloom { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .zridez .orailcard[data-bloom]::before { animation: none; opacity: .6; } }
 :is(html.calm-mode, :root[data-calm="true"]) .zridez .orailcard[data-bloom]::before { animation: none; opacity: .6; }
@@ -95,3 +95,36 @@
 /* Section label outside .zas/.zxp (drawer). */
 .zridez .zas-sec { margin: 4px 0 2px; font: 700 11px var(--font-display); letter-spacing: .24em; text-transform: uppercase; color: var(--neon-orange); display: flex; justify-content: space-between; gap: 8px; }
 .zridez .zrc-head .zas-sec { margin: 0; }
+
+/* I'M COMING / WHO'S COMING: a small pill on the NEEDS A RIDE card (sibling of the card button). */
+.zridez .orailcard--need .ocarpool { padding-bottom: 34px; }
+.zridez .ocarpool-act {
+  position: absolute; z-index: 4; right: 12px; bottom: 10px; min-height: 28px; padding: 0 12px; border-radius: 999px; cursor: pointer;
+  border: 1.5px solid var(--neon-orange); background: var(--neon-orange); color: var(--z-oled);
+  font: 800 10px/1 var(--font-display); letter-spacing: .14em; touch-action: manipulation;
+}
+.zridez .ocarpool-act.is-on { background: var(--z-oled); color: var(--neon-orange); cursor: default; }
+.zridez .ocarpool-act:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 2px; }
+
+/* Who's coming sheet. */
+.zwho { display: grid; gap: 12px; }
+.zwho-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.zwho-row {
+  display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; padding: 12px;
+  background: radial-gradient(120% 90% at 0 0, color-mix(in srgb, var(--neon-orange) 18%, transparent), transparent 62%), var(--z-black);
+  -webkit-mask: url('/boardz/punk/torn-card-wide.svg') center / 100% 100% no-repeat; mask: url('/boardz/punk/torn-card-wide.svg') center / 100% 100% no-repeat;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--neon-orange) 70%, transparent);
+}
+.zwho .ocarpool-av { width: 48px; height: 48px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; border: 1.5px solid var(--neon-orange); background: var(--z-black); color: var(--neon-orange); font: 800 18px var(--font-display); }
+.zwho .ocarpool-av img { width: 100%; height: 100%; object-fit: cover; }
+.zwho-t { display: grid; gap: 3px; min-width: 0; }
+.zwho-t b { font: 800 15px/1.1 var(--font-display); letter-spacing: .02em; }
+.zwho-rides, .zwho-eta { font: 700 11px/1.2 var(--font-display); letter-spacing: .1em; color: var(--neon-orange); }
+.zwho-eta { color: var(--text-hi); }
+.zwho-fuel { font: 500 12px/1.3 var(--font-body); color: color-mix(in srgb, var(--text-hi) 70%, transparent); }
+.zwho-check { display: grid; gap: 10px; }
+.zwho-check label { display: grid; gap: 4px; font: 700 10px var(--font-display); letter-spacing: .16em; text-transform: uppercase; color: var(--neon-orange); }
+.zwho-check input:not([type=checkbox]), .zwho-check select { min-height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--ink-border-strong); background: var(--ink-850); color: var(--text-hi); font: 500 15px var(--font-body); }
+.zwho-check .zwho-consent { display: flex; gap: 8px; align-items: flex-start; text-transform: none; letter-spacing: 0; font: 500 13px/1.35 var(--font-body); color: var(--text-hi); }
+.zwho-ok, .zwho-err { margin: 0; font: 500 13px/1.4 var(--font-body); }
+.zwho-err { color: var(--neon-orange); }

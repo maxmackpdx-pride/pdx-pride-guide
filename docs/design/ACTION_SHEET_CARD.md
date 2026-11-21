@@ -345,6 +345,37 @@ Tapping a NEEDS A RIDE card opens OFFER A RIDE.
 | `GET /api/ridez/needs?lat&lng` | Needs within 2 mi right now (drawer). |
 | `DELETE /api/ridez/needs/me` | Withdraw the location-only need. |
 
+### I'M COMING, Who's coming, safety check-in, ETA, fuel (owner, Nov 20)
+
+- **NEEDS A RIDE card:** avatar on the left always (photo, else initial). A driver taps **I'M COMING**:
+  the rider gets an in-app inbox note from the driver plus a push (existing `my_events` push). It's
+  idempotent, so there is no repeat notice. If location is already permitted (never prompts), the driver's position
+  is shared for the ETA only.
+- **WHO'S COMING** (on your own need) opens a Ridez sheet listing each driver: avatar, **rides given**
+  (completed rides: offers with an accepted rider that left or whose night passed, plus arrived need
+  rides; a personal track record, not an attendee count), an ETA from the driver's rounded distance
+  (the Directions drive estimate `driveMinutes`), and "Fuel for their drive to you: $x est.".
+- **Safety check-in** reuses the existing ride check (`night_ride_watches`, reminders, trusted mutual
+  follows, escalation message with last location, `GET/DELETE /api/night/ride-checks`). A need ride uses
+  the key `-needId`.
+- **Fuel estimate** = miles ÷ mpg × price per gallon, labeled "est.". `mpg` defaults to 25
+  (`RIDEZ_AVG_MPG`). The price is a configurable constant (`RIDEZ_GAS_PRICE_USD`, default $4.50), because no
+  keyless public Portland gas-price API is wired (EIA needs a key). `GET /api/ridez/fuel` returns the inputs.
+
+| Call | Who | Purpose |
+|---|---|---|
+| `POST /api/ridez/needs/:id/coming` `{lat?, lng?}` | driver | I'M COMING (201; `{already:true}` on repeat) |
+| `DELETE /api/ridez/needs/:id/coming` | driver | withdraw |
+| `PUT /api/ridez/needs/:id/coming/location` `{lat, lng}` | driver | update position for the ETA |
+| `POST /api/ridez/needs/:id/coming/arrived` | driver | arrival; push to the rider |
+| `GET /api/ridez/needs/mine/coming` | rider | `{needs:[{needId, area, eventId, direction, drivers:[{user, photoUrl, ridesGiven, distanceMi, locatedAt, since, arrived}]}]}` |
+| `POST /api/ridez/needs/:id/watch` `{contact, minutes 5–180, consent:true, lat?, lng?}` | rider | safety check-in (existing engine) |
+| `GET /api/ridez/fuel` | any | `{pricePerGallon, mpg, source, label:"est."}` |
+
+**Not in this version (next):** optional Cash App / Venmo handles in profile settings (shown only to
+matched ride partners) and the on-arrival "Thank them with a tip" popup. Both need a profile-settings
+field, a privacy gate and a server-side match check.
+
 ## Design notes: future Afterz cards (NOT in this version)
 
 Notes only. Nothing below is built, stubbed or flagged in this version.

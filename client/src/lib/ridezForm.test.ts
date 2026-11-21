@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { parsePacificDateTime } from "@shared/missedConnections";
-import { rideDirectionOf, ridezLeaveBy, ridezOfferBody, ridezPlanningBase } from "./ridezForm";
+import { driveMinutes, driverEtaLabel, fuelEstimate, rideDirectionOf, ridezLeaveBy, ridezOfferBody, ridezPlanningBase } from "./ridezForm";
 
 test("ridez form: the event is preselected in the planning path", () => {
   assert.equal(ridezPlanningBase(42, "2026-11-21T21:00:00"), "/api/events/42/occurrences/2026-11-21/planning");
@@ -23,4 +23,14 @@ test("ridez form: ride direction from the plan kind", () => {
   assert.equal(rideDirectionOf({ id: 1, plan: { kind: "carpool" } }), "arriving");
   assert.equal(rideDirectionOf({ id: 1, plan: { kind: "home" } }), "departing");
   assert.equal(rideDirectionOf({ id: 1, plan: null }), "arriving");
+});
+
+test("who's coming ETA reuses the Directions drive estimate; fuel is miles / mpg x price", () => {
+  assert.equal(driveMinutes(2.2), 11);
+  assert.equal(driverEtaLabel(2.2), "2.2 MI · ~11 MIN AWAY");
+  assert.equal(driverEtaLabel(null), null);
+  assert.equal(driverEtaLabel(1, true), "ARRIVED");
+  assert.equal(fuelEstimate(10), 1.8, "default 25 mpg x $4.50");
+  assert.equal(fuelEstimate(10, { mpg: 20, pricePerGallon: 5 }), 2.5);
+  assert.equal(fuelEstimate(null), null);
 });

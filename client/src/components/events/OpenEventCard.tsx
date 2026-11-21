@@ -30,7 +30,7 @@ import AuthModal from "@/components/AuthModal";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import { EventHostNotice } from "./EventHostNotice";
 import { weekdayCode, dayColorVar, startMs, dateStrOf, countdownParts } from "./EventFlyerFront";
-import { Car, MapPin, Moon } from "lucide-react";
+import { Car, Globe, MapPin, Moon, Ticket } from "lucide-react";
 import { CarpoolRailCard, EventNearbyPlaceCard, EventRailCard, gigBoardPost, mizzBoardPosts, rideBoardPost, rideDirection, useBoardRailSaves, type PlanRide } from "./EventRailCards";
 import { MAP_BRAND_COLOR, MapBrandMark, RIDE_BRAND_COLOR, RideBrandMark, type MapBrand, type RideBrand } from "@/components/cards/rideBrands";
 import { memberProfileHref } from "@/lib/avatarLinks";
@@ -40,6 +40,7 @@ import { FAMILY_LOGOS } from "@/components/cards/cardLogo";
 import { EventFormCard, type EventFormKind } from "./EventFormCards";
 import { RidezFormCard, type RidezMode } from "@/components/ridez/RidezFormCard";
 import { RidezRail, type RideNeed } from "@/components/ridez/RidezRail";
+import { RidezWhosComing } from "@/components/ridez/RidezWhosComing";
 import { getAfterzWindow } from "@shared/afterzWindow";
 import { FLIP_MS, flipIn, flipOut, haptic, rectOf, type OriginRect } from "@/components/cards/flipCard";
 import "./FlyerBoard.css";
@@ -70,6 +71,11 @@ function countdownLabel(ms: number): string {
   return d > 0 ? `${d}D ${h}H` : h > 0 ? `${h}H ${m}M` : `${m}M`;
 }
 const DISMISS_PX = 110;
+/** Only http(s) links become tiles. */
+function webUrl(u?: string | null): string | null {
+  if (!u) return null;
+  try { const x = new URL(u.trim()); return x.protocol === "https:" || x.protocol === "http:" ? x.href : null; } catch { return null; }
+}
 
 type EventDetailResponse = {
   event?: {
@@ -77,6 +83,7 @@ type EventDetailResponse = {
     isClaimable?: boolean;
     hasPendingClaim?: boolean;
     ticketUrl?: string | null;
+    venueWebsite?: string | null;
   } | null;
   /** Only present when the server passes this viewer through the source
    *  link gate (admins / promoters / owner); absent for everyone else. */
@@ -248,6 +255,7 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   const [carpoolStub, setCarpoolStub] = useState<null | { origin: OriginRect | null; el?: HTMLElement }>(null);
   /* OFFER A RIDE / I NEED A RIDE (owner, Nov 20): the shared Ridez form, event preselected. */
   const [ridezForm, setRidezForm] = useState<null | { mode: RidezMode; origin: OriginRect | null }>(null);
+  const [whosComing, setWhosComing] = useState<null | { needId: number; origin: OriginRect | null }>(null);
   const [item, setItem] = useState<null | { kind: "gig" | "mizz"; id: number; title: string; body?: string | null; origin: OriginRect | null }>(null);
   const [popOrigin, setPopOrigin] = useState<OriginRect | null>(null);
   const [night, setNight] = useState<undefined | "rides" | "afterz">(undefined);
@@ -422,7 +430,7 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   }));
   /* Directions header (t345u): distance + travel time, only when location is already permitted. */
   const travel = usePermittedTravel(openLat != null && openLng != null ? { lat: openLat, lng: openLng } : null, panel?.kind === "maps");
-  type Tile = { key: string; label: string; color: string; icon: React.ReactNode; href?: string; popup?: boolean; badge?: string; dot?: boolean };
+  type Tile = { key: string; label: string; color: string; icon: React.ReactNode; href?: string; external?: boolean; aria?: string; popup?: boolean; badge?: string; dot?: boolean };
   /* Host slot above the tiles (Tucker, t308u). One wide slot, three cases:
      claimable -> CLAIM THIS EVENT; a promoter (person) hosts -> face stack +
      name linking to them; venue or collective/group -> no slot (they're
@@ -439,11 +447,17 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
     setLastTile(kind);
     try { localStorage.setItem(lastTileKey, kind); } catch { /* private mode */ }
   };
+  /* Tile row (owner, Nov 20): TICKETS (--neon-red) first and the VENUE WEBSITE (--neon-violet) last,
+     both opening in a new tab; each hides when the event has no such link. */
+  const venueSite = webUrl(detailEvent?.venueWebsite || (openListing as { venueWebsite?: string | null }).venueWebsite);
+  const ticketSite = webUrl(openTicket);
   const tiles: Tile[] = [
+    ...(ticketSite ? [{ key: "tickets", label: "TICKETS", color: "var(--neon-red)", icon: <Ticket />, href: ticketSite, external: true, aria: "Tickets (opens in a new tab)" }] : []),
     ...(hasPlace || live ? [{ key: "rides", label: "RIDEZ", color: "var(--neon-orange)", icon: <Car />, popup: true, dot: live && hasNew("carpool") }] : []),
     ...(live ? [{ key: "afterz", label: "AFTERZ", color: "var(--yellow)", icon: <Moon />, popup: true,
       badge: afterzWin?.state === "before" ? `OPENS ${countdownLabel(afterzWin.opensAt - tick).split(" ")[0]}` : undefined, dot: hasNew("afterz") }] : []),
     ...(hasPlace ? [{ key: "maps", label: "DIRECTIONS", color: "var(--green-acid)", icon: <MapPin />, popup: true }] : []),
+    ...(venueSite ? [{ key: "venue-website", label: "WEBSITE", color: "var(--neon-violet)", icon: <Globe />, href: venueSite, external: true, aria: `${openListing.venueName} website (opens in a new tab)` }] : []),
   ];
   /* Tiles are plain data; the tap handler lives here so render never builds
      closures over refs (React Compiler). */
@@ -572,9 +586,10 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
               </a>
             ) : null}
             {tiles.length ? (
-              <nav className="otiles" aria-label="Event actions" data-panel={panel && !panel.closing ? panel.kind : undefined}>
+              <nav className="otiles" aria-label="Event actions" data-panel={panel && !panel.closing ? panel.kind : undefined} data-tiles={tiles.length} style={{ "--tiles": tiles.length } as CSSProperties}>
                 {tiles.map(t => t.href ? (
-                  <a key={t.key} data-action={t.key} className="otile" href={t.href} style={{ "--tile": t.color } as CSSProperties}>
+                  <a key={t.key} data-action={t.key} className="otile" href={t.href} {...(t.external ? NEW_TAB : {})} aria-label={t.aria}
+                    style={{ "--tile": t.color } as CSSProperties}>
                     <span className="otile-face" aria-hidden="true">{t.icon}</span>
                     <span className="otile-l">{t.label}</span>
                   </a>
@@ -651,12 +666,13 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
                     label="Ridez" accent="var(--neon-orange)" title={`TO ${openListing.venueName.toUpperCase()}`} logo="ridez-pending" centered>
                     {live ? (
                       <>
-                        <RidezRail rides={planning.data?.rides} needs={planning.data?.needs} signedOut={planning.data?.rides == null}
+                        <RidezRail rides={planning.data?.rides} needs={planning.data?.needs} signedOut={!viewer || planning.data?.rides == null}
                           onOffer={e => setRidezForm({ mode: "offer", origin: rectOf(e.currentTarget) })}
                           onNeed={e => setRidezForm({ mode: "need", origin: rectOf(e.currentTarget) })}
                           onLead={el => setCarpoolStub({ origin: rectOf(el), el })}
                           onOpenRide={(_r, el) => { setCarpoolStub(null); setPanel(null); openNight("rides", el); }}
-                          onOpenNeed={(_n, el) => setRidezForm({ mode: "offer", origin: rectOf(el) })} />
+                          onOpenNeed={(_n, el) => setRidezForm({ mode: "offer", origin: rectOf(el) })}
+                          onWhosComing={(needId, el) => setWhosComing({ needId, origin: rectOf(el) })} />
                       </>
                     ) : null}
                     {hasPlace ? (
@@ -933,6 +949,7 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
                       key={d.ds}
                       type="button"
                       className={`oday${oday === i ? " hot" : ""}`}
+                      style={{ "--day-c": dayColorVar(d.ds) } as CSSProperties}
                       onClick={() => setOday(i)}
                     >
                       <i>{d.dow}</i>
@@ -1044,6 +1061,7 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
             <p className="zas-note" data-stub="expanded-carpool">Placeholder: the expanded carpool card is being designed. To post, use OFFER A RIDE or I NEED A RIDE in Ridez.</p>
           </ActionSheetCard>
         ) : null}
+        {whosComing ? <RidezWhosComing needId={whosComing.needId} origin={whosComing.origin} onClose={() => setWhosComing(null)} /> : null}
         {ridezForm ? (
           <RidezFormCard mode={ridezForm.mode} direction={startMs(openListing) <= Date.now() ? "departing" : "arriving"} eventId={openListing.id} eventTitle={openListing.title} occurrenceDate={planningDate} eventStart={openListing.dateStart}
             venueName={openListing.venueName} rides={planning.data?.rides ?? null} origin={ridezForm.origin}

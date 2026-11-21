@@ -48,6 +48,7 @@ export const openCardModules = [
   ['ridez/RidezFormCard', ['RidezFormCard']],
   ['ridez/RidezCircleToggle', ['RidezCircleToggle']],
   ['ridez/RidezRail', ['RidezRail', 'RideNeedCard']],
+  ['ridez/RidezWhosComing', ['RidezWhosComing']],
   ['inbox/InboxGroupChat', ['TimedInboxGroupChat']],
   ['HeartButton', ['HeartButton']],
 ];
@@ -73,7 +74,7 @@ export const cardSourcePatterns = [
   /[\\/]client[\\/]src[\\/]components[\\/]board[\\/]punk[\\/]ZineCard\.jsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/](?:OpenEventCard|OpenCardShare|EventFormCards|EventParticipation|EventRailCards)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/](?:ActionSheetCard|ExpandingActionPanel|FormCard|cardLogo|rideBrands)\.tsx$/,
-  /[\\/]client[\\/]src[\\/]components[\\/]ridez[\\/](?:RidezFormCard|RidezCircleToggle|RidezRail)\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]ridez[\\/](?:RidezFormCard|RidezCircleToggle|RidezRail|RidezWhosComing)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]inbox[\\/]InboxGroupChat\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]HeartButton\.tsx$/,
 ];

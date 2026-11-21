@@ -24,6 +24,9 @@
   separates the controls from the list. NEEDS A RIDE cards join the rail: people going to this event
   plus anyone within 2 miles who needs a ride right now; a slow `--yellow` bloom marks someone going
   to your Afterz, `--neon-orange` someone going to this event (static in reduced motion / Calm Mode).
+- **I'M COMING / Who's coming:** drivers tap I'M COMING on a NEEDS A RIDE card. The rider gets an in-app
+  note and a push. The rider's Who's coming sheet shows each driver's avatar, rides given, ETA and an
+  estimated fuel cost, plus the existing safety check-in.
 - **Directions panel:** venue + address with COPY, distance/time chips, and large tiles: Zaylist
   Mapz (first, in-app), Google Maps, Apple Maps, Waze, Citymapper (new tab).
 - **Countdown box:** fixed size, dead center; venue mark directly left, collective/host mark
@@ -38,7 +41,10 @@
 - `GET /api/events/:id/occurrences/:date/planning`: each ride now includes `driverPhotoUrl` and
   `circle` (you / friend / fof / everybody); new `needs[]` (members only, no coordinates).
 - New: `POST` / `DELETE {planning}/needs(/me)` for I NEED A RIDE, and `POST` / `GET` / `DELETE
-  /api/ridez/needs` for location-only needs within 2 miles (the #117 drawer). New table `ride_needs`.
+  /api/ridez/needs` for location-only needs within 2 miles (the #117 drawer). New tables `ride_needs`,
+  `ride_need_responses`.
+- New: `/api/ridez/needs/:id/coming` (POST/DELETE, `/location`, `/arrived`), `GET /api/ridez/needs/mine/coming`,
+  `POST /api/ridez/needs/:id/watch` (the existing ride check-in), `GET /api/ridez/fuel`.
 
 ## Fixes behind CI
 
@@ -47,6 +53,12 @@
 - Open card poster uses the responsive DPR variants (srcset), retrying the original on error.
 - The at-event dialog leaves the modal layer when its exit animation starts, so one Escape closes
   the card underneath.
+
+## Next (not in this version)
+
+- Optional Cash App / Venmo handles in profile settings (visible only to matched ride partners) and the
+  on-arrival "Thank them with a tip" popup.
+- A live Portland gas price. Fuel is a configurable constant labeled "est.".
 
 ## Design notes: future (NOT in this version)
 

@@ -62,7 +62,7 @@ test('production cards preserve source geometry across viewport and in-flow pres
   browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||undefined,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
   const context=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'reduce'});
   await context.route('**/api/**',route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/session')return route.fulfill({contentType:'application/json',body:'null'});
-    if(p.endsWith('/planning'))return route.fulfill({json:{checked:false,onSiteWindow:false,poster:null,venue:'QA venue',title:'QA Event',open:true,canPostGig:false,gigs:[],rides:[{id:7,area:'North Portland',driver:'qa_driver',driverPhotoUrl:null,remaining:2,mine:false,myRequest:null,requests:[],circle:'everybody',plan:{kind:'carpool',meeting:'NE 15th & Alberta',leaveBy:null,oneWay:true,departed:false},faces:[]}],needs:[{id:1,user:'qa_needs',photoUrl:null,area:'Pearl',direction:'departing',mine:false,sameEvent:true,sameAfterz:false,circle:'everybody',distanceMi:null},{id:2,user:'qa_afterz',photoUrl:null,area:'Alberta',direction:'now',mine:false,sameEvent:false,sameAfterz:true,circle:'friend',distanceMi:0.1}]}});
+    if(p.endsWith('/planning'))return route.fulfill({json:{checked:false,onSiteWindow:false,poster:null,venue:'QA venue',title:'QA Event',open:true,canPostGig:false,gigs:[],rides:[{id:7,area:'North Portland',driver:'qa_driver',driverPhotoUrl:null,remaining:2,mine:false,myRequest:null,requests:[],circle:'everybody',plan:{kind:'carpool',meeting:'NE 15th & Alberta',leaveBy:null,oneWay:true,departed:false},faces:[]}],needs:[{id:1,user:'qa_needs',photoUrl:null,area:'Pearl',direction:'departing',mine:false,sameEvent:true,sameAfterz:false,circle:'everybody',distanceMi:null},{id:2,user:'qa_afterz',photoUrl:null,area:'Alberta',direction:'now',mine:false,sameEvent:false,sameAfterz:true,circle:'friend',distanceMi:0.1},{id:3,user:'qa_me',photoUrl:null,area:'Kenton',direction:'departing',mine:true,sameEvent:true,sameAfterz:false,circle:'you',distanceMi:null}]}});
     return route.fulfill({json:[]});});
   await context.route('**/outzide-map/index.html?*',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body><h2>Destination detail fixture</h2><p>Map internals intentionally isolated from host geometry tests.</p></body></html>'}));
   const page=await context.newPage();page.setDefaultTimeout(15000);const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error('BROWSER ERROR',e.message);});
@@ -137,6 +137,22 @@ test('production cards preserve source geometry across viewport and in-flow pres
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'mobile event has no horizontal overflow');
     // RIDEZ tile -> in-card Ridez panel (t345u). The leading rail area opens the expanded carpool
     // card stub (design pending); a carpool card opens the existing at-event carpool flow.
+    // Tile row (owner, Nov 20): TICKETS first, VENUE WEBSITE last, both new-tab links; the row is centered.
+    {
+     const row=details.locator('nav.otiles');
+     const keys=await row.locator(':scope > .otile').evaluateAll(els=>els.map(e=>e.dataset.action));
+     assert.equal(keys[0],'tickets','TICKETS is the first tile');
+     assert.equal(keys[keys.length-1],'venue-website','VENUE WEBSITE is the last tile');
+     for(const k of ['tickets','venue-website']){
+      const a=row.locator(`a[data-action=${k}]`);
+      assert.equal(await a.getAttribute('target'),'_blank',`${k} opens in a new tab`);
+      assert.ok((await a.getAttribute('rel')).includes('noopener'),`${k} is rel=noopener`);
+     }
+     assert.equal(await row.locator('a[data-action=tickets]').getAttribute('href'),'https://tickets.example.test/qa-event');
+     const geo=await row.evaluate(nav=>{const card=nav.closest('.ocard').getBoundingClientRect();const faces=[...nav.querySelectorAll('.otile-face')].map(f=>f.getBoundingClientRect());return {cardMid:(card.left+card.right)/2,first:faces[0].left-card.left,last:card.right-faces[faces.length-1].right,gaps:faces.slice(1).map((f,i)=>Math.round(f.left-faces[i].right))};});
+     assert.ok(Math.abs(geo.first-geo.last)<=1,'tile row is centered '+JSON.stringify(geo));
+     assert.ok(Math.max(...geo.gaps)-Math.min(...geo.gaps)<=1,'tiles are evenly spaced '+JSON.stringify(geo));
+    }
     const ridezTile=details.locator('[data-action=rides]');
     const openRidez=async()=>{if(await ridezTile.getAttribute('aria-expanded')!=='true')await ridezTile.click();const ridez=details.locator('.zxp[aria-label=Ridez].is-open');await ridez.waitFor();return ridez;};
     {
@@ -175,7 +191,16 @@ test('production cards preserve source geometry across viewport and in-flow pres
      assert.equal(await circle.getByRole('radio',{name:'Everybody'}).getAttribute('aria-checked'),'true','default Everybody');
      const offers=ridez.locator('[data-card-category=carpool] button.ocarpool'),needCards=ridez.locator('[data-card-category=carpool-need]');
      assert.equal(await offers.count(),1,'Everybody shows every carpool');
-     assert.equal(await needCards.count(),2,'NEEDS A RIDE cards share the rail');
+     assert.equal(await needCards.count(),3,'NEEDS A RIDE cards share the rail');
+     for(let i=0;i<3;i++)assert.equal(await needCards.nth(i).locator('.ocarpool-av').count(),1,'every NEEDS A RIDE card has an avatar');
+     assert.equal(await ridez.locator('[data-action=ridez-coming]').count(),0,"signed out: no I'M COMING");
+     {
+      // Who's coming (rider side of my own need) opens over the card, not clipped by the panel.
+      await ridez.locator('[data-action=ridez-whos-coming]').click();
+      const who=page.locator('.zas[aria-label="Who\'s coming"]');await who.waitFor();
+      assert.ok(await who.locator('.zwho').isVisible(),"who's coming renders");
+      await page.keyboard.press('Escape');await who.waitFor({state:'detached'});
+     }
      // Divider between the buttons + toggle and the list; NEEDS A RIDE label; blooms (afterz yellow first).
      assert.equal(await ridez.locator('.zridez > hr.zridez-div').count(),1,'divider above the card list');
      assert.equal(await needCards.first().locator('.orailcard-tag').textContent(),'NEEDS A RIDE');
@@ -186,7 +211,7 @@ test('production cards preserve source geometry across viewport and in-flow pres
      assert.equal(bloom.anim==='none',bloom.reduced,'bloom pulses, static under reduced motion');
      await circle.getByRole('radio',{name:'Friends',exact:true}).click();
      assert.equal(await offers.count(),0,'Friends hides a ride outside your circle');
-     assert.equal(await needCards.count(),1,'Friends keeps only needs from friends');
+     assert.equal(await needCards.count(),2,'Friends keeps only needs from friends (and you)');
      assert.equal(await page.evaluate(()=>localStorage.getItem('zaylist:ridez-circle')),'friends','choice persists');
      await page.keyboard.press('ArrowRight');
      assert.equal(await circle.getByRole('radio',{name:'Friends of friends'}).getAttribute('aria-checked'),'true','arrow keys move the choice');

@@ -225,7 +225,6 @@ export function registerEventPlanning(
     next();
   };
   const needs = createRideNeeds(db, storage);
-  registerRideNeedRoutes(app, needs, requireAuth, moderate);
   /** Public venue coordinates only (house parties / registration-only stay unlocated). */
   const venueAt = (event: Event) =>
     !event.isHouseParty && !hasRegistrationOnlyLocation(event) && event.lat != null && event.lng != null
@@ -240,6 +239,7 @@ export function registerEventPlanning(
     path,
     notifyRiders,
   );
+  registerRideNeedRoutes(app, needs, storage, requireAuth, moderate, { notify: notifyRiders, startWatch: night.startWatch });
   app.get("/api/night/ride-waypoints", requireAuth, (req, res) => {
     res.set("Cache-Control", "private, no-store");
     res.vary("Cookie");

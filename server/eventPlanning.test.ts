@@ -52,12 +52,17 @@ test("planning is occurrence-, owner-, participant- and host-scoped", async (t) 
     lat: 45.5231,
     lng: -122.6765,
   };
+  const notices: { ids: number[]; sender: number; title: string; path: string; tag: string }[] = [];
+  const inbox: { from: number; to: number; subject: string }[] = [];
   const storage = {
+    sendMessage: (from: number, to: number, subject: string) => { inbox.push({ from, to, subject }); },
     getEvent: (id: number) => (id === 10 ? dbEvent : null),
     getUserById: (id: number) =>
       db.prepare("SELECT * FROM users WHERE id=?").get(id),
-    getUserByUsername: (username: string) =>
-      username === "driver" ? { photoUrl: "/uploads/profile/driver.webp" } : undefined,
+    getUserByUsername: (username: string) => {
+      const row = db.prepare("SELECT * FROM users WHERE username=?").get(username) as Record<string, unknown> | undefined;
+      return row ? { ...row, photoUrl: username === "driver" ? "/uploads/profile/driver.webp" : null } : undefined;
+    },
     getMemberBlockStatus: (a: number, b: number) => ({
       interactionBlocked: !!db
         .prepare(
@@ -87,6 +92,7 @@ test("planning is occurrence-, owner-, participant- and host-scoped", async (t) 
     },
     () => true,
     () => false,
+    (ids, sender, title, _body, path, tag) => notices.push({ ids, sender, title, path, tag }),
   );
   const { store } = planning;
   store.linkGig(21, 10, "2099-07-02");
@@ -210,6 +216,34 @@ test("planning is occurrence-, owner-, participant- and host-scoped", async (t) 
   const drawer = await (await request("/api/ridez/needs?lat=45.62&lng=-122.6765", 3)).json();
   assert.deepEqual(drawer.needs.map((n: { user: string }) => n.user), ["driver"]);
   assert.equal(drawer.radiusMi, 2);
+  // I'M COMING + who's coming + safety check-in (owner, Nov 20).
+  const riderNeedId = riderNeed.id as number;
+  assert.equal((await request(`/api/ridez/needs/${riderNeedId}/coming`, 2, "POST")).status, 404, "not on your own need");
+  assert.equal((await request(`/api/ridez/needs/${riderNeedId}/coming`, 3, "POST", { lat: 45.5300, lng: -122.6765 })).status, 201);
+  assert.equal((await (await request(`/api/ridez/needs/${riderNeedId}/coming`, 3, "POST")).json()).already, true, "no repeat notice");
+  assert.deepEqual(inbox, [{ from: 3, to: 2, subject: "@other is coming" }], "rider gets one in-app note");
+  assert.deepEqual(notices.filter(n => n.tag.startsWith("need-coming")).map(n => [n.ids, n.sender, n.path]), [[[2], 3, "/events/10?night=rides"]]);
+  const coming = (await (await request("/api/ridez/needs/mine/coming", 2)).json()).needs;
+  assert.equal(coming[0].needId, riderNeedId);
+  assert.equal(coming[0].drivers[0].user, "other");
+  assert.equal(coming[0].drivers[0].ridesGiven, 0);
+  assert.ok(Math.abs(coming[0].drivers[0].distanceMi - 0.5) <= 0.1, "rounded driver distance for the ETA");
+  assert.ok(!("lat" in coming[0].drivers[0]), "driver coordinates stay server-side");
+  assert.deepEqual((await (await request("/api/ridez/needs/mine/coming", 3)).json()).needs, [], "only the rider sees who's coming");
+  assert.equal((await request(`/api/ridez/needs/${riderNeedId}/coming/location`, 3, "PUT", { lat: 45.5240, lng: -122.6765 })).status, 200);
+  assert.equal((await (await request("/api/ridez/needs/mine/coming", 2)).json()).needs[0].drivers[0].distanceMi, 0.1);
+  assert.equal((await request(`/api/ridez/needs/${riderNeedId}/watch`, 3, "POST", { contact: "other", minutes: 30, consent: true })).status, 404, "only the rider starts a check-in");
+  assert.equal((await request(`/api/ridez/needs/${riderNeedId}/watch`, 2, "POST", { contact: "driver", minutes: 30, consent: true })).status, 400, "trusted contact must be a mutual follow");
+  const watch = await (await request(`/api/ridez/needs/${riderNeedId}/watch`, 2, "POST", { contact: "other", minutes: 30, consent: true })).json();
+  assert.equal(watch.check, -riderNeedId, JSON.stringify(watch));
+  assert.ok(watch.dueAt > Date.now());
+  const checks = await (await request("/api/night/ride-checks", 2)).json();
+  assert.deepEqual(checks.map((c: { ride: number }) => c.ride), [-riderNeedId], "the existing ride-check list carries the need ride");
+  assert.equal((await request(`/api/night/ride-checks/${-riderNeedId}`, 2, "DELETE")).status, 200);
+  assert.equal((await request(`/api/ridez/needs/${riderNeedId}/coming/arrived`, 3, "POST")).status, 200);
+  assert.equal((await request(`/api/ridez/needs/${riderNeedId}/coming/arrived`, 3, "POST")).status, 409);
+  assert.equal((await (await request("/api/ridez/needs/mine/coming", 2)).json()).needs[0].drivers[0].arrived, true);
+  assert.equal((await request("/api/ridez/fuel")).status, 200);
   assert.equal((await request(second + "/needs/me", 2, "DELETE")).status, 200);
   assert.equal((await request("/api/ridez/needs/me", 4, "DELETE")).status, 200);
   assert.equal((await request("/api/ridez/needs/me", 1, "DELETE")).status, 200);

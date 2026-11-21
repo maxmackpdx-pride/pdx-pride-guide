@@ -40,3 +40,23 @@ export function ridezOfferBody(v: Values, occurrenceDate: string, eventStart?: s
   };
 }
 
+
+/** Driving minutes for a distance (the Directions panel's estimate: road factor 1.3, 22 mph city, +3 min). */
+export function driveMinutes(miles: number): number {
+  return Math.max(3, Math.round((miles * 1.3) / 22 * 60 + 3));
+}
+
+/** Who's-coming ETA label from the driver's rounded distance to the pickup. */
+export function driverEtaLabel(distanceMi: number | null | undefined, arrived = false): string | null {
+  if (arrived) return "ARRIVED";
+  if (typeof distanceMi !== "number" || !Number.isFinite(distanceMi)) return null;
+  return `${distanceMi < 0.1 ? "<0.1" : distanceMi} MI · ~${driveMinutes(distanceMi)} MIN AWAY`;
+}
+
+/** Fuel estimate (owner, Nov 20): miles ÷ mpg × price per gallon. Always an estimate ("est."). */
+export function fuelEstimate(miles: number | null | undefined, cfg: { mpg?: number; pricePerGallon?: number } = {}): number | null {
+  const mpg = cfg.mpg && cfg.mpg > 0 ? cfg.mpg : 25;
+  const price = cfg.pricePerGallon && cfg.pricePerGallon > 0 ? cfg.pricePerGallon : 4.5;
+  if (typeof miles !== "number" || !Number.isFinite(miles) || miles < 0) return null;
+  return Math.round((miles / mpg) * price * 100) / 100;
+}
