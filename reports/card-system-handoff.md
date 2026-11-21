@@ -4,7 +4,7 @@
 
 | State | Evidence |
 | --- | --- |
-| Demo | [Original private ChatGPT Site](https://zaylist-yes-coach-cards.tucker-pdmax.chatgpt.site). Its three captured files matched PR #121. |
+| Demo | The owner-private ChatGPT Site holds the [original four surfaces](https://zaylist-yes-coach-cards.tucker-pdmax.chatgpt.site/) and the [interactive Afterz and Ridez demo](https://zaylist-yes-coach-cards.tucker-pdmax.chatgpt.site/demo/). All three original capture files match PR #121. |
 | Built | Local React 19, React Compiler and Tailwind 4.3.5 build, exercised in Chrome with the application API and local database. |
 | Deployed to zaylist.com | No. The feature branch is local. |
 | Live-verified on zaylist.com | No. Production served as a read-only reference for the previous card and navigation. |
@@ -95,7 +95,18 @@ The published six-role, nine-power matrix informed visible actions and counts. L
 | Glass gate | The checker read release 2026-11-21.8 at runtime. It compared 38 painted samples across overlay, dock and scrim with zero advisories. A separate intentional mismatch produced an advisory and permitted the build to proceed. |
 | Copy gate | The final local guest view matched the Codex editorial review (SHA-256 `93358fbf97a90fe946bc37d8b44dd3aebd5e85b7a2100d1df821798c4afbfc25`). The organizer’s description and API prices matched, including $15 presale and $25 at the door. The gate returned its documented editorial-only exit code 2. Independent human voice sign-off remains open. |
 | React Compiler | 121 render functions and 20 hooks across 87 changed application source files had a successful compiler transform and matching Vite output. The four private demo renders were checked separately. |
-| Release motion | The 402 × 874 and 390 × 874 phone-width runs each recorded 44 animation-frame samples in desktop Chrome. Both had a 16.7ms median and 16.8ms 95th percentile. The longest intervals were 50.0ms and 33.4ms respectively. Both entrances grew without rotation and returned to their original front card on close. An uninterrupted 60fps on a physical iPhone remains unverified. [Frame samples](card-system-captures/opening-motion.json) |
+| Release motion | The 402 × 874 and 390 × 874 phone-width runs each captured 44 frames before the opening animation reached full opacity in desktop Chrome. Both had a 16.7ms median and 16.8ms 95th percentile. The longest intervals were 50.0ms and 33.4ms respectively. Both entrances grew without rotation and returned to their original front card on close. An uninterrupted 60fps on a physical iPhone remains unverified. [Frame samples](card-system-captures/opening-motion.json) |
 | Regression suite | The combined local suite ran 95 tests. It passed 94 with zero failures. The one skipped case is the opt-in timing benchmark for legacy versus cached event feeds. Separately, the drawer-page tests passed 22 of 22. The TypeScript check and full local release build passed. |
 
 The local development viewer opens the real application routes with their normal data and permissions. [Run the gates](card-system-gates.md)
+
+## Try Afterz and carpool
+
+The owner-private ChatGPT Site opens on the Yes Coach anniversary at Sanctuary Club. Jules Finch is a fictional checked-in guest. Rowan Vale hosts The Lantern Room and drives the Buckman carpool. The profile selector lets you operate both sides of each exchange. Reset restores the original rooms, seats and messages. Changes stay in this browser. [Open the interactive demo](https://zaylist-yes-coach-cards.tucker-pdmax.chatgpt.site/demo/)
+
+- **Afterz.** As Jules, open The Lantern Room, confirm you are 18 or older and request an invite. Switch to Rowan, accept Jules, then switch back to Jules. The private group chat and meeting directions are now available. Side B shows an accepted invitation and Night Kitchen shows a waitlist. The product’s map discovery window is 9 PM to 6 AM Pacific. The demo opens at 10 PM Pacific so you can try it at any hour. [Afterz](https://zaylist-yes-coach-cards.tucker-pdmax.chatgpt.site/demo/#/afterz) · [402 × 874 capture](card-system-captures/private-site-afterz.png)
+- **Ridez.** As Jules, choose Going and request a seat in the Buckman carpool. As Rowan, accept Jules’s request. Switch back to Jules to see Seat confirmed and the shared passenger tools. You can also offer a carpool or post a pickup neighborhood using I need a ride. Departing covers the trip from the event. Matching requires attendance and venue check-in, and a departing rider’s home neighborhood stays private. [Carpool](https://zaylist-yes-coach-cards.tucker-pdmax.chatgpt.site/demo/#/rides) · [402 × 874 capture](card-system-captures/private-site-carpool.png)
+
+Private Site version 2 uses source commit `5f38669321b0c0511024524fe93b7516f0c5af95`. Chrome at 402 × 874 operated the hosted invitation, approval, private chat and directions, seat request and acceptance, profile switch, withdrawal, local safety check and reset. The six captures and full poster loaded. The original HTML served at the root retained SHA-256 `47a7e6f62afef0f378387d43957e9d8faa34a6b39f3678865a7b63a0075de33d`. The interactive route made zero external network requests in the navigation check. The access policy still lists only the owner. [Phone gallery](https://zaylist-yes-coach-cards.tucker-pdmax.chatgpt.site/demo/#/captures)
+
+Run `node demos/card-system-preview/build.mjs` to reproduce the static demo from this checkout. It compiles the same Afterz drawer and event planning components as the local application. An in-browser fixture adapter supplies sample data through their existing API contracts. The demo’s location and phone controls operate on fictional data. The Zaylist feature branch remains local.
