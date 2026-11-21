@@ -355,7 +355,7 @@ export function createDemoApi({ storage, poster }: Options = {}) {
     eventId: DEMO_EVENT.id,
     occurrence: DEMO_EVENT.occurrence,
     capacity: room.capacity,
-    poster: room.poster,
+    poster: room.poster ?? (room.id === "demo-lantern-room" ? poster ?? null : null),
     sexPositive: Number(room.sexPositive),
     nudityOk: Number(room.nudityOk),
     vibe: room.vibe,
