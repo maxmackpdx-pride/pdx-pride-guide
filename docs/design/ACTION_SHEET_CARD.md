@@ -245,7 +245,15 @@ Three tiles under the countdown box, nothing else:
    the planning payload's `rides` (members only; signed out shows SIGN IN TO SEE RIDES) and render
    through `outzWallToBoardPost` (`CARPOOL_OFFER`, carpool sticker) → `BoardBrowseCard size="small"`.
    Ride cards have no save API, so the heart is disabled.
-2. `RIDE APPS`: Lyft, Uber, TriMet buttons, each with the brand mark and the brand primary as rim.
+2. `RIDE APPS`: a row of three square app-icon tiles (Lyft, Uber, TriMet), same anatomy as the
+   card's locked tiles, brand color as rim + glyph, label under.
+
+Header: the Ridez logo placeholder and `TO <VENUE>` centered (`centered` prop), no icon/kicker.
+Every carpool small card is labeled `ARRIVING` (carpool to the venue) or `DEPARTING` (ride home /
+on to Afterz) at its top; both kinds show anytime. The `+` slot first asks ARRIVING or DEPARTING and
+opens the existing offer form preselected. Departing (ride home) keeps the server safety rule: the
+poster must be Going and verified present at the venue (foreground checks + missed-check
+escalation), so it can't be posted before check-in yet (product decision pending).
 
 **Third-party brand exception.** Lyft/Uber/TriMet colors are the one allowed non-system color,
 only on those buttons, from `ds/tokens/brand-third-party.css` (`--brand-lyft #FF00BF`,
@@ -269,3 +277,13 @@ input. Members see the newest bubbles that fit (read-only, faded at the top) and
 non-members see JOIN THE PREGAME (joining = Going, `POST /api/events/:id/attendance`); signed out
 sees SIGN IN TO JOIN. Every tap opens the inbox group chat directly:
 `useInboxSheet().openSheet({ view: "chats", group: { kind: "EVENT", id, title, calendarDate } })`.
+
+## Shared expanded-card backdrop (t332u)
+
+One backdrop for every expanded card (open event card, Gigz/Mizzed/carpool cards, action sheets,
+forms, share popups): `--z-backdrop-tint` + `--z-backdrop-filter` (`blur(var(--z-backdrop-blur))`,
+12px) in `ds/tokens/effects.css`. `prefers-reduced-transparency: reduce` swaps to a 94% solid tint,
+no blur. The backdrop always stops above the bottom dock (`CardStage` measures the dock and
+publishes `--z-dock-h`), so the dock stays sharp and usable. Collectives: the countdown box uses a
+party collective's saved SceneZ logo (`sceneCollectiveLogo(slug)`) before the name-matched
+directory trace.
