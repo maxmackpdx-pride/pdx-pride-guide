@@ -293,8 +293,11 @@
   border-radius: 50%;
   font-size: 0;
 }
+html .drawer-mini button[data-card-heart="true"][aria-pressed].zheart-btn,
 .drawer-mini .zheart-btn,
 .drawer-mini button[data-card-heart="true"] {
+  position: absolute !important;
+  inset: auto 6px 6px auto !important;
   z-index: 3;
 }
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { EventCard } from "@/components/cards";
+import { DrawerMiniCard } from "@/components/drawers";
 import EventPlanExtension from "./EventPlanExtension";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import { usePlacezDrawerPlans, type PlacezDrawerEvent } from "@/hooks/usePlacezDrawerPlans";
@@ -73,11 +73,10 @@ function EventItem({ item, side }: { item: PlacezDrawerEvent; side: "left" | "ri
           mizzedClosesAt={item.mizzedClosesAt}
         />
       )}
-      <EventCard
-        listing={listing}
-        size="small"
-        rsvped={rsvp.myEventIds.has(listing.id)}
-        onToggleRsvp={() => rsvp.toggleRsvp(listing.id)}
+      <DrawerMiniCard
+        event={listing}
+        saved={rsvp.myEventIds.has(listing.id)}
+        onToggleSave={() => rsvp.toggleRsvp(listing.id)}
         onOpen={() => openEventFromDrawer(listing.id, listing.title)}
       />
       {side === "right" && (

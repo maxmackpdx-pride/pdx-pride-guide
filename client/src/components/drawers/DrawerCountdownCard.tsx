@@ -39,7 +39,7 @@ export default function DrawerCountdownCard({
   }
   const listing = lead as unknown as Event;
   const poster = listingPosterUrl(listing);
-  const accent = lead.accentColor || dayAccentToken(listingDay(lead));
+  const accent = lead.accentColor || dayAccentToken(listingDay(listing));
   return (
     <article
       className="drawer-count pdx-glass-rebind"

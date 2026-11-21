@@ -1,5 +1,12 @@
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { EVENT_TYPE_FILTERS } from "@shared/eventTypeTags";
+import {
+  eventTypeLabelToTagId,
+  tagIdToEventTypeLabel,
+  type DrawerFilterState,
+} from "@shared/drawerFilters";
+import { DrawerTop } from "@/components/drawers";
+import type { DrawerTopEvent } from "@shared/drawerTop";
 import "./EventsFilterDrawer.css";
 import NightDrawer from "../afterz/NightDrawer";
 
@@ -18,22 +25,6 @@ export type EventsFilterDay = {
   isToday: boolean;
   selected: boolean;
 };
-
-const WINDOWS = [
-  ["all", "ALL"],
-  ["tonight", "TONIGHT"],
-  ["week", "THIS WEEK"],
-  ["later", "LATER"],
-] as const;
-
-const TAG_CHIPS: Array<[string, string]> = [
-  ["21plus", "21+"],
-  ["free", "FREE"],
-  ["party", "PARTY"],
-  ["drag", "DRAG"],
-  ["kink", "KINK"],
-  ["social", "SOCIAL"],
-];
 
 const LIP_H = 32;
 type Stage = 0 | 1 | 2;
@@ -62,7 +53,6 @@ export default function EventsFilterDrawer({
   query,
   onQuery,
   count,
-  days,
   pastView,
   onPickDay,
   onHeightChange,
@@ -74,6 +64,9 @@ export default function EventsFilterDrawer({
   activeWindow,
   onPickWindow,
   startAtSchedule = false,
+  upcomingEvents = [],
+  selectedDate = null,
+  onSelectDate,
 }: {
   window: string;
   onWindow: (value: string) => void;
@@ -100,6 +93,9 @@ export default function EventsFilterDrawer({
   onPickWindow?: (key: string) => void;
   /** Arrive already at stage 2 (the /schedule deep link). */
   startAtSchedule?: boolean;
+  upcomingEvents?: DrawerTopEvent[];
+  selectedDate?: string | null;
+  onSelectDate?: (date: string) => void;
 }) {
   const [stage, setStage] = useState<Stage>(startAtSchedule ? 2 : 1);
   const [arriving, setArriving] = useState(!startAtSchedule);
@@ -286,6 +282,32 @@ export default function EventsFilterDrawer({
     onPickDay(date);
   };
 
+  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
+  const sharedFilters: DrawerFilterState = {
+    categories: categoryFilters,
+    times: windowFilter && windowFilter !== "all" ? [windowFilter] : [],
+    tags: Array.from(new Set([
+      ...Array.from(tags),
+      ...(activeTypes ?? []).map(label => eventTypeLabelToTagId(label as (typeof EVENT_TYPE_FILTERS)[number])),
+    ].filter(Boolean))),
+  };
+  const applySharedFilters = (next: DrawerFilterState) => {
+    const time = next.times[0] || "all";
+    if (time !== windowFilter) onWindow(time);
+    setCategoryFilters(next.categories);
+    const typeLabels = next.tags.map(id => tagIdToEventTypeLabel(id)).filter((label): label is NonNullable<typeof label> => !!label);
+    for (const label of EVENT_TYPE_FILTERS) {
+      const was = !!activeTypes?.includes(label);
+      const isOn = typeLabels.includes(label);
+      if (was !== isOn) onToggleType?.(label);
+    }
+    const sceneTags = next.tags.filter(id => !tagIdToEventTypeLabel(id));
+    const current = new Set(tags);
+    for (const id of new Set([...current, ...sceneTags])) {
+      if (current.has(id) !== sceneTags.includes(id)) onToggleTag(id);
+    }
+  };
+
   return (
     <section
       ref={rootRef}
@@ -321,30 +343,14 @@ export default function EventsFilterDrawer({
       <div className="edrawer__bodywrap" style={{ height: shownH }} inert={stage === 0 && dragH == null}>
         <div className="edrawer__stage1" ref={stage1Ref} hidden={showSchedule} inert={showSchedule}>
           <NightDrawer/>
-          <div className="edrawer__filters" role="group" aria-label="Filter the board">
-            {WINDOWS.map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                className={`edrawer__chip${windowFilter === value ? " on" : ""}`}
-                aria-pressed={windowFilter === value}
-                onClick={() => onWindow(value)}
-              >
-                {label}
-              </button>
-            ))}
-            <span className="edrawer__div" />
-            {TAG_CHIPS.map(([token, label]) => (
-              <button
-                key={token}
-                type="button"
-                className={`edrawer__chip${tags.has(token) ? " on" : ""}`}
-                aria-pressed={tags.has(token)}
-                onClick={() => onToggleTag(token)}
-              >
-                {label}
-              </button>
-            ))}
+          <DrawerTop
+            events={upcomingEvents}
+            selectedDate={selectedDate}
+            onSelectDate={onSelectDate}
+            filters={sharedFilters}
+            onFiltersChange={applySharedFilters}
+          />
+          <div className="edrawer__filters" role="group" aria-label="Search the board">
             <input
               className="edrawer__search"
               type="text"
@@ -354,57 +360,16 @@ export default function EventsFilterDrawer({
               onChange={e => onQuery(e.target.value)}
             />
             <span className="edrawer__count">{count} EVENTS</span>
-          </div>
-          {onToggleType ? (
-            <div className="edrawer__types" role="group" aria-label="Filter by event type">
-              {EVENT_TYPE_FILTERS.map(f => (
-                <button
-                  key={f}
-                  type="button"
-                  className={`edrawer__chip${activeTypes?.includes(f) ? " on" : ""}`}
-                  aria-pressed={!!activeTypes?.includes(f)}
-                  onClick={() => onToggleType(f)}
-                >
-                  {f}
-                </button>
-              ))}
-              {onTogglePast ? (
-                <>
-                  <span className="edrawer__div" />
-                  <button
-                    type="button"
-                    className={`edrawer__chip${pastView ? " on" : ""}`}
-                    aria-pressed={pastView}
-                    onClick={onTogglePast}
-                  >
-                    {pastView ? "BACK TO UPCOMING" : "BACK IN TIME"}
-                  </button>
-                </>
-              ) : null}
-            </div>
-          ) : null}
-          <div className="edrawer__days" role="group" aria-label={pastView ? "Jump to a past day" : "Jump to a day"}>
-            {days.map(d => {
-              const lower = d.dowCode.toLowerCase();
-              const has = d.count > 0;
-              return (
-                <button
-                  key={d.date}
-                  type="button"
-                  className={`edrawer__day${has ? " has-events" : ""}${d.isToday ? " is-today" : ""}${d.selected ? " is-selected" : ""}`}
-                  style={{ "--dc": `var(--day-${lower})`, "--dt": `var(--day-${lower}-text, var(--day-${lower}))` } as CSSProperties}
-                  aria-pressed={d.selected}
-                  aria-label={`${d.dowCode} ${d.dom}${d.isToday ? ", today" : ""}${has ? `, ${d.count} event${d.count === 1 ? "" : "s"}` : ", no events"}`}
-                  onClick={() => pickDay(d.date)}
-                >
-                  <span className="edrawer__dow">{d.dowCode.slice(0, 1)}</span>
-                  <span className="edrawer__dom">{d.dom}</span>
-                  <span className="edrawer__mark" aria-hidden="true">
-                    {has ? <span className="edrawer__dcount">{d.count}</span> : <span className="edrawer__idle" />}
-                  </span>
-                </button>
-              );
-            })}
+            {onTogglePast ? (
+              <button
+                type="button"
+                className={`edrawer__chip${pastView ? " on" : ""}`}
+                aria-pressed={pastView}
+                onClick={onTogglePast}
+              >
+                {pastView ? "BACK TO UPCOMING" : "BACK IN TIME"}
+              </button>
+            ) : null}
           </div>
           {windowChips && windowChips.length > 0 && onPickWindow ? (
             <div className="edrawer__windows" role="group" aria-label="Jump to a date window">

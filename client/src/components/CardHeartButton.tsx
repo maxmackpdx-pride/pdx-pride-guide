@@ -23,7 +23,7 @@ export function CardHeartButton({ active, className = '', ref, ...props }: Butto
       // Absolute positioning begins at the containing block's inner border.
       // Category borders differ; the shared control always sits 6px inside the
       // actual card's OUTER edge, not 6px plus that category's border thickness.
-      button.style.setProperty('--card-heart-top',`${face.top+6-container.top-parent.clientTop}px`);
+      button.style.setProperty('--card-heart-bottom',`${container.bottom-parent.clientTop-parent.clientHeight-(face.bottom-container.top)+6}px`);
       button.style.setProperty('--card-heart-right',`${container.right-borderRight-face.right+6}px`);
     };
     align();

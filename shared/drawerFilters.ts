@@ -306,7 +306,7 @@ function eventCoords(
   }
   const place = placesByVenue.get(venueKey(event.venueName));
   if (place) return { lat: place.lat, lng: place.lng, venueType: place.type };
-  return { venueType: place?.type };
+  return {};
 }
 
 /**

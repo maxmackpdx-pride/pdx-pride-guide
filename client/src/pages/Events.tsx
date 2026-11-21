@@ -942,6 +942,9 @@ export default function Events() {
         activeWindow={activeDay}
         onPickWindow={pickDrawerWindow}
         startAtSchedule={startAtSchedule}
+        upcomingEvents={liveEvents}
+        selectedDate={pickedDay}
+        onSelectDate={(date) => { if (date) pickDrawerDay(date); else setPickedDay(null); }}
       />
 
       {showSaveAuth && <AuthModal onClose={() => setShowSaveAuth(false)} />}

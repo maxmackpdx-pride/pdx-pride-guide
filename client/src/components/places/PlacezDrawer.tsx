@@ -13,6 +13,7 @@ import './PlacezEventsDrawer.css';
 export default function PlacezDrawer({
   accent,
   title = 'Placez',
+  top,
   inView,
   filterTags,
   events,
@@ -22,6 +23,8 @@ export default function PlacezDrawer({
 }: {
   accent: string;
   title?: string;
+  /** Shared untitled DrawerTop. */
+  top?: ReactNode;
   /** Live small cards for places currently in view on the map. */
   inView?: ReactNode;
   /** Map filters restyled as tag chips. */
@@ -46,6 +49,7 @@ export default function PlacezDrawer({
       onStopChange={setStop}
       maxStops={1}
     >
+      {top}
       <header className="pz-events-section">
         <h2 className="pz-events-section__title">{title}</h2>
       </header>
@@ -55,7 +59,7 @@ export default function PlacezDrawer({
           {inView}
         </section>
       ) : null}
-      {filterTags ? (
+      {!top && filterTags ? (
         <section aria-label="Map filters" data-testid="placez-map-filter-tags">
           <h3 className="pz-events-section__label">Filters</h3>
           {filterTags}

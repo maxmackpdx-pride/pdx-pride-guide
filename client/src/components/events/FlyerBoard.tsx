@@ -1,4 +1,5 @@
 import { EventFrontStage, DOW_INDEX, MONTHS, shareEventListing, ROT_CYCLE, weekdayCode, dayColorVar, startMs, dateStrOf, countdownParts, ShareIcon, Tape, Hardware, type CellCommon, aspectByPosterUrl, usePosterLoad, PosterCell, DayFlag } from './EventFlyerFront';
+import { eventMatchesAnyTime, eventMatchesTags } from "@shared/drawerFilters";
 import { CardStage } from "@/components/cards/CardStage";
 import { eventAge, eventPrice } from "@/lib/eventFacts";
 import { EventGoingButton, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
@@ -317,11 +318,8 @@ export default function FlyerBoard({
     return "later";
   };
   const passCell = (e: EventListing): boolean => {
-    if (fday !== "all" && fdayOf(e) !== fday) return false;
-    if (tags.size > 0) {
-      const own = tagsOf(e);
-      for (const t of tags) if (!own.has(t)) return false;
-    }
+    if (fday !== "all" && !eventMatchesAnyTime(e, [fday], tick)) return false;
+    if (tags.size > 0 && !eventMatchesTags(e, [...tags])) return false;
     // The parent applies the shared event query, including verified age filters.
     return true;
   };

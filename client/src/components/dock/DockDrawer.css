@@ -96,6 +96,9 @@
 .dock-drawer .pz-drawer-bare button:not(.pz-open-surface):not(.oz-hit) { visibility: hidden; }
 .dock-drawer .pz-drawer-bare .pz-heart,
 .dock-drawer .pz-drawer-bare .oz-closed-actions { visibility: hidden; }
+/* Event small cards keep their flyer button plus share/heart controls. */
+.dock-drawer .pz-drawer-bare .event-rail-card button,
+.dock-drawer .pz-drawer-bare .drawer-mini button { visibility: visible !important; }
 
 /* The bottom dock itself is mobile-only (<=959px); the drawer follows it. */
 @media (min-width:960px){.dock-drawer,.dock-drawer-lip{display:none}}

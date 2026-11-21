@@ -36,6 +36,10 @@
   width: 108px;
   flex: none;
 }
+.pz-events-rail__item .drawer-mini {
+  width: 148px;
+  flex: none;
+}
 .pz-events-rail__item.is-left { flex-direction: row; }
 .pz-events-rail__item.is-right { flex-direction: row; }
 .pz-events-rail-arrow {
@@ -172,3 +176,9 @@
   .pz-plan-ext__body, .pz-events-rail { scroll-behavior: auto; }
 }
 :is(html.calm-mode, :root[data-calm="true"]) .pz-events-rail { scroll-behavior: auto; }
+
+.pz-drawer-rail .event-rail-card,
+.pz-drawer-bare .event-rail-card {
+  width: 108px;
+  flex: none;
+}
