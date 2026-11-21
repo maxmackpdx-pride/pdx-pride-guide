@@ -1,3 +1,4 @@
+import { rememberCardOrigin } from "@/components/cards/CardAPI";
 import { ArrowDown } from "lucide-react";
 import { DemoTag } from "@/components/ds";
 import { ArrowUp } from "lucide-react";
@@ -9,7 +10,7 @@ import UserAvatar from "@/components/UserAvatar";
 import { FeedbackModal } from "@/components/FeedbackForm";
 import SpottedDetailModal from "@/components/SpottedDetailModal";
 import BoardPostOverlay from "@/components/board/BoardPostOverlay";
-import EventModal from "@/components/EventModal";
+import EventzExpanded from "@/components/events/EventzExpanded";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { avatarHrefFor } from "@/lib/avatarLinks";
@@ -174,7 +175,6 @@ export default function HubFeedCard({ item, compact = false }: Props) {
     setOpeningEventId(eventId);
     try {
       const res = await apiRequest("GET", `/api/events/${eventId}`);
-      if (!res.ok) throw new Error("Event not found");
       const full = (await res.json()) as Event;
       setAttendanceFirst(attendance);
       setModalEvent(full);
@@ -183,15 +183,14 @@ export default function HubFeedCard({ item, compact = false }: Props) {
       if (embed) {
         window.location.assign(eventPath(embed.id, embed.title, embed.dayOfWeek));
       }
-    } finally {
-      setOpeningEventId(null);
     }
+    setOpeningEventId(null);
   };
 
   const BOARD_ACCENTS: Record<string, string> = {
     gig: "var(--board-gigs)",
-    gifting: "#D4FF00",
-    spotted: "#FF1FA0",
+    gifting: "var(--neon-yellow)",
+    spotted: "var(--neon-magenta)",
     housing: "var(--panel-cyan)",
   };
   const glow = BOARD_ACCENTS[item.kind];
@@ -443,7 +442,7 @@ export default function HubFeedCard({ item, compact = false }: Props) {
   );
 
   const legacyBody = (
-    <article
+    <article onClickCapture={rememberCardOrigin}
       className={cardClass}
       style={accentStyle}
       onClick={(isSpotted || isBoard || canNavigateCard) ? openCard : undefined}
@@ -479,7 +478,7 @@ export default function HubFeedCard({ item, compact = false }: Props) {
       ) : listingFace ? listingFace : socialFace}
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
       {modalEvent && (
-        <EventModal
+        <EventzExpanded
           event={modalEvent}
           onClose={() => setModalEvent(null)}
           onEventUpdated={(ev) => setModalEvent(ev)}
@@ -494,7 +493,7 @@ export default function HubFeedCard({ item, compact = false }: Props) {
       engagement={engagement} onVote={value => voteMutation.mutate(value)} votePending={voteMutation.isPending}
       isFollowing={isFollowing} onToggleFollow={() => followMutation.mutate(!isFollowing)} />
     {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
-    {modalEvent && <EventModal event={modalEvent} initialSection={attendanceFirst ? "attendance" : "details"} onClose={() => setModalEvent(null)} onEventUpdated={event => { setModalEvent(event); void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] }); }} />}
+    {modalEvent && <EventzExpanded event={modalEvent} openChat={attendanceFirst} onClose={() => setModalEvent(null)} onEventUpdated={event => { setModalEvent(event); void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] }); }} />}
   </> : legacyBody;
 
   if (isSpotted) {

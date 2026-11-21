@@ -1,3 +1,4 @@
+import { rememberCardOrigin } from "@/components/cards/CardAPI";
 import { Volume2, VolumeX, X } from "lucide-react";
 import {
   useEffect,
@@ -8,40 +9,25 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { createPortal } from "react-dom";
-import { DAY_TEXT_COLORS } from "@shared/eventWeek";
+import { dayAccentToken } from "@/lib/dsColors";
+import { formatCardCountdown, parsePacificEventTime } from "@/lib/countdown";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/scrollLock";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
-import EventModal from "@/components/EventModal";
+import EventzExpanded from "@/components/events/EventzExpanded";
 import type { Event } from "@shared/schema";
 import "./FeaturedEventAd.css";
 
 /** Loops under the Stank secret story until the overlay closes. */
 const STANK_EGG_AUDIO = "/easter-eggs/stank-secret-story.m4a";
 
-function eventStartMs(dateStart: string): number {
-  // Event date strings are Pacific-local and naive; Pride week is PDT (-07:00).
-  const iso = /[zZ]|[+-]\d\d:?\d\d$/.test(dateStart) ? dateStart : `${dateStart}-07:00`;
-  return new Date(iso).getTime();
-}
-
-function pad(n: number): string {
-  return String(n).padStart(2, "0");
-}
-
-function useCountdown(targetMs: number) {
-  const [now, setNow] = useState(() => Date.now());
+function useKickoff(dateStart: string) {
+  const [now, setNow] = useState(Date.now);
   useEffect(() => {
-    const t = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(t);
+    const timer = window.setInterval(() => setNow(Date.now()), 30000);
+    return () => window.clearInterval(timer);
   }, []);
-  const diff = Math.max(0, targetMs - now);
-  return {
-    done: diff <= 0,
-    days: Math.floor(diff / 86400000),
-    hours: Math.floor((diff % 86400000) / 3600000),
-    minutes: Math.floor((diff % 3600000) / 60000),
-    seconds: Math.floor((diff % 60000) / 1000),
-  };
+  const start = parsePacificEventTime(dateStart);
+  return start != null && start > now ? formatCardCountdown(start - now) : null;
 }
 
 const POSTER_MS = 4000;
@@ -153,13 +139,13 @@ function EasterEggOverlay({
     width: 44,
     height: 44,
     borderRadius: 999,
-    border: "2px solid #5bff5b",
-    background: "rgba(0,0,0,0.85)",
-    color: "#5bff5b",
+    border: "2px solid var(--green-acid)",
+    background: "color-mix(in srgb, var(--z-black) 85%, transparent)",
+    color: "var(--green-acid)",
     fontSize: 18,
     lineHeight: 1,
     cursor: "pointer",
-    boxShadow: "0 0 24px rgba(91,255,91,0.35)",
+    boxShadow: "0 0 24px color-mix(in srgb, var(--green-acid) 35%, transparent)",
     fontFamily: "var(--font-display, system-ui)",
     fontWeight: 800,
     display: "inline-flex",
@@ -176,7 +162,7 @@ function EasterEggOverlay({
         position: "fixed",
         inset: 0,
         zIndex: 10000,
-        background: "#050a05",
+        background: "var(--z-black)",
         display: "flex",
         flexDirection: "column",
       }}
@@ -232,9 +218,9 @@ function EasterEggOverlay({
             bottom: "max(24px, env(safe-area-inset-bottom))",
             transform: "translateX(-50%)",
             zIndex: 10001,
-            border: "2px solid #5bff5b",
-            background: "rgba(0,0,0,0.9)",
-            color: "#5bff5b",
+            border: "2px solid var(--green-acid)",
+            background: "color-mix(in srgb, var(--z-black) 90%, transparent)",
+            color: "var(--green-acid)",
             fontFamily: "var(--font-mono, monospace)",
             fontSize: 11,
             letterSpacing: ".12em",
@@ -242,7 +228,7 @@ function EasterEggOverlay({
             padding: "12px 18px",
             borderRadius: 999,
             cursor: "pointer",
-            boxShadow: "0 0 24px rgba(91,255,91,0.35)",
+            boxShadow: "0 0 24px color-mix(in srgb, var(--green-acid) 35%, transparent)",
           }}
         >
           Tap for sound
@@ -257,7 +243,7 @@ function EasterEggOverlay({
           width: "100%",
           height: "100%",
           border: "none",
-          background: "#050a05",
+          background: "var(--z-black)",
         }}
         allow="autoplay; fullscreen"
       />
@@ -276,9 +262,9 @@ export default function FeaturedEventAd({
   const [open, setOpen] = useState(false);
   const [eggOpen, setEggOpen] = useState(false);
   const day = event.dayOfWeek || "";
-  const accent = DAY_TEXT_COLORS[day as keyof typeof DAY_TEXT_COLORS] || "#19E3FF";
+  const accent = dayAccentToken(day);
   const poster = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
-  const cd = useCountdown(eventStartMs(event.dateStart));
+  const cd = useKickoff(event.dateStart);
 
   // Slideshow: poster (4s) then each extra image (2s), looping.
   const frames = useMemo(() => {
@@ -311,8 +297,8 @@ export default function FeaturedEventAd({
 
   return (
     <div
-      className="featured-event-ad pdx-glass-rebind"
-      style={{ ["--fea-accent" as string]: accent, ["--c" as string]: accent } as CSSProperties}
+      onClickCapture={rememberCardOrigin} className="featured-event-ad pdx-glass-rebind"
+      style={{ "--fea-accent": accent, "--c": accent } as CSSProperties}
     >
       <span className="pdx-glass-sheen" aria-hidden="true" />
       <span className="pdx-glass-sheen--specular" aria-hidden="true" />
@@ -365,11 +351,9 @@ export default function FeaturedEventAd({
           style={{ cursor: easterEggUrl ? "pointer" : "default" }}
         >
           <div className="featured-event-ad__row-label featured-event-ad__row-label--lg featured-event-ad__row-label--cyan">
-            {cd.done
-              ? "Live now"
-              : `${cd.days > 0 ? `${cd.days}d ` : ""}${pad(cd.hours)}:${pad(cd.minutes)}:${pad(cd.seconds)}`}
+            {cd ?? "Live now"}
           </div>
-          <div className="featured-event-ad__row-copy">{cd.done ? "It's on" : "Kickoff in"}</div>
+          <div className="featured-event-ad__row-copy">{cd ? "Kickoff in" : "It's on"}</div>
         </div>
       </div>
 
@@ -401,7 +385,7 @@ export default function FeaturedEventAd({
         </button>
       </div>
 
-      {open && <EventModal event={event} onClose={() => setOpen(false)} />}
+      {open && <EventzExpanded event={event} onClose={() => setOpen(false)} />}
       {eggOpen && easterEggUrl && (
         <EasterEggOverlay
           src={easterEggUrl}

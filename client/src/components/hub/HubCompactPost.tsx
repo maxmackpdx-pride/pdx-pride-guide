@@ -1,3 +1,4 @@
+import { rememberCardOrigin } from "@/components/cards/CardAPI";
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
@@ -76,7 +77,7 @@ export default function HubCompactPost({ item, when, openControl, events, onOpen
   const accent = item.kind === "housing"
     ? ({ OFFERING: "var(--neon-orange)", MANAGED: "var(--neon-violet)", FORMING: "var(--neon-yellow)", LOOKING: "var(--neon-cyan)" } as Record<string,string>)[item.listing?.status || item.badge.toUpperCase()] || hubFeedBadgeColor(item.kind)
     : hubFeedBadgeColor(item.kind);
-  return <article className={`hub-item hub-item--${item.kind}${isListing ? " hub-item--listing" : ""}`}
+  return <article onClickCapture={rememberCardOrigin} className={`hub-item hub-item--${item.kind}${isListing ? " hub-item--listing" : ""}`}
     data-status={item.listing?.status || item.badge}
     style={{ "--hub-item-accent": accent } as CSSProperties}>
     <div className="hub-item__identity">
