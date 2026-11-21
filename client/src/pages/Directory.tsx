@@ -729,7 +729,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
             <ResourceFilterButton quietMotion={Boolean(calmMode || reducedMotion)}
               type="button"
               className={`directory-browser-category${activeType === "ALL" ? " directory-browser-category--active" : ""}`}
-              style={{ ["--_c" as string]: "var(--neon-cyan)" }}
+              style={{ "--_c": "var(--neon-cyan)" } as React.CSSProperties}
               aria-pressed={activeType === "ALL"}
               onClick={() => handleSelectCategory("ALL")}
             >
@@ -741,7 +741,7 @@ export default function Directory({ surface = "directory" }: DirectoryProps) {
                 key={category.key}
                 type="button"
                 className={`directory-browser-category${activeType.split(",").includes(category.key) ? " directory-browser-category--active" : ""}`}
-                style={{ ["--_c" as string]: category.color }}
+                style={{ "--_c": category.color } as React.CSSProperties}
                 aria-pressed={activeType.split(",").includes(category.key)}
                 onClick={() => handleSelectCategory(category.key)}
               >

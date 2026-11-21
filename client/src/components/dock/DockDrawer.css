@@ -5,13 +5,15 @@
 .dock-drawer-lip,
 .dock-drawer {
   position: fixed;
-  left: 0; right: 0;
-  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
-  width: min(640px, calc(100% - 16px));
+  --drawer-gutter: var(--space-4);
+  --drawer-dock-offset: calc(64px + env(safe-area-inset-bottom, 0px));
+  inset-inline: max(var(--space-2), env(safe-area-inset-left), env(safe-area-inset-right));
+  bottom: var(--drawer-dock-offset);
+  max-width: 640px;
   margin: 0 auto;
   z-index: 150;
   background: var(--z-black);
-  border: 1px solid color-mix(in srgb, var(--c) 55%, var(--z-black));
+  border: 1px solid var(--c);
   border-bottom: 0;
   border-radius: 20px 20px 0 0;
   box-shadow: 0 0 0 2px var(--z-black), inset 0 1px 0 color-mix(in srgb, var(--c) 60%, transparent);
@@ -19,7 +21,7 @@
 }
 .dock-drawer-lip { height: 30px; }
 .dock-drawer-lip__label {
-  position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+  position: absolute; inset-inline-start: var(--drawer-gutter); top: 50%; transform: translateY(-50%);
   font: 700 10px/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase;
   color: var(--text-meta); pointer-events: none;
 }
@@ -28,7 +30,7 @@
   max-height: 62dvh;
   animation: dock-drawer-in .38s cubic-bezier(.22, 1.25, .36, 1) both;
 }
-.dock-drawer.is-stop2 { height: calc(100dvh - 72px); max-height: none; }
+.dock-drawer.is-stop2 { height: calc(100dvh - var(--drawer-dock-offset) - max(var(--space-2), env(safe-area-inset-top))); max-height: none; }
 .dock-drawer.is-dragging { transition: none; animation: none; }
 .dock-drawer.is-bounce { animation: dock-drawer-bounce .45s cubic-bezier(.22, 1.4, .36, 1); }
 @keyframes dock-drawer-in { from { transform: translateY(102%); } to { transform: translateY(0); } }
@@ -51,7 +53,7 @@
 .dock-drawer__lines i { display: block; width: 44px; height: 4px; border-radius: 999px; background: var(--border-strong); }
 .dock-drawer__body {
   flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
-  padding: 2px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+  padding: var(--space-1) var(--drawer-gutter) var(--space-5);
   display: flex; flex-direction: column; gap: 18px;
 }
 .dock-drawer__label {

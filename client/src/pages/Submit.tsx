@@ -213,28 +213,27 @@ export default function Submit() {
   const handleFlyerUploaded = async (url: string) => {
     setEventForm(f => ({ ...f, posterImageUrl: url }));
     setFlyerReadStatus("reading");
-    try {
-      const r = await apiRequest("POST", "/api/flyer-autofill", { uploadUrl: url });
-      if (!r.ok) {
-        setFlyerReadStatus("error");
-        return;
-      }
-      const data = await r.json();
-      const fields = data?.fields || {};
-      setEventForm(f => ({
-        ...f,
-        title: f.title || fields.title || "",
-        description: f.description || fields.description || "",
-        venueName: f.venueName || fields.venueName || "",
-        address: f.address || fields.address || "",
-        ticketUrl: f.ticketUrl || fields.ticketUrl || "",
-        dateStart: f.dateStart || fields.dateStart || "",
-        dateEnd: f.dateEnd || fields.dateEnd || "",
-      }));
-      setFlyerReadStatus("filled");
-    } catch {
-      setFlyerReadStatus("error");
-    }
+    await apiRequest("POST", "/api/flyer-autofill", { uploadUrl: url })
+      .then(async response => {
+        if (!response.ok) {
+          setFlyerReadStatus("error");
+          return;
+        }
+        const data = await response.json();
+        const fields = data?.fields || {};
+        setEventForm(f => ({
+          ...f,
+          title: f.title || fields.title || "",
+          description: f.description || fields.description || "",
+          venueName: f.venueName || fields.venueName || "",
+          address: f.address || fields.address || "",
+          ticketUrl: f.ticketUrl || fields.ticketUrl || "",
+          dateStart: f.dateStart || fields.dateStart || "",
+          dateEnd: f.dateEnd || fields.dateEnd || "",
+        }));
+        setFlyerReadStatus("filled");
+      })
+      .catch(() => setFlyerReadStatus("error"));
   };
   const [promoterForm, setPromoterForm] = useState({
     ...emptyPromoterForm(),
@@ -538,20 +537,18 @@ export default function Submit() {
     setFormError(null);
     if (!isApproved && promoterStatus !== "pending") {
       setSendingApplication(true);
-      try { await sendSubmission({
+      const sent = await sendSubmission({
         type: "PROMOTER_APPLICATION",
         submitterOrg,
         ticketUrl: promoterForm.proofUrl,
         claimReason: promoterForm.appReason,
-      });
-      } catch (error) {
+      }).then(() => true).catch((error: unknown) => {
         const message = parseApiError(error, "Could not submit your promoter application. Please try again.");
         setFormError(message);
         toast(roomToast("eventz", "didn't send", message));
-        return;
-      } finally {
-        setSendingApplication(false);
-      }
+        return false;
+      }).finally(() => setSendingApplication(false));
+      if (!sent) return;
     }
     eventMutation.mutate({ type: "NEW_EVENT" });
   };

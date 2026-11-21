@@ -81,6 +81,8 @@ function Section({
   );
 }
 
+const loadDesignSystem = () => import("@/components/ds");
+
 export default function DesignSystemSandbox() {
   usePageSeo(
     "Historical Design System Preview",
@@ -98,7 +100,7 @@ export default function DesignSystemSandbox() {
     let cancelled = false;
 
     (async () => {
-      const mod = await tryLoadComponent(() => import("@/components/ds"));
+      const mod = await tryLoadComponent(loadDesignSystem);
       if (cancelled) return;
 
       if (mod) {

@@ -14,28 +14,20 @@ export default function ResetPassword() {
     document.title = "Reset password · Zaylist";
   }, []);
 
-  const submit = async (event: React.FormEvent) => {
+  const submit = (event: React.FormEvent) => {
     event.preventDefault();
     setError("");
     if (!token) return setError("This reset link is invalid or expired.");
     if (password.length < 6) return setError("Password must be at least 6 characters.");
     if (password !== confirm) return setError("Passwords do not match.");
     setLoading(true);
-    try {
-      const res = await fetch("/api/auth/password/reset", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password }),
-      });
-      const data = await res.json().catch(() => ({})) as { error?: string };
-      if (!res.ok) throw new Error(data.error || "This reset link is invalid or expired.");
-      window.history.replaceState({}, "", "/reset-password");
-      setDone(true);
-    } catch (err: any) {
-      setError(err.message || "This reset link is invalid or expired.");
-    } finally {
-      setLoading(false);
-    }
+    void resetPassword(token, password)
+      .then(() => {
+        window.history.replaceState({}, "", "/reset-password");
+        setDone(true);
+      })
+      .catch((err: Error) => setError(err.message || "This reset link is invalid or expired."))
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -67,6 +59,16 @@ export default function ResetPassword() {
       </div>
     </section>
   );
+}
+
+async function resetPassword(token: string, password: string) {
+  const res = await fetch("/api/auth/password/reset", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, password }),
+  });
+  const data = await res.json().catch(() => ({})) as { error?: string };
+  if (!res.ok) throw new Error(data.error || "This reset link is invalid or expired.");
 }
 
 const pageStyle: React.CSSProperties = { minHeight: "70vh", display: "grid", placeItems: "center", padding: "48px 20px", background: "#050505", color: "#f4eee1" };

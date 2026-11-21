@@ -71,7 +71,7 @@ jobs:
         run: node script/prepare-map-release.mjs client/public && timeout --signal=TERM --kill-after=30s 12m node --test script/placez-six-map-browser.test.mjs
         env:
           PLACEZ_MAP_QA_DIR: artifacts/placez-artwork/six/maps
-      - name: Verify exact PlaceZ compiler scope
+      - name: Verify React Compiler route and card transforms
         run: node --test script/react-compiler-function-proof.test.mjs && node script/react-compiler-production-scope.mjs
       - name: Compare optimized PlaceZ compiler off and on
         if: steps.map_gate.outputs.ready == 'true'

@@ -194,7 +194,10 @@ export default function MemberProfile() {
   const openEvent = useCallback(async (eventId: number) => {
     try {
       const res = await apiRequest("GET", `/api/events/${eventId}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        toast({ title: parseApiError(new Error(`HTTP ${res.status}`), "Could not open event"), variant: "destructive" });
+        return;
+      }
       const full = (await res.json()) as Event;
       setSelectedEvent(full);
     } catch (err) {
@@ -342,7 +345,7 @@ export default function MemberProfile() {
 
         {marqueeItems.length > 0 && <div
           className="pp-marquee-wrap"
-          style={{ ["--pp-mq-accent" as string]: accent }}
+          style={{ "--pp-mq-accent": accent } as React.CSSProperties}
         >
           <ProfileMarquee items={marqueeItems} speed={data.marquee?.speed || 30} color={data.marquee?.color} />
         </div>}

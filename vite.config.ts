@@ -6,7 +6,6 @@ import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
 import fs from "node:fs";
 import { createHash } from "node:crypto";
-import { cardSourcePatterns, cardCompilerExcludedPatterns } from "./script/react-compiler-card-scope.mjs";
 
 // Fingerprint the independent homepage flyover. The five-mode engine uses a separately pinned release.
 const flightSource = path.resolve(import.meta.dirname, "client/public/home-flight");
@@ -26,21 +25,12 @@ export default defineConfig(({ command }):UserConfig => {
   plugins: [
     tailwindcss(),
     react(),
-    // Exact compiler scope: Eventz/Boardz and the reviewed six-PlaceZ presentation
-    // cohort. The shared scope also drives optimized off/on comparison builds.
-    // Keep Resources, shared CardAPI, other pages, auth, consent, modal
-    // controllers, Mapz and profiling harness uncompiled. Revalidate every
-    // revision against balanced Chromium/WebKit and release approval gates.
+    // Infer React components and hooks across the app, including lazy route
+    // modules. Public assets and independently built map engines have their own builds.
     babel({
-      presets: [reactCompilerPreset({ compilationMode: "infer" })],
-      include: cardSourcePatterns,
-      exclude: cardCompilerExcludedPatterns,
-    }),
-    // Only annotated landing-page functions opt in. Inline modal and
-    // mutation controllers stay outside compiler scope unless separately reviewed.
-    babel({
-      presets: [reactCompilerPreset({ compilationMode: "annotation" })],
-      include: /[\\/]client[\\/]src[\\/]pages[\\/](?:Events|PlacezBrowse|Scenez|OutzidePlacesPage|HostHub)\.tsx$/,
+      presets: [reactCompilerPreset({ compilationMode: "infer", target: "19" })],
+      include: /[\\/]client[\\/]src[\\/].*\.[jt]sx?$/,
+      exclude: /[\\/]node_modules[\\/]|\.(?:test|spec)\.[jt]sx?$/,
     }),
     {
       name: "version-home-flight-assets",

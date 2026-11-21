@@ -1,14 +1,14 @@
 /**
  * Check transforms through the actual Vite app configuration, not only an
  * isolated benchmark. Nothing here imports live user data or writes to APIs.
- * The release candidate must never compile Mapz, unrelated route controllers, consent
- * handling, or the uncompiled benchmark parent.
+ * Assert each lazy route component actually receives its own memo cache.
  */
 import assert from 'node:assert/strict';
 import {assertCompiledFunction} from './react-compiler-function-proof.mjs';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import {createServer} from 'vite';
-import {cardCompilerFunction,cardFaceModules,cardSourcePatterns,placezCompilerModules} from './react-compiler-card-scope.mjs';
+import {cardCompilerFunction,cardFaceModules,placezCompilerModules} from './react-compiler-card-scope.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
 const compilerMarker=/react(?:\/|_)compiler-runtime|useMemoCache|memo_cache_sentinel/;
@@ -18,82 +18,49 @@ const inScope=[
  ...placezCompilerModules.map(module=>'components/'+module+'.tsx'),
  ...cardFaceModules.map(face=>'components/'+face+(face.startsWith('board/punk/')?'.jsx':'.tsx')),
 ];
-const pageFunctions=['Events','PlacezBrowse','Scenez','OutzidePlacesPage','HostHub'];
-const outOfScope=[
- 'components/discovery/PlaceDiscoveryCard.tsx',
- 'components/home/TodayLocationCard.tsx',
- 'components/cards/ZaylistCard.tsx',
- 'components/cards/NeedzCard.tsx',
- 'components/cards/OutzCard.tsx',
- 'components/cards/CardAPI.tsx',
- 'components/cards/react19Card.tsx',
- 'components/cards/cardLayout.ts',
- 'components/cards/experimental/React19CardBoundaries.tsx',
- 'components/discovery/EventzBrowse.tsx',
- 'components/VenueFollowButton.tsx',
- 'components/PlaceModal.tsx',
- 'components/placez/nativeData.ts',
- 'components/placez/nativeModel.ts',
- // Never let exact-card Compiler selection cross into Mapz or adult-access boundaries.
- 'components/zaylist/EventMode.tsx',
- 'components/zaylist/OrganizerPlanning.tsx',
- 'components/zaylist/PushComposer.tsx',
- 'components/AdultContentGate.tsx',
- 'components/AuthModal.tsx',
- 'components/EventModal.tsx',
- 'pages/UnifiedMap.tsx',
- 'lib/pinnedMapModule.ts',
- 'lib/mapBookmarks.ts',
- 'context/AuthContext.tsx',
- 'pages/Directory.tsx',
- 'pages/Boards.tsx',
-];
+// Derive the route inventory from the real app shell, including lazy routes.
+const app = await readFile(path.join(root, 'client/src/App.tsx'), 'utf8');
+const pages = [...new Set(
+  [...app.matchAll(/import\(["']\.\/pages\/([^"']+)["']\)/g)]
+    .map(([, name]) => `pages/${name}.tsx`),
+)];
+assert.ok(pages.length > 0, 'No route modules found in App.tsx');
 
-for(const file of inScope){
- const absolute=path.join(root,'client/src',file);
- assert.ok(cardSourcePatterns.some(pattern=>pattern.test(absolute)),`Expected card renderer not allowlisted: ${file}`);
-}
-for(const file of outOfScope){
- const absolute=path.join(root,'client/src',file);
- assert.ok(cardSourcePatterns.every(pattern=>!pattern.test(absolute)),`Unsafe compiler scope includes: ${file}`);
-}
-
-const server=await createServer({
- configFile:path.join(root,'vite.config.ts'),
- server:{host:'127.0.0.1',port:0,hmr:false,watch:null},
+const server = await createServer({
+  configFile: path.join(root, 'vite.config.ts'),
+  server: { host: '127.0.0.1', port: 0, hmr: false, watch: null },
 });
-try{
- await server.listen();
- const inspected=[];
- for(const [files,expected] of [[inScope,true],[outOfScope,false]]){
-  for(const file of files){
-   const url='/src/'+file;
-   const transformed=await server.transformRequest(url);
-   assert.ok(transformed?.code,`Vite did not transform ${url}`);
-   const compiled=compilerMarker.test(transformed.code);
-   assert.equal(compiled,expected,`Incorrect real-app React Compiler scope: ${url}`);
-   const target=placezCompilerModules.find(module=>file===`components/${module}.tsx`);
-   const functionProof=target?assertCompiledFunction(transformed.code,cardCompilerFunction(target),expected):null;
-   if(file==='components/events/FlyerBoard.tsx'||file==='components/events/EventFlyerFront.tsx'){
-    for(const name of (file.endsWith('/FlyerBoard.tsx')?['FlyerBoard','PastCell']:['PosterCell'])){
-     inspected.push({url,compiled,functionProof:assertCompiledFunction(transformed.code,name,true)});
-    }
-   }else inspected.push({url,compiled,functionProof});
-  }
- }
- for(const name of pageFunctions){
-  const url='/src/pages/'+name+'.tsx';
-  const transformed=await server.transformRequest(url);
-  assert.ok(transformed?.code);
-  const functionProof=assertCompiledFunction(transformed.code,name,true);
-  for(const excluded of (name==='Scenez'?['SceneExpanded','useScene']:name==='OutzidePlacesPage'?['Expanded']:[]))assertCompiledFunction(transformed.code,excluded,false);
-  inspected.push({url,compiled:true,functionProof});
- }
- console.log('REACT_COMPILER_PRODUCTION_SCOPE '+JSON.stringify({
-  mode:'card-presentation-infer-annotated-pages',config:'vite.config.ts',
-  functionProofs:inspected.filter(item=>item.functionProof).map(item=>item.functionProof),
-  compiled:inspected.filter(item=>item.compiled).map(item=>item.url),
-  excluded:inspected.filter(item=>!item.compiled).map(item=>item.url),
- }));
-}finally{await server.close();}
+try {
+  const compiled = [];
+  const functionProofs = [];
+  for (const file of [...inScope, ...pages]) {
+    const url = '/src/' + file;
+    const transformed = await server.transformRequest(url);
+    assert.ok(transformed?.code, `Vite did not transform ${url}`);
+    assert.match(transformed.code, compilerMarker, `React Compiler emitted no cache: ${url}`);
+    compiled.push(url);
 
+    const place = placezCompilerModules.find(module => file === `components/${module}.tsx`);
+    const names = place ? [cardCompilerFunction(place)] : [];
+    if (file.startsWith('pages/')) {
+      const source = await readFile(path.join(root, 'client/src', file), 'utf8');
+      const entry = source.match(/export default function (\w+)/)?.[1];
+      assert.ok(entry, `Missing named route component: ${url}`);
+      names.push(entry);
+    }
+    if (file === 'components/events/FlyerBoard.tsx') names.push('FlyerBoard', 'PastCell');
+    if (file === 'components/events/EventFlyerFront.tsx') names.push('PosterCell');
+    for (const name of names) {
+      functionProofs.push(assertCompiledFunction(transformed.code, name, true));
+    }
+  }
+
+  console.log('REACT_COMPILER_PRODUCTION_SCOPE ' + JSON.stringify({
+    mode: 'app-infer-react-19',
+    config: 'vite.config.ts',
+    functionProofs,
+    compiled,
+  }));
+} finally {
+  await server.close();
+}

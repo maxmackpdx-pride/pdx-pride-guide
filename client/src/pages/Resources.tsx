@@ -524,7 +524,7 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
   const allRows = useMemo(() => mergeCommunityResources(ROWS, communities.data || [], CATEGORIES.find(c => c.id === "community")!), [communities.data]);
   const [initial] = useState(readBrowseState);
   const [safetyPlacement] = useState(() => Math.random());
-  const safetyRank = useRef<number | null>(null);
+  const [safetyRank, setSafetyRank] = useState<number | null>(null);
   const [categoryIds, setCategoryIds] = useState<string[]>(initial.ids);
   const [searchQuery, setSearchQuery] = useState(initial.query);
   const [mode, setMode] = useState<"directory" | "talk">(initial.mode);
@@ -621,8 +621,10 @@ export default function Resources({embeddedDetail, onEmbeddedClose}: ResourcesPr
     group: rows.filter(row => categoriesFor(row).some(c => c.id === category.id)).sort((a, b) => Number(b.category.id === category.id) - Number(a.category.id === category.id)),
   })).filter(({group}) => group.length);
   const cardCount = browseView === "grid" ? rows.length : browseGroups.reduce((sum, {group}) => sum + group.length, 0);
-  if (safetyRank.current === null && cardCount) safetyRank.current = Math.min(3, cardCount - 1);
-  const safetyIndex = cardCount ? Math.min(cardCount - 1, safetyRank.current ?? 4) : -1;
+  // Once results arrive, keep the safety entry's original rank across filters.
+  const firstSafetyRank = Math.min(3, cardCount - 1);
+  if (safetyRank === null && cardCount > 0) setSafetyRank(firstSafetyRank);
+  const safetyIndex = cardCount ? Math.min(cardCount - 1, safetyRank ?? firstSafetyRank) : -1;
   const safetyCard = <div key="safety-options" className="eb-original-card">
     <RoomDiscoveryCard room="needz" name="ARE YOU SAFE?" category="Safety" accent="var(--neon-red)" fallback={<ShieldAlert size={90} strokeWidth={1}/>}
       description="A quiet place to find safety and emergency options. Opening this card does not contact anyone."

@@ -88,7 +88,7 @@ function formatChatClose(expiresAt: string | null) {
 export default function OutzPlace({placeSlug, embedded = false, boardIntent = null}: {placeSlug?: string; embedded?: boolean; boardIntent?: 'ride'|'missed'|'buddy'|null} = {}) {
   const [, params] = useRoute("/outzide/:placeSlug");
   const slug = placeSlug ?? params?.placeSlug;
-  const incidentalMap = useIncidentalMap(true, slug ?? "outz");
+  const { ref: mapHostRef, active: mapActive, memory: mapCameraMemory } = useIncidentalMap(true, slug ?? "outz");
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -353,9 +353,9 @@ export default function OutzPlace({placeSlug, embedded = false, boardIntent = nu
 
         <div className="outz-place__where">
           {coords && snapshot
-            ? <div ref={incidentalMap.ref} className="outz-place__map">
-                {incidentalMap.active && <Suspense fallback={<span role="status">Loading map…</span>}><OutzMap key={slug}
-                  cameraMemory={incidentalMap.memory}
+            ? <div ref={mapHostRef} className="outz-place__map">
+                {mapActive && <Suspense fallback={<span role="status">Loading map…</span>}><OutzMap key={slug}
+                  cameraMemory={mapCameraMemory}
                   destinations={destination ? [destination] : []}
                   catalog={catalogSite ? [catalogSite] : []}
                   stays={stay ? [stay] : []}

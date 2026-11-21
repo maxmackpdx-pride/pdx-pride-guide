@@ -8,8 +8,9 @@
 .edrawer {
   position: fixed;
   z-index: 56;
-  left: max(8px, env(safe-area-inset-left, 0px), calc((100vw - 576px) / 2));
-  width: min(576px, calc(100vw - max(8px, env(safe-area-inset-left, 0px)) - max(8px, env(safe-area-inset-right, 0px))));
+  inset-inline: max(var(--space-2), env(safe-area-inset-left), env(safe-area-inset-right));
+  max-width: 576px;
+  margin-inline: auto;
   bottom: calc(var(--site-mobile-nav-height, 82px) + var(--site-mobile-nav-offset, 8px) + env(safe-area-inset-bottom, 0px) + var(--edrawer-lift, 0px));
   border-radius: 24px;
   border: 1px solid rgba(172, 207, 231, .16);

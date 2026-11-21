@@ -75,6 +75,17 @@
 .scenez-native .new-scenez .ns-search input {
   font: 700 16px/1.2 var(--font-body); letter-spacing: 0; text-transform: none; font-style: normal;
 }
+/* Keep the search action on the same axis at narrow widths and on keyboard focus. */
+:is(.pl-page .pl-body .pl-search, .outz-native-page .ol-body .ol-search, .scenez-native .new-scenez .ns-search) input {
+  min-width: 0;
+}
+:is(.pl-page .pl-body .pl-search, .outz-native-page .ol-body .ol-search, .scenez-native .new-scenez .ns-search) button {
+  min-width: 44px;
+}
+:is(.pl-page .pl-body .pl-search, .outz-native-page .ol-body .ol-search, .scenez-native .new-scenez .ns-search) button:focus-visible {
+  outline: 2px solid var(--text-hi);
+  outline-offset: 2px;
+}
 .pl-page .pl-filters { gap: 12px 10px; margin: 16px 0 26px; }
 .pl-page .pl-filters button { min-height: 76px; padding: 12px 9px; }
 .pl-page .pl-filters button b:not(.pl-age) { font: 800 clamp(17px, 3.4vw, 24px)/1.05 var(--font-body); font-style: normal; }
@@ -87,9 +98,9 @@
 
 .pl-search button { display: grid; place-items: center; min-width: 44px; min-height: 44px; border: 0; background: transparent; color: inherit; }
 /* Search go-buttons share OutZide's exact geometry on all three pages:
-   42x44, radius 10, filled with the page accent, dark arrow. SceneZ's is
+   44x44, radius 10, filled with the page accent, dark arrow. SceneZ's is
    sized in sceneReference.css; PlaceZ's paper fill is its white accent. */
-.pl-page.pl-production .pl-body .pl-search button { width: 42px; min-width: 42px; height: 44px; border-radius: 10px; background: var(--paper); color: var(--ink); }
+.pl-page.pl-production .pl-body .pl-search button { width: 44px; height: 44px; border-radius: 10px; background: var(--paper); color: var(--ink); }
 /* PlacezLanding.css still paints .pl-search svg:last-child paper — a rule
    from the bare-arrow era. On the paper-filled button the arrow vanished
    (paper on paper); outrank it so the arrow reads dark on the fill. */

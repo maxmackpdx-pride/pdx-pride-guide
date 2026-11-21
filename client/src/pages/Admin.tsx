@@ -232,6 +232,25 @@ function adminTabFromQuery(
   return null;
 }
 
+async function fetchAdminSession() {
+  const response = await fetch("/api/admin/me", { credentials: "include" });
+  return response.ok ? response.json() : null;
+}
+
+function adminPushErrorDescription(error: unknown) {
+  const fallback = parseApiError(error, "Push test failed.");
+  const message = error instanceof Error ? error.message : "";
+  const match = message.match(/^\d{3}:\s*(\{[\s\S]*\})$/);
+  if (!match) return fallback;
+
+  try {
+    const body = JSON.parse(match[1]) as { error?: string; hint?: string };
+    return body.hint ? `${body.error || fallback} ${body.hint}` : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export default function Admin() {
   usePageSeo("Admin | Zaylist", "Site administration panel.");
   const { toast } = useToast();
@@ -317,24 +336,25 @@ export default function Admin() {
         return;
       }
 
-      try {
-        const res = await fetch("/api/admin/me", { credentials: "include" });
-        const data = res.ok ? await res.json() : null;
-        if (!cancelled && data?.isAdmin) {
-          setAuthenticated(true);
-          if (data.username) setAdminName(data.username);
-          if (data.isSuperAdmin) setIsSuperAdmin(true);
-          if (data.isPrimaryOwner) setIsPrimaryOwner(true);
-          if (data.canManageTeam) setCanManageTeam(true);
-          if (data.canViewUsers) setCanViewUsers(true);
-          if (data.canPush) setCanPush(true);
-          if (data.canManageCatalog) setCanManageCatalog(true);
-        }
-      } catch {
-        // fall through to legacy login gate
-      } finally {
-        if (!cancelled) setSessionReady(true);
-      }
+      await fetchAdminSession()
+        .then(data => {
+          if (!cancelled && data?.isAdmin) {
+            setAuthenticated(true);
+            if (data.username) setAdminName(data.username);
+            if (data.isSuperAdmin) setIsSuperAdmin(true);
+            if (data.isPrimaryOwner) setIsPrimaryOwner(true);
+            if (data.canManageTeam) setCanManageTeam(true);
+            if (data.canViewUsers) setCanViewUsers(true);
+            if (data.canPush) setCanPush(true);
+            if (data.canManageCatalog) setCanManageCatalog(true);
+          }
+        })
+        .catch(() => {
+          // fall through to legacy login gate
+        })
+        .finally(() => {
+          if (!cancelled) setSessionReady(true);
+        });
     };
 
     bootstrapAdmin();
@@ -436,36 +456,25 @@ export default function Admin() {
     },
   });
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await apiRequest("POST", "/api/admin/login", { username, password });
-      const data = await res.json();
-      if (data?.username) setAdminName(data.username);
-      try {
-        const meRes = await fetch("/api/admin/me", { credentials: "include" });
-        const me = meRes.ok ? await meRes.json() : null;
-        if (me?.username) setAdminName(me.username);
-        if (me?.isSuperAdmin) setIsSuperAdmin(true);
-        if (me?.isPrimaryOwner) setIsPrimaryOwner(true);
-        // Owner peers (e.g. brohoejams) get canManageTeam; plain super admins do not.
-        if (me?.canManageTeam) setCanManageTeam(true);
-        if (me?.canViewUsers) setCanViewUsers(true);
-        if (me?.canPush) setCanPush(true);
-        if (me?.canManageCatalog) setCanManageCatalog(true);
-      } catch {
-        if (data?.isSuperAdmin) setIsSuperAdmin(true);
-        if (data?.isPrimaryOwner) setIsPrimaryOwner(true);
-        if (data?.canManageTeam) setCanManageTeam(true);
-        if (data?.canViewUsers) setCanViewUsers(true);
-        if (data?.canPush) setCanPush(true);
-        if (data?.canManageCatalog) setCanManageCatalog(true);
-      }
-      setAuthenticated(true);
-      setPasswordError(false);
-    } catch {
-      setPasswordError(true);
-    }
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
+    await apiRequest("POST", "/api/admin/login", { username, password })
+      .then(response => response.json())
+      .then(async data => {
+        if (data?.username) setAdminName(data.username);
+        const session = await fetchAdminSession().catch(() => data);
+        if (session?.username) setAdminName(session.username);
+        if (session?.isSuperAdmin) setIsSuperAdmin(true);
+        if (session?.isPrimaryOwner) setIsPrimaryOwner(true);
+        // Trust the server's explicit team and owner capabilities.
+        if (session?.canManageTeam) setCanManageTeam(true);
+        if (session?.canViewUsers) setCanViewUsers(true);
+        if (session?.canPush) setCanPush(true);
+        if (session?.canManageCatalog) setCanManageCatalog(true);
+        setAuthenticated(true);
+        setPasswordError(false);
+      })
+      .catch(() => setPasswordError(true));
   };
 
   const invalidateInboxQueries = () => {
@@ -569,16 +578,7 @@ export default function Admin() {
       refetchPushStatus();
     },
     onError: (err: unknown) => {
-      let description = parseApiError(err, "Push test failed.");
-      const message = err instanceof Error ? err.message : "";
-      const jsonMatch = message.match(/^\d{3}:\s*(\{[\s\S]*\})$/);
-      if (jsonMatch) {
-        try {
-          const body = JSON.parse(jsonMatch[1]) as { error?: string; hint?: string };
-          if (body.hint) description = `${body.error || description} ${body.hint}`;
-        } catch { /* ignore */ }
-      }
-      toast({ title: "Push test failed", description, variant: "destructive" });
+      toast({ title: "Push test failed", description: adminPushErrorDescription(err), variant: "destructive" });
     },
   });
 
@@ -1166,21 +1166,20 @@ export default function Admin() {
     // "@user" must match username "user" - server and client both strip leading @
     const q = raw.toLowerCase().replace(/^@+/, "");
     setUserSearching(true);
-    try {
-      // Prefer API (full user table). Fall back to already-loaded allUsers if request fails.
-      try {
-        const r = await apiRequest("GET", `/api/admin/users/search?q=${encodeURIComponent(q)}`);
-        const data = await r.json();
-        if (!r.ok) {
-          throw new Error(data?.error || data?.message || "Search failed");
-        }
-        const rows = Array.isArray(data) ? data : [];
-        setUserSearchResults(rows);
-        if (rows.length === 0) {
-          toast({ title: "No users found", description: `Nothing matched “${raw}”. Try username without @, email, or display name.` });
-        }
-        return;
-      } catch (apiErr) {
+    await (async () => {
+      const r = await apiRequest("GET", `/api/admin/users/search?q=${encodeURIComponent(q)}`);
+      const data = await r.json();
+      if (!r.ok) {
+        throw new Error(data?.error || data?.message || "Search failed");
+      }
+      const rows = Array.isArray(data) ? data : [];
+      setUserSearchResults(rows);
+      if (rows.length === 0) {
+        toast({ title: "No users found", description: `Nothing matched “${raw}”. Try username without @, email, or display name.` });
+      }
+      return;
+    })()
+      .catch((apiErr: unknown) => {
         // Client-side fallback when list is already loaded (owner-admin promoters tab)
         if (allUsers.length > 0) {
           const local = allUsers
@@ -1209,17 +1208,18 @@ export default function Admin() {
           return;
         }
         throw apiErr;
-      }
-    } catch (err) {
-      setUserSearchResults([]);
-      toast({
-        title: "Search failed",
-        description: parseApiError(err, "Could not search users. Owner-admin access is required."),
-        variant: "destructive",
+      })
+      .catch((err: unknown) => {
+        setUserSearchResults([]);
+        toast({
+          title: "Search failed",
+          description: parseApiError(err, "Could not search users. Owner-admin access is required."),
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        setUserSearching(false);
       });
-    } finally {
-      setUserSearching(false);
-    }
   }
 
   const revokeAdminMutation = useMutation({
@@ -1407,7 +1407,7 @@ export default function Admin() {
     const body = messageBody.trim();
     if (!body) return;
     setMessageSending(true);
-    try {
+    await (async () => {
       if (messageTarget.as === "personal") {
         // Logged-in admin’s personal DM - replies land in *their* Personal inbox only.
         await apiRequest("POST", `/api/users/${encodeURIComponent(messageTarget.username)}/message`, { body });
@@ -1428,11 +1428,13 @@ export default function Admin() {
       }
       setMessageTarget(null);
       setMessageBody("");
-    } catch (err) {
-      toast({ title: "Could not send", description: parseApiError(err, "Message failed"), variant: "destructive" });
-    } finally {
-      setMessageSending(false);
-    }
+    })()
+      .catch((err: unknown) => {
+        toast({ title: "Could not send", description: parseApiError(err, "Message failed"), variant: "destructive" });
+      })
+      .finally(() => {
+        setMessageSending(false);
+      });
   };
 
   /** Guide MESSAGE (shared admin inbox). */
@@ -1490,16 +1492,18 @@ export default function Admin() {
     const q = adminGlobalSearchQ.trim();
     if (!q) return;
     setAdminGlobalSearching(true);
-    try {
+    await (async () => {
       const res = await fetch(`/api/admin/search?q=${encodeURIComponent(q)}&limit=20`, { credentials: "include" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Search failed");
       setAdminGlobalSearchResults(data);
-    } catch (err) {
-      toast({ title: "Search failed", description: parseApiError(err, "Could not search"), variant: "destructive" });
-    } finally {
-      setAdminGlobalSearching(false);
-    }
+    })()
+      .catch((err: unknown) => {
+        toast({ title: "Search failed", description: parseApiError(err, "Could not search"), variant: "destructive" });
+      })
+      .finally(() => {
+        setAdminGlobalSearching(false);
+      });
   };
 
   const { data: adminActivityLog, isError: activityUnavailable } = useQuery<
@@ -2011,7 +2015,7 @@ export default function Admin() {
                   className="zay-action pdx-glass-rebind display text-xs px-3 py-1 border"
                   onClick={async () => {
                     setBulkBusy(true);
-                    try {
+                    await (async () => {
                       const res = await apiRequest("POST", "/api/admin/events/bulk/preview", {
                         ids: bulkEventIds,
                         action: bulkAction,
@@ -2020,11 +2024,13 @@ export default function Admin() {
                       if (!res.ok) throw new Error(data.error || "Preview failed");
                       setBulkPreview(data);
                       toast({ title: "Bulk preview ready", description: data.impact });
-                    } catch (err) {
-                      toast({ title: "Preview failed", description: parseApiError(err, "Bulk preview failed"), variant: "destructive" });
-                    } finally {
-                      setBulkBusy(false);
-                    }
+                    })()
+                      .catch((err: unknown) => {
+                        toast({ title: "Preview failed", description: parseApiError(err, "Bulk preview failed"), variant: "destructive" });
+                      })
+                      .finally(() => {
+                        setBulkBusy(false);
+                      });
                   }}
                 >
                   PREVIEW
@@ -2036,7 +2042,7 @@ export default function Admin() {
                   style={{ borderColor: "#D4FF00", color: "#D4FF00", opacity: bulkPreview ? 1 : 0.4 }}
                   onClick={async () => {
                     setBulkBusy(true);
-                    try {
+                    await (async () => {
                       const res = await apiRequest("POST", "/api/admin/events/bulk/execute", {
                         ids: bulkEventIds,
                         action: bulkAction,
@@ -2052,11 +2058,13 @@ export default function Admin() {
                       setBulkPreview(null);
                       queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
                       queryClient.invalidateQueries({ queryKey: ["/api/admin/activity"] });
-                    } catch (err) {
-                      toast({ title: "Bulk failed", description: parseApiError(err, "Bulk execute failed"), variant: "destructive" });
-                    } finally {
-                      setBulkBusy(false);
-                    }
+                    })()
+                      .catch((err: unknown) => {
+                        toast({ title: "Bulk failed", description: parseApiError(err, "Bulk execute failed"), variant: "destructive" });
+                      })
+                      .finally(() => {
+                        setBulkBusy(false);
+                      });
                   }}
                 >
                   CONFIRM
@@ -2556,8 +2564,14 @@ export default function Admin() {
                         <AdminBoardReject
                           reasonCode={boardRejectReasons[gigBoardRejectKey(gig.id)] || "OFF_TOPIC"}
                           note={boardRejectNotes[gigBoardRejectKey(gig.id)] || ""}
-                          onReasonChange={code => setBoardRejectReasons(prev => ({ ...prev, [gigBoardRejectKey(gig.id)]: code }))}
-                          onNoteChange={note => setBoardRejectNotes(prev => ({ ...prev, [gigBoardRejectKey(gig.id)]: note }))}
+                          onReasonChange={code => {
+                            const key = gigBoardRejectKey(gig.id);
+                            setBoardRejectReasons(prev => ({ ...prev, [key]: code }));
+                          }}
+                          onNoteChange={note => {
+                            const key = gigBoardRejectKey(gig.id);
+                            setBoardRejectNotes(prev => ({ ...prev, [key]: note }));
+                          }}
                           onReject={() => rejectBoardPostMutation.mutate({
                             board: "gigs",
                             id: gig.id,
