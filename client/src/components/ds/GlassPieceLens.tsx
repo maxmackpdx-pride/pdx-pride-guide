@@ -51,9 +51,20 @@ export function GlassPieceLens() {
       ctx.putImageData(pixels, 0, 0);
       setMap({ href: canvas.toDataURL(), scale: strength });
     }
-    const observer = new ResizeObserver(() => { cancelAnimationFrame(frame); frame = requestAnimationFrame(update); });
+    // A ResizeObserver fires on mount inside the opening animation. Leave the
+    // compositor its frame budget and build the texture after the grow settles.
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      if (host.dataset.cardEntering !== "true") frame = requestAnimationFrame(update);
+    };
+    const observer = new ResizeObserver(schedule);
     observer.observe(host);
-    return () => { cancelAnimationFrame(frame); observer.disconnect(); };
+    host.addEventListener("zaylist:card-settled", schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      host.removeEventListener("zaylist:card-settled", schedule);
+    };
   }, []);
   useEffect(() => {
     const host = svg.current?.closest<HTMLElement>("[data-glass-piece]");

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/scrollLock";
 
 const modalStack: HTMLDivElement[] = [];
@@ -15,11 +15,13 @@ export function useModalA11y(opts: {
   onClose: () => void;
   /** When false, skip (e.g. parent not mounted). Default true. */
   enabled?: boolean;
+  dialogRef?: RefObject<HTMLDivElement | null>;
 }) {
   const { open = true, onClose, enabled = true } = opts;
-  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const ownDialogRef = useRef<HTMLDivElement | null>(null);
+  const dialogRef = opts.dialogRef ?? ownDialogRef;
   const closeRef = useRef(onClose);
-  closeRef.current = onClose;
+  useLayoutEffect(() => { closeRef.current = onClose; }, [onClose]);
   const previousFocus = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -85,7 +87,7 @@ export function useModalA11y(opts: {
       unlockBodyScroll();
       if (previousFocus.current?.isConnected) previousFocus.current.focus({ preventScroll: true });
     };
-  }, [enabled, open]);
+  }, [enabled, open, dialogRef]);
 
   return dialogRef;
 }

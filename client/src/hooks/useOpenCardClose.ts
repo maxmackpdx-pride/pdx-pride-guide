@@ -6,11 +6,34 @@ const quietMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").
   document.documentElement.classList.contains("calm-mode") ||
   document.documentElement.dataset.calm === "true";
 
-/** Shared 21st-inspired reveal; the shell and logo never scale. */
-export function useOpenCardClose(onClose: () => void, enabled = true) {
+type CardRect = Pick<DOMRect, "left" | "top" | "width" | "height">;
+function sourceTransform(panel: HTMLElement, origin?: CardRect | null) {
+  if (!origin || !origin.width || !origin.height) return "scale(.86)";
+  const end = panel.getBoundingClientRect();
+  if (!end.width || !end.height) return "scale(.86)";
+  const dx = origin.left + origin.width / 2 - end.left - end.width / 2;
+  const dy = origin.top + origin.height / 2 - end.top - end.height / 2;
+  return `translate(${dx}px, ${dy}px) scale(${origin.width / end.width}, ${origin.height / end.height})`;
+}
+/** Convert distance along the grow's easing curve to time. */
+function sheenDelay(distance: number) {
+  const curve = (t: number, a: number, b: number) =>
+    3 * (1 - t) ** 2 * t * a + 3 * (1 - t) * t ** 2 * b + t ** 3;
+  let low = 0, high = 1;
+  for (let i = 0; i < 12; i++) {
+    const mid = (low + high) / 2;
+    if (curve(mid, .78, 1) < distance) low = mid;
+    else high = mid;
+  }
+  return Math.round(720 * curve((low + high) / 2, .19, .24));
+}
+export function useOpenCardClose(onClose: () => void, enabled = true, grow?: { origin: CardRect | null }) {
+  const growEnabled = Boolean(grow);
+  const origin = grow?.origin;
   const inline = useInlineBoardCard();
+  const dialogRef = useRef<HTMLDivElement | null>(null);
   const latestClose = useRef(onClose);
-  latestClose.current = onClose;
+  useLayoutEffect(() => { latestClose.current = onClose; }, [onClose]);
   const closing = useRef(false);
   const animations = useRef<Animation[]>([]);
   const cancelAnimations = useCallback(() => {
@@ -26,9 +49,17 @@ export function useOpenCardClose(onClose: () => void, enabled = true) {
     closing.current = true;
     const panel = dialogRef.current;
     const opacity = panel ? getComputedStyle(panel).opacity : "1";
+    const transform = panel ? getComputedStyle(panel).transform : "none";
     cancelAnimations();
     if (!panel || quietMotion() || typeof panel.animate !== "function") {
       latestClose.current();
+      return;
+    }
+    if (growEnabled) {
+      const reverse = panel.animate([{ transform, opacity }, { transform: sourceTransform(panel, origin), opacity: 0 }],
+        { duration: 260, easing: "cubic-bezier(.4,0,.8,.45)", fill: "forwards" });
+      animations.current = [reverse];
+      reverse.onfinish = () => latestClose.current();
       return;
     }
     if (closeBoardCard(panel, () => latestClose.current())) return;
@@ -46,8 +77,8 @@ export function useOpenCardClose(onClose: () => void, enabled = true) {
       latestClose.current();
     };
     animation.oncancel = () => { closing.current = false; };
-  }, [cancelAnimations]);
-  const dialogRef = useModalA11y({ onClose: requestClose, enabled: enabled && !inline });
+  }, [cancelAnimations, growEnabled, origin]);
+  useModalA11y({ dialogRef, onClose: requestClose, enabled: enabled && !inline });
   useInlineBoardCardKeyboard(dialogRef, requestClose);
 
   useLayoutEffect(() => {
@@ -58,7 +89,24 @@ export function useOpenCardClose(onClose: () => void, enabled = true) {
     // Override the older family-specific scale/flip entrance before paint.
     const originalOpacity = panel.style.opacity;
     panel.style.opacity = "1";
-    if (!panel.dataset.boardContinuity && !quietMotion() && typeof panel.animate === "function") {
+    function settled() {
+      delete panel.dataset.cardEntering;
+      panel.dispatchEvent(new Event("zaylist:card-settled"));
+    }
+    if (growEnabled && !quietMotion() && typeof panel.animate === "function") {
+      const end = panel.getBoundingClientRect();
+      const start = origin?.height ?? end.height * .86;
+      const poster = panel.querySelector<HTMLImageElement>(".evz-x__thumb img");
+      const aspect = poster?.naturalWidth ? poster.naturalHeight / poster.naturalWidth : 912 / 724;
+      const crossing = end.height > start ? (end.width * aspect - start) / (end.height - start) : .5;
+      panel.style.setProperty("--evz-sheen-delay", sheenDelay(Math.max(.2, Math.min(.85, crossing))) + "ms");
+      panel.dataset.cardEntering = "true";
+      animations.current = [panel.animate([
+        { transform: sourceTransform(panel, origin), opacity: 0 },
+        { transform: "none", opacity: 1 }
+      ], { duration: 720, easing: "cubic-bezier(.19,.78,.24,1)" })];
+      animations.current[0].onfinish = settled;
+    } else if (!panel.dataset.boardContinuity && !quietMotion() && typeof panel.animate === "function") {
       const timing = { duration: 240, easing: "cubic-bezier(.16,1,.3,1)" };
       animations.current = [panel.animate([{ opacity: 0 }, { opacity: 1 }], timing)];
       // Only text/detail regions move, never the shell, artwork, or wordmark.
@@ -74,6 +122,7 @@ export function useOpenCardClose(onClose: () => void, enabled = true) {
     const onPreferenceChange = () => {
       if (!quietMotion()) return;
       cancelAnimations();
+      if (panel.dataset.cardEntering) settled();
       if (closing.current) latestClose.current();
     };
     media.addEventListener("change", onPreferenceChange);
@@ -85,8 +134,10 @@ export function useOpenCardClose(onClose: () => void, enabled = true) {
       cancelAnimations();
       closing.current = false;
       delete panel.dataset.cardMotion;
+      delete panel.dataset.cardEntering;
+      panel.style.removeProperty("--evz-sheen-delay");
       panel.style.opacity = originalOpacity;
     };
-  }, [enabled, cancelAnimations, dialogRef]);
+  }, [enabled, cancelAnimations, dialogRef, growEnabled, origin]);
   return { dialogRef, requestClose };
 }
