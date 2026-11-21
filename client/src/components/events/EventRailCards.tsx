@@ -4,6 +4,8 @@ import { toBoardPosts, type BoardPost } from "@/lib/allBoards";
 import { outzWallToBoardPost } from "@/lib/outzBoardPost";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
+import PlaceDiscoveryCard from "@/components/discovery/PlaceDiscoveryCard";
+import type { Business } from "@/pages/Directory";
 import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 
 /* Event rails (Mizzed, Gigz, Ridez carpools) use the site's standard small card:
@@ -57,6 +59,16 @@ export function EventRailCard({ post, saved, saveDisabled, onSave, onOpen, tag }
     <div className="orailcard" data-card-category={post.category} data-tag={tag || undefined}>
       {tag ? <span className="orailcard-tag">{tag}</span> : null}
       <BoardBrowseCard post={post} size="small" isSaved={saved} saveDisabled={saveDisabled || !onSave} onSave={onSave ?? (() => {})} onOpen={el => onOpen(el)} />
+    </div>
+  );
+}
+
+/** Nearby restaurants use the standard Placez small card (lead review, v8): its artwork, else the
+ *  directory logo, else the place-mark fallback (ServiceNameMark). Never an empty box. */
+export function EventNearbyPlaceCard({ place, onOpen }: { place: Pick<Business, "id" | "name" | "type"> & Partial<Business>; onOpen: () => void }) {
+  return (
+    <div className="orailcard orailcard--place" data-card-category="placez">
+      <PlaceDiscoveryCard place={place} size="small" onOpen={() => onOpen()} />
     </div>
   );
 }

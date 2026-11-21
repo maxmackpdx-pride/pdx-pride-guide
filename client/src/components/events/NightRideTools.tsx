@@ -535,6 +535,13 @@ export function RideCheckReminder() {
     </aside>
   );
 }
+/** Swap an open modal <dialog> to non-modal (still visible) for its exit animation. */
+function demoteDialog(d: HTMLDialogElement | null) {
+  if (!d || !d.open) return;
+  d.close();
+  d.show();
+}
+
 export function AtEventDialog({
   poster,
   title,
@@ -556,13 +563,16 @@ export function AtEventDialog({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const iconRef = useRef<HTMLSpanElement>(null);
-  const closing = useRef(false);
+  const [leaving, setLeaving] = useState(false);
   const close = () => {
-    if (closing.current) return;
-    closing.current = true;
+    if (leaving) return;
+    setLeaving(true);
+    // Leave the modal layer first so the event card underneath is live again
+    // (focus restore + its own Escape) while the exit animation plays.
+    demoteDialog(ref.current);
     void growOut(contentRef.current, origin, iconRef.current, origin).then(onClose);
   };
-  const contentRef = useModalA11y({ onClose: close });
+  const contentRef = useModalA11y({ onClose: close, enabled: !leaving });
   useEffect(() => {
     const d = ref.current;
     d?.showModal();

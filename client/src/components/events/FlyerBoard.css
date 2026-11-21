@@ -1346,3 +1346,28 @@ html.calm-mode .fbx .ocard .otile.is-pressed .otile-face { transform: none; }
 .fbx .ocard .ofeed--pregame .ofeed-cta { padding-top: 10px; }
 .fbx .ocard .ofeed--pregame .ofeed-cta { padding: 6px 12px 14px; }
 .fbx .ocard .ofeed--pregame .ofeed-cta .obtn { margin-top: 0; }
+
+/* ---- Lead review, yescoach-v8 ------------------------------------------ */
+/* (1) A darker scrim band behind the tile row and tabs, so poster type never collides with the
+   tab labels. It only darkens: the poster keeps running (and fading at its own foot) behind it,
+   never cut. The band fades in above the tiles, so it has no top edge. */
+.fbx .ocard .ohead > :is(.otiles, .otabs) { position: relative; z-index: 1; }
+.fbx .ocard .ohead::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; z-index: 0; pointer-events: none;
+  height: 168px;
+  background: linear-gradient(to bottom,
+    transparent 0,
+    color-mix(in srgb, var(--z-black) 62%, transparent) 44px,
+    color-mix(in srgb, var(--z-black) 80%, transparent) 100%);
+}
+/* (2) The three tiles share the full width in equal columns (no gap on the right). */
+.fbx .ocard .otiles { max-width: none; gap: 8px; padding-inline: 16px; }
+.fbx .ocard .otiles > .otile { flex: 1 1 0; min-width: 0; }
+/* (3) Public attendance sits once at the foot of Info. */
+.fbx .ocard .ogoing { margin-top: 18px; }
+/* (6) Pregame preview: every bubble shows whole (at most three, two lines each); no clip, no mask. */
+.fbx .ocard .ofeed--pregame .ofeed-peek { max-height: none; overflow: visible; -webkit-mask-image: none; mask-image: none; padding-bottom: 8px; }
+.fbx .ocard .ofeed-bubble { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+/* (4) Nearby restaurants: the standard Placez small card at the rail's small-card size. */
+.fbx .ocard .orail .orailcard--place { flex: 0 0 var(--card-small-width); height: var(--card-small-height); }
+.fbx .ocard .orail .orailcard--place > * { height: 100%; }

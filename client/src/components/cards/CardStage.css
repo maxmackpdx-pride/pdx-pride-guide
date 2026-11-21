@@ -58,3 +58,8 @@
 body:has(> .zay-card-stage[data-active]) .site-header.site-header--glass { position: fixed; inset-inline: 0; margin-inline: auto; margin-block-start: 0; }
 
 .map-place-preview { width: min(380px, calc(100% - 32px)); }
+/* The page reserves scrollbar gutters on both edges (index.css). While a card
+   stage is open the body is scroll-locked, so release the gutter: otherwise a
+   classic-scrollbar browser shrinks the fixed stage's viewport by two gutters
+   and the mobile card loses its 10px edge gutter (matches the native dialogs). */
+html:has(> body > .zay-card-stage[data-active]) { scrollbar-gutter: auto; }

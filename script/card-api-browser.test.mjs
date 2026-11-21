@@ -32,17 +32,16 @@ async function geometryReady(page){
 }
 async function snapshot(page){await geometryReady(page);return page.locator('#qa-grid').evaluate(grid=>[...grid.children].filter(el=>el.getBoundingClientRect().width>0).map(el=>{const face=el.matches("[data-card-expanded=true],[data-card-size]")?el:el.querySelector("[data-card-size]")||el;const r=face.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};}));}
 async function documentBox(locator){return locator.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});}
+// One open event card everywhere (Tucker, t276u): an event opener goes straight to the
+// shared OpenEventCard (no front preview step), centered in the card stage on INFO.
 async function openEventDetails(page, trigger) {
  await trigger.click();
- const front=page.locator('.event-front-dialog');
- await front.waitFor();
- const stage=page.locator('.zay-card-stage--front');
- const frontBox=await front.boundingBox(), stageBox=await stage.boundingBox();
- near(frontBox.x+frontBox.width/2,stageBox.x+stageBox.width/2,'event front centered horizontally');
- near(frontBox.y+frontBox.height/2,stageBox.y+stageBox.height/2,'event front centered vertically');
- await front.getByRole('button',{name:/View details/}).click();
- const details=page.locator('.zay-card-stage--expanded .evz-x[role=dialog]');
- await details.waitFor();await details.locator('[aria-label=Info][aria-hidden=false]').waitFor();
+ const details=page.locator('.zay-card-stage--expanded .ocard[role=dialog]');
+ await details.waitFor();
+ const stage=page.locator('.zay-card-stage--expanded');
+ const cardBox=await details.boundingBox(), stageBox=await stage.boundingBox();
+ near(cardBox.x+cardBox.width/2,stageBox.x+stageBox.width/2,'open event card centered horizontally');
+ await details.locator('.otabs [role=tab][aria-selected=true]',{hasText:'INFO'}).waitFor();
  return details;
 }
 async function settled(page){await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.waitForTimeout(450);}
@@ -94,7 +93,7 @@ test('production cards preserve source geometry across viewport and in-flow pres
     const original=await snapshot(page);const originalScroll=await page.evaluate(()=>({x:scrollX,y:scrollY}));const open=page.locator('#qa-grid button[aria-label^="Open "],#qa-grid button[aria-label^="View details for "]').nth(index);
     if(family==='event'){
      const details=await openEventDetails(page,open);
-     await details.getByRole('button',{name:/^Close QA Event/}).click();
+     await details.getByRole('button',{name:'Close event',exact:true}).click();
      await details.waitFor({state:'hidden'});await settled(page);
      const restored=await snapshot(page);
      restored.forEach((r,i)=>{for(const axis of ['x','y','width','height'])near(r[axis],original[i][axis],`event/${size}: restored source ${i} ${axis}`);});
@@ -136,9 +135,9 @@ test('production cards preserve source geometry across viewport and in-flow pres
    if(family==='event'){
     const details=await openEventDetails(page,first);
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'mobile event has no horizontal overflow');
-    await details.getByRole('button',{name:'Next page',exact:true}).click();
-    const launch=details.getByRole('button',{name:'At the event',exact:true});
-    await launch.click();
+    // RIDEZ tile -> Ridez sheet -> "+" -> ARRIVING opens the existing at-event carpool flow.
+    const launch=async()=>{await details.locator('[data-action=rides]').click();const ridez=page.locator('.zas[aria-label=Ridez]');await ridez.waitFor();await ridez.locator('[data-action=post-carpool]').click();await ridez.locator('[data-action=post-carpool-arriving]').click();};
+    await launch();
     const atEvent=page.locator('dialog.at-event-dialog[open]');
     await atEvent.getByRole('button',{name:'Carpools & rides home'}).click();
     await atEvent.getByRole('button',{name:'Sign in to coordinate a ride'}).click();
@@ -149,11 +148,11 @@ test('production cards preserve source geometry across viewport and in-flow pres
     assert.ok(await atEvent.isVisible(),'Closing sign-in returns to the at-event screen');
     await page.keyboard.press('Escape');
     await atEvent.waitFor({state:'hidden'});
-    await launch.click();
+    await launch();
     await atEvent.getByRole('button',{name:'Sign in to coordinate a ride'}).waitFor();
     await atEvent.getByRole('button',{name:'Back to event'}).click();
     assert.ok(await details.isVisible(),'Closing at-event preserves the event and its selected tab');
-    await details.getByRole('button',{name:/^Close QA Event/}).press('Escape');await details.waitFor({state:'hidden'});
+    await details.getByRole('button',{name:'Close event',exact:true}).press('Escape');await details.waitFor({state:'hidden'});
     assert.equal(await first.evaluate(el=>document.activeElement===el),true,'Escape restores event opener focus');
     await page.setViewportSize({width:1280,height:1000});continue;
    }
@@ -175,9 +174,9 @@ test('production cards preserve source geometry across viewport and in-flow pres
    if(family==='event'){
     for(let i=0;i<2;i++){
      const details=await openEventDetails(page,openers.nth(i));
-     assert.equal(await details.getAttribute('aria-label'),`QA Event ${i+1} details`);
-     assert.equal(await page.locator('.zay-card-stage--expanded .evz-x:visible').count(),1,'only selected event remains open');
-     await details.getByRole('button',{name:/^Close QA Event/}).click();await details.waitFor({state:'hidden'});await settled(page);
+     assert.equal(await details.getAttribute('aria-label'),`QA Event ${i+1}`);
+     assert.equal(await page.locator('.zay-card-stage--expanded .ocard:visible').count(),1,'only selected event remains open');
+     await details.getByRole('button',{name:'Close event',exact:true}).click();await details.waitFor({state:'hidden'});await settled(page);
     }
     continue;
    }

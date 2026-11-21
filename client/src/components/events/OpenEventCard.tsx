@@ -1,4 +1,7 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { useLocation } from "wouter";
+import { useResponsivePoster } from "@/lib/useResponsivePoster";
+import { restoreOriginalPoster, POSTER_DETAIL_SIZES } from "@/lib/responsivePoster";
 import type React from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -27,7 +30,7 @@ import { useEventRsvp } from "@/hooks/useEventRsvp";
 import { EventHostNotice } from "./EventHostNotice";
 import { weekdayCode, dayColorVar, startMs, dateStrOf, countdownParts } from "./EventFlyerFront";
 import { Car, MapPin, Moon } from "lucide-react";
-import { EventRailCard, gigBoardPost, mizzBoardPosts, rideBoardPost, rideDirection, useBoardRailSaves, type PlanRide } from "./EventRailCards";
+import { EventNearbyPlaceCard, EventRailCard, gigBoardPost, mizzBoardPosts, rideBoardPost, rideDirection, useBoardRailSaves, type PlanRide } from "./EventRailCards";
 import { RIDE_BRAND_COLOR, RideBrandMark } from "@/components/cards/rideBrands";
 import { memberProfileHref } from "@/lib/avatarLinks";
 import { ActionSheetCard } from "@/components/cards/ActionSheetCard";
@@ -87,7 +90,7 @@ type EventDetailResponse = {
   gigs?: Array<{ id?: number | string; title?: string | null; description?: string | null }>;
   missedConnections?: unknown[];
   nearby?: {
-    restaurants?: Array<{ name?: string | null; type?: string | null }>;
+    restaurants?: Array<{ id?: number; name?: string | null; type?: string | null; neighborhood?: string | null; address?: string | null; imageUrl?: string | null; distanceMi?: number }>;
     events?: Array<{ id?: number; title?: string | null; venueName?: string | null; dateStart?: string | null }>;
   } | null;
 };
@@ -220,6 +223,7 @@ function EventFeedChat({ listing, onLeave }: { listing: EventListing; onLeave: (
 
 export default function OpenEventCard({ listing, onClose, related = [], initialPage = 0, originRect = null }: OpenEventCardProps) {
   const closingRef = useRef(false);
+  const [, navigate] = useLocation();
   const requestClose = (fromY = 0, after?: () => void) => {
     if (closingRef.current) return;
     closingRef.current = true;
@@ -269,6 +273,9 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   const [failedOpenPoster, setFailedOpenPoster] = useState<string>();
   const openPosterUrl = listingPosterUrl(openListing);
   const openPoster = openPosterUrl === failedOpenPoster ? null : openPosterUrl;
+  /* Same DPR-aware variant delivery as the old EventModal poster (srcset +
+     detail sizes); a failed variant retries the original before the fallback. */
+  const heroPoster = useResponsivePoster(openPoster, POSTER_DETAIL_SIZES);
   const cd = openCountdown(openListing, tick);
   const openCdText = cd.chip;
   const venueId = detailQuery.data?.venue?.id;
@@ -508,7 +515,7 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
               the locked head AND the scroller, fading out at its own bottom edge. */}
           <div className="ohero" ref={heroRef}>
               {openPoster ? (
-                <img src={openPoster} alt="" fetchPriority="high" decoding="async" onError={() => setFailedOpenPoster(openPoster)} />
+                <img {...heroPoster} className="ohero-img" alt="" fetchPriority="high" decoding="async" onError={e => { if (!restoreOriginalPoster(e.currentTarget, openPoster)) setFailedOpenPoster(openPoster); }} />
               ) : (
                 <div
                   className="ohero-typo"
@@ -603,7 +610,6 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
             </div>
             </div>
           <div className="oscrollarea">
-            <EventGoingButton eventId={openListing.id} past={!!openListing.dateEnd && endMs(openListing) < tick} poster />
             <div
               className="opages"
               ref={pagesRef}
@@ -684,6 +690,10 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
                     MANAGE EVENT <span>›</span>
                   </a>
                 ) : null}
+                {/* Public attendance, once, at the foot of Info (lead review, v8): not repeated on every tab. */}
+                <div className="ogoing">
+                  <EventGoingButton eventId={openListing.id} past={!!openListing.dateEnd && endMs(openListing) < tick} poster />
+                </div>
                 <EventHostNotice className="onote" />
               </section>
               <section className="opage opage--feed" inert={opage!==1} aria-hidden={opage!==1} aria-label="Feed">
@@ -860,7 +870,9 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
                 </p>
                 {!Array.isArray(detailQuery.data?.nearby?.restaurants) ? detailStatus : nearbyR.length ? (
                   <div className="orail">
-                    {nearbyR.map((r, i) => (
+                    {nearbyR.map((r, i) => r.id && r.name ? (
+                      <EventNearbyPlaceCard key={r.id} place={{ ...r, id: r.id, name: r.name, type: r.type || "restaurant" }} onOpen={() => requestClose(0, () => navigate(placePath(r.id!, r.name!)))} />
+                    ) : (
                       <div className="omini" key={`${r.name ?? "r"}-${i}`}>
                         <b>{r.name}</b>
                         <span>{r.type || "restaurant"}</span>

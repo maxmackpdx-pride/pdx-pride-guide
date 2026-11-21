@@ -220,7 +220,7 @@
    corner, and one evenly spaced column of card-style buttons. */
 .at-event-dialog--tinted { display: grid; align-items: end; background: transparent; }
 /* Shared backdrop; the dialog stops above the dock so the dock stays sharp (t332u). */
-.at-event-dialog--tinted[open] { inset: 0 0 var(--z-dock-h, 0px) 0; height: auto; max-height: none; }
+.at-event-dialog--tinted[open] { inset: 0 0 var(--z-dock-h, 0px) 0; width: auto; height: auto; max-width: none; max-height: none; margin: 0; }
 .at-event-dialog--tinted::backdrop { background: transparent; }
 .at-event-dialog--tinted[open]::before { content: ""; position: fixed; inset: 0 0 var(--z-dock-h, 0px) 0; z-index: -1; background: var(--z-backdrop-tint); backdrop-filter: var(--z-backdrop-filter); -webkit-backdrop-filter: var(--z-backdrop-filter); }
 .at-event-dialog--tinted .at-event-poster { filter: blur(10px); opacity: .55; }

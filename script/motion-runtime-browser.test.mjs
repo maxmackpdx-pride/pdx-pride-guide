@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 import { mkdtemp, rm, readFile, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { createServer } from 'vite';
+// The app's Tailwind 4 utilities (AuthModal's fixed scrim) come from the Vite plugin since f6b69bba.
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { chromium } from 'playwright';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -30,7 +32,7 @@ test('real dock, navigation and auth transitions work with normal and reduced mo
   const fixture='script/fixtures/motion-runtime-browser.tsx';
   const server=await createServer({configFile:false,root,cacheDir,publicDir:false,
     optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime','motion/react']},
-    plugins:[react(),{name:'motion-fixture',configureServer(s){s.middlewares.use(async(req,res,next)=>{
+    plugins:[react(),tailwindcss(),{name:'motion-fixture',configureServer(s){s.middlewares.use(async(req,res,next)=>{
       if(!req.url?.startsWith('/__motion-qa'))return next();
       res.setHeader('Content-Type','text/html');
       res.end(await s.transformIndexHtml(req.url,`<!doctype html><html><head><style>

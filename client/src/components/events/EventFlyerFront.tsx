@@ -322,11 +322,6 @@ export function PosterCell({
    * gradient. (Tucker's ruling, Nov 18, 2026.) */
   const wideChunk = !!poster && aspect >= 1.15;
 
-  const share = async (ev: React.MouseEvent) => {
-    ev.stopPropagation();
-    await shareEventListing(listing);
-  };
-
   return (
     <div
       ref={cellRef}
@@ -388,9 +383,7 @@ export function PosterCell({
             logoUrl={isFetLife ? null : resolveDirectoryLogo(listing.venueName, listing.fallbackPlaceImage)}
             wordmark={isFetLife ? "FetLife" : null}
           /> : null}
-          <button type="button" className="pshare" aria-label={`Share ${listing.title}`} onClick={share}>
-            <ShareIcon />
-          </button>
+          {/* No share on front cards (Tucker): sharing lives on the open card. */}
           {!priceUnconfirmed && <span className={`pprice${priceCls}`}>{price}</span>}
           <div className="pcdtop">
             <span className="ps-lab">{countdownLabel}</span>
