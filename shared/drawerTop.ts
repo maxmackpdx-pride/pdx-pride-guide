@@ -1,7 +1,7 @@
 /**
  * Helpers for the shared DrawerTop used by every room drawer. The calendar
- * is the Placez seven-day rail. The countdown card lists the next three
- * upcoming events. Visual style lives in the client DrawerTop components.
+ * is a 14-day Placez rail (two weeks out). The countdown card shows the
+ * next upcoming event. Visual style lives in the client DrawerTop components.
  */
 import { addCalendarDays } from "./drawerFilters";
 import { pacificCalendarDate, pacificTodayDate, parsePacificDateTime } from "./missedConnections";
@@ -15,6 +15,8 @@ export type DrawerTopEvent = {
   venueName?: string | null;
   dayOfWeek?: string | null;
   accentColor?: string | null;
+  lat?: number | null;
+  lng?: number | null;
 };
 
 export type DrawerCalendarDay = {
@@ -40,8 +42,8 @@ function utcNoonFromIsoDate(isoDate: string): Date {
   return new Date(Date.UTC(year, month - 1, day, 12));
 }
 
-/** Seven Pacific dates starting today, with how many events fall on each day. */
-export function buildDrawerCalendarDays(events: DrawerTopEvent[], now = Date.now()): DrawerCalendarDay[] {
+/** Pacific dates starting today, with how many events fall on each day. Default is two weeks (14 days). */
+export function buildDrawerCalendarDays(events: DrawerTopEvent[], now = Date.now(), length = 14): DrawerCalendarDay[] {
   const today = pacificTodayDate(now);
   const counts = new Map<string, number>();
   for (const event of events) {
@@ -49,7 +51,8 @@ export function buildDrawerCalendarDays(events: DrawerTopEvent[], now = Date.now
     if (!key) continue;
     counts.set(key, (counts.get(key) || 0) + 1);
   }
-  return Array.from({ length: 7 }, (_, index) => {
+  const days = Math.max(1, length);
+  return Array.from({ length: days }, (_, index) => {
     const key = addCalendarDays(today, index);
     const date = utcNoonFromIsoDate(key);
     return {

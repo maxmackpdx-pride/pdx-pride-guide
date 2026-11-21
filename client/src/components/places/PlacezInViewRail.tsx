@@ -1,14 +1,14 @@
-import { EventCard, PlaceCard } from "@/components/cards";
+import { DrawerMiniCard } from "@/components/drawers";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
-import { openEventFromDrawer } from "@/lib/placezEventsDrawerApi";
+import { centerThenOpenFromDrawer } from "@/lib/placezEventsDrawerApi";
 import type { InViewItem } from "@shared/drawerFilters";
-import type { EventListing } from "@shared/multiDayEvents";
-import "@/pages/Events.css";
+import type { DrawerTopEvent } from "@shared/drawerTop";
 import "./PlacezEventsDrawer.css";
 
 /**
- * Mixed in-view rail: standard small event and place cards for everything
- * currently visible on the map.
+ * Mixed in-view rail: one DrawerMiniCard height and chrome (share top-right,
+ * heart bottom-right, no outer bloom) for every event and place currently on
+ * the map. A tap centers the map on the item, then opens the existing card.
  */
 export default function PlacezInViewRail({
   items,
@@ -25,15 +25,39 @@ export default function PlacezInViewRail({
       {items.map(item => (
         <div className="pz-drawer-bare" key={`${item.kind}:${item.id}`} role="listitem">
           {item.kind === "event" ? (
-            <EventCard
-              listing={item.event as EventListing}
-              size="small"
-              rsvped={rsvp.myEventIds.has(item.event.id)}
-              onToggleRsvp={() => rsvp.toggleRsvp(item.event.id)}
-              onOpen={() => openEventFromDrawer(item.event.id, item.event.title)}
+            <DrawerMiniCard
+              event={item.event as DrawerTopEvent}
+              saved={rsvp.myEventIds.has(item.event.id)}
+              onToggleSave={() => rsvp.toggleRsvp(item.event.id)}
+              onOpen={event => void centerThenOpenFromDrawer({
+                kind: "event",
+                id: event.id,
+                title: event.title,
+                lat: event.lat ?? item.event.lat,
+                lng: event.lng ?? item.event.lng,
+              })}
             />
           ) : (
-            <PlaceCard place={item.place as never} size="small" onRequireAuth={onRequireAuth} />
+            <DrawerMiniCard
+              place={{
+                id: item.place.id,
+                name: item.place.name || "Place",
+                type: item.place.type,
+                imageUrl: item.place.imageUrl,
+                neighborhood: item.place.neighborhood,
+                isFollowing: item.place.isFollowing,
+                lat: item.place.lat,
+                lng: item.place.lng,
+              }}
+              onRequireAuth={onRequireAuth}
+              onOpenPlace={place => void centerThenOpenFromDrawer({
+                kind: "place",
+                id: place.id,
+                title: place.name,
+                lat: place.lat ?? item.place.lat,
+                lng: place.lng ?? item.place.lng,
+              })}
+            />
           )}
         </div>
       ))}

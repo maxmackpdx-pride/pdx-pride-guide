@@ -4,7 +4,7 @@ import { DrawerMiniCard } from "@/components/drawers";
 import EventPlanExtension from "./EventPlanExtension";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import { usePlacezDrawerPlans, type PlacezDrawerEvent } from "@/hooks/usePlacezDrawerPlans";
-import { openEventFromDrawer } from "@/lib/placezEventsDrawerApi";
+import { centerThenOpenFromDrawer } from "@/lib/placezEventsDrawerApi";
 import AuthModal from "@/components/AuthModal";
 import "@/pages/Events.css";
 import "@/components/events/DayMotif.css";
@@ -77,7 +77,13 @@ function EventItem({ item, side }: { item: PlacezDrawerEvent; side: "left" | "ri
         event={listing}
         saved={rsvp.myEventIds.has(listing.id)}
         onToggleSave={() => rsvp.toggleRsvp(listing.id)}
-        onOpen={() => openEventFromDrawer(listing.id, listing.title)}
+        onOpen={() => void centerThenOpenFromDrawer({
+          kind: "event",
+          id: listing.id,
+          title: listing.title,
+          lat: listing.lat,
+          lng: listing.lng,
+        })}
       />
       {side === "right" && (
         <EventPlanExtension

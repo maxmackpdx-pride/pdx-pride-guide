@@ -15,8 +15,26 @@ import '@/components/nav.css';
 import '@/components/ds/tokens/index.css';
 import '@/components/ds/styles.css';
 
+type EaseMap = {
+  easeTo: (options: {center: [number, number]; duration?: number}) => void;
+  once: (event: string, handler: () => void) => void;
+  off: (event: string, handler: () => void) => void;
+};
+
+const mapListeners: Record<string, Array<() => void>> = {};
+let mapCenter: [number, number] = [-122.6757, 45.5241];
+const qaMap: EaseMap = {
+  easeTo({center}) {
+    mapCenter = center;
+    (window as unknown as {__mapCentered?: [number, number]}).__mapCentered = center;
+    window.setTimeout(() => { for (const handler of mapListeners.moveend || []) handler(); }, 20);
+  },
+  once(event, handler) { (mapListeners[event] ||= []).push(handler); },
+  off(event, handler) { mapListeners[event] = (mapListeners[event] || []).filter(fn => fn !== handler); },
+};
+(window as unknown as {__zaylistMap: EaseMap}).__zaylistMap = qaMap;
 (window as unknown as {__mapReleaseDiagnostics:{snapshot:() => object}}).__mapReleaseDiagnostics = {
-  snapshot: () => ({mode: 'mapz', center: [-122.6757, 45.5241], zoom: 15.25, pitch: 45, bearing: 0}),
+  snapshot: () => ({mode: 'mapz', center: mapCenter, zoom: 15.25, pitch: 45, bearing: 0}),
 };
 
 function qaEvent(): EventListing {
@@ -80,19 +98,7 @@ function YesCoachCard() {
   );
 }
 
-function Fixture() {
-  const [params, setParams] = useState(() => new URLSearchParams(location.search));
-  useEffect(() => {
-    const onOpen = () => setParams(new URLSearchParams(location.search));
-    window.addEventListener('placez-mizzed-open', onOpen);
-    window.addEventListener('popstate', onOpen);
-    return () => {
-      window.removeEventListener('placez-mizzed-open', onOpen);
-      window.removeEventListener('popstate', onOpen);
-    };
-  }, []);
-  if (params.get('card')) return <YesCoachCard />;
-  if (params.get('event')) return <MizzedPreview eventId={params.get('event') || ''} title="Past dance" />;
+function MapSurface({children}:{children?: React.ReactNode}) {
   return (
     <>
       <NavShell>
@@ -100,6 +106,7 @@ function Fixture() {
       </NavShell>
       <div className="zaylist-unified-map" data-placez-host-drawer="on" style={{minHeight:'100dvh',background:'var(--z-black)'}} />
       <PlacezMapDrawer />
+      {children}
       <MobileDockShell activeIndex={0} location="/placez/map">
         <button type="button">Home</button>
         <button type="button">Places</button>
@@ -107,6 +114,52 @@ function Fixture() {
       </MobileDockShell>
     </>
   );
+}
+
+function OpenMapCard({eventId}:{eventId:string}) {
+  const event = Number(eventId) === 10 ? qaEvent() : {
+    ...qaEvent(),
+    id: Number(eventId) || 10,
+    title: Number(eventId) === 12 ? 'Late show' : Number(eventId) === 13 ? 'Tomorrow brunch' : qaEvent().title,
+  };
+  return (
+    <MapSurface>
+      <div data-testid="placez-center-open-card">
+        <EventzExpanded event={event} onClose={() => undefined} documentMeta={false} />
+      </div>
+    </MapSurface>
+  );
+}
+
+function Fixture() {
+  const [params, setParams] = useState(() => new URLSearchParams(location.search));
+  const [path, setPath] = useState(() => location.pathname);
+  useEffect(() => {
+    if (location.pathname.startsWith('/__drawer-qa') && !location.search.includes('card=') && !location.search.includes('board=mizzed') && !location.pathname.startsWith('/mizzed')) {
+      const next = '/placez/map' + (location.search || '');
+      window.history.replaceState(window.history.state, '', next);
+      setPath('/placez/map');
+    }
+    const onOpen = () => {
+      setParams(new URLSearchParams(location.search));
+      setPath(location.pathname);
+    };
+    window.addEventListener('placez-mizzed-open', onOpen);
+    window.addEventListener('popstate', onOpen);
+    window.addEventListener('zaylist:open-map-card', onOpen);
+    return () => {
+      window.removeEventListener('placez-mizzed-open', onOpen);
+      window.removeEventListener('popstate', onOpen);
+      window.removeEventListener('zaylist:open-map-card', onOpen);
+    };
+  }, []);
+  const onMizzed = path.includes('/mizzed') || params.get('board') === 'mizzed';
+  if (params.get('card')) return <YesCoachCard />;
+  if (onMizzed && params.get('event')) return <MizzedPreview eventId={params.get('event') || ''} title="Past dance" />;
+  if (params.get('event') && (path === '/placez/map' || path === '/mapz' || path.startsWith('/__drawer-qa'))) {
+    return <OpenMapCard eventId={params.get('event') || ''} />;
+  }
+  return <MapSurface />;
 }
 
 createRoot(document.getElementById('root')!).render(

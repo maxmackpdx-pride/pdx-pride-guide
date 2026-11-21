@@ -2,9 +2,8 @@ import type { DrawerCalendarDay } from "@shared/drawerTop";
 import "./DrawerTop.css";
 
 /**
- * The Placez seven-day calendar rail, used as the date filter at the top of
- * every shared drawer. No section title. Selecting a day is a button
- * alternative to swiping the rail.
+ * Horizontal date rail under FILTERS. DrawerTop feeds 14 days (two weeks)
+ * by default. Selecting a day is a button alternative to swiping the rail.
  */
 export default function PlacezCalendarFilter({
   days,

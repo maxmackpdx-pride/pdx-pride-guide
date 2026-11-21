@@ -18,17 +18,19 @@ const events: DrawerTopEvent[] = [
   { id: 5, title: "Already started", dateStart: "2026-11-20T10:00:00", venueName: "Sanctuary" },
 ];
 
-test("calendar days are seven Pacific dates with event counts and no title data", () => {
+test("calendar days are fourteen Pacific dates with event counts and no title data", () => {
   const days = buildDrawerCalendarDays(events, now);
-  assert.equal(days.length, 7);
+  assert.equal(days.length, 14);
   assert.equal(days[0].key, "2026-11-20");
   assert.equal(days[0].count, 3);
   assert.equal(days[1].key, "2026-11-21");
   assert.equal(days[1].count, 1);
   assert.equal(days[5].key, "2026-11-25");
   assert.equal(days[5].count, 1);
+  assert.equal(days[13].key, "2026-12-03");
   assert.ok(days[0].weekday);
   assert.ok(days[0].day);
+  assert.equal(buildDrawerCalendarDays(events, now, 7).length, 7);
 });
 
 test("countdown remaining matches the Placez hologram units", () => {
@@ -40,10 +42,10 @@ test("countdown remaining matches the Placez hologram units", () => {
   assert.equal(remainingToStart("2026-11-20T10:00:00", now), null);
 });
 
-test("countdown card source is the next three upcoming event names", () => {
-  const next = nextDrawerEvents(events, now, 3);
-  assert.deepEqual(next.map(event => event.title), ["Yes Coach", "Late show", "Tomorrow brunch"]);
+test("countdown card source is the next upcoming event name", () => {
+  const next = nextDrawerEvents(events, now, 1);
+  assert.deepEqual(next.map(event => event.title), ["Yes Coach"]);
   const onFriday = nextDrawerEvents(events, now, 3, "2026-11-20");
   assert.deepEqual(onFriday.map(event => event.title), ["Yes Coach", "Late show"]);
-  assert.ok(!next.some(event => event.title === "Already started"));
+  assert.ok(!nextDrawerEvents(events, now, 3).some(event => event.title === "Already started"));
 });

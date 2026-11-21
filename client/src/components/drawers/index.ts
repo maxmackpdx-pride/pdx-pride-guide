@@ -7,4 +7,5 @@ export type { DrawerTopProps } from "./DrawerTop";
 export { default as DrawerCountdownCard } from "./DrawerCountdownCard";
 export { default as DrawerFilterRail } from "./DrawerFilterRail";
 export { default as DrawerMiniCard } from "./DrawerMiniCard";
+export type { DrawerMiniPlace } from "./DrawerMiniCard";
 export { default as PlacezCalendarFilter } from "./PlacezCalendarFilter";

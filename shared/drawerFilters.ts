@@ -263,6 +263,9 @@ export type InViewPlace = FilterablePlace & {
   id: number;
   lat?: number | null;
   lng?: number | null;
+  imageUrl?: string | null;
+  neighborhood?: string | null;
+  isFollowing?: boolean;
   locations?: Array<{ lat?: number | null; lng?: number | null }>;
   upcomingEvents?: Dated[];
 };

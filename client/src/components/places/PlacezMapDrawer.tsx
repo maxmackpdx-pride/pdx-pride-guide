@@ -5,7 +5,7 @@ import PlacezInViewRail from '@/components/places/PlacezInViewRail';
 import { DrawerTop } from '@/components/drawers';
 import AuthModal from '@/components/AuthModal';
 import { useMapViewportItems } from '@/hooks/useMapViewportItems';
-import { openEventFromDrawer } from '@/lib/placezEventsDrawerApi';
+import { centerThenOpenFromDrawer } from '@/lib/placezEventsDrawerApi';
 import { EMPTY_DRAWER_FILTERS, type DrawerFilterState } from '@shared/drawerFilters';
 import type { DrawerTopEvent } from '@shared/drawerTop';
 import './PlacezEventsDrawer.css';
@@ -32,7 +32,7 @@ export default function PlacezMapDrawer() {
             onSelectDate={date => setSelectedDate(date || null)}
             filters={filters}
             onFiltersChange={setFilters}
-            onOpenEvent={event => openEventFromDrawer(event.id, event.title)}
+            onOpenEvent={event => void centerThenOpenFromDrawer({ kind: 'event', id: event.id, title: event.title, lat: event.lat, lng: event.lng })}
           />
         }
         inView={

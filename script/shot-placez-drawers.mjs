@@ -139,7 +139,9 @@ const server = await createServer({
     name: 'placez-drawer-qa',
     configureServer(s) {
       s.middlewares.use(async (req, res, next) => {
-        if (!req.url?.startsWith('/__drawer-qa')) return next();
+        const url = req.url || '';
+        if (!(url.startsWith('/__drawer-qa') || url.startsWith('/placez/map') || url.startsWith('/mizzed'))) return next();
+        if (url.startsWith('/api/')) return next();
         const html = await s.transformIndexHtml(req.url, '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#000}</style></head><body><div id="root"></div><script type="module" src="/script/fixtures/placez-drawers-browser.tsx"></script></body></html>');
         res.setHeader('Content-Type', 'text/html');
         res.end(html);
@@ -160,8 +162,9 @@ await context.addInitScript(event => {
   const assign = window.location.assign.bind(window.location);
   window.location.assign = href => {
     const url = String(href);
-    if (url.includes('event=')) {
-      const next = new URL(url, window.location.origin);
+    const next = new URL(url, window.location.origin);
+    const mizzed = next.pathname.startsWith('/mizzed') || next.searchParams.get('board') === 'mizzed';
+    if (mizzed) {
       window.history.pushState({}, '', next.pathname + next.search);
       window.dispatchEvent(new Event('placez-mizzed-open'));
       return;
@@ -192,6 +195,11 @@ await context.route('**/api/**', route => {
     }});
   }
   if (p === '/api/directory') return route.fulfill({json: places});
+  const directoryOne = p.match(/^\/api\/directory\/(\d+)$/);
+  if (directoryOne) {
+    const place = places.find(item => String(item.id) === directoryOne[1]);
+    return route.fulfill({status: place ? 200 : 404, json: place || {error: 'missing'}});
+  }
   if (p.startsWith('/api/placez/')) {
     return route.fulfill({json: {
       upcomingEvents: [lateShow, brunch],
@@ -216,7 +224,7 @@ await page.goto(`${base}__drawer-qa`, {waitUntil: 'networkidle'});
 if (errors.length) console.log('EARLY_ERRORS', errors);
 await page.getByRole('button', {name: /Open Placez/i}).click();
 await page.getByTestId('drawer-top').waitFor();
-await shot('placez-v10-map-drawer-top.png');
+await shot('placez-v11-map-drawer-top.png');
 
 const inView = page.getByTestId('placez-in-view-rail');
 await inView.waitFor();
@@ -228,28 +236,48 @@ if (await inViewList.count()) {
     item?.scrollIntoView({inline: 'center', block: 'nearest'});
   });
 }
-await shot('placez-v10-in-view-rail.png');
+await shot('placez-v11-in-view-rail.png');
+
+const yesMini = inView.getByRole('button', {name: /Open Yes Coach/i});
+if (await yesMini.count()) {
+  await yesMini.scrollIntoViewIfNeeded();
+  await yesMini.click();
+} else {
+  await inView.getByRole('button', {name: /Open Late show/i}).click();
+}
+const openCard = page.getByTestId('event-modal').or(page.locator('.zay-card-stage'));
+await openCard.first().waitFor({state: 'visible'});
+const centered = await page.evaluate(() => window.__mapCentered);
+console.log('CENTERED', JSON.stringify(centered));
+if (errors.length) console.log('OPEN_CARD_ERRORS', errors);
+await shot('placez-v11-center-then-open.png');
+await page.goBack().catch(() => {});
+if (!await page.getByTestId('drawer-top').count()) {
+  await page.goto(`${base}__drawer-qa`, {waitUntil: 'networkidle'});
+  await page.getByRole('button', {name: /Open Placez/i}).click();
+  await page.getByTestId('drawer-top').waitFor();
+}
 
 const upcomingRail = page.getByTestId('placez-upcoming-events-rail');
 await upcomingRail.scrollIntoViewIfNeeded();
-await shot('placez-v10-events-right-drawer.png');
+await shot('placez-v11-events-right-drawer.png');
 
 const pastRail = page.getByTestId('placez-past-events-rail');
 await pastRail.scrollIntoViewIfNeeded();
-await shot('placez-v10-past-left-mizzed.png');
+await shot('placez-v11-past-left-mizzed.png');
 
 const mizzedBtn = page.getByRole('button', {name: /Open Mizzed Connections for Past dance/i});
 if (await mizzedBtn.count()) await mizzedBtn.click();
-else await page.goto(`${base}__drawer-qa?event=11`, {waitUntil: 'networkidle'});
+else await page.goto(`${base}mizzed?event=11`, {waitUntil: 'networkidle'});
 if (!await page.getByTestId('placez-mizzed-page').count()) {
-  await page.goto(`${base}__drawer-qa?event=11`, {waitUntil: 'networkidle'});
+  await page.goto(`${base}mizzed?event=11`, {waitUntil: 'networkidle'});
 }
 await page.getByTestId('placez-mizzed-page').waitFor();
-await shot('placez-v10-mizzed-page.png');
+await shot('placez-v11-mizzed-page.png');
 
 await page.goto(`${base}__drawer-qa?card=yes-coach`, {waitUntil: 'networkidle'});
 await page.getByTestId('yes-coach-card-stage').waitFor();
-await shot('placez-v10-yes-coach-card.png');
+await shot('placez-v11-yes-coach-card.png');
 const details = page.getByRole('button', {name: /View details/i});
 if (await details.count()) {
   await details.click();
@@ -263,7 +291,7 @@ for (const label of pages) {
     const next = page.getByRole('button', {name: 'Next page'});
     if (await next.count()) await next.click();
   }
-  await shot(`placez-v10-yes-coach-${label.toLowerCase()}.png`);
+  await shot(`placez-v11-yes-coach-${label.toLowerCase()}.png`);
 }
 
 await browser.close();

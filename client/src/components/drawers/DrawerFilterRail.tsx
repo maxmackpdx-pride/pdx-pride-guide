@@ -20,6 +20,7 @@ import {
   type DrawerFilterChip,
   type DrawerFilterState,
 } from "@shared/drawerFilters";
+import { isPlacezType } from "@shared/directoryTheme";
 import "./DrawerTop.css";
 
 const ICONS: Record<string, ComponentType<{ size?: number; "aria-hidden"?: boolean }>> = {
@@ -42,8 +43,8 @@ const ICONS: Record<string, ComponentType<{ size?: number; "aria-hidden"?: boole
 };
 
 /**
- * Placez-style tag filters on a two-row horizontal rail. Same shared
- * filter config used by every drawer and map.
+ * Compact filter chips on a horizontal rail. Only place-type chips use
+ * category colors; event, time, and tag chips stay neutral.
  */
 export default function DrawerFilterRail({
   value,
@@ -68,12 +69,12 @@ export default function DrawerFilterRail({
           <button
             key={chip.id}
             type="button"
-            className="drawer-filter-rail__chip pdx-glass-rebind"
-            style={{ "--c": chip.accent, "--category": chip.accent } as CSSProperties}
+            className={`drawer-filter-rail__chip pdx-glass-rebind${isPlacezType(chip.id) ? " is-place" : " is-neutral"}`}
+            style={isPlacezType(chip.id) ? { "--c": chip.accent, "--category": chip.accent } as CSSProperties : undefined}
             aria-pressed={on}
             onClick={() => onChange(toggleDrawerFilter(value, chip))}
           >
-            <Icon size={18} aria-hidden={true} />
+            <Icon size={14} aria-hidden={true} />
             {chip.label}
           </button>
         );

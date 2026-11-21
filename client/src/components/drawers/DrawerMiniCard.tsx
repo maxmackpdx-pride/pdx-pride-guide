@@ -1,28 +1,55 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { CardHeartButton } from "@/components/CardHeartButton";
 import RailShareButton from "@/components/home/RailShareButton";
+import VenueFollowButton from "@/components/VenueFollowButton";
 import EventFlyerArt from "@/components/events/EventFlyerArt";
 import { listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import { dayAccentToken } from "@/lib/dsColors";
 import { eventPath } from "@shared/eventSlug";
+import { placePath } from "@shared/placeSlug";
+import { DIRECTORY_TYPE_LABELS } from "@shared/directoryTheme";
+import { DRAWER_CATEGORY_FILTERS } from "@shared/drawerFilters";
 import { formatDrawerCountdown, remainingToStart, type DrawerTopEvent } from "@shared/drawerTop";
 import type { Event } from "@shared/schema";
 import "./DrawerTop.css";
 
+/** Place payload for the same mini card used by events. Additive; event usage is unchanged. */
+export type DrawerMiniPlace = {
+  id: number;
+  name: string;
+  type?: string | null;
+  imageUrl?: string | null;
+  neighborhood?: string | null;
+  isFollowing?: boolean;
+  lat?: number | null;
+  lng?: number | null;
+};
+
+function placeAccent(type?: string | null): string {
+  return DRAWER_CATEGORY_FILTERS.find(chip => chip.id === type)?.accent || "var(--room-placez)";
+}
+
 /**
- * Full-bleed mini event card for Placez drawer rails. Same share and heart
- * placement as other small cards: share top-right, heart bottom-right.
+ * Full-bleed mini card for every drawer rail. Same chrome on events, restaurants,
+ * venues, and past events: share circle top-right, heart bottom-right. Hearts
+ * mean interested (save to stack and notifications) through existing APIs.
  */
 export default function DrawerMiniCard({
   event,
+  place,
   saved = false,
   onToggleSave,
   onOpen,
+  onOpenPlace,
+  onRequireAuth,
 }: {
-  event: DrawerTopEvent;
+  event?: DrawerTopEvent;
+  place?: DrawerMiniPlace;
   saved?: boolean;
   onToggleSave?: (id: number) => void;
   onOpen?: (event: DrawerTopEvent) => void;
+  onOpenPlace?: (place: DrawerMiniPlace) => void;
+  onRequireAuth?: () => void;
 }) {
   "use memo";
   const [now, setNow] = useState(() => Date.now());
@@ -30,10 +57,50 @@ export default function DrawerMiniCard({
     const id = window.setInterval(() => setNow(Date.now()), 30000);
     return () => window.clearInterval(id);
   }, []);
-  const listing = event as unknown as Event;
-  const poster = listingPosterUrl(listing);
-  const accent = event.accentColor || dayAccentToken(listingDay(listing));
-  const remaining = remainingToStart(event.dateStart, now);
+  if (!event && !place) return null;
+  if (place && !event) {
+    const accent = placeAccent(place.type);
+    const kind = DIRECTORY_TYPE_LABELS[place.type || ""] || place.type || "Place";
+    return (
+      <article
+        data-card-size="small"
+        data-card-category="placez"
+        data-testid="drawer-mini-card"
+        className="drawer-mini pdx-glass-rebind"
+        style={{ "--c": accent } as CSSProperties}
+      >
+        <div className="drawer-mini__art" aria-hidden="true">
+          {place.imageUrl ? (
+            <img src={place.imageUrl} alt="" />
+          ) : (
+            <div className="drawer-mini__fallback">{kind}</div>
+          )}
+        </div>
+        <button
+          type="button"
+          className="drawer-mini__open"
+          onClick={() => onOpenPlace ? onOpenPlace(place) : window.location.assign(placePath(place.id, place.name))}
+          aria-label={`Open ${place.name}`}
+        >
+          <span className="drawer-mini__meta">
+            <span className="drawer-mini__title">{place.name}</span>
+            <span className="drawer-mini__count">{kind}</span>
+          </span>
+        </button>
+        <RailShareButton href={placePath(place.id, place.name)} title={place.name} />
+        <VenueFollowButton
+          variant="small-card"
+          businessId={place.id}
+          initialFollowing={Boolean(place.isFollowing)}
+          onRequireAuth={onRequireAuth}
+        />
+      </article>
+    );
+  }
+  const listing = event as DrawerTopEvent;
+  const poster = listingPosterUrl(listing as unknown as Event);
+  const accent = listing.accentColor || dayAccentToken(listingDay(listing as unknown as Event));
+  const remaining = remainingToStart(listing.dateStart, now);
   return (
     <article
       data-card-size="small"
@@ -43,22 +110,23 @@ export default function DrawerMiniCard({
       style={{ "--c": accent } as CSSProperties}
     >
       <div className="drawer-mini__art" aria-hidden="true">
-        <EventFlyerArt src={poster} day={listingDay(listing)} showDay={false} title={event.title} venueName={event.venueName || ""} />
+        <EventFlyerArt src={poster} day={listingDay(listing as unknown as Event)} showDay={false} title={listing.title} venueName={listing.venueName || ""} />
       </div>
-      <button type="button" className="drawer-mini__open" onClick={() => onOpen?.(event)} aria-label={`Open ${event.title}`}>
+      <button type="button" className="drawer-mini__open" onClick={() => onOpen?.(listing)} aria-label={`Open ${listing.title}`}>
         <span className="drawer-mini__meta">
-          <span className="drawer-mini__title">{event.title}</span>
+          <span className="drawer-mini__title">{listing.title}</span>
           {remaining ? <span className="drawer-mini__count">{formatDrawerCountdown(remaining)}</span> : null}
         </span>
       </button>
-      <RailShareButton href={eventPath(event.id, event.title, event.dayOfWeek)} title={event.title} />
-      {onToggleSave ? (
-        <CardHeartButton
-          active={saved}
-          aria-label={`${saved ? "Remove" : "Add"} ${event.title} ${saved ? "from" : "to"} my schedule`}
-          onClick={click => { click.stopPropagation(); onToggleSave(event.id); }}
-        />
-      ) : null}
+      <RailShareButton href={eventPath(listing.id, listing.title, listing.dayOfWeek)} title={listing.title} />
+      <CardHeartButton
+        active={saved}
+        aria-label={`${saved ? "Remove" : "Add"} ${listing.title} ${saved ? "from" : "to"} my schedule`}
+        onClick={click => {
+          click.stopPropagation();
+          if (onToggleSave) onToggleSave(listing.id);
+        }}
+      />
     </article>
   );
 }
