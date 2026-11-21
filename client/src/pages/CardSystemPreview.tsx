@@ -3,7 +3,7 @@ import "./CardSystemPreview.css";
 
 const surfaces = [
   ["Event card", "/dev/card-fronts"],
-  ["Events + Placez", "/placez/map"],
+  ["Events + Placez", "/placez/map?mode=mapz"],
   ["Outzide", "/outzide"],
   ["Afterz", "/map?mode=afterz"],
 ] as const;
