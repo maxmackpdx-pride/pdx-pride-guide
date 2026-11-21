@@ -8,6 +8,7 @@ import {
   type MemberSearchResult,
   type ZaylistEntry,
   type ZaylistEventPayload,
+  type ZaylistPermissions,
 } from "@/lib/zaylistApi";
 
 function initials(name: string) {
@@ -89,7 +90,19 @@ function PersonRow({
   );
 }
 
-export default function ZaylistPanel({ eventId }: { eventId: number }) {
+export default function ZaylistPanel({
+  eventId,
+  preview = null,
+}: {
+  eventId: number;
+  /**
+   * "See it as…" preview (owner only): when set, the panel renders the
+   * previewed role's permissions instead of the account's real ones,
+   * and every change stays off — run() and member search are inert.
+   * The session and the server-side permissions never change.
+   */
+  preview?: { roleLabel: string; permissions: ZaylistPermissions } | null;
+}) {
   const queryClient = useQueryClient();
   const key = ["zaylist", eventId] as const;
   const query = useQuery({
@@ -103,6 +116,10 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
   const run = async (fn: () => Promise<unknown>, ok?: string) => {
     setError(null);
     setNotice(null);
+    if (preview) {
+      setNotice(`Previewing as ${preview.roleLabel} — changes are off in preview.`);
+      return;
+    }
     try {
       await fn();
       if (ok) setNotice(ok);
@@ -131,12 +148,12 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
   const messagesQuery = useQuery({
     queryKey: ["zaylist-messages", eventId],
     queryFn: () => zaylistApi.getMessages(eventId),
-    enabled: !!payload?.permissions.editor,
+    enabled: !!payload?.permissions.editor && (!preview || preview.permissions.editor),
   });
   const broadcastsQuery = useQuery({
     queryKey: ["zaylist-broadcasts", eventId],
     queryFn: () => zaylistApi.getBroadcasts(eventId),
-    enabled: !!payload?.permissions.editor,
+    enabled: !!payload?.permissions.editor && (!preview || preview.permissions.editor),
   });
 
   const grouped = useMemo(() => {
@@ -161,7 +178,7 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
     );
   if (!payload) return <p className="zl-note">You are not on this event team.</p>;
 
-  const perms = payload.permissions;
+  const perms = preview ? preview.permissions : payload.permissions;
   const cfg = payload.config;
   const cfgForm = config ?? {
     poolSize: String(cfg?.poolSize ?? 0),
@@ -173,6 +190,10 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
 
   const doSearch = async (q: string) => {
     setSearchQ(q);
+    if (preview) {
+      setResults([]);
+      return;
+    }
     if (q.trim().length < 2) {
       setResults([]);
       return;
@@ -209,6 +230,12 @@ export default function ZaylistPanel({ eventId }: { eventId: number }) {
 
   return (
     <div>
+      {preview ? (
+        <p className="zl-note" role="status">
+          Previewing as {preview.roleLabel} — this panel shows what {preview.roleLabel} sees.
+          Changes are off in preview.
+        </p>
+      ) : null}
       <div className="zl-counts" aria-label="List counts">
         <div className="zl-count"><b>{payload.counts.pending}</b><span>Pending</span></div>
         <div className="zl-count"><b>{payload.counts.accepted}</b><span>On the list</span></div>

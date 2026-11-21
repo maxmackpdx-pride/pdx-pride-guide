@@ -10,6 +10,11 @@ import ZaylistPanel from "./ZaylistPanel";
 import { EventTeam, Connections, EventGig, ScanLedger } from "./HostOperations";
 import PushComposer from "./PushComposer";
 import EventMode from "./EventMode";
+import {
+  hubRoleLabel,
+  panelPermissionsFor,
+  type HubRole,
+} from "@/lib/hubRolePreview";
 
 export interface HostEvent {
   id: number;
@@ -58,15 +63,28 @@ export default function HostCard({
   event,
   otherEvents,
   startInEdit = false,
+  previewRole = null,
 }: {
   event: HostEvent;
   otherEvents: HostEvent[];
   startInEdit?: boolean;
+  /**
+   * "See it as…" preview (owner only): when set, the card renders the
+   * previewed role's view — the event already carries that role's
+   * flags — and every live action stays off. The door scanner is live
+   * equipment, so in preview its button explains instead of opening.
+   */
+  previewRole?: HubRole | null;
 }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const dialogRef = useModalA11y({open,onClose:()=>setOpen(false)});
   const [door, setDoor] = useState(false);
+  const [doorNote, setDoorNote] = useState(false);
+  const openDoor = () => {
+    if (previewRole) { setDoorNote(true); return; }
+    setDoor(true);
+  };
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     title: event.title,
@@ -91,6 +109,10 @@ export default function HostCard({
 
   const save = async () => {
     setError(null);
+    if (previewRole) {
+      setError(`Previewing as ${hubRoleLabel(previewRole)} — changes are off in preview.`);
+      return;
+    }
     try {
       await apiRequest("PUT", `/api/events/${event.id}/edit`, {
         title: form.title.trim(),
@@ -171,7 +193,7 @@ export default function HostCard({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                setDoor(true);
+                openDoor();
               }}
             >
               Event Mode
@@ -251,13 +273,13 @@ export default function HostCard({
                   <a className="zl-btn" href={`/events/${event.id}`}>
                     View live card
                   </a>
-                  <button className="zl-btn" type="button" onClick={() => setDoor(true)}>
+                  <button className="zl-btn" type="button" onClick={openDoor}>
                     Event Mode
                   </button>
                 </div>
               )}
 
-              {event.canManageList && <HostSignal event={event} onEdit={()=>{setEditing(true);dialogRef.current?.scrollTo({top:0});}} onDoor={()=>setDoor(true)}/>}
+              {event.canManageList && <HostSignal event={event} onEdit={()=>{setEditing(true);dialogRef.current?.scrollTo({top:0});}} onDoor={openDoor}/>}
               <details className="zl-tool"><summary>Night in numbers</summary>
                 <dl className="zl-stat-strip">{[
                   ["Interested",counts.interested],["Going",counts.going],["Expected",counts.accepted],
@@ -274,7 +296,13 @@ export default function HostCard({
               {(event.canEditEvent || event.canManageTeam) && <PushComposer selectedEvent={event} />}
               <section aria-label="Zay'list" style={{ marginTop: 18 }}>
                 <h3 style={{ fontFamily: "var(--font-display)", margin: "0 0 4px" }}>Zay'list</h3>
-                <ZaylistPanel eventId={event.id} />
+                <ZaylistPanel
+                  eventId={event.id}
+                  preview={previewRole ? {
+                    roleLabel: hubRoleLabel(previewRole),
+                    permissions: panelPermissionsFor(previewRole),
+                  } : null}
+                />
               </section>
             </div>
           </div>
@@ -282,6 +310,29 @@ export default function HostCard({
       ) : null}
 
       {door ? <EventMode eventId={event.id} eventTitle={event.title} onClose={() => setDoor(false)} /> : null}
+
+      {doorNote && previewRole ? (
+        <>
+          <div className="zl-overlay-backdrop" onClick={() => setDoorNote(false)} />
+          <div className="zl-overlay" role="dialog" aria-modal="true" aria-label="Event Mode in preview">
+            <div className="zl-sheet zl-root" style={{ padding: 18 }}>
+              <div className="zl-sheet-head">
+                <div className="zl-sheet-head-main">
+                  <h2 className="zl-h1" style={{ fontSize: "1.45rem" }}>Event Mode</h2>
+                  <p className="zl-sub">
+                    Previewing as {hubRoleLabel(previewRole)} — {hubRoleLabel(previewRole)} can open
+                    the door scanner from here. The scanner itself is live equipment, so it stays
+                    off in preview.
+                  </p>
+                </div>
+                <button className="zl-close" type="button" onClick={() => setDoorNote(false)} aria-label="Close Event Mode preview note">
+                  ×
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
     </>
   );
 }
