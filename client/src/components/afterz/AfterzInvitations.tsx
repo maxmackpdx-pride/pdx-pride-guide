@@ -1,20 +1,14 @@
 import AfterzPrivateLocation from "./AfterzPrivateLocation";
-import { useEffect, useRef, useState } from "react";
-import { useLocation, useSearch } from "wouter";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
 import "./invitations.css";
 
 import NightOptions, { defaultOptions } from "./NightOptions";
 
-type Role =
+export type Role =
+  | "passed"
   | "waitlisted"
   | "guest"
   | "host"
@@ -22,7 +16,7 @@ type Role =
   | "accepted"
   | "declined"
   | "revoked";
-type Gathering = { id: string; title: string; closesAt: number; role: Role };
+export type Gathering = { hostName: string; id: string; title: string; closesAt: number; role: Role };
 type Details = Gathering & {
   hostName: string;
   night?: {
@@ -42,9 +36,10 @@ type Details = Gathering & {
   }[];
 };
 type ChatMessage = { id: number; name: string; body: string };
-const base = "/api/afterz/gatherings";
-const readableStatus: Record<Role, string> = {
+export const base = "/api/afterz/gatherings";
+export const readableStatus: Record<Role, string> = {
   host: "Hosting",
+  passed: "Not going",
   guest: "Guest",
   pending: "Requested",
   waitlisted: "On the waitlist",
@@ -52,7 +47,7 @@ const readableStatus: Record<Role, string> = {
   declined: "Declined",
   revoked: "Access ended",
 };
-function privateRead<T>(url: string, signal: AbortSignal): Promise<T> {
+export function privateRead<T>(url: string, signal: AbortSignal): Promise<T> {
   return fetch(url, {
     signal,
     credentials: "same-origin",
@@ -107,9 +102,8 @@ function GatheringReport({ id }: { id: string }) {
           });
         } catch {
           setError("Could not confirm your report. Please try again.");
-        } finally {
-          setBusy(false);
         }
+        setBusy(false);
       }}
     >
       <label>
@@ -137,7 +131,7 @@ function GatheringReport({ id }: { id: string }) {
   );
 }
 
-function GatheringRoom({
+export function GatheringRoom({
   id,
   signIn,
   done,
@@ -195,13 +189,13 @@ function GatheringRoom({
       await Promise.all([
         client.invalidateQueries({ queryKey: [base] }),
         client.invalidateQueries({ queryKey: chatKey }),
+        client.invalidateQueries({ queryKey: ["/api/afterz/nights"] }),
       ]);
     } catch (e) {
       setFailure(e instanceof Error ? e.message : "Could not save. Try again.");
       void room.refetch();
-    } finally {
-      setWorking(false);
     }
+    setWorking(false);
   };
   const [shareLink, setShareLink] = useState("");
   const share = async () => {
@@ -210,9 +204,10 @@ function GatheringRoom({
       mode: "afterz",
       gathering: id,
     }).toString();
+    const title = room.data?.title;
     try {
       if (navigator.share)
-        await navigator.share({ title: room.data?.title, url: url.href });
+        await navigator.share({ title, url: url.href });
       else {
         await navigator.clipboard.writeText(url.href);
         setNotice("Invite link copied.");
@@ -267,9 +262,10 @@ function GatheringRoom({
           hour: "numeric",
           minute: "2-digit",
           timeZoneName: "short",
+          timeZone: "America/Los_Angeles",
         })}
       </p>
-      {role === "guest" &&
+      {(role === "guest" || role === "passed") &&
         (user ? (
           <form
             onSubmit={(e) => {
@@ -472,61 +468,17 @@ function GatheringRoom({
     </section>
   );
 }
-function GatheringList({
-  select,
-  signIn,
-}: {
-  select: (id: string) => void;
-  signIn: () => void;
-}) {
-  const { user } = useAuth(),
-    client = useQueryClient();
-  const list = useQuery<Gathering[]>({
-    queryKey: [base, "mine", user?.id],
-    queryFn: ({ signal }) => privateRead(base, signal),
-    enabled: !!user,
-    retry: false,
-    refetchInterval: 15_000,
-  });
-  const [create, setCreate] = useState(false),
-    [title, setTitle] = useState(""),
+export function HostForm({ select }: { select: (id: string) => void }) {
+  const client = useQueryClient();
+  const [title, setTitle] = useState(""),
     [confirmed, setConfirmed] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const [options, setOptions] = useState(defaultOptions),
     [uploading, setUploading] = useState(false);
   const [key, setKey] = useState(() => crypto.randomUUID());
-  if (!user)
-    return <button onClick={signIn}>Sign in to see or host a gathering</button>;
   return (
-    <>
-      {list.isError ? (
-        <p role="alert">
-          Could not load your gatherings.{" "}
-          <button onClick={() => void list.refetch()}>Retry</button>
-        </p>
-      ) : list.isPending ? (
-        <p role="status">Loading invites…</p>
-      ) : list.data?.length ? (
-        <ul>
-          {list.data.map((g) => (
-            <li key={g.id}>
-              <button onClick={() => select(g.id)}>
-                {g.title} · {readableStatus[g.role]}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>
-          You have no active invitations. Open a host’s shared link to ask to
-          join.
-        </p>
-      )}
-      {!create ? (
-        <button onClick={() => setCreate(true)}>Host a gathering</button>
-      ) : (
-        <form
+        <form className="afterz-host-form"
           onSubmit={async (e) => {
             e.preventDefault();
             if (busy) return;
@@ -539,7 +491,7 @@ function GatheringList({
                 confirmed18: confirmed,
                 requestId: key,
               }).then((r) => r.json());
-              void client.invalidateQueries({ queryKey: [base] });
+              await Promise.all([client.invalidateQueries({ queryKey: [base] }), client.invalidateQueries({ queryKey: ["/api/afterz/nights"] })]);
               select(id);
             } catch (e) {
               setError(
@@ -547,9 +499,8 @@ function GatheringList({
                   ? e.message
                   : "Could not create the gathering.",
               );
-            } finally {
-              setBusy(false);
             }
+            setBusy(false);
           }}
         >
           <label>
@@ -590,80 +541,5 @@ function GatheringList({
           </button>
           {error && <p role="alert">{error}</p>}
         </form>
-      )}
-    </>
-  );
-}
-export default function AfterzInvitations({
-  signIn,
-  signingIn,
-  drawer = false,
-}: {
-  drawer?: boolean;
-  signIn: () => void;
-  signingIn: boolean;
-}) {
-  const { user } = useAuth(),
-    [, navigate] = useLocation(),
-    search = useSearch(),
-    trigger = useRef<HTMLButtonElement>(null);
-  const params = new URLSearchParams(search),
-    id = params.get("gathering");
-  const open = !!id || params.get("invites") === "1";
-  const change = (selection: string | null) => {
-    const url = new URL(window.location.href);
-    url.searchParams.delete("gathering");
-    url.searchParams.delete("invites");
-    if (selection === "") url.searchParams.set("invites", "1");
-    else if (selection) url.searchParams.set("gathering", selection);
-    navigate(url.pathname + url.search + url.hash, { replace: open });
-  };
-  return (
-    <>
-      <button
-        type="button"
-        ref={trigger}
-        className={drawer ? "afterz-host-widget" : "afterz-invite-trigger"}
-        onClick={() => change("")}
-      >
-        {drawer ? "Afterz · Host or manage invitations" : "Invitations"}
-      </button>
-      <Dialog
-        open={open && !signingIn}
-        onOpenChange={(value) => {
-          if (!value) change(null);
-        }}
-      >
-        <DialogContent
-          className="afterz-invite-sheet"
-          onCloseAutoFocus={(event) => {
-            event.preventDefault();
-            trigger.current?.focus();
-          }}
-        >
-          <DialogTitle>Afterz invitations</DialogTitle>
-          <DialogDescription>
-            Private gatherings shared by their hosts.
-          </DialogDescription>
-          {id ? (
-            <>
-              <button onClick={() => change("")}>My gatherings</button>
-              <GatheringRoom
-                key={id + ":" + user?.id}
-                id={id}
-                signIn={signIn}
-                done={() => change("")}
-              />
-            </>
-          ) : (
-            <GatheringList
-              key={user?.id ?? "guest"}
-              select={change}
-              signIn={signIn}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
   );
 }

@@ -89,6 +89,10 @@ export function afterzNights(
     db
       .prepare("INSERT OR IGNORE INTO afterz_adult_members VALUES(?,?)")
       .run(user, now());
+  app.get("/api/afterz/discovery", auth, (req, res) => {
+    res.set("Cache-Control", "private, no-store");
+    res.json({ confirmed: adult(req.session.userId!) });
+  });
   app.post("/api/afterz/discovery", auth, (req, res) => {
     if (req.body.confirmed18 !== true)
       return res
@@ -97,14 +101,12 @@ export function afterzNights(
     confirm(req.session.userId!);
     res.json({ confirmed: true });
   });
-  app.get("/api/afterz/nights", auth, (req, res) => {
-    res.set("Cache-Control", "private, no-store");
-    const viewer = req.session.userId!;
-    if (!adult(viewer)) return res.json([]);
+  const listVisibleNights = (viewer: number) => {
+    if (!adult(viewer)) return [];
     const nights = db
       .prepare(
         `SELECT n.*,g.title,g.host_id AS host,g.closes_at AS closesAt,g.id,
-      COALESCE(a.status,'guest') AS role FROM afterz_nights n JOIN afterz_gatherings g ON n.gathering_id=g.id
+      COALESCE(NULLIF(u.display_name,''),u.username) AS hostName,COALESCE(a.status,'guest') AS role FROM afterz_nights n JOIN afterz_gatherings g ON n.gathering_id=g.id
       JOIN users u ON u.id=g.host_id AND u.status='active'
       LEFT JOIN afterz_guests a ON a.gathering_id=g.id AND a.user_id=?
       WHERE g.closes_at>? AND COALESCE(a.status,'') NOT IN ('declined','revoked') AND NOT EXISTS
@@ -119,13 +121,13 @@ export function afterzNights(
       closesAt: number;
       role: string;
       host: number;
+      hostName: string;
       poster: string | null;
       vibe: string;
       glow: number;
       sex_positive: number;
     }[];
-    res.json(
-      nights.flatMap((n) => {
+    return nights.flatMap((n) => {
         const event = catalog?.event(n.event_id);
         if (!event || !timing(event, n.occurrence)) return [];
         return [
@@ -133,7 +135,9 @@ export function afterzNights(
             id: n.id,
             title: n.title,
             eventId: event.id,
+            occurrence: n.occurrence,
             eventTitle: event.title,
+            hostName: n.hostName,
             venue: event.venueName,
             lat:
               hasRegistrationOnlyLocation(event) || event.isHouseParty
@@ -151,8 +155,11 @@ export function afterzNights(
             role: n.host === viewer ? "host" : n.role,
           },
         ];
-      }),
-    );
+    });
+  };
+  app.get("/api/afterz/nights", auth, (req, res) => {
+    res.set("Cache-Control", "private, no-store");
+    res.json(listVisibleNights(req.session.userId!));
   });
   app.get("/api/afterz/eligible-events", auth, (_req, res) => {
     res.set("Cache-Control", "private, no-store");
@@ -216,6 +223,7 @@ export function afterzNights(
       eventId: number;
       occurrence: string;
       host: number;
+      hostName: string;
       title: string;
     }[];
     for (const n of current) {
@@ -252,6 +260,7 @@ export function afterzNights(
     }
   };
   return {
+    listVisibleNights,
     get,
     live,
     timing,

@@ -94,8 +94,19 @@ test("event Afterz enforce time, host capacity, one renewed request and opt-in r
   const { id } = await (await call("gatherings", 1, "POST", make)).json();
   const room = "gatherings/" + id;
   assert.deepEqual(await (await call("nights", 2)).json(), []);
+  assert.deepEqual(await (await call("discovery", 2)).json(), { confirmed: false });
+  assert.equal((await call(room + "/leave", 2, "POST", { pass: true })).status, 403);
   await call("discovery", 2, "POST", { confirmed18: true });
-  assert.equal((await (await call("nights", 2)).json())[0].glow, true);
+  const invite = (await (await call("nights", 2)).json())[0];
+  assert.equal(invite.glow, true);
+  assert.equal(invite.hostName, "Host");
+  assert.deepEqual(await (await call("discovery", 2)).json(), { confirmed: true });
+  assert.equal((await call(room + "/leave", 1, "POST", { pass: true })).status, 403);
+  for (let i = 0; i < 2; i++)
+    assert.equal((await (await call(room + "/leave", 2, "POST", { pass: true })).json()).status, "passed");
+  assert.equal((await (await call("nights", 2)).json())[0].role, "passed");
+  assert.equal((await call(room + "/chat", 2)).status, 403);
+  assert.deepEqual((await (await call(room, 1)).json()).requests, []);
   evt.venueName = "Sub Rosa PDX";
   evt.lat = 45.501;
   evt.lng = -122.601;

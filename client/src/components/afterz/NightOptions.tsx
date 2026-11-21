@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -19,13 +19,18 @@ export const defaultOptions: Options = {
   sexPositive: false,
   nudityOk: false,
 };
+async function uploadPoster(data: FormData): Promise<string> {
+  const response = await fetch("/api/upload/poster", { method: "POST", credentials: "same-origin", body: data });
+  if (!response.ok) throw Error("Upload failed. Choose a JPG, PNG, GIF or WebP under 8 MB.");
+  return (await response.json()).url;
+}
 export default function NightOptions({
   options,
   onChange,
   onUploading,
 }: {
   options: Options;
-  onChange: (o: Options) => void;
+  onChange: Dispatch<SetStateAction<Options>>;
   onUploading: (v: boolean) => void;
 }) {
   const events = useQuery<{ id: number; title: string; date: string }[]>({
@@ -72,9 +77,10 @@ export default function NightOptions({
             ends. Use the private chat for your address.
           </p>
           <label>
-            Guest spots
+            Guest spots · {options.capacity}
             <input
-              type="number"
+              type="range"
+              data-glass-piece="slider"
               min={1}
               max={500}
               required
@@ -139,23 +145,13 @@ export default function NightOptions({
                 onUploading(true);
                 setError("");
                 try {
-                  const response = await fetch("/api/upload/poster", {
-                    method: "POST",
-                    credentials: "same-origin",
-                    body: data,
-                  });
-                  if (!response.ok)
-                    throw Error(
-                      "Upload failed. Choose a JPG, PNG, GIF or WebP under 8 MB.",
-                    );
-                  const { url } = await response.json();
-                  onChange({ ...options, poster: url });
+                  const poster = await uploadPoster(data);
+                  onChange(current => ({ ...current, poster }));
                 } catch (reason) {
                   setError((reason as Error).message);
                   input.value = "";
-                } finally {
-                  onUploading(false);
                 }
+                onUploading(false);
               }}
             />
           </label>

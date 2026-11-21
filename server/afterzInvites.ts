@@ -1,15 +1,12 @@
 import { randomUUID } from "node:crypto";
 import type Database from "better-sqlite3";
 import type { Express, RequestHandler } from "express";
-import {
-  pacificTodayDate,
-  parsePacificDateTime,
-} from "@shared/missedConnections";
+import { afterzClosesAt } from "@shared/afterzWindow";
 import { moderateFields, moderationMessage } from "@shared/contentModeration";
 
 import { afterzNights, type NightCatalog } from "./afterzNights";
 
-type State = "waitlisted" | "pending" | "accepted" | "declined" | "revoked";
+type State = "passed" | "waitlisted" | "pending" | "accepted" | "declined" | "revoked";
 type Gathering = {
   id: string;
   hostId: number;
@@ -20,15 +17,7 @@ type Gathering = {
 const requestKey = (value: unknown): value is string =>
   typeof value === "string" && /^[a-zA-Z0-9-]{16,80}$/.test(value);
 
-export function afterzClosesAt(now: number) {
-  const today = pacificTodayDate(now);
-  const todayClose = parsePacificDateTime(today + "T06:00:00")!;
-  if (now < todayClose) return todayClose;
-  const tomorrow = new Date(Date.parse(today + "T12:00:00Z") + 86_400_000)
-    .toISOString()
-    .slice(0, 10);
-  return parsePacificDateTime(tomorrow + "T06:00:00")!;
-}
+export { afterzClosesAt } from "@shared/afterzWindow";
 
 export function registerAfterzInvites(
   app: Express,
@@ -137,10 +126,14 @@ export function registerAfterzInvites(
       .all(userId, userId, now()) as Gathering[];
     res.json(
       rows
-        .filter((g) => !blocked(g.hostId, userId))
+        .filter((g) => {
+          const night = nights.get(g.id);
+          return !blocked(g.hostId, userId) && (!night || nights.live(night));
+        })
         .map((g) => ({
           id: g.id,
           title: g.title,
+          hostName: g.hostName,
           closesAt: g.closesAt,
           role: g.hostId === userId ? "host" : status(g.id, userId),
         })),
@@ -292,9 +285,10 @@ export function registerAfterzInvites(
     nights.confirm(who);
     const state = nights.full(g.id) ? "waitlisted" : "pending";
     db.prepare(
-      "INSERT OR IGNORE INTO afterz_guests(gathering_id,user_id,status) VALUES(?,?,?)",
+      `INSERT INTO afterz_guests(gathering_id,user_id,status) VALUES(?,?,?)
+       ON CONFLICT(gathering_id,user_id) DO UPDATE SET status=excluded.status WHERE afterz_guests.status='passed'`,
     ).run(g.id, who, state);
-    res.json({ status: previous ?? state });
+    res.json({ status: previous === "passed" ? state : previous ?? state });
   });
   app.post(route + "/:id/second", auth, find, (_req, res) => {
     const { room: g, actor } = res.locals;
@@ -366,7 +360,19 @@ export function registerAfterzInvites(
       ).run(id);
     res.json({ status: next });
   });
-  app.post(route + "/:id/leave", auth, find, (_req, res) => {
+  app.post(route + "/:id/leave", auth, find, (req, res) => {
+    const { room: g, actor } = res.locals;
+    if (req.body?.pass === true) {
+      if (!actor || g.hostId === actor || !nights.adult(actor))
+        return res.status(403).json({ error: "This invitation is unavailable." });
+      db.transaction(() => {
+        db.prepare(`INSERT INTO afterz_guests(gathering_id,user_id,status) VALUES(?,?,'passed')
+          ON CONFLICT(gathering_id,user_id) DO UPDATE SET status='passed'
+          WHERE afterz_guests.status NOT IN ('declined','revoked')`).run(g.id, actor);
+        db.prepare("DELETE FROM afterz_seconds WHERE gathering_id=? AND user_id=?").run(g.id, actor);
+      })();
+      return res.json({ status: status(g.id, actor) });
+    }
     db.prepare(
       "DELETE FROM afterz_guests WHERE gathering_id=? AND user_id=? AND status IN ('waitlisted','pending','accepted')",
     ).run(res.locals.room.id, res.locals.actor);
@@ -462,5 +468,5 @@ export function registerAfterzInvites(
     ).run(res.locals.room.id, res.locals.actor, text, now(), key);
     res.json({ saved: true });
   });
-  return { remind: nights.remind, dispose: () => clearInterval(expiry) };
+  return { listVisibleNights: nights.listVisibleNights, remind: nights.remind, dispose: () => clearInterval(expiry) };
 }
