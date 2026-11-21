@@ -210,9 +210,11 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
     const card = pin.closest<HTMLElement>(".evz-x")!;
     let frame = 0;
     let pinned = false;
-    function scrub() {
+    function scrub(measureHeight = false) {
       frame = 0;
+      const height = measureHeight ? pin!.offsetHeight : 0;
       const progress = Math.min(1, Math.max(0, (active as HTMLElement).scrollTop / 140));
+      if (measureHeight) card.style.setProperty("--pin-height", height + "px");
       const scale = 1 - progress * .3;
       card.style.setProperty("--pin-scale", String(scale));
       card.style.setProperty("--pin-progress", String(progress));
@@ -223,11 +225,8 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
       }
       pinned = progress === 1;
     }
-    const queue = () => { if (!frame) frame = requestAnimationFrame(scrub); };
-    const measure = () => {
-      card.style.setProperty("--pin-height", pin.offsetHeight + "px");
-      scrub();
-    };
+    const queue = () => { if (!frame) frame = requestAnimationFrame(() => scrub()); };
+    const measure = () => scrub(true);
     const observer = new ResizeObserver(measure);
     observer.observe(pin);
     active.addEventListener("scroll", queue, { passive: true });

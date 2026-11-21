@@ -7,9 +7,9 @@ const quietMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").
   document.documentElement.dataset.calm === "true";
 
 type CardRect = Pick<DOMRect, "left" | "top" | "width" | "height">;
-function sourceTransform(panel: HTMLElement, origin?: CardRect | null) {
+function sourceTransform(panel: HTMLElement, origin?: CardRect | null, measured?: CardRect) {
   if (!origin || !origin.width || !origin.height) return "scale(.86)";
-  const end = panel.getBoundingClientRect();
+  const end = measured ?? panel.getBoundingClientRect();
   if (!end.width || !end.height) return "scale(.86)";
   const dx = origin.left + origin.width / 2 - end.left - end.width / 2;
   const dy = origin.top + origin.height / 2 - end.top - end.height / 2;
@@ -102,7 +102,7 @@ export function useOpenCardClose(onClose: () => void, enabled = true, grow?: { o
       panel.style.setProperty("--evz-sheen-delay", sheenDelay(Math.max(.2, Math.min(.85, crossing))) + "ms");
       panel.dataset.cardEntering = "true";
       animations.current = [panel.animate([
-        { transform: sourceTransform(panel, origin), opacity: 0 },
+        { transform: sourceTransform(panel, origin, end), opacity: 0 },
         { transform: "none", opacity: 1 }
       ], { duration: 720, easing: "cubic-bezier(.19,.78,.24,1)" })];
       animations.current[0].onfinish = settled;

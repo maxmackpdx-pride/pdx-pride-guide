@@ -12,12 +12,10 @@ export function CardStage({ children, front = false, onClose, className = '' }: 
 }) {
   const frame = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
-    const stage = frame.current;
-    stage?.setAttribute("data-active", "true");
     const bars = document.querySelectorAll<HTMLElement>('.site-header, .site-hub-mtop, .z-mobile-dock');
     const measure = () => {
       const viewport = document.documentElement.clientHeight;
-      let top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--site-header-sticky-edge')) || 0;
+      let top = parseFloat(document.documentElement.style.getPropertyValue('--site-header-sticky-edge')) || 0;
       let bottom = 0;
       for (const bar of bars) {
         const rect = bar.getBoundingClientRect();
@@ -34,14 +32,13 @@ export function CardStage({ children, front = false, onClose, className = '' }: 
     window.addEventListener('resize', measure);
     window.addEventListener('scroll', measure, { passive: true });
     return () => {
-      stage?.removeAttribute("data-active");
       observer.disconnect();
       window.removeEventListener('resize', measure);
       window.removeEventListener('scroll', measure);
     };
   }, []);
   return createPortal(
-    <div ref={frame} className={`zay-card-stage ${front ? 'zay-card-stage--front' : 'zay-card-stage--expanded'} ${className}`}
+    <div ref={frame} data-active="true" className={`zay-card-stage ${front ? 'zay-card-stage--front' : 'zay-card-stage--expanded'} ${className}`}
       onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
       <div className="zay-card-stage__scrim" data-glass-piece="scrim" aria-hidden="true" />
       <BoardCardInline.Provider value={false}>{children}</BoardCardInline.Provider>

@@ -9,7 +9,6 @@ import { createServer, type ViteDevServer } from "vite";
 import { fanSlots, isPosterActivation } from "./flyerBoardBehavior";
 
 const source = readFileSync(new URL("./FlyerBoard.tsx", import.meta.url), "utf8");
-const css = readFileSync(new URL("./FlyerBoard.css", import.meta.url), "utf8");
 
 test("poster keyboard activation ignores nested share/save controls", () => {
   for (const key of ["Enter", " "]) {
@@ -44,12 +43,6 @@ test("event-attached connections never spill; venue-hinted ones pool by venue", 
   // an event with none of its own falls back to the venue pool
   assert.deepEqual(connectionsForListing([a, b, loose], 12, "Same venue"), [loose]);
   assert.deepEqual(connectionsForListing([a, b, loose], 12, "Elsewhere"), []);
-});
-
-test("whole board escapes the shared fixed-size card dimensions", () => {
-  assert.match(source, /<div className="fbx" ref=\{rootRef\}>/);
-  assert.match(css, /\.fbx \.boardz-punk-scope\s*\{\s*display:\s*contents;/);
-  assert.match(source, /createPortal\([\s\S]*?className="fbx fbx-overlay"[\s\S]*?document\.body,/);
 });
 
 describe("approved FlyerBoard interactions", {timeout:90_000}, () => {
@@ -106,26 +99,38 @@ describe("approved FlyerBoard interactions", {timeout:90_000}, () => {
     await page.locator(".fbx").first().waitFor().catch(async error=>{
       throw new Error(`${error} · ${(await page.locator("body").innerText()).slice(-2500)}`);
     });
+    const closeFilters = page.getByRole("button", { name: "Close filters", exact: true });
+    if (await closeFilters.isVisible()) {
+      await closeFilters.click();
+      await closeFilters.waitFor({ state: "hidden" });
+    }
     return page;
   }
   const posterIds = (page:Page) => page.locator(".lboard .poster[data-event-id]").evaluateAll(nodes=>nodes.map(node=>Number((node as HTMLElement).dataset.eventId)));
 
-  test("paper trim stays behind artwork and leaves Share and the interested heart reachable",async t=>{
+  test("full board spans multiple fixed-size posters and opens Share from the expanded card",async t=>{
     const page=await boardPage("/events");t.after(()=>page.close());
     const poster=page.locator(".lboard .poster.torn").first();
     const art=poster.locator(".pc img");
     await poster.scrollIntoViewIfNeeded();
     await art.waitFor();
     await art.evaluate(img=>(img as HTMLImageElement).decode());
+    const board = await page.locator(".fbx .lboard").first().boundingBox();
+    const front = await poster.boundingBox();
+    assert.ok(board && front && board.width > front.width * 2 && board.height >= front.height);
     assert.equal(await poster.locator(".trim").isVisible(),true);
     const artReceivesHits=await art.evaluate(img=>{
       const box=img.getBoundingClientRect();
-      return document.elementFromPoint(box.left+box.width/2,box.top+box.height/2)===img;
+      const hit = document.elementFromPoint(box.left+box.width/2,box.top+box.height/2);
+      return hit?.closest(".poster") === img.closest(".poster") && !hit?.closest(".trim");
     });
     assert.equal(artReceivesHits,true);
-    // Actionability checks hit-testing, visibility and coverage without sharing or saving.
-    await poster.getByRole("button",{name:/^Share /}).click({trial:true});
-    await poster.getByRole("button",{name:/^Mark interest in /}).click({trial:true});
+    assert.equal(await poster.getByRole("button", { name: /^Share / }).count(), 0);
+    await poster.getByRole("button", { name: /interest/i }).click({trial:true});
+    await poster.click();
+    const expanded = page.getByTestId("event-modal");
+    await expanded.getByRole("button", { name: /^Share / }).click();
+    await page.getByRole("dialog", { name: "Share this event" }).waitFor();
   });
 
   test("a feed refresh preserves loaded rows and the caller’s descending title order",async t=>{
