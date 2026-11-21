@@ -1,3 +1,6 @@
+.afterz-wordmark { display: block; position: relative; width: 136px; max-width: 100%; aspect-ratio: 4 / 1; overflow: hidden; }
+.afterz-wordmark > img { position: absolute; inset: 50% auto auto 0; display: block; width: 100%; height: auto; max-height: none; transform: translateY(-50%); }
+.afterz-drawer > .afterz-wordmark, .night-consent > .afterz-wordmark { margin: 0 auto 12px; }
 .afterz-drawer, .night-consent { --afterz-accent: var(--day-wed); }
 .afterz-drawer { min-width: 0; color: var(--text-hi); font-family: var(--font-body); }
 .afterz-drawer button:focus-visible, .afterz-drawer input:focus-visible, .afterz-drawer select:focus-visible,

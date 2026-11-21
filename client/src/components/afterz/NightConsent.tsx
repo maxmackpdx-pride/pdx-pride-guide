@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import AfterzWordmark from "./AfterzWordmark";
 import { useAuth } from "@/context/AuthContext";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { apiRequest } from "@/lib/queryClient";
@@ -45,9 +46,8 @@ export default function NightConsent() {
       setPrompt(null);
     } catch {
       setError("Could not save your choice. Try again.");
-    } finally {
-      setBusy(false);
     }
+    setBusy(false);
   };
   return createPortal(
     <dialog
@@ -56,6 +56,7 @@ export default function NightConsent() {
       aria-labelledby="afterz-consent-title"
       onCancel={() => setPrompt(null)}
     >
+      <AfterzWordmark/>
       <h2 id="afterz-consent-title">
         {prompt.source === "rsvp"
           ? "Remind you about Afterz?"

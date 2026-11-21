@@ -8,6 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { pacificCalendarDate } from "@shared/missedConnections";
 import { afterzWindowState } from "@shared/afterzWindow";
 import { base, GatheringRoom, HostForm, privateRead, type Gathering } from "./AfterzInvitations";
+import AfterzWordmark from "./AfterzWordmark";
 import AfterzNightCard, { type AfterzListing } from "./AfterzNightCard";
 
 export type AfterzCard = AfterzListing & {
@@ -36,8 +37,8 @@ function useAfterzWindow() {
   return clock.open;
 }
 
-export default function NightDrawer({ roomId, onRoomChange, eventId, occurrenceDate }: {
-  eventId?: number; occurrenceDate?: string;
+export default function NightDrawer({ roomId, onRoomChange, eventId, occurrenceDate, showWordmark = true }: {
+  eventId?: number; occurrenceDate?: string; showWordmark?: boolean;
   roomId?: string | null; onRoomChange?: (id: string | null) => void;
 } = {}) {
   const { user } = useAuth();
@@ -89,6 +90,7 @@ export default function NightDrawer({ roomId, onRoomChange, eventId, occurrenceD
     setBusy(null);
   };
   return <section className="afterz-drawer" aria-label="Afterz invitations">
+    {showWordmark && <AfterzWordmark/>}
     {id ? <div className="afterz-invite-sheet">
       <button type="button" onClick={() => pick(null)}>Back to Afterz</button>
       <h3 ref={roomTitle} tabIndex={-1}>Afterz invitation</h3>
@@ -132,5 +134,5 @@ export function AfterzMapDrawer() {
     navigate(url.pathname + url.search + url.hash, { replace: true });
   };
   return <DockDrawer accent="var(--day-wed)" stop={roomId ? 1 : stop} onStopChange={value => { if (!value && roomId) change(null); setStop(value); }}
-    ariaLabel="Afterz" lipLabel="Afterz"><NightDrawer roomId={roomId} onRoomChange={change}/></DockDrawer>;
+    ariaLabel="Afterz" lipLabel="Afterz" brand={<AfterzWordmark/>}><NightDrawer showWordmark={false} roomId={roomId} onRoomChange={change}/></DockDrawer>;
 }

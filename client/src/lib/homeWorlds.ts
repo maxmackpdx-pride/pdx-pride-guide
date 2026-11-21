@@ -439,6 +439,8 @@ export const DEMO_ITEMS: WorldItem[] = [
   { id: "demo-sellz-4", href: "/sellz", price: "$8", cond: "Good · N Portland", photo: null, reserved: false, isLive: false },
 ];
 
+export const AFTERZ_WORDMARK = "/brand/family/afterz.svg";
+
 /**
  * NEXT is the teaser for the three unbuilt products. My Hoüz, OUTZ and
  * Z/SPACE graduated into the rail above, so they are not restated here.
@@ -446,7 +448,7 @@ export const DEMO_ITEMS: WorldItem[] = [
  */
 export const ROADMAP_MARKS: WorldRoadmapMark[] = [
   { name: "ZAYDARK", src: "/brand/family/zaydark.svg", glow: "#ff1f1f", width: "82%", rotate: "0deg" },
-  { name: "AFTERZ", src: "/brand/family/afterz.svg", glow: "#ffb400", width: "82%", rotate: "0deg" },
+  { name: "AFTERZ", src: AFTERZ_WORDMARK, glow: "#ffb400", width: "82%", rotate: "0deg" },
   { name: "ZENEGADES", src: "/brand/family/zenegades.svg", glow: "#ff2d2d", width: "94%", rotate: "-3deg" },
 ];
 
