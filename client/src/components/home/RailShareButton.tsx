@@ -1,4 +1,4 @@
-import { Share2 } from "lucide-react";
+import { ShareIcon } from "@/components/icons/ShareIcon";
 import { sharePageLink } from "@/lib/shareEvent";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,5 +11,5 @@ export default function RailShareButton({ href, title }: { href: string; title: 
     } catch (error) {
       if ((error as Error)?.name !== "AbortError") toast({ title: "Could not share. Please try again.", variant: "destructive" });
     }
-  }}><Share2 size={16} aria-hidden="true" />Share</button>;
+  }}><ShareIcon size={16} />Share</button>;
 }

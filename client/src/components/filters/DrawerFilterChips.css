@@ -1,0 +1,25 @@
+/* Shared drawer and map filter chips. Token colors only. */
+.drawer-filters { display: flex; flex-direction: column; gap: 10px; }
+.drawer-filters__label {
+  margin: 0 0 6px;
+  color: var(--text-meta);
+  font: 700 11px/1 var(--font-mono, monospace);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.drawer-filters__row { display: flex; flex-wrap: wrap; gap: 8px; }
+.drawer-filters__chip {
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--category, var(--c)) 55%, transparent);
+  background: color-mix(in srgb, var(--category, var(--c)) 10%, transparent);
+  color: var(--text-hi);
+  font: 700 13px/1.1 var(--font-body);
+}
+.drawer-filters__chip[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--category, var(--c)) 26%, transparent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--category, var(--c)) 30%, transparent);
+}
+.drawer-filters__chip:focus-visible { outline: 2px solid var(--category, var(--c)); outline-offset: 2px; }

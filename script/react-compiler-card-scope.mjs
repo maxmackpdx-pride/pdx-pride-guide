@@ -26,6 +26,13 @@ export const drawerCompilerModules = [
   'places/PlacezMapDrawer',
   'places/PlacezEventsRails',
   'places/EventPlanExtension',
+  'places/PlacezInViewRail',
+  'drawers/DrawerTop',
+  'drawers/DrawerCountdownCard',
+  'drawers/DrawerFilterRail',
+  'drawers/DrawerMiniCard',
+  'drawers/PlacezCalendarFilter',
+  'filters/DrawerFilterChips',
 ];
 
 export const placezCompilerModules = [
@@ -49,7 +56,9 @@ export const cardSourcePatterns = [
   /[\\/]client[\\/]src[\\/]components[\\/]outz[\\/]native[\\/]NativeOutzideFace\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/]PlaceCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]placez[\\/](?:NativePlacezFace|PlacezQuickCard|NativePlacezExpanded|ExpandedPager)\.tsx$/,
-  /[\\/]client[\\/]src[\\/]components[\\/]places[\\/](?:PlacezDrawer|PlacezMapDrawer|PlacezEventsRails|EventPlanExtension)\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]places[\\/](?:PlacezDrawer|PlacezMapDrawer|PlacezEventsRails|EventPlanExtension|PlacezInViewRail)\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]drawers[\\/](?:DrawerTop|DrawerCountdownCard|DrawerFilterRail|DrawerMiniCard|PlacezCalendarFilter)\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]filters[\\/]DrawerFilterChips\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/](?:EventCard|BoardCard)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/](?:FlyerBoard|EventFlyerFront)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]EventRailCard\.tsx$/,

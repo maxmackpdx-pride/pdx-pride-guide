@@ -1,0 +1,303 @@
+/* Shared DrawerTop: untitled lead for every room drawer. Token colors only. */
+.drawer-top {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: -8px -12px 16px;
+  padding: 16px 12px 18px;
+  isolation: isolate;
+}
+.drawer-top__shade {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 120px;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--z-black) 88%, transparent), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+.drawer-top > *:not(.drawer-top__shade):not(.drawer-top__rule) { position: relative; z-index: 1; }
+.drawer-top__rule {
+  height: 1px;
+  margin: 4px 0 0;
+  background: color-mix(in srgb, var(--c, var(--room-placez)) 45%, transparent);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--z-black) 80%, transparent);
+}
+
+/* Placez seven-day calendar rail, restyled with room tokens so it works in every drawer. */
+.drawer-cal__rail,
+.drawer-top .pz-calendar-rail {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  overscroll-behavior-inline: contain;
+}
+.drawer-cal__rail::-webkit-scrollbar { display: none; }
+.drawer-cal__day,
+.drawer-top .pz-calendar-day {
+  flex: none;
+  width: 58px;
+  min-height: 82px;
+  padding: 9px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid color-mix(in srgb, var(--c, var(--room-placez)) 40%, transparent);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--z-black) 70%, transparent);
+  color: var(--text-meta);
+  cursor: pointer;
+  scroll-snap-align: start;
+}
+.drawer-cal__day > span,
+.drawer-top .pz-calendar-day > span {
+  font: 600 10px/1 var(--font-body, Barlow, sans-serif);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.drawer-cal__day > strong,
+.drawer-top .pz-calendar-day > strong {
+  font: 700 25px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  color: var(--text-hi);
+}
+.drawer-cal__day > small,
+.drawer-top .pz-calendar-day > small {
+  font: 500 9px/1.1 var(--font-body, Barlow, sans-serif);
+  min-height: 1em;
+}
+.drawer-cal__day[aria-pressed="true"],
+.drawer-top .pz-calendar-day[aria-pressed="true"] {
+  border-color: var(--c, var(--room-placez));
+  background: color-mix(in srgb, var(--c, var(--room-placez)) 10%, var(--z-black));
+  color: var(--c, var(--room-placez));
+}
+.drawer-cal__day:focus-visible,
+.drawer-top .pz-calendar-day:focus-visible {
+  outline: 2px solid var(--c, var(--room-placez));
+  outline-offset: 2px;
+}
+
+/* Wide, short countdown card. Hologram / Placez NextEventCountdown digits. */
+.drawer-count {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 112px;
+  max-height: 148px;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--c, var(--room-eventz)) 45%, transparent);
+  background: var(--z-black);
+  color: var(--text-hi);
+}
+.drawer-count__art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.drawer-count__art .day-motif,
+.drawer-count__art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+.drawer-count__list {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 10px 12px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+  min-height: 112px;
+  background: linear-gradient(to top, color-mix(in srgb, var(--z-black) 88%, transparent) 0%, color-mix(in srgb, var(--z-black) 35%, transparent) 70%, transparent);
+}
+.drawer-count__empty {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 18px 12px;
+  font: 500 13px/1.4 var(--font-body);
+  color: var(--text-body);
+}
+.drawer-count__open {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.drawer-count__open:focus-visible { outline: 2px solid var(--c, var(--room-eventz)); outline-offset: 2px; }
+.drawer-count__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 600 13px/1.2 var(--font-body, Barlow, sans-serif);
+  text-shadow: 0 1px 3px var(--z-black);
+}
+.drawer-count li.is-lead .drawer-count__name {
+  font: 800 16px/1.05 var(--font-display, "Barlow Condensed", sans-serif);
+  text-transform: uppercase;
+}
+.drawer-count__time,
+.drawer-count .pz-countdown-inline {
+  flex: none;
+  font: 700 11px/1.2 var(--font-mono, "JetBrains Mono", monospace);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-hi);
+  text-shadow: 0 1px 3px var(--z-black);
+}
+.drawer-count__digits,
+.drawer-count .pz-countdown-digits {
+  display: flex;
+  gap: 10px;
+}
+.drawer-count__digits span,
+.drawer-count .pz-countdown-digits span {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+.drawer-count__digits strong,
+.drawer-count .pz-countdown-digits strong {
+  font: 700 20px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  font-variant-numeric: tabular-nums;
+}
+.drawer-count__digits small,
+.drawer-count .pz-countdown-digits small {
+  font: 500 9px/1 var(--font-body, Barlow, sans-serif);
+  color: var(--text-meta);
+  text-transform: uppercase;
+}
+
+/* Placez-style tag filters: two-row horizontal rail. */
+.drawer-filter-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: 1fr 1fr;
+  grid-auto-columns: max-content;
+  gap: 8px 10px;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  overscroll-behavior-inline: contain;
+}
+.drawer-filter-rail::-webkit-scrollbar { display: none; }
+.drawer-filter-rail__chip {
+  scroll-snap-align: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px 8px 10px;
+  border: 0;
+  border-bottom: 4px solid var(--category, var(--c));
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--paper, var(--text-hi)) 12%, var(--z-black));
+  color: var(--text-hi);
+  cursor: pointer;
+  font: italic 800 15px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  text-transform: uppercase;
+}
+.drawer-filter-rail__chip svg {
+  flex: none;
+  color: var(--category, var(--c));
+}
+.drawer-filter-rail__chip[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--category, var(--c)) 22%, var(--z-black));
+  box-shadow: inset 0 0 0 2px var(--category, var(--c));
+}
+.drawer-filter-rail__chip:focus-visible {
+  outline: 2px solid var(--category, var(--c));
+  outline-offset: 2px;
+}
+
+/* Full-bleed mini event card used in Placez drawer rails. */
+.drawer-mini {
+  position: relative;
+  display: block;
+  width: 148px;
+  height: 96px;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--c) 50%, transparent);
+  background: var(--z-black);
+  color: var(--text-hi);
+  flex: none;
+}
+.drawer-mini__art { position: absolute; inset: 0; }
+.drawer-mini__art img, .drawer-mini__art .day-motif { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.drawer-mini__open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 0;
+  border: 0;
+  background: linear-gradient(to top, color-mix(in srgb, var(--z-black) 86%, transparent) 0%, transparent 58%);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.drawer-mini__open:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+.drawer-mini__meta {
+  position: absolute;
+  left: 8px;
+  right: 40px;
+  bottom: 8px;
+}
+.drawer-mini__title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 800 13px/1.05 var(--font-display, "Barlow Condensed", sans-serif);
+  text-transform: uppercase;
+  text-shadow: 0 1px 3px var(--z-black);
+}
+.drawer-mini__count {
+  display: block;
+  margin-top: 2px;
+  font: 700 10px/1.2 var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+  color: var(--c);
+  text-shadow: 0 1px 3px var(--z-black);
+}
+.drawer-mini .rail-card-share {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 3;
+  width: 34px;
+  min-height: 34px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0;
+}
+.drawer-mini .zheart-btn,
+.drawer-mini button[data-card-heart="true"] {
+  z-index: 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer-cal__rail, .drawer-filter-rail { scroll-behavior: auto; }
+}
