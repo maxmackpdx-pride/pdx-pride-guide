@@ -12,6 +12,7 @@ import './NativePlacezExpanded.css';
 import {useNativePlacezData,useNearbyPlacezRestaurants} from './nativeData';
 import SevenDayEvents from './SevenDayEvents';
 import PlaceLocation from './PlaceLocation';
+import { ShareIcon } from '@/components/icons/ShareIcon';
 
 type Props = {
   place:Business; contacts:ReactNode; info:ReactNode; feed:ReactNode; events:ReactNode;
@@ -37,7 +38,7 @@ export default function NativePlacezExpanded({place,contacts,info,feed,events,ma
   return <article ref={artworkRef} className="pdx-glass-rebind pz-card pz-card--expanded pz-native-expanded" data-calm={calmMode?'true':'false'} data-motion="paused" style={{'--pz-accent':model.accent,'--c':model.accent,'--_c':model.accent,'--event-accent':model.accent,backgroundImage:model.glassUrl('expanded')?`url("${model.glassUrl('expanded')}")`:undefined} as CSSProperties}>
     <Artwork model={model} wide={false}/>
     <button type="button" className="pz-close" aria-label={`Close ${place.name}`} onClick={onClose}><span aria-hidden="true">×</span></button>
-    <button type="button" className="pz-share" aria-label={`Share ${place.name}`} onClick={onShare} disabled={sharing}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="5" r="3"/><circle cx="18" cy="19" r="3"/><path d="m9 10 6-4M9 14l6 4"/></svg></button>
+    <button type="button" className="pz-share" aria-label={`Share ${place.name}`} onClick={onShare} disabled={sharing}><ShareIcon size={20} strokeWidth={1.6}/></button>
     <header className="pz-native-header">
       <h2>{place.name}</h2><span className="pz-category">{model.category}</span>
       <Link className="pz-native-compose pz-compose-row" href={model.composeHref} onClick={onClose}><span>Post a Mizzed Connection<small>At this place, anytime</small></span><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 18 18 6M6 6h12v12"/></svg></Link>

@@ -6,10 +6,15 @@
   place-items: center;
   isolation: isolate;
   box-sizing: border-box;
-  background: color-mix(in srgb, var(--z-black) 65%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--z-backdrop-tint);
+  backdrop-filter: var(--z-backdrop-filter);
+  -webkit-backdrop-filter: var(--z-backdrop-filter);
 }
+/* Open event sheet (Tucker, Nov 20): the board's dock padding (.fbx) must not
+   shrink the stage, and the sheet's top edge sits halfway over the top bar
+   (measured --card-stage-nav-mid) while its bottom edge meets the dock. */
+.zay-card-stage.fbx { padding: 0; }
+.zay-card-stage--expanded.fbx { top: var(--card-stage-nav-mid, var(--card-stage-top, 0px)); }
 .zay-card-stage--expanded > :is(.evz-x, .scene-native-dialog, .outz-native-dialog, .placez-native-overlay) {
   position: relative; inset: auto; margin: 0; padding: 0;
   width: min(620px, 100%); max-width: 100%; height: 100%; max-height: 100%;
@@ -53,3 +58,8 @@
 body:has(> .zay-card-stage[data-active]) .site-header.site-header--glass { position: fixed; inset-inline: 0; margin-inline: auto; margin-block-start: 0; }
 
 .map-place-preview { width: min(380px, calc(100% - 32px)); }
+/* The page reserves scrollbar gutters on both edges (index.css). While a card
+   stage is open the body is scroll-locked, so release the gutter: otherwise a
+   classic-scrollbar browser shrinks the fixed stage's viewport by two gutters
+   and the mobile card loses its 10px edge gutter (matches the native dialogs). */
+html:has(> body > .zay-card-stage[data-active]) { scrollbar-gutter: auto; }

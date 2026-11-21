@@ -1,13 +1,6 @@
-import { EventFrontStage, DOW_INDEX, MONTHS, shareEventListing, ROT_CYCLE, weekdayCode, dayColorVar, startMs, dateStrOf, countdownParts, ShareIcon, Tape, Hardware, type CellCommon, aspectByPosterUrl, usePosterLoad, PosterCell, DayFlag } from './EventFlyerFront';
-import { CardStage } from "@/components/cards/CardStage";
-import { eventAge, eventPrice } from "@/lib/eventFacts";
-import { EventGoingButton, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
-import EventPlanning from "./EventPlanning";
-import { EventHostNotice } from "./EventHostNotice";
+import { DOW_INDEX, MONTHS, shareEventListing, ROT_CYCLE, weekdayCode, dayColorVar, startMs, dateStrOf, countdownParts, Tape, Hardware, type CellCommon, aspectByPosterUrl, usePosterLoad, PosterCell, DayFlag } from './EventFlyerFront';
 import {useHistoryState} from "wouter/use-browser-location";
-import {useAuth} from "@/context/AuthContext";
 import {useModalA11y} from "@/hooks/useModalA11y";
-import {sharePageLink,shareToastTitle} from "@/lib/shareEvent";
 import type React from "react";
 import {
   useEffect,
@@ -23,18 +16,16 @@ import { apiRequest } from "@/lib/queryClient";
 import { listingKey, type EventListing } from "@shared/multiDayEvents";
 import {
   getMissedConnectionWindow,
-  pacificCalendarDate,
   pacificTodayDate,
   parsePacificDateTime,
 } from "@shared/missedConnections";
 import { listingPosterUrl } from "@/lib/dsEvent";
-import { eventDateLabel, eventTimeLabel } from "@/lib/eventDisplay";
-import { eventPath } from "@shared/eventSlug";
-import { placePath } from "@shared/placeSlug";
 import type { EventModalOriginRect } from "../EventModal";
 import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import "../board/punk/push-pins.css";
 import "./FlyerBoard.css";
+import OpenEventCard from "./OpenEventCard";
+import { rectOf, type OriginRect } from "@/components/cards/flipCard";
 import { connectionsForListing, isPosterActivation } from "./flyerBoardBehavior";
 
 /**
@@ -68,8 +59,6 @@ export type FlyerBoardProps = {
   onVisibleCount?: (count: number) => void;
 };
 const DAY_MS = 86_400_000;
-const OPAGE_NAMES = ["INFO", "FEED", "MAPS", "MORE + NEARBY", "PEOPLE"];
-const OPAGE_LABELS = ["INFO", "FEED", "MAPS", "MORE", "PEOPLE"];
 const MTOPS = [0, 10, 4, 14, 2, 8, 0, 12, 6, 2];
 const PILE_SPOTS: Array<[number, number, number]> = [
   [4, -9, 54],
@@ -207,33 +196,6 @@ function PastCell({
   );
 }
 
-type EventDetailResponse = {
-  event?: {
-    description?: string | null;
-    isClaimable?: boolean;
-    hasPendingClaim?: boolean;
-    ticketUrl?: string | null;
-  } | null;
-  /** Only present when the server passes this viewer through the source
-   *  link gate (admins / promoters / owner); absent for everyone else. */
-  sourceLink?: string | null;
-  hostGroup?: { slug?: string | null; name?: string | null } | null;
-  venue?: {
-    id?: number;
-    address?: string | null;
-    neighborhood?: string | null;
-    lat?: number | null;
-    lng?: number | null;
-  } | null;
-  hosts?: Array<{ displayName?: string | null; username?: string | null; role?: string | null }>;
-  talent?: Array<{ userId?: number; addedByUserId?: number | null; displayName?: string | null; username?: string | null; role?: string | null }>;
-  gigs?: Array<{ id?: number | string; title?: string | null; description?: string | null }>;
-  missedConnections?: unknown[];
-  nearby?: {
-    restaurants?: Array<{ name?: string | null; type?: string | null }>;
-    events?: Array<{ id?: number; title?: string | null; venueName?: string | null; dateStart?: string | null }>;
-  } | null;
-};
 
 type WindowFilter = "all" | "tonight" | "week" | "later";
 type FlowItem =
@@ -256,12 +218,9 @@ export default function FlyerBoard({
   const [cols, setCols] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(min-width: 1100px)").matches ? 5 : 3,
   );
-  const [frontShowing, setFrontShowing] = useState(false);
   const [openListing, setOpenListing] = useState<EventListing | null>(null);
+  const [openOrigin, setOpenOrigin] = useState<OriginRect | null>(null);
   const [ocardOn, setOcardOn] = useState(false);
-  const [opage, setOpage] = useState(0);
-  const [oday, setOday] = useState(0);
-  const pagesRef = useRef<HTMLDivElement | null>(null);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
@@ -429,13 +388,6 @@ export default function FlyerBoard({
     return ids.size;
   }, [pastList, mcFor]);
 
-  const {user: viewer} = useAuth();
-  const detailQuery = useQuery<EventDetailResponse>({
-    queryKey: ["/api/events", openListing?.id, "detail", viewer?.id, openListing && dateStrOf(openListing)],
-    queryFn: () => apiRequest("GET", `/api/events/${openListing!.id}/detail?date=${encodeURIComponent(dateStrOf(openListing!))}`).then(r => r.json()),
-    enabled: !!openListing,
-    staleTime: 60_000,
-  });
 
   /* ----- open card (demo flip) ----- */
   const clearTimers = () => {
@@ -445,35 +397,21 @@ export default function FlyerBoard({
   const later = (fn: () => void, ms: number) => {
     timersRef.current.push(window.setTimeout(fn, ms));
   };
-  const goOpage = (i: number) => {
-    const el = pagesRef.current;
-    if (el) el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
-  };
-  useEffect(() => {
-    if (pagesRef.current) pagesRef.current.scrollLeft = 0;
-  }, [openListing]);
   const historyState = useHistoryState() as {flyerPoster?:{id:number;date:string}}|null;
-  const shareOpen = () => { if(openListing) void shareEventListing(openListing); };
   const openCard = (listing: EventListing, el: HTMLElement | null) => {
     clearTimers();
     setFan(null);
-    setOpage(0);
-    setOday(0);
     setOpenListing(listing);
     if (!window.history.state?.flyerPoster) {
       window.history.pushState({ ...window.history.state, flyerPoster: { id: listing.id, date: dateStrOf(listing) } }, "", window.location.href);
     }
     flipElRef.current = el;
-    setOcardOn(false);
-    setFrontShowing(true);
-  };
-  const expandFront = () => {
-    setFrontShowing(false);
+    setOpenOrigin(rectOf(el));
+    // Tucker, Nov 20: a tapped event opens straight into the sheet, not the centered preview.
     setOcardOn(true);
   };
   const closeCard = (fromHistory = false) => {
     if (!fromHistory && window.history.state?.flyerPoster) { window.history.back(); return; }
-    setFrontShowing(false);
     setOcardOn(false);
     const p = flipElRef.current;
     flipElRef.current = null;
@@ -492,34 +430,6 @@ export default function FlyerBoard({
     const origin = rootRef.current?.querySelector<HTMLElement>(`[data-event-id="${selection.id}"][data-event-date="${selection.date}"]`);
     openCard(listing, origin ?? null);
   }, [historyState, events, pastEvents, openListing, ocardOn]);
-  const posterDialog = useModalA11y({open:ocardOn,onClose:()=>closeCard()});
-  /* Nov 19 fix set (Tucker): the open card's page scroller spans the
-   * full card BEHIND the flyer layer (see FlyerBoard.css); each page
-   * pads down by the measured hero + identity + going + tabs stack and
-   * up by the footer, so the resting layout is unchanged while content
-   * scrolls underneath the flyer. The stack height varies with the
-   * title, so it is measured from the live card (layout values, which
-   * the flip transform cannot distort). */
-  useLayoutEffect(() => {
-    if (!ocardOn) return;
-    const card = posterDialog.current;
-    if (!card) return;
-    const measure = () => {
-      const tabs = card.querySelector<HTMLElement>(".otabs");
-      const foot = card.querySelector<HTMLElement>(".ofoot");
-      if (!tabs || !foot) return;
-      card.style.setProperty("--ocard-top-offset", `${tabs.offsetTop + tabs.offsetHeight}px`);
-      card.style.setProperty("--ocard-bottom-offset", `${foot.offsetHeight}px`);
-    };
-    measure();
-    const t = window.setTimeout(measure, 700);
-    document.fonts?.ready.then(measure).catch(() => {});
-    window.addEventListener("resize", measure);
-    return () => {
-      window.clearTimeout(t);
-      window.removeEventListener("resize", measure);
-    };
-  }, [ocardOn, openListing, posterDialog]);
 
   /* ----- fan deck ----- */
   const closeFan = () => {
@@ -683,77 +593,6 @@ export default function FlyerBoard({
 
   const pileMinis = pastList.filter(e => listingPosterUrl(e)).slice(0, 4);
 
-  const openAccent = openListing ? openListing.accentColor || dayColorVar(dateStrOf(openListing)) : "var(--neon-red)";
-  const [failedOpenPoster, setFailedOpenPoster] = useState<string>();
-  const openPosterUrl = openListing ? listingPosterUrl(openListing) : null;
-  const openPoster = openPosterUrl === failedOpenPoster ? null : openPosterUrl;
-  const openCd = openListing ? countdownParts(startMs(openListing) - tick) : null;
-  const openRunning = openListing
-    ? startMs(openListing) <= tick && (endMs(openListing) > tick || (!openListing.dateEnd && dateStrOf(openListing) === todayStr))
-    : false;
-  const openCdText = openListing
-    ? openRunning
-      ? "ON NOW"
-      : `STARTS IN ${
-          Number(openCd!.d) > 0
-            ? `${Number(openCd!.d)}D ${Number(openCd!.h)}H`
-            : Number(openCd!.h) > 0
-              ? `${Number(openCd!.h)}H ${Number(openCd!.m)}M`
-              : `${Number(openCd!.m)}M`
-        }`
-    : "";
-  const venueId = detailQuery.data?.venue?.id;
-  const venueQuery = useQuery<{ promoters?: { id: number; displayName?: string; username: string }[] }>({
-    queryKey: ["/api/placez", venueId, "card-extras"],
-    queryFn: () => apiRequest("GET", `/api/placez/${venueId}`).then(r => r.json()),
-    enabled: !!venueId,
-    staleTime: 300_000,
-  });
-  const detailStatus = <EventReadStatus label="Event details" query={detailQuery} />;
-  const mizzCount = detailQuery.data?.missedConnections?.length;
-  const detailEvent = detailQuery.data?.event ?? null;
-  const detailVenue = detailQuery.data?.venue ?? null;
-  const hosts = detailQuery.data?.hosts ?? [];
-  const talent = detailQuery.data?.talent ?? [];
-  const nearbyR = detailQuery.data?.nearby?.restaurants ?? [];
-  const nearbyE = detailQuery.data?.nearby?.events ?? [];
-  const openAddr = detailVenue?.address || openListing?.address || "";
-  const openDesc = detailEvent?.description || openListing?.description || "";
-  const openTicket = detailEvent?.ticketUrl || openListing?.ticketUrl || "";
-  /* The detail payload carries sourceLink only when the server's gate
-   * passed for this viewer (admins / promoters / owner) — rendering it
-   * here inherits the gate exactly; everyone else never receives it. */
-  const openSourceLink = /^https?:\/\//i.test(detailQuery.data?.sourceLink || "") ? (detailQuery.data?.sourceLink as string) : "";
-  const openHostGroup = detailQuery.data?.hostGroup ?? null;
-  const openClaimable = detailEvent?.isClaimable ?? openListing?.isClaimable ?? false;
-  const openPending = detailEvent?.hasPendingClaim ?? Boolean((openListing as { hasPendingClaim?: boolean } | null)?.hasPendingClaim);
-  const openLat = detailVenue?.lat ?? openListing?.lat ?? null;
-  const openLng = detailVenue?.lng ?? openListing?.lng ?? null;
-  const pinX = openLng != null ? Math.min(92, Math.max(8, ((openLng + 122.85) / 0.4) * 100)) : 50;
-  const pinY = openLat != null ? Math.min(88, Math.max(10, ((45.65 - openLat) / 0.2) * 100)) : 50;
-  const dirDest = encodeURIComponent(
-    `${openAddr ? `${openAddr}, ` : ""}${openListing?.venueName ?? ""}, Portland, OR`,
-  );
-  const openCdLabel = openCdText === "ON NOW" ? "HAPPENING" : openCdText.startsWith("ENDS") ? "ENDS IN" : "STARTS IN";
-  const openCdNums = openCdText.replace(/^(STARTS IN|ENDS IN)\s*/, "") || "ON NOW";
-  /* More-at-venue strip: the open event's venue, day by day, for the 7
-   * days starting on the event's own day (same shape as the expanded
-   * card's strip on the event page). */
-  const openStrip = useMemo(() => {
-    type StripDay = { ds: string; dow: string; num: number; items: EventListing[] };
-    if (!openListing) return [] as StripDay[];
-    const start = dateStrOf(openListing);
-    const [sy, sm, sd] = start.split("-").map(Number);
-    const out: StripDay[] = [];
-    for (let i = 0; i < 7; i++) {
-      const ds = new Date(Date.UTC(sy, sm - 1, sd + i)).toISOString().slice(0, 10);
-      const items = events
-        .filter(e2 => e2.id !== openListing.id && e2.venueName === openListing.venueName && dateStrOf(e2) === ds)
-        .sort((a, b) => a.dateStart.localeCompare(b.dateStart));
-      out.push({ ds, dow: weekdayCode(ds), num: Number(ds.slice(8, 10)), items });
-    }
-    return out;
-  }, [openListing, events]);
 
   /* The board's filter row moved into the page's bottom filter drawer
      (EventsFilterDrawer); the board reports its visible count up and takes
@@ -1099,381 +938,15 @@ export default function FlyerBoard({
       </div>
 
       {/* open card */}
-      {openListing && frontShowing && <EventFrontStage listing={openListing} onClose={() => closeCard()} onExpand={expandFront} />}
-      {openListing && ocardOn && <CardStage className="fbx" onClose={() => closeCard()}>
-        <div
-          className={`ocard${ocardOn ? " on" : ""}`} ref={posterDialog} inert={!ocardOn}
-          style={{ "--a": openAccent } as CSSProperties}
-          role="dialog"
-          aria-modal="true"
-          aria-label={openListing.title}
-        >
-          <button type="button" className="ox" aria-label="Close event" onClick={()=>closeCard()}>✕</button>
-          <button type="button" className="oshare" aria-label={`Share ${openListing.title}`} onClick={shareOpen}>
-            <ShareIcon />
-          </button>
-          <div className="ohero">
-              {openPoster ? (
-                <img src={openPoster} alt="" onError={() => setFailedOpenPoster(openPoster)} />
-              ) : (
-                <div
-                  className="ohero-typo"
-                  style={{ background: `linear-gradient(160deg, ${openAccent} 0%, var(--evz-ink-0a0a0e) 78%)` }}
-                >
-                  <div className="typo-t">{openListing.title}</div>
-                  <div className="typo-v" style={{ color: openAccent }}>
-                    {openListing.venueName.toUpperCase()}
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="oid">
-              <div className="ochips">
-                <span className="ochip">{eventAge(openListing.ageRequirement)==="Not stated"?"Age not stated":eventAge(openListing.ageRequirement)}</span>
-                {openListing.isSexPositive ? <span className="ochip">SEX-POSITIVE</span> : null}
-                <span className="ochip">{openCdText}</span>
-              </div>
-              <h2>{openListing.title}</h2>
-              <p className="ometa">
-                {eventDateLabel(openListing.dateStart)} · {eventTimeLabel(openListing.dateStart)}
-                {"\n"}
-                {openListing.venueName}
-              </p>
-            </div>
-            <EventGoingButton eventId={openListing.id} past={!!openListing.dateEnd && endMs(openListing) < tick} poster />
-            <div className="otabs" role="tablist" aria-label="Event card pages">
-              {OPAGE_NAMES.map((n, i) => (
-                <button
-                  key={n}
-                  type="button"
-                  role="tab"
-                  aria-selected={opage === i}
-                  className={opage === i ? "on" : ""}
-                  onClick={() => goOpage(i)}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-            <div
-              className="opages"
-              ref={pagesRef}
-              onScroll={e => {
-                const el = e.currentTarget;
-                const i = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
-                if (i !== opage) setOpage(i);
-              }}
-            >
-              <section className="opage" inert={opage!==0} aria-hidden={opage!==0} aria-label="Info">
-                <p className="osec">EVENT DETAILS</p>
-                <div className="ostarts">
-                  <i>{openCdLabel}</i>
-                  <b>{openCdNums}</b>
-                </div>
-                <div className="okv">
-                  <span className="ok">WHEN</span>
-                  <span>
-                    {eventDateLabel(openListing.dateStart)} · {eventTimeLabel(openListing.dateStart)}
-                  </span>
-                </div>
-                <div className="okv">
-                  <span className="ok">WHERE</span>
-                  <span>
-                    {detailVenue?.id ? (
-                      <a className="ovenue" href={placePath(detailVenue.id, openListing.venueName)}>
-                        {openListing.venueName}
-                      </a>
-                    ) : (
-                      openListing.venueName
-                    )}
-                    {openAddr ? (
-                      <>
-                        <br />
-                        {openAddr}
-                      </>
-                    ) : null}
-                  </span>
-                </div>
-                {openHostGroup?.name ? (
-                  <div className="okv">
-                    <span className="ok">HOSTED BY</span>
-                    <span>
-                      {openHostGroup.slug ? (
-                        <a className="ovenue" href={`/z/${openHostGroup.slug}`}>
-                          {openHostGroup.name}
-                        </a>
-                      ) : (
-                        openHostGroup.name
-                      )}
-                    </span>
-                  </div>
-                ) : null}
-                {openDesc ? <p className="odesc">{openDesc}</p> : null}
-                <div className="okv">
-                  <span className="ok">ADMISSION</span>
-                  <span>{eventPrice(openListing.admission)}</span>
-                </div>
-                <div className="okv">
-                  <span className="ok">AGE</span>
-                  <span>{eventAge(openListing.ageRequirement)}</span>
-                </div>
-                {openTicket ? (
-                  <a className="olinkbtn accent" href={openTicket} target="_blank" rel="noreferrer">
-                    GET TICKETS <span>↗</span>
-                  </a>
-                ) : null}
-                {openSourceLink ? (
-                  <a className="olinkbtn" href={openSourceLink} target="_blank" rel="noreferrer">
-                    SOURCE LINK <span>↗</span>
-                  </a>
-                ) : null}
-                {openClaimable ? (
-                  <p className="onote">
-                    This event has not been claimed by its organizer. Details were sourced from public listings —
-                    confirm time, venue, and ticketing directly before attending.
-                    {openPending ? " A claim is pending admin review." : ""}
-                  </p>
-                ) : null}
-                <a className="olinkbtn" href={eventPath(openListing.id, openListing.title, openListing.dayOfWeek, dateStrOf(openListing))}>
-                  REPORT / REQUEST A CHANGE <span>›</span>
-                </a>
-                <EventHostNotice className="onote" />
-              </section>
-              <section className="opage" inert={opage!==1} aria-hidden={opage!==1} aria-label="Feed">
-                {openListing.id > 0 && <EventPlanning eventId={openListing.id} occurrenceDate={openListing.dateStart} />}
-                <button
-                  type="button"
-                  className="addm"
-                  onClick={() => {
-                    const target = openListing;
-                    closeCard(true);
-                    onOpen(target, null);
-                  }}
-                >
-                  <b>+ ADD A MIZZED CONNECTION</b>
-                  <p>{mizzCount ? `${mizzCount} posted for this event` : "Post during or after the event."}</p>
-                </button>
-              </section>
-              <section className="opage" inert={opage!==2} aria-hidden={opage!==2} aria-label="Maps">
-                <p className="osec">
-                  MAP & DIRECTIONS <span className="osec-r">LOCATION OVERVIEW</span>
-                </p>
-                <div className="omap" aria-hidden="true">
-                  <span className="omap-river" />
-                  <span className="omap-road" style={{ left: 0, right: 0, top: "30%", height: 7 }} />
-                  <span className="omap-road" style={{ top: 0, bottom: 0, left: "38%", width: 7 }} />
-                  <span className="omap-road" style={{ left: 0, right: 0, top: "74%", height: 5 }} />
-                  <span className="omap-tag">REAL LOCATION · NO STREET TILES</span>
-                  <span className="omap-pin" style={{ left: `${pinX}%`, top: `${pinY}%` }} />
-                </div>
-                <div className="okv">
-                  <span className="ok">VENUE</span>
-                  <span>
-                    {openListing.venueName}
-                    {openAddr ? (
-                      <>
-                        <br />
-                        {openAddr}
-                      </>
-                    ) : null}
-                  </span>
-                </div>
-                <div className="odir">
-                  <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${dirDest}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    DIRECTIONS · GOOGLE
-                  </a>
-                  <a href={`https://maps.apple.com/?daddr=${dirDest}`} target="_blank" rel="noreferrer">
-                    DIRECTIONS · APPLE
-                  </a>
-                </div>
-              </section>
-              <section className="opage" inert={opage!==3} aria-hidden={opage!==3} aria-label="More and nearby">
-                <p className="osec">
-                  MORE AT {openListing.venueName.toUpperCase()} <span className="osec-r">THE SAME WEEK</span>
-                </p>
-                <div className="odays">
-                  {openStrip.map((d, i) => (
-                    <button
-                      key={d.ds}
-                      type="button"
-                      className={`oday${oday === i ? " hot" : ""}`}
-                      onClick={() => setOday(i)}
-                    >
-                      <i>{d.dow}</i>
-                      <b>{d.num}</b>
-                      <span>{d.items.length ? `${d.items.length} event${d.items.length === 1 ? "" : "s"}` : "—"}</span>
-                    </button>
-                  ))}
-                </div>
-                {openStrip[oday]?.items.length ? (
-                  <div className="orail">
-                    {openStrip[oday].items.map(n => (
-                      <div className="omini" key={n.id}>
-                        <b>{n.title}</b>
-                        <span>{eventTimeLabel(n.dateStart)}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="oempty">No other events at {openListing.venueName} on this day.</p>
-                )}
-                <p className="osec" style={{ marginTop: 16 }}>
-                  RESTAURANTS CLOSE BY
-                </p>
-                {!Array.isArray(detailQuery.data?.nearby?.restaurants) ? detailStatus : nearbyR.length ? (
-                  <div className="orail">
-                    {nearbyR.map((r, i) => (
-                      <div className="omini" key={`${r.name ?? "r"}-${i}`}>
-                        <b>{r.name}</b>
-                        <span>{r.type || "restaurant"}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="oempty">No restaurants listed nearby yet.</p>
-                )}
-                <p className="osec" style={{ marginTop: 16 }}>
-                  EVENTS SAME DAY · CLOSE BY
-                </p>
-                {!Array.isArray(detailQuery.data?.nearby?.events) ? detailStatus : nearbyE.length ? (
-                  <div className="orail">
-                    {nearbyE.map((n, i) => (
-                      <div className="omini" key={n.id ?? i}>
-                        <b>{n.title}</b>
-                        <span>
-                          {n.venueName}
-                          {n.dateStart ? (
-                            <>
-                              <br />
-                              {eventDateLabel(n.dateStart)}
-                            </>
-                          ) : null}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="oempty">No other events close by on this day.</p>
-                )}
-              </section>
-              <section className="opage" inert={opage!==4} aria-hidden={opage!==4} aria-label="People">
-                <p className="osec">{hosts.length === 1 ? "HOST" : "HOSTS"}</p>
-                {!Array.isArray(detailQuery.data?.hosts) ? detailStatus : hosts.length > 0 ? (
-                  hosts.map((h, i) => {
-                    const name = h.displayName || h.username || "";
-                    const initials =
-                      name
-                        .trim()
-                        .split(/\s+/)
-                        .map(w => w[0])
-                        .slice(0, 2)
-                        .join("")
-                        .toUpperCase() || "?";
-                    return (
-                      <div className="operson" key={h.username ?? i}>
-                        <span className="oavatar">{initials}</span>
-                        <span>
-                          <span className="opn">{name}</span>
-                          {h.role ? (
-                            <span className="opr">{h.role === "PRIMARY" ? "Primary host" : h.role}</span>
-                          ) : null}
-                        </span>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <>
-                    <div className="oclaimbox">
-                      <p className="oct">{openPending ? "CLAIM IN REVIEW" : openClaimable ? "OPEN TO CLAIM" : "HOST INFORMATION"}</p>
-                      <p className="ocs">
-                        No public event host is listed.
-                        {openPending ? " A claim is pending admin review." : ""}
-                      </p>
-                    </div>
-                    {openClaimable && !openPending ? (
-                      <a className="olinkbtn" href={`/submit/claim/${openListing.id}`}>
-                        CLAIM THIS EVENT <span>›</span>
-                      </a>
-                    ) : null}
-                  </>
-                )}
-                {talent.length > 0 && (
-                  <>
-                    <p className="osec" style={{ marginTop: 16 }}>
-                      TALENT · THIS EDITION
-                    </p>
-                    {talent.map((t, i) => {
-                      const name = t.displayName || t.username || "";
-                      const initials =
-                        name
-                          .trim()
-                          .split(/\s+/)
-                          .map(w => w[0])
-                          .slice(0, 2)
-                          .join("")
-                          .toUpperCase() || "?";
-                      return (
-                        <div className="operson" key={t.username ?? i}>
-                          <span className="oavatar">{initials}</span>
-                          <span>
-                            <span className="opn">{name}</span>
-                            {t.role ? <span className="opr">{t.role}</span> : null}
-                            <span className="opr">{t.addedByUserId == null ? "Source unavailable" : t.addedByUserId === t.userId ? "Self-listed" : "Added by host or staff"}</span>
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </>
-                )}
-                <p className="osec" style={{ marginTop: 16 }}>
-                  VENUE PROMOTERS
-                </p>
-                {!detailQuery.data ? detailStatus : !venueId ? <p className="oempty">No venue is linked.</p> : !Array.isArray(venueQuery.data?.promoters) ? <EventReadStatus label="Venue promoters" query={venueQuery} /> : venueQuery.data.promoters.length ? (
-                  <ul>{venueQuery.data.promoters.map(person => <li key={person.id}>{person.displayName || person.username}</li>)}</ul>
-                ) : <p className="oempty">No public promoters listed for this venue.</p>}
-              </section>
-            </div>
-          <div className="ofoot">
-            <button
-              type="button"
-              className="oarw"
-              disabled={opage === 0}
-              onClick={() => goOpage(opage - 1)}
-              aria-label="Previous page"
-            >
-              ‹
-            </button>
-            <span className="opg">
-              PAGE {opage + 1} · {OPAGE_LABELS[opage]}
-            </span>
-            <button
-              type="button"
-              className="oarw"
-              disabled={opage === OPAGE_NAMES.length - 1}
-              onClick={() => goOpage(opage + 1)}
-              aria-label="Next page"
-            >
-              ›
-            </button>
-            <EventPrivateSaveButton eventId={openListing.id} poster />
-            <EventInterestedHeart
-              eventId={openListing.id}
-              variant="poster"
-              snapshot={{
-                title: openListing.title,
-                subtitle: openListing.venueName,
-                image: listingPosterUrl(openListing),
-                href: eventPath(openListing.id, openListing.title, openListing.dayOfWeek, dateStrOf(openListing)),
-                accent: openListing.accentColor ?? null,
-              }}
-            />
-          </div>
-        </div>
-      </CardStage>}
+{openListing && ocardOn && (
+        <OpenEventCard
+          key={listingKey(openListing)}
+          listing={openListing}
+          related={events}
+          originRect={openOrigin}
+          onClose={() => closeCard()}
+        />
+      )}
           </div>,
           document.body,
         )}

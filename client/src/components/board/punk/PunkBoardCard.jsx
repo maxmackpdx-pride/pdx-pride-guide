@@ -4,7 +4,7 @@ import {rememberCardOrigin} from '@/components/cards/CardAPI';
 import {openCardFromEvent} from '@/components/cards/react19CardModel';
 import React,{useEffect,useState,useRef,useLayoutEffect} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Heart,Share2,ArrowUpRight,MapPin,Waves} from 'lucide-react';
+import {Heart,ArrowUpRight,MapPin,Waves} from 'lucide-react';
 import {BoardCardMotif} from './BoardCardMotif';
 import {InkFilters} from './InkFilters';
 import {BoardzCollage,BoardzInkFilters,boardPalette} from './BoardzCollage';

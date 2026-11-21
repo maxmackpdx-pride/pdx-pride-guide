@@ -1,5 +1,7 @@
+import type { CSSProperties } from "react";
 import { useForegroundCheck } from "./useForegroundCheck";
 import { useModalA11y } from "@/hooks/useModalA11y";
+import { growIn, growOut, type OriginRect } from "@/components/cards/flipCard";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -148,13 +150,15 @@ export function RideOfferForm({
   busy,
   checked,
   send,
+  initialKind = "carpool",
 }: {
   eventId: number;
+  initialKind?: RideFields["kind"];
   busy: boolean;
   checked: boolean;
   send: (body: RideFields & { area: string; seats: number }) => void;
 }) {
-  const [kind, setKind] = useState<RideFields["kind"]>("carpool"),
+  const [kind, setKind] = useState<RideFields["kind"]>(initialKind === "home" && !checked ? "carpool" : initialKind),
     [oneWay, setOneWay] = useState(false),
     rooms = useAfterzNights();
   const joined = (rooms.data ?? []).filter(
@@ -186,9 +190,11 @@ export function RideOfferForm({
           value={kind}
           onChange={(e) => setKind(e.target.value as RideFields["kind"])}
         >
-          <option value="carpool">Carpool to the event</option>
+          <option value="carpool">Arriving: carpool to the event</option>
+          {/* Ride-home offers keep the server's safety rule: verified presence at the
+              venue (foreground checks + missed-check escalation). */}
           <option value="home" disabled={!checked}>
-            Offer ride home
+            {checked ? "Departing: ride home" : "Departing: ride home (check in at the venue first)"}
           </option>
           <option value="afterz" disabled={!checked || !joined.length}>
             Ride to Afterz
@@ -529,33 +535,60 @@ export function RideCheckReminder() {
     </aside>
   );
 }
+/** Swap an open modal <dialog> to non-modal (still visible) for its exit animation. */
+function demoteDialog(d: HTMLDialogElement | null) {
+  if (!d || !d.open) return;
+  d.close();
+  d.show();
+}
+
 export function AtEventDialog({
   poster,
   title,
   onClose,
   children,
+  accent,
+  origin = null,
+  icon = null,
 }: {
   poster: string | null;
   title: string;
   onClose: () => void;
   children: ReactNode;
+  /** Tile color from the open card (carpool orange, afterz yellow). */
+  accent?: string;
+  /** Tile-face rect (t306u): the content grows from the tile, icon morphs in. */
+  origin?: OriginRect | null;
+  icon?: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
-  const contentRef = useModalA11y({ onClose });
+  const iconRef = useRef<HTMLSpanElement>(null);
+  const [leaving, setLeaving] = useState(false);
+  const close = () => {
+    if (leaving) return;
+    setLeaving(true);
+    // Leave the modal layer first so the event card underneath is live again
+    // (focus restore + its own Escape) while the exit animation plays.
+    demoteDialog(ref.current);
+    void growOut(contentRef.current, origin, iconRef.current, origin).then(onClose);
+  };
+  const contentRef = useModalA11y({ onClose: close, enabled: !leaving });
   useEffect(() => {
     const d = ref.current;
     d?.showModal();
+    growIn(contentRef.current, origin, iconRef.current, origin);
     return () => d?.close();
   }, []);
   return createPortal(
     <dialog
       ref={ref}
-      className="at-event-dialog"
+      className={"at-event-dialog" + (accent ? " at-event-dialog--tinted" : "")}
+      style={accent ? ({ "--night-c": accent } as CSSProperties) : undefined}
       aria-label={"At " + title}
       onCancel={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        onClose();
+        close();
       }}
       onKeyDown={(e) => {
         if (e.key === "Escape") e.stopPropagation();
@@ -576,9 +609,10 @@ export function AtEventDialog({
       />
       <div ref={contentRef} className="at-event-content">
         <header>
+          {icon ? <span ref={iconRef} className="at-event-icon" aria-hidden="true">{icon}</span> : null}
           <small>At the event</small>
           <h2>{title}</h2>
-          <button autoFocus onClick={onClose}>
+          <button autoFocus onClick={close}>
             Back to event
           </button>
         </header>

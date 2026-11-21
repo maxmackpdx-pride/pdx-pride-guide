@@ -13234,10 +13234,15 @@ export const storage: IStorage = {
   },
   notifyAttendeesOfHostUpdate(eventId, hostUserId, eventTitle, body) {
     const rows = sqlite.prepare(`
-      SELECT DISTINCT user_id AS userId
+      SELECT user_id AS userId
       FROM attendances
       WHERE event_id = ? AND is_active = 1 AND user_id IS NOT NULL AND user_id != ?
-    `).all(eventId, hostUserId) as { userId: number }[];
+      UNION
+      -- Hearts are "I'm interested": a hearted event follows its updates
+      -- (Tucker, t319u). Same delivery as attendees; card_hearts is hearts.ts.
+      SELECT user_id AS userId FROM card_hearts
+      WHERE kind = 'event' AND ref = CAST(? AS TEXT) AND user_id != ?
+    `).all(eventId, hostUserId, eventId, hostUserId) as { userId: number }[];
     let sent = 0;
     for (const row of rows) {
       storage.sendMessage(hostUserId, row.userId, `Host update: ${eventTitle}`, body, {

@@ -949,6 +949,7 @@ export default function Events() {
         <EventzExpanded
           key={selectedEvent.id}
           openChat={selectedEvent.id === routeEventId && routeSearch.get("chat") === "1"}
+          openManage={selectedEvent.id === routeEventId && routeSearch.get("manage") === "1"}
           event={selectedEvent}
           openPlanning={selectedEvent.id === routeEventId && ["rides", "safety"].includes(routeSearch.get("night") || "")}
           onClose={closeEvent}

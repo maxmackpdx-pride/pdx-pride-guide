@@ -2,7 +2,8 @@ import BoardPostFace from "@/components/board/BoardPostFace";
 import { ArrowRight } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import type { CSSProperties } from "react";
-import { MapPin, Share2 } from "lucide-react";
+import { MapPin } from "lucide-react";
+import { ShareIcon } from "@/components/icons/ShareIcon";
 import type { MissedConnectionPost } from "./MissedConnectionsPanel";
 import { shareMissedConnectionStory } from "@/lib/shareMissedConnection";
 import { useToast } from "@/hooks/use-toast";
@@ -130,7 +131,7 @@ export default function SpottedCard({
           onClick={handleShare}
           aria-label="Share as Instagram Story image"
         >
-          <Share2 size={12} strokeWidth={2.5} /> SHARE
+          <ShareIcon size={12} strokeWidth={2.5} /> SHARE
         </button>
       </div>
     </article>

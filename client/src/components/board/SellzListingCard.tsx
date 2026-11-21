@@ -13,7 +13,8 @@ import {
   SELLZ_SAVED_KEY,
   snapshotQueries,
 } from "@/lib/optimisticCache";
-import { Bookmark, MessageCircle, Share2, ShieldAlert, Tag } from "lucide-react";
+import { Bookmark, MessageCircle, ShieldAlert, Tag } from "lucide-react";
+import { ShareIcon } from "@/components/icons/ShareIcon";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -125,7 +126,7 @@ export default function SellzListingCard({ post, skipLeadPhoto = false, expanded
         <p>{post.description}</p>
         <div className="gifting-details">{post.condition} · {post.pickupPreference} · {post.neighborhood}</div>
         <div className="gifting-listing-actions">
-          <button type="button" onClick={share}><Share2 size={14} /> Share</button>
+          <button type="button" onClick={share}><ShareIcon size={14} /> Share</button>
           <button type="button" disabled={mutate.isPending && savePendingRef.current.has(post.id)} onClick={() => act(`/api/sellz/${post.id}/save`)}><Bookmark size={14} fill={saved ? "currentColor" : "none"} /> {saved ? "Saved" : "Save"}</button>
         </div>
         {!post.isMine && post.status === "ACTIVE" ? <div className="gifting-response">

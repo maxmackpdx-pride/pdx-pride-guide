@@ -9,6 +9,8 @@ import {
   parsePacificDateTime,
 } from "@shared/missedConnections";
 import { registerNightRides, type RideNotice } from "./nightRides";
+import { createCircleOf } from "./socialCircle";
+import { createRideNeeds, registerRideNeedRoutes, NEED_EXPIRY_AFTER_END_MS } from "./rideNeeds";
 import type { IStorage } from "./storage";
 
 export function createPlanningStore(db: Database.Database) {
@@ -222,6 +224,12 @@ export function registerEventPlanning(
       Date.now();
     next();
   };
+  const needs = createRideNeeds(db, storage);
+  /** Public venue coordinates only (house parties / registration-only stay unlocated). */
+  const venueAt = (event: Event) =>
+    !event.isHouseParty && !hasRegistrationOnlyLocation(event) && event.lat != null && event.lng != null
+      ? { lat: Number(event.lat), lng: Number(event.lng) }
+      : null;
   const night = registerNightRides(
     app,
     db,
@@ -231,6 +239,7 @@ export function registerEventPlanning(
     path,
     notifyRiders,
   );
+  registerRideNeedRoutes(app, needs, storage, requireAuth, moderate, { notify: notifyRiders, startWatch: night.startWatch });
   app.get("/api/night/ride-waypoints", requireAuth, (req, res) => {
     res.set("Cache-Control", "private, no-store");
     res.vary("Cookie");
@@ -302,6 +311,7 @@ export function registerEventPlanning(
       sessionId && storage.getUserById(sessionId)?.status === "active"
         ? sessionId
         : undefined;
+    const circleOf = viewer ? createCircleOf(storage, viewer) : null;
     const rides = viewer
       ? store.rides(event.id, date, viewer).flatMap((ride) => {
           const meta = night.plan(ride.id),
@@ -311,6 +321,10 @@ export function registerEventPlanning(
           return [
             {
               ...ride,
+              /* The offerer's avatar on the carpool card (members-only payload, like faces). */
+              driverPhotoUrl: storage.getUserByUsername?.(ride.driver)?.photoUrl ?? null,
+              /* Ridez circle filter bucket (you / friend / fof / everybody); never who links you. */
+              circle: ride.mine ? "you" : circleOf!(offer.driver_id),
               plan: meta
                 ? {
                     kind: meta.kind,
@@ -340,7 +354,26 @@ export function registerEventPlanning(
       open,
       gigs: store.gigs(event.id, date),
       rides,
+      /* NEEDS A RIDE cards (owner, Nov 20): same event + within 2 mi of the venue right now. */
+      needs: viewer ? needs.list(viewer, { eventId: event.id, occurrence: date, at: venueAt(event) }) : null,
     });
+  });
+  app.post(path + "/needs", requireAuth, scope, (req, res) => {
+    const { event, date, open } = res.locals;
+    if (!open) return res.status(409).json({ error: "This occurrence has passed" });
+    const area = typeof req.body?.area === "string" ? req.body.area.trim() : "";
+    const direction = req.body?.direction === "departing" ? "departing" : req.body?.direction === "arriving" ? "arriving" : null;
+    if (!direction || area.length < 2 || area.length > 80)
+      return res.status(400).json({ error: "Choose arriving or departing and a neighborhood (2–80 characters)." });
+    if (moderate(res, "Ride need", { area })) return;
+    const at = venueAt(event);
+    const end = parsePacificDateTime(event.dateEnd || event.dateStart) ?? Date.now();
+    needs.post(req.session.userId!, { eventId: event.id, occurrence: date, direction, area, lat: at?.lat ?? null, lng: at?.lng ?? null, expiresAt: Math.max(end, Date.now()) + NEED_EXPIRY_AFTER_END_MS });
+    res.status(201).json({ ok: true });
+  });
+  app.delete(path + "/needs/me", requireAuth, scope, (req, res) => {
+    needs.remove(req.session.userId!, res.locals.event.id, res.locals.date);
+    res.json({ ok: true });
   });
   app.post(path + "/rides", requireAuth, scope, (req, res) => {
     const { event, date, open } = res.locals;

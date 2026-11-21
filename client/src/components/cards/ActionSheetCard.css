@@ -1,0 +1,126 @@
+/* ActionSheetCard (Tucker, t305u). See docs/design/ACTION_SHEET_CARD.md. */
+.zas-scrim {
+  position: absolute; inset: 0; z-index: 40; display: grid; justify-items: center; padding: 14px;
+  background: var(--z-backdrop-tint); backdrop-filter: var(--z-backdrop-filter); -webkit-backdrop-filter: var(--z-backdrop-filter);
+  animation: zas-scrim-in .22s ease-out;
+}
+.zas-scrim--card { place-items: center; }
+.zas-scrim--sheet { align-items: end; padding: 0; }
+@keyframes zas-scrim-in { from { opacity: 0; } to { opacity: 1; } }
+/* Deep glass in the opener's accent: near-black fill, black keyline, accent
+   edge, two-ring glow (same recipe as the open card's edge). */
+.zas {
+  position: relative; box-sizing: border-box; width: min(360px, 100%); max-height: calc(100% - 8px); overflow: auto;
+  padding: 18px 16px 16px; border-radius: 14px; scrollbar-width: none; color: var(--text-hi);
+  background: radial-gradient(120% 70% at 50% 0, color-mix(in srgb, var(--tile) 12%, transparent), transparent 60%), var(--fbx-card, var(--z-oled));
+  border: 1px solid color-mix(in srgb, var(--tile) 63%, var(--evz-line-17171d, var(--z-black)));
+  box-shadow: 0 0 0 2px var(--z-black), 0 0 9px 1px color-mix(in srgb, var(--tile) 41%, transparent),
+    0 0 18px color-mix(in srgb, var(--tile) 18%, transparent), 0 30px 70px color-mix(in srgb, var(--z-oled) 75%, transparent);
+  transform-origin: 50% 50%; backface-visibility: hidden; will-change: transform, opacity;
+}
+.zas::-webkit-scrollbar { display: none; }
+.zas--wide { width: min(420px, 100%); }
+.zas--sheet { width: min(620px, 100%); border-radius: 18px 18px 0 0; border-bottom: 0; padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); touch-action: pan-x; }
+.zas-grab { display: block; width: 40px; height: 4px; border-radius: 2px; margin: -8px auto 10px; background: color-mix(in srgb, var(--tile) 60%, var(--text-hi)); opacity: .6; }
+.zas-x { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 50%; border: 0; background: none; color: var(--text-hi); font-size: 16px; cursor: pointer; }
+.zas-head { display: flex; align-items: center; gap: 10px; padding-right: 44px; margin-bottom: 12px; }
+.zas-icon { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 12px; border: 1.5px solid var(--tile); color: var(--tile); background: var(--z-black); }
+.zas-icon svg { width: 20px; height: 20px; }
+.zas-kicker { margin: 0; font: 700 11.5px var(--font-display); letter-spacing: .24em; color: var(--tile); text-transform: uppercase; }
+.zas-kicker span { display: block; margin-top: 4px; color: var(--text-hi); letter-spacing: .08em; font-size: 16px; font-weight: 800; }
+.zas-acts { display: grid; gap: 10px; margin-top: 4px; }
+.zas-act { width: 100%; justify-content: space-between !important; }
+.zas-act span { color: var(--tile); }
+.zas-note { font: 500 13px/1.45 var(--font-body); color: var(--evz-mist-cfd8de, var(--text-hi)); margin: 0 0 12px; }
+.zas-body { font: 400 14px/1.5 var(--font-body); color: var(--text-hi); margin: 0 0 14px; white-space: pre-line; }
+
+/* The card button (one class, t303u): the open card's ADD TO SCHEDULE pill.
+   Neutral = white rim on black with an accent glow; .obtn--accent = accent rim
+   (the one primary action, like GET TICKETS). */
+:is(.fbx .ocard, .zas, .zxp, .zform, .zridez) .obtn {
+  --obtn-c: var(--tile, var(--a, var(--text-hi)));
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 44px; min-width: 44px; padding: 0 16px; box-sizing: border-box;
+  border: 1.5px solid var(--evz-mist-f4f8fa, var(--text-hi)); border-radius: 22px;
+  /* Canonical glow recipe (glass.css / buttons.css), rebound to this
+     control so the 8% bloom takes the card's accent, not the root cyan. */
+  --button-c: var(--obtn-c);
+  --neon-bloom: 0 0 18px -4px color-mix(in srgb, var(--button-c) var(--bloom-alpha, 8%), transparent);
+  --btn-glow-bg: radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--button-c) 16%, transparent), transparent 60%), var(--z-oled);
+  --btn-glow-shadow: 0 2px 0 color-mix(in srgb, var(--button-c) 40%, var(--z-oled)),
+    inset 0 1px 0 color-mix(in srgb, var(--text-hi) 28%, transparent), inset 0 -8px 14px -8px color-mix(in srgb, var(--text-hi) 6%, transparent),
+    inset 0 10px 16px -12px color-mix(in srgb, var(--z-oled) 90%, transparent), var(--neon-bloom);
+  background: var(--btn-glow-bg);
+  box-shadow: var(--btn-glow-shadow);
+  color: var(--evz-mist-f4f8fa, var(--text-hi)); text-decoration: none; cursor: pointer;
+  font: 800 15px/1 var(--font-display); letter-spacing: .05em; text-transform: uppercase; white-space: nowrap;
+}
+:is(.fbx .ocard, .zas, .zxp, .zform, .zridez) .obtn:disabled { opacity: .6; cursor: progress; }
+:is(.fbx .ocard, .zas, .zxp, .zform, .zridez) .obtn:hover { filter: brightness(1.12); }
+:is(.fbx .ocard, .zas, .zxp, .zform, .zridez) .obtn:focus-visible { outline: 2px solid var(--obtn-c); outline-offset: 2px; }
+:is(.fbx .ocard, .zas, .zxp, .zform, .zridez) .obtn--accent { border-color: var(--obtn-c); }
+
+@media (prefers-reduced-motion: reduce) { .zas-scrim { animation: none; } }
+
+/* Family logo slot (t312u): readable, never a hero. 30px tall. */
+.zcard-logo-row { display: flex; justify-content: flex-start; margin: 0 0 10px; padding-right: 44px; }
+.zcard-logo { display: block; height: 30px; width: auto; max-width: 180px; object-fit: contain; }
+.zcard-logo--pending {
+  display: inline-grid; align-content: center; height: 30px; padding: 0 10px; box-sizing: border-box;
+  border: 1.5px dashed var(--tile); border-radius: 8px; color: var(--tile);
+  font: 900 15px/1 var(--font-display); letter-spacing: .12em;
+}
+.zcard-logo--pending small { font: 700 7px/1.2 var(--font-display); letter-spacing: .2em; color: var(--text-hi); opacity: .8; }
+/* Brand ride buttons (t327u): mark + name, the brand color as the rim and glow (third-party brand exception). */
+:is(.zas, .zxp) .zas-act--brand { gap: 12px; justify-content: flex-start; }
+:is(.zas, .zxp) .zas-act--brand > span:last-child { margin-left: auto; }
+:is(.zas, .zxp) .zas-act-mark { display: inline-grid; place-items: center; width: 56px; height: 28px; flex: none; color: var(--obtn-c); }
+:is(.zas, .zxp) .zride-mark { width: 56px; height: 24px; display: block; }
+/* Sections inside a sheet (the Ridez carpool rail). */
+:is(.zas, .zxp) .zas-sec { margin: 4px 0 2px; font: 700 11px var(--font-display); letter-spacing: .24em; text-transform: uppercase; color: var(--tile); display: flex; justify-content: space-between; }
+:is(.zas, .zxp) .zas-rail { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 4px 2px 10px; scroll-snap-type: x mandatory; }
+:is(.zas, .zxp) .zas-rail::-webkit-scrollbar { display: none; }
+:is(.zas, .zxp) .zas-rail > * { flex: none; scroll-snap-align: start; }
+:is(.zas, .zxp) .zas-act--brand { border-color: var(--obtn-c); }
+
+:is(.zas, .zxp) .zride-mark { width: 56px; height: 24px; text-transform: none; }
+:is(.zas, .zxp) .zride-mark--wide { width: 72px; }
+:is(.zas, .zxp) .zas-act-mark { width: auto; min-width: 56px; }
+
+/* Ride app tiles (t327u lead review): square app-icon tiles in each brand's
+   color, same anatomy as the event card's locked tiles, label under. */
+:is(.zas, .zxp) .zride-tiles { display: flex; justify-content: space-around; gap: 10px; padding: 4px 4px 2px; }
+:is(.zas, .zxp) .zride-tile {
+  display: grid; justify-items: center; gap: 8px; min-width: 72px; color: var(--text-hi); text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+:is(.zas, .zxp) .zride-tile-icon {
+  display: grid; place-items: center; width: 60px; height: 60px; border-radius: 16px;
+  border: 1.5px solid var(--obtn-c); color: var(--obtn-c);
+  background: radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--obtn-c) 24%, transparent), transparent 62%), var(--z-black);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-hi) 28%, transparent), 0 0 18px -4px color-mix(in srgb, var(--obtn-c) 40%, transparent);
+  transition: transform .12s;
+}
+:is(.zas, .zxp) .zride-tile:active .zride-tile-icon { transform: scale(.94); }
+:is(.zas, .zxp) .zride-tile-icon .zride-mark { width: 46px; height: 22px; }
+:is(.zas, .zxp) .zride-tile-icon .zride-mark--glyph { width: 30px; height: 30px; }
+:is(.zas, .zxp) .zride-tile-label { font: 700 11px/1 var(--font-display); letter-spacing: .12em; text-transform: uppercase; }
+.zas--centered .zcard-logo-row { justify-content: center; padding-inline: 44px; }
+.zas--centered .zas-head { justify-content: center; text-align: center; }
+.zas--centered .zas-kicker { align-items: center; }
+/* Carpool rail: ARRIVING / DEPARTING label at each small card's top (t335u). */
+:is(.zas, .zxp) .orailcard-tag, .fbx .orailcard-tag {
+  position: absolute; z-index: 3; top: 6px; left: 50%; translate: -50% 0; pointer-events: none;
+  padding: 3px 8px; border-radius: 4px; background: var(--z-black); color: var(--tile, var(--neon-orange));
+  border: 1px solid currentColor; font: 800 10px/1 var(--font-display); letter-spacing: .14em;
+}
+:is(.zas, .zxp) .orailcard[data-tag="DEPARTING"] .orailcard-tag { color: var(--text-hi); border-color: var(--tile); }
+/* "+" picks the direction before posting (t336u). */
+:is(.zas, .zxp) .zas-rail .oslot--pick { display: grid; grid-template-rows: 1fr 1fr; gap: 8px; padding: 8px; place-items: stretch; cursor: default; }
+:is(.zas, .zxp) .oslot--pick button {
+  border: 1.5px solid var(--tile); border-radius: 8px; background: color-mix(in srgb, var(--tile) 14%, var(--z-black)); color: var(--text-hi);
+  font: 800 12px/1 var(--font-display); letter-spacing: .12em; cursor: pointer;
+}
+:is(.zas, .zxp) .oslot--pick button:active { background: var(--tile); color: var(--z-black); }
+:is(.zas, .zxp) .zas-rail .oslot.oslot--pick { display: grid; grid-template-rows: 1fr 1fr; gap: 8px; padding: 8px; place-items: stretch; cursor: default; }
+:is(.zas, .zxp) .zas-rail .oslot.oslot--pick > button { width: 100%; height: 100%; border-radius: 8px; padding: 0; }

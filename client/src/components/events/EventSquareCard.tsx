@@ -1,6 +1,6 @@
 import { rememberCardOrigin } from "@/components/cards/CardAPI";
 import { useEffect, useState, type CSSProperties } from "react";
-import { Share2 } from "lucide-react";
+import { ShareIcon } from "@/components/icons/ShareIcon";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { dayAccentToken, dayComplementToken } from "@/lib/dsColors";
 import { listingDay, listingPosterUrl } from "@/lib/dsEvent";
@@ -83,7 +83,7 @@ export default function EventSquareCard({
         } catch (error) {
           if ((error as Error)?.name !== "AbortError") toast({ title: "Could not share. Please try again.", variant: "destructive" });
         }
-      }}><Share2 size={17} aria-hidden="true" /></button>
+      }}><ShareIcon size={17} aria-hidden="true" /></button>
       {liveState ? <span className="event-square-card__live"><LiveBadge live={liveState} /></span> : null}
       <CardHeartButton active={saved}
         className="event-square-card__save"

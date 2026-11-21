@@ -13,7 +13,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link } from "wouter";
-import { ArrowLeft, ArrowRight, ArrowUpRight, CalendarDays, MapPin, Plus, Share2, Sparkle, Trash2, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, CalendarDays, MapPin, Plus, Sparkle, Trash2, Zap } from "lucide-react";
+import { ShareIcon } from "@/components/icons/ShareIcon";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -412,7 +413,7 @@ export function GigListingCard({
             </div>
           ) : null}
           <div className="gifting-listing-actions">
-            <button className="pdx-glass-rebind" type="button" onClick={handleShare}><Share2 size={14} /> Share</button>
+            <button className="pdx-glass-rebind" type="button" onClick={handleShare}><ShareIcon size={14} /> Share</button>
             {gig.username && profileHref ? (
               <Link href={profileHref} className="pdx-glass-rebind">View @{gig.username}&apos;s profile</Link>
             ) : null}

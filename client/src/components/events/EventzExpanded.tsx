@@ -7,7 +7,8 @@ import { EventHostNotice } from "./EventHostNotice";
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { ArrowUpRight, ChevronLeft, ChevronRight, Clock3, MapPin, Share2, X } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Clock3, MapPin, X } from "lucide-react";
+import { ShareIcon } from "@/components/icons/ShareIcon";
 import type { EventListing as Event } from "@shared/multiDayEvents";
 import { EVENT_TALENT_ROLE_COLORS, EVENT_TALENT_ROLE_LABELS, type EventTalentRow } from "@shared/eventTalent";
 import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
@@ -35,7 +36,9 @@ import { POSTER_DETAIL_SIZES, restoreOriginalPoster } from "@/lib/responsivePost
 import UserAvatar from "@/components/UserAvatar";
 import AuthModal from "@/components/AuthModal";
 import MissedConnectionsPanel from "@/components/MissedConnectionsPanel";
-import EventModal, { type EventModalOriginRect } from "@/components/EventModal";
+import { EventManageModal as EventModal, type EventModalOriginRect } from "@/components/EventModal";
+import OpenEventCard from "./OpenEventCard";
+import type { EventListing } from "@shared/multiDayEvents";
 import "./EventzExpanded.css";
 
 /**
@@ -116,6 +119,8 @@ const PAGES = ["Info", "Feed", "Maps", "More", "People"] as const;
 type EventzExpandedProps = {
   openPlanning?: boolean;
   openChat?: boolean;
+  /** ?manage=1: open straight into the legacy manage view. */
+  openManage?: boolean;
   event: Event;
   onClose: () => void;
   onEventUpdated?: (event: Event) => void;
@@ -124,20 +129,20 @@ type EventzExpandedProps = {
   onOpenEvent?: (event: Event) => void;
 };
 
-export default function EventzExpanded({ event, onClose, onEventUpdated, originRect = null, documentMeta = true, onOpenEvent, openPlanning = false, openChat = false }: EventzExpandedProps) {
-  const [expandedKey, setExpandedKey] = useState("");
-  const [manage, setManage] = useState(openChat);
+export default function EventzExpanded({ event, onClose, onEventUpdated, originRect = null, documentMeta = true, onOpenEvent, openPlanning = false, openChat = false, openManage = false }: EventzExpandedProps) {
+  const [manage, setManage] = useState(openChat || openManage);
   if (!event || typeof event.id !== "number") return null;
   const key = event.id + "/" + event.dateStart;
   if (manage) {
     return <EventModal initialSection={openChat ? "attendance" : undefined} event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} documentMeta={documentMeta} />;
   }
-  if (!openPlanning && expandedKey !== key) return <EventFrontStage key={key} listing={event} onClose={onClose} onExpand={() => setExpandedKey(key)} />;
+  // One open card everywhere (Tucker, t276u): no preview step, no legacy layout.
+  void onOpenEvent;
   return (
-    <CardStage key={event.id} onClose={onClose}>
+    <>
       {documentMeta ? <OpenCardMeta title={event.title} description={event.venueName || event.description} /> : null}
-      <EventzExpandedInner openPlanning={openPlanning} event={event} onClose={() => closeOpenCard(onClose)} onManage={() => setManage(true)} onOpenEvent={onOpenEvent} />
-    </CardStage>
+      <OpenEventCard key={key} listing={event as unknown as EventListing} onClose={onClose} initialPage={openPlanning ? 4 : 0} originRect={originRect} />
+    </>
   );
 }
 
@@ -334,7 +339,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
             </>
           )}
         <div className="evz-x__chrome">
-          <button type="button" className="evz-x__iconbtn" onClick={share} aria-label={`Share ${event.title}`}><Share2 size={17} aria-hidden="true" /></button>
+          <button type="button" className="evz-x__iconbtn" onClick={share} aria-label={`Share ${event.title}`}><ShareIcon size={17} aria-hidden="true" /></button>
           <button type="button" className="evz-x__iconbtn" onClick={requestClose} aria-label={`Close ${event.title}`}><X size={19} aria-hidden="true" /></button>
         </div>
         <div className="evz-x__id">

@@ -49,6 +49,8 @@ type InboxOverlayProps = {
   initialQueueBucket?: string;
   initialQueueItem?: string;
   initialThreadId?: string | null;
+  /** Open straight into one group chat (the event card's JOIN THE PREGAME, t327u). */
+  initialGroup?: InboxGroupChatTarget | null;
 };
 
 function InboxPanelHeader({ onClose, onRefresh, refreshing = false, guest = false }: { onClose: () => void; onRefresh?: () => void; refreshing?: boolean; guest?: boolean }) {
@@ -93,7 +95,7 @@ type HousingThreadGate = {
   canNudge: boolean;
 };
 
-export default function InboxOverlay({ open, trigger, onClose, initialView, initialAccount, initialThreadId, initialQueueFolder, initialQueueBucket, initialQueueItem }: InboxOverlayProps) {
+export default function InboxOverlay({ open, trigger, onClose, initialView, initialAccount, initialThreadId, initialQueueFolder, initialQueueBucket, initialQueueItem, initialGroup = null }: InboxOverlayProps) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -204,7 +206,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
       setQuery("");
       return;
     }
-    setView(initialView ?? "inbox");
+    setView(initialView ?? (initialGroup ? "chats" : "inbox"));
     if (initialAccount) {
       const permitted = initialAccount === "personal" || (initialAccount === "admin" && isAdmin) || (initialAccount === "owner" && isOwner);
       setAccount(permitted ? initialAccount : "personal");
@@ -222,7 +224,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
     setFilterOpen(false);
     setQuery("");
   // Counts select a starting account only when opening; polling must never reset a draft.
-  }, [open, initialView, initialAccount, initialQueueFolder, initialQueueBucket, initialQueueItem, isAdmin, isOwner]);
+  }, [open, initialView, initialAccount, initialQueueFolder, initialQueueBucket, initialQueueItem, initialGroup, isAdmin, isOwner]);
 
   // After the reset above, so a thread passed in (the /inbox?thread= door, a
   // notification row) is the one that opens.
@@ -242,6 +244,14 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
     if (view !== "chats") setActiveGroup(null);
     if (view !== "inbox") setActiveId(null);
   }, [view]);
+
+  // A group passed in (the event card's JOIN THE PREGAME) opens last, after the
+  // resets above, so mount-time resets cannot clear it.
+  useEffect(() => {
+    if (!open || !initialGroup) return;
+    setActiveId(null);
+    setActiveGroup(initialGroup);
+  }, [open, initialGroup]);
 
   if (!open) return null;
 

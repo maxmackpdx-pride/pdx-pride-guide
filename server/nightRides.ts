@@ -203,7 +203,7 @@ export function registerNightRides(
           0,
           "Ride check-in due",
           "Open your safety check and confirm you arrived.",
-          "/events/" + (e?.event_id ?? "") + "?night=safety",
+          w.offer_id < 0 ? "/inbox" : "/events/" + (e?.event_id ?? "") + "?night=safety",
           "ride-check-" + w.offer_id + "-" + w.stage,
         );
         db.prepare(
@@ -461,10 +461,15 @@ export function registerNightRides(
       return res.status(409).json({ error: "This offer cannot start." });
     res.json({ departed: true });
   });
-  app.post(ridePath + "/watch", auth, scope, participant, (req, res) => {
-    const o = res.locals.rideOffer as Offer,
-      user = req.session.userId!,
-      { contact, minutes, lat, lng } = req.body;
+  /** Safety check-in (shared): ride offers use their offer id; Ridez need rides use
+   *  -needId (owner, Nov 20), so the same scheduler, reminders, escalation, location
+   *  updates and /api/night/ride-checks endpoints serve both. */
+  function startWatch(
+    key: number,
+    user: number,
+    body: Record<string, unknown>,
+  ): { error: string } | { dueAt: number } {
+    const { contact, minutes, lat, lng } = body as { contact?: unknown; minutes?: number; lat?: number | null; lng?: number | null };
     const names =
       typeof contact === "string"
         ? [
@@ -490,35 +495,31 @@ export function registerNightRides(
           !storage.isFollowing(person.id, user),
       )
     )
-      return res.status(400).json({
-        error: "Choose one to three trusted members you mutually follow.",
-      });
+      return { error: "Choose one to three trusted members you mutually follow." };
     if (
       !Number.isInteger(minutes) ||
-      minutes < 5 ||
-      minutes > 180 ||
+      minutes! < 5 ||
+      minutes! > 180 ||
       ((lat != null || lng != null) && !coordsValid(lat, lng)) ||
-      req.body.consent !== true
+      body.consent !== true
     )
-      return res
-        .status(400)
-        .json({ error: "Confirm the safety check and choose 5–180 minutes." });
+      return { error: "Confirm the safety check and choose 5–180 minutes." };
     const now = Date.now(),
-      due = now + minutes * minute;
+      due = now + minutes! * minute;
     db.transaction(() => {
       db.prepare(
         "DELETE FROM night_watch_contacts WHERE user_id=? AND offer_id=?",
-      ).run(user, o.id);
+      ).run(user, key);
       for (const person of recipients)
         db.prepare("INSERT INTO night_watch_contacts VALUES(?,?,?)").run(
-          o.id,
+          key,
           user,
           person!.id,
         );
       db.prepare(
         `INSERT INTO night_ride_watches VALUES(?,?,?,?,0,?,?,?,?) ON CONFLICT(offer_id,user_id) DO UPDATE SET contact_id=excluded.contact_id,due_at=excluded.due_at,stage=0,next_at=excluded.next_at,lat=excluded.lat,lng=excluded.lng,located_at=excluded.located_at`,
       ).run(
-        o.id,
+        key,
         user,
         recipients[0]!.id,
         due,
@@ -528,7 +529,13 @@ export function registerNightRides(
         lat != null ? now : null,
       );
     })();
-    res.json({ dueAt: due });
+    return { dueAt: due };
+  }
+  app.post(ridePath + "/watch", auth, scope, participant, (req, res) => {
+    const o = res.locals.rideOffer as Offer;
+    const result = startWatch(o.id, req.session.userId!, req.body ?? {});
+    if ("error" in result) return res.status(400).json(result);
+    res.json(result);
   });
   app.get("/api/night/ride-checks", auth, (req, res) => {
     res.set("Cache-Control", "private, no-store");
@@ -565,6 +572,7 @@ export function registerNightRides(
     res.json({ ended: true });
   });
   return {
+    startWatch,
     dispose: () => clearInterval(timer),
     endForegroundChecks: (userId: number, sessionId: string) =>
       db

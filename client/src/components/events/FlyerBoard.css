@@ -449,14 +449,14 @@
 /* ---------- open card ---------- */
 .fbx .scrim {
   position: fixed;
-  inset: 0;
-  background: rgba(2, 2, 4, .6);
+  inset: 0 0 var(--z-dock-h, 0px) 0;
+  background: var(--z-backdrop-tint);
   opacity: 0;
   pointer-events: none;
   transition: opacity .35s;
   z-index: 3000;
-  backdrop-filter: blur(3px) brightness(.85);
-  -webkit-backdrop-filter: blur(3px) brightness(.85);
+  backdrop-filter: var(--z-backdrop-filter);
+  -webkit-backdrop-filter: var(--z-backdrop-filter);
 }
 .fbx .scrim.on { opacity: 1; pointer-events: auto; }
 .fbx .ocard {
@@ -581,7 +581,7 @@
 }
 .fbx .oscroll::-webkit-scrollbar { display: none; }
 .fbx .obody { padding: 16px; }
-.fbx .osec { font: 700 10px var(--font-mono); color: var(--neon-violet); letter-spacing: .14em; margin: 4px 0 10px; }
+.fbx .osec { font: 700 10px var(--font-mono); color: var(--a); letter-spacing: .14em; margin: 4px 0 10px; }
 .fbx .gig { display: flex; gap: 11px; padding: 11px 0; border-bottom: 1px solid var(--fbx-line-soft); }
 .fbx .gig .av {
   width: 36px; height: 36px;
@@ -666,16 +666,20 @@
 }
 .fbx .otabs button.on { color: var(--evz-mist-f4f8fa); border-bottom-color: var(--a); }
 .fbx .opages {
-  position: absolute; inset: 0; z-index: -1; display: flex; overflow-x: auto;
+  position: relative; z-index: 1; display: flex; align-items: flex-start; overflow-x: auto; overflow-y: hidden;
   scroll-snap-type: x mandatory; scrollbar-width: none;
-  -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
 }
 .fbx .opages::-webkit-scrollbar { display: none; }
 .fbx .opage {
-  flex: 0 0 100%; overflow-y: auto;
-  padding: calc(var(--ocard-top-offset, 480px) + 16px) 16px calc(var(--ocard-bottom-offset, 76px) + 16px);
-  scroll-snap-align: start; scroll-snap-stop: always; scrollbar-width: none; overscroll-behavior: contain;
+  flex: 0 0 100%; min-width: 0; box-sizing: border-box; overflow: visible;
+  padding: 16px 16px 24px;
+  scroll-snap-align: start; scroll-snap-stop: always;
 }
+/* Only the active page sets the pager's height, so a long neighbour never
+   leaves empty scroll under a short page. Inactive pages still paint (clipped
+   to the pager) while swiping; the pager itself never scrolls vertically. */
+.fbx .opage[aria-hidden="true"] { height: 0; overflow: visible; }
 .fbx .opage::-webkit-scrollbar { display: none; }
 .fbx .osec-r { float: right; color: var(--evz-gray-8a8a94); letter-spacing: .05em; }
 .fbx .oempty {
@@ -743,8 +747,11 @@
 .fbx .oday i { display: block; font: 700 10px var(--font-display); font-style: normal; letter-spacing: .12em; color: var(--evz-gray-8a8a94); }
 .fbx .oday b { display: block; font: 800 18px/1.15 var(--font-display); }
 .fbx .oday span { display: block; font-size: 9px; color: var(--evz-gray-8a8a94); }
-.fbx .oday.hot { border-color: var(--a); }
-.fbx .oday.hot i { color: var(--a); }
+/* Day-of-week tokens on calendar day cells (owner, Nov 20): soft day border, full when selected. */
+.fbx .oday { border-color: color-mix(in srgb, var(--day-c, var(--fbx-line-soft)) 45%, transparent); }
+.fbx .oday i { color: var(--day-c, var(--evz-gray-8a8a94)); }
+.fbx .oday.hot { border-color: var(--day-c, var(--a)); box-shadow: 0 0 10px -3px var(--day-c, var(--a)); }
+.fbx .oday.hot i { color: var(--day-c, var(--a)); }
 .fbx .orail { display: flex; gap: 9px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
 .fbx .orail::-webkit-scrollbar { display: none; }
 .fbx .omini { flex: 0 0 128px; border: 1px solid var(--fbx-line-soft); border-radius: 9px; padding: 9px 10px; background: var(--fbx-chip-bg); }
@@ -829,14 +836,155 @@
   .fbx { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 }
 
-/* Open card: everything below the hero rides above the poster's fade tail.
-   Nov 19 fix set (Tucker): the page scroller now spans the full card
-   BEHIND the flyer layer (.opages above) — content scrolls up
-   underneath the flyer + fade, which are unchanged; pages pad by the
-   stack/footer offsets the component measures onto the card
-   (--ocard-top-offset / --ocard-bottom-offset). */
-.fbx .ovenue { color: var(--a); text-decoration: underline; text-underline-offset: 2px; }
-.fbx .otabs, .fbx .opageswrap, .fbx .ofoot { position: relative; z-index: 2; }
+/* Open event sheet (Tucker, Nov 20). The sheet is two stacked regions:
+   .ohead is LOCKED: poster (fading into the card surface) behind the title,
+   meta and the tab strip, which ends on an opaque plate. .oscrollarea is the
+   only scroller; it fills exactly from the tab strip to the footer and holds
+   Going plus the active page, so scrolled text is clipped at the tabs and can
+   never pass behind or over the title. The title starts just under the
+   share/close row so it sits high on tall portrait flyers. */
+/* Venue links (Tucker, t270u): no underline in any state; the day accent and
+   a small chevron mark them as links to the venue's place card. */
+.fbx .ovenue, .fbx .ovenue:is(:hover, :focus, :active, :visited) { color: var(--a); text-decoration: none; }
+.fbx .ovenue::after { content: "\203A"; display: inline-block; margin-left: .3em; opacity: .8; }
+.fbx .ovenue:hover { filter: brightness(1.15); }
+.fbx .ovenue:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; border-radius: 3px; }
+.fbx .opageswrap, .fbx .ofoot { position: relative; z-index: 2; }
+.zay-card-stage.fbx .ocard { container-type: size; }
+.fbx .ohead {
+  position: relative; flex: none; z-index: 1;
+  padding-top: clamp(96px, 14cqh, 140px);
+  background: transparent;
+}
+/* Poster (Tucker, t277): one continuous layer at natural aspect from the card
+   top. It runs behind the locked head and the transparent scroller, as far
+   as its own height goes, then fades into the card surface at its own bottom
+   edge. No clip at the tab baseline: the scroller's box only clips the
+   scrolled content, never the poster. */
+.fbx .ocard > .ohero {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 0;
+  height: auto; overflow: visible; background: transparent;
+}
+.fbx .ocard > .ohero img {
+  position: relative; display: block;
+  width: 100%; height: auto; object-fit: contain;
+  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 0, var(--z-oled) calc(100% - 180px), transparent 100%);
+  mask-image: linear-gradient(to bottom, var(--z-oled) 0, var(--z-oled) calc(100% - 180px), transparent 100%);
+  transform-origin: 50% 0;
+}
+/* Soft readability scrim over the poster (no solid fill), plus the accent
+   bloom at the poster's own foot. */
+.fbx .ocard > .ohero::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(120% 22% at 50% 100%, color-mix(in srgb, var(--a) 22%, transparent), transparent 70%),
+    linear-gradient(to bottom, rgba(5, 5, 6, .05) 0, rgba(5, 5, 6, .3) 30%, rgba(5, 5, 6, .55) 55%, rgba(5, 5, 6, .62) 100%);
+}
+/* Parallax: the poster drifts slower than the page scroller. */
+.fbx .ocard { timeline-scope: --osheet; }
+.fbx .oscrollarea { scroll-timeline: --osheet y; }
+@keyframes oposterDrift { from { transform: scale(1.04) translateY(0); } to { transform: scale(1.04) translateY(-6%); } }
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .fbx .ocard > .ohero img { animation: oposterDrift linear both; animation-timeline: --osheet; }
+    :is(html.calm-mode, :root[data-calm="true"]) .fbx .ocard > .ohero img { animation: none; }
+  }
+}
+.fbx .ocard > .ohero:has(.ohero-typo) { height: 62cqh; }
+.fbx .ocard > .ohero .ohero-typo {
+  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 50%, transparent 100%);
+  mask-image: linear-gradient(to bottom, var(--z-oled) 50%, transparent 100%);
+}
+/* Posterless fallback: .oid already carries title and venue on the fade. */
+.fbx .ocard > .ohero :is(.typo-t, .typo-v) { display: none; }
+.fbx .ohead > .oid { margin-top: 0; text-shadow: 0 1px 2px var(--z-black), 0 2px 10px rgba(0, 0, 0, .9), 0 6px 24px rgba(0, 0, 0, .7); }
+.fbx .ohead .ochip { box-shadow: 0 4px 12px -4px rgba(0, 0, 0, .9); }
+/* Tags sit directly under the venue line (Tucker, t269u). */
+.fbx .ohead > .oid h2 { margin-top: 0; }
+.fbx .ohead > .oid .ochips { margin-top: 8px; }
+/* Tabs (Tucker, t265u): no blocks or plates over the poster. Labels sit
+   directly on the poster foot with a text shadow; the active tab takes the
+   day accent and a thin accent underline with the card's bloom. The thin
+   accent baseline marks where scrolled content is clipped. */
+.fbx .ohead > .otabs {
+  position: relative; z-index: 1;
+  display: flex; gap: 0; align-items: flex-end;
+  margin: 12px 0 0; padding: 0 12px;
+  background: transparent; border-bottom: 0;
+}
+/* No baseline rule under the tabs (Tucker, t277): nothing may read as an edge
+   across the poster. Scrolled content fades out over the first 14px of the
+   scroller instead of cutting on a hard line. */
+.fbx .oscrollarea {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, var(--z-oled) 14px);
+  mask-image: linear-gradient(to bottom, transparent 0, var(--z-oled) 14px);
+}
+.fbx .ohead > .otabs button {
+  position: relative; flex: 1 1 0; min-width: 0;
+  margin: 0; padding: 8px 2px 9px;
+  border: 0; border-radius: 0; background: transparent; box-shadow: none;
+  color: var(--evz-mist-aeb8c3); text-transform: uppercase;
+  text-shadow: 0 1px 2px var(--z-black), 0 2px 10px rgba(0, 0, 0, .9);
+}
+/* Label stays white; the poster-matched accent lives only on the underline,
+   so the active tab never disappears into a poster of the same color. */
+.fbx .ohead > .otabs button.on { color: var(--text-hi); }
+.fbx .ohead > .otabs button.on::after {
+  content: ""; position: absolute; left: 14%; right: 14%; bottom: 0; height: 2px; z-index: 1;
+  border-radius: 2px; background: var(--a);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--a) 60%, transparent), 0 0 18px -4px color-mix(in srgb, var(--a) 45%, transparent);
+}
+.fbx .oscrollarea {
+  position: relative; z-index: 1; flex: 1 1 auto; min-height: 0; background: transparent;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .85), 0 2px 10px rgba(0, 0, 0, .6);
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.fbx .oscrollarea::-webkit-scrollbar { display: none; }
+.fbx .oscrollarea > .ointerested { margin-top: 14px; }
+/* Soft lift on the Going box and page blocks (single layer, no inner slabs). */
+.fbx .ocard :is(.ointerested, .ostarts, .olinkbtn, .omap, .addm, .omini) { box-shadow: 0 10px 22px -14px rgba(0, 0, 0, .95), 0 2px 6px -3px rgba(0, 0, 0, .7); }
+
+/* Compact footer: page arrows, schedule button and heart on one 44px row.
+   The 10px padding plus the card's 1px edge matches the share/close inset,
+   so the heart sits evenly in the bottom-right corner. */
+.fbx .ocard .ofoot { gap: 8px; padding: 10px; }
+.fbx .ocard .ofoot .oarw { width: 44px; height: 44px; font-size: 20px; }
+.fbx .ocard .ofoot .opg {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+.fbx .ocard .ofoot .osave {
+  flex: 1 1 auto; min-width: 0; height: 44px; padding: 0 10px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: 1.5px solid var(--evz-mist-f4f8fa); border-radius: 22px;
+  background: radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--a) 16%, transparent), transparent 60%), var(--z-black);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .28),
+    inset 0 10px 16px -12px rgba(0, 0, 0, .9),
+    0 0 18px -4px color-mix(in srgb, var(--a) 8%, transparent);
+  color: var(--evz-mist-f4f8fa);
+  font: 800 15px/1 "Barlow Condensed", sans-serif; letter-spacing: .05em; text-transform: uppercase;
+  white-space: nowrap;
+}
+.fbx .ocard .ofoot .osave span { overflow: hidden; text-overflow: ellipsis; }
+.fbx .ocard .ofoot .osave svg { flex: none; }
+.fbx .ocard .ofoot .osave[aria-pressed="true"] {
+  border-color: var(--a); color: var(--a);
+  background: radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--a) 26%, transparent), transparent 64%), var(--z-black);
+}
+.fbx .ocard .ofoot .osave:disabled { opacity: .7; cursor: progress; }
+.fbx .ocard .ofoot .oheart { margin-left: 0; }
+/* Share lives in the footer (Tucker, t266u): a 44px circle paired with the
+   heart, white rim to match the schedule pill. */
+.fbx .ocard .ofoot .oshare {
+  position: static; flex: none; width: 44px; height: 44px; padding: 0;
+  display: grid; place-items: center;
+  border: 1.5px solid var(--evz-mist-f4f8fa); border-radius: 50%;
+  background: var(--z-black); color: var(--evz-mist-f4f8fa);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28);
+}
+.fbx .ocard .ofoot .oshare svg { width: 18px; height: 18px; }
 
 .fbx .ocard :is(.oclose,.oshare,.oarw,.osave,.otabs button,.opage button) { min-height:44px; min-width:44px; }
 .fbx .ointerested .evz-x__act-main {display:grid;gap:2px;}
@@ -845,3 +993,467 @@
 .fbx .pheart::after,.fbx .pshare::after {
  content:"";position:absolute;left:50%;top:50%;min-width:44px;min-height:44px;transform:translate(-50%,-50%);
 }
+
+/* ===== v7: one open-event card (Tucker, t276u-t291u) ===== */
+/* Locked area, one composition on a 16px left datum:
+   poster clearance -> title -> meta + chips (one wrapping row) -> app tiles
+   -> tabs -> hairline. Top clearance follows the card height so small phones
+   keep more scroll room; the title still clears the close button. */
+.fbx .ocard .ohead { padding-top: clamp(64px, 12cqh, 132px); }
+.fbx .ocard .ohead > .oid { padding: 0 16px; }
+.fbx .ocard .oid h2 {
+  font: var(--open-card-title-font);
+  font-size: clamp(24px, 7.6cqi, 34px); line-height: 1; letter-spacing: -.005em;
+  text-transform: uppercase; margin: 0; text-wrap: balance;
+}
+.fbx .ocard .ometarow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 7px; }
+.fbx .ocard .ometa {
+  font: var(--open-card-meta-font); font-size: 14px; line-height: 1.3;
+  color: var(--evz-mist-f4f8fa); margin: 0; white-space: normal;
+}
+.fbx .ocard .ometa .osep { color: var(--evz-mist-aeb8c3); }
+.fbx .ocard .ometa .ovenue { font-weight: 600; }
+.fbx .ocard .ohead > .oid .ochips { margin-top: 0; gap: 6px; }
+.fbx .ocard .ochip { font: 700 10.5px/1 var(--font-display); letter-spacing: .1em; padding: 5px 7px; }
+.fbx .ocard .ochip--tonight, .fbx .ocard .ochip--now { border-color: var(--a); color: var(--text-hi); }
+.fbx .ocard .ochip--ended { opacity: .7; }
+
+/* App tiles: small "app faces" in the glow-button recipe, each with its
+   own fluorescent identity. Five fit 360px; each tile is a 44px+ target. */
+.fbx .ocard .otiles {
+  display: flex; justify-content: center; gap: 6px;
+  padding: 0 12px; margin-top: 12px;
+}
+/* Four equal columns; with fewer tiles (an ended night drops Carpool and Afterz) they stay centered. */
+.fbx .ocard .otiles > .otile { flex: 0 0 calc((100% - 18px) / 4); }
+.fbx .ocard .otile {
+  --button-c: var(--tile);
+  display: grid; justify-items: center; gap: 4px; min-height: 44px; min-width: 44px;
+  padding: 0; border: 0; background: none; color: var(--text-hi); text-decoration: none; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.fbx .ocard .otile-face {
+  display: grid; place-items: center; width: 44px; height: 40px; border-radius: 12px;
+  border: 1.5px solid var(--tile); color: var(--tile);
+  background: radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--tile) 22%, transparent), transparent 62%), var(--z-black);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-hi) 28%, transparent), inset 0 10px 16px -12px color-mix(in srgb, var(--z-oled) 90%, transparent),
+    0 0 18px -4px color-mix(in srgb, var(--tile) 8%, transparent), 0 6px 14px -8px color-mix(in srgb, var(--z-oled) 90%, transparent);
+  transition: transform .12s, box-shadow .12s;
+}
+.fbx .ocard .otile-face svg { width: 20px; height: 20px; stroke-width: 2; }
+.fbx .ocard .otile-l {
+  font: 700 10px/1 var(--font-display); letter-spacing: .12em; text-transform: uppercase;
+  text-shadow: 0 1px 2px var(--z-black), 0 2px 8px color-mix(in srgb, var(--z-oled) 90%, transparent);
+}
+.fbx .ocard .otile:hover .otile-face { box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-hi) 28%, transparent), 0 0 18px -2px color-mix(in srgb, var(--tile) 35%, transparent); }
+.fbx .ocard .otile:active .otile-face { transform: scale(.94); }
+.fbx .ocard .otile:focus-visible { outline: none; }
+.fbx .ocard .otile:focus-visible .otile-face { outline: 2px solid var(--tile); outline-offset: 2px; }
+
+/* Tabs sit on the hairline that closes the locked area (Tucker, t288u). The
+   hairline is a 1px divider, not a plate: the poster keeps running behind. */
+.fbx .ocard .ohead > .otabs { margin-top: 6px; }
+.fbx .ocard .ohead > .otabs button { font: 700 11.5px var(--font-display); letter-spacing: .1em; padding: 9px 2px 9px; }
+.fbx .ocard .ohead::after {
+  content: ""; position: absolute; left: 12px; right: 12px; bottom: 0; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text-hi) 28%, transparent) 12%, color-mix(in srgb, var(--text-hi) 28%, transparent) 88%, transparent);
+}
+
+/* Font standardization (audit): section labels read like STARTS IN. */
+.fbx .ocard .osec { font: 700 11.5px var(--font-display); letter-spacing: .24em; text-transform: uppercase; }
+.fbx .ocard :is(.ointerested b, .addm b, .osave) { font-family: var(--font-display); }
+.fbx .ocard .ointerested span { font: 500 12px/1.35 var(--font-body); }
+.fbx .ocard .omap-tag { font-family: var(--font-display); letter-spacing: .14em; }
+
+/* Countdown box + marks (t286u/t287u): one mark sits left of the countdown;
+   two marks share a row and the countdown moves under them. */
+.fbx .ocard .ostarts { display: grid; place-items: center; gap: 10px; }
+.fbx .ocard .ostarts.ologos-1 { grid-template-columns: auto 1fr; text-align: center; padding: 12px 14px; }
+.fbx .ocard .ostarts.ologos-1 .ostarts-count { justify-self: center; }
+.fbx .ocard .ologos { display: flex; align-items: center; justify-content: center; gap: 18px; }
+.fbx .ocard .ologos img { display: block; height: 58px; width: auto; max-width: 132px; object-fit: contain; filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--z-oled) 80%, transparent)); }
+.fbx .ocard .ostarts.ologos-1 .ologos img { height: 58px; max-width: 110px; }
+.fbx .ocard .ostarts.ologos-2 .ologos { width: 100%; justify-content: space-evenly; }
+.fbx .ocard .ostarts.ologos-2 .ologos img { height: 48px; max-width: 46%; }
+.fbx .ocard .ostarts-count { display: block; }
+.fbx .ocard .ostarts[data-state="ended"] b { color: var(--evz-mist-aeb8c3); }
+@keyframes oLivePulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--a) 0%, transparent), 0 10px 22px -14px color-mix(in srgb, var(--z-oled) 95%, transparent); }
+  50% { box-shadow: 0 0 22px -2px color-mix(in srgb, var(--a) 45%, transparent), 0 10px 22px -14px color-mix(in srgb, var(--z-oled) 95%, transparent); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .fbx .ocard .ostarts.is-live { animation: oLivePulse 2.4s ease-in-out infinite; }
+  .fbx .ocard .ochip--now { animation: oLivePulse 2.4s ease-in-out infinite; }
+  :is(html.calm-mode, :root[data-calm="true"]) .fbx .ocard :is(.ostarts.is-live, .ochip--now) { animation: none; }
+}
+
+/* Full flyer viewer: uncropped, natural aspect; double-tap zooms, pinch is native. */
+.oflyer {
+  position: fixed; inset: 0; z-index: 4000; display: grid;
+  background: color-mix(in srgb, var(--z-oled) 92%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.oflyer-scroll { overflow: auto; display: grid; place-items: center; padding: 56px 12px 24px; touch-action: pan-x pan-y pinch-zoom; overscroll-behavior: contain; }
+.oflyer-scroll img { display: block; max-width: 100%; max-height: calc(100dvh - 80px); width: auto; height: auto; object-fit: contain; border-radius: 6px; box-shadow: 0 20px 60px color-mix(in srgb, var(--z-oled) 80%, transparent); }
+.oflyer-scroll.is-zoom { place-items: start; }
+.oflyer-scroll.is-zoom img { max-width: none; max-height: none; width: 200%; }
+.oflyer-x {
+  position: fixed; top: max(12px, env(safe-area-inset-top, 0px)); right: 12px; z-index: 1;
+  width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--text-hi);
+  background: var(--z-black); color: var(--text-hi); font-size: 18px; cursor: pointer;
+}
+.fbx .ovisually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.fbx .ocard .ohead { cursor: zoom-in; }
+.fbx .ocard .ohead :is(.oid, .otiles, .otabs) { cursor: auto; }
+.fbx .omizzed { margin-top: 12px; }
+
+/* Swipe-down dismiss needs the vertical drag on the locked area. */
+@media (max-width: 1099px) {
+  .fbx .ocard .ohead { touch-action: pan-x; }
+}
+
+/* Desktop: the same card, large and centered over the blurred stage. */
+@media (min-width: 1100px) {
+  .zay-card-stage--expanded.fbx.oevent { top: 0; bottom: 0; }
+  .zay-card-stage.fbx.oevent .ocard { width: min(640px, 92vw); height: min(900px, calc(100dvh - 56px)); }
+}
+
+.zas .opop-opts { display: grid; gap: 10px; }
+.zas .opop-opts > .obtn { justify-content: space-between; width: 100%; }
+.zas .opop-note { font: 500 13px/1.45 var(--font-body); color: var(--evz-mist-cfd8de); margin: 8px 0 12px; }
+.zas .opop-label { display: block; font: 700 11.5px var(--font-display); letter-spacing: .24em; color: var(--tile); margin: 4px 0 6px; }
+.zas .opop-text {
+  width: 100%; box-sizing: border-box; margin-bottom: 12px; padding: 10px 12px; border-radius: 10px; resize: vertical;
+  border: 1px solid color-mix(in srgb, var(--tile) 55%, transparent); background: var(--z-black); color: var(--text-hi);
+  font: 500 14px/1.45 var(--font-body);
+}
+.zas .opop-friends { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 220px; overflow: auto; }
+.zas .opop-friends li { display: flex; align-items: center; justify-content: space-between; gap: 10px; font: 600 14px var(--font-body); color: var(--text-hi); }
+.zas .opop-friends small { display: block; font: 500 12px var(--font-body); color: var(--evz-mist-aeb8c3); }
+.zas .opop-friends .obtn { min-width: 76px; padding: 0 12px; }
+.zas .oshareimg { display: grid; gap: 10px; }
+.zas .oshareimg-size { display: flex; gap: 8px; }
+.zas .oshareimg-size button { flex: 1; min-height: 36px; border-radius: 18px; border: 1px solid var(--evz-line-2c2c35); background: var(--z-black); color: var(--evz-mist-aeb8c3); font: 700 11.5px var(--font-display); letter-spacing: .14em; cursor: pointer; }
+.zas .oshareimg-size button[aria-pressed="true"] { border-color: var(--tile); color: var(--text-hi); }
+.zas .oshareimg-frame { display: grid; place-items: center; border-radius: 10px; overflow: hidden; background: var(--z-black); }
+.zas .oshareimg-frame img { display: block; width: 100%; height: auto; max-height: 52dvh; object-fit: contain; }
+.zas .oshareimg-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.zas .oshareimg-acts .opop-btn--main { grid-column: 1 / -1; }
+
+/* Card rails (Mizzed, Gigz, Nearby): one small-card size. */
+.fbx .ocard .orail .omini { flex: 0 0 128px; min-height: 112px; box-sizing: border-box; display: flex; flex-direction: column; text-decoration: none; }
+.fbx .ocard .orail .omini span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.fbx .ocard .orail--cards .omini { border-color: color-mix(in srgb, var(--rail) 45%, transparent); }
+.fbx .ocard .ocardlet a { text-decoration: none; }
+.fbx .ocard .ocardlet .obtn { margin-top: auto; min-height: 44px; padding: 0 8px; font-size: 12px; letter-spacing: .06em; --obtn-c: var(--rail); }
+.fbx .ocard .oslot {
+  flex: 0 0 112px; min-height: 112px; display: grid; place-items: center; align-content: center; gap: 4px;
+  border: 1.5px dashed var(--rail); border-radius: 9px; background: var(--z-black); color: var(--rail); cursor: pointer;
+}
+.fbx .ocard .oslot span { font: 300 44px/1 var(--font-display); }
+.fbx .ocard .oslot.is-locked { cursor: default; opacity: .85; }
+.fbx .ocard .oslot.is-locked span { font-size: 22px; filter: grayscale(1); }
+.fbx .ocard .oslot small { font: 700 10px var(--font-display); letter-spacing: .14em; color: var(--text-hi); text-align: center; padding: 0 6px; }
+.fbx .ocard .osec--mizz { color: var(--neon-magenta); }
+.fbx .ocard .osec--gigz { color: var(--neon-violet); }
+.fbx .ocard .orail .oempty { flex: 1; margin: 0; }
+
+/* FEED (t309u/t310u): the event's group chat. Empty or not joined = a
+   blank dashed slot (same as the rail "+" slots) inviting the first message.
+   Live = a black panel showing only the newest bubbles that fit (no inner
+   scroll): yours in the poster accent, others grey, avatar on every bubble. */
+.fbx .ofeed { display: grid; gap: 10px; }
+.fbx .ocard .osec.ofeed-h { display: flex; align-items: center; min-height: 30px; margin: 0; }
+.fbx .ofeed-empty, .fbx .ofeed-room .inbox-group-chat__start {
+  display: grid; justify-items: center; align-content: center; gap: 8px; text-align: center;
+  min-height: 220px; padding: 20px 18px; box-sizing: border-box;
+  border: 1.5px dashed color-mix(in srgb, var(--a) 70%, transparent); border-radius: 10px; background: transparent;
+}
+.fbx .ofeed-empty-t, .fbx .ofeed-room .inbox-group-chat__start-t { margin: 0; font: 900 22px/1.1 var(--font-display); letter-spacing: .02em; text-transform: uppercase; color: var(--text-hi); }
+.fbx .ofeed-empty-s, .fbx .ofeed-room .inbox-group-chat__start-s { margin: 0 0 6px; max-width: 30ch; font: 500 13px/1.45 var(--font-body); color: var(--evz-mist-cfd8de, var(--text-hi)); }
+.fbx .ofeed-room .inbox-group-chat__start .obtn { --obtn-c: var(--a); }
+.fbx .ofeed-room .inbox-group-chat--card {
+  position: static; display: flex; flex-direction: column; height: clamp(260px, 52cqh, 420px); min-height: 0;
+  border-radius: 10px; background: var(--z-black); border: 1px solid color-mix(in srgb, var(--a) 35%, transparent); overflow: hidden;
+}
+.fbx .ofeed-room .inbox-group-chat--card.is-empty { background: transparent; border: 0; height: auto; }
+.fbx .ofeed-room .inbox-group-chat--card.is-empty .inbox-group-chat__messages { padding: 0; }
+.fbx .ofeed-room .inbox-group-chat--card .inbox-group-chat__messages {
+  flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; padding: 12px;
+}
+.fbx .ofeed-room .inbox-group-chat--card .inbox-group-chat__messages > button { display: none; }
+.fbx .ofeed-room .inbox-group-chat--card .inbox-group-chat__msg { display: flex; align-items: flex-end; gap: 8px; max-width: 88%; flex: none; }
+.fbx .ofeed-room .inbox-group-chat--card .inbox-group-chat__msg--mine { align-self: flex-end; flex-direction: row-reverse; }
+.fbx .ofeed-room .inbox-group-chat--card .inbox-group-chat__bubble {
+  min-width: 0; padding: 8px 12px; border-radius: 14px; font: 400 14px/1.4 var(--font-body); white-space: pre-wrap; word-break: break-word;
+}
+.fbx .ofeed-room .inbox-group-chat--card .inbox-group-chat__bubble p { margin: 0; }
+.fbx .ofeed-room .inbox-group-chat--card .inbox-exp-bubble--self { background: var(--a); color: var(--z-black); border: 0; border-bottom-right-radius: 4px; }
+.fbx .ofeed-room .inbox-group-chat--card .inbox-exp-bubble--other { background: var(--evz-panel-2a2a30, var(--z-oled)); color: var(--text-hi); border: 0; border-bottom-left-radius: 4px; }
+.fbx .ofeed-room .inbox-group-chat--card .inbox-group-chat__author { display: block; margin-bottom: 2px; font: 700 11px var(--font-body); color: var(--evz-gray-8a8a94, var(--text-hi)); }
+.fbx .ofeed-room .inbox-group-chat--card .inbox-group-chat__composer { display: flex; gap: 8px; padding: 10px; border-top: 1px solid color-mix(in srgb, var(--a) 25%, transparent); }
+.fbx .ofeed-room .inbox-group-chat--card.is-empty .inbox-group-chat__composer { border: 0; padding: 10px 0 0; }
+.fbx .ofeed-room .inbox-group-chat--card .inbox-exp-composer__input {
+  flex: 1; min-width: 0; min-height: 44px; padding: 0 16px; border-radius: 22px; box-sizing: border-box;
+  border: 1.5px solid color-mix(in srgb, var(--text-hi) 35%, transparent); background: var(--z-black); color: var(--text-hi); font: 500 15px var(--font-body);
+}
+.fbx .ofeed-room .inbox-group-chat--card .inbox-exp-composer__send {
+  min-height: 44px; padding: 0 16px; border-radius: 22px; border: 1.5px solid var(--a); background: var(--z-black); color: var(--text-hi);
+  font: 800 15px/1 var(--font-display); letter-spacing: .05em; text-transform: uppercase; cursor: pointer;
+}
+.fbx .ofeed-room .inbox-group-chat--card .inbox-exp-composer__send:disabled { opacity: .5; cursor: default; }
+
+/* Rail titles use the family logos, sized to the chat header row (30px). */
+.fbx .ocard .osec--logo { display: flex; align-items: center; justify-content: space-between; min-height: 30px; margin: 0 0 10px; }
+.fbx .ocard .osec--gigz.osec--logo { margin-top: 22px; }
+.fbx .ocard .osec-logo { display: block; width: auto; height: 26px; }
+.fbx .ocard .osec-logo--mizz { height: 30px; }
+.fbx .ocard .osec--logo .osec-r { float: none; }
+/* The open card runs its own flip (flipCard.ts) from the tapped card. */
+.zay-card-stage.oevent > .ocard { animation: none; }
+
+/* Host slot (t308u): one wide row above the four tiles. CLAIM THIS EVENT is
+   the card button; a promoter is a face stack + name. Venue / collective
+   hosts render nothing (no empty gap): they're linked from the venue row and
+   the countdown logos. */
+.fbx .ocard .ohostslot { margin: 12px 12px 0; width: calc(100% - 24px); }
+.fbx .ocard .oclaim { justify-content: space-between; }
+.fbx .ocard .oclaim span { color: var(--obtn-c); }
+.fbx .ocard .opromo {
+  display: flex; align-items: center; gap: 10px; min-height: 44px; box-sizing: border-box; padding: 4px 6px 4px 4px;
+  border-radius: 22px; color: var(--text-hi); text-decoration: none;
+  background: color-mix(in srgb, var(--z-black) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--a) 40%, transparent);
+}
+.fbx .ocard .ofaces { display: flex; flex: none; }
+.fbx .ocard .oface {
+  display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; overflow: hidden;
+  border: 2px solid var(--z-black); background: var(--z-oled); color: var(--text-hi);
+  font: 800 12px/1 var(--font-display); letter-spacing: .04em; box-shadow: 0 0 0 1px var(--a);
+}
+.fbx .ocard .oface + .oface { margin-left: -10px; }
+.fbx .ocard .oface img { width: 100%; height: 100%; object-fit: cover; }
+.fbx .ocard .opromo-t { display: grid; min-width: 0; flex: 1; }
+.fbx .ocard .opromo-k { font: 700 10px/1.2 var(--font-display); letter-spacing: .22em; color: var(--a); }
+.fbx .ocard .opromo-n { font: 700 15px/1.25 var(--font-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fbx .ocard .opromo-go { font-size: 20px; padding: 0 8px; color: var(--a); }
+
+/* Tile states (t314u): press dip + accent glow, activity dot, window badge. */
+.fbx .ocard .otile { position: relative; }
+.fbx .ocard .otile-face { position: relative; }
+.fbx .ocard .otile.is-pressed .otile-face {
+  transform: translateY(1px) scale(.94);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-hi) 28%, transparent), 0 0 0 1px var(--tile), 0 0 20px 2px color-mix(in srgb, var(--tile) 45%, transparent);
+}
+.fbx .ocard .otile-dot {
+  position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--tile); box-shadow: 0 0 0 2px var(--z-black); animation: oTileDot 1.8s ease-in-out infinite;
+}
+@keyframes oTileDot { 0%, 100% { opacity: 1; box-shadow: 0 0 0 2px var(--z-black), 0 0 0 0 color-mix(in srgb, var(--tile) 60%, transparent); } 50% { opacity: .75; box-shadow: 0 0 0 2px var(--z-black), 0 0 0 5px transparent; } }
+.fbx .ocard .otile-badge {
+  position: absolute; top: -6px; left: 50%; translate: -50% 0; padding: 2px 5px; border-radius: 6px; white-space: nowrap;
+  background: var(--z-black); border: 1px solid var(--tile); color: var(--tile); font: 800 8.5px/1 var(--font-display); letter-spacing: .08em;
+}
+@media (prefers-reduced-motion: reduce) { .fbx .ocard .otile-dot { animation: none; } .fbx .ocard .otile.is-pressed .otile-face { transform: none; } }
+html.calm-mode .fbx .ocard .otile-dot { animation: none; }
+html.calm-mode .fbx .ocard .otile.is-pressed .otile-face { transform: none; }
+.fbx .ocard .orail .ocardlet:has(.obtn) span { -webkit-line-clamp: 2; }
+
+/* The Carpool/Afterz tiles open the at-event dialog, so the plain launcher is redundant inside the card. */
+.fbx .ocard .at-event-launch { display: none; }
+/* The logos are links now, so each one takes an equal cell and the image fits inside it. */
+.fbx .ocard .ologos > * { flex: 1 1 0; min-width: 0; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+.fbx .ocard .ostarts.ologos-1 .ologos > * { flex: 0 0 auto; }
+.fbx .ocard .ostarts.ologos-2 .ologos img { max-width: 100%; }
+/* The 18+ chat gate inside the open card uses the card's pill buttons instead of the inbox's square ones. */
+.fbx .ocard .adult-gate { padding: 28px 18px; }
+.fbx .ocard .adult-gate__kicker { color: var(--a); }
+.fbx .ocard .adult-gate__actions { gap: 10px; flex-wrap: wrap; justify-content: center; }
+.fbx .ocard :is(.adult-gate__enter, .adult-gate__leave) {
+  min-height: 44px; padding: 0 20px; border-radius: 999px; font: 800 13px/1 var(--font-display); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-hi); background: var(--z-oled); border: 2px solid var(--a);
+  box-shadow: 0 0 14px -4px color-mix(in srgb, var(--a) 60%, transparent);
+}
+.fbx .ocard .adult-gate__leave { border-color: color-mix(in srgb, var(--text-hi) 30%, transparent); box-shadow: none; }
+
+/* Narrow phones (360px): keep the whole schedule label. The icon drops and the type tightens slightly. */
+@container (max-width: 372px) {
+  .fbx .ocard .ofoot { gap: 6px; }
+  .fbx .ocard .ofoot .osave { padding: 0 8px; font-size: 14px; letter-spacing: .02em; }
+  .fbx .ocard .ofoot .osave svg { display: none; }
+}
+/* Wide cards (tablet and desktop): the four tiles keep their phone rhythm instead of spreading edge to edge. */
+.fbx .ocard .otiles { max-width: 460px; margin-inline: auto; width: 100%; box-sizing: border-box; }
+
+/* Short landscape phones (844x390): the locked head would take the whole card. Below 480px of
+   height, head and page scroll together and the footer sticks to the bottom. */
+@media (max-height: 480px) {
+  .fbx .ocard { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+  .fbx .ocard .ohead { padding-top: 64px; }
+  .fbx .ocard .oscrollarea { flex: none; overflow: visible; min-height: auto; -webkit-mask-image: none; mask-image: none; }
+  .fbx .ocard .ofoot { position: sticky; bottom: 0; background: var(--z-black); }
+}
+/* Active chat: the oldest visible bubble fades out under the panel top instead of being cut off. */
+.fbx .ofeed-room .inbox-group-chat--card:not(.is-empty) .inbox-group-chat__messages {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, var(--z-oled) 44px);
+  mask-image: linear-gradient(to bottom, transparent 0, var(--z-oled) 44px);
+}
+
+/* ---- t327u / t329u ---------------------------------------------------- */
+/* (1) More air above the locked tile row. */
+.fbx .ocard .otiles { margin-top: 18px; }
+/* (5) Poster, per the yes Coach rules: natural size from the card top, behind everything. The
+   readability scrim fades out with the poster at the poster's own bottom edge, so no fixed line
+   (tabs, scrim end, accent bloom) ever reads as an edge. */
+.fbx .ocard > .ohero::after {
+  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 0, var(--z-oled) calc(100% - 180px), transparent 100%);
+  mask-image: linear-gradient(to bottom, var(--z-oled) 0, var(--z-oled) calc(100% - 180px), transparent 100%);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--z-black) 5%, transparent) 0, color-mix(in srgb, var(--z-black) 30%, transparent) 30%, color-mix(in srgb, var(--z-black) 55%, transparent) 60%, color-mix(in srgb, var(--z-black) 55%, transparent) 100%);
+}
+/* Tags sit on their own row under the venue (yes Coach, t269u). */
+.fbx .ocard .ometarow { flex-direction: column; align-items: flex-start; gap: 8px; }
+/* (4) Rails use the site's standard small card (136x170, CardAPI), the Boardz zine small card
+   with its existing torn rim. The "+" / locked slots and Nearby cards match that size. */
+.fbx .ocard .orail .orailcard, :is(.zas, .zxp) .zas-rail .orailcard { flex: 0 0 var(--card-small-width); height: var(--card-small-height); position: relative; }
+.fbx .ocard .orail .oslot, :is(.zas, .zxp) .zas-rail .oslot { flex: 0 0 var(--card-small-width); min-height: var(--card-small-height); }
+.fbx .ocard .orail .omini { flex: 0 0 var(--card-small-width); min-height: var(--card-small-height); }
+:is(.zas, .zxp) .zas-rail .oslot {
+  display: grid; place-items: center; border: 1.5px dashed var(--tile); border-radius: 9px; background: var(--z-black); color: var(--tile); cursor: pointer;
+}
+:is(.zas, .zxp) .zas-rail .oslot span { font: 300 44px/1 var(--font-display); }
+/* (6) FEED: the pregame CTA. Transparent, no scroll, no input; the newest bubbles that fit. */
+.fbx .ocard .ofeed--pregame .ofeed-peek {
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; width: 100%;
+  max-height: 150px; overflow: hidden; padding: 6px 0 0; margin: 0 0 2px; border: 0; background: transparent; cursor: pointer; text-align: left;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, var(--z-oled) 48px);
+  mask-image: linear-gradient(to bottom, transparent 0, var(--z-oled) 48px);
+}
+.fbx .ocard .ofeed-b { display: flex; align-items: flex-end; gap: 8px; max-width: 86%; flex: none; }
+.fbx .ocard .ofeed-b.is-mine { align-self: flex-end; flex-direction: row-reverse; }
+.fbx .ocard .ofeed-av {
+  flex: none; width: 28px; height: 28px; border-radius: 50%; overflow: hidden; display: grid; place-items: center;
+  background: var(--evz-line-2c2c35); color: var(--text-hi); font: 800 12px var(--font-display);
+}
+.fbx .ocard .ofeed-av img { width: 100%; height: 100%; object-fit: cover; }
+.fbx .ocard .ofeed-bubble {
+  display: block; padding: 8px 12px; border-radius: 16px; border-bottom-left-radius: 4px; font: 400 14px/1.35 var(--font-body, inherit);
+  background: color-mix(in srgb, var(--evz-line-2c2c35) 88%, transparent); color: var(--text-hi); text-shadow: none;
+}
+.fbx .ocard .ofeed-bubble small { display: block; color: var(--evz-gray-8a8a94); font-size: 11px; margin-bottom: 2px; }
+.fbx .ocard .ofeed-b.is-mine .ofeed-bubble { background: var(--a); color: var(--z-black); border-bottom-left-radius: 16px; border-bottom-right-radius: 4px; }
+.fbx .ocard .ofeed-cta { display: grid; justify-items: center; gap: 8px; text-align: center; padding: 18px 12px 8px; background: transparent; }
+.fbx .ocard .ofeed-cta-t { margin: 0; font: 800 22px/1 var(--font-display); text-transform: uppercase; letter-spacing: .02em; color: var(--text-hi); }
+.fbx .ocard .ofeed-cta-s { margin: 0; color: var(--evz-mist-cfd8de); font-size: 14px; max-width: 30ch; }
+.fbx .ocard .ofeed-cta .obtn { margin-top: 6px; }
+
+.fbx .ocard .ofeed--pregame .ofeed-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.fbx .ocard .ofeed--pregame .ofeed-cta { padding-top: 10px; }
+.fbx .ocard .ofeed--pregame .ofeed-cta { padding: 6px 12px 14px; }
+.fbx .ocard .ofeed--pregame .ofeed-cta .obtn { margin-top: 0; }
+
+/* ---- Lead review, yescoach-v8 ------------------------------------------ */
+/* (1) A darker scrim band behind the tile row and tabs, so poster type never collides with the
+   tab labels. It only darkens: the poster keeps running (and fading at its own foot) behind it,
+   never cut. The band fades in above the tiles, so it has no top edge. */
+.fbx .ocard .ohead > :is(.otiles, .otabs) { position: relative; z-index: 1; }
+.fbx .ocard .ohead::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; z-index: 0; pointer-events: none;
+  height: 168px;
+  background: linear-gradient(to bottom,
+    transparent 0,
+    color-mix(in srgb, var(--z-black) 62%, transparent) 44px,
+    color-mix(in srgb, var(--z-black) 80%, transparent) 100%);
+}
+/* (2) The three tiles share the full width in equal columns (no gap on the right). */
+.fbx .ocard .otiles { max-width: none; gap: 8px; padding-inline: 16px; }
+.fbx .ocard .otiles > .otile { flex: 1 1 0; min-width: 0; }
+/* (3) Public attendance sits once at the foot of Info. */
+.fbx .ocard .ogoing { margin-top: 18px; }
+/* (6) Pregame preview: every bubble shows whole (at most three, two lines each); no clip, no mask. */
+.fbx .ocard .ofeed--pregame .ofeed-peek { max-height: none; overflow: visible; -webkit-mask-image: none; mask-image: none; padding-bottom: 8px; }
+.fbx .ocard .ofeed-bubble { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+/* (4) Nearby restaurants: the standard Placez small card at the rail's small-card size. */
+.fbx .ocard .orail .orailcard--place { flex: 0 0 var(--card-small-width); height: var(--card-small-height); }
+.fbx .ocard .orail .orailcard--place > * { height: 100%; }
+
+/* ---- t345u (A) Countdown box ------------------------------------------- */
+/* The countdown never changes size and sits dead center (both axes). The venue mark sits directly
+   left and the collective/host mark directly right, each centered in its own equal side column on
+   the same center line, so the padding is even on both sides. With one mark (or none) the empty
+   column keeps the countdown centered. Never stacked. */
+.fbx .ocard .ostarts,
+.fbx .ocard .ostarts.ologos-1,
+.fbx .ocard .ostarts.ologos-2 {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-areas: "venue count host";
+  align-items: center; justify-items: center; column-gap: 12px; padding: 14px 16px; text-align: center;
+}
+.fbx .ocard .ostarts .ologo-slot--venue { grid-area: venue; }
+.fbx .ocard .ostarts .ologo-slot--host { grid-area: host; }
+.fbx .ocard .ostarts .ostarts-count { grid-area: count; justify-self: center; align-self: center; width: 132px; }
+.fbx .ocard .ostarts .ostarts-count b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fbx .ocard .ologo-slot { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 44px; }
+.fbx .ocard .ologo-slot a { display: flex; align-items: center; justify-content: center; max-width: 100%; }
+.fbx .ocard .ologo-slot img { display: block; height: 52px; width: auto; max-width: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--z-oled) 80%, transparent)); }
+
+/* ---- t345u (B) In-card tile panel -------------------------------------- */
+/* While a panel is open the locked head and the page scroll together (the panel has no inner
+   scroll), and the footer stays pinned, like the short-landscape layout. */
+.fbx .ocard.ocard--panel { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.fbx .ocard.ocard--panel::-webkit-scrollbar { display: none; }
+.fbx .ocard.ocard--panel .oscrollarea { flex: none; overflow: visible; min-height: auto; -webkit-mask-image: none; mask-image: none; }
+.fbx .ocard.ocard--panel .ofoot { position: sticky; bottom: 0; }
+.fbx .ocard #ocard-tile-panel { position: relative; z-index: 1; }
+/* 1) The pressed tile stays lit; the others dim slightly. */
+.fbx .ocard .otiles > .otile { transition: opacity .2s; }
+.fbx .ocard .otiles[data-panel] > .otile:not(.is-active) { opacity: .62; }
+.fbx .ocard .otile.is-active .otile-face {
+  background: radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--tile) 42%, transparent), transparent 70%), var(--z-black);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-hi) 28%, transparent), 0 0 22px -2px color-mix(in srgb, var(--tile) 60%, transparent);
+}
+/* 6) Last opened tile: a small accent dot under the label. */
+.fbx .ocard .otile-last { position: absolute; top: 100%; left: 50%; translate: -50% 0; display: block; width: 5px; height: 5px; border-radius: 50%; background: var(--tile); box-shadow: 0 0 6px var(--tile); margin-top: 2px; }
+.fbx .ocard .otile.is-active .otile-last { visibility: hidden; }
+.fbx .ocard .zxp { margin-top: 14px; }
+
+/* ---- Ridez carpool rail: moved to components/ridez/ridez.css (shared with the #117 drawer). */
+
+/* ---- Directions panel (owner, Nov 20) ---------------------------------- */
+.zxp .zdir-where { display: flex; align-items: center; gap: 12px; padding-right: 36px; margin-bottom: 10px; }
+.zxp .zdir-where-t { display: grid; gap: 3px; min-width: 0; flex: 1; }
+.zxp .zdir-where-t b { font: 800 18px/1.1 var(--font-display); text-transform: uppercase; letter-spacing: .02em; }
+.zxp .zdir-where-t span { font: 500 13px/1.35 var(--font-body); color: var(--evz-mist-cfd8de, var(--text-hi)); }
+.zxp .zdir-copy { flex: none; min-height: 36px; padding: 0 12px; font-size: 12px; }
+.zxp .zdir-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.zxp .zdir-chip {
+  padding: 5px 10px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--tile) 60%, transparent);
+  background: color-mix(in srgb, var(--tile) 12%, var(--z-black)); font: 700 11px/1 var(--font-display); letter-spacing: .12em;
+}
+.zxp .zdir-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 8px; padding: 4px 0 2px; }
+.zxp .zdir-tile { display: grid; justify-items: center; gap: 8px; color: var(--text-hi); text-decoration: none; -webkit-tap-highlight-color: transparent; }
+.zxp .zdir-tile:active .zride-tile-icon { transform: scale(.94); }
+.zxp .zdir-tile:focus-visible { outline: 2px solid var(--obtn-c); outline-offset: 2px; border-radius: 12px; }
+.zxp .zdir-tile--primary .zride-tile-icon { box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-hi) 28%, transparent), 0 0 24px -2px color-mix(in srgb, var(--obtn-c) 65%, transparent); }
+.zxp .zdir-tile .zride-tile-label { text-align: center; font-size: 10px; }
+/* (1, revised for the tile panel) The scrim band travels with the tiles and the tabs separately,
+   so it stays behind both whether a panel is open between them or not. */
+.fbx .ocard .ohead::before { content: none; }
+.fbx .ocard .ohead > .otiles::before {
+  content: ""; position: absolute; z-index: -1; pointer-events: none; left: -16px; right: -16px; top: -44px; bottom: -6px;
+  background: linear-gradient(to bottom, transparent 0, color-mix(in srgb, var(--z-black) 62%, transparent) 44px, color-mix(in srgb, var(--z-black) 78%, transparent) 100%);
+}
+.fbx .ocard .ohead > .otabs { background: color-mix(in srgb, var(--z-black) 80%, transparent); }
+.fbx .ocard .ohead > .otiles { isolation: isolate; }
+/* While the card scrolls as one (tile panel open), dialogs opened from it pin to the visible card
+   area (the stage is their containing block), not to the card's scroll origin. */
+.fbx .ocard.ocard--panel :is(.zas-scrim, .zform) { position: fixed; }
+.fbx .ocard .ogoing > * { margin-inline: 0; width: 100%; box-sizing: border-box; }
+
+/* ---- Tile row (owner, Nov 20): TICKETS · RIDEZ · AFTERZ · DIRECTIONS · WEBSITE ---------- */
+/* Equal grid columns centered on the card; labels offset their trailing letter-spacing so the
+   visible text (not the box) sits on each column's center. Five fit 390px. */
+.fbx .ocard .ohead > .otiles {
+  display: grid; grid-template-columns: repeat(var(--tiles, 3), minmax(0, 1fr)); justify-items: center;
+  gap: 4px; padding-inline: 10px; max-width: 520px; margin-inline: auto;
+}
+.fbx .ocard .ohead > .otiles > .otile { flex: none; width: 100%; min-width: 0; }
+.fbx .ocard .otile-l { padding-left: .12em; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.fbx .ocard .ohead > .otiles[data-tiles="5"] .otile-l { font-size: 9.5px; letter-spacing: .08em; padding-left: .08em; }

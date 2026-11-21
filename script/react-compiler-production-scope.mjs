@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import {assertCompiledFunction} from './react-compiler-function-proof.mjs';
 import path from 'node:path';
 import {createServer} from 'vite';
-import {cardCompilerFunction,cardFaceModules,cardSourcePatterns,placezCompilerModules} from './react-compiler-card-scope.mjs';
+import {cardCompilerFunction,cardFaceModules,cardSourcePatterns,openCardModules,placezCompilerModules} from './react-compiler-card-scope.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
 const compilerMarker=/react(?:\/|_)compiler-runtime|useMemoCache|memo_cache_sentinel/;
@@ -17,6 +17,7 @@ const inScope=[
  'components/cards/BoardCard.tsx',
  ...placezCompilerModules.map(module=>'components/'+module+'.tsx'),
  ...cardFaceModules.map(face=>'components/'+face+(face.startsWith('board/punk/')?'.jsx':'.tsx')),
+ ...openCardModules.map(([module])=>'components/'+module+'.tsx'),
 ];
 const pageFunctions=['Events','PlacezBrowse','Scenez','OutzidePlacesPage','HostHub'];
 const outOfScope=[
@@ -74,7 +75,10 @@ try{
    assert.equal(compiled,expected,`Incorrect real-app React Compiler scope: ${url}`);
    const target=placezCompilerModules.find(module=>file===`components/${module}.tsx`);
    const functionProof=target?assertCompiledFunction(transformed.code,cardCompilerFunction(target),expected):null;
-   if(file==='components/events/FlyerBoard.tsx'||file==='components/events/EventFlyerFront.tsx'){
+   const open=openCardModules.find(([module])=>file===`components/${module}.tsx`);
+   if(open){
+    for(const name of open[1])inspected.push({url,compiled,functionProof:assertCompiledFunction(transformed.code,name,true)});
+   }else if(file==='components/events/FlyerBoard.tsx'||file==='components/events/EventFlyerFront.tsx'){
     for(const name of (file.endsWith('/FlyerBoard.tsx')?['FlyerBoard','PastCell']:['PosterCell'])){
      inspected.push({url,compiled,functionProof:assertCompiledFunction(transformed.code,name,true)});
     }

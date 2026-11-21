@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 import assert from 'node:assert/strict';import test from 'node:test';import path from 'node:path';import {mkdtemp,rm,readFile,mkdir,writeFile} from 'node:fs/promises';import {tmpdir} from 'node:os';import {createServer} from 'vite';import react from '@vitejs/plugin-react';import {chromium} from 'playwright';
 const root=process.cwd();
-test('real Home cards and EventModal retain geometry/DPR delivery; failed variants retry original before caller fallback',{timeout:240000},async()=>{
+test('real Home cards and the open event card (EventModal) retain geometry/DPR delivery; failed variants retry original before caller fallback',{timeout:240000},async()=>{
  const cacheDir=await mkdtemp(path.join(tmpdir(),'poster-vite-')),fixture='script/fixtures/responsive-poster-browser.tsx';
  const server=await createServer({configFile:false,root,cacheDir,optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime']},publicDir:path.join(root,'client/public'),plugins:[react(),{name:'poster-fixture',configureServer(s){s.middlewares.use(async(req,res,next)=>{if(!req.url?.startsWith('/__poster-qa'))return next();res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml(req.url,`<!doctype html><html data-zaylist-cards="true"><head><style>body{margin:12px!important}#qa-card,#qa-row{margin-bottom:20px}#qa-open{display:block;color:white}</style></head><body><div id="root"></div><script type="module" src="/${fixture}"></script></body></html>`));});}}],resolve:{alias:{'@':path.join(root,'client/src'),'@shared':path.join(root,'shared'),'@assets':path.join(root,'attached_assets')}},server:{host:'127.0.0.1',port:0,hmr:false,watch:null},define:{__OUTZIDE_ASSETS__:'{}',__MAPZ_ASSETS__:'{}',__HOME_FLIGHT_BASE__:JSON.stringify('/home-flight')}});
  let browser;const results=[],evidence=process.env.POSTER_QA_OUTPUT||'/tmp/zaylist-poster-qa';await mkdir(evidence,{recursive:true});
@@ -17,7 +17,7 @@ test('real Home cards and EventModal retain geometry/DPR delivery; failed varian
   for(const dpr of [1,2,3]){let baseline;for(const original of [true,false]){
    const context=await makeContext(dpr),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await context.route(u=>u.pathname===source,route=>route.fulfill({contentType,body:originalBytes}));
    await page.goto(base+'__poster-qa?source='+encodeURIComponent(source)+(original?'&original=1':''),{waitUntil:'networkidle'});
-   const tall=await measure(page,'#qa-card .tonight-card__art img'),wide=await measure(page,'#qa-row .tonight-card__art img');await page.locator('#qa-open').click();const detail=await measure(page,'.event-modal__poster-img');
+   const tall=await measure(page,'#qa-card .tonight-card__art img'),wide=await measure(page,'#qa-row .tonight-card__art img');await page.locator('#qa-open').click();const detail=await measure(page,'.ocard .ohero-img');
    await page.waitForLoadState('networkidle');
    // Keep real DPR for delivery/layout checks, but do not rasterize 9x evidence pixels
    // on the software compositor at DPR3. Two-CPU CI otherwise stalls capture >30s.

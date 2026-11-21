@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CardHeartButton } from "./CardHeartButton";
 import AuthModal from "@/components/AuthModal";
-import { useHeart, type HeartKind, type HeartSnapshot } from "@/hooks/useHearts";
+import { heartLabel, useHeart, type HeartKind, type HeartSnapshot } from "@/hooks/useHearts";
 import "./HeartButton.css";
 
 /**
@@ -18,8 +18,9 @@ export default function HeartButton({ kind, refId, snapshot, onRequireAuth, clas
     <>
     <CardHeartButton active={hearted}
       className={className}
-      aria-label={hearted ? `Remove heart from ${name}` : `Heart ${name}: follow it and pin it to your Stacks`}
-      title={hearted ? "Hearted: following and pinned to your Stacks" : "Heart: follow and pin to your Stacks"}
+      aria-label={heartLabel(name, hearted).label}
+      title={heartLabel(name, hearted).title}
+      data-action="heart"
       disabled={pending}
       onClick={event => { event.stopPropagation(); event.preventDefault(); signedIn ? toggle() : onRequireAuth ? onRequireAuth() : setAuth(true); }}
     />

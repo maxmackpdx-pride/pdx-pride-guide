@@ -32,17 +32,16 @@ async function geometryReady(page){
 }
 async function snapshot(page){await geometryReady(page);return page.locator('#qa-grid').evaluate(grid=>[...grid.children].filter(el=>el.getBoundingClientRect().width>0).map(el=>{const face=el.matches("[data-card-expanded=true],[data-card-size]")?el:el.querySelector("[data-card-size]")||el;const r=face.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};}));}
 async function documentBox(locator){return locator.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height};});}
+// One open event card everywhere (Tucker, t276u): an event opener goes straight to the
+// shared OpenEventCard (no front preview step), centered in the card stage on INFO.
 async function openEventDetails(page, trigger) {
  await trigger.click();
- const front=page.locator('.event-front-dialog');
- await front.waitFor();
- const stage=page.locator('.zay-card-stage--front');
- const frontBox=await front.boundingBox(), stageBox=await stage.boundingBox();
- near(frontBox.x+frontBox.width/2,stageBox.x+stageBox.width/2,'event front centered horizontally');
- near(frontBox.y+frontBox.height/2,stageBox.y+stageBox.height/2,'event front centered vertically');
- await front.getByRole('button',{name:/View details/}).click();
- const details=page.locator('.zay-card-stage--expanded .evz-x[role=dialog]');
- await details.waitFor();await details.locator('[aria-label=Info][aria-hidden=false]').waitFor();
+ const details=page.locator('.zay-card-stage--expanded .ocard[role=dialog]');
+ await details.waitFor();
+ const stage=page.locator('.zay-card-stage--expanded');
+ const cardBox=await details.boundingBox(), stageBox=await stage.boundingBox();
+ near(cardBox.x+cardBox.width/2,stageBox.x+stageBox.width/2,'open event card centered horizontally');
+ await details.locator('.otabs [role=tab][aria-selected=true]',{hasText:'INFO'}).waitFor();
  return details;
 }
 async function settled(page){await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.waitForTimeout(450);}
@@ -63,7 +62,7 @@ test('production cards preserve source geometry across viewport and in-flow pres
   browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||undefined,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
   const context=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'reduce'});
   await context.route('**/api/**',route=>{const p=new URL(route.request().url()).pathname;if(route.request().method()!=='GET')return route.abort('blockedbyclient');if(p==='/api/auth/session')return route.fulfill({contentType:'application/json',body:'null'});
-    if(p.endsWith('/planning'))return route.fulfill({json:{checked:false,onSiteWindow:false,poster:null,venue:'QA venue',title:'QA Event',open:true,canPostGig:false,gigs:[],rides:null}});
+    if(p.endsWith('/planning'))return route.fulfill({json:{checked:false,onSiteWindow:false,poster:null,venue:'QA venue',title:'QA Event',open:true,canPostGig:false,gigs:[],rides:[{id:7,area:'North Portland',driver:'qa_driver',driverPhotoUrl:null,remaining:2,mine:false,myRequest:null,requests:[],circle:'everybody',plan:{kind:'carpool',meeting:'NE 15th & Alberta',leaveBy:null,oneWay:true,departed:false},faces:[]}],needs:[{id:1,user:'qa_needs',photoUrl:null,area:'Pearl',direction:'departing',mine:false,sameEvent:true,sameAfterz:false,circle:'everybody',distanceMi:null},{id:2,user:'qa_afterz',photoUrl:null,area:'Alberta',direction:'now',mine:false,sameEvent:false,sameAfterz:true,circle:'friend',distanceMi:0.1},{id:3,user:'qa_me',photoUrl:null,area:'Kenton',direction:'departing',mine:true,sameEvent:true,sameAfterz:false,circle:'you',distanceMi:null}]}});
     return route.fulfill({json:[]});});
   await context.route('**/outzide-map/index.html?*',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body><h2>Destination detail fixture</h2><p>Map internals intentionally isolated from host geometry tests.</p></body></html>'}));
   const page=await context.newPage();page.setDefaultTimeout(15000);const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error('BROWSER ERROR',e.message);});
@@ -94,7 +93,7 @@ test('production cards preserve source geometry across viewport and in-flow pres
     const original=await snapshot(page);const originalScroll=await page.evaluate(()=>({x:scrollX,y:scrollY}));const open=page.locator('#qa-grid button[aria-label^="Open "],#qa-grid button[aria-label^="View details for "]').nth(index);
     if(family==='event'){
      const details=await openEventDetails(page,open);
-     await details.getByRole('button',{name:/^Close QA Event/}).click();
+     await details.getByRole('button',{name:'Close event',exact:true}).click();
      await details.waitFor({state:'hidden'});await settled(page);
      const restored=await snapshot(page);
      restored.forEach((r,i)=>{for(const axis of ['x','y','width','height'])near(r[axis],original[i][axis],`event/${size}: restored source ${i} ${axis}`);});
@@ -136,9 +135,102 @@ test('production cards preserve source geometry across viewport and in-flow pres
    if(family==='event'){
     const details=await openEventDetails(page,first);
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'mobile event has no horizontal overflow');
-    await details.getByRole('button',{name:'Next page',exact:true}).click();
-    const launch=details.getByRole('button',{name:'At the event',exact:true});
-    await launch.click();
+    // RIDEZ tile -> in-card Ridez panel (t345u). The leading rail area opens the expanded carpool
+    // card stub (design pending); a carpool card opens the existing at-event carpool flow.
+    // Tile row (owner, Nov 20): TICKETS first, VENUE WEBSITE last, both new-tab links; the row is centered.
+    {
+     const row=details.locator('nav.otiles');
+     const keys=await row.locator(':scope > .otile').evaluateAll(els=>els.map(e=>e.dataset.action));
+     assert.equal(keys[0],'tickets','TICKETS is the first tile');
+     assert.equal(keys[keys.length-1],'venue-website','VENUE WEBSITE is the last tile');
+     for(const k of ['tickets','venue-website']){
+      const a=row.locator(`a[data-action=${k}]`);
+      assert.equal(await a.getAttribute('target'),'_blank',`${k} opens in a new tab`);
+      assert.ok((await a.getAttribute('rel')).includes('noopener'),`${k} is rel=noopener`);
+     }
+     assert.equal(await row.locator('a[data-action=tickets]').getAttribute('href'),'https://tickets.example.test/qa-event');
+     const geo=await row.evaluate(nav=>{const card=nav.closest('.ocard').getBoundingClientRect();const faces=[...nav.querySelectorAll('.otile-face')].map(f=>f.getBoundingClientRect());return {cardMid:(card.left+card.right)/2,first:faces[0].left-card.left,last:card.right-faces[faces.length-1].right,gaps:faces.slice(1).map((f,i)=>Math.round(f.left-faces[i].right))};});
+     assert.ok(Math.abs(geo.first-geo.last)<=1,'tile row is centered '+JSON.stringify(geo));
+     assert.ok(Math.max(...geo.gaps)-Math.min(...geo.gaps)<=1,'tiles are evenly spaced '+JSON.stringify(geo));
+    }
+    const ridezTile=details.locator('[data-action=rides]');
+    const openRidez=async()=>{if(await ridezTile.getAttribute('aria-expanded')!=='true')await ridezTile.click();const ridez=details.locator('.zxp[aria-label=Ridez].is-open');await ridez.waitFor();return ridez;};
+    {
+     const ridez=await openRidez();
+     assert.equal(await ridezTile.getAttribute('aria-expanded'),'true','Ridez tile reports its open panel');
+     assert.equal(await page.locator('.zas-scrim').count(),0,'tile panels open in the card, not as a sheet');
+     // Ride websites (Lyft, Uber, TriMet) render only for events with a place; every one opens in a
+     // new tab (hrefs are covered by client/src/lib/travelLinks.test.ts).
+     const links=ridez.locator('a.zride-tile');
+     for(let i=0;i<await links.count();i++){
+      const a=links.nth(i);
+      assert.equal(await a.getAttribute('target'),'_blank','ride websites open in a new tab');
+      const rel=(await a.getAttribute('rel')||'').split(/\s+/);
+      assert.ok(rel.includes('noopener')&&rel.includes('noreferrer'),'ride links are rel=noopener noreferrer');
+      assert.match(await a.getAttribute('href'),/^https:\/\/(ride\.lyft\.com|m\.uber\.com\/go\/|trimet\.org\/home\/planner)/,'ride links are websites, not app hand-offs');
+     }
+     const lead=ridez.locator('button[data-action=open-carpool]');
+     assert.match(await lead.getAttribute('aria-label'),/expanded carpool card/i,'leading carpool area is a labelled button');
+     assert.equal(await ridez.locator('[data-action=post-carpool]').count(),0,'no dashed plus slot');
+     // OFFER A RIDE / I NEED A RIDE (owner, Nov 20): expanded-card buttons in Ridez orange that open
+     // the shared RidezFormCard with the event preselected (signed out: the sign-in gate).
+     for(const [action,kicker] of [['ridez-offer','OFFER A RIDE'],['ridez-need','I NEED A RIDE']]){
+      const btn=ridez.locator(`button[data-action=${action}]`);
+      assert.equal((await btn.textContent()).trim(),kicker);
+      assert.ok((await btn.getAttribute('class')).split(/\s+/).includes('obtn'),'Ridez buttons use the expanded card action style');
+      await btn.click();
+      const form=page.locator(`.zform[role=dialog][aria-label^="${kicker}: "]`);await form.waitFor();
+      assert.match(await form.getAttribute('aria-label'),/QA EVENT/,'the event is preselected (no event picker)');
+      assert.equal(await form.locator('select[name=event],[data-field=event]').count(),0,'no event picker step');
+      await page.keyboard.press('Escape');await form.waitFor({state:'detached'});
+     }
+     // Circle toggle (owner, Nov 20): top-right radiogroup, default Everybody, persisted, filters the rail.
+     const circle=ridez.getByRole('radiogroup',{name:'Show carpools from'});
+     const radios=circle.getByRole('radio');
+     assert.equal(await radios.count(),3);
+     assert.equal(await circle.getByRole('radio',{name:'Everybody'}).getAttribute('aria-checked'),'true','default Everybody');
+     const offers=ridez.locator('[data-card-category=carpool] button.ocarpool'),needCards=ridez.locator('[data-card-category=carpool-need]');
+     assert.equal(await offers.count(),1,'Everybody shows every carpool');
+     assert.equal(await needCards.count(),3,'NEEDS A RIDE cards share the rail');
+     for(let i=0;i<3;i++)assert.equal(await needCards.nth(i).locator('.ocarpool-av').count(),1,'every NEEDS A RIDE card has an avatar');
+     assert.equal(await ridez.locator('[data-action=ridez-coming]').count(),0,"signed out: no I'M COMING");
+     {
+      // Who's coming (rider side of my own need) opens over the card, not clipped by the panel.
+      await ridez.locator('[data-action=ridez-whos-coming]').click();
+      const who=page.locator('.zas[aria-label="Who\'s coming"]');await who.waitFor();
+      assert.ok(await who.locator('.zwho').isVisible(),"who's coming renders");
+      await page.keyboard.press('Escape');await who.waitFor({state:'detached'});
+     }
+     // Divider between the buttons + toggle and the list; NEEDS A RIDE label; blooms (afterz yellow first).
+     assert.equal(await ridez.locator('.zridez > hr.zridez-div').count(),1,'divider above the card list');
+     assert.equal(await needCards.first().locator('.orailcard-tag').textContent(),'NEEDS A RIDE');
+     assert.equal(await needCards.first().getAttribute('data-bloom'),'afterz','same Afterz blooms first (yellow)');
+     assert.equal(await needCards.nth(1).getAttribute('data-bloom'),'event','same event blooms orange');
+     const bloom=await needCards.first().evaluate(el=>{const b=getComputedStyle(el,'::before');return {content:b.content,anim:b.animationName,reduced:matchMedia('(prefers-reduced-motion: reduce)').matches};});
+     assert.notEqual(bloom.content,'none','bloom layer renders');
+     assert.equal(bloom.anim==='none',bloom.reduced,'bloom pulses, static under reduced motion');
+     await circle.getByRole('radio',{name:'Friends',exact:true}).click();
+     assert.equal(await offers.count(),0,'Friends hides a ride outside your circle');
+     assert.equal(await needCards.count(),2,'Friends keeps only needs from friends (and you)');
+     assert.equal(await page.evaluate(()=>localStorage.getItem('zaylist:ridez-circle')),'friends','choice persists');
+     await page.keyboard.press('ArrowRight');
+     assert.equal(await circle.getByRole('radio',{name:'Friends of friends'}).getAttribute('aria-checked'),'true','arrow keys move the choice');
+     assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('aria-label')),'Friends of friends','focus follows the choice');
+     await circle.getByRole('radio',{name:'Everybody'}).click();
+     assert.equal(await offers.count(),1);
+     await ridezTile.click();await details.locator('.zxp').waitFor({state:'detached'});
+     assert.equal(await ridezTile.getAttribute('aria-expanded'),'false','tapping the same tile closes the panel');
+    }
+    {
+     // The leading rail area opens the marked expanded-carpool stub (no posting from it any more).
+     const ridez=await openRidez();await ridez.locator('[data-action=open-carpool]').click();
+     const stub=page.locator('.zas[aria-label^="Expanded carpool card"]');await stub.waitFor();await stub.locator('[data-stub=expanded-carpool]').waitFor();
+     assert.equal(await stub.locator('[data-action^=post-]').count(),0,'posting moved to OFFER A RIDE / I NEED A RIDE');
+     await page.keyboard.press('Escape');await stub.waitFor({state:'detached'});
+    }
+    // A carpool card opens the existing at-event ride flow.
+    const launch=async()=>{const ridez=await openRidez();await ridez.locator('[data-card-category=carpool] button.ocarpool').first().click();};
+    await launch();
     const atEvent=page.locator('dialog.at-event-dialog[open]');
     await atEvent.getByRole('button',{name:'Carpools & rides home'}).click();
     await atEvent.getByRole('button',{name:'Sign in to coordinate a ride'}).click();
@@ -149,11 +241,11 @@ test('production cards preserve source geometry across viewport and in-flow pres
     assert.ok(await atEvent.isVisible(),'Closing sign-in returns to the at-event screen');
     await page.keyboard.press('Escape');
     await atEvent.waitFor({state:'hidden'});
-    await launch.click();
+    await launch();
     await atEvent.getByRole('button',{name:'Sign in to coordinate a ride'}).waitFor();
     await atEvent.getByRole('button',{name:'Back to event'}).click();
     assert.ok(await details.isVisible(),'Closing at-event preserves the event and its selected tab');
-    await details.getByRole('button',{name:/^Close QA Event/}).press('Escape');await details.waitFor({state:'hidden'});
+    await details.getByRole('button',{name:'Close event',exact:true}).press('Escape');await details.waitFor({state:'hidden'});
     assert.equal(await first.evaluate(el=>document.activeElement===el),true,'Escape restores event opener focus');
     await page.setViewportSize({width:1280,height:1000});continue;
    }
@@ -175,9 +267,9 @@ test('production cards preserve source geometry across viewport and in-flow pres
    if(family==='event'){
     for(let i=0;i<2;i++){
      const details=await openEventDetails(page,openers.nth(i));
-     assert.equal(await details.getAttribute('aria-label'),`QA Event ${i+1} details`);
-     assert.equal(await page.locator('.zay-card-stage--expanded .evz-x:visible').count(),1,'only selected event remains open');
-     await details.getByRole('button',{name:/^Close QA Event/}).click();await details.waitFor({state:'hidden'});await settled(page);
+     assert.equal(await details.getAttribute('aria-label'),`QA Event ${i+1}`);
+     assert.equal(await page.locator('.zay-card-stage--expanded .ocard:visible').count(),1,'only selected event remains open');
+     await details.getByRole('button',{name:'Close event',exact:true}).click();await details.waitFor({state:'hidden'});await settled(page);
     }
     continue;
    }

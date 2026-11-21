@@ -1,4 +1,6 @@
 import { EventHostNotice } from "./events/EventHostNotice";
+import OpenEventCard from "@/components/events/OpenEventCard";
+import type { EventListing } from "@shared/multiDayEvents";
 import {pacificCalendarDate} from '@shared/missedConnections';
 import { useResponsivePoster } from "@/lib/useResponsivePoster";
 import { restoreOriginalPoster, POSTER_DETAIL_SIZES } from "@/lib/responsivePoster";
@@ -37,7 +39,7 @@ import { formatPacificDateTime } from "@/lib/countdown";
 import { eventPath } from "@shared/eventSlug";
 import { shareEventLink, shareToastTitle } from "@/lib/shareEvent";
 import { timeAgo } from "@/lib/timeAgo";
-import { Bookmark, MessageCircle, CalendarDays, CalendarPlus, ChevronRight, Ellipsis, FileText, Lock, MapPin, Pencil, Share2 } from "lucide-react";
+import { Bookmark, MessageCircle, CalendarDays, CalendarPlus, ChevronRight, Ellipsis, FileText, Lock, MapPin, Pencil } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DashboardEventEditForm } from "@/components/dashboard/DashboardEventEditor";
 import {
@@ -193,7 +195,23 @@ function isIngestSource(source?: string | null): boolean {
   );
 }
 
-export default function EventModal({
+/** The one open-event card for every EventModal caller (Tucker, t276u).
+ *  Attendance-first opens land on the same card: no attendee lists. */
+export default function EventModal({ event, onClose, originRect = null }: {
+  event: Event;
+  onClose: () => void;
+  onEventUpdated?: (event: Event) => void;
+  originRect?: EventModalOriginRect | null;
+  initialSection?: "details" | "attendance";
+  documentMeta?: boolean;
+}) {
+  if (!event || typeof event.id !== "number") return null;
+  return <OpenEventCard key={event.id + "/" + event.dateStart} listing={event as unknown as EventListing} onClose={onClose} originRect={originRect} />;
+}
+
+/** Legacy manage view (owners, hosts, admins): editing, moderation, chat.
+ *  Reached only from EventzExpanded's manage mode (?manage=1 / ?chat=1). */
+export function EventManageModal({
   event,
   onClose,
   onEventUpdated,

@@ -180,6 +180,7 @@ Type: Barlow Condensed (`--font-display`) for titles and labels, Barlow (`--font
 - Prefer existing tokens + `pgDirCardIn` entrances.
 - Calm / `prefers-reduced-motion` kill ambient pulses and seam animation (bar may stay static).
 - See archive `GROK_ANIMATION_MIGRATION.md` only for inventory - do not re-migrate.
+- Open cards: full cards (event card, Gigz, Mizzed) flip-and-grow from the tapped card and flip back on dismiss. Tile-opened sheets grow from the tile with the icon morphing into the header (no flip). Reduced motion / Calm: fade. See `docs/design/ACTION_SHEET_CARD.md`.
 
 ## Site navigation
 
@@ -258,6 +259,7 @@ Before changing a global rule, read its relevant accepted Library chapter, inspe
 | `docs/LIVE_DESIGN_STANDARD.md` | **This file** - production trap list / implementation notes |
 | `docs/DESIGN_SYSTEM_INTEGRATION.md` | How product maps to the guide |
 | `docs/BOARD_CARD_STANDARD.md` | Board triad / rainbow seam / feed structure |
+| `docs/design/ACTION_SHEET_CARD.md` | ActionSheetCard: sheets and popups opened from a card (API, motion, buttons) |
 | `docs/handoffs/deep-glass-2026-07-16/` | **Historical** migration package - not active work orders |
 | `AGENTS.md` | Ship rules + points at the design guide |
 

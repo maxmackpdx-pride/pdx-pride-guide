@@ -380,3 +380,16 @@ html.calm-mode .featured-event-ad::before {
   }
 }
 
+
+/* Shared expanded-card backdrop (Tucker, t332u). Every expanded card (open event
+   card, Gigz/Mizzed/carpool cards, action sheets, forms, share popups) blurs what
+   is behind it with these, and stops above the bottom dock so the dock stays sharp
+   and usable (CardStage insets by the measured dock height, --z-dock-h). */
+:root {
+  --z-backdrop-blur: 12px;
+  --z-backdrop-tint: color-mix(in srgb, var(--z-oled) 55%, transparent);
+  --z-backdrop-filter: blur(var(--z-backdrop-blur));
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root { --z-backdrop-filter: none; --z-backdrop-tint: color-mix(in srgb, var(--z-oled) 94%, transparent); }
+}

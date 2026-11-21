@@ -4,7 +4,7 @@ import { listingKey, type EventListing } from '@shared/multiDayEvents';
 import { parsePacificDateTime, pacificCalendarDate, pacificTodayDate } from '@shared/missedConnections';
 import { eventPath } from '@shared/eventSlug';
 import { resolveDirectoryLogo } from '@shared/directoryLogos';
-import { useHeart } from '@/hooks/useHearts';
+import { heartLabel, useHeart } from '@/hooks/useHearts';
 import { useModalA11y } from '@/hooks/useModalA11y';
 import { toast } from '@/hooks/use-toast';
 import { eventDateLabel, eventTimeLabel } from '@/lib/eventDisplay';
@@ -158,17 +158,9 @@ function useDemoTilt(ref: React.RefObject<HTMLElement | null>, enabled: boolean)
   }, [ref, enabled]);
 }
 
-export function ShareIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-      <circle cx="18" cy="5" r="3" />
-      <circle cx="6" cy="12" r="3" />
-      <circle cx="18" cy="19" r="3" />
-      <path d="m8.59 13.51 6.83 3.98" />
-      <path d="m15.41 6.51-6.82 3.98" />
-    </svg>
-  );
-}
+/** Universal share glyph; re-exported so FlyerBoard keeps its import. */
+import { ShareIcon } from "@/components/icons/ShareIcon";
+export { ShareIcon };
 
 function HeartIcon() {
   return (
@@ -330,11 +322,6 @@ export function PosterCell({
    * gradient. (Tucker's ruling, Nov 18, 2026.) */
   const wideChunk = !!poster && aspect >= 1.15;
 
-  const share = async (ev: React.MouseEvent) => {
-    ev.stopPropagation();
-    await shareEventListing(listing);
-  };
-
   return (
     <div
       ref={cellRef}
@@ -396,9 +383,7 @@ export function PosterCell({
             logoUrl={isFetLife ? null : resolveDirectoryLogo(listing.venueName, listing.fallbackPlaceImage)}
             wordmark={isFetLife ? "FetLife" : null}
           /> : null}
-          <button type="button" className="pshare" aria-label={`Share ${listing.title}`} onClick={share}>
-            <ShareIcon />
-          </button>
+          {/* No share on front cards (Tucker): sharing lives on the open card. */}
           {!priceUnconfirmed && <span className={`pprice${priceCls}`}>{price}</span>}
           <div className="pcdtop">
             <span className="ps-lab">{countdownLabel}</span>
@@ -424,8 +409,8 @@ export function PosterCell({
                   <button
                     type="button"
                     className={`pheart${heart.hearted ? " saved" : ""}`}
-                    aria-label={heart.hearted ? `Remove interest in ${listing.title}` : `Mark interest in ${listing.title}`}
-                    title={heart.hearted ? "Interested" : "Mark interest"}
+                    aria-label={heartLabel(listing.title, heart.hearted).label}
+                    title={heartLabel(listing.title, heart.hearted).title}
                     disabled={heart.pending} aria-pressed={heart.hearted}
                     onClick={ev => {
                       ev.stopPropagation();
@@ -452,8 +437,8 @@ export function PosterCell({
               <button
                 type="button"
                 className={`pheart${heart.hearted ? " saved" : ""}`}
-                aria-label={heart.hearted ? `Remove interest in ${listing.title}` : `Mark interest in ${listing.title}`}
-                title={heart.hearted ? "Interested" : "Mark interest"}
+                aria-label={heartLabel(listing.title, heart.hearted).label}
+                title={heartLabel(listing.title, heart.hearted).title}
                 disabled={heart.pending} aria-pressed={heart.hearted}
                 onClick={ev => {
                   ev.stopPropagation();
