@@ -4,12 +4,18 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 const root=new URL('../',import.meta.url);
 const read=p=>readFileSync(new URL(p,root),'utf8');
-const source=read('client/src/pages/OutzidePlacesPage.tsx');
+import {destinationIdentity} from '../client/src/lib/outzDestinationBrowse.ts';
 test('converted destinations retain approved names, descriptors, waypoint glyphs and secondary colors',()=>{
- assert.ok(source.includes("name:silver?'Silver Falls State Park':rooster?'Rooster Rock State Park':place.name"));
- assert.ok(source.includes("kind:silver?'Camping · Hiking':rooster?'Beach · Day use':place.kind.replaceAll('-',' ')"));
- assert.ok(source.includes("categoryAccent:silver?COLORS.camp:rooster?'#FF1FA0':COLORS[kind]"));
- assert.ok(source.includes("waypointKind:silver?'camp':rooster?'beach':kind"));
+ assert.deepEqual(destinationIdentity('Silver Falls', 'trailhead', 'dayuse'), {
+   artworkId:'silver-falls',name:'Silver Falls State Park',kind:'Camping · Hiking',waypointKind:'camp',categoryAccent:'#2BFF00',
+ });
+ assert.deepEqual(destinationIdentity('Rooster Rock', 'beach', 'fishing'), {
+   artworkId:'rooster-rock',name:'Rooster Rock State Park',kind:'Beach · Day use',waypointKind:'beach',categoryAccent:'#FF1FA0',
+ });
+ assert.deepEqual(destinationIdentity('Eagle Creek', 'trailhead', 'winter'), {
+   artworkId:null,name:'Eagle Creek',kind:'Winter',waypointKind:'winter',categoryAccent:'#7B00FF',
+ });
+ assert.equal(destinationIdentity('Fern Lake', 'camp-hike').kind,'camp hike');
 });
 test('approved v35 screenprint artwork remains byte-identical',()=>{
  for(const [file,sha] of Object.entries({'rooster-rock':'4c006d4ae072918627d1842bcfa8bd6116c48474b5037099678771591046316a','silver-falls':'c74216dcc7a079e7733bd535426559f78e577fed97e9e2db535778fb97c6e708'})){
