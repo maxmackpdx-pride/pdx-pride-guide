@@ -8,15 +8,12 @@ import {createProfileShareCache} from "./profileShareCache";
 import {PROFILE_SHARE_IMAGE_VERSION, profileShareImagePath} from "@shared/profileShare";
 import path from "node:path";
 import sharp from "sharp";
+import { eventShareImagePath } from "@shared/eventSlug";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
 import { resolveDirectoryLogo, directoryFallbackLogo } from "@shared/directoryLogos";
 import { renderSocialCardArtwork } from "./socialCardArtwork";
 import { storage } from "./storage";
-import {
-  getTuckerHostedArchiveRow,
-  isTuckerHostedArchiveId,
-  tuckerHostedArchiveAsEvent,
-} from "@shared/tuckerHostedArchive";
+import { canSharePublicEvent } from "@shared/publicEventVisibility";
 
 const H = 630;
 const SITE_URL = (process.env.SITE_URL || "https://www.zaylist.com").replace(/\/$/, "");
@@ -152,7 +149,7 @@ async function loadAvatarBuffer(photoUrl: string | null | undefined): Promise<Bu
 }
 
 export function ogEventCardUrl(eventId: number): string {
-  return `${SITE_URL}/api/og/event/${eventId}?v=2`;
+  return SITE_URL + eventShareImagePath(eventId);
 }
 
 export function ogPlaceCardUrl(placeId: number): string {
@@ -168,18 +165,16 @@ export function ogProfileCardUrl(username: string): string {
 }
 
 export async function renderEventOgCard(eventId: number): Promise<Buffer | null> {
-  let evt = storage.getEvent(eventId) as any;
-  if ((!evt || evt.status !== "LIVE") && isTuckerHostedArchiveId(eventId)) {
-    const row = getTuckerHostedArchiveRow(eventId);
-    if (row) evt = tuckerHostedArchiveAsEvent(row);
-  }
-  if (!evt) return null;
+  const evt = storage.getEvent(eventId);
+  if (!evt || !canSharePublicEvent(evt)) return null;
 
   const posterRel = resolveEventPosterUrl(evt.id, evt.posterImageUrl, evt.dayOfWeek);
   const local = resolveLocalAsset(posterRel);
   const raw = await loadImageBuffer(local);
 
-  return renderSocialCardArtwork(raw, "contain", () => makeFallbackArtwork(String(evt.title || "Event")));
+  const image = await renderSocialCardArtwork(raw, "contain", () => makeFallbackArtwork(evt.title));
+  const current = storage.getEvent(eventId);
+  return current && canSharePublicEvent(current) ? image : null;
 }
 
 function makeFallbackArtwork(title: string, color = "#fff"): Buffer {

@@ -5,7 +5,8 @@ import { buildGoogleAnalyticsHead } from "./gaSnippet";
 import { buildCartoBasemapHead } from "./cartoSnippet";
 import { storage } from "./storage";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
-import { eventUrl } from "@shared/eventSlug";
+import { eventShareImagePath, eventUrl } from "@shared/eventSlug";
+import { canSharePublicEvent } from "@shared/publicEventVisibility";
 import { placeUrl } from "@shared/placeSlug";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
 import type { Event } from "@shared/schema";
@@ -56,7 +57,7 @@ function decodeHtmlEntities(value: string) {
 }
 
 export function getLiveEventsForSeo(): SeoEvent[] {
-  return expandMultiDayEvents(storage.getEvents({ status: "LIVE" }))
+  return expandMultiDayEvents(storage.getEvents({ status: "LIVE" }).filter(canSharePublicEvent))
     .map(evt => ({
       id: evt.id,
       title: evt.title,
@@ -391,7 +392,7 @@ const ROUTE_SEO: Record<string, { title: string; description: string }> = {
 
 function parseEventIdFromPath(requestPath: string): number | null {
   const path = (requestPath.split("?")[0] || "/").trim();
-  const match = path.match(/^\/events\/(\d+)(?:\/[^/]*)?$/);
+  const match = path.match(/^\/events\/(-?\d+)(?:\/[^/]*)?$/);
   if (!match) return null;
   const id = Number(match[1]);
   return Number.isFinite(id) ? id : null;
@@ -554,7 +555,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
   const sharedOutz = getOutzSharePlace(outzShareId(pathKey));
   const eventId = parseEventIdFromPath(requestPath);
   const dbEvent = eventId != null ? storage.getEvent(eventId) : null;
-  const liveEvent = dbEvent?.status === "LIVE" ? dbEvent : null;
+  const liveEvent = dbEvent && canSharePublicEvent(dbEvent) ? dbEvent : null;
   const placeId = parsePlaceIdFromPath(requestPath);
   const place = placeId != null ? storage.getBusiness(placeId) : null;
   const livePlace = place && place.active !== false ? place : null;
@@ -564,7 +565,7 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
     profileUser && String(profileUser.status || "").toLowerCase() === "active" ? profileUser : null;
 
   // Directory place paths map to /directory SEO base when no place id
-  const routeKey =
+  const routeKey = eventId !== null && !liveEvent ? "/events" :
     pathKey.startsWith("/directory/") && !livePlace
       ? "/directory"
       : pathKey.startsWith("/directory/")
@@ -609,15 +610,15 @@ export function injectSeoIntoHtml(html: string, requestPath = "/") {
       ? placeUrl(livePlace.id, livePlace.name, SITE_URL)
       : liveProfile
         ? `${SITE_URL}/u/${encodeURIComponent(liveProfile.username)}`
-        : canonical;
+        : eventId !== null ? SITE_URL + "/events" : canonical;
   const placeLogo = livePlace
     ? resolveDirectoryLogo(livePlace.name, livePlace.imageUrl)
     : null;
   // Branded share cards: per-entity dynamic OG, else static board share art, else home fallback.
   const boardShareKey =
-    !liveEvent && !livePlace && !liveProfile ? shareCardKeyForPath(pathKey) : null;
+    !liveEvent && !livePlace && !liveProfile ? shareCardKeyForPath(eventId !== null ? "/events" : pathKey) : null;
   const pageImage = sharedOutz ? `${SITE_URL}/api/og/outzide/${encodeURIComponent(sharedOutz.id)}?v=3` : liveEvent
-    ? `${SITE_URL}/api/og/event/${liveEvent.id}?v=2`
+    ? `${SITE_URL}${eventShareImagePath(liveEvent.id)}`
     : livePlace
       ? `${SITE_URL}/api/og/place/${livePlace.id}?v=4`
       : liveProfile

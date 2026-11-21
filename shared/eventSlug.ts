@@ -24,3 +24,7 @@ export function eventUrl(id: number, title: string, siteUrl = "https://www.zayli
   const base = siteUrl.replace(/\/$/, "");
   return `${base}${eventPath(id, title, day)}`;
 }
+/** Versioned so current shared cards revalidate public visibility. */
+export function eventShareImagePath(eventId: number): string {
+  return `/api/og/event/${eventId}?v=3`;
+}

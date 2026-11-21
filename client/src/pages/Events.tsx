@@ -39,8 +39,8 @@ import type { EventModalOriginRect } from "../components/EventModal";
 import Schedule from "@/pages/Schedule";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePageSeo } from "@/hooks/usePageSeo";
-import { hasPublicEventFlags } from "@shared/publicEventVisibility";
-import { eventPath } from "@shared/eventSlug";
+import { canSharePublicEvent, hasPublicEventFlags } from "@shared/publicEventVisibility";
+import { eventPath, eventShareImagePath } from "@shared/eventSlug";
 import { scatterAffiliateCards } from "@/lib/affiliateCards";
 import { ChevronDown, ChevronRight, CalendarDays, Map as MapIcon, MapPin, SlidersHorizontal } from "lucide-react";
 import { Button, FilterChip, SearchInput } from "@/components/ds";
@@ -301,7 +301,7 @@ function filterBoardEvents(
 
 /** Branded 1200×630 card (replaces raw flyer as social preview image). */
 function eventOgCardImage(eventId: number) {
-  return `https://www.zaylist.com/api/og/event/${eventId}?v=2`;
+  return "https://www.zaylist.com" + eventShareImagePath(eventId);
 }
 
 function truncateSeo(text: string, max = 160) {
@@ -492,7 +492,8 @@ export default function Events() {
     enabled: routeEventId != null && Number.isFinite(routeEventId),
   });
 
-  const shareEvent = selectedEvent || routeEvent || null;
+  const detailForSeo = selectedEvent || routeEvent;
+  const shareEvent = detailForSeo && canSharePublicEvent(detailForSeo) ? detailForSeo : null;
   usePageSeo(
     roomTitle("eventz", shareEvent?.title),
     shareEvent
@@ -508,6 +509,7 @@ export default function Events() {
           type: "article",
         }
       : {
+          url: routeEventId != null || detailForSeo ? "https://www.zaylist.com/events" : undefined,
           image: shareCardUrl("events"),
           imageAlt: "Events on Zaylist — Portland queer nights",
         },

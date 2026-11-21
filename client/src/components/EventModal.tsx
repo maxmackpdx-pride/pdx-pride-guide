@@ -48,6 +48,7 @@ import {
 } from "@/lib/eventEditForm";
 import { admissionEventLinkLabel } from "@shared/admission";
 import { resolveVenueWebsite } from "@shared/venueLinks";
+import { canSharePublicEvent } from "@shared/publicEventVisibility";
 import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { getEventScheduleTiming } from "@shared/missedConnections";
 import type { EventTalentRow } from "@shared/eventTalent";
@@ -209,7 +210,7 @@ export default function EventModal({
   documentMeta?: boolean;
 }) {
   if (!event || typeof event.id !== "number") return null;
-  return <CardDetails navigationWidth key={event.id} onClose={onClose}>{documentMeta ? <OpenCardMeta title={event.title} description={event.venueName || event.description} /> : null}<EventModalInner event={event} onClose={() => closeOpenCard(onClose)} onEventUpdated={onEventUpdated} originRect={originRect} initialSection={initialSection} /></CardDetails>;
+  return <CardDetails navigationWidth key={event.id} onClose={onClose}>{documentMeta && canSharePublicEvent(event) ? <OpenCardMeta title={event.title} description={event.venueName || event.description} /> : null}<EventModalInner event={event} onClose={() => closeOpenCard(onClose)} onEventUpdated={onEventUpdated} originRect={originRect} initialSection={initialSection} /></CardDetails>;
 }
 
 function EventModalInner({
@@ -792,7 +793,7 @@ function EventModalInner({
         } as React.CSSProperties}
       >
         <div className="event-modal__chrome">
-          <DetailActions label="event" onClose={handleClose} onShare={async () => {
+          <DetailActions label="event" onClose={handleClose} onShare={canSharePublicEvent(event) ? async () => {
                 try {
                   const result = await shareEventLink(eventPath(event.id, event.title, event.dayOfWeek, pacificCalendarDate(event.dateStart)), event.title);
                   toast({ title: shareToastTitle(result, "event") });
@@ -801,7 +802,7 @@ function EventModalInner({
                     toast({ title: "Could not share event", variant: "destructive" });
                   }
                 }
-              }} >
+              } : undefined}>
             {!editing && (event.isClaimable || hasPendingClaim) && (
               <Button
                 variant="neon"
