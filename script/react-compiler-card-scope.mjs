@@ -67,9 +67,16 @@ export const cardSourcePatterns = [
   /[\\/]client[\\/]src[\\/]components[\\/]outz[\\/]native[\\/]NativeOutzideFace\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/]PlaceCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]placez[\\/](?:NativePlacezFace|PlacezQuickCard|NativePlacezExpanded|ExpandedPager)\.tsx$/,
+<<<<<<< HEAD
   /[\\/]client[\\/]src[\\/]components[\\/]places[\\/](?:PlacezDrawer|PlacezMapDrawer|PlacezEventsRails|EventPlanExtension|PlacezInViewRail)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]drawers[\\/](?:DrawerTop|DrawerCountdownCard|DrawerFilterRail|DrawerMiniCard|PlacezCalendarFilter)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]filters[\\/]DrawerFilterChips\.tsx$/,
+=======
+  /[\\/]client[\\/]src[\\/]components[\\/]places[\\/](?:PlacezDrawer|PlacezMapDrawer|PlacezEventsRails|EventPlanExtension)\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]drawers[\\/](?:DrawerTop|DrawerCountdownCard|DrawerFilterRail|DrawerMiniCard|PlacezCalendarFilter)\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]outz[\\/](?:OutzideDrawer|OutzideInViewRail)\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]afterz[\\/](?:AfterzDrawer|AfterzNightCard|AfterzHostForm)\.tsx$/,
+>>>>>>> 22c86c6 (Fix drawer glass-rebind selectors and Compiler allowlist)
   /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/](?:EventCard|BoardCard)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/](?:FlyerBoard|EventFlyerFront)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]EventRailCard\.tsx$/,

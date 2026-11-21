@@ -1,8 +1,6 @@
 /* Afterz drawer and off-hours map blur. Token colors only. Accent is --yellow. */
-.afterz-drawer {
-  --c: var(--yellow);
-  padding-bottom: 28px;
-}
+.afterz-drawer { padding-bottom: 28px; }
+.afterz-drawer.pdx-glass-rebind { --c: var(--yellow); }
 .afterz-host-btn {
   display: flex;
   align-items: center;

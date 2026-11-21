@@ -10,7 +10,7 @@
 }
 .outz-drawer-lead::-webkit-scrollbar { display: none; }
 .outz-drawer-lead__item { flex: none; scroll-snap-align: start; }
-.outz-mini-place {
+.outz-mini-place.pdx-glass-rebind {
   --c: var(--room-outz, var(--neon-orange));
 }
 .outz-drawer-title {
