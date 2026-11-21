@@ -227,3 +227,45 @@ Errors are `{error: string}` with HTTP 400/401/403/404/409. No new endpoints wer
 ## App Translation
 
 Not yet worked out. Theory only: ActionSheetCard maps to a native sheet and FormCard to a pushed modal, but this is undecided and unbuilt.
+
+## Event card tiles (t327u): RIDEZ · AFTERZ · DIRECTIONS
+
+Three tiles under the countdown box, nothing else:
+
+| Tile | Token | Sheet |
+|---|---|---|
+| RIDEZ | `--neon-orange` (Ridez logo slot `ridez-pending`) | Carpool rail + ride-app buttons |
+| AFTERZ | `--yellow` | Afterz window + invites |
+| DIRECTIONS | `--green-acid` (was MAPS) | Apple/Google Maps directions |
+
+**RIDEZ sheet.** One deep-glass ActionSheetCard, single column:
+1. `CARPOOLS` rail of standard small cards (136×170). First slot is the black dashed `+` square
+   (`data-action="post-carpool"`), which opens the existing carpool flow (`AtEventDialog` /
+   `EventPlanning`, `POST /api/events/:id/occurrences/:date/planning/rides`). Ride cards come from
+   the planning payload's `rides` (members only; signed out shows SIGN IN TO SEE RIDES) and render
+   through `outzWallToBoardPost` (`CARPOOL_OFFER`, carpool sticker) → `BoardBrowseCard size="small"`.
+   Ride cards have no save API, so the heart is disabled.
+2. `RIDE APPS`: Lyft, Uber, TriMet buttons, each with the brand mark and the brand primary as rim.
+
+**Third-party brand exception.** Lyft/Uber/TriMet colors are the one allowed non-system color,
+only on those buttons, from `ds/tokens/brand-third-party.css` (`--brand-lyft #FF00BF`,
+`--brand-uber #FFFFFF` (Uber's reverse mark, since black disappears on black), `--brand-trimet
+#0E68B0`). Marks are simplified wordmarks in `cards/rideBrands.tsx` until the official logo files
+are dropped in.
+
+## Standard small card (t327u/t329u)
+
+Every small card in an event rail (Mizzed, Gigz, Ridez carpools) is the site's existing standard
+small card: the Boardz zine small card (`BoardBrowseCard size="small"` → `PunkBoardCard` →
+`ZineSmallCard`) at `--card-small-width/height` (136×170), with its existing torn rim in the
+category accent. Do not build a new card; convert the data to a `BoardPost`
+(`client/src/components/events/EventRailCards.tsx`). Empty/new slots are a black square, dashed
+accent border, `+`. Tapping a card flips/grows it open over a blurred background.
+
+## Feed = JOIN THE PREGAME (t327u)
+
+The FEED tab does not host the chat. It is a transparent call to action: no panel, no scroll, no
+input. Members see the newest bubbles that fit (read-only, faded at the top) and OPEN THE PREGAME;
+non-members see JOIN THE PREGAME (joining = Going, `POST /api/events/:id/attendance`); signed out
+sees SIGN IN TO JOIN. Every tap opens the inbox group chat directly:
+`useInboxSheet().openSheet({ view: "chats", group: { kind: "EVENT", id, title, calendarDate } })`.

@@ -1,7 +1,7 @@
 /* ActionSheetCard (Tucker, t305u). See docs/design/ACTION_SHEET_CARD.md. */
 .zas-scrim {
   position: absolute; inset: 0; z-index: 40; display: grid; justify-items: center; padding: 14px;
-  background: color-mix(in srgb, var(--z-oled) 50%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  background: var(--z-backdrop-tint); backdrop-filter: var(--z-backdrop-filter); -webkit-backdrop-filter: var(--z-backdrop-filter);
   animation: zas-scrim-in .22s ease-out;
 }
 .zas-scrim--card { place-items: center; }
@@ -71,3 +71,56 @@
   font: 900 15px/1 var(--font-display); letter-spacing: .12em;
 }
 .zcard-logo--pending small { font: 700 7px/1.2 var(--font-display); letter-spacing: .2em; color: var(--text-hi); opacity: .8; }
+/* Brand ride buttons (t327u): mark + name, the brand color as the rim and glow (third-party brand exception). */
+.zas .zas-act--brand { gap: 12px; justify-content: flex-start; }
+.zas .zas-act--brand > span:last-child { margin-left: auto; }
+.zas .zas-act-mark { display: inline-grid; place-items: center; width: 56px; height: 28px; flex: none; color: var(--obtn-c); }
+.zas .zride-mark { width: 56px; height: 24px; display: block; }
+/* Sections inside a sheet (the Ridez carpool rail). */
+.zas .zas-sec { margin: 4px 0 2px; font: 700 11px var(--font-display); letter-spacing: .24em; text-transform: uppercase; color: var(--tile); display: flex; justify-content: space-between; }
+.zas .zas-rail { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 4px 2px 10px; scroll-snap-type: x mandatory; }
+.zas .zas-rail::-webkit-scrollbar { display: none; }
+.zas .zas-rail > * { flex: none; scroll-snap-align: start; }
+.zas .zas-act--brand { border-color: var(--obtn-c); }
+
+.zas .zride-mark { width: 56px; height: 24px; text-transform: none; }
+.zas .zride-mark--wide { width: 72px; }
+.zas .zas-act-mark { width: auto; min-width: 56px; }
+
+/* Ride app tiles (t327u lead review): square app-icon tiles in each brand's
+   color, same anatomy as the event card's locked tiles, label under. */
+.zas .zride-tiles { display: flex; justify-content: space-around; gap: 10px; padding: 4px 4px 2px; }
+.zas .zride-tile {
+  display: grid; justify-items: center; gap: 8px; min-width: 72px; color: var(--text-hi); text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.zas .zride-tile-icon {
+  display: grid; place-items: center; width: 60px; height: 60px; border-radius: 16px;
+  border: 1.5px solid var(--obtn-c); color: var(--obtn-c);
+  background: radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--obtn-c) 24%, transparent), transparent 62%), var(--z-black);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-hi) 28%, transparent), 0 0 18px -4px color-mix(in srgb, var(--obtn-c) 40%, transparent);
+  transition: transform .12s;
+}
+.zas .zride-tile:active .zride-tile-icon { transform: scale(.94); }
+.zas .zride-tile-icon .zride-mark { width: 46px; height: 22px; }
+.zas .zride-tile-icon .zride-mark--glyph { width: 30px; height: 30px; }
+.zas .zride-tile-label { font: 700 11px/1 var(--font-display); letter-spacing: .12em; text-transform: uppercase; }
+.zas--centered .zcard-logo-row { justify-content: center; padding-inline: 44px; }
+.zas--centered .zas-head { justify-content: center; text-align: center; }
+.zas--centered .zas-kicker { align-items: center; }
+/* Carpool rail: ARRIVING / DEPARTING label at each small card's top (t335u). */
+.zas .orailcard-tag, .fbx .orailcard-tag {
+  position: absolute; z-index: 3; top: 6px; left: 50%; translate: -50% 0; pointer-events: none;
+  padding: 3px 8px; border-radius: 4px; background: var(--z-black); color: var(--tile, var(--neon-orange));
+  border: 1px solid currentColor; font: 800 10px/1 var(--font-display); letter-spacing: .14em;
+}
+.zas .orailcard[data-tag="DEPARTING"] .orailcard-tag { color: var(--text-hi); border-color: var(--tile); }
+/* "+" picks the direction before posting (t336u). */
+.zas .zas-rail .oslot--pick { display: grid; grid-template-rows: 1fr 1fr; gap: 8px; padding: 8px; place-items: stretch; cursor: default; }
+.zas .oslot--pick button {
+  border: 1.5px solid var(--tile); border-radius: 8px; background: color-mix(in srgb, var(--tile) 14%, var(--z-black)); color: var(--text-hi);
+  font: 800 12px/1 var(--font-display); letter-spacing: .12em; cursor: pointer;
+}
+.zas .oslot--pick button:active { background: var(--tile); color: var(--z-black); }
+.zas .zas-rail .oslot.oslot--pick { display: grid; grid-template-rows: 1fr 1fr; gap: 8px; padding: 8px; place-items: stretch; cursor: default; }
+.zas .zas-rail .oslot.oslot--pick > button { width: 100%; height: 100%; border-radius: 8px; padding: 0; }

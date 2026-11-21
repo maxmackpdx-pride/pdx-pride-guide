@@ -13,6 +13,7 @@ import { eventDateLabel, eventTimeLabel } from "@/lib/eventDisplay";
 import { eventPath } from "@shared/eventSlug";
 import { placePath } from "@shared/placeSlug";
 import { resolveDirectoryLogo } from "@shared/directoryLogos";
+import { sceneCollectiveLogo } from "@/components/scenez/sceneModel";
 import { type EventListing } from "@shared/multiDayEvents";
 import { pacificTodayDate, parsePacificDateTime } from "@shared/missedConnections";
 import { getMissedConnectionWindow } from "@shared/missedConnections";
@@ -20,12 +21,14 @@ import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
 import { EventSharePopup, GigInvitePopup, ShareJoinPrompt, shareUrlFor, useShareJoinGate } from "./OpenCardShare";
 import { EventGoingButton, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
 import EventPlanning from "./EventPlanning";
-import InboxGroupChat from "@/components/inbox/InboxGroupChat";
+import { useInboxSheet } from "@/context/InboxSheetContext";
 import AuthModal from "@/components/AuthModal";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
 import { EventHostNotice } from "./EventHostNotice";
 import { weekdayCode, dayColorVar, startMs, dateStrOf, countdownParts } from "./EventFlyerFront";
-import { Car, CarTaxiFront, MapPin, Moon } from "lucide-react";
+import { Car, MapPin, Moon } from "lucide-react";
+import { EventRailCard, gigBoardPost, mizzBoardPosts, rideBoardPost, rideDirection, useBoardRailSaves, type PlanRide } from "./EventRailCards";
+import { RIDE_BRAND_COLOR, RideBrandMark } from "@/components/cards/rideBrands";
 import { memberProfileHref } from "@/lib/avatarLinks";
 import { ActionSheetCard } from "@/components/cards/ActionSheetCard";
 import { FAMILY_LOGOS } from "@/components/cards/cardLogo";
@@ -153,33 +156,63 @@ function FlyerViewer({ src, title, onClose }: { src: string; title: string; onCl
   );
 }
 
-/** FEED (Tucker, t292u): the event's group chat, the same InboxGroupChat the
- *  inbox renders. The server only returns messages to people going (or
- *  hosts), so non-members see the room's state plus JOIN CHAT, which is the
- *  existing Going flow. */
-function EventFeedChat({ listing }: { listing: EventListing }) {
+type FeedBubble = { id: number; body: string; isMine?: boolean; isAnonymous?: boolean; displayName?: string; username?: string; photoUrl?: string | null };
+
+/* FEED (t327u): the pregame call to action. The chat itself lives in the inbox
+   with its existing plumbing; this slot shows only the newest bubbles that fit
+   (transparent, no scroll, no input) and every tap routes to that inbox group
+   chat. Joining = Going (POST /api/events/:id/attendance), as before. */
+/** Runs after the card's close has changed the route (the inbox closes itself on
+ *  route changes, so it must open after that). */
+function afterRouteSettles(fn: () => void) { window.setTimeout(fn, 120); }
+
+function EventFeedChat({ listing, onLeave }: { listing: EventListing; onLeave: (after: () => void) => void }) {
   const { user } = useAuth();
   const rsvp = useEventRsvp();
+  const inbox = useInboxSheet();
   const joined = rsvp.myEventIds.has(listing.id);
   const pending = rsvp.isRsvpPending(listing.id);
+  const member = joined && !!user;
+  const chat = useQuery<{ messages?: FeedBubble[] }>({
+    queryKey: ["/api/events", listing.id, "chat", "preview"],
+    queryFn: () => apiRequest("GET", `/api/events/${listing.id}/chat`).then(r => r.json()),
+    enabled: member,
+    staleTime: 15_000,
+  });
+  const bubbles = (Array.isArray(chat.data?.messages) ? chat.data.messages : []).slice(-3);
+  const target = { kind: "EVENT" as const, id: listing.id, title: listing.title, calendarDate: dateStrOf(listing) };
+  /* The inbox is a header sheet, so the card closes first and the inbox opens on
+     the event's group chat (no second chat UI inside the card). */
+  const openRoom = (el?: HTMLElement) => { void el; onLeave(() => inbox.openSheet({ view: "chats", group: target })); };
+  const join = (el: HTMLElement) => {
+    if (member) { openRoom(el); return; }
+    if (!user) { rsvp.toggleRsvp(listing.id); return; }
+    rsvp.toggleRsvp(listing.id);
+    openRoom(el);
+  };
   return (
-    <div className="ofeed">
-      <p className="osec ofeed-h">EVENT CHAT</p>
-      {joined && user ? (
-        <div className="ofeed-room">
-          <InboxGroupChat variant="card" target={{ kind: "EVENT", id: listing.id, title: listing.title, calendarDate: dateStrOf(listing) }} onBack={() => {}} />
-        </div>
-      ) : (
-        /* Members only: the server returns no messages to non-members, so the
-           slot invites them in instead of previewing the room. */
-        <div className="ofeed-empty">
-          <p className="ofeed-empty-t">Start the conversation</p>
-          <p className="ofeed-empty-s">The group chat for this night, the same room as in your inbox. Joining marks you Going.</p>
-          <button type="button" data-action="join-chat" className="obtn obtn--accent" disabled={pending || rsvp.loading} onClick={() => rsvp.toggleRsvp(listing.id)}>
-            {pending ? "JOINING…" : user ? "JOIN CHAT" : "SIGN IN TO JOIN CHAT"}
-          </button>
-        </div>
-      )}
+    <div className="ofeed ofeed--pregame">
+      <p className="osec ofeed-h">THE PREGAME <span className="osec-r">GROUP CHAT · INBOX</span></p>
+      <div className="ofeed-cta">
+        {member && bubbles.length ? null : <p className="ofeed-cta-t">{member ? "Start the pregame" : "Join the pregame"}</p>}
+        {member && bubbles.length ? null : <p className="ofeed-cta-s">{member ? "The group chat for this night lives in your inbox." : "The group chat for this night, in your inbox. Joining marks you Going."}</p>}
+        <button type="button" data-action="join-chat" className="obtn obtn--accent" disabled={pending || rsvp.loading} onClick={e => join(e.currentTarget)}>
+          {pending ? "JOINING…" : member ? "OPEN THE PREGAME" : user ? "JOIN THE PREGAME" : "SIGN IN TO JOIN THE PREGAME"}
+        </button>
+      </div>
+      {member && bubbles.length ? (
+        <button type="button" className="ofeed-peek" aria-label={`Open the ${listing.title} group chat in your inbox`} onClick={e => openRoom(e.currentTarget)}>
+          {bubbles.map(m => {
+            const name = m.isAnonymous ? "Someone" : m.displayName || m.username || "Member";
+            return (
+              <span key={m.id} className={`ofeed-b${m.isMine ? " is-mine" : ""}`}>
+                <span className="ofeed-av" aria-hidden="true">{m.photoUrl ? <img src={m.photoUrl} alt="" /> : name.slice(0, 1).toUpperCase()}</span>
+                <span className="ofeed-bubble">{m.isMine ? null : <small>@{m.username || name}</small>}{m.body}</span>
+              </span>
+            );
+          })}
+        </button>
+      ) : null}
       {rsvp.showAuth && <AuthModal onClose={() => rsvp.setShowAuth(false)} />}
     </div>
   );
@@ -187,10 +220,10 @@ function EventFeedChat({ listing }: { listing: EventListing }) {
 
 export default function OpenEventCard({ listing, onClose, related = [], initialPage = 0, originRect = null }: OpenEventCardProps) {
   const closingRef = useRef(false);
-  const requestClose = (fromY = 0) => {
+  const requestClose = (fromY = 0, after?: () => void) => {
     if (closingRef.current) return;
     closingRef.current = true;
-    void flipOut(cardEl.current, originRect, fromY).then(onClose);
+    void flipOut(cardEl.current, originRect, fromY).then(() => { onClose(); if (after) afterRouteSettles(after); });
   };
   const openListing = listing;
   const { user: viewer } = useAuth();
@@ -210,6 +243,8 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   const [item, setItem] = useState<null | { kind: "gig" | "mizz"; id: number; title: string; body?: string | null; origin: OriginRect | null }>(null);
   const [popOrigin, setPopOrigin] = useState<OriginRect | null>(null);
   const [night, setNight] = useState<undefined | "rides" | "afterz">(undefined);
+  const [rideKind, setRideKind] = useState<undefined | "carpool" | "home">(undefined);
+  const [ridePick, setRidePick] = useState(false);
   const pagesRef = useRef<HTMLDivElement | null>(null);
   const heroRef = useRef<HTMLDivElement | null>(null);
   const cardEl = useModalA11y({ open: !flyerOpen, onClose: () => requestClose() });
@@ -303,7 +338,9 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
     const v = whiteMark(openListing.venueName);
     if (v) out.push({ src: v, alt: openListing.venueName, href: detailVenue?.id ? placePath(detailVenue.id, openListing.venueName) : "" });
     const hostName = openHostGroup?.name || null;
-    const h = whiteMark(hostName);
+    /* A party collective's own saved logo (SceneZ collective art) wins over the
+       name-matched directory trace (t331u: Yes Coach). */
+    const h = sceneCollectiveLogo(openHostGroup?.slug) ?? whiteMark(hostName);
     if (h && h.split("?")[0] !== v?.split("?")[0]) out.push({ src: h, alt: hostName!, href: openHostGroup?.slug ? `/z/${openHostGroup.slug}` : "" });
     return out;
   })();
@@ -319,7 +356,7 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   const mizzPosts = (detailQuery.data?.missedConnections ?? []) as MissedConnectionPost[];
   const planningDate = dateStrOf(openListing);
   const planningBase = `/api/events/${openListing.id}/occurrences/${planningDate}/planning`;
-  const planning = useQuery<{ canPostGig?: boolean; gigs?: { id: number; title: string; description?: string | null }[]; rides?: { id: number; plan?: { kind?: string } }[] }>({
+  const planning = useQuery<{ canPostGig?: boolean; gigs?: { id: number; title: string; description?: string | null }[]; rides?: PlanRide[] | null }>({
     queryKey: [planningBase, viewer?.id ?? null],
     queryFn: () => apiRequest("GET", planningBase).then(r => r.json()),
     enabled: openListing.id > 0,
@@ -327,6 +364,11 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   const canPostGig = Boolean(planning.data?.canPostGig);
   const gigs = planning.data?.gigs ?? (detailQuery.data?.gigs ?? []).filter((g): g is { id: number; title: string; description?: string | null } => typeof g.id === "number" && !!g.title);
   const hostOnZaylist = hosts.some(h => h.username);
+  const [railAuth, setRailAuth] = useState(false);
+  const railSaves = useBoardRailSaves(() => setRailAuth(true));
+  const mizzCards = mizzBoardPosts(mizzPosts);
+  /* Both directions show anytime, each labeled at the card top (t335u/t336u). */
+  const rideCards = (planning.data?.rides ?? []).flatMap(r => { const post = rideBoardPost(r, openListing.venueName); return post ? [{ post, tag: rideDirection(r) }] : []; });
   /* Afterz window (shared helper, same rule as the server): opens 72h before
      doors, closes 30 min after the end. */
   const afterzWin = getAfterzWindow(openListing.dateStart, openListing.dateEnd, tick);
@@ -356,8 +398,8 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   const hasPlace = Boolean(geo || openAddr);
   const live = cd.state !== "ended" && openListing.id > 0;
   const [nightOrigin, setNightOrigin] = useState<{ rect: OriginRect | null; seq: number }>({ rect: null, seq: 0 });
-  const openNight = (n: "rides" | "afterz", el?: HTMLElement) => {
-    setNight(n);
+  const openNight = (n: "rides" | "afterz", el?: HTMLElement, kind?: "carpool" | "home") => {
+    setNight(n); setRideKind(kind);
     setNightOrigin(o => ({ rect: rectOf(el?.querySelector(".otile-face") ?? null), seq: o.seq + 1 }));
     setOpage(4); goOpage(4);
   };
@@ -370,9 +412,14 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
     { label: "ZAYLIST MAPZ", href: zaylistMap, external: false },
   ];
   if (!isAppleDevice()) mapOptions.unshift(mapOptions.splice(1, 1)[0]);
+  const trimetHref = openLat != null && openLng != null
+    ? `https://trimet.org/home/planner?toPlace=${encodeURIComponent(`${openListing.venueName}::${openLat},${openLng}`)}`
+    : `https://trimet.org/home/planner?toPlace=${encodeURIComponent(openAddr || openListing.venueName)}`;
+  /* Ride app buttons (t327u): brand mark + brand color (third-party brand exception). */
   const rideOptions = [
-    { label: "UBER", href: uberHref, external: true },
-    ...(lyftHref ? [{ label: "LYFT", href: lyftHref, external: true }] : []),
+    ...(lyftHref ? [{ brand: "lyft", name: "LYFT", label: "Get a Lyft", href: lyftHref, icon: <RideBrandMark brand="lyft" />, color: RIDE_BRAND_COLOR.lyft }] : []),
+    { brand: "uber", name: "UBER", label: "Get an Uber", href: uberHref, icon: <RideBrandMark brand="uber" />, color: RIDE_BRAND_COLOR.uber },
+    { brand: "trimet", name: "TRIMET", label: "Plan a TriMet trip", href: trimetHref, icon: <RideBrandMark brand="trimet" glyph />, color: RIDE_BRAND_COLOR.trimet },
   ];
   type Tile = { key: string; label: string; color: string; icon: React.ReactNode; href?: string; popup?: boolean; badge?: string; dot?: boolean };
   /* Host slot above the tiles (Tucker, t308u). One wide slot, three cases:
@@ -385,16 +432,15 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   const openSheet = (kind: "maps" | "rides" | "afterz") => (el: HTMLElement) =>
     setSheet({ kind, el, origin: rectOf(el.querySelector(".otile-face")), iconOrigin: rectOf(el.querySelector(".otile-face svg")) });
   const tiles: Tile[] = [
-    ...(live ? [{ key: "carpool", label: "CARPOOL", color: "var(--neon-orange)", icon: <Car />, dot: hasNew("carpool") }] : []),
+    ...(hasPlace || live ? [{ key: "rides", label: "RIDEZ", color: "var(--neon-orange)", icon: <Car />, popup: true, dot: live && hasNew("carpool") }] : []),
     ...(live ? [{ key: "afterz", label: "AFTERZ", color: "var(--yellow)", icon: <Moon />, popup: true,
       badge: afterzWin?.state === "before" ? `OPENS ${countdownLabel(afterzWin.opensAt - tick).split(" ")[0]}` : undefined, dot: hasNew("afterz") }] : []),
-    ...(hasPlace ? [{ key: "maps", label: "MAPS", color: "var(--green-acid)", icon: <MapPin />, popup: true }] : []),
-    ...(hasPlace ? [{ key: "rides", label: "RIDES", color: "var(--neon-magenta)", icon: <CarTaxiFront />, popup: true }] : []),
+    ...(hasPlace ? [{ key: "maps", label: "DIRECTIONS", color: "var(--green-acid)", icon: <MapPin />, popup: true }] : []),
   ];
   /* Tiles are plain data; the tap handler lives here so render never builds
      closures over refs (React Compiler). */
   const onTile = (key: string, el: HTMLElement) => {
-    if (key === "carpool") { markSeen("carpool"); openNight("rides", el); return; }
+    if (key === "rides") markSeen("carpool");
     if (key === "afterz") markSeen("afterz");
     if (key === "afterz" || key === "maps" || key === "rides") openSheet(key)(el);
   };
@@ -641,7 +687,7 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
                 <EventHostNotice className="onote" />
               </section>
               <section className="opage opage--feed" inert={opage!==1} aria-hidden={opage!==1} aria-label="Feed">
-                <EventFeedChat listing={openListing} />
+                <EventFeedChat listing={openListing} onLeave={after => requestClose(0, after)} />
               </section>
               <section className="opage" inert={opage!==2} aria-hidden={opage!==2} aria-label="Maps">
                 <p className="osec">
@@ -759,11 +805,9 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
                   ) : mizzWin && tick < mizzWin.opensAt ? (
                     <div className="oslot is-locked" role="note"><span aria-hidden="true">🔒</span><small>OPENS IN {countdownLabel(mizzWin.opensAt - tick)}</small></div>
                   ) : null}
-                  {mizzPosts.map(m => (
-                    <button key={m.id} type="button" className="omini ocardlet" onClick={e => setItem({ kind: "mizz", id: m.id, title: m.title, body: m.body, origin: rectOf(e.currentTarget) })}>
-                      <b>{m.title}</b>
-                      <span>{m.body}</span>
-                    </button>
+                  {mizzCards.map(m => (
+                    <EventRailCard key={m.key} post={m} saved={railSaves.isSaved(m)} saveDisabled={railSaves.pending} onSave={() => railSaves.toggle(m)}
+                      onOpen={el => setItem({ kind: "mizz", id: m.id, title: m.title, body: m.description, origin: rectOf(el.closest(".orailcard")) })} />
                   ))}
                   {!mizzPosts.length && !mizzWin?.canPost && !(mizzWin && tick < mizzWin.opensAt) ? <p className="oempty">No Mizzed Connections were posted.</p> : null}
                 </div>
@@ -773,20 +817,13 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
                   {canPostGig ? (
                     <button type="button" data-action="post-gig" className="oslot" aria-label="Post a gig for this event" onClick={() => setForm({ kind: "gig" })}><span aria-hidden="true">+</span></button>
                   ) : null}
-                  {gigs.map(g => (
-                    <div key={g.id} className="omini ocardlet" role="button" tabIndex={0}
-                      onClick={e => { if ((e.target as HTMLElement).closest("button")) return; setItem({ kind: "gig", id: g.id, title: g.title, body: g.description, origin: rectOf(e.currentTarget) }); }}
-                      onKeyDown={e => { if (e.key === "Enter" && e.target === e.currentTarget) setItem({ kind: "gig", id: g.id, title: g.title, body: g.description, origin: rectOf(e.currentTarget) }); }}>
-                      <b>{g.title}</b>
-                      {g.description ? <span>{g.description}</span> : null}
-                      <button type="button" className="obtn ocardlet-act" onClick={e => { if (hostOnZaylist) { setForm({ kind: "message", gigTitle: g.title }); return; } setPopOrigin(rectOf(e.currentTarget)); setGigPop({ gig: g.title, mode: "invite" }); }}>
-                        {hostOnZaylist ? "MESSAGE HOST" : "INVITE THEM"}
-                      </button>
-                    </div>
-                  ))}
+                  {gigs.map(g => { const post = gigBoardPost(g, openListing.venueName); return (
+                    <EventRailCard key={post.key} post={post} saved={railSaves.isSaved(post)} saveDisabled={railSaves.pending} onSave={() => railSaves.toggle(post)}
+                      onOpen={el => setItem({ kind: "gig", id: g.id, title: g.title, body: g.description, origin: rectOf(el.closest(".orailcard")) })} />
+                  ); })}
                   {!gigs.length && !canPostGig ? <p className="oempty">{planning.isLoading ? "Loading gigs…" : planning.isError ? "Couldn't load gigs. Pull to refresh." : "No gigs posted for this night."}</p> : null}
                 </div>
-                {openListing.id > 0 && <EventPlanning key={(night ?? "feed") + nightOrigin.seq} eventId={openListing.id} occurrenceDate={openListing.dateStart} night={night} nightOrigin={nightOrigin.rect} hideInlineRides hideGigs />}
+                {openListing.id > 0 && <EventPlanning key={(night ?? "feed") + nightOrigin.seq} eventId={openListing.id} occurrenceDate={openListing.dateStart} night={night} nightOrigin={nightOrigin.rect} rideKind={rideKind} hideInlineRides hideGigs />}
                 <p className="osec" style={{ marginTop: 16 }}>
                   MORE AT {openListing.venueName.toUpperCase()} <span className="osec-r">THE SAME WEEK</span>
                 </p>
@@ -915,15 +952,54 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
               {" "}Area invites never show on the map.
             </p>
           </ActionSheetCard>
-        ) : sheet ? (() => {
-          const maps = sheet.kind === "maps";
-          return (
-            <ActionSheetCard label={maps ? "Directions" : "Ride share"} accent={maps ? "var(--green-acid)" : "var(--neon-magenta)"}
-              kicker={maps ? "DIRECTIONS" : "RIDE SHARE"} title={`TO ${openListing.venueName.toUpperCase()}`} logo={maps ? null : "ridez-pending"}
-              icon={maps ? <MapPin /> : <CarTaxiFront />} motion="grow" origin={sheet.origin} iconOrigin={sheet.iconOrigin} placement="sheet"
-              actions={maps ? mapOptions : rideOptions} onDismiss={() => setSheet(null)} />
-          );
-        })() : null}
+        ) : sheet?.kind === "maps" ? (
+          <ActionSheetCard label="Directions" accent="var(--green-acid)" kicker="DIRECTIONS" title={`TO ${openListing.venueName.toUpperCase()}`}
+            icon={<MapPin />} motion="grow" origin={sheet.origin} iconOrigin={sheet.iconOrigin} placement="sheet"
+            actions={mapOptions} onDismiss={() => setSheet(null)} />
+        ) : sheet ? (
+          /* Ridez (t327u/t329u): one orange sheet. The carpool rail (event-night rides, the
+             existing planning API and the existing carpool card) sits above the ride app buttons. */
+          <ActionSheetCard label="Ridez" accent="var(--neon-orange)" kicker="" title={`TO ${openListing.venueName.toUpperCase()}`} logo="ridez-pending" centered
+            motion="grow" origin={sheet.origin} placement="sheet" onDismiss={() => { setRidePick(false); setSheet(null); }}>
+            {live ? (
+              <>
+                <p className="zas-sec">CARPOOLS <span>{planning.data?.rides == null ? "SIGN IN TO SEE RIDES" : rideCards.length ? "" : "BE THE FIRST"}</span></p>
+                <div className="zas-rail orail--cards" data-rail="carpool">
+                  {ridePick ? (
+                    <div className="oslot oslot--ride oslot--pick" role="group" aria-label="Post a carpool">
+                      {([["carpool", "ARRIVING"], ["home", "DEPARTING"]] as const).map(([k, l]) => (
+                        <button key={k} type="button" data-action={`post-carpool-${k === "home" ? "departing" : "arriving"}`}
+                          onClick={() => { const el = sheet.el; setRidePick(false); setSheet(null); openNight("rides", el, k); }}>{l}</button>
+                      ))}
+                    </div>
+                  ) : (
+                    <button type="button" data-action="post-carpool" className="oslot oslot--ride" aria-label="Post an arriving or departing carpool"
+                      onClick={() => setRidePick(true)}><span aria-hidden="true">+</span></button>
+                  )}
+                  {rideCards.map(r => (
+                    <EventRailCard key={r.post.key} post={r.post} tag={r.tag} onOpen={() => { const el = sheet.el; setSheet(null); openNight("rides", el); }} />
+                  ))}
+                </div>
+              </>
+            ) : null}
+            {hasPlace ? (
+              <>
+                <p className="zas-sec">RIDE APPS</p>
+                {/* App-icon tiles in each brand's color (third-party brand exception). */}
+                <div className="zride-tiles">
+                  {rideOptions.map(o => (
+                    <a key={o.brand} className="zride-tile" data-action={`ride-${o.brand}`} href={o.href} target="_blank" rel="noreferrer"
+                      style={{ "--obtn-c": o.color } as CSSProperties} aria-label={o.label}>
+                      <span className="zride-tile-icon" aria-hidden="true">{o.icon}</span>
+                      <span className="zride-tile-label">{o.name}</span>
+                    </a>
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </ActionSheetCard>
+        ) : null}
+        {railAuth ? <AuthModal onClose={() => setRailAuth(false)} /> : null}
         {form ? (
           <EventFormCard kind={form.kind} gigTitle={form.gigTitle} eventId={openListing.id} eventTitle={openListing.title} occurrenceDate={openListing.dateStart}
             venueName={openListing.venueName} pageUrl={typeof window !== "undefined" ? shareUrlFor(sharePath, "afterz") : sharePath}

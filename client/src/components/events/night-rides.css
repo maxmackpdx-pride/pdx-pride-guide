@@ -218,7 +218,11 @@
 /* Lead review (t325u): when opened from a tile, the at-event dialog reads as an ActionSheetCard.
    It's a bottom deep-glass sheet with the tile icon header (icon, kicker, title), a ✕ close in the
    corner, and one evenly spaced column of card-style buttons. */
-.at-event-dialog--tinted { display: grid; align-items: end; background: color-mix(in srgb, var(--z-oled) 55%, transparent); }
+.at-event-dialog--tinted { display: grid; align-items: end; background: transparent; }
+/* Shared backdrop; the dialog stops above the dock so the dock stays sharp (t332u). */
+.at-event-dialog--tinted[open] { inset: 0 0 var(--z-dock-h, 0px) 0; height: auto; max-height: none; }
+.at-event-dialog--tinted::backdrop { background: transparent; }
+.at-event-dialog--tinted[open]::before { content: ""; position: fixed; inset: 0 0 var(--z-dock-h, 0px) 0; z-index: -1; background: var(--z-backdrop-tint); backdrop-filter: var(--z-backdrop-filter); -webkit-backdrop-filter: var(--z-backdrop-filter); }
 .at-event-dialog--tinted .at-event-poster { filter: blur(10px); opacity: .55; }
 .at-event-dialog--tinted .at-event-content {
   position: relative; gap: 12px; margin: auto auto 0; width: min(100%, 620px);

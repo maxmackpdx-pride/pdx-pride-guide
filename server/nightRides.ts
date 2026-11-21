@@ -609,8 +609,13 @@ export function registerNightRides(
             departure > end + 30 * minute))
       )
         return "Choose a future leave-by time within this occurrence, or a one-way carpool.";
+      // Arriving and departing (home) carpools can both be posted in advance
+      // (Tucker, t336u); a ride home needs the poster to be Going. Afterz rides
+      // still need a verified presence at the venue.
+      if (kind === "home" && !attendance(e.id, user))
+        return "Mark yourself Going before offering a ride home.";
       if (
-        kind !== "carpool" &&
+        kind === "afterz" &&
         (!attendance(e.id, user) || !present(e.id, date, user))
       )
         return "Verify your location at the venue before offering a ride.";

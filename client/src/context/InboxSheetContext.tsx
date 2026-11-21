@@ -5,6 +5,7 @@ import { MOBILE_NAV_DISMISS, dismissMobileNavOverlays, type MobileNavDismissDeta
 import { isLocalDemo } from "@/lib/localDemo";
 
 const InboxOverlay = lazy(() => import("@/components/InboxOverlay"));
+import type { InboxGroupChatTarget } from "@/components/inbox/InboxGroupChat";
 const AuthModal = lazy(() => import("@/components/AuthModal"));
 
 export type InboxSheetOpenOpts = {
@@ -14,6 +15,8 @@ export type InboxSheetOpenOpts = {
   queueFolder?: "active" | "inbox";
   queueBucket?: string;
   queueItem?: string;
+  /** Opens one group chat directly (e.g. an event's chat from its open card). */
+  group?: InboxGroupChatTarget;
 };
 
 type InboxSheetContextValue = {
@@ -155,6 +158,7 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
               initialQueueBucket={openOpts?.queueBucket}
               initialQueueItem={openOpts?.queueItem}
               initialThreadId={openOpts?.threadId}
+              initialGroup={openOpts?.group ?? null}
             />
           </Suspense>
         </div>

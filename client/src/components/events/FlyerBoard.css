@@ -449,14 +449,14 @@
 /* ---------- open card ---------- */
 .fbx .scrim {
   position: fixed;
-  inset: 0;
-  background: rgba(2, 2, 4, .6);
+  inset: 0 0 var(--z-dock-h, 0px) 0;
+  background: var(--z-backdrop-tint);
   opacity: 0;
   pointer-events: none;
   transition: opacity .35s;
   z-index: 3000;
-  backdrop-filter: blur(3px) brightness(.85);
-  -webkit-backdrop-filter: blur(3px) brightness(.85);
+  backdrop-filter: var(--z-backdrop-filter);
+  -webkit-backdrop-filter: var(--z-backdrop-filter);
 }
 .fbx .scrim.on { opacity: 1; pointer-events: auto; }
 .fbx .ocard {
@@ -1294,3 +1294,55 @@ html.calm-mode .fbx .ocard .otile.is-pressed .otile-face { transform: none; }
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, var(--z-oled) 44px);
   mask-image: linear-gradient(to bottom, transparent 0, var(--z-oled) 44px);
 }
+
+/* ---- t327u / t329u ---------------------------------------------------- */
+/* (1) More air above the locked tile row. */
+.fbx .ocard .otiles { margin-top: 18px; }
+/* (5) Poster, per the yes Coach rules: natural size from the card top, behind everything. The
+   readability scrim fades out with the poster at the poster's own bottom edge, so no fixed line
+   (tabs, scrim end, accent bloom) ever reads as an edge. */
+.fbx .ocard > .ohero::after {
+  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 0, var(--z-oled) calc(100% - 180px), transparent 100%);
+  mask-image: linear-gradient(to bottom, var(--z-oled) 0, var(--z-oled) calc(100% - 180px), transparent 100%);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--z-black) 5%, transparent) 0, color-mix(in srgb, var(--z-black) 30%, transparent) 30%, color-mix(in srgb, var(--z-black) 55%, transparent) 60%, color-mix(in srgb, var(--z-black) 55%, transparent) 100%);
+}
+/* Tags sit on their own row under the venue (yes Coach, t269u). */
+.fbx .ocard .ometarow { flex-direction: column; align-items: flex-start; gap: 8px; }
+/* (4) Rails use the site's standard small card (136x170, CardAPI), the Boardz zine small card
+   with its existing torn rim. The "+" / locked slots and Nearby cards match that size. */
+.fbx .ocard .orail .orailcard, .zas .zas-rail .orailcard { flex: 0 0 var(--card-small-width); height: var(--card-small-height); position: relative; }
+.fbx .ocard .orail .oslot, .zas .zas-rail .oslot { flex: 0 0 var(--card-small-width); min-height: var(--card-small-height); }
+.fbx .ocard .orail .omini { flex: 0 0 var(--card-small-width); min-height: var(--card-small-height); }
+.zas .zas-rail .oslot {
+  display: grid; place-items: center; border: 1.5px dashed var(--tile); border-radius: 9px; background: var(--z-black); color: var(--tile); cursor: pointer;
+}
+.zas .zas-rail .oslot span { font: 300 44px/1 var(--font-display); }
+/* (6) FEED: the pregame CTA. Transparent, no scroll, no input; the newest bubbles that fit. */
+.fbx .ocard .ofeed--pregame .ofeed-peek {
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; width: 100%;
+  max-height: 150px; overflow: hidden; padding: 6px 0 0; margin: 0 0 2px; border: 0; background: transparent; cursor: pointer; text-align: left;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, var(--z-oled) 48px);
+  mask-image: linear-gradient(to bottom, transparent 0, var(--z-oled) 48px);
+}
+.fbx .ocard .ofeed-b { display: flex; align-items: flex-end; gap: 8px; max-width: 86%; flex: none; }
+.fbx .ocard .ofeed-b.is-mine { align-self: flex-end; flex-direction: row-reverse; }
+.fbx .ocard .ofeed-av {
+  flex: none; width: 28px; height: 28px; border-radius: 50%; overflow: hidden; display: grid; place-items: center;
+  background: var(--evz-line-2c2c35); color: var(--text-hi); font: 800 12px var(--font-display);
+}
+.fbx .ocard .ofeed-av img { width: 100%; height: 100%; object-fit: cover; }
+.fbx .ocard .ofeed-bubble {
+  display: block; padding: 8px 12px; border-radius: 16px; border-bottom-left-radius: 4px; font: 400 14px/1.35 var(--font-body, inherit);
+  background: color-mix(in srgb, var(--evz-line-2c2c35) 88%, transparent); color: var(--text-hi); text-shadow: none;
+}
+.fbx .ocard .ofeed-bubble small { display: block; color: var(--evz-gray-8a8a94); font-size: 11px; margin-bottom: 2px; }
+.fbx .ocard .ofeed-b.is-mine .ofeed-bubble { background: var(--a); color: var(--z-black); border-bottom-left-radius: 16px; border-bottom-right-radius: 4px; }
+.fbx .ocard .ofeed-cta { display: grid; justify-items: center; gap: 8px; text-align: center; padding: 18px 12px 8px; background: transparent; }
+.fbx .ocard .ofeed-cta-t { margin: 0; font: 800 22px/1 var(--font-display); text-transform: uppercase; letter-spacing: .02em; color: var(--text-hi); }
+.fbx .ocard .ofeed-cta-s { margin: 0; color: var(--evz-mist-cfd8de); font-size: 14px; max-width: 30ch; }
+.fbx .ocard .ofeed-cta .obtn { margin-top: 6px; }
+
+.fbx .ocard .ofeed--pregame .ofeed-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.fbx .ocard .ofeed--pregame .ofeed-cta { padding-top: 10px; }
+.fbx .ocard .ofeed--pregame .ofeed-cta { padding: 6px 12px 14px; }
+.fbx .ocard .ofeed--pregame .ofeed-cta .obtn { margin-top: 0; }

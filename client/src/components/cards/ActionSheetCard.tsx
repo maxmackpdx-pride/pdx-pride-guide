@@ -25,6 +25,10 @@ export type ActionSheetAction = {
   /** Accent rim (the one primary action). */
   primary?: boolean;
   disabled?: boolean;
+  /** Leading mark, e.g. a ride app's brand mark (t327u). */
+  icon?: ReactNode;
+  /** Accent for this one button (a token, or a third-party brand color). */
+  color?: string;
 };
 
 export type ActionSheetCardProps = {
@@ -50,10 +54,12 @@ export type ActionSheetCardProps = {
   /** "sheet" docks to the bottom (option lists); "card" centers (items, popups). */
   placement?: "sheet" | "card";
   wide?: boolean;
+  /** Logo and title centered in the header (Ridez, t334u). */
+  centered?: boolean;
   children?: ReactNode;
 };
 
-export function ActionSheetCard({ accent, kicker, title, icon, logo = null, label, origin = null, motion = "flip", iconOrigin = null, onDismiss, actions = [], placement = "card", wide = false, children }: ActionSheetCardProps) {
+export function ActionSheetCard({ accent, kicker, title, icon, logo = null, label, origin = null, motion = "flip", iconOrigin = null, onDismiss, actions = [], placement = "card", wide = false, centered = false, children }: ActionSheetCardProps) {
   const box = useRef<HTMLDivElement | null>(null);
   const iconEl = useRef<HTMLSpanElement | null>(null);
   const closing = useRef(false);
@@ -76,7 +82,7 @@ export function ActionSheetCard({ accent, kicker, title, icon, logo = null, labe
   }, []);
   return (
     <div className={`zas-scrim zas-scrim--${placement}`} onClick={e => { if (e.target === e.currentTarget) dismiss(); }}>
-      <div ref={box} className={`zas zas--${placement}${wide ? " zas--wide" : ""}`} role="dialog" aria-modal="true" aria-label={label}
+      <div ref={box} className={`zas zas--${placement}${wide ? " zas--wide" : ""}${centered ? " zas--centered" : ""}`} role="dialog" aria-modal="true" aria-label={label}
         style={{ "--tile": accent } as CSSProperties}
         onPointerDown={e => {
           if ((e.target as HTMLElement).closest("a,button,input,textarea,select,.zas-scroll")) return;
@@ -103,10 +109,11 @@ export function ActionSheetCard({ accent, kicker, title, icon, logo = null, labe
         {actions.length ? (
           <div className="zas-acts">
             {actions.map(a => a.href ? (
-              <a key={a.label} data-action={a.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")} className={`obtn zas-act${a.primary ? " obtn--accent" : ""}`} href={a.href}
+              <a key={a.label} data-action={a.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")} className={`obtn zas-act${a.primary ? " obtn--accent" : ""}${a.icon ? " zas-act--brand" : ""}`} href={a.href}
+                style={a.color ? ({ "--obtn-c": a.color } as CSSProperties) : undefined}
                 target={a.external ? "_blank" : undefined} rel={a.external ? "noreferrer" : undefined}
                 onClick={() => { a.onClick?.(); if (!a.external) return; window.setTimeout(() => dismiss(), 0); }}>
-                {a.label} <span>{a.external ? "↗" : "›"}</span>
+                {a.icon ? <span className="zas-act-mark">{a.icon}</span> : null}{a.label} <span>{a.external ? "↗" : "›"}</span>
               </a>
             ) : (
               <button key={a.label} type="button" data-action={a.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")} className={`obtn zas-act${a.primary ? " obtn--accent" : ""}`} disabled={a.disabled} onClick={a.onClick}>

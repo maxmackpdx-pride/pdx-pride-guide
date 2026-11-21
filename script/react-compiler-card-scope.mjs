@@ -42,6 +42,8 @@ export const openCardModules = [
   ['cards/ActionSheetCard', ['ActionSheetCard']],
   ['cards/FormCard', ['FormCard']],
   ['cards/cardLogo', ['CardLogoMark']],
+  ['events/EventRailCards', ['EventRailCard']],
+  ['cards/rideBrands', ['RideBrandMark']],
   ['inbox/InboxGroupChat', ['TimedInboxGroupChat']],
   ['HeartButton', ['HeartButton']],
 ];
@@ -65,8 +67,8 @@ export const cardSourcePatterns = [
   /[\\/]client[\\/]src[\\/]components[\\/]board[\\/]BoardBrowseCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]board[\\/]punk[\\/]PunkBoardCard\.jsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]board[\\/]punk[\\/]ZineCard\.jsx$/,
-  /[\\/]client[\\/]src[\\/]components[\\/]events[\\/](?:OpenEventCard|OpenCardShare|EventFormCards|EventParticipation)\.tsx$/,
-  /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/](?:ActionSheetCard|FormCard|cardLogo)\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]events[\\/](?:OpenEventCard|OpenCardShare|EventFormCards|EventParticipation|EventRailCards)\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/](?:ActionSheetCard|FormCard|cardLogo|rideBrands)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]inbox[\\/]InboxGroupChat\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]HeartButton\.tsx$/,
 ];

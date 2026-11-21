@@ -51,11 +51,14 @@ export default function EventPlanning({
   occurrenceDate,
   night,
   nightOrigin,
+  rideKind,
   hideInlineRides = false,
   hideGigs = false,
 }: {
   eventId: number;
   occurrenceDate: string;
+  /** Ridez "+" (t336u): the direction the user picked, preselected in the offer form. */
+  rideKind?: "carpool" | "home";
   /** Open straight into the At-the-event sheet on this tab (open card tiles). */
   night?: "rides" | "afterz";
   /** Tile-face rect the At-the-event dialog grows from. */
@@ -78,6 +81,7 @@ export default function EventPlanning({
       userId={user?.id}
       night={night}
       nightOrigin={nightOrigin}
+      rideKind={rideKind}
       hideInlineRides={hideInlineRides}
       hideGigs={hideGigs}
     />
@@ -95,9 +99,11 @@ function PlanningPanel({
   userId,
   night,
   nightOrigin = null,
+  rideKind,
   hideInlineRides,
   hideGigs,
 }: {
+  rideKind?: "carpool" | "home";
   eventId: number;
   date: string;
   userId?: number;
@@ -294,6 +300,7 @@ function PlanningPanel({
           {open && !rides.some((r) => r.mine) && (
             <RideOfferForm
               eventId={eventId}
+              initialKind={rideKind}
               checked={!!query.data.checked}
               busy={mutation.isPending}
               send={(payload) => act("POST", "/rides", payload)}

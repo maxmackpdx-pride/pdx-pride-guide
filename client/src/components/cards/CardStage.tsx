@@ -31,6 +31,8 @@ export function CardStage({ children, front = false, onClose, className = '' }: 
       }
       frame.current?.style.setProperty('--card-stage-top', top + 'px');
       frame.current?.style.setProperty('--card-stage-bottom', bottom + 'px');
+      // Shared with portaled dialogs (carpool) so every backdrop stops above the dock.
+      document.documentElement.style.setProperty('--z-dock-h', bottom + 'px');
       // Open event sheets start halfway over the top bar.
       frame.current?.style.setProperty('--card-stage-nav-mid', (navMid || top) + 'px');
     };

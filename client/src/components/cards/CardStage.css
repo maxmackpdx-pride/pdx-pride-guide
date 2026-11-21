@@ -6,9 +6,9 @@
   place-items: center;
   isolation: isolate;
   box-sizing: border-box;
-  background: color-mix(in srgb, var(--z-black) 65%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--z-backdrop-tint);
+  backdrop-filter: var(--z-backdrop-filter);
+  -webkit-backdrop-filter: var(--z-backdrop-filter);
 }
 /* Open event sheet (Tucker, Nov 20): the board's dock padding (.fbx) must not
    shrink the stage, and the sheet's top edge sits halfway over the top bar

@@ -150,13 +150,15 @@ export function RideOfferForm({
   busy,
   checked,
   send,
+  initialKind = "carpool",
 }: {
   eventId: number;
+  initialKind?: RideFields["kind"];
   busy: boolean;
   checked: boolean;
   send: (body: RideFields & { area: string; seats: number }) => void;
 }) {
-  const [kind, setKind] = useState<RideFields["kind"]>("carpool"),
+  const [kind, setKind] = useState<RideFields["kind"]>(initialKind),
     [oneWay, setOneWay] = useState(false),
     rooms = useAfterzNights();
   const joined = (rooms.data ?? []).filter(
@@ -188,10 +190,8 @@ export function RideOfferForm({
           value={kind}
           onChange={(e) => setKind(e.target.value as RideFields["kind"])}
         >
-          <option value="carpool">Carpool to the event</option>
-          <option value="home" disabled={!checked}>
-            Offer ride home
-          </option>
+          <option value="carpool">Arriving: carpool to the event</option>
+          <option value="home">Departing: ride home</option>
           <option value="afterz" disabled={!checked || !joined.length}>
             Ride to Afterz
           </option>
