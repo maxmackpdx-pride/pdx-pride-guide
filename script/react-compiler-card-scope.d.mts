@@ -7,3 +7,4 @@ export declare const cardCompilerExcludedPatterns: RegExp[];
 
 export declare const placezCompilerModules: string[];
 export declare function cardCompilerFunction(module: string): string;
+export declare const openCardModules: [string, string[]][];

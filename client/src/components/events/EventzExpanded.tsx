@@ -36,7 +36,9 @@ import { POSTER_DETAIL_SIZES, restoreOriginalPoster } from "@/lib/responsivePost
 import UserAvatar from "@/components/UserAvatar";
 import AuthModal from "@/components/AuthModal";
 import MissedConnectionsPanel from "@/components/MissedConnectionsPanel";
-import EventModal, { type EventModalOriginRect } from "@/components/EventModal";
+import { EventManageModal as EventModal, type EventModalOriginRect } from "@/components/EventModal";
+import OpenEventCard from "./OpenEventCard";
+import type { EventListing } from "@shared/multiDayEvents";
 import "./EventzExpanded.css";
 
 /**
@@ -117,6 +119,8 @@ const PAGES = ["Info", "Feed", "Maps", "More", "People"] as const;
 type EventzExpandedProps = {
   openPlanning?: boolean;
   openChat?: boolean;
+  /** ?manage=1: open straight into the legacy manage view. */
+  openManage?: boolean;
   event: Event;
   onClose: () => void;
   onEventUpdated?: (event: Event) => void;
@@ -125,20 +129,20 @@ type EventzExpandedProps = {
   onOpenEvent?: (event: Event) => void;
 };
 
-export default function EventzExpanded({ event, onClose, onEventUpdated, originRect = null, documentMeta = true, onOpenEvent, openPlanning = false, openChat = false }: EventzExpandedProps) {
-  const [expandedKey, setExpandedKey] = useState("");
-  const [manage, setManage] = useState(openChat);
+export default function EventzExpanded({ event, onClose, onEventUpdated, originRect = null, documentMeta = true, onOpenEvent, openPlanning = false, openChat = false, openManage = false }: EventzExpandedProps) {
+  const [manage, setManage] = useState(openChat || openManage);
   if (!event || typeof event.id !== "number") return null;
   const key = event.id + "/" + event.dateStart;
   if (manage) {
     return <EventModal initialSection={openChat ? "attendance" : undefined} event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} documentMeta={documentMeta} />;
   }
-  if (!openPlanning && expandedKey !== key) return <EventFrontStage key={key} listing={event} onClose={onClose} onExpand={() => setExpandedKey(key)} />;
+  // One open card everywhere (Tucker, t276u): no preview step, no legacy layout.
+  void onOpenEvent;
   return (
-    <CardStage key={event.id} onClose={onClose}>
+    <>
       {documentMeta ? <OpenCardMeta title={event.title} description={event.venueName || event.description} /> : null}
-      <EventzExpandedInner openPlanning={openPlanning} event={event} onClose={() => closeOpenCard(onClose)} onManage={() => setManage(true)} onOpenEvent={onOpenEvent} />
-    </CardStage>
+      <OpenEventCard key={key} listing={event as unknown as EventListing} onClose={onClose} initialPage={openPlanning ? 4 : 0} originRect={originRect} />
+    </>
   );
 }
 

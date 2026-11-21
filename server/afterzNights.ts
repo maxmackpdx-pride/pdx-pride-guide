@@ -4,6 +4,7 @@ import type { Express, RequestHandler } from "express";
 import type { Event } from "@shared/schema";
 import { hasPublicEventFlags } from "@shared/publicEventVisibility";
 import { expandMultiDayEvents } from "@shared/multiDayEvents";
+import { getAfterzWindow } from "@shared/afterzWindow";
 import {
   pacificCalendarDate,
   parsePacificDateTime,
@@ -66,16 +67,9 @@ export function afterzNights(
       (e) => pacificCalendarDate(e.dateStart) === date,
     );
     if (!e) return;
-    const start = parsePacificDateTime(e.dateStart),
-      end = parsePacificDateTime(e.dateEnd);
-    if (
-      start == null ||
-      end == null ||
-      now() < start - 72 * hour ||
-      now() >= end + hour / 2
-    )
-      return;
-    return { start, closesAt: end + hour / 2 };
+    const w = e.dateEnd ? getAfterzWindow(e.dateStart, e.dateEnd, now()) : null;
+    if (!w || w.state !== "open") return;
+    return { start: w.start, closesAt: w.closesAt };
   };
   const live = (night: Night) => {
     const e = catalog?.event(night.eventId);

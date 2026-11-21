@@ -1,0 +1,73 @@
+/* ActionSheetCard (Tucker, t305u). See docs/design/ACTION_SHEET_CARD.md. */
+.zas-scrim {
+  position: absolute; inset: 0; z-index: 40; display: grid; justify-items: center; padding: 14px;
+  background: color-mix(in srgb, var(--z-oled) 50%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  animation: zas-scrim-in .22s ease-out;
+}
+.zas-scrim--card { place-items: center; }
+.zas-scrim--sheet { align-items: end; padding: 0; }
+@keyframes zas-scrim-in { from { opacity: 0; } to { opacity: 1; } }
+/* Deep glass in the opener's accent: near-black fill, black keyline, accent
+   edge, two-ring glow (same recipe as the open card's edge). */
+.zas {
+  position: relative; box-sizing: border-box; width: min(360px, 100%); max-height: calc(100% - 8px); overflow: auto;
+  padding: 18px 16px 16px; border-radius: 14px; scrollbar-width: none; color: var(--text-hi);
+  background: radial-gradient(120% 70% at 50% 0, color-mix(in srgb, var(--tile) 12%, transparent), transparent 60%), var(--fbx-card, var(--z-oled));
+  border: 1px solid color-mix(in srgb, var(--tile) 63%, var(--evz-line-17171d, var(--z-black)));
+  box-shadow: 0 0 0 2px var(--z-black), 0 0 9px 1px color-mix(in srgb, var(--tile) 41%, transparent),
+    0 0 18px color-mix(in srgb, var(--tile) 18%, transparent), 0 30px 70px color-mix(in srgb, var(--z-oled) 75%, transparent);
+  transform-origin: 50% 50%; backface-visibility: hidden; will-change: transform, opacity;
+}
+.zas::-webkit-scrollbar { display: none; }
+.zas--wide { width: min(420px, 100%); }
+.zas--sheet { width: min(620px, 100%); border-radius: 18px 18px 0 0; border-bottom: 0; padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); touch-action: pan-x; }
+.zas-grab { display: block; width: 40px; height: 4px; border-radius: 2px; margin: -8px auto 10px; background: color-mix(in srgb, var(--tile) 60%, var(--text-hi)); opacity: .6; }
+.zas-x { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 50%; border: 0; background: none; color: var(--text-hi); font-size: 16px; cursor: pointer; }
+.zas-head { display: flex; align-items: center; gap: 10px; padding-right: 44px; margin-bottom: 12px; }
+.zas-icon { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 12px; border: 1.5px solid var(--tile); color: var(--tile); background: var(--z-black); }
+.zas-icon svg { width: 20px; height: 20px; }
+.zas-kicker { margin: 0; font: 700 11.5px var(--font-display); letter-spacing: .24em; color: var(--tile); text-transform: uppercase; }
+.zas-kicker span { display: block; margin-top: 4px; color: var(--text-hi); letter-spacing: .08em; font-size: 16px; font-weight: 800; }
+.zas-acts { display: grid; gap: 10px; margin-top: 4px; }
+.zas-act { width: 100%; justify-content: space-between !important; }
+.zas-act span { color: var(--tile); }
+.zas-note { font: 500 13px/1.45 var(--font-body); color: var(--evz-mist-cfd8de, var(--text-hi)); margin: 0 0 12px; }
+.zas-body { font: 400 14px/1.5 var(--font-body); color: var(--text-hi); margin: 0 0 14px; white-space: pre-line; }
+
+/* The card button (one class, t303u): the open card's ADD TO SCHEDULE pill.
+   Neutral = white rim on black with an accent glow; .obtn--accent = accent rim
+   (the one primary action, like GET TICKETS). */
+:is(.fbx .ocard, .zas, .zform) .obtn {
+  --obtn-c: var(--tile, var(--a, var(--text-hi)));
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 44px; min-width: 44px; padding: 0 16px; box-sizing: border-box;
+  border: 1.5px solid var(--evz-mist-f4f8fa, var(--text-hi)); border-radius: 22px;
+  /* Canonical glow recipe (glass.css / buttons.css), rebound to this
+     control so the 8% bloom takes the card's accent, not the root cyan. */
+  --button-c: var(--obtn-c);
+  --neon-bloom: 0 0 18px -4px color-mix(in srgb, var(--button-c) var(--bloom-alpha, 8%), transparent);
+  --btn-glow-bg: radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--button-c) 16%, transparent), transparent 60%), var(--z-oled);
+  --btn-glow-shadow: 0 2px 0 color-mix(in srgb, var(--button-c) 40%, var(--z-oled)),
+    inset 0 1px 0 color-mix(in srgb, var(--text-hi) 28%, transparent), inset 0 -8px 14px -8px color-mix(in srgb, var(--text-hi) 6%, transparent),
+    inset 0 10px 16px -12px color-mix(in srgb, var(--z-oled) 90%, transparent), var(--neon-bloom);
+  background: var(--btn-glow-bg);
+  box-shadow: var(--btn-glow-shadow);
+  color: var(--evz-mist-f4f8fa, var(--text-hi)); text-decoration: none; cursor: pointer;
+  font: 800 15px/1 var(--font-display); letter-spacing: .05em; text-transform: uppercase; white-space: nowrap;
+}
+:is(.fbx .ocard, .zas, .zform) .obtn:disabled { opacity: .6; cursor: progress; }
+:is(.fbx .ocard, .zas, .zform) .obtn:hover { filter: brightness(1.12); }
+:is(.fbx .ocard, .zas, .zform) .obtn:focus-visible { outline: 2px solid var(--obtn-c); outline-offset: 2px; }
+:is(.fbx .ocard, .zas, .zform) .obtn--accent { border-color: var(--obtn-c); }
+
+@media (prefers-reduced-motion: reduce) { .zas-scrim { animation: none; } }
+
+/* Family logo slot (t312u): readable, never a hero. 30px tall. */
+.zcard-logo-row { display: flex; justify-content: flex-start; margin: 0 0 10px; padding-right: 44px; }
+.zcard-logo { display: block; height: 30px; width: auto; max-width: 180px; object-fit: contain; }
+.zcard-logo--pending {
+  display: inline-grid; align-content: center; height: 30px; padding: 0 10px; box-sizing: border-box;
+  border: 1.5px dashed var(--tile); border-radius: 8px; color: var(--tile);
+  font: 900 15px/1 var(--font-display); letter-spacing: .12em;
+}
+.zcard-logo--pending small { font: 700 7px/1.2 var(--font-display); letter-spacing: .2em; color: var(--text-hi); opacity: .8; }

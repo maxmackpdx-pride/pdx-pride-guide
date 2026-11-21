@@ -1,5 +1,7 @@
+import type { CSSProperties } from "react";
 import { useForegroundCheck } from "./useForegroundCheck";
 import { useModalA11y } from "@/hooks/useModalA11y";
+import { growIn, growOut, type OriginRect } from "@/components/cards/flipCard";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -534,28 +536,45 @@ export function AtEventDialog({
   title,
   onClose,
   children,
+  accent,
+  origin = null,
+  icon = null,
 }: {
   poster: string | null;
   title: string;
   onClose: () => void;
   children: ReactNode;
+  /** Tile color from the open card (carpool orange, afterz yellow). */
+  accent?: string;
+  /** Tile-face rect (t306u): the content grows from the tile, icon morphs in. */
+  origin?: OriginRect | null;
+  icon?: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
-  const contentRef = useModalA11y({ onClose });
+  const iconRef = useRef<HTMLSpanElement>(null);
+  const closing = useRef(false);
+  const close = () => {
+    if (closing.current) return;
+    closing.current = true;
+    void growOut(contentRef.current, origin, iconRef.current, origin).then(onClose);
+  };
+  const contentRef = useModalA11y({ onClose: close });
   useEffect(() => {
     const d = ref.current;
     d?.showModal();
+    growIn(contentRef.current, origin, iconRef.current, origin);
     return () => d?.close();
   }, []);
   return createPortal(
     <dialog
       ref={ref}
-      className="at-event-dialog"
+      className={"at-event-dialog" + (accent ? " at-event-dialog--tinted" : "")}
+      style={accent ? ({ "--night-c": accent } as CSSProperties) : undefined}
       aria-label={"At " + title}
       onCancel={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        onClose();
+        close();
       }}
       onKeyDown={(e) => {
         if (e.key === "Escape") e.stopPropagation();
@@ -576,9 +595,10 @@ export function AtEventDialog({
       />
       <div ref={contentRef} className="at-event-content">
         <header>
+          {icon ? <span ref={iconRef} className="at-event-icon" aria-hidden="true">{icon}</span> : null}
           <small>At the event</small>
           <h2>{title}</h2>
-          <button autoFocus onClick={onClose}>
+          <button autoFocus onClick={close}>
             Back to event
           </button>
         </header>

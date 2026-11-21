@@ -31,6 +31,21 @@ export const placezCompilerModules = [
   'outz/native/NativeOutzideFace',
 ];
 
+/** The open event card and the new card types it opens (Tucker, t321u):
+ * module -> the component functions that must each own a compiler cache.
+ * The legacy EventModal manage view, AuthModal and VenueFollowButton stay out. */
+export const openCardModules = [
+  ['events/OpenEventCard', ['OpenEventCard', 'EventFeedChat', 'FlyerViewer']],
+  ['events/OpenCardShare', ['EventSharePopup', 'GigInvitePopup', 'ShareJoinPrompt', 'ShareImagePanel']],
+  ['events/EventFormCards', ['EventFormCard']],
+  ['events/EventParticipation', ['EventInterestedHeart', 'EventPrivateSaveButton']],
+  ['cards/ActionSheetCard', ['ActionSheetCard']],
+  ['cards/FormCard', ['FormCard']],
+  ['cards/cardLogo', ['CardLogoMark']],
+  ['inbox/InboxGroupChat', ['TimedInboxGroupChat']],
+  ['HeartButton', ['HeartButton']],
+];
+
 export function cardCompilerFunction(module) {
   if (module === 'scenez/SceneCardFace') return 'Closed';
   if (module === 'outz/native/NativeOutzideFace') return 'OutzClosed';
@@ -50,6 +65,10 @@ export const cardSourcePatterns = [
   /[\\/]client[\\/]src[\\/]components[\\/]board[\\/]BoardBrowseCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]board[\\/]punk[\\/]PunkBoardCard\.jsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]board[\\/]punk[\\/]ZineCard\.jsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]events[\\/](?:OpenEventCard|OpenCardShare|EventFormCards|EventParticipation)\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/](?:ActionSheetCard|FormCard|cardLogo)\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]inbox[\\/]InboxGroupChat\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]HeartButton\.tsx$/,
 ];
 
 export const cardCompilerExcludedPatterns = [

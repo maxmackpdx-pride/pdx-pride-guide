@@ -4,7 +4,7 @@ import { listingKey, type EventListing } from '@shared/multiDayEvents';
 import { parsePacificDateTime, pacificCalendarDate, pacificTodayDate } from '@shared/missedConnections';
 import { eventPath } from '@shared/eventSlug';
 import { resolveDirectoryLogo } from '@shared/directoryLogos';
-import { useHeart } from '@/hooks/useHearts';
+import { heartLabel, useHeart } from '@/hooks/useHearts';
 import { useModalA11y } from '@/hooks/useModalA11y';
 import { toast } from '@/hooks/use-toast';
 import { eventDateLabel, eventTimeLabel } from '@/lib/eventDisplay';
@@ -416,8 +416,8 @@ export function PosterCell({
                   <button
                     type="button"
                     className={`pheart${heart.hearted ? " saved" : ""}`}
-                    aria-label={heart.hearted ? `Remove interest in ${listing.title}` : `Mark interest in ${listing.title}`}
-                    title={heart.hearted ? "Interested" : "Mark interest"}
+                    aria-label={heartLabel(listing.title, heart.hearted).label}
+                    title={heartLabel(listing.title, heart.hearted).title}
                     disabled={heart.pending} aria-pressed={heart.hearted}
                     onClick={ev => {
                       ev.stopPropagation();
@@ -444,8 +444,8 @@ export function PosterCell({
               <button
                 type="button"
                 className={`pheart${heart.hearted ? " saved" : ""}`}
-                aria-label={heart.hearted ? `Remove interest in ${listing.title}` : `Mark interest in ${listing.title}`}
-                title={heart.hearted ? "Interested" : "Mark interest"}
+                aria-label={heartLabel(listing.title, heart.hearted).label}
+                title={heartLabel(listing.title, heart.hearted).title}
                 disabled={heart.pending} aria-pressed={heart.hearted}
                 onClick={ev => {
                   ev.stopPropagation();

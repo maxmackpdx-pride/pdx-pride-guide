@@ -3,7 +3,7 @@ import { CalendarCheck, CalendarPlus, Heart } from "lucide-react";
 import AuthModal from "@/components/AuthModal";
 import { useAuth } from "@/context/AuthContext";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
-import { useHeart, type HeartSnapshot } from "@/hooks/useHearts";
+import { heartLabel, useHeart, type HeartSnapshot } from "@/hooks/useHearts";
 import { useSavedEvents } from "@/hooks/useSavedEvents";
 
 type ReadQuery = { isPending: boolean; isError: boolean; error: unknown; refetch: () => Promise<unknown> };
@@ -48,8 +48,9 @@ export function EventInterestedHeart({ eventId, snapshot, variant }: { eventId: 
   if (eventId <= 0) return null;
   return <>
     <button type="button" className={variant === "poster" ? "oheart" : "evz-x__heart"} aria-pressed={hearted}
-      aria-label={hearted ? `Remove interest in ${snapshot.title}` : `Mark interest in ${snapshot.title}`}
-      title={hearted ? "Interested" : "Mark interest"}
+      aria-label={heartLabel(snapshot.title, hearted).label}
+      title={heartLabel(snapshot.title, hearted).title}
+      data-action="heart"
       disabled={pending}
       onClick={(e) => { e.stopPropagation(); signedIn ? toggle() : setAuth(true); }}>
       <Heart size={variant === "poster" ? 20 : 19} aria-hidden="true" fill={hearted ? "currentColor" : "none"} />

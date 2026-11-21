@@ -59,6 +59,11 @@ type BeachChatPayload = {
 type Props = {
   target: InboxGroupChatTarget;
   onBack: () => void;
+  /** "card": the open event card's FEED (Tucker, t309u/t310u). No header;
+   *  empty = dashed slot inviting the first message; otherwise a black panel
+   *  that shows only the newest bubbles that fit (no inner scroll), accent for
+   *  your own, grey for others, avatars on every bubble. */
+  variant?: "inbox" | "card";
 };
 
 /**
@@ -68,7 +73,9 @@ type Props = {
 export default function InboxGroupChat(props: Props) {
   return props.target.kind === 'COMMUNITY' ? <CommunityInboxChat slug={String(props.target.id)} onBack={props.onBack}/> : <TimedInboxGroupChat {...props}/>;
 }
-function TimedInboxGroupChat({ target, onBack }: Props) {
+function TimedInboxGroupChat({ target, onBack, variant = "inbox" }: Props) {
+  const card = variant === "card";
+  const inputRef = useRef<HTMLInputElement>(null);
   const [body, setBody] = useState("");
   const [tick, setTick] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
@@ -200,11 +207,11 @@ function TimedInboxGroupChat({ target, onBack }: Props) {
 
   return (
     <div
-      className={`inbox-group-chat inbox-group-chat--${isEvent ? "event" : isOutz ? "outz" : "beach"}`}
+      className={`inbox-group-chat inbox-group-chat--${isEvent ? "event" : isOutz ? "outz" : "beach"}${card ? " inbox-group-chat--card" : ""}${card && !isLoading && messages.length === 0 ? " is-empty" : ""}`}
       data-testid="inbox-group-chat"
       style={accentStyle}
     >
-      <header className="inbox-group-chat__head">
+      {card ? null : <header className="inbox-group-chat__head">
         <button type="button" className="inbox-exp-icon-btn" onClick={onBack} aria-label="Back to inbox" title="Back">
           <ChevronLeft size={18} />
         </button>
@@ -225,7 +232,7 @@ function TimedInboxGroupChat({ target, onBack }: Props) {
             </span>
           </div>
         </div>
-      </header>
+      </header>}
 
       {windowState === "BEFORE" && (
         <div className="inbox-group-chat__countdown" role="status" aria-live="polite">
@@ -247,7 +254,7 @@ function TimedInboxGroupChat({ target, onBack }: Props) {
           </div>
         )}
 
-        {isHost && (
+        {isHost && !card && (
           <p className="inbox-group-chat__host-hint">Host tools live on the event page. Chat with the room here.</p>
         )}
 
@@ -255,13 +262,19 @@ function TimedInboxGroupChat({ target, onBack }: Props) {
           {eventQuery.isError && <p role="alert">Could not load event chat. <button type="button" onClick={() => void eventQuery.retry()}>Retry</button></p>}
           {eventQuery.canLoadEarlier && <button type="button" disabled={eventQuery.loadingEarlier} onClick={eventQuery.earlier}>{eventQuery.loadingEarlier ? "Loading earlier messages…" : eventQuery.earlierFailed ? "Retry earlier messages" : "Load earlier messages"}</button>}
           {isLoading && <p className="inbox-group-chat__empty">Loading chat…</p>}
-          {!isLoading && !eventQuery.isError && messages.length === 0 && <p className="inbox-group-chat__empty">{emptyCopy}</p>}
+          {!isLoading && !eventQuery.isError && messages.length === 0 && (card ? (
+            <div className="inbox-group-chat__start">
+              <p className="inbox-group-chat__start-t">Start the conversation</p>
+              <p className="inbox-group-chat__start-s">{windowState === "OPEN" ? "Nobody has posted yet. Say hi to everyone going." : emptyCopy}</p>
+              {chatOpen ? <button type="button" className="obtn" onClick={() => inputRef.current?.focus()}>SAY HI</button> : null}
+            </div>
+          ) : <p className="inbox-group-chat__empty">{emptyCopy}</p>)}
           {messages.map(msg => (
             <div
               key={msg.id} data-chat-id={msg.id}
               className={`inbox-group-chat__msg${msg.isMine ? " inbox-group-chat__msg--mine" : ""}`}
             >
-              {!msg.isMine && (
+              {(!msg.isMine || card) && (
                 <UserAvatar
                   username={msg.username}
                   displayName={msg.isAnonymous ? undefined : msg.displayName}
@@ -290,6 +303,7 @@ function TimedInboxGroupChat({ target, onBack }: Props) {
 
         <footer className="inbox-group-chat__composer inbox-exp-composer">
           <input
+            ref={inputRef}
             className="inbox-exp-composer__input"
             value={body}
             onChange={e => setBody(e.target.value)}

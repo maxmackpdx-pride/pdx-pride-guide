@@ -125,7 +125,7 @@ describe("approved FlyerBoard interactions", {timeout:90_000}, () => {
     assert.equal(artReceivesHits,true);
     // Actionability checks hit-testing, visibility and coverage without sharing or saving.
     await poster.getByRole("button",{name:/^Share /}).click({trial:true});
-    await poster.getByRole("button",{name:/^Mark interest in /}).click({trial:true});
+    await poster.getByRole("button",{name:/^Interested in /}).click({trial:true});
   });
 
   test("a feed refresh preserves loaded rows and the caller’s descending title order",async t=>{

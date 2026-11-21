@@ -26,7 +26,7 @@ export function useHeart(kind: HeartKind, ref: string, snapshot: HeartSnapshot) 
   const cache = useQueryClient();
   const hearts = useHearts();
   const key = [...HEARTS_KEY, user?.id];
-  const hearted = !!hearts.data?.some(h => h.kind === kind && h.ref === ref);
+  const hearted = Array.isArray(hearts.data) && hearts.data.some(h => h.kind === kind && h.ref === ref);
   const [optimisticHearted, setOptimisticHearted] = useOptimistic(hearted, nextOptimisticFlag);
   const toggle = useMutation({
     mutationFn: () => hearted
@@ -49,4 +49,13 @@ export function useHeart(kind: HeartKind, ref: string, snapshot: HeartSnapshot) 
     toggle.mutate();
   };
   return { hearted: optimisticHearted, signedIn: !!user, loading: hearts.isLoading, pending: toggle.isPending, toggle: run };
+}
+
+/** One heart vocabulary site-wide (Tucker, t319u/t320u): a heart is "I'm
+ *  interested": it saves the card to the member's Stacks and follows its
+ *  updates. Saved state says updates are on. */
+export function heartLabel(name: string, hearted: boolean): { label: string; title: string } {
+  return hearted
+    ? { label: `Interested in ${name}, saved with updates on. Remove`, title: "Interested · saved, updates on" }
+    : { label: `Interested in ${name}: save it and get updates`, title: "Interested: save and get updates" };
 }

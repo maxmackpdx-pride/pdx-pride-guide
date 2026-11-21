@@ -1,3 +1,5 @@
+import type { OriginRect } from "@/components/cards/flipCard";
+import { Car, Moon } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
@@ -47,9 +49,21 @@ type Planning = {
 export default function EventPlanning({
   eventId,
   occurrenceDate,
+  night,
+  nightOrigin,
+  hideInlineRides = false,
+  hideGigs = false,
 }: {
   eventId: number;
   occurrenceDate: string;
+  /** Open straight into the At-the-event sheet on this tab (open card tiles). */
+  night?: "rides" | "afterz";
+  /** Tile-face rect the At-the-event dialog grows from. */
+  nightOrigin?: OriginRect | null;
+  /** The open card's CARPOOL tile owns rides; don't repeat them inline. */
+  hideInlineRides?: boolean;
+  /** The open card renders Gigz as its own rail. */
+  hideGigs?: boolean;
 }) {
   const date = /^\d{4}-\d{2}-\d{2}$/.test(occurrenceDate)
     ? occurrenceDate
@@ -62,6 +76,10 @@ export default function EventPlanning({
       eventId={eventId}
       date={date}
       userId={user?.id}
+      night={night}
+      nightOrigin={nightOrigin}
+      hideInlineRides={hideInlineRides}
+      hideGigs={hideGigs}
     />
   );
 }
@@ -75,10 +93,19 @@ function PlanningPanel({
   eventId,
   date,
   userId,
+  night,
+  nightOrigin = null,
+  hideInlineRides,
+  hideGigs,
 }: {
   eventId: number;
   date: string;
   userId?: number;
+  night?: "rides" | "afterz";
+  /** Tile-face rect the At-the-event dialog grows from. */
+  nightOrigin?: OriginRect | null;
+  hideInlineRides?: boolean;
+  hideGigs?: boolean;
 }) {
   const base = `/api/events/${eventId}/occurrences/${date}/planning`;
   const key = [base, userId ?? null];
@@ -91,10 +118,11 @@ function PlanningPanel({
   const [compose, setCompose] = useState(false);
   const [auth, setAuth] = useState(false);
   const [atEvent, setAtEvent] = useState(() =>
-    new URLSearchParams(location.search).has("night"),
+    Boolean(night) || new URLSearchParams(location.search).has("night"),
   );
   const memoryKey = "night-tab:" + eventId + ":" + date + ":" + userId;
   const [tab, setTab] = useState(() => {
+    if (night) return night;
     const action = new URLSearchParams(location.search).get("night");
     if (action === "rides" || action === "safety") return "rides";
     try {
@@ -279,6 +307,7 @@ function PlanningPanel({
   );
   return (
     <section className="event-planning" aria-label={`Event plans for ${date}`}>
+      {!hideGigs && <>
       <h3>
         Gigz <span>({gigs.length})</span>
       </h3>
@@ -311,6 +340,7 @@ function PlanningPanel({
           />
         </Suspense>
       )}
+      </>}
       <button
         type="button"
         className="at-event-launch"
@@ -319,12 +349,15 @@ function PlanningPanel({
         At the event
       </button>
       <BuddyEvent id={eventId} venue={query.data.venue}/>
-      {!atEvent && ridesPanel}
+      {!atEvent && !hideInlineRides && ridesPanel}
       {atEvent && (
         <AtEventDialog
           poster={query.data.poster}
           title={title}
           onClose={() => setAtEvent(false)}
+          accent={tab === "rides" ? "var(--neon-orange)" : tab === "afterz" ? "var(--yellow)" : undefined}
+          origin={nightOrigin}
+          icon={night === "rides" ? <Car /> : night === "afterz" ? <Moon /> : null}
         >
           <nav aria-label="Event actions">
             {[
