@@ -54,7 +54,7 @@
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  border: 1px solid color-mix(in srgb, var(--c, var(--room-placez)) 40%, transparent);
+  border: 1px solid var(--day, color-mix(in srgb, var(--c, var(--room-placez)) 40%, transparent));
   border-radius: 9px;
   background: color-mix(in srgb, var(--z-black) 70%, transparent);
   color: var(--text-meta);
@@ -79,13 +79,18 @@
 }
 .drawer-cal__day[aria-pressed="true"],
 .drawer-top .pz-calendar-day[aria-pressed="true"] {
-  border-color: var(--c, var(--room-placez));
-  background: color-mix(in srgb, var(--c, var(--room-placez)) 10%, var(--z-black));
-  color: var(--c, var(--room-placez));
+  border-color: var(--day, var(--c, var(--room-placez)));
+  background: color-mix(in srgb, var(--day, var(--c, var(--room-placez))) 16%, var(--z-black));
+  color: var(--text-hi);
+  box-shadow: inset 0 0 0 1px var(--day, var(--c, var(--room-placez)));
+}
+.drawer-cal__day[aria-pressed="true"] > span,
+.drawer-top .pz-calendar-day[aria-pressed="true"] > span {
+  color: var(--day, var(--c, var(--room-placez)));
 }
 .drawer-cal__day:focus-visible,
 .drawer-top .pz-calendar-day:focus-visible {
-  outline: 2px solid var(--c, var(--room-placez));
+  outline: 2px solid var(--day, var(--c, var(--room-placez)));
   outline-offset: 2px;
 }
 

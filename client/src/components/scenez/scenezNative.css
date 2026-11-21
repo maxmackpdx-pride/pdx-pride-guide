@@ -117,11 +117,11 @@
 .scenez-native .pz-card--expanded .pz-compose-row{margin-top:0;margin-bottom:18px}
 .scenez-native .pz-event-calendar{margin-top:22px;padding-top:18px;border-top:1px solid var(--pz-color-ffffff25)}
 .scenez-native .pz-calendar-rail{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 9px;scroll-snap-type:x proximity;scrollbar-color:var(--pz-color-435d6b) var(--pz-color-09151b);overscroll-behavior-inline:contain}
-.scenez-native .pz-calendar-day{flex:0 0 58px;min-height:82px;padding:9px 4px;display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid var(--pz-color-405963);border-radius:9px;background:var(--pz-color-0b171e);color:var(--pz-color-b4c6cf);cursor:pointer;scroll-snap-align:start}
+.scenez-native .pz-calendar-day{flex:0 0 58px;min-height:82px;padding:9px 4px;display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid var(--day, var(--pz-color-405963));border-radius:9px;background:var(--pz-color-0b171e);color:var(--pz-color-b4c6cf);cursor:pointer;scroll-snap-align:start}
 .scenez-native .pz-calendar-day>span{font:600 10px/1 var(--font-body,Barlow,sans-serif);text-transform:uppercase;letter-spacing:.06em}
 .scenez-native .pz-calendar-day>strong{font:700 25px/1 var(--font-display,'Barlow Condensed',sans-serif);color:var(--pz-paper)}
 .scenez-native .pz-calendar-day>small{font:500 9px/1.1 var(--font-body,Barlow,sans-serif)}
-.scenez-native .pz-calendar-day[aria-pressed=true]{border-color:var(--pz-accent);background:color-mix(in srgb,var(--pz-accent) 10%,var(--pz-color-071016));color:var(--pz-accent)}
+.scenez-native .pz-calendar-day[aria-pressed=true]{border-color:var(--day, var(--pz-accent));background:color-mix(in srgb,var(--day, var(--pz-accent)) 10%,var(--pz-color-071016));color:var(--pz-paper);box-shadow:inset 0 0 0 1px var(--day, var(--pz-accent))}
 .scenez-native .pz-calendar-date{font:600 11px/1.4 var(--font-body,Barlow,sans-serif);color:var(--pz-color-d4e1e8);margin:8px 0!important}
 .scenez-native .pz-calendar-empty{padding:12px;background:var(--pz-color-071016);border:1px solid var(--pz-color-ffffff16);border-radius:8px;font:400 12px/1.5 var(--font-body,Barlow,sans-serif);color:var(--pz-color-a6bac5)}
 .scenez-native .pz-calendar-events ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:7px}

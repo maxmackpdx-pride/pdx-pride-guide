@@ -224,7 +224,12 @@ await page.goto(`${base}__drawer-qa`, {waitUntil: 'networkidle'});
 if (errors.length) console.log('EARLY_ERRORS', errors);
 await page.getByRole('button', {name: /Open Placez/i}).click();
 await page.getByTestId('drawer-top').waitFor();
-await shot('placez-v12-map-drawer-top.png');
+const calendar = page.getByTestId('drawer-top-calendar');
+const busyDay = calendar.getByRole('option', {name: /\d+ events?/i}).first();
+if (await busyDay.count()) await busyDay.click();
+await shot('placez-v13-map-drawer-top.png');
+const selectedDay = calendar.locator('[aria-pressed="true"]');
+if (await selectedDay.count()) await selectedDay.first().click();
 
 const inView = page.getByTestId('placez-in-view-rail');
 await inView.waitFor();

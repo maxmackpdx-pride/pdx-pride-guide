@@ -1,9 +1,12 @@
+import type { CSSProperties } from "react";
 import type { DrawerCalendarDay } from "@shared/drawerTop";
+import { dayAccentToken } from "@/lib/dsColors";
 import "./DrawerTop.css";
 
 /**
  * Horizontal date rail under FILTERS. DrawerTop feeds 14 days (two weeks)
  * by default. Selecting a day is a button alternative to swiping the rail.
+ * Tile borders use the shared day-of-week tokens (--day-mon through --day-sun).
  */
 export default function PlacezCalendarFilter({
   days,
@@ -25,6 +28,7 @@ export default function PlacezCalendarFilter({
               key={day.key}
               type="button"
               className="pz-calendar-day drawer-cal__day"
+              style={{ "--day": dayAccentToken(day.weekday) } as CSSProperties}
               role="option"
               aria-selected={pressed}
               aria-pressed={pressed}

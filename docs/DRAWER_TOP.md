@@ -10,7 +10,7 @@ Worlds stay similar, not identical. They share the building blocks, then each wo
 2. A narrow countdown card (`DrawerCountdownCard`): one full-bleed flyer, a dark scrim, a big hologram countdown, and the next event name. No list of extra events. Replace the whole card with `countdown`, or pass a mixed list as `countdownEvents` (Outzide: featured plus next-up buddy events and carpools).
 3. `actions` (optional; Afterz uses this for the wide HOST AN AFTERZ button).
 4. `filtersTitle` (default **FILTERS**). Pass `null` to hide.
-5. A 14-day calendar rail (`PlacezCalendarFilter`). Outzide replaces this rail only with `lead` (a full-bleed In View mini-card rail). Set `showCalendar={false}` to hide it when you are not passing `lead`. `calendarLength` defaults to 14.
+5. A 14-day calendar rail (`PlacezCalendarFilter`). Outzide replaces this rail only with `lead` (a full-bleed In View mini-card rail). Set `showCalendar={false}` to hide it when you are not passing `lead`. `calendarLength` defaults to 14. Calendar day tiles use the shared day-of-week tokens (`--day-mon` through `--day-sun`) for their borders; the selected day keeps a clear inset ring and fill of that same token.
 6. Compact filter chips (`DrawerFilterRail`). Only place-type chips use category colors. Event, time, and tag chips stay neutral.
 7. `after` (optional; Afterz uses this for yellow-bloom RSVP cards and off-hours explainer copy).
 8. A divider, then the drawer’s existing titled sections.

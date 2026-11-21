@@ -1,5 +1,6 @@
 import {Link} from 'wouter';
-import {useEffect,useId,useState} from 'react';
+import {useEffect,useId,useState,type CSSProperties} from 'react';
+import {dayAccentToken} from '@/lib/dsColors';
 import {buildEventCalendar,eventPublicHref,type CalendarFeed} from './eventCalendar';
 
 export default function SevenDayEvents({feed,venueId,previewNow}:{feed?:CalendarFeed;venueId:number;previewNow?:number}) {
@@ -15,7 +16,7 @@ export default function SevenDayEvents({feed,venueId,previewNow}:{feed?:Calendar
   const active=days.find(d=>d.key===selected)||days.find(d=>d.events.length)||days[0];
   return <section className="pz-event-calendar" aria-labelledby={id}>
     <div className="pz-section-heading"><h3 id={id}>Next 7 days</h3><span>Events · {calendar.zoneLabel||'Local time'}</span></div>
-    <div className="pz-calendar-rail" aria-label="Choose an event day">{days.map(day=><button key={day.key} type="button" className="pz-calendar-day" aria-pressed={active?.key===day.key} aria-controls={`${id}-events`} aria-label={`${day.label}. ${calendar.fresh?`${day.events.length} upcoming ${day.events.length===1?'event':'events'}`:'Listings need refresh'}`} onClick={()=>setSelected(day.key)}>
+    <div className="pz-calendar-rail" aria-label="Choose an event day">{days.map(day=><button key={day.key} type="button" className="pz-calendar-day" style={{'--day':dayAccentToken(day.weekday)} as CSSProperties} aria-pressed={active?.key===day.key} aria-controls={`${id}-events`} aria-label={`${day.label}. ${calendar.fresh?`${day.events.length} upcoming ${day.events.length===1?'event':'events'}`:'Listings need refresh'}`} onClick={()=>setSelected(day.key)}>
       <span>{day.weekday}</span><strong>{day.day}</strong><small>{calendar.fresh?(day.events.length?`${day.events.length} ${day.events.length===1?'event':'events'}`:'—'):'—'}</small>
     </button>)}</div><p className="pz-calendar-help">Scroll for all 7 days</p>
     <div className="pz-calendar-events" id={`${id}-events`} aria-live="polite">
