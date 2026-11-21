@@ -55,7 +55,7 @@
   /* Community board identity colors */
   --board-spotted: var(--neon-magenta);
   --board-gifting: var(--neon-yellow);
-  --board-gigs: #6E3DFF; /* product live gig purple */
+  --board-gigs: #7B00FF; /* Gigz violet — design guide token, law (Tucker, Nov 21, 2026) */
   --board-zspace: #8F5CFF; /* z/ index violet, one step lighter than gigs */
 
   /* Day colors - mirror of shared/eventWeek.ts (DAY_COLORS / DAY_TEXT_COLORS) */

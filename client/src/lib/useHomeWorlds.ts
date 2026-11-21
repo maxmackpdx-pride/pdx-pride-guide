@@ -78,7 +78,7 @@ type BeachCheckin = { id: number };
  */
 const TODAY_ACCENTS = [
   "var(--day-thu, #00ffff)",
-  "var(--board-gigs, #6e3dff)",
+  "var(--board-gigs, #7b00ff)",
   "var(--neon-green, #2BFF00)",
   "var(--board-spotted, #FF1FA0)",
   "var(--board-gifting, #D4FF00)",
