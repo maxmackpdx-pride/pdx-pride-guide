@@ -24,26 +24,27 @@ export function useAfterzNights() {
     enabled: !!user, retry: false, refetchInterval: 60_000, gcTime: 0,
   });
 }
-function useAfterzWindow() {
+function useAfterzWindow(previewNow?: number) {
   const [now, setNow] = useState(Date.now);
-  const clock = afterzWindowState(now);
+  const clock = afterzWindowState(previewNow ?? now);
   useEffect(() => {
+    if (previewNow !== undefined) return;
     const refresh = () => setNow(Date.now());
     const next = (clock.open ? clock.closesAt : clock.opensAt) - Date.now();
     const timer = window.setTimeout(refresh, Math.max(1, next));
     document.addEventListener("visibilitychange", refresh);
     return () => { clearTimeout(timer); document.removeEventListener("visibilitychange", refresh); };
-  }, [clock.open, clock.opensAt, clock.closesAt]);
+  }, [clock.open, clock.opensAt, clock.closesAt, previewNow]);
   return clock.open;
 }
 
-export default function NightDrawer({ roomId, onRoomChange, eventId, occurrenceDate, showWordmark = true }: {
-  eventId?: number; occurrenceDate?: string; showWordmark?: boolean;
+export default function NightDrawer({ roomId, onRoomChange, eventId, occurrenceDate, previewNow, showWordmark = true }: {
+  eventId?: number; occurrenceDate?: string; showWordmark?: boolean; previewNow?: number;
   roomId?: string | null; onRoomChange?: (id: string | null) => void;
 } = {}) {
   const { user } = useAuth();
   const client = useQueryClient();
-  const open = useAfterzWindow();
+  const open = useAfterzWindow(previewNow);
   const occurrence = occurrenceDate ? pacificCalendarDate(occurrenceDate) : null;
   const nights = useAfterzNights();
   const mine = useQuery<Gathering[]>({ queryKey: [base, "mine", user?.id],

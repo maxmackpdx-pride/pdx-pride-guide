@@ -1163,6 +1163,13 @@ function mayReadEventDetail(req: express.Request, event: Event): boolean {
   return !publicOnly && (staff || (!!req.session?.userId && storage.isUserEventHost(event.id, req.session.userId)));
 }
 
+/** Directory rails and promoter counts share the viewer's event visibility. */
+function directoryEventsForViewer(req: express.Request) {
+  return storage.getEvents({ status: "LIVE" }).filter(event =>
+    canSharePublicEvent(event) || mayReadEventDetail(req, event)
+  );
+}
+
 // ─── SOURCE LINK GATE — THE one place this visibility is decided ───
 // Tucker (Nov 19, 2026): the expanded event card's SOURCE LINK button is
 // visible only to admins, the event's promoters/hosts, and the event's
@@ -3130,13 +3137,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // ── Business Directory ──────────────────────────────────────────────────
   app.get("/api/directory", async (req, res, next) => {
     try {
+      res.set("Cache-Control", "private, no-store");
     const { type, neighborhood, queerOwned } = req.query as Record<string, string>;
     const businesses = storage.getBusinesses({
       type: type || undefined,
       neighborhood: neighborhood || undefined,
       queerOwned: queerOwned === "true" ? true : undefined,
     });
-    const liveEvents = storage.getEvents({ status: "LIVE" });
+    const liveEvents = directoryEventsForViewer(req);
     // Upcoming Pride nights + past (LIVE past + Tucker archive for Sanctuary/Eagle)
     const withEvents = await attachEventsToBusinessesAsync(businesses, liveEvents);
     const promoterMap = storage.getPromotersForBusinesses(businesses, liveEvents);
@@ -3433,10 +3441,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // show (missing or CLOSED) is a 404 here too.
   app.get("/api/directory/:id", async (req, res, next) => {
     try {
+      res.set("Cache-Control", "private, no-store");
       const id = Number(req.params.id);
       if (!Number.isInteger(id) || id <= 0) return res.status(404).json({ error: "Place not found" });
       const businesses = storage.getBusinesses({});
-      const liveEvents = storage.getEvents({ status: "LIVE" });
+      const liveEvents = directoryEventsForViewer(req);
       const withEvents = await attachEventsToBusinessesAsync(businesses, liveEvents);
       const promoterMap = storage.getPromotersForBusinesses(businesses, liveEvents);
       const withPromoters = attachPromotersToBusinesses(withEvents, pid => promoterMap.get(pid) ?? []);
@@ -3470,7 +3479,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   // The blended endpoint stays for legacy clients.
   async function directoryFamilyDetail(req: any, id: number, family: "placez") {
     const businesses = storage.getBusinesses({});
-    const liveEvents = storage.getEvents({ status: "LIVE" });
+    const liveEvents = directoryEventsForViewer(req);
     const withEvents = await attachEventsToBusinessesAsync(businesses, liveEvents);
     const promoterMap = storage.getPromotersForBusinesses(businesses, liveEvents);
     const withPromoters = attachPromotersToBusinesses(withEvents, pid => promoterMap.get(pid) ?? []);
@@ -3501,6 +3510,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.get("/api/placez/:id", async (req: any, res, next) => {
     try {
+      res.set("Cache-Control", "private, no-store");
       const id = Number(req.params.id);
       if (!Number.isInteger(id) || id <= 0) return res.status(404).json({ error: "Place not found" });
       const payload = await directoryFamilyDetail(req, id, "placez");
@@ -5052,7 +5062,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/events/:id/missed-connections", (req: any, res) => {
     const evt = storage.getEvent(Number(req.params.id));
     if (!evt || !mayReadEventDetail(req, evt)) return res.status(404).json({ error: "Not found" });
-    res.json(storage.getMissedConnectionsByEvent(evt.id, req.session?.userId));
+    const canShare = canSharePublicEvent(evt);
+    res.set("Cache-Control", "private, no-store").json(storage.getMissedConnectionsByEvent(evt.id, req.session?.userId).map(post => ({ ...post, canShare })));
   });
 
   app.get("/api/missed-connections/mine", requireAuth, (req, res) => {

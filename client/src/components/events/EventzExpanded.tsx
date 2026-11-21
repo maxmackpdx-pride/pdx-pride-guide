@@ -274,7 +274,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
   // carry: "More at {venue}" (next-7-days strip on More + Nearby) and the
   // Promoters block on People.
   const placeQuery = useQuery<{ upcomingEvents?: PlaceUpcomingEvent[]; promoters?: PlacePromoter[] }>({
-    queryKey: ["/api/placez", venue?.id, "card-extras"],
+    queryKey: ["/api/placez", venue?.id, "card-extras", user?.id],
     queryFn: () => apiRequest("GET", `/api/placez/${venue!.id}`).then((r) => r.json()),
     enabled: Boolean(venue?.id) && (visited.includes(3) || visited.includes(4)),
     staleTime: 300_000,
