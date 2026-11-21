@@ -99,6 +99,7 @@ export default function AfterzHostForm({
           label="Blast audience"
           accent="var(--yellow)"
           testId="afterz-audience-toggle"
+          layout="rows"
         />
       </div>
       <label className="afterz-host-form__radius">

@@ -11,6 +11,7 @@ import { rsvpAfterzNo, rsvpAfterzYes } from "@/lib/afterzDrawerApi";
 import { AFTERZ_OFF_HOURS_COPY, afterzWindowState, type AfterzWindowState } from "@shared/afterzWindow";
 import { EMPTY_DRAWER_FILTERS, type DrawerFilterState } from "@shared/drawerFilters";
 import type { DrawerTopEvent } from "@shared/drawerTop";
+import { centerThenOpenFromDrawer } from "@/lib/placezEventsDrawerApi";
 import type { RidezNeed } from "@shared/ridezNeeds";
 import "./AfterzDrawer.css";
 import "@/components/ridez/ridez.css";
@@ -122,6 +123,7 @@ export default function AfterzDrawer({
             filters={filters}
             onFiltersChange={setFilters}
             now={at}
+            onOpenEvent={event => { void centerThenOpenFromDrawer({ kind: "event", id: event.id, title: event.title, lat: event.lat, lng: event.lng }); }}
             actions={!hostOpen ? (
               <button
                 type="button"

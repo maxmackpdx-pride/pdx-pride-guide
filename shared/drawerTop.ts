@@ -78,6 +78,16 @@ export function remainingToStart(dateStart: string, now = Date.now()): DrawerCou
   };
 }
 
+/** Digits for the Up Next card. Uses the provided `now` so fixture clocks stay stable. After start, returns zeros so the DAYS/HRS/MIN row always renders. */
+export function countdownUnits(dateStart: string, now = Date.now()): DrawerCountdownRemaining {
+  return remainingToStart(dateStart, now) ?? {
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    starts: parsePacificDateTime(dateStart) ?? now,
+  };
+}
+
 export function formatDrawerCountdown(remaining: DrawerCountdownRemaining): string {
   const hours = String(remaining.hours).padStart(2, "0");
   const minutes = String(remaining.minutes).padStart(2, "0");

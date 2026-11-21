@@ -8,7 +8,8 @@ import { UpcomingOutdoorEvents } from "@/components/outz/BuddyHosting";
 import OutzideInViewRail from "@/components/outz/OutzideInViewRail";
 import { useMapViewportItems } from "@/hooks/useMapViewportItems";
 import { useEventRsvp } from "@/hooks/useEventRsvp";
-import { fetchOutzideFeatured, openOutzideCountdownItem } from "@/lib/outzideDrawerApi";
+import { fetchOutzideFeatured } from "@/lib/outzideDrawerApi";
+import { centerThenOpenFromDrawer } from "@/lib/placezEventsDrawerApi";
 import { EMPTY_DRAWER_FILTERS, type DrawerFilterState, type InViewItem } from "@shared/drawerFilters";
 import { nextOutzideCountdown, type OutzideCountdownItem } from "@shared/outzideDrawer";
 import type { DrawerTopEvent } from "@shared/drawerTop";
@@ -80,7 +81,7 @@ export default function OutzideDrawer({
             filters={filters}
             onFiltersChange={setFilters}
             now={countdownNow}
-            onOpenEvent={event => openOutzideCountdownItem(event)}
+            onOpenEvent={event => { void centerThenOpenFromDrawer({ kind: "event", id: event.id, title: event.title, lat: event.lat, lng: event.lng }); }}
             lead={
               live.loading && leadItems == null ? (
                 <p className="outz-drawer-status" role="status">Loading what is in view…</p>
@@ -97,8 +98,6 @@ export default function OutzideDrawer({
                     if (kind === "event") rsvp.toggleRsvp(id);
                     else setAuth(true);
                   }}
-                  onOpenEvent={event => openOutzideCountdownItem(event)}
-                  onOpenPlace={(id, name) => { window.location.assign(`/outzide/${id}`); void name; }}
                 />
               )
             }

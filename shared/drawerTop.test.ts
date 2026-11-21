@@ -4,6 +4,7 @@ import {
   buildDrawerCalendarDays,
   formatDrawerCountdown,
   nextDrawerEvents,
+  countdownUnits,
   remainingToStart,
   type DrawerTopEvent,
 } from "./drawerTop";
@@ -48,4 +49,20 @@ test("countdown card source is the next upcoming event name", () => {
   const onFriday = nextDrawerEvents(events, now, 3, "2026-11-20");
   assert.deepEqual(onFriday.map(event => event.title), ["Yes Coach", "Late show"]);
   assert.ok(!nextDrawerEvents(events, now, 3).some(event => event.title === "Already started"));
+});
+
+test("countdown digits use the provided now, and stay visible after start", () => {
+  const noon = Date.parse("2026-11-20T12:00:00-08:00");
+  const remaining = countdownUnits("2026-11-20T16:00:00", noon);
+  assert.equal(remaining.days, 0);
+  assert.equal(remaining.hours, 4);
+  assert.equal(remaining.minutes, 0);
+  // Wall-clock evening would hide digits if the card used Date.now(); the
+  // provided now keeps the 4pm buddy event counting down at noon.
+  const evening = Date.parse("2026-11-20T21:35:00-08:00");
+  const past = countdownUnits("2026-11-20T16:00:00", evening);
+  assert.equal(past.days, 0);
+  assert.equal(past.hours, 0);
+  assert.equal(past.minutes, 0);
+  assert.equal(remainingToStart("2026-11-20T16:00:00", evening), null);
 });

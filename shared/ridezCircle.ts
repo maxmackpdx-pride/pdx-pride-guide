@@ -4,9 +4,9 @@ export type RidezCircle = "everybody" | "friends" | "fof";
 export type RideCircleTag = "you" | "friend" | "fof" | "everybody";
 
 export const RIDEZ_CIRCLES: { value: RidezCircle; label: string; short: string }[] = [
-  { value: "everybody", label: "Everybody", short: "EVERYBODY" },
-  { value: "friends", label: "Friends", short: "FRIENDS" },
-  { value: "fof", label: "Friends of friends", short: "FOF" },
+  { value: "everybody", label: "Everybody", short: "Everybody" },
+  { value: "friends", label: "Friends", short: "Friends" },
+  { value: "fof", label: "Friends of friends", short: "Friends of friends" },
 ];
 
 /** Friends keeps you + friends; Friends of friends also keeps their friends. Unknown tags stay under Everybody only. */

@@ -18,16 +18,20 @@ import "./DrawerTop.css";
 export default function DrawerCountdownCard({
   events,
   onOpen,
+  now: nowProp,
 }: {
   events: DrawerTopEvent[];
   onOpen?: (event: DrawerTopEvent) => void;
+  now?: number;
 }) {
   "use memo";
-  const [now, setNow] = useState(() => Date.now());
+  const [tick, setTick] = useState(() => Date.now());
   useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 30000);
+    if (nowProp != null) return;
+    const id = window.setInterval(() => setTick(Date.now()), 30000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [nowProp]);
+  const now = nowProp ?? tick;
   const event = events[0];
   if (!event) {
     return (

@@ -57,12 +57,17 @@ export default function RidezNeedList({
                   data-testid="ridez-need-card"
                   data-bloom={bloom || "none"}
                 >
-                  <p className="zridez-need__name">{need.name}</p>
-                  <p className="zridez-need__meta">
-                    {need.direction === "departing" ? "Departing" : "Arriving"}
-                    {need.afterzTitle ? ` · ${need.afterzTitle}` : need.eventTitle ? ` · ${need.eventTitle}` : ""}
-                    {need.neighborhood ? ` · ${need.neighborhood}` : ""}
-                  </p>
+                  <span className="zridez-need__av" aria-hidden="true">
+                    {need.photoUrl ? <img src={need.photoUrl} alt="" /> : need.name.slice(0, 1).toUpperCase()}
+                  </span>
+                  <div className="zridez-need__body">
+                    <p className="zridez-need__name">{need.name}</p>
+                    <p className="zridez-need__meta">
+                      {need.direction === "departing" ? "Departing" : "Arriving"}
+                      {need.afterzTitle ? ` · ${need.afterzTitle}` : need.eventTitle ? ` · ${need.eventTitle}` : ""}
+                      {need.neighborhood ? ` · ${need.neighborhood}` : ""}
+                    </p>
+                  </div>
                 </article>
               </li>
             );

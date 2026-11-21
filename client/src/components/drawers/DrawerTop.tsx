@@ -81,7 +81,7 @@ export default function DrawerTop({
     >
       <div className="drawer-top__shade" aria-hidden="true" />
       {upcomingTitle != null ? <h2 className="drawer-top__title">{upcomingTitle}</h2> : null}
-      {countdown ?? <DrawerCountdownCard events={upcoming} onOpen={onOpenEvent} />}
+      {countdown ?? <DrawerCountdownCard events={upcoming} onOpen={onOpenEvent} now={at} />}
       {actions}
       {filtersTitle != null ? <h2 className="drawer-top__title">{filtersTitle}</h2> : null}
       {lead ?? (showCalendar ? (

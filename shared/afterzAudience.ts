@@ -6,10 +6,10 @@
 export type AfterzAudience = "open" | "request" | "friends" | "fof";
 
 export const AFTERZ_AUDIENCES: { value: AfterzAudience; label: string; short: string }[] = [
-  { value: "open", label: "Everybody, no invite needed", short: "OPEN" },
-  { value: "request", label: "Everybody, request invite", short: "REQUEST" },
-  { value: "friends", label: "Friends", short: "FRIENDS" },
-  { value: "fof", label: "Friends of friends", short: "FOF" },
+  { value: "open", label: "Everybody, no invite needed", short: "Everybody, no invite needed" },
+  { value: "request", label: "Everybody, request invite", short: "Everybody, request invite" },
+  { value: "friends", label: "Friends", short: "Friends" },
+  { value: "fof", label: "Friends of friends", short: "Friends of friends" },
 ];
 
 /** Half a mile in meters: the normal event discovery radius. */

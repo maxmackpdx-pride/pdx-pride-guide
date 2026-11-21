@@ -79,9 +79,9 @@ const nights = [
 const scene = new URLSearchParams(location.search).get("scene") || "outzide";
 
 const needRides = [
-  { id: "need-1", name: "Alex Rider", eventId: 10, eventTitle: "Yes Coach", neighborhood: "Alberta", direction: "arriving" as const, lat: 45.559, lng: -122.675 },
-  { id: "need-2", name: "Riley Guest", afterzId: "g1", afterzTitle: "Snacks and quiet music", neighborhood: "Division", direction: "arriving" as const, lat: 45.504, lng: -122.63 },
-  { id: "need-3", name: "Sam Nearby", neighborhood: "Pearl", direction: "departing" as const, lat: 45.53, lng: -122.68 },
+  { id: "need-1", name: "Alex Rider", photoUrl: "/avatars/biker.webp", eventId: 10, eventTitle: "Yes Coach", neighborhood: "Alberta", direction: "arriving" as const, lat: 45.559, lng: -122.675 },
+  { id: "need-2", name: "Riley Guest", photoUrl: "/avatars/rose.webp", afterzId: "g1", afterzTitle: "Snacks and quiet music", neighborhood: "Division", direction: "arriving" as const, lat: 45.504, lng: -122.63 },
+  { id: "need-3", name: "Sam Nearby", photoUrl: "/avatars/coffee.webp", neighborhood: "Pearl", direction: "departing" as const, lat: 45.53, lng: -122.68 },
 ];
 
 function MapField() {

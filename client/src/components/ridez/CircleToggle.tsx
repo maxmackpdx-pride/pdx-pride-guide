@@ -19,6 +19,7 @@ export default function CircleToggle<Value extends string>({
   label,
   accent,
   testId,
+  layout = "wrap",
 }: {
   value: Value;
   onChange: (value: Value) => void;
@@ -26,6 +27,7 @@ export default function CircleToggle<Value extends string>({
   label: string;
   accent?: string;
   testId?: string;
+  layout?: "wrap" | "rows";
 }) {
   "use memo";
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -39,7 +41,7 @@ export default function CircleToggle<Value extends string>({
   };
   return (
     <div
-      className="zrc"
+      className={`zrc${layout === "rows" ? " is-rows" : ""}`}
       role="radiogroup"
       aria-label={label}
       data-testid={testId ?? "circle-toggle"}
@@ -62,7 +64,7 @@ export default function CircleToggle<Value extends string>({
             onClick={() => onChange(option.value)}
             onKeyDown={event => onKey(event, index)}
           >
-            {option.short}
+            {option.label}
           </button>
         );
       })}

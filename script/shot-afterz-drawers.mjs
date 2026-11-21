@@ -46,11 +46,11 @@ await context.route("**/api/**", route => {
 });
 
 const shotsToTake = [
-  { scene: "outzide", file: "v3-outzide-drawer.png", wait: "[data-testid='outzide-drawer']" },
-  { scene: "afterz-open", file: "v3-afterz-drawer-in-window.png", wait: "[data-testid='afterz-drawer']" },
-  { scene: "afterz-off", file: "v3-afterz-off-hours-blur.png", wait: "[data-testid='afterz-map-blur']" },
-  { scene: "afterz-host", file: "v3-afterz-host-form.png", wait: "[data-testid='afterz-host-form']", clickHost: true },
-  { scene: "afterz-open", file: "v3-afterz-needs-a-ride.png", wait: "[data-testid='ridez-need-list']", scrollNeeds: true },
+  { scene: "outzide", file: "v4-outzide-drawer.png", wait: "[data-testid='outzide-drawer']" },
+  { scene: "afterz-open", file: "v4-afterz-drawer-in-window.png", wait: "[data-testid='afterz-drawer']" },
+  { scene: "afterz-off", file: "v4-afterz-off-hours-blur.png", wait: "[data-testid='afterz-map-blur']" },
+  { scene: "afterz-host", file: "v4-afterz-host-form.png", wait: "[data-testid='afterz-host-form']", clickHost: true },
+  { scene: "afterz-open", file: "v4-afterz-needs-a-ride.png", wait: "[data-testid='ridez-need-list']", scrollNeeds: true, motion: true },
 ];
 
 for (const shot of shotsToTake) {
@@ -79,7 +79,26 @@ for (const shot of shotsToTake) {
       await list.evaluate(node => { node.scrollIntoView({ block: "start", inline: "nearest" }); });
     }
   }
-  await page.waitForTimeout(400);
+  if (shot.motion) {
+    // Context defaults to reduced motion for other shots. This one must show
+    // the flashing bloom, frozen at the peak so the frame is readable.
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.waitForTimeout(200);
+    await page.evaluate(() => {
+      for (const anim of document.getAnimations()) {
+        const name = anim.animationName || "";
+        if (name.includes("zridez-need-bloom")) {
+          const duration = (anim.effect && "getComputedTiming" in anim.effect)
+            ? (anim.effect.getComputedTiming().duration || 1100)
+            : 1100;
+          anim.pause();
+          anim.currentTime = typeof duration === "number" ? duration / 2 : 550;
+        }
+      }
+    });
+  } else {
+    await page.waitForTimeout(400);
+  }
   await page.screenshot({ path: path.join(shots, shot.file), fullPage: false });
   console.log("wrote", path.join(shots, shot.file));
   await page.close();

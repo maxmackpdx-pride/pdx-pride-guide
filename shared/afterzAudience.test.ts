@@ -13,6 +13,13 @@ import {
 
 test("Afterz audience has four blast options and open join auto-accepts", () => {
   assert.deepEqual(AFTERZ_AUDIENCES.map(option => option.value), ["open", "request", "friends", "fof"]);
+  assert.deepEqual(AFTERZ_AUDIENCES.map(option => option.label), [
+    "Everybody, no invite needed",
+    "Everybody, request invite",
+    "Friends",
+    "Friends of friends",
+  ]);
+  assert.ok(!AFTERZ_AUDIENCES.some(option => /FOF|OPEN|REQUEST/.test(option.short)));
   assert.equal(parseAfterzAudience("open"), "open");
   assert.equal(parseAfterzAudience("request"), "request");
   assert.equal(parseAfterzAudience("nope"), null);

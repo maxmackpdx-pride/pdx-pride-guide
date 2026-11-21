@@ -12,6 +12,7 @@ export type RidezNeedBloom = "afterz" | "event" | null;
 export type RidezNeed = {
   id: string;
   name: string;
+  photoUrl?: string | null;
   neighborhood?: string | null;
   eventId?: number | null;
   eventTitle?: string | null;
