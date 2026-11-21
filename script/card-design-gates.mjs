@@ -5,7 +5,7 @@ import { parseArgs } from "node:util";
 import { chromium } from "playwright";
 import { publishedGlass, measureGlass, glassFlags } from "./card-glass-gate.mjs";
 import { auditInterestApi } from "./card-api-gate.mjs";
-import { eventAge, eventPrice } from "../client/src/lib/eventFacts.ts";
+import { eventAge, eventPrice, eventTicketFacts } from "../client/src/lib/eventFacts.ts";
 
 const [gate, ...args] = process.argv.slice(2);
 if (args.includes("--help")) {
@@ -57,12 +57,18 @@ async function clickTab(card, tab) {
 }
 
 async function visitCard(page, url) {
-  const detailRequest = page.waitForResponse(response => /\/api\/events\/\d+\/detail$/.test(new URL(response.url()).pathname));
-  await page.goto(url, { waitUntil: "domcontentloaded" });
-  const detail = await detailRequest;
-  assert.equal(detail.status(), 200, "Event detail API");
   const card = page.locator(".evz-x");
-  await card.waitFor();
+  const front = page.locator(".event-front-controls").getByRole("button", { name: /view details/i });
+  const [detail] = await Promise.all([
+    page.waitForResponse(response => /\/api\/events\/\d+\/detail$/.test(new URL(response.url()).pathname), { timeout: 45000 }),
+    (async () => {
+      await page.goto(url, { waitUntil: "domcontentloaded" });
+      await card.or(front).first().waitFor({ timeout: 45000 });
+      if (await front.isVisible()) await front.click();
+      await card.waitFor();
+    })(),
+  ]);
+  assert.equal(detail.status(), 200, "Event detail API");
   return { card, detail: await detail.json() };
 }
 
@@ -165,16 +171,23 @@ async function checkCopy(browser) {
   if (eventAge(event.ageRequirement) !== "Not stated") expectedChips.push(eventAge(event.ageRequirement));
   if (event.isSexPositive) expectedChips.push("Sex-positive");
   assert.deepEqual(chips, expectedChips, "Rendered chips must preserve the API's facts and unknowns");
+  const ticketFacts = eventTicketFacts(event.description);
+  const actualDescription = card.locator(".evz-x__desc");
+  if (ticketFacts.description) assert.equal(await actualDescription.textContent(), ticketFacts.description);
+  const priceRows = card.getByRole("region", { name: "Info" }).locator(".evz-ticket-prices dd");
+  if (ticketFacts.prices) assert.deepEqual(await priceRows.allTextContents(), [ticketFacts.prices.presale, ticketFacts.prices.door]);
+  const organizerLines = new Set(ticketFacts.description.split(/\n+/).map(line => line.trim()));
   const sections = new Map();
   const paragraphFlags = new Set();
   for (const label of ["Info", "Maps", "People", "More", "Nearby", "Feed"]) {
     const pane = await clickTab(card, label);
+    await pane.locator('[role="status"]').filter({ hasText: /^Loading/i }).first().waitFor({ state: "hidden" });
     const rendered = await pane.innerText();
     sections.set(label, rendered);
     const paragraphs = rendered.split(/\n+/);
     for (const text of paragraphs) {
       // Exact source descriptions are data supplied by organizers.
-      if (/\w.*—.*\w/u.test(text) && text !== event.description) paragraphFlags.add(text.trim());
+      if (/\w.*—.*\w/u.test(text) && !organizerLines.has(text.trim())) paragraphFlags.add(text.trim());
     }
   }
   const actions = card.locator(".evz-actions button");
@@ -182,6 +195,7 @@ async function checkCopy(browser) {
     await action.click();
     const drawer = card.locator(".evz-action-drawer");
     await drawer.waitFor();
+    await drawer.locator('[role="status"]').filter({ hasText: /^Loading/i }).first().waitFor({ state: "hidden" });
     sections.set("Action · " + await drawer.getAttribute("aria-label"), await drawer.innerText());
     await drawer.getByRole("button", { name: /^Close /i }).first().click();
   }
@@ -194,7 +208,7 @@ async function checkCopy(browser) {
     (_, label, clock) => label + clock.replace(/\d+/g, "#"));
   const digest = createHash("sha256").update(reviewText).digest("hex");
   if (values.transcript) await writeFile(values.transcript, transcript + "\n");
-  console.log(`Copy · ${event.title}\nAPI title, venue, claim status, admission and age facts matched.\nCopy fingerprint SHA-256 ${digest}`);
+  console.log(`Copy · ${event.title}\nAPI title, venue, claim status, admission, age, organizer description and ticket prices matched.\nCopy fingerprint SHA-256 ${digest}`);
   for (const text of paragraphFlags) console.warn(`COPY FLAG ${text}`);
   if (values.review) {
     const review = JSON.parse(await readFile(values.review, "utf8"));
