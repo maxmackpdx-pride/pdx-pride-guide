@@ -2364,7 +2364,7 @@ a.home-boards__utility--lime:focus .home-boards__utility-name {
 
 a.home-boards__utility--purple:hover .home-boards__utility-name,
 a.home-boards__utility--purple:focus .home-boards__utility-name {
-  color: #6e3dff !important;
+  color: #7b00ff !important;
 }
 
 a.home-boards__utility--cyan:hover .home-boards__utility-name,
@@ -2400,8 +2400,8 @@ a.home-boards__utility:focus .home-boards__utility-mantra {
 }
 
 .home-boards__utility--purple.pdx-glass-rebind {
-  --util-acc: #6e3dff;
-  --c: #6e3dff;
+  --util-acc: #7b00ff;
+  --c: #7b00ff;
 }
 
 .home-boards__utility--cyan.pdx-glass-rebind {
@@ -2431,7 +2431,7 @@ a.home-boards__utility:focus .home-boards__utility-mantra {
 }
 
 .home-boards__utility--purple .home-boards__utility-name {
-  color: #6e3dff;
+  color: #7b00ff;
 }
 
 .home-boards__utility-desc {

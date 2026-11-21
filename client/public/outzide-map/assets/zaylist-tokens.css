@@ -176,7 +176,7 @@
 :root{
   --panel-lime: #D4FF00;
   --tag-free: var(--panel-lime);
-  --board-gigs: #6E3DFF;
+  --board-gigs: #7B00FF;
 }
 
 /* rooms.css */
@@ -189,7 +189,7 @@
   --room-placez: var(--panel-cyan, #19e3ff);
   --room-hauz: var(--neon-cyan, #00ffff);
   --room-giftz: var(--board-gifting, #D4FF00);
-  --room-gigz: var(--board-gigs, #6e3dff);
+  --room-gigz: var(--board-gigs, #7b00ff);
   --room-sellz: var(--green-acid, #2BFF00);
   --room-outz: var(--neon-orange, #FF7B00);
   --room-mizzed: var(--board-spotted, #FF1FA0);

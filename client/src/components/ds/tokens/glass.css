@@ -638,7 +638,7 @@ html.calm-mode .pdxLegend,
   -webkit-backdrop-filter: blur(var(--glass-card-blur));
 }
 
-/* Board cards: listing accent → --c (MC #FF1FA0 · Gifting #D4FF00 · Gigs #6E3DFF)
+/* Board cards: listing accent → --c (MC #FF1FA0 · Gifting #D4FF00 · Gigs #7B00FF)
    Solid posts: black ring + accent rim + left accent bar.
    ISO / Looking: dashed full border (no solid left bar). */
 .board-listing-card,
