@@ -44,3 +44,8 @@
 .event-pregame__messages p { justify-self: start; max-width: 85%; padding: 7px 10px; border-radius: 9px; background: var(--ink-750); overflow-wrap: anywhere; }
 .event-pregame__messages strong { display: block; font-size: 11px; }
 .event-pregame__messages [data-mine="true"] { justify-self: end; background: var(--ac, var(--neon-red)); color: var(--z-black); }
+
+.ridez-choices { display: flex; gap: 6px; }
+.event-planning .ridez-choices button { flex: 1; justify-content: center; color: var(--neon-orange); border: 1px solid var(--neon-orange); background: var(--z-black); border-radius: 9px; font: 800 15px var(--font-display); text-transform: uppercase; text-decoration: none; }
+.event-planning .ridez-choices button[aria-pressed="true"] { background: var(--neon-orange); color: var(--z-black); }
+.ridez-need-row { padding-block: 8px; }

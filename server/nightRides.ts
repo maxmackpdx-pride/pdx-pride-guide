@@ -575,6 +575,7 @@ export function registerNightRides(
     announce,
     watches,
     present,
+    attendance,
     plan,
     offer,
     visible,

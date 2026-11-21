@@ -42,7 +42,7 @@
   min-height: 46px;
   background: var(--ink-850);
   color: inherit;
-  border: 1px solid color-mix(in srgb, var(--neon-orange) 40%, var(--text-mid));
+  border: 1px solid var(--neon-orange);
   border-radius: 8px;
   padding: 0.55rem 0.85rem;
 }
@@ -101,7 +101,7 @@
 .ride-car b {
   position: absolute;
   background: var(--neon-orange);
-  border: 1px solid color-mix(in srgb, var(--neon-orange), var(--text-hi));
+  border: 1px solid var(--neon-orange);
 }
 .ride-car i {
   inset: 6px 0 2px;
@@ -187,3 +187,5 @@
     animation: none;
   }
 }
+
+.night-ride-offer input[type="range"] { accent-color: var(--neon-orange); }

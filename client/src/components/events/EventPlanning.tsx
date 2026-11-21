@@ -35,7 +35,13 @@ type Ride = {
   myRequest: 0 | 1 | null;
   requests: { id: number; username: string; accepted: number }[];
 };
+type RideDirection = "arriving" | "departing";
+type RideNeed = { username: string; direction: RideDirection; area: string; mine: number };
 type Planning = {
+  needs: RideNeed[] | null;
+  attending: boolean;
+  homeArea: string | null;
+
   checked: boolean;
   onSiteWindow: boolean;
   gpsAvailable?: boolean;
@@ -120,6 +126,9 @@ function PlanningPanel({
     queryFn: () => apiRequest("GET", base).then((r) => r.json()),
     refetchInterval: userId ? 30_000 : false,
   });
+  const [intent, setIntent] = useState<"offer" | "need">("offer");
+  const [direction, setDirection] = useState<RideDirection>("arriving");
+  const [suggestedArea, setSuggestedArea] = useState("");
   const [compose, setCompose] = useState(false);
   const [auth, setAuth] = useState(false);
   const [atEvent, setAtEvent] = useState(() =>
@@ -171,18 +180,44 @@ function PlanningPanel({
       </p>
     );
   const { gigs, rides, open, canPostGig, title } = query.data;
+  const matches = (rides || []).filter(ride => (ride.plan && ride.plan.kind !== "carpool" ? "departing" : "arriving") === direction);
+  const needs = (query.data.needs || []).filter(need => need.direction === direction);
+  const mine = needs.find(need => need.mine);
+  const mayMatch = direction === "arriving" || (!!query.data.checked && query.data.attending && (intent === "offer" || !!query.data.homeArea));
   const ridesPanel = (
     <>
-      <h3>Carpools {rides && <span>({rides.length})</span>}</h3>
+      <h3>Ridez · {query.data.venue}</h3>
       {!userId || !rides ? (
         <button type="button" onClick={() => setAuth(true)}>
           Sign in to coordinate a ride
         </button>
       ) : (
         <>
-          {!rides.length && <p>No ride offers for this occurrence.</p>}
+          <div className="ridez-choices" role="group" aria-label="Ride action">
+            <button type="button" aria-pressed={intent === "offer"} onClick={() => setIntent("offer")}>Offer a ride</button>
+            <button type="button" aria-pressed={intent === "need"} onClick={() => setIntent("need")}>I need a ride</button>
+          </div>
+          <div className="ridez-choices" role="group" aria-label="Ride direction">
+            <button type="button" aria-pressed={direction === "arriving"} onClick={() => { setSuggestedArea(""); setDirection("arriving"); }}>Going</button>
+            <button type="button" aria-pressed={direction === "departing"} onClick={() => { setSuggestedArea(""); setDirection("departing"); }}>Departing</button>
+          </div>
+          {!mayMatch && <>
+            <p>Leaving the event? Ride matching opens for attendees checked in at the venue.</p>
+            {query.data.attending && query.data.onSiteWindow && <VenueCheck base={base} eventId={eventId} checked={query.data.checked} visible refresh={() => void query.refetch()}/>}
+          </>}
+          {intent === "need" && (mine ? <div><p>You need a ride · {mine.area}</p>
+            <button type="button" disabled={mutation.isPending} onClick={() => act("DELETE", `/needs/${direction}`)}>Withdraw my ride need</button></div> :
+            open && mayMatch && <form key={direction} onSubmit={e => { e.preventDefault(); act("PUT", `/needs/${direction}`, { area: new FormData(e.currentTarget).get("area") }); }}>
+              {direction === "arriving" ? <label>Pickup neighborhood<input name="area" minLength={2} maxLength={80} required/></label> : <p>Heading to {query.data.homeArea || "your neighborhood"}</p>}
+              <button disabled={mutation.isPending}>Post my ride need</button>
+            </form>)}
+          {intent === "offer" && needs.filter(need => !need.mine).map(need => <div key={need.username} className="ridez-need-row">
+            <p><MemberLink username={need.username}/> needs a ride · {need.area}</p>
+            {open && mayMatch && !rides.some(r => r.mine) && <button type="button" onClick={() => { setSuggestedArea(need.area); requestAnimationFrame(() => document.getElementById(`ride-offer-${eventId}-${date}`)?.querySelector<HTMLInputElement>('input[name="area"]')?.focus()); }}>Offer a ride {direction === "arriving" ? "from" : "to"} {need.area}</button>}
+          </div>)}
+          {!matches.length && <p>No {direction === "arriving" ? "arriving" : "departing"} ride offers yet.</p>}
           <ul>
-            {rides.map((ride) => (
+            {matches.map((ride) => (
               <li key={ride.id}>
                 {ride.plan && (
                   <RideHologram
@@ -293,13 +328,16 @@ function PlanningPanel({
               </li>
             ))}
           </ul>
-          {open && !rides.some((r) => r.mine) && (
-            <RideOfferForm
+          {open && mayMatch && intent === "offer" && !rides.some((r) => r.mine) && (
+            <div id={`ride-offer-${eventId}-${date}`}><RideOfferForm
+              key={direction + suggestedArea}
+              direction={direction}
+              initialArea={suggestedArea || (direction === "departing" ? query.data.homeArea || "" : "")}
               eventId={eventId}
               checked={!!query.data.checked}
               busy={mutation.isPending}
               send={(payload) => act("POST", "/rides", payload)}
-            />
+            /></div>
           )}
           {mutation.isPending && <p role="status">Updating ride…</p>}
           {mutation.isError && <p role="alert">{mutation.error.message}</p>}

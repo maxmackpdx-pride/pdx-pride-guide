@@ -67,9 +67,8 @@ export function VenueCheck({
       askAfterzConsent(eventId, "checkin");
     } catch (e) {
       setError((e as Error).message);
-    } finally {
-      setBusy(false);
     }
+    setBusy(false);
   }
   if (!visible && !automatic.active) return null;
   return (
@@ -144,6 +143,7 @@ export function VenueCheck({
   );
 }
 export function RideOfferForm({
+  direction, initialArea,
   eventId,
   busy,
   checked,
@@ -152,10 +152,13 @@ export function RideOfferForm({
   eventId: number;
   busy: boolean;
   checked: boolean;
+  direction: "arriving" | "departing";
+  initialArea: string;
   send: (body: RideFields & { area: string; seats: number }) => void;
 }) {
-  const [kind, setKind] = useState<RideFields["kind"]>("carpool"),
+  const [kind, setKind] = useState<RideFields["kind"]>(direction === "departing" ? "home" : "carpool"),
     [oneWay, setOneWay] = useState(false),
+    [seats, setSeats] = useState(2),
     rooms = useAfterzNights();
   const joined = (rooms.data ?? []).filter(
     (r: AfterzCard & { eventId?: number }) =>
@@ -180,21 +183,11 @@ export function RideOfferForm({
         });
       }}
     >
-      <label>
-        Ride type
-        <select
-          value={kind}
-          onChange={(e) => setKind(e.target.value as RideFields["kind"])}
-        >
-          <option value="carpool">Carpool to the event</option>
-          <option value="home" disabled={!checked}>
-            Offer ride home
-          </option>
-          <option value="afterz" disabled={!checked || !joined.length}>
-            Ride to Afterz
-          </option>
+      {direction === "departing" && checked && joined.length > 0 && <label>Ride type
+        <select value={kind} onChange={e => setKind(e.target.value as RideFields["kind"])}>
+          <option value="home">Ride home</option><option value="afterz">Ride to Afterz</option>
         </select>
-      </label>
+      </label>}
       {kind === "afterz" && (
         <label>
           Afterz
@@ -211,7 +204,7 @@ export function RideOfferForm({
         {kind === "carpool"
           ? "Departure neighborhood"
           : "Destination neighborhood"}
-        <input name="area" minLength={2} maxLength={80} required />
+        <input name="area" defaultValue={initialArea} minLength={2} maxLength={80} required />
       </label>
       <label>
         Meet in view of others
@@ -241,13 +234,14 @@ export function RideOfferForm({
         />
       </label>
       <label>
-        Passenger seats
+        Passenger seats · {seats}
         <input
           name="seats"
-          type="number"
+          type="range"
           min={2}
           max={8}
-          defaultValue={2}
+          value={seats}
+          onChange={e => setSeats(e.target.valueAsNumber)}
           required
         />
       </label>
@@ -354,6 +348,14 @@ function unlock() {
     /* Device may only support visual alerts. */
   }
 }
+async function startRideWatch(base: string, ride: number, fields: FormData): Promise<{ dueAt: number }> {
+  const pos = fields.has("position") ? await position() : undefined;
+  const response = await apiRequest("POST", `${base}/rides/${ride}/watch`, {
+    contact: fields.get("contact"), minutes: Number(fields.get("minutes")),
+    lat: pos?.coords.latitude, lng: pos?.coords.longitude, consent: true,
+  });
+  return response.json();
+}
 export function RideSafety({ base, ride }: { base: string; ride: number }) {
   const [cards] = useState(shuffled),
     [card, setCard] = useState(0),
@@ -388,27 +390,15 @@ export function RideSafety({ base, ride }: { base: string; ride: number }) {
             setBusy(true);
             setError("");
             try {
-              const pos = f.has("position") ? await position() : undefined;
-              const data = await apiRequest(
-                "POST",
-                base + "/rides/" + ride + "/watch",
-                {
-                  contact: f.get("contact"),
-                  minutes: Number(f.get("minutes")),
-                  lat: pos?.coords.latitude,
-                  lng: pos?.coords.longitude,
-                  consent: true,
-                },
-              ).then((r) => r.json());
+              const data = await startRideWatch(base, ride, f);
               setDue(data.dueAt);
               void cache.invalidateQueries({
                 queryKey: ["/api/night/ride-checks"],
               });
             } catch (e) {
               setError((e as Error).message);
-            } finally {
-              setBusy(false);
             }
+            setBusy(false);
           }}
         >
           <label>

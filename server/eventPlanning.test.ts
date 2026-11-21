@@ -94,6 +94,20 @@ test("planning is occurrence-, owner-, participant- and host-scoped", async (t) 
     second = first.replace("07-01", "07-02");
   const guest = await (await request(second)).json();
   assert.equal(guest.rides, null);
+  assert.equal(guest.needs, null);
+  const needPath = second + "/needs/arriving";
+  assert.equal((await request(needPath, 2, "PUT", { area: "Alberta" })).status, 200);
+  assert.equal((await request(needPath, 2, "PUT", { area: "Kerns" })).status, 200);
+  assert.equal((await request(second + "/needs/departing", 2, "PUT", { area: "Kerns" })).status, 400);
+  assert.deepEqual((await (await request(first, 1)).json()).needs, []);
+  assert.deepEqual((await (await request(second, 1)).json()).needs, [{username:"rider",direction:"arriving",area:"Kerns",mine:0}]);
+  db.prepare("INSERT INTO member_blocks VALUES(?,?)").run(1,2);
+  assert.deepEqual((await (await request(second, 1)).json()).needs, []);
+  db.prepare("DELETE FROM member_blocks WHERE blocker_user_id=1 AND blocked_user_id=2").run();
+  await request(needPath, 1, "DELETE");
+  assert.equal((await (await request(second, 2)).json()).needs.length, 1);
+  await request(needPath, 2, "DELETE");
+  assert.deepEqual((await (await request(second, 1)).json()).needs, []);
   assert.deepEqual(
     guest.gigs.map((g: { id: number }) => g.id),
     [21],
