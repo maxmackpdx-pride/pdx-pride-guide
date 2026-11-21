@@ -1,16 +1,19 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import EventFlyerArt from "@/components/events/EventFlyerArt";
+import { EventFrontCountdown, eventFrontCountdownState } from "@/components/events/EventFlyerFront";
 import { listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import { dayAccentToken } from "@/lib/dsColors";
-import { remainingToStart, type DrawerTopEvent } from "@shared/drawerTop";
+import type { DrawerTopEvent } from "@shared/drawerTop";
 import type { Event } from "@shared/schema";
+import "@/components/events/EventFlyerFront.css";
 import "./DrawerTop.css";
 
 /**
- * Narrow (short) countdown card: one full-bleed flyer, a dark scrim, a big
- * hologram countdown, and the event name. No list of extra events.
- * `events` is unchanged so existing callers can still pass an array; only
- * the first (next) event is shown.
+ * Narrow (short) countdown card used by every room drawer: full-bleed flyer,
+ * the existing card-front STARTS IN countdown (scaled up) in a
+ * semi-transparent outlined plate, and the event name over a soft gradient.
+ * No inset panel covering the flyer. `events` is unchanged; only the next
+ * event is shown.
  */
 export default function DrawerCountdownCard({
   events,
@@ -36,11 +39,11 @@ export default function DrawerCountdownCard({
   const listing = event as unknown as Event;
   const poster = listingPosterUrl(listing);
   const accent = event.accentColor || dayAccentToken(listingDay(listing));
-  const remaining = remainingToStart(event.dateStart, now);
+  const countdown = eventFrontCountdownState(event, now);
   return (
     <article
       className="drawer-count pdx-glass-rebind"
-      style={{ "--c": accent } as CSSProperties}
+      style={{ "--c": accent, "--a": accent } as CSSProperties}
       data-testid="drawer-top-countdown"
     >
       <div className="drawer-count__art" aria-hidden="true">
@@ -51,17 +54,9 @@ export default function DrawerCountdownCard({
         type="button"
         className="drawer-count__open"
         onClick={() => onOpen?.(event)}
-        aria-label={remaining ? `${event.title}, starts in ${remaining.days} days ${remaining.hours} hours ${remaining.minutes} minutes` : event.title}
+        aria-label={countdown.parts ? `${event.title}, ${countdown.label.toLowerCase()} ${countdown.parts.d} days ${countdown.parts.h} hours ${countdown.parts.m} minutes` : `${event.title}, ${countdown.label}`}
       >
-        {remaining ? (
-          <span className="drawer-count__time pz-countdown-inline" role="timer">
-            <span className="drawer-count__digits pz-countdown-digits" aria-hidden="true">
-              {([[remaining.days, "days"], [remaining.hours, "hrs"], [remaining.minutes, "min"]] as const).map(([value, unit]) => (
-                <span key={unit}><strong>{String(value).padStart(2, "0")}</strong><small>{unit}</small></span>
-              ))}
-            </span>
-          </span>
-        ) : null}
+        <EventFrontCountdown label={countdown.label} parts={countdown.parts} />
         <span className="drawer-count__name">{event.title}</span>
       </button>
     </article>

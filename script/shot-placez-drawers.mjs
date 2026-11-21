@@ -116,19 +116,19 @@ const past = {
   mizzedClosesAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
 };
 const places = [
-  {id: 9001, name: 'Sanctuary', type: 'venue', description: 'Venue', address: 'Portland', neighborhood: 'Downtown', website: null, instagram: null, donateUrl: null, hours: null, phone: null, queerOwned: true, queerFriendly: true, imageUrl: null, lat: 45.5241, lng: -122.6757, isNew: false},
-  {id: 9002, name: 'Coffee Beer', type: 'cafe', description: 'Cafe', address: 'Portland', neighborhood: 'Alberta', website: null, instagram: null, donateUrl: null, hours: null, phone: null, queerOwned: true, queerFriendly: true, imageUrl: null, lat: 45.5245, lng: -122.6760, isNew: false},
-  {id: 9003, name: 'Dining Room', type: 'restaurant', description: 'Restaurant', address: 'Portland', neighborhood: 'Downtown', website: null, instagram: null, donateUrl: null, hours: null, phone: null, queerOwned: true, queerFriendly: true, imageUrl: null, lat: 45.5240, lng: -122.6755, isNew: false},
+  {id: 31, name: 'Alberta Rose Theatre', type: 'venue', description: 'Venue', address: 'Portland', neighborhood: 'Alberta', website: null, instagram: null, donateUrl: null, hours: null, phone: null, queerOwned: true, queerFriendly: true, imageUrl: null, lat: 45.5241, lng: -122.6757, isNew: false},
+  {id: 17, name: 'Coffee Beer', type: 'cafe', description: 'Cafe', address: 'Portland', neighborhood: 'Alberta', website: null, instagram: null, donateUrl: null, hours: null, phone: null, queerOwned: true, queerFriendly: true, imageUrl: null, lat: 45.5245, lng: -122.6760, isNew: false},
+  {id: 60, name: 'Q Restaurant', type: 'restaurant', description: 'Restaurant', address: 'Portland', neighborhood: 'Downtown', website: null, instagram: null, donateUrl: null, hours: null, phone: null, queerOwned: true, queerFriendly: true, imageUrl: null, lat: 45.5240, lng: -122.6755, isNew: false},
 ];
 
 const yesDetail = {
   event: yesCoach,
-  venue: {id: 9001, name: 'Sanctuary', type: 'venue', neighborhood: 'Downtown', address: 'Portland', imageUrl: null, lat: 45.5241, lng: -122.6757},
+  venue: {id: 31, name: 'Alberta Rose Theatre', type: 'venue', neighborhood: 'Alberta', address: 'Portland', imageUrl: null, lat: 45.5241, lng: -122.6757},
   hosts: [{userId: 1, username: 'qa', displayName: 'Party Collective', photoUrl: null, role: 'host'}],
   talent: [],
   gigs: [{id: 20, title: 'Door host', postType: 'gig', createdAt: yesStart, location: 'Sanctuary', description: 'Example gig for this screenshot.'}],
   missedConnections: [],
-  nearby: {restaurants: [{id: 9003, name: 'Dining Room', type: 'restaurant', neighborhood: 'Downtown'}], events: [lateShow]},
+  nearby: {restaurants: [{id: 60, name: 'Q Restaurant', type: 'restaurant', neighborhood: 'Downtown'}], events: [lateShow]},
 };
 
 const server = await createServer({
@@ -224,7 +224,7 @@ await page.goto(`${base}__drawer-qa`, {waitUntil: 'networkidle'});
 if (errors.length) console.log('EARLY_ERRORS', errors);
 await page.getByRole('button', {name: /Open Placez/i}).click();
 await page.getByTestId('drawer-top').waitFor();
-await shot('placez-v11-map-drawer-top.png');
+await shot('placez-v12-map-drawer-top.png');
 
 const inView = page.getByTestId('placez-in-view-rail');
 await inView.waitFor();
@@ -232,11 +232,11 @@ await inView.scrollIntoViewIfNeeded();
 const inViewList = page.getByRole('list', {name: 'In view on the map'});
 if (await inViewList.count()) {
   await inViewList.evaluate(el => {
-    const item = [...el.querySelectorAll('[role="listitem"]')].find(node => /Late show|Yes Coach/i.test(node.textContent || ''));
-    item?.scrollIntoView({inline: 'center', block: 'nearest'});
+    const item = [...el.querySelectorAll('[role="listitem"]')].find(node => /Q Restaurant/i.test(node.textContent || ''));
+    item?.scrollIntoView({inline: 'end', block: 'nearest'});
   });
 }
-await shot('placez-v11-in-view-rail.png');
+await shot('placez-v12-in-view-rail.png');
 
 const yesMini = inView.getByRole('button', {name: /Open Yes Coach/i});
 if (await yesMini.count()) {
@@ -250,7 +250,7 @@ await openCard.first().waitFor({state: 'visible'});
 const centered = await page.evaluate(() => window.__mapCentered);
 console.log('CENTERED', JSON.stringify(centered));
 if (errors.length) console.log('OPEN_CARD_ERRORS', errors);
-await shot('placez-v11-center-then-open.png');
+await shot('placez-v12-center-then-open.png');
 await page.goBack().catch(() => {});
 if (!await page.getByTestId('drawer-top').count()) {
   await page.goto(`${base}__drawer-qa`, {waitUntil: 'networkidle'});

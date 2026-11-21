@@ -125,7 +125,7 @@ function OpenMapCard({eventId}:{eventId:string}) {
   return (
     <MapSurface>
       <div data-testid="placez-center-open-card">
-        <EventzExpanded event={event} onClose={() => undefined} documentMeta={false} />
+        <EventzExpanded event={event} onClose={() => undefined} documentMeta={false} startExpanded={true} />
       </div>
     </MapSurface>
   );
@@ -146,11 +146,9 @@ function Fixture() {
     };
     window.addEventListener('placez-mizzed-open', onOpen);
     window.addEventListener('popstate', onOpen);
-    window.addEventListener('zaylist:open-map-card', onOpen);
     return () => {
       window.removeEventListener('placez-mizzed-open', onOpen);
       window.removeEventListener('popstate', onOpen);
-      window.removeEventListener('zaylist:open-map-card', onOpen);
     };
   }, []);
   const onMizzed = path.includes('/mizzed') || params.get('board') === 'mizzed';

@@ -94,9 +94,9 @@
   position: relative;
   display: block;
   width: 100%;
-  height: 84px;
-  min-height: 76px;
-  max-height: 92px;
+  height: 108px;
+  min-height: 100px;
+  max-height: 116px;
   overflow: hidden;
   border-radius: 12px;
   border: 1px solid color-mix(in srgb, var(--c, var(--room-eventz)) 45%, transparent);
@@ -121,11 +121,10 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background:
-    linear-gradient(to top,
-      color-mix(in srgb, var(--z-black) 92%, transparent) 0%,
-      color-mix(in srgb, var(--z-black) 86%, transparent) 55%,
-      color-mix(in srgb, var(--z-black) 80%, transparent) 100%);
+  background: linear-gradient(to top,
+    color-mix(in srgb, var(--z-black) 55%, transparent) 0%,
+    color-mix(in srgb, var(--z-black) 18%, transparent) 42%,
+    transparent 72%);
 }
 .drawer-count__empty {
   position: relative;
@@ -138,40 +137,74 @@
 .drawer-count__open {
   position: relative;
   z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+  display: block;
   width: 100%;
   height: 100%;
-  min-height: 76px;
-  padding: 6px 12px;
+  min-height: 100px;
+  padding: 0;
   border: 0;
   background: none;
   color: inherit;
-  text-align: center;
+  text-align: left;
   cursor: pointer;
   font: inherit;
 }
 .drawer-count__open:focus-visible { outline: 2px solid var(--c, var(--room-eventz)); outline-offset: 2px; }
-.drawer-count__open::before {
-  content: "";
+
+/* Reused card-front countdown, scaled up, token fill + outline. Not a full-card inset box. */
+.drawer-count .pcdtop {
   position: absolute;
-  inset: 6px 8px;
-  z-index: -1;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--z-black) 78%, transparent);
+  top: 7px;
+  left: 8px;
+  z-index: 1;
+  background: color-mix(in srgb, var(--z-black) 58%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-hi) 12%, transparent);
+  border-radius: 8px;
+  padding: 5px 10px 6px;
+  text-shadow: 0 1px 6px color-mix(in srgb, var(--z-black) 60%, transparent);
+  pointer-events: none;
+  flex: none;
+}
+.drawer-count .ps-lab {
+  display: block;
+  margin-bottom: 3px;
+  font: 800 11px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--a, var(--c, var(--room-eventz)));
+}
+.drawer-count .ps-nums {
+  display: flex;
+  gap: 12px;
+}
+.drawer-count .ps-nums span { text-align: center; }
+.drawer-count .ps-nums b {
+  font: 800 26px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  font-variant-numeric: tabular-nums;
+  display: block;
+  color: var(--text-hi);
+}
+.drawer-count .ps-nums i {
+  font: 700 10px/1 var(--font-display, "Barlow Condensed", sans-serif);
+  letter-spacing: .14em;
+  font-style: normal;
+  display: block;
+  margin-top: 2px;
+  color: var(--text-meta, var(--text-body));
 }
 
 .drawer-count__name {
-  max-width: 100%;
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 6px;
+  z-index: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font: 800 15px/1.05 var(--font-display, "Barlow Condensed", sans-serif);
   text-transform: uppercase;
-  text-shadow: 0 1px 2px var(--z-black), 0 0 10px var(--z-black);
+  text-shadow: 0 1px 2px var(--z-black), 0 0 8px var(--z-black), 0 0 16px var(--z-black);
 }
 .drawer-count__time,
 .drawer-count .pz-countdown-inline {
@@ -185,8 +218,8 @@
 .drawer-count .pz-countdown-digits {
   display: flex;
   align-items: flex-end;
-  justify-content: center;
-  gap: 14px;
+  justify-content: flex-start;
+  gap: 12px;
 }
 .drawer-count__digits span,
 .drawer-count .pz-countdown-digits span {
@@ -201,7 +234,7 @@
 .drawer-count .pz-countdown-digits strong {
   font: 700 32px/1 var(--font-display, "Barlow Condensed", sans-serif);
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 1px 3px var(--z-black);
+  text-shadow: 0 1px 2px var(--z-black), 0 0 8px var(--z-black), 0 0 16px var(--z-black);
 }
 .drawer-count__digits small,
 .drawer-count .pz-countdown-digits small {
@@ -276,8 +309,24 @@
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--c) 50%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--z-black) 55%, transparent);
   filter: none;
 }
-.drawer-mini__art { position: absolute; inset: 0; }
-.drawer-mini__art img, .drawer-mini__art .day-motif { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.drawer-mini__art { position: absolute; inset: 0; background: var(--z-black); }
+.drawer-mini__art img, .drawer-mini__art .day-motif {
+  width: 100%;
+  height: 100%;
+  object-fit: var(--mini-fit, cover);
+  object-position: var(--mini-position, top center);
+}
+.drawer-mini__art.is-mark {
+  display: grid;
+  place-items: center;
+  padding: 14px 12px 28px;
+}
+.drawer-mini__art.is-mark img {
+  width: 80%;
+  height: 70%;
+  object-fit: contain;
+  object-position: center;
+}
 .drawer-mini__open {
   position: absolute;
   inset: 0;

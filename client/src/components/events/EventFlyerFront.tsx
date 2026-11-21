@@ -109,6 +109,48 @@ export function countdownParts(ms: number): { d: string; h: string; m: string } 
   };
 }
 
+export function eventFrontCountdownState(
+  listing: { dateStart: string; dateEnd?: string | null },
+  tick: number,
+): { label: string; parts: { d: string; h: string; m: string } | null } {
+  const start = startMs(listing as EventListing);
+  const end = listing.dateEnd ? parsePacificDateTime(listing.dateEnd) : null;
+  const running = start <= tick && (
+    (end !== null && tick < end) ||
+    (!listing.dateEnd && dateStrOf(listing as EventListing) === pacificTodayDate(tick))
+  );
+  const label = running ? (end === null ? "ON NOW" : "ENDS IN") : "STARTS IN";
+  const parts = label === "ON NOW" ? null : countdownParts(
+    running && end !== null ? end - tick : start - tick,
+  );
+  return { label, parts };
+}
+
+/** The card-front countdown plate: STARTS IN / 00 DAYS 23 HRS 34 MIN. */
+export function EventFrontCountdown({
+  label,
+  parts,
+  className = "",
+}: {
+  label: string;
+  parts: { d: string; h: string; m: string } | null;
+  className?: string;
+}) {
+  "use memo";
+  return (
+    <div className={`pcdtop${className ? ` ${className}` : ""}`}>
+      <span className="ps-lab">{label}</span>
+      {parts ? (
+        <span className="ps-nums">
+          <span><b>{parts.d}</b><i>DAYS</i></span>
+          <span><b>{parts.h}</b><i>HRS</i></span>
+          <span><b>{parts.m}</b><i>MIN</i></span>
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 /** Pointer-tracked tilt for taped posters; the tape line stays put (demo). */
 function useDemoTilt(ref: React.RefObject<HTMLElement | null>, enabled: boolean) {
   useEffect(() => {
@@ -306,16 +348,7 @@ export function PosterCell({
   const tear = useMemo(() => (pinned ? tearPolygons(key) : null), [pinned, key]);
   useDemoTilt(articleRef, !pinned);
 
-  const start = startMs(listing);
-  const end = parsePacificDateTime(listing.dateEnd);
-  const running = start <= tick && (
-    (end !== null && tick < end) ||
-    (!listing.dateEnd && dateStr === pacificTodayDate(tick))
-  );
-  const countdownLabel = running ? (end === null ? "ON NOW" : "ENDS IN") : "STARTS IN";
-  const cd = countdownLabel === "ON NOW" ? null : countdownParts(
-    running && end !== null ? end - tick : start - tick,
-  );
+  const { label: countdownLabel, parts: cd } = eventFrontCountdownState(listing, tick);
   const age = eventAge(listing.ageRequirement);
   const meta = `${eventDateLabel(listing.dateStart)} · ${eventTimeLabel(listing.dateStart)} · ${listing.venueName} · ${listing.ageRequirement && age!=="Not stated"?age:"Age not stated"}`;
   const price = eventPrice(listing.admission) === "Not confirmed" ? "PRICE NOT CONFIRMED" : eventPrice(listing.admission).toUpperCase();
@@ -400,16 +433,7 @@ export function PosterCell({
             <ShareIcon />
           </button>
           {!priceUnconfirmed && <span className={`pprice${priceCls}`}>{price}</span>}
-          <div className="pcdtop">
-            <span className="ps-lab">{countdownLabel}</span>
-            {cd && (
-              <span className="ps-nums">
-                <span><b>{cd.d}</b><i>DAYS</i></span>
-                <span><b>{cd.h}</b><i>HRS</i></span>
-                <span><b>{cd.m}</b><i>MIN</i></span>
-              </span>
-            )}
-          </div>
+          <EventFrontCountdown label={countdownLabel} parts={cd} />
           {wideChunk ? <span className="pblend" aria-hidden="true" /> : null}
           {!wideChunk && (
             <>

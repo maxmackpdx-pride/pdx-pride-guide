@@ -58,13 +58,12 @@ export function easeMapTo(lng: number, lat: number, duration = 700): Promise<voi
   });
 }
 
-/** Reuse the map bookmark or existing event/place routes. Does not rebuild the open card. */
+/** Existing open path: map bookmarks (?event= / ?place=) or the event/place routes. */
 export function openExistingCard(target: MapCardTarget, assign: (href: string) => void = href => window.location.assign(href)): string {
   if (typeof window !== "undefined" && isMapSurfacePath(window.location.pathname)) {
     const href = mapCardSearch(`${window.location.pathname}${window.location.search}${window.location.hash}`, target);
     window.history.pushState(window.history.state, "", href);
     window.dispatchEvent(new PopStateEvent("popstate"));
-    window.dispatchEvent(new CustomEvent("zaylist:open-map-card", { detail: target }));
     return href;
   }
   const href = target.kind === "place"
@@ -76,7 +75,7 @@ export function openExistingCard(target: MapCardTarget, assign: (href: string) =
   return href;
 }
 
-/** Agent-callable: center the map on the item, then open the existing expanded card. */
+/** Center the map on the item, then call the existing open-card path. */
 export async function centerThenOpenFromDrawer(target: MapCardTarget): Promise<MapCardTarget> {
   return centerThenOpenMapCard(target, { centerMap: easeMapTo, openCard: openExistingCard });
 }

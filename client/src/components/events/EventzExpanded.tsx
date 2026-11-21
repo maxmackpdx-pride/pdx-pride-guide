@@ -122,13 +122,15 @@ type EventzExpandedProps = {
   originRect?: EventModalOriginRect | null;
   documentMeta?: boolean;
   onOpenEvent?: (event: Event) => void;
+  /** Skip the flyer front stage and open the existing expanded card chrome. */
+  startExpanded?: boolean;
 };
 
-export default function EventzExpanded({ event, onClose, onEventUpdated, originRect = null, documentMeta = true, onOpenEvent, openPlanning = false, openChat = false }: EventzExpandedProps) {
-  const [expandedKey, setExpandedKey] = useState("");
+export default function EventzExpanded({ event, onClose, onEventUpdated, originRect = null, documentMeta = true, onOpenEvent, openPlanning = false, openChat = false, startExpanded = false }: EventzExpandedProps) {
+  const key = event && typeof event.id === "number" ? event.id + "/" + event.dateStart : "";
+  const [expandedKey, setExpandedKey] = useState(() => startExpanded && key ? key : "");
   const [manage, setManage] = useState(openChat);
   if (!event || typeof event.id !== "number") return null;
-  const key = event.id + "/" + event.dateStart;
   if (manage) {
     return <EventModal initialSection={openChat ? "attendance" : undefined} event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} documentMeta={documentMeta} />;
   }

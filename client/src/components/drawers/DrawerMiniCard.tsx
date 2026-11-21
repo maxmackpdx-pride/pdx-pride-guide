@@ -8,7 +8,9 @@ import { dayAccentToken } from "@/lib/dsColors";
 import { eventPath } from "@shared/eventSlug";
 import { placePath } from "@shared/placeSlug";
 import { DIRECTORY_TYPE_LABELS } from "@shared/directoryTheme";
+import { directoryFallbackLogo, resolveDirectoryLogo } from "@shared/directoryLogos";
 import { DRAWER_CATEGORY_FILTERS } from "@shared/drawerFilters";
+import { nativePlacezModel } from "@/components/placez/nativeModel";
 import { formatDrawerCountdown, remainingToStart, type DrawerTopEvent } from "@shared/drawerTop";
 import type { Event } from "@shared/schema";
 import "./DrawerTop.css";
@@ -27,6 +29,31 @@ export type DrawerMiniPlace = {
 
 function placeAccent(type?: string | null): string {
   return DRAWER_CATEGORY_FILTERS.find(chip => chip.id === type)?.accent || "var(--room-placez)";
+}
+
+/** Existing Placez photo / logo / fallback pipeline. Never a flat category color block. */
+function placeMiniArt(place: DrawerMiniPlace): { src: string; fit: "cover" | "contain"; position?: string } {
+  try {
+    const model = nativePlacezModel({
+      id: place.id,
+      name: place.name,
+      type: place.type || "venue",
+      imageUrl: place.imageUrl,
+    });
+    if (model.imageUrl) {
+      return {
+        src: model.imageUrl,
+        fit: model.imageFit === "contain" ? "contain" : "cover",
+        position: model.imagePosition || "top center",
+      };
+    }
+    if (model.logoUrl) return { src: model.logoUrl, fit: "contain" };
+  } catch {
+    // Invalid or incomplete records still get a logo or the standard placeholder.
+  }
+  const logo = resolveDirectoryLogo(place.name, place.imageUrl);
+  if (logo) return { src: logo, fit: "contain" };
+  return { src: directoryFallbackLogo(place.type || "venue"), fit: "contain" };
 }
 
 /**
@@ -61,6 +88,7 @@ export default function DrawerMiniCard({
   if (place && !event) {
     const accent = placeAccent(place.type);
     const kind = DIRECTORY_TYPE_LABELS[place.type || ""] || place.type || "Place";
+    const art = placeMiniArt(place);
     return (
       <article
         data-card-size="small"
@@ -69,12 +97,12 @@ export default function DrawerMiniCard({
         className="drawer-mini pdx-glass-rebind"
         style={{ "--c": accent } as CSSProperties}
       >
-        <div className="drawer-mini__art" aria-hidden="true">
-          {place.imageUrl ? (
-            <img src={place.imageUrl} alt="" />
-          ) : (
-            <div className="drawer-mini__fallback">{kind}</div>
-          )}
+        <div
+          className={`drawer-mini__art${art.fit === "contain" ? " is-mark" : ""}`}
+          style={{ "--mini-fit": art.fit, "--mini-position": art.position || "top center" } as CSSProperties}
+          aria-hidden="true"
+        >
+          <img src={art.src} alt="" />
         </div>
         <button
           type="button"
