@@ -32,6 +32,10 @@
   scroll-snap-align: start;
   min-height: 44px;
 }
+.pz-events-rail__item .event-rail-card {
+  width: 108px;
+  flex: none;
+}
 .pz-events-rail__item.is-left { flex-direction: row; }
 .pz-events-rail__item.is-right { flex-direction: row; }
 .pz-events-rail-arrow {

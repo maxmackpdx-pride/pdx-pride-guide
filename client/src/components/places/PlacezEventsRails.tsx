@@ -6,6 +6,8 @@ import { useEventRsvp } from "@/hooks/useEventRsvp";
 import { usePlacezDrawerPlans, type PlacezDrawerEvent } from "@/hooks/usePlacezDrawerPlans";
 import { openEventFromDrawer } from "@/lib/placezEventsDrawerApi";
 import AuthModal from "@/components/AuthModal";
+import "@/pages/Events.css";
+import "@/components/events/DayMotif.css";
 import "./PlacezEventsDrawer.css";
 
 function Rail({
