@@ -1,3 +1,4 @@
+import { canSharePublicEvent } from "@shared/publicEventVisibility";
 import { legacyOrganizer } from "@shared/eventHostAuthority";
 import { initPickupNotices } from "./pickupReservation";
 import { pacificDayStart } from "./inboxReportingTime";
@@ -14124,13 +14125,13 @@ export const storage: IStorage = {
   },
   getPostableEventsForMissedConnections(requireToday = false) {
     const live = db.select().from(events).where(eq(events.status, "LIVE")).all();
-    return live.filter(evt => isMissedConnectionPostable(evt.dateStart, evt.dateEnd, { requireToday }).ok);
+    return live.filter(evt => canSharePublicEvent(evt) && isMissedConnectionPostable(evt.dateStart, evt.dateEnd, { requireToday }).ok);
   },
   getLinkableEventsForMissedConnections() {
     const live = db.select().from(events).where(eq(events.status, "LIVE")).all();
     const timingRank = { live: 0, upcoming: 1, past: 2 } as const;
     return live
-      .filter(evt => isMissedConnectionLinkable(evt.dateStart))
+      .filter(evt => canSharePublicEvent(evt) && isMissedConnectionLinkable(evt.dateStart))
       .map(evt => ({
         id: evt.id,
         title: evt.title,
@@ -14177,6 +14178,7 @@ export const storage: IStorage = {
       FROM missed_connections m
       LEFT JOIN events e ON e.id = m.event_id
       WHERE m.status = ?
+        AND (m.event_id IS NULL OR (e.status = 'LIVE' AND e.is_public = 1 AND e.is_private = 0))
       ORDER BY m.created_at DESC
     `).all(status) as any[];
     return withoutArchivedPosts(sqlite,"mizzed",rows).map(row => mapMissedConnectionRow(row, viewerUserId));

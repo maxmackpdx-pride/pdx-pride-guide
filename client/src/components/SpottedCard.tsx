@@ -124,14 +124,14 @@ export default function SpottedCard({
             MESSAGE <ArrowRight size={14} aria-hidden="true" />
           </button>
         )}
-        <button
+        {post.canShare !== false && <button
           type="button"
           className="spotted-card__share-btn"
           onClick={handleShare}
           aria-label="Share as Instagram Story image"
         >
           <Share2 size={12} strokeWidth={2.5} /> SHARE
-        </button>
+        </button>}
       </div>
     </article>
   );

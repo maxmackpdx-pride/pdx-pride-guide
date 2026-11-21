@@ -3,6 +3,7 @@ import BoardComposerPreview from "@/components/board/BoardComposerPreview";
 import { Flag } from "lucide-react";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMizzedEventPosting } from "@/lib/mizzedPosting";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -36,6 +37,7 @@ export type MissedConnectionPost = {
   isMine?: boolean;
   anonymous?: boolean;
   isDemo?: boolean;
+  canShare?: boolean;
 };
 
 export type LinkableMissedConnectionEvent = Pick<Event, "id" | "title" | "venueName" | "dayOfWeek" | "dateStart" | "dateEnd" | "posterImageUrl"> & {
@@ -95,7 +97,7 @@ export default function MissedConnectionsPanel({
       : ["/api/missed-connections"];
 
   const { data: posts = [], isLoading, isError, refetch } = useQuery<MissedConnectionPost[]>({
-    queryKey: postsQueryKey,
+    queryKey: [...postsQueryKey, user?.id ?? null],
     queryFn: async () => {
       const url = mode === "event" && eventId
         ? `/api/events/${eventId}/missed-connections`
@@ -109,29 +111,15 @@ export default function MissedConnectionsPanel({
   });
 
   const { data: linkableEvents = [] } = useQuery<PostableEvent[]>({
-    queryKey: ["/api/missed-connections/postable-events", mode === "board" ? "board" : "window"],
+    queryKey: ["/api/missed-connections/postable-events", "board", user?.id],
     queryFn: async () => {
-      const scope = mode === "board" ? "board" : "window";
-      const r = await fetch(`/api/missed-connections/postable-events?scope=${scope}`, { credentials: "include" });
+      const r = await fetch("/api/missed-connections/postable-events?scope=board", { credentials: "include" });
       if (!r.ok) throw new Error("Could not load events");
       return r.json();
     },
-    enabled: !!user && (mode === "board" || mode === "event"),
+    enabled: !!user && mode === "board",
   });
-
-  const { data: eventPostableCheck } = useQuery<PostableEvent[]>({
-    queryKey: ["/api/missed-connections/postable-events", "event", eventId],
-    queryFn: async () => {
-      const r = await fetch("/api/missed-connections/postable-events?scope=window", { credentials: "include" });
-      if (!r.ok) throw new Error("Could not load events");
-      return r.json();
-    },
-    enabled: !!user && mode === "event" && !!eventId,
-  });
-
-  const canPostToEventStrict = mode === "event" && eventId
-    ? (eventPostableCheck || []).some(e => e.id === eventId)
-    : false;
+  const posting = useMizzedEventPosting(user?.id, eventId, mode === "event");
 
   const deriveTitle = (title: string, body: string) => {
     const trimmed = title.trim();
@@ -152,7 +140,7 @@ export default function MissedConnectionsPanel({
         body: form.body,
         eventId: mode === "beach" ? undefined : mode === "event" ? eventId : (form.eventId ? Number(form.eventId) : undefined),
         beachId: mode === "beach" ? beachId : undefined,
-        scope: mode === "board" || (mode === "event" && !canPostToEventStrict) ? "board" : undefined,
+        scope: mode === "board" ? "board" : undefined,
         ...(form.eventLabel ? { eventLabel: form.eventLabel } : {}),
         ...(form.venueHint ? { venueHint: form.venueHint } : {}),
       }),
@@ -353,7 +341,7 @@ export default function MissedConnectionsPanel({
     <div>
       {composeForm}
 
-      {(mode === "event" || mode === "beach") && (
+      {((mode === "event" && posting.data === true) || mode === "beach") && (
         <section style={{ background: "#0a0a0a", border: "1px solid #333", padding: 16, marginBottom: 16 }}>
           <h3 className="display" style={{ color: "#FF1FA0", fontSize: "1rem", marginBottom: 8 }}>Post a MIZZED CONNECTION</h3>
           <p style={{ color: "#888", fontSize: "0.78rem", marginBottom: 10 }}>
