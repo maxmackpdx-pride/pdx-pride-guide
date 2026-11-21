@@ -1,0 +1,13 @@
+.card-system-preview {
+  min-height: 100dvh; display: grid; align-content: start; justify-items: center;
+  gap: 8px; padding: 8px 0; background: var(--z-black); color: var(--text-hi);
+}
+.card-system-preview nav { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
+.card-system-preview button {
+  min-height: 40px; font: 700 14px var(--font-display); text-transform: uppercase;
+  padding: 5px 9px; border: 1px solid var(--panel-border); border-radius: 20px;
+  color: var(--text-hi); background: var(--z-black); cursor: pointer;
+}
+.card-system-preview button[aria-pressed="true"] { color: var(--neon-cyan); border-color: currentColor; }
+.card-system-preview iframe { width: min(402px,100%); height: 874px; border: 0; }
+.card-front-preview { display: grid; justify-items: center; gap: 18px; padding: 22px 8px 78px; }

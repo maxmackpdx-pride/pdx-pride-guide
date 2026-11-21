@@ -34,7 +34,7 @@ function isWithinPrideWeekCalendar(dayKey: string | null | undefined): boolean {
   return dayKey >= EVENT_WEEK_START_DATE && dayKey <= EVENT_WEEK_END_DATE;
 }
 
-export type EventListing = Event & { listingInstanceKey?: string; fallbackPlaceImage?: string; sourcePlatform?: string };
+export type EventListing = Event & { isClaimed?: boolean; listingInstanceKey?: string; fallbackPlaceImage?: string; sourcePlatform?: string };
 
 function formatPacificDateTime(ms: number): string {
   const parts: Record<string, string> = {};

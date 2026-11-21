@@ -106,7 +106,7 @@ export default function ThisWeekRail({
         <div role="listitem" key={`day-${d.key}`} className={`events-rail__item week-day pdx-glass-rebind${isOpen ? " is-open" : " is-closed"}`} style={{ "--c": d.color } as CSSProperties}>
           {!isOpen && fan.map((e, i) => (
             <div key={e.id} className={`week-day__fan week-day__fan--${fan.length - i}`} aria-hidden="true" ref={el => el?.setAttribute("inert", "")}>
-              <EventRailCard listing={e} size="m" saved={savedIds.has(e.id)} onToggleSave={() => {}} onOpen={() => {}} />
+              {listingPosterUrl(e) ? <img src={listingPosterUrl(e)!} alt="" loading="lazy" className="week-day__fan-art" /> : <span className="week-day__fan-title">{e.title}</span>}
             </div>
           ))}
           <button type="button" className="week-day__card" aria-expanded={isOpen} aria-label={`${isOpen ? "Close" : "Open"} ${d.code}, ${d.items.length} events`} onClick={toggle}>
@@ -125,18 +125,19 @@ export default function ThisWeekRail({
       );
       if (!isOpen) continue;
       const slots = sponsorSlots(d.items.length);
-      let step = 0;
+      const startIndex = out.length;
       d.items.forEach((e, i) => {
         if (slots.includes(i)) {
-          const kind = SPONSOR_KINDS[(offset + sponsorCount++) % SPONSOR_KINDS.length];
+          const kind = SPONSOR_KINDS[(offset + sponsorCount) % SPONSOR_KINDS.length];
+          sponsorCount += 1;
           out.push(
-            <div role="listitem" key={`ad-${d.key}-${i}`} className="events-rail__item week-slide" style={{ animationDelay: `${step++ * 60}ms` }}>
+            <div role="listitem" key={`ad-${d.key}-${i}`} className="events-rail__item week-slide" style={{ animationDelay: `${(out.length - startIndex) * 60}ms` }}>
               <SponsorRailCard kind={kind} />
             </div>,
           );
         }
         out.push(
-          <div role="listitem" key={`ev-${d.key}-${e.id}-${e.dateStart}`} className="events-rail__item week-slide" style={{ animationDelay: `${step++ * 60}ms` }}>
+          <div role="listitem" key={`ev-${d.key}-${e.id}-${e.dateStart}`} className="events-rail__item week-slide" style={{ animationDelay: `${(out.length - startIndex) * 60}ms` }}>
             <EventRailCard listing={e} size="m" saved={savedIds.has(e.id)} liveState={liveStateFor(e)} onToggleSave={onToggleSave} onOpen={onOpen} />
           </div>,
         );

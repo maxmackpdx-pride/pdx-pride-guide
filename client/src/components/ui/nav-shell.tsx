@@ -1,7 +1,6 @@
 import { forwardRef, type ReactNode } from "react";
 import { Divider } from "@/components/ds/Divider";
 import { navGlassPointer } from "@/components/ui/nav-glass";
-import { MobileLiquidGlass } from "@/components/ui/mobile-liquid-glass";
 
 /**
  * Board 34: the site header's shell. It owns the glass, the bottom seam and the
@@ -15,12 +14,12 @@ export const NavShell = forwardRef<HTMLElement, { mapSurface?: boolean; loading?
       <header
         ref={ref}
         className="site-header site-header--real-seam site-header--compact site-header--caption-split z-glass site-header--glass"
+        data-nav-surface="solid"
         data-seam="bottom"
         data-map-surface={mapSurface || undefined}
         onPointerMove={navGlassPointer}
         onPointerLeave={navGlassPointer}
       >
-        <MobileLiquidGlass quiet={false} />
         {children}
         <Divider seam thin loading={loading} className="site-header-rainbow-seam" />
       </header>

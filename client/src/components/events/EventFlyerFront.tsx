@@ -1,3 +1,5 @@
+import { EventFrontSheen } from "@/components/events/EventFrontSheen";
+import { formatCardCountdown } from '@/lib/countdown';
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type React from 'react';
 import { listingKey, type EventListing } from '@shared/multiDayEvents';
@@ -5,15 +7,11 @@ import { parsePacificDateTime, pacificCalendarDate, pacificTodayDate } from '@sh
 import { eventPath } from '@shared/eventSlug';
 import { resolveDirectoryLogo } from '@shared/directoryLogos';
 import { useHeart } from '@/hooks/useHearts';
-import { useModalA11y } from '@/hooks/useModalA11y';
-import { toast } from '@/hooks/use-toast';
 import { eventDateLabel, eventTimeLabel } from '@/lib/eventDisplay';
 import { eventAge, eventPrice } from '@/lib/eventFacts';
-import { sharePageLink, shareToastTitle } from '@/lib/shareEvent';
 import { listingPosterUrl } from '@/lib/dsEvent';
 import AuthModal from '@/components/AuthModal';
 import BoardPushPin from '@/components/board/BoardPushPin';
-import { CardStage } from '@/components/cards/CardStage';
 import { isPosterActivation } from './flyerBoardBehavior';
 import { PosterlessFlyer } from './PosterlessFlyer';
 import '../board/punk/push-pins.css';
@@ -24,15 +22,6 @@ const PACIFIC = "America/Los_Angeles";
 const WEEKDAY_CODES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
 export const DOW_INDEX: Record<string, number> = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
 export const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-export async function shareEventListing(listing: EventListing) {
-  const url = eventPath(listing.id,listing.title,listing.dayOfWeek,dateStrOf(listing));
-  try {
-    const result = await sharePageLink(url,listing.title);
-    toast({title:shareToastTitle(result,"event")});
-  } catch (error) {
-    if (!(error instanceof Error && error.name === "AbortError")) toast({title:"Could not share the event",variant:"destructive"});
-  }
-}
 /** The demo's rotation rhythm and stagger, by position in the container. */
 export const ROT_CYCLE = [-2.2, 1.6, -1.2, 2.6, -2.8, 1.9];
 
@@ -158,17 +147,6 @@ function useDemoTilt(ref: React.RefObject<HTMLElement | null>, enabled: boolean)
   }, [ref, enabled]);
 }
 
-export function ShareIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-      <circle cx="18" cy="5" r="3" />
-      <circle cx="6" cy="12" r="3" />
-      <circle cx="18" cy="19" r="3" />
-      <path d="m8.59 13.51 6.83 3.98" />
-      <path d="m15.41 6.51-6.82 3.98" />
-    </svg>
-  );
-}
 
 function HeartIcon() {
   return (
@@ -313,7 +291,7 @@ export function PosterCell({
     (!listing.dateEnd && dateStr === pacificTodayDate(tick))
   );
   const countdownLabel = running ? (end === null ? "ON NOW" : "ENDS IN") : "STARTS IN";
-  const cd = countdownLabel === "ON NOW" ? null : countdownParts(
+  const cd = countdownLabel === "ON NOW" || !Number.isFinite(start) ? null : formatCardCountdown(
     running && end !== null ? end - tick : start - tick,
   );
   const age = eventAge(listing.ageRequirement);
@@ -330,10 +308,6 @@ export function PosterCell({
    * gradient. (Tucker's ruling, Nov 18, 2026.) */
   const wideChunk = !!poster && aspect >= 1.15;
 
-  const share = async (ev: React.MouseEvent) => {
-    ev.stopPropagation();
-    await shareEventListing(listing);
-  };
 
   return (
     <div
@@ -396,17 +370,13 @@ export function PosterCell({
             logoUrl={isFetLife ? null : resolveDirectoryLogo(listing.venueName, listing.fallbackPlaceImage)}
             wordmark={isFetLife ? "FetLife" : null}
           /> : null}
-          <button type="button" className="pshare" aria-label={`Share ${listing.title}`} onClick={share}>
-            <ShareIcon />
-          </button>
+          <EventFrontSheen/>
           {!priceUnconfirmed && <span className={`pprice${priceCls}`}>{price}</span>}
           <div className="pcdtop">
             <span className="ps-lab">{countdownLabel}</span>
             {cd && (
               <span className="ps-nums">
-                <span><b>{cd.d}</b><i>DAYS</i></span>
-                <span><b>{cd.h}</b><i>HRS</i></span>
-                <span><b>{cd.m}</b><i>MIN</i></span>
+                <span><b>{cd}</b></span>
               </span>
             )}
           </div>
@@ -419,8 +389,6 @@ export function PosterCell({
               </div>
               <div className="pfoot">
                 <div className="pactions">
-                  <span className="pgigz"><b>–</b><i>GIGZ</i></span>
-                  <span className="pgigz pcarpool"><b>–</b><i>CARPOOL</i></span>
                   <button
                     type="button"
                     className={`pheart${heart.hearted ? " saved" : ""}`}
@@ -447,8 +415,6 @@ export function PosterCell({
               {listing.venueName} · {weekdayCode(dateStr)} {eventTimeLabel(listing.dateStart)}
             </p>
             <div className="pchunk-row">
-              <span className="pgigz"><b>–</b><i>GIGZ</i></span>
-              <span className="pgigz pcarpool"><b>–</b><i>CARPOOL</i></span>
               <button
                 type="button"
                 className={`pheart${heart.hearted ? " saved" : ""}`}
@@ -471,29 +437,6 @@ export function PosterCell({
       {heartAuth && <AuthModal onClose={() => setHeartAuth(false)} />}
     </div>
   );
-}
-
-/** The preview uses the board's real flyer face, including its live Interested and Share actions. */
-export function EventFrontStage({ listing, onExpand, onClose }: {
-  listing: EventListing; onExpand: () => void; onClose: () => void;
-}) {
-  const dialog = useModalA11y({ onClose });
-  const [tick, setTick] = useState(Date.now);
-  const [aspect, setAspect] = useState(.8);
-  useEffect(() => {
-    const timer = window.setInterval(() => setTick(Date.now()), 30_000);
-    return () => window.clearInterval(timer);
-  }, []);
-  return <CardStage front className="fbx" onClose={onClose}>
-    <div className="event-front-dialog" style={{ "--front-aspect": aspect } as CSSProperties}
-      role="dialog" aria-modal="true" aria-label={listing.title} ref={dialog}>
-      <PosterCell listing={listing} index={0} tick={tick} mtop={0} onAspect={setAspect} onOpenCard={onExpand} />
-      <div className="event-front-controls">
-        <button type="button" onClick={onClose}>Close</button>
-        <button type="button" onClick={onExpand}>View details →</button>
-      </div>
-    </div>
-  </CardStage>;
 }
 
 export function DayFlag({ dateStr }: { dateStr: string }) {

@@ -1,3 +1,4 @@
+import { confirmAttendanceRemoval } from "@/hooks/useEventRsvp";
 import {askAfterzConsent} from "@/components/afterz/NightConsent";
 import { ArrowRight } from "lucide-react";
 import { Check } from "lucide-react";
@@ -148,6 +149,9 @@ export default function AttendanceCluster({
       queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
       void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
       void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
+      for (const queryKey of [["/api/hearts"], ["/api/events/mine/drawer-plans"], ["/api/chats/mine"], ["/api/events", eventId, "chat"]]) {
+        void queryClient.invalidateQueries({ queryKey });
+      }
       queryClient.invalidateQueries({ queryKey: ["profile"] });
     },
   });
@@ -179,6 +183,9 @@ export default function AttendanceCluster({
       queryClient.invalidateQueries({ queryKey: ["/api/events/mine/check-ins"] });
       void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed"] });
       void queryClient.invalidateQueries({ queryKey: ["/api/hub/feed/head"] });
+      for (const queryKey of [["/api/hearts"], ["/api/events/mine/drawer-plans"], ["/api/chats/mine"], ["/api/events", eventId, "chat"]]) {
+        void queryClient.invalidateQueries({ queryKey });
+      }
       queryClient.invalidateQueries({ queryKey: ["profile"] });
     },
   });
@@ -360,7 +367,7 @@ export default function AttendanceCluster({
                   <button
                     type="button"
                     data-testid="button-remove-was-here"
-                    onClick={() => removeMutation.mutate()}
+                    onClick={() => { if (confirmAttendanceRemoval()) removeMutation.mutate(); }}
                     disabled={removeMutation.isPending || mutation.isPending}
                     className="attendance-cluster-cta__withdraw"
                   >
@@ -399,6 +406,7 @@ export default function AttendanceCluster({
                   type="button"
                   data-testid="button-withdraw-rsvp"
                   onClick={() => {
+                    if (!confirmAttendanceRemoval()) return;
                     setShowChat(false);
                     removeMutation.mutate();
                   }}
@@ -489,6 +497,7 @@ export default function AttendanceCluster({
         onClose={() => setShowForm(false)}
         onSubmit={submitVibe}
         onRemove={() => {
+          if (!confirmAttendanceRemoval()) return;
           setShowChat(false);
           removeMutation.mutate();
         }}

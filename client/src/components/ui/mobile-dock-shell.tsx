@@ -1,6 +1,6 @@
+import { GlassPieceLens } from "@/components/ds/GlassPieceLens";
 import { Children, cloneElement, isValidElement, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { MobileGlassLite } from "./mobile-glass-lite";
 import "./mobile-dock-shell.css";
 import { useContext } from "react";
 import { DockMaterialContext } from "@/lib/dockMaterial";
@@ -19,7 +19,7 @@ export function MobileDockShell({ children, activeIndex, location: _location, at
   const [calm, setCalm] = useState(false);
   const reduced = useReducedMotion();
   const quiet = Boolean(reduced || calm);
-  const [indicator, setIndicator] = useState({ left: 0, width: 0, color: "#19e3ff" });
+  const [indicator, setIndicator] = useState({ left: 0, width: 0, color: "var(--neon-cyan)" });
   useLayoutEffect(() => {
     // The imported page uses scrollbar-gutter: stable both-edges. 100vw
     // includes those gutters, which was clipping the last button in Chrome.
@@ -48,14 +48,15 @@ export function MobileDockShell({ children, activeIndex, location: _location, at
       const tab = row.querySelector<HTMLElement>(`[data-dock-index="${activeIndex}"]`);
       if (!tab) return;
       const style = getComputedStyle(tab);
-      setIndicator({ left: tab.offsetLeft, width: tab.offsetWidth, color: style.getPropertyValue("--nav-glow").trim() || style.getPropertyValue("--c").trim() || "#19e3ff" });
+      setIndicator({ left: tab.offsetLeft, width: tab.offsetWidth, color: style.getPropertyValue("--nav-glow").trim() || style.getPropertyValue("--c").trim() || "var(--neon-cyan)" });
     };
     measure(); const observer = new ResizeObserver(measure); observer.observe(row);
     return () => observer.disconnect();
   }, [activeIndex]);
   return <nav ref={navRef} className="hub-mobile-bar site-hub-mobile-bar site-mobile-nav--compact site-mobile-nav--caption z-glass site-mobile-nav--glass z-mobile-dock"
-    data-seam="top" data-material={material} data-collapsed="false" data-quiet={quiet} aria-label="Site mobile navigation">
-    <MobileGlassLite />
+    data-glass-piece="dock" style={{ "--piece": indicator.color } as CSSProperties} data-seam="top" data-material={material} data-collapsed="false" data-quiet={quiet} aria-label="Site mobile navigation">
+
+    <GlassPieceLens />
     <div ref={rowRef} id={rowId} className="hub-mobile-bar__dock">
       <motion.div className="z-mobile-dock__indicator" aria-hidden="true" initial={false}
         animate={{ left: material === "m3" ? indicator.left + (indicator.width - Math.min(64, Math.max(0, indicator.width - 8))) / 2 : indicator.left, width: material === "m3" ? Math.min(64, Math.max(0, indicator.width - 8)) : indicator.width, opacity: activeIndex >= 0 ? 1 : 0 }}

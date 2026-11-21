@@ -1,21 +1,3 @@
-/* Eventz expanded card on the Placez setup. One card, five swipe pages,
-   flyer from the top, gradient starting 35% down the card, black action
-   cards, pager + save pinned at the bottom, bloom held at the raised level.
-   Made-by: Muse
-
-   Nov 19, 2026 fixes (Tucker):
-   - Scroll sticking: the pager is a horizontal scroll-snap container whose
-     children are themselves vertical scrollers, and nothing set
-     overscroll-behavior — at a page's top/bottom edge the gesture chained
-     into the pager / surrounding board and the page felt stuck. Pages and
-     the pager now contain overscroll, snap stops are firm, and momentum
-     scrolling is explicit.
-   - The page scroller now spans the FULL card height positioned BEHIND the
-     flyer layer (pageswrap z-index -1 inside the card's stacking context):
-     content scrolls up underneath the flyer + gradient, which are
-     byte-for-byte unchanged. Pages carry top/bottom padding equal to the
-     hero + actions + tabs stack (--evz-top-offset) and the pinned footer
-     (--evz-bottom-offset) so the resting layout is exactly where it was. */
 .evz-x {
   --ac: var(--c, var(--neon-magenta));
   --evz-top-offset: 471px;
@@ -30,36 +12,15 @@
 }
 .evz-x button { font: inherit; cursor: pointer; }
 .evz-x button:focus-visible { outline: 2px solid var(--ac); outline-offset: -3px; }
-
-/* ── Hero: flyer full-size from the top ─────────────────────────────── */
-.evz-x__hero { position: relative; flex: none; height: 336px; overflow: hidden; pointer-events: none; }
-.evz-x__flyer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
-.evz-x__flyer--none { background: color-mix(in srgb, var(--ac) 14%, var(--ink-800)); }
-/* The gradient starts 35% of the way down the card (768px reference height)
-   and reaches the card ink before the identity block ends. The layer is
-   capped at the stack offset (--evz-top-offset) with its stops expressed
-   in px (269/361/430/507 — the old 35/47/56/66% of 768px), so the flyer's
-   fade is pixel-identical but the layer ends where the page content
-   begins: at its old 768px height its solid tail veiled the pages riding
-   behind it at z-index -1 (caught live, Nov 19, 2026). */
-.evz-x__grad { position: absolute; left: 0; right: 0; top: 0; height: var(--evz-top-offset); z-index: 1; pointer-events: none;
-  background: linear-gradient(to bottom, rgba(11, 11, 11, 0) 269px, rgba(11, 11, 11, .45) 361px, rgba(11, 11, 11, .88) 430px, var(--ink-800) 507px); }
-.evz-x__chrome { position: absolute; top: 10px; right: 10px; z-index: 5; display: flex; gap: 8px; pointer-events: auto; }
 .evz-x__iconbtn { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--ac) 55%, transparent); background: rgba(4, 9, 13, .8); color: var(--text-hi); }
+  border: 1px solid var(--ac); background: rgba(4, 9, 13, .8); color: var(--text-hi); }
 .evz-x__iconbtn--sm { width: 34px; height: 34px; }
-.evz-x__id { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; padding: 0 16px 12px; }
 .evz-x__title { margin: 5px 0 0; font: 800 31px/1.0 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; overflow-wrap: anywhere; text-shadow: 0 2px 6px var(--z-black); }
-.evz-x__venue { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; font: 600 13.5px/1.35 var(--font-body, sans-serif); color: var(--evz-mist-f2f5f7); text-shadow: 0 1px 4px var(--z-black); }
-.evz-x__venue svg { color: var(--ac); flex: none; }
 .evz-x__chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
 .evz-x__chip { padding: 3px 7px; border-radius: 5px; background: var(--paper); color: var(--evz-ink-0a0a0e);
   font: 700 9.5px/1.25 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .08em; }
-
-/* ── Black action cards ─────────────────────────────────────────────── */
-.evz-x__actions { flex: none; padding: 12px 14px 0; display: flex; flex-direction: column; gap: 9px; }
 .evz-x__act { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%;
-  padding: 11px 13px; border: 1px solid color-mix(in srgb, var(--ac) 42%, var(--evz-ink-0a0e12)); border-radius: 9px;
+  padding: 11px 13px; border: 1px solid var(--ac); border-radius: 9px;
   background: var(--z-oled); color: var(--text-hi); text-align: left; }
 .evz-x__act[aria-pressed="true"] { border-color: var(--ac); }
 .evz-x__act-main { display: flex; flex-direction: column; min-width: 0; }
@@ -86,30 +47,16 @@
 .evz-x__sech:not(:first-child) { margin-top: 16px; }
 .evz-x__sech-r { font: 600 9.5px/1 var(--font-body, sans-serif); color: var(--evz-gray-8a8a94); letter-spacing: .03em; text-transform: none; }
 .evz-x__act--dash { border-style: dashed; margin-top: 14px; }
-.evz-x__act--owner { margin-top: 14px; }
-.evz-x__cnt { background: var(--ac); color: var(--z-black); border-radius: 5px; padding: 1px 7px; font-size: 11px; }
 .evz-x__empty { margin: 0; font: 400 12.5px/1.55 var(--font-body, sans-serif); color: var(--evz-mist-9aa7b0); }
 
 /* Feed — Gigz */
-.evz-x__gig { padding: 10px 0; border-bottom: 1px solid var(--evz-line-17171d); }
-.evz-x__gig-t { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font: 700 13.5px/1.3 var(--font-body, sans-serif); }
-.evz-x__gig-pay { flex: none; font: 700 10px/1 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .06em; color: var(--ac); }
-.evz-x__gig-meta { margin: 3px 0 0; font: 500 10.5px/1.4 var(--font-mono, monospace); color: var(--evz-mist-9aa7b0); text-transform: capitalize; }
-.evz-x__gig-desc { margin: 5px 0 0; font: 400 12px/1.5 var(--font-body, sans-serif); color: var(--evz-gray-c6c6cf);
-  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 
 /* Info */
-.evz-x__starts { border: 1px solid color-mix(in srgb, var(--ac) 45%, var(--evz-line-2c2c35)); border-radius: 9px; background: rgba(4, 9, 13, .6); padding: 12px 14px; margin-bottom: 6px; }
+.evz-x__starts { border: 1px solid var(--ac); border-radius: 9px; background: rgba(4, 9, 13, .6); padding: 12px 14px; margin-bottom: 6px; }
 .evz-x__starts-l { margin: 0; font: 700 10px/1.2 var(--font-display, "Barlow Condensed", sans-serif); letter-spacing: .15em; text-transform: uppercase; color: var(--ac); }
-.evz-x__starts-d { display: flex; gap: 24px; align-items: baseline; margin-top: 6px; }
-.evz-x__starts-d span { display: inline-flex; align-items: baseline; gap: 3px; }
-.evz-x__starts-d strong { font: 700 27px/1 var(--font-display, "Barlow Condensed", sans-serif); font-variant-numeric: tabular-nums; color: var(--text-hi); }
-.evz-x__starts-d small { font: 600 9px/1 var(--font-body, sans-serif); letter-spacing: .08em; text-transform: uppercase; color: var(--evz-mist-c5d2dc); }
-.evz-x__starts-w { margin: 7px 0 0; font: 500 11px/1.4 var(--font-body, sans-serif); color: var(--evz-mist-aeb8c3); }
 .evz-x__kv { display: flex; gap: 9px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--evz-line-17171d);
   font: 400 12.5px/1.5 var(--font-body, sans-serif); color: var(--evz-gray-d8d8e0); }
 .evz-x__kv > svg { color: var(--ac); flex: none; margin-top: 1px; }
-.evz-x__kv-k { flex: none; width: 84px; font: 700 10px/1.5 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .1em; color: var(--evz-mist-9aa7b0); }
 .evz-x__desc { margin: 0; padding: 11px 0 2px; font: 400 12.5px/1.6 var(--font-body, sans-serif); color: var(--evz-gray-c6c6cf); white-space: pre-wrap; }
 .evz-x__linkrow { display: flex; flex-wrap: wrap; gap: 8px; }
 .evz-x__venuelink { color: var(--ac); text-decoration: underline; text-underline-offset: 2px; }
@@ -120,14 +67,6 @@
 .evz-x__manage { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .evz-x__managebtn { padding: 8px 11px; border: 1px solid var(--evz-line-2c2c35); border-radius: 8px; background: transparent; color: var(--evz-mist-cfd8de);
   font: 700 11px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .05em; }
-
-/* Maps — the v12 stylized box: real location, no street tiles. */
-.evz-x__addr { margin: 0 0 10px; font: 500 12px/1.5 var(--font-mono, monospace); color: var(--evz-mist-9aa7b0); }
-.evz-x__mapbox { position: relative; height: 120px; border: 1px solid var(--evz-line-2c2c35); border-radius: 10px; margin-bottom: 10px;
-  background: radial-gradient(circle at 42% 46%, color-mix(in srgb, var(--ac) 35%, transparent), transparent 34%), linear-gradient(150deg, var(--evz-ink-0a0e12), var(--ink-800)); }
-.evz-x__pin { position: absolute; left: 42%; top: 38%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 99px; background: var(--ac);
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--ac) 25%, transparent); }
-.evz-x__note-inline { color: var(--evz-gray-8a8a94); font-size: 10.5px; }
 .evz-x__dirrow { display: flex; flex-wrap: wrap; gap: 8px; }
 .evz-x__dirrow .evz-x__link { margin-top: 10px; }
 
@@ -146,7 +85,7 @@
 .evz-x__rail { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: none; overscroll-behavior-x: contain; }
 .evz-x__rail::-webkit-scrollbar { display: none; }
 .evz-x__railcard { --ac: var(--c); position: relative; flex: none; width: 136px; height: 170px; padding: 0;
-  border: 1px solid color-mix(in srgb, var(--ac) 45%, var(--evz-ink-0a0a0e)); border-radius: 12px; overflow: hidden;
+  border: 1px solid var(--ac); border-radius: 12px; overflow: hidden;
   background: var(--ink-800); color: var(--text-hi); text-align: left; text-decoration: none; display: block; }
 .evz-x__railimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .evz-x__railfill { position: absolute; inset: 0; background: color-mix(in srgb, var(--ac) 26%, var(--ink-800)); }
@@ -166,8 +105,6 @@
 .evz-x__claim { border: 1px dashed var(--evz-line-2c2c35); border-radius: 10px; padding: 13px 14px; margin-bottom: 14px; }
 .evz-x__claim-t { margin: 0; font: 800 13px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .06em; color: var(--ac); }
 .evz-x__claim-s { margin: 5px 0 0; font: 400 12px/1.5 var(--font-body, sans-serif); color: var(--evz-mist-9aa7b0); }
-.evz-x__claimbtn { margin-top: 11px; padding: 9px 12px; border: 1px solid var(--ac); border-radius: 8px; background: var(--z-oled); color: var(--text-hi);
-  font: 700 12px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .05em; }
 
 /* Mizzed overlay (the add action, opened from its black card) */
 .evz-x__mizzed { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; background: var(--ink-800);
@@ -175,22 +112,10 @@
 .evz-x__mizzed-head { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px;
   border-bottom: 1px solid var(--panel-border); font: 800 12.5px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .05em; }
 .evz-x__mizzed-body { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 14px 14px; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
-
-/* ── Pinned footer: pager + save ────────────────────────────────────── */
-/* Footer padding gives the restored heart its clearance: the visible
-   circle (44px button, ::before inset 6px) sits 22px from the right
-   edge and 20px from the bottom — the same inset language as the
-   front card hearts (Tucker, Nov 19, 2026). margin-top:auto (expanded-card
-   fix set) keeps the footer pinned with the pageswrap out of flow. */
 .evz-x__foot { flex: none; margin-top: auto; border-top: 1px solid var(--panel-border); padding: 12px 16px 14px; background: var(--ink-800); }
 .evz-x__pager { display: flex; align-items: center; justify-content: space-between; }
 .evz-x__arw { width: 34px; height: 30px; display: grid; place-items: center; border: 1px solid var(--evz-line-2c2c35); border-radius: 8px; background: transparent; color: var(--evz-mist-cfd8de); }
 .evz-x__arw:disabled { opacity: .35; cursor: default; }
-.evz-x__dots { display: flex; align-items: center; gap: 5px; }
-.evz-x__dots i { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 99px; background: var(--evz-dot-3a3a44); }
-.evz-x__dots i.on { background: var(--ac); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ac) 25%, transparent); }
-.evz-x__pg { margin-left: 8px; font: 600 9px/1 var(--font-mono, monospace); letter-spacing: .06em; color: var(--evz-gray-8a8a94); }
-.evz-x__save { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; }
 .evz-x__savet { padding: 4px 0; border: 0; background: transparent; color: var(--text-hi);
   font: 700 13px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .08em; }
 .evz-x__heart { position: relative; width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: transparent; color: var(--text-hi); }
@@ -202,14 +127,163 @@
 
 @media (max-width: 480px) {
   .evz-x { --evz-top-offset: 435px; }
-  .evz-x__hero { height: 300px; }
   .evz-x__title { font-size: 27px; }
 }
-
-/* The hero gradient is a card-level layer (moved out of the clipped hero):
-   the flyer fades down behind the I'M INTERESTED row, and the card's content
-   rides above the fade. */
-.evz-x__actions, .evz-x__tabs, .evz-x__foot { position: relative; z-index: 2; }
+.evz-x__tabs, .evz-x__foot { position: relative; z-index: 2; }
 
 .evz-x__arw, .evz-x__iconbtn--sm, .evz-x__tabs button, .evz-x__savet, .evz-x__page button { min-width: 44px; min-height: 44px; }
-.evz-x__save .evz-x__savet { flex: 1; width: auto; text-align: center; }
+
+/* The flyer stays beside the title at rest and at the pin. The opaque header
+   owns its pixels so scrolling copy cannot show through the glass. */
+.zay-card-stage--expanded > .evz-x {
+  /* PR 121's 402 × 874 stage has a one-pixel frame on each side. */
+  width: min(376px, calc((100% - 2px) * .94));
+  height: min(697.97px, calc((100dvh - 107px) * .91), 100%);
+  align-self: center;
+  border-radius: 14px;
+}
+.evz-x__heading {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  flex: none; padding: 22px 16px 0; background: linear-gradient(165deg, color-mix(in srgb,var(--ac) 12%,var(--z-black)),var(--z-black) 65%);
+}
+.evz-x__heading-copy {min-width: 0; flex: 1;}
+.evz-x__heading .evz-x__title {font: 800 clamp(24px,7vw,34px)/1 var(--font-display); margin: 0; text-wrap: balance;}
+.evz-x__when {font: 600 13px/1.4 var(--font-body); margin: 6px 0; color: var(--text-hi);}
+.evz-x__when :is(a,strong) {color: var(--ac);}
+.evz-x__thumb {position:relative; width:74px; height:94px; flex:none; isolation:isolate;}
+.evz-x__thumb > button:first-child {padding:0; width:100%; height:100%; overflow:hidden; border-radius:8px; background:var(--z-black); border:1px solid var(--ac);}
+.evz-x__thumb img {width:100%;height:100%;object-fit:cover;object-position:top;}
+.evz-x__thumb .evz-x__close,.evz-action-close,.evz-poster-full button {
+  position:absolute; right:-6px; top:-9px; width:36px; height:36px; display:grid;place-items:center;
+  color:var(--text-hi);border:1px solid var(--panel-border);border-radius:50%;background:var(--z-black);
+}
+.evz-x__chip {border:1px solid var(--ac);background:var(--z-black);color:var(--text-hi);}
+.evz-x__chip[data-claimed="true"] {color:var(--green-acid);border-color:currentColor;}
+.evz-x__chip[data-claimed="false"] {background:var(--text-hi);color:var(--z-black);border-color:var(--z-black);}
+.evz-actions {display:flex;justify-content:space-between;gap:6px;margin:18px 16px 8px;flex:none;}
+.evz-actions button {min-width:0;flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:2px 0 0;border:0;background:transparent;color:var(--text-hi);text-transform:uppercase;font:600 12.5px/1 var(--font-display);letter-spacing:.12em;}
+.evz-actions button > span {width:52px;height:52px;position:relative;display:grid;place-items:center;color:var(--piece);border:1px solid var(--piece);border-radius:12px;background:var(--z-black);}
+.evz-actions svg {width:24px;height:24px;}
+.evz-actions button > span::after {content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;box-shadow:0 0 14px color-mix(in srgb,var(--piece) 15%,transparent);opacity:0;transition:opacity .18s;}
+.evz-actions button:is(:active,[aria-expanded="true"]) > span::after {opacity:1;}
+.evz-action-drawer {position:relative;flex:0 1 auto;overflow:auto;overscroll-behavior:contain;max-height:min(347px,34dvh);border:1px solid var(--piece);border-top:0;border-radius:0 0 16px 16px;padding:14px 16px;background:color-mix(in srgb,var(--z-black) 88%,transparent);backdrop-filter:saturate(180%);animation:evz-panel-in .22s ease-out;}
+.evz-action-drawer h3 {margin:0 40px 8px 0;font:700 20px var(--font-display);}
+.evz-action-close {position:sticky;top:0;float:right;right:0;z-index:1;}
+.evz-x__tabs {justify-content:space-between;gap:0;margin:0;padding:0 7px;border-block:1px solid var(--ac);background:var(--z-black);}
+.evz-x__tabs button {padding:0 3px;color:var(--text-hi);font:700 12px var(--font-display);letter-spacing:.05em;text-transform:uppercase;}
+.evz-x__tabs button.on {color:var(--ac);box-shadow:inset 0 -2px var(--ac);}
+.evz-x__pageswrap {position:relative;inset:auto;flex:1;min-height:0;z-index:0;}
+.evz-x__page {padding:14px 15px 20px;}
+.evz-x__starts {text-align:center;display:grid;gap:3px;border:1px solid var(--ac);background:var(--z-black);}
+.evz-x__starts strong {font:800 30px/1 var(--font-display);text-transform:uppercase;}
+.evz-x__foot {position:relative;margin:0;padding:5px 10px;border-top:1px solid var(--ac);background:var(--z-black);}
+.evz-x__pager {gap:6px;justify-content:flex-start;}
+.evz-going {flex:1;border:1px solid var(--ac);border-radius:99px;text-align:center;min-height:42px;color:var(--text-hi);background:color-mix(in srgb,var(--ac) 14%,var(--z-black));}
+.evz-going[aria-pressed="true"] {background:var(--ac);color:var(--z-black);}
+.evz-rsvp-options {position:absolute;inset:auto 8px calc(100% + 2px);z-index:3;background:var(--z-black);border:1px solid var(--ac);border-radius:12px;padding:12px;display:flex;flex-wrap:wrap;gap:8px;}
+.evz-rsvp-options p {width:100%;margin:0;}
+.evz-rsvp-options button {padding:8px;border:1px solid var(--ac);border-radius:8px;background:var(--z-black);color:var(--text-hi);}
+.evz-poster-full[open] {position:fixed;inset:0;width:100vw;height:100dvh;max-width:100vw;max-height:100dvh;margin:0;padding:0;display:grid;place-items:center;background:var(--z-black);border:0;}
+.evz-poster-full img {width:100%;height:100%;object-fit:contain;}
+.evz-poster-full button {top:max(12px,env(safe-area-inset-top));right:12px;width:44px;height:44px;}
+.evz-x::after {content:"";position:absolute;inset:0;pointer-events:none;z-index:3;background:linear-gradient(105deg,transparent 42%,color-mix(in srgb,var(--text-hi) 15%,transparent) 50%,transparent 58%);opacity:0;animation:evz-sheen .35s var(--evz-sheen-delay,.19s) both;}
+@keyframes evz-sheen {0%{transform:translateX(-90%);opacity:0}40%{opacity:1}100%{transform:translateX(90%);opacity:0}}
+@keyframes evz-panel-in {from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce) {.evz-action-drawer,.evz-x::after {animation:none;}}
+.evz-x__arw.evz-share {border-radius:50%;border:1px solid var(--ac);}
+.evz-share-panel[open] {margin:auto;max-width:min(90vw,370px);padding:20px;display:grid;gap:10px;background:color-mix(in srgb,var(--z-black) 88%,transparent);color:var(--text-hi);border:1px solid var(--ac);border-radius:18px;backdrop-filter:saturate(180%);}
+.evz-share-panel::backdrop {background:color-mix(in srgb,var(--z-black) 65%,transparent);backdrop-filter:blur(4px);}
+.evz-share-panel header {display:flex;justify-content:space-between;align-items:center;gap:16px;}
+.evz-share-panel :is(h3,p) {margin:0;}
+.evz-share-panel h3 {font:800 28px var(--font-display);text-transform:uppercase;}
+.evz-share-panel label {display:grid;gap:4px;font-weight:600;}
+.evz-share-panel :is(button,input,select) {min-height:42px;border:1px solid var(--ac);color:var(--text-hi);background:var(--z-black);padding:8px;border-radius:8px;max-width:100%;}
+.evz-share-panel form {display:grid;gap:8px;}
+
+.evz-x { --pin-scale: 1; --pin-progress: 0; --pin-height: 255px; }
+.evz-pin {
+  position: absolute; inset: 0 0 auto; z-index: 3; isolation: isolate;
+  transform: scaleY(var(--pin-scale)); transform-origin: top center;
+  background: var(--z-black);
+}
+.evz-pin::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse at top left, color-mix(in srgb,var(--ac) 22%,transparent), transparent 54%),
+    radial-gradient(ellipse at bottom right, color-mix(in srgb,var(--ac) 16%,transparent),transparent 42%);
+  opacity: var(--pin-progress);
+}
+.evz-pin .evz-x__heading { background-color: transparent; }
+.evz-pin :is(.evz-x__heading-copy,.evz-x__thumb,.evz-actions button,.evz-x__tabs button) { transform: scaleX(var(--pin-scale)); }
+.evz-pin .evz-x__heading-copy { transform-origin: left center; }
+.evz-pin .evz-x__thumb { transform-origin: right center; }
+.evz-x__page { padding-top: calc(var(--pin-height) + 12px); scroll-padding-top: var(--pin-height); }
+.evz-x__pageswrap { flex: 1; }
+.evz-x__mizzed { padding-top: calc(var(--pin-height) * var(--pin-scale)); background: var(--z-black); }
+.evz-x__pager { align-items: center; }
+.evz-x__pager .evz-x__heart { flex: none; position: relative; inset: auto; }
+/* Each fact keeps its own cell, including the single-fact and long-lineup cases. */
+.evz-glance { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 96px), 1fr)); gap: 1px; overflow: hidden; margin: 0 0 18px; padding: 0; border: 1px solid var(--panel-border); border-radius: 8px; background: var(--panel-border); }
+.evz-glance > div { min-width: 0; padding: 12px 8px; background: var(--ink-800); text-align: center; }
+.evz-glance dt { color: var(--ac); font: 700 10px/1.1 var(--font-display); letter-spacing: .14em; text-transform: uppercase; }
+.evz-glance dd { overflow-wrap: anywhere; margin: 5px 0 0; font: 800 17px/1.06 var(--font-display); text-transform: uppercase; }
+.evz-glance-host { position: relative; }
+.evz-glance-host a { color: inherit; text-decoration: none; }
+.evz-glance-host a::after { content: ""; position: absolute; inset: 0; }
+.evz-glance-host a:focus-visible { outline: 2px solid var(--ac); }
+.evz-glance-host svg { display: inline-block; color: var(--ac); vertical-align: baseline; }
+.evz-report { padding: 0; border: 0; background: transparent; color: var(--text-hi); width: min(92vw, 420px); margin: auto auto max(24px,8dvh); }
+.evz-report form { display: grid; gap: 12px; background: var(--z-black); border: 1px solid var(--piece); border-radius: 18px; padding: 18px; }
+.evz-report header { display: flex; align-items: center; justify-content: space-between; }
+.evz-report h3 { margin: 0; }
+.evz-report label { display: grid; gap: 4px; }
+.evz-report fieldset label { display: inline-flex; align-items: center; padding-right: 10px; }
+.evz-report :is(button,input,textarea) { color: var(--text-hi); background: var(--z-black); border: 1px solid var(--ac); padding: 8px; border-radius: 8px; }
+.evz-report::backdrop { background: color-mix(in srgb,var(--z-black) 70%,transparent); }
+.evz-x__page .event-location-map { position: relative; min-height: 214px; border-radius: 12px; overflow: hidden; border: 1px solid var(--ac); }
+.evz-map-open { position: relative; z-index: 1; margin-inline: 12px; }
+/* Lay out once in the sheet's natural coordinates, then fit the approved rectangle. */
+.evz-sheet-layout {
+  position: absolute; inset: 0 auto auto 0; width: calc(100% / .94); height: calc(100% / .91);
+  display: flex; flex-direction: column; transform: scale(.94,.91); transform-origin: top left;
+}
+.evz-pin-settle {
+  position: absolute; inset: auto 0 0; height: 1px; pointer-events: none; opacity: 0;
+  background: var(--ac); box-shadow: 0 0 14px var(--ac);
+}
+.evz-x__pages { background: var(--z-black); }
+.evz-x__foot :is(button,.evz-going), .evz-rsvp-options button { transition: transform .16s ease-out; }
+.evz-x__foot button:active { transform: scale(.96); }
+.evz-x__foot :is(.evz-going,.evz-share,.evz-x__heart):active { box-shadow: 0 0 14px color-mix(in srgb,var(--ac) 9%,transparent); }
+@media (prefers-reduced-motion:reduce) {
+  .evz-x__foot button:active { transform: none; }
+}
+.evz-actions button > span { background: color-mix(in srgb, var(--piece) 9%, var(--z-black)); box-shadow: none; }
+.evz-x__starts {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px;
+  min-height: 76px; margin: 0 0 16px; padding: 10px 12px; border-radius: 8px; background: var(--ink-800);
+}
+.evz-timer-value, .evz-timer-mark { display: grid; place-items: center; }
+.evz-timer-value { gap: 3px; }
+.evz-timer-mark img { display: block; width: 100%; max-width: 70px; height: 42px; object-fit: contain; }
+.evz-x__starts-l, .evz-x__sech { letter-spacing: .16em; }
+.evz-x__sech { color: var(--ac); }
+.evz-x__desc { padding: 11px 12px; background: var(--ink-800); border-left: 2px solid var(--ac); }
+.evz-x__people { overflow: hidden; border: 1px solid var(--panel-border); border-radius: 7px; background: var(--ink-800); }
+.evz-x__person { min-height: 44px; padding: 8px 12px; }
+.evz-x__person:last-child { border-bottom: 0; }
+.evz-action-brand { display: flex; align-items: center; min-height: 30px; margin: 0 38px 8px 0; }
+.evz-action-brand img { display: block; width: auto; max-width: 128px; height: 30px; object-fit: contain; object-position: left center; }
+.evz-x__heading { background: linear-gradient(165deg,color-mix(in srgb,var(--ac) 7%,var(--z-black)),var(--z-black) 72%); }
+
+.evz-x[data-card-entering="true"] { will-change: transform, opacity; }
+.evz-x__page[aria-hidden="true"] { content-visibility: auto; }
+.evz-ticket-prices { margin: 12px 0 8px; border: 1px solid var(--panel-border); border-radius: 6px; overflow: hidden; }
+.evz-ticket-prices div { display: flex; justify-content: space-between; padding: 8px 12px; background: var(--ink-800); }
+.evz-ticket-prices div + div { border-top: 1px solid var(--panel-border); }
+.evz-ticket-prices dd { margin: 0; font-weight: 700; }
+.evz-drawer-grip { display: grid; place-items: center; margin: -12px auto 2px; height: 24px; width: 64px; touch-action: none; border: 0; background: transparent; }
+.evz-drawer-grip span { height: 3px; width: 32px; border-radius: 3px; background: var(--piece); }
+/* Attached drawers meet the tile shelf on its open seam. */
+.evz-x .evz-action-drawer[data-glass-piece="overlay"] { border-top: 0 !important; }
+.evz-x__heading { padding: 25px 25px 0; }
+.evz-x__foot { padding: 6px 24px 14px; }

@@ -20,6 +20,33 @@
   --ink-border-faint: #1a1a1a;
   --ink-border-strong: #333333;
 
+  /* ---- EVENTZ CARD NEUTRALS (exact values from the approved Placez-setup
+     event faces + expanded card; named in the places-art hex-suffix style) -- */
+  --evz-ink-0a0a0e:  #0A0A0E;  /* frame ink mixed into the card bloom border */
+  --evz-ink-0a0e12:  #0A0E12;  /* deep ink for chip/count borders + tag fill mix */
+  --evz-line-17171d: #17171D;  /* hairline row borders on the expanded card */
+  --evz-line-2c2c35: #2C2C35;  /* dashed claim border, quiet button borders */
+  --evz-dot-3a3a44:  #3A3A44;  /* pager dots (inactive) */
+  --evz-mist-f4f8fa: #F4F8FA;  /* brightest steel text (tag labels) */
+  --fbx-poster-paper: #EDE6D6; /* flyer board: poster back / paper body */
+  --fbx-trim-paper:   #F6F1E6; /* flyer board: torn-edge fibre rim */
+  --fbx-placeholder:  #5C5C66; /* flyer board: search placeholder */
+  --fbx-pc-hi:        #181820; /* flyer board: poster fallback gradient, top */
+  --fbx-chip-bg:      #101014; /* flyer board: counter boxes / inset chips */
+  --fbx-line-soft:    #1C1C22; /* flyer board: hairline borders */
+  --fbx-card:         #0C0C0F; /* flyer board: card surface */
+  --fbx-fan-text:     #EDF2F5; /* flyer board: fan card body text */
+  --evz-mist-f2f5f7: #F2F5F7;  /* venue line on the expanded hero */
+  --evz-mist-e8f0f5: #E8F0F5;  /* when line on the expanded hero */
+  --evz-mist-cfd8de: #CFD8DE;  /* steel meta text */
+  --evz-mist-c5d2dc: #C5D2DC;  /* countdown unit labels */
+  --evz-mist-aeb8c3: #AEB8C3;
+  --evz-mist-aeb7c4: #AEB7C4;  /* countdown time line */
+  --evz-mist-9aa7b0: #9AA7B0;  /* muted steel text (sub-lines, keys, notes) */
+  --evz-gray-d8d8e0: #D8D8E0;  /* info row values */
+  --evz-gray-c6c6cf: #C6C6CF;  /* body copy on the expanded card */
+  --evz-gray-8a8a94: #8A8A94;  /* tab labels, page counter */
+
   /* ---- NEON PALETTE (exact hexes) ------------------------ */
   --neon-yellow:  #D4FF00;  /* PRIMARY action (chartreuse) */
   --neon-cyan:    #00FFFF;  /* accent pop, THU, links */
@@ -186,7 +213,7 @@
 :root {
   --room-zlists: var(--neon-violet);
   --room-eventz: var(--neon-cyan, #00ffff);
-  --room-placez: var(--panel-cyan, #19e3ff);
+  --room-placez: var(--panel-cyan, #00FFFF);
   --room-hauz: var(--neon-cyan, #00ffff);
   --room-giftz: var(--board-gifting, #D4FF00);
   --room-gigz: var(--board-gigs, #7b00ff);
@@ -575,19 +602,10 @@ html.calm-mode {
   --sticker-bloom: 0 12px 26px -14px color-mix(in srgb, var(--c) 90%, transparent);
   --sticker-lit: var(--chrome-keyline), var(--chrome-bevel), var(--sticker-bloom), var(--neon-bloom);
   --chrome-bloom: 0 10px 26px -13px color-mix(in srgb, var(--c) 75%, transparent);
-  --glass-card-bg:
-    linear-gradient(133deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.0175) 14%, transparent 38%),
-    radial-gradient(80% 62% at 108% 112%, rgba(255, 255, 255, 0.055), color-mix(in srgb, var(--c) 4.5%, transparent) 42%, transparent 72%),
-    radial-gradient(115% 90% at 50% -18%, color-mix(in srgb, var(--c) 8%, transparent), transparent 58%),
-    rgba(5, 5, 8, 0.72);
-  --glass-card-border: 1px solid color-mix(in srgb, var(--c) 55%, #101014);
-  --glass-card-shadow:
-    0 0 0 2px #000,
-    0 34px 66px -24px rgba(0, 0, 0, 0.95),
-    0 0 26px -8px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
-    0 0 13px -5px color-mix(in srgb, var(--c) calc(var(--dir-gm, 60) * 1.3%), transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--c) 55%, rgba(255, 255, 255, 0.12)),
-    inset 0 0 34px -26px color-mix(in srgb, var(--c) 40%, transparent);
+  --glass-card-bg: var(--glass-dark-fill);
+  --glass-card-border: 1px solid var(--c);
+  --glass-card-shadow: 0 0 0 2px var(--z-black), inset 0 1px 0 color-mix(in srgb, var(--text-hi) 51%, transparent),
+    0 0 35px color-mix(in srgb, var(--c) 18.7%, transparent), inset 0 0 30px color-mix(in srgb, var(--c) 17%, transparent);
   --poster-well-bg: radial-gradient(
     130% 130% at 50% 14%,
     color-mix(in srgb, var(--c) 32%, #050506),
@@ -597,7 +615,7 @@ html.calm-mode {
   /* rebind solid/outline only - default glass btn stays dark translucent */
   --glass-btn-solid-bg: var(--c);
   --glass-btn-outline-color: var(--c);
-  --glass-btn-outline-border: 1px solid #000;
+  --glass-btn-outline-border: 1px solid var(--c);
   --glass-btn-outline-bg: linear-gradient(
       150deg,
       color-mix(in srgb, var(--c) 16%, transparent),
@@ -614,6 +632,6 @@ html.calm-mode {
     color-mix(in srgb, var(--c) 6%, transparent) 40%,
     transparent 70%
   );
-  --pdx-glass-edge: color-mix(in srgb, var(--c) 55%, #101014);
+  --pdx-glass-edge: var(--c);
   --pdx-glass-shadow: var(--glass-card-shadow);
 }

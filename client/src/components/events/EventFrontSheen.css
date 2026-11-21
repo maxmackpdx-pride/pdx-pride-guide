@@ -1,0 +1,13 @@
+.event-front-sheen { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
+@media (prefers-reduced-motion:no-preference) {
+  .event-front-sheen[data-seen]::after {
+    content: ""; position: absolute; inset: 0; opacity: 0;
+    background: linear-gradient(108deg,transparent 38%,color-mix(in srgb,var(--text-hi) 14%,transparent) 50%,transparent 62%);
+    animation: event-front-light .44s ease-out both;
+  }
+  @keyframes event-front-light {
+    from { transform: translateX(-100%); opacity: 0; }
+    40% { opacity: .8; }
+    to { transform: translateX(100%); opacity: 0; }
+  }
+}

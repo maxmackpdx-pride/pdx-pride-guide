@@ -1,13 +1,11 @@
+import { EventFrontSheen } from "@/components/events/EventFrontSheen";
 import { rememberCardOrigin } from "@/components/cards/CardAPI";
 import type { CSSProperties } from "react";
 import { dayAccentToken, dayComplementToken } from "@/lib/dsColors";
 import { listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import { eventTimeLabel } from "@/lib/eventDisplay";
-import { CardHeartButton } from "@/components/CardHeartButton";
-import RailShareButton from "@/components/home/RailShareButton";
-import { eventPath } from "@shared/eventSlug";
+import { EventFrontHeart } from "@/components/events/EventParticipation";
 import EventFlyerArt from "./EventFlyerArt";
-import { CardArtworkGlass } from '../CardArtworkGlass';
 import { LiveBadge, type TonightCardLive } from "@/components/home/TonightEventCard";
 import type { EventListing } from "@shared/multiDayEvents";
 
@@ -38,18 +36,12 @@ export default function EventRailCard({
       <button type="button" className="event-rail-card__open" onClick={() => onOpen(listing)} aria-label={`Open ${listing.title}`}>
         <span className="event-rail-card__art">
           <EventFlyerArt src={poster} day={listingDay(listing)} showDay={size === "m"} title={listing.title} venueName={listing.venueName} />
-          <CardArtworkGlass />
+          <EventFrontSheen/>
           {liveState && size === "m" ? <LiveBadge live={liveState} /> : null}
           <span className="event-rail-card__shade"><span className="event-rail-card__title">{listing.title}</span><span className="event-rail-card__meta">{eventTimeLabel(listing.dateStart)} · {listing.venueName}</span></span>
         </span>
       </button>
-      <RailShareButton href={eventPath(listing.id, listing.title, listing.dayOfWeek)} title={listing.title} />
-      <CardHeartButton active={saved}
-        className="event-rail-card__save"
-        aria-pressed={saved}
-        aria-label={`${saved ? "Remove" : "Add"} ${listing.title} ${saved ? "from" : "to"} my schedule`}
-        onClick={event => { event.stopPropagation(); onToggleSave(listing.id); }}
-      />
+      <EventFrontHeart listing={listing} className="event-rail-card__save"/>
     </article>
   );
 }

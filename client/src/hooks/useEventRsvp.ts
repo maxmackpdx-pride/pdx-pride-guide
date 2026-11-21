@@ -8,6 +8,9 @@ import { RSVP_CHECKINS_KEY, RSVP_SUMMARIES_KEY, type CheckInRow } from "@/lib/op
 
 import {askAfterzConsent} from "@/components/afterz/NightConsent";
 
+export function confirmAttendanceRemoval() {
+  return window.confirm("Remove your attendance and take this event out of your heart stack?");
+}
 export function useEventRsvp() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -24,7 +27,7 @@ export function useEventRsvp() {
   });
   const myEventIds = useMemo(() => new Set(query.data?.map(row => row.eventId)), [query.data]);
   const mutation = useMutation({
-    mutationFn: async ({ eventId, nextGoing }: { eventId: number; actor: number; nextGoing: boolean }) => {
+    mutationFn: async ({ eventId, nextGoing }: { eventId: number; actor: number; nextGoing: boolean; removal?: "un-rsvp" | "cannot-go" }) => {
       if (nextGoing) {
         await apiRequest("POST", `/api/events/${eventId}/attendance`, {
           message: attendancePhraseLabel(DEFAULT_ATTENDANCE_PHRASE_KEY), visibility: "public", isAnonymous: false,
@@ -33,7 +36,7 @@ export function useEventRsvp() {
         await apiRequest("DELETE", `/api/events/${eventId}/attendance`);
       }
     },
-    onSuccess: (_, { eventId, actor, nextGoing }) => {
+    onSuccess: (_, { eventId, actor, nextGoing, removal }) => {
       // Mutations touch the originating viewer only; one event cannot roll back another.
       const key = [...RSVP_CHECKINS_KEY, actor];
       if (queryClient.getQueryData(key) !== undefined) {
@@ -43,25 +46,26 @@ export function useEventRsvp() {
         });
       }
       if(nextGoing && viewer.current===actor) askAfterzConsent(eventId,"rsvp");
-      if(viewer.current===actor) toast({ title: nextGoing ? "Public attendance recorded" : "Attendance removed" });
+      if(viewer.current===actor) toast({ title: nextGoing ? "Public attendance recorded" : removal === "un-rsvp" ? "lame :(" : removal === "cannot-go" ? "thanks for letting me know" : "Attendance removed" });
     },
     onError: (_, {actor}) => {if(viewer.current===actor) toast({ title: "Attendance could not be updated", description: "Check your connection and try again.", variant: "destructive" });},
     onSettled: (_, __, { eventId, actor }) => {
       pending.current.delete(`${actor}:${eventId}`);
       invalidatePending(n => n + 1);
-      for (const key of [RSVP_CHECKINS_KEY, RSVP_SUMMARIES_KEY, ["profile"], ["/api/hub/feed"], ["/api/hub/feed/head"], ["/api/hearts"], ["/api/outz/upcoming"], ["/api/events", eventId, "attendance"]]) {
+      for (const key of [RSVP_CHECKINS_KEY, RSVP_SUMMARIES_KEY, ["profile"], ["/api/hub/feed"], ["/api/hub/feed/head"], ["/api/hearts"], ["/api/outz/upcoming"], ["/api/events/mine/drawer-plans"], ["/api/chats/mine"], ["/api/events", eventId, "chat"], ["/api/events", eventId, "attendance"]]) {
         void queryClient.invalidateQueries({ queryKey: key });
       }
     },
   });
   const isRsvpPending = useCallback((eventId: number) => pending.current.has(`${userId}:${eventId}`), [userId]);
-  const toggleRsvp = (eventId: number) => {
+  const toggleRsvp = (eventId: number, confirmedRemoval?: "un-rsvp" | "cannot-go") => {
     if (userId == null) { setShowAuth(true); return; }
     if (query.isError) { void query.refetch(); return; }
     if (query.isPending || isRsvpPending(eventId)) return;
+    if (myEventIds.has(eventId) && !confirmedRemoval && !confirmAttendanceRemoval()) return;
     pending.current.add(`${userId}:${eventId}`);
     invalidatePending(n => n + 1);
-    mutation.mutate({ eventId, actor: userId, nextGoing: !myEventIds.has(eventId) });
+    mutation.mutate({ eventId, actor: userId, nextGoing: !myEventIds.has(eventId), removal: confirmedRemoval });
   };
   return { myEventIds, toggleRsvp, showAuth, setShowAuth, isRsvpPending, loading: !!user && query.isPending, error: !!user && query.isError, retry: query.refetch };
 }

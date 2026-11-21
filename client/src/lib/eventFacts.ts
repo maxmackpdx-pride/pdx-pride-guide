@@ -17,3 +17,17 @@ export function eventPrice(value: string | null | undefined) {
 export function eventAge(value: string | null | undefined) {
   return value && Object.prototype.hasOwnProperty.call(AGE_FULL,value) ? AGE_FULL[value] : "Not stated";
 }
+
+/** A complete ticket line can be moved intact out of the description. Leave
+ * descriptions with conditional pricing or additional qualifications as written. */
+export function eventTicketFacts(description: string | null | undefined) {
+  const text = description ?? "";
+  const pair = /(?<!\S)(\$\d+(?:\.\d{2})?)\s+presale\s*\/\s*(\$\d+(?:\.\d{2})?)\s+door(?:\.(?=\s|$)|$)/i.exec(text);
+  if (!pair || (pair.index > 0 && !/[.!?\n]\s*$/.test(text.slice(0,pair.index)))) {
+    return { description: text, prices: null };
+  }
+  return {
+    description: [text.slice(0,pair.index).trimEnd(), text.slice(pair.index + pair[0].length).trimStart()].filter(Boolean).join(" "),
+    prices: { presale: pair[1], door: pair[2] },
+  };
+}

@@ -159,7 +159,7 @@ export default function TheBigOne({
   const dayInk = dayCode === "MON" || dayCode === "TUE" ? "#fff" : "#050506";
 
   const rsvpLabel = isGoing ? "Remove attendance" : "Going · Public";
-  const rsvpCaption = isGoing ? "Keeps your event follow" : "Shows your name and follows event updates";
+  const rsvpCaption = isGoing ? "Removes your RSVP and heart" : "Shows your name and follows event updates";
 
   return (
     <section

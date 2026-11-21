@@ -1,54 +1,46 @@
+import { EventMapSurface } from "@/components/EventLocationMap";
+import { EventReport } from "./EventReport";
+import { EventShare } from "./EventShare";
+import { canSharePublicEvent } from "@shared/publicEventVisibility";
 import { pacificCalendarDate } from "@shared/missedConnections";
-import { eventAge, eventPrice } from "@/lib/eventFacts";
-import { EventGoingButton, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
+import { eventAge, eventPrice, eventTicketFacts } from "@/lib/eventFacts";
+import { EventGoingButton, EventRemoveAttendance, EventInterestedHeart, EventPrivateSaveButton, EventReadStatus } from "./EventParticipation";
 import { PosterlessFlyer } from "./PosterlessFlyer";
 import EventPlanning from "./EventPlanning";
 import { EventHostNotice } from "./EventHostNotice";
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { ArrowUpRight, ChevronLeft, ChevronRight, Clock3, MapPin, Share2, X } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, MapPin, X } from "lucide-react";
 import type { EventListing as Event } from "@shared/multiDayEvents";
 import { EVENT_TALENT_ROLE_COLORS, EVENT_TALENT_ROLE_LABELS, type EventTalentRow } from "@shared/eventTalent";
-import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { publicHttpUrl } from "@shared/safeHttpUrl";
 import { resolveVenueWebsite } from "@shared/venueLinks";
 import { resolveDirectoryLogo } from "@shared/directoryLogos";
 import { CardStage } from "@/components/cards/CardStage";
-import { EventFrontStage } from "./EventFlyerFront";
+import { eventCardOrigin } from "@/components/cards/CardAPI";
+import { formatCardCountdown } from "@/lib/countdown";
+import { EventActionTiles, EventPosterDialog } from "./EventCardActions";
+import { memberProfileHref } from "@/lib/avatarLinks";
 import { OpenCardMeta } from "@/components/cards/react19Card";
 import { closeOpenCard } from "@/components/cards/react19CardModel";
 import { useOpenCardClose } from "@/hooks/useOpenCardClose";
 import { useAuth } from "@/context/AuthContext";
-import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { dayAccentToken } from "@/lib/dsColors";
-import { formatCardTime, listingDay, listingPosterUrl } from "@/lib/dsEvent";
+import { listingDay, listingPosterUrl } from "@/lib/dsEvent";
 import { formatPacificDateTime } from "@/lib/countdown";
 import { eventTimeLabel } from "@/lib/eventDisplay";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { eventPath } from "@shared/eventSlug";
 import { placePath } from "@shared/placeSlug";
-import { shareEventLink, shareToastTitle } from "@/lib/shareEvent";
 import { useResponsivePoster } from "@/lib/useResponsivePoster";
 import { POSTER_DETAIL_SIZES, restoreOriginalPoster } from "@/lib/responsivePoster";
 import UserAvatar from "@/components/UserAvatar";
 import AuthModal from "@/components/AuthModal";
 import MissedConnectionsPanel from "@/components/MissedConnectionsPanel";
-import EventModal, { type EventModalOriginRect } from "@/components/EventModal";
+import EventModal,{ type EventModalOriginRect } from "@/components/EventModal";
 import "./EventzExpanded.css";
-
-/**
- * The Eventz expanded card, built on the Placez setup: one card, five swipe
- * pages (Info / Feed / Maps / More + Nearby / People — Info is the first
- * page per Tucker's Nov 19, 2026 ruling, superseding the Feed-first order),
- * the flyer full-size from the top with its gradient starting 35% down the
- * card, black action cards, and the pager + SAVE THIS EVENT pinned at the
- * bottom. The page scroller spans the full card behind the flyer layer, so
- * content scrolls up underneath the flyer instead of stopping below it.
- * Data comes from GET /api/events/:id/detail. Admin / edit / moderation
- * stay in EventModal, one tap away from the Info page. Made-by: Muse
- */
 
 type DetailHost = {
   userId: number;
@@ -111,7 +103,7 @@ type EventDetail = {
   nearby: { restaurants: SlimPlace[]; events: NearbyEvent[] };
 };
 
-const PAGES = ["Info", "Feed", "Maps", "More", "People"] as const;
+const PAGES = ["Feed", "Info", "Maps", "People", "More", "Nearby"] as const;
 
 type EventzExpandedProps = {
   openPlanning?: boolean;
@@ -125,19 +117,17 @@ type EventzExpandedProps = {
 };
 
 export default function EventzExpanded({ event, onClose, onEventUpdated, originRect = null, documentMeta = true, onOpenEvent, openPlanning = false, openChat = false }: EventzExpandedProps) {
-  const [expandedKey, setExpandedKey] = useState("");
+  const [origin] = useState(() => originRect ?? eventCardOrigin());
   const [manage, setManage] = useState(openChat);
   if (!event || typeof event.id !== "number") return null;
-  const key = event.id + "/" + event.dateStart;
   if (manage) {
     return <EventModal initialSection={openChat ? "attendance" : undefined} event={event} onClose={onClose} onEventUpdated={onEventUpdated} originRect={originRect} documentMeta={documentMeta} />;
   }
-  if (!openPlanning && expandedKey !== key) return <EventFrontStage key={key} listing={event} onClose={onClose} onExpand={() => setExpandedKey(key)} />;
   return (
-    <CardStage key={event.id} onClose={onClose}>
-      {documentMeta ? <OpenCardMeta title={event.title} description={event.venueName || event.description} /> : null}
-      <EventzExpandedInner openPlanning={openPlanning} event={event} onClose={() => closeOpenCard(onClose)} onManage={() => setManage(true)} onOpenEvent={onOpenEvent} />
-    </CardStage>
+    <>
+      {documentMeta && canSharePublicEvent(event) ? <OpenCardMeta title={event.title} description={event.venueName || event.description} /> : null}
+      <EventzExpandedInner key={event.id} origin={origin} openPlanning={openPlanning} event={event} onClose={() => closeOpenCard(onClose)} onManage={() => setManage(true)} onOpenEvent={onOpenEvent} />
+    </>
   );
 }
 
@@ -146,7 +136,7 @@ export default function EventzExpanded({ event, onClose, onEventUpdated, originR
  * and the date line, in a bordered box. Renders nothing once the event has
  * started.
  */
-function StartsInBox({ event }: { event: Event }) {
+function StartsInBox({ event, hostName }: { event: Event; hostName?: string }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 30000);
@@ -154,23 +144,21 @@ function StartsInBox({ event }: { event: Event }) {
   }, []);
   const startMs = parsePacificDateTime(event.dateStart);
   if (startMs == null || startMs - now <= 0) return null;
-  const remaining = startMs - now;
-  const days = Math.floor(remaining / 86400000);
-  const hours = Math.floor((remaining % 86400000) / 3600000);
-  const minutes = Math.floor((remaining % 3600000) / 60000);
-  const pad2 = (n: number) => String(n).padStart(2, "0");
-  const units: Array<[number, string]> = [[days, "days"], [hours, "hrs"], [minutes, "min"]];
-  return (
-    <div className="evz-x__starts" role="timer" aria-label={`Starts in ${days} days, ${hours} hours, ${minutes} minutes`}>
-      <p className="evz-x__starts-l">Starts in</p>
-      <div className="evz-x__starts-d" aria-hidden="true">
-        {units.map(([value, unit]) => (
-          <span key={unit}><strong>{pad2(value)}</strong><small>{unit}</small></span>
-        ))}
-      </div>
-      <p className="evz-x__starts-w">{formatPacificDateTime(event.dateStart, { weekday: "short", month: "short", day: "numeric" })} · {formatCardTime(event)}</p>
+  const venueMark = resolveDirectoryLogo(event.venueName);
+  const hostMark = hostName ? resolveDirectoryLogo(hostName) : null;
+  return <div className="evz-x__starts" role="timer">
+    <span className="evz-timer-mark" aria-hidden="true">{venueMark && <img src={venueMark} alt="" />}</span>
+    <div className="evz-timer-value">
+      <span className="evz-x__starts-l">Starts in</span>
+      <strong>{formatCardCountdown(startMs - now)}</strong>
     </div>
-  );
+    <span className="evz-timer-mark" aria-hidden="true">{hostMark && hostMark !== venueMark && <img src={hostMark} alt="" />}</span>
+  </div>;
+}
+
+function EventPersonRow({ username, children }: { username?: string | null; children: ReactNode }) {
+  const href = memberProfileHref(username);
+  return href ? <Link className="evz-x__person" href={href}>{children}</Link> : <div className="evz-x__person">{children}</div>;
 }
 
 type PlaceUpcomingEvent = { id: number; title: string; dateStart: string; dateEnd?: string | null; dayOfWeek?: string | null; posterImageUrl?: string | null };
@@ -202,7 +190,8 @@ function primaryLinkFor(event: Event): { href: string; label: string } | null {
   return null;
 }
 
-function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanning }: {
+function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanning, origin }: {
+  origin: EventModalOriginRect | null;
   openPlanning: boolean;
   event: Event;
   onClose: () => void;
@@ -210,18 +199,54 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
   onOpenEvent?: (event: Event) => void;
 }) {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [showAuth, setShowAuth] = useState(false);
-  const [page, setPage] = useState(openPlanning ? 1 : 0);
+  const [page, setPage] = useState(openPlanning ? 0 : 1);
   const [mizzedOpen, setMizzedOpen] = useState(false);
   const [venueDay, setVenueDay] = useState<string | null>(null);
   const pagesRef = useRef<HTMLDivElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const pages = pagesRef.current;
-    if (openPlanning && pages) pages.scrollTo({ left: pages.clientWidth, behavior: "instant" });
+    const pin = pinRef.current;
+    const active = pages?.children[page];
+    if (!pages || !pin || !(active instanceof HTMLElement)) return;
+    const card = pin.closest<HTMLElement>(".evz-x")!;
+    let frame = 0;
+    let pinned = false;
+    function scrub() {
+      frame = 0;
+      const progress = Math.min(1, Math.max(0, (active as HTMLElement).scrollTop / 140));
+      const scale = 1 - progress * .3;
+      card.style.setProperty("--pin-scale", String(scale));
+      card.style.setProperty("--pin-progress", String(progress));
+      if (progress === 1 && !pinned && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        pin!.querySelector(".evz-pin-settle")?.animate(
+          [{ opacity: 0 }, { opacity: 1, offset: .32 }, { opacity: 0 }], { duration: 280 }
+        );
+      }
+      pinned = progress === 1;
+    }
+    const queue = () => { if (!frame) frame = requestAnimationFrame(scrub); };
+    const measure = () => {
+      card.style.setProperty("--pin-height", pin.offsetHeight + "px");
+      scrub();
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(pin);
+    active.addEventListener("scroll", queue, { passive: true });
+    measure();
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      active.removeEventListener("scroll", queue);
+    };
+  }, [page]);
+  useLayoutEffect(() => {
+    const pages = pagesRef.current;
+    if (pages) pages.scrollTo({ left: openPlanning ? 0 : pages.clientWidth, behavior: "instant" });
   }, [openPlanning]);
-  const { dialogRef, requestClose } = useOpenCardClose(onClose);
+  const { dialogRef, requestClose } = useOpenCardClose(onClose, true, { origin });
 
   const detailQuery = useQuery<EventDetail>({
     queryKey: ["/api/events", event.id, "detail", user?.id, pacificCalendarDate(event.dateStart)],
@@ -281,30 +306,29 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
   const endMs = parsePacificDateTime(event.dateEnd);
   const isPastEvent = endMs != null && endMs < Date.now();
   const hasPendingClaim = Boolean(((detail?.event ?? event) as { hasPendingClaim?: boolean }).hasPendingClaim);
+  const claimed = (detail?.event ?? event).isClaimed ?? Boolean((detail?.event ?? event).claimedBy);
   const claimable = (detail?.event ?? event).isClaimable && !(detail?.event ?? event).claimedBy;
   const canManage = Boolean(user?.isAdmin) || Boolean(user && hosts.some((h) => h.userId === user.id));
   const primaryLink = primaryLinkFor(event);
   const age = eventAge(event.ageRequirement);
   const admission = eventPrice(event.admission);
-  const rawChips = [...getEventTypeTagsForEvent(event).slice(0, 3), ...(age === "Not stated" ? [] : [age]), ...(event.isSexPositive ? ["Sex-positive"] : [])];
-  const seenChipKeys = new Set<string>();
-  const chips = rawChips.filter((chip) => {
-    const key = chip.toLowerCase().replace(/-/g, " ").replace(/\s+/g, " ").trim();
-    if (seenChipKeys.has(key)) return false;
-    seenChipKeys.add(key);
-    return true;
-  });
-  const whenLine = `${formatPacificDateTime(event.dateStart, { weekday: "long", month: "long", day: "numeric" })} · ${formatCardTime(event)}`;
-  const shortWhen = `${formatPacificDateTime(event.dateStart, { weekday: "short", month: "short", day: "numeric" })} · ${formatCardTime(event)}`;
+  const ticketFacts = eventTicketFacts(event.description);
+  const chips = [
+    ...(event.admission && event.admission !== "UNKNOWN" ? [admission] : []),
+    ...(age === "Not stated" ? [] : [age]),
+    ...(event.isSexPositive ? ["Sex-positive"] : []),
+  ];
+  const [posterOpen, setPosterOpen] = useState(false);
+  const shortWhen = `${formatPacificDateTime(event.dateStart, { weekday: "short", month: "short", day: "numeric" })} · ${eventTimeLabel(event.dateStart)}`;
   const directionsDest = event.lat != null && event.lng != null ? `${event.lat},${event.lng}` : (event.address || `${event.venueName}, Portland, OR`);
   const googleDirections = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsDest)}`;
   const appleDirections = `https://maps.apple.com/?daddr=${encodeURIComponent(directionsDest)}`;
 
   const goTo = (index: number) => {
-    const next = Math.max(0, Math.min(PAGES.length - 1, index));
+    const next = (index + PAGES.length) % PAGES.length;
     setPage(next);
     const el = pagesRef.current;
-    if (el) el.scrollTo({ left: next * el.clientWidth, behavior: "smooth" });
+    if (el) el.scrollTo({ left: next * el.clientWidth, behavior: "instant" });
   };
   const onPagesScroll = () => {
     const el = pagesRef.current;
@@ -312,66 +336,70 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
     const index = Math.round(el.scrollLeft / el.clientWidth);
     if (index !== page && index >= 0 && index < PAGES.length) setPage(index);
   };
-  const share = async () => {
-    try {
-      const result = await shareEventLink(eventPath(event.id, event.title, event.dayOfWeek, pacificCalendarDate(event.dateStart)), event.title);
-      toast({ title: shareToastTitle(result, "event") });
-    } catch (error) {
-      if ((error as Error)?.name !== "AbortError") toast({ title: "Could not share. Please try again.", variant: "destructive" });
-    }
-  };
 
   return (
-    <div ref={dialogRef} role="dialog" aria-modal="true" tabIndex={-1} data-testid="event-modal" data-card-category="eventz" className="evz-x pdx-glass-rebind" style={{ "--c": accent, "--ac": accent } as CSSProperties} aria-label={`${event.title} details`}>
-      <span className="evz-x__grad" aria-hidden="true" />
-      <header className="evz-x__hero">
-        {poster
-          ? <img {...posterAttributes} alt="" loading="lazy" decoding="async" className="evz-x__flyer" onError={(e) => { if (!restoreOriginalPoster(e.currentTarget, poster)) setFailedPoster(poster); }} />
-          : (
-            <>
-              <span className="evz-x__flyer evz-x__flyer--none" aria-hidden="true" />
-              <PosterlessFlyer placeImageUrl={isFetLife ? null : venue?.imageUrl || event.fallbackPlaceImage} logoUrl={fallbackLogo} wordmark={fallbackWordmark} />
-            </>
-          )}
-        <div className="evz-x__chrome">
-          <button type="button" className="evz-x__iconbtn" onClick={share} aria-label={`Share ${event.title}`}><Share2 size={17} aria-hidden="true" /></button>
-          <button type="button" className="evz-x__iconbtn" onClick={requestClose} aria-label={`Close ${event.title}`}><X size={19} aria-hidden="true" /></button>
-        </div>
-        <div className="evz-x__id">
+    <CardStage onClose={requestClose}>
+    <div ref={dialogRef} role="dialog" aria-modal="true" tabIndex={-1} data-testid="event-modal" data-card-category="eventz" className="evz-x pdx-glass-rebind" style={{ "--c": accent, "--ac": accent, "--piece": accent } as CSSProperties} aria-label={`${event.title} details`}>
+    <div className="evz-sheet-layout">
+      <div className="evz-pin" ref={pinRef}>
+      <header className="evz-x__heading">
+        <div className="evz-x__heading-copy">
           <h2 className="evz-x__title">{event.title}</h2>
-          <p className="evz-x__venue"><MapPin size={14} aria-hidden="true" />{event.venueName}{event.neighborhood ? <span> · {event.neighborhood}</span> : null}<span> · {shortWhen}</span></p>
-          <div className="evz-x__chips">{chips.map((chip) => <span key={chip} className="evz-x__chip">{chip}</span>)}</div>
+          <p className="evz-x__when">{shortWhen} · {venue
+            ? <Link href={placePath(venue.id, venue.name)}>{event.venueName}</Link>
+            : <strong>{event.venueName}</strong>}</p>
+          <div className="evz-x__chips">
+            <span className="evz-x__chip" data-claimed={claimed}>{claimed ? "Claimed" : "Unclaimed"}</span>
+            {chips.map(chip => <span className="evz-x__chip" key={chip}>{chip}</span>)}
+          </div>
+        </div>
+        <div className="evz-x__thumb">
+          {poster ? <button type="button" onClick={() => setPosterOpen(true)} aria-label={`Open full poster for ${event.title}`}>
+            <img {...posterAttributes} alt="" onError={e => { if (!restoreOriginalPoster(e.currentTarget, poster)) setFailedPoster(poster); }}/>
+          </button> : <PosterlessFlyer placeImageUrl={isFetLife ? null : venue?.imageUrl || event.fallbackPlaceImage} logoUrl={fallbackLogo} wordmark={fallbackWordmark}/>}
+          <button type="button" className="evz-x__close" onClick={requestClose} aria-label={`Close ${event.title}`}><X size={18}/></button>
         </div>
       </header>
-
-      <div className="evz-x__actions">
-        <EventGoingButton eventId={event.id} past={isPastEvent} />
-      </div>
-
+      <EventActionTiles event={event} website={publicHttpUrl((event as Event & {venueWebsite?: string}).venueWebsite) ?? publicHttpUrl(resolveVenueWebsite(event.venueName))} googleDirections={googleDirections} appleDirections={appleDirections}/>
+      {posterOpen && poster && <EventPosterDialog src={poster} title={event.title} onClose={() => setPosterOpen(false)}/>}
       <nav className="evz-x__tabs" aria-label="Event pages">
         {PAGES.map((label, index) => (
           <button key={label} type="button" className={index === page ? "on" : ""} aria-current={index === page ? "page" : undefined} onClick={() => goTo(index)}>
-            {label === "More" ? "More + Nearby" : label}
+            {label}
           </button>
         ))}
       </nav>
+      <span className="evz-pin-settle" aria-hidden="true"/>
+      </div>
 
       <div className="evz-x__pageswrap">
         <div className="evz-x__pages" ref={pagesRef} onScroll={onPagesScroll}>
-          <section className="evz-x__page" inert={page!==0} aria-hidden={page!==0} aria-label="Info">
-            <div className="evz-x__sech"><span>Event details</span></div>
-            <StartsInBox event={event} />
-            <div className="evz-x__kv"><Clock3 size={17} aria-hidden="true" /><span>{whenLine}</span></div>
-            <div className="evz-x__kv"><MapPin size={17} aria-hidden="true" /><span>{venue ? <Link href={placePath(venue.id, venue.name)} className="evz-x__venuelink">{event.venueName}</Link> : event.venueName}{event.address ? <><br />{event.address}</> : null}</span></div>
-            {hostGroup ? (
-              <div className="evz-x__kv"><span className="evz-x__kv-k">Hosted by</span><span><Link href={`/z/${hostGroup.slug}`} className="evz-x__venuelink">{hostGroup.name}</Link></span></div>
-            ) : null}
-            {event.description ? <p className="evz-x__desc">{event.description}</p> : null}
-            <div className="evz-x__kv"><span className="evz-x__kv-k">Admission</span><span>{admission}</span></div>
-            <div className="evz-x__kv"><span className="evz-x__kv-k">Age</span><span>{age}</span></div>
-            {(primaryLink || sourceUrl) ? (
+          <section className="evz-x__page" inert={page !== 0} aria-hidden={page !== 0} aria-label="Feed">
+            {page === 0 && event.id > 0 && <EventPlanning section="feed" eventId={event.id} occurrenceDate={event.dateStart} />}
+          </section>
+
+          <section className="evz-x__page" inert={page !== 1} aria-hidden={page !== 1} aria-label="Info">
+
+            <StartsInBox event={event} hostName={hostGroup?.name} />
+            <h3 className="evz-x__sech">Night at a glance</h3>
+            <dl className="evz-glance">
+              {event.dateEnd && <div><dt>Ends</dt><dd>{eventTimeLabel(event.dateEnd)}</dd></div>}
+              {hostGroup && <div className="evz-glance-host">
+                <dt>Host</dt>
+                <dd><Link href={`/z/${hostGroup.slug}`}>{hostGroup.name} <ArrowUpRight size={12} aria-hidden="true" /></Link></dd>
+              </div>}
+              {talent.length > 0 && <div><dt>Lineup</dt><dd>{talent.map(person => person.displayName || person.username).filter(Boolean).join(", ")}</dd></div>}
+              {!hostGroup && !talent.length && !event.dateEnd && <div><dt>Event</dt><dd>{admission}</dd></div>}
+            </dl>
+            {event.description && <h3 className="evz-x__sech">About this night</h3>}
+            {ticketFacts.description && <p className="evz-x__desc">{ticketFacts.description}</p>}
+            {ticketFacts.prices && <dl className="evz-ticket-prices" aria-label="Ticket prices">
+              <div><dt>Presale</dt><dd>{ticketFacts.prices.presale}</dd></div>
+              <div><dt>Door</dt><dd>{ticketFacts.prices.door}</dd></div>
+            </dl>}
+            {(primaryLink?.label === "Tickets" || sourceUrl) ? (
               <div className="evz-x__linkrow">
-                {primaryLink ? (
+                {primaryLink?.label === "Tickets" ? (
                   <a className="evz-x__link" href={primaryLink.href} target="_blank" rel="noopener noreferrer">{primaryLink.label} <ArrowUpRight size={16} aria-hidden="true" /></a>
                 ) : null}
                 {sourceUrl ? (
@@ -384,33 +412,86 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
             ) : null}
             <div className="evz-x__manage">
               {canManage ? <button type="button" className="evz-x__managebtn" onClick={onManage}>Manage event</button> : null}
-              <button type="button" className="evz-x__managebtn" onClick={onManage}>Report / request a change</button>
+              <EventReport title={event.title} href={eventPath(event.id, event.title, event.dayOfWeek, pacificCalendarDate(event.dateStart))}/>
             </div>
+            <EventRemoveAttendance eventId={event.id} />
+            <EventPrivateSaveButton eventId={event.id} />
             <EventHostNotice className="evz-x__note" />
           </section>
 
-          <section className="evz-x__page" inert={page!==1} aria-hidden={page!==1} aria-label="Feed — Gigz">
-            {event.id > 0 && <EventPlanning eventId={event.id} occurrenceDate={event.dateStart} />}
-            <button type="button" className="evz-x__act evz-x__act--dash" aria-expanded={mizzedOpen} onClick={() => setMizzedOpen((open) => !open)}>
-              <span className="evz-x__act-main">
-                <span className="evz-x__act-t">Add a Mizzed Connection</span>
-                <span className="evz-x__act-s">{missedCount > 0 ? `${missedCount} posted for this event` : "Met someone at this event? Post it — during or after."}</span>
-              </span>
-              <span className="evz-x__act-ar" aria-hidden="true">+</span>
-            </button>
-          </section>
-
-          <section className="evz-x__page" inert={page!==2} aria-hidden={page!==2} aria-label="Maps">
+          <section className="evz-x__page" inert={page !== 2} aria-hidden={page !== 2} aria-label="Maps">
             <div className="evz-x__sech"><span>Map &amp; directions</span><span className="evz-x__sech-r">Location overview</span></div>
-            <div className="evz-x__mapbox" aria-hidden="true"><span className="evz-x__pin" /></div>
-            <div className="evz-x__kv"><MapPin size={17} aria-hidden="true" /><span>This event · {event.venueName}<br />{event.address || venue?.address || "Portland, OR"}<br /><span className="evz-x__note-inline">Real locations, no street tiles. Directions open in your chosen app.</span></span></div>
-            <div className="evz-x__dirrow">
-              <a className="evz-x__link" href={googleDirections} target="_blank" rel="noopener noreferrer">Directions · Google <ArrowUpRight size={16} aria-hidden="true" /></a>
-              <a className="evz-x__link" href={appleDirections} target="_blank" rel="noopener noreferrer">Directions · Apple <ArrowUpRight size={16} aria-hidden="true" /></a>
-            </div>
+            {page === 2 && <EventMapSurface event={event} primary={flyerAccent || "var(--neon-red)"} complementary="var(--text-hi)">
+              {!event.isPrivate && <a className="evz-x__link evz-map-open" href={`/placez/map?mode=mapz&item=event-${event.id}`}>Open on PlaceZ <MapPin size={16}/></a>}
+            </EventMapSurface>}
           </section>
 
-          <section className="evz-x__page" inert={page!==3} aria-hidden={page!==3} aria-label="More + Nearby">
+          <section className="evz-x__page" inert={page !== 3} aria-hidden={page !== 3} aria-label="People">
+            <div className="evz-x__sech"><span>{hosts.length === 1 ? "Host" : "Hosts"}</span></div>
+            {!Array.isArray(detail?.hosts) ? detailStatus : hosts.length > 0 ? (
+              <div className="evz-x__people">
+                {hosts.map((host) => {
+                  const inner = (
+                    <>
+                      <UserAvatar photoUrl={host.photoUrl} avatarChoice={host.avatarChoice} avatarRing={host.avatarRing} displayName={host.displayName} username={host.username ?? undefined} size={48} />
+                      <span className="evz-x__person-meta">
+                        <span className="evz-x__person-name">{host.displayName || host.username}</span>
+                        {host.role === "PRIMARY" ? <span className="evz-x__person-role">Primary host</span> : null}
+                      </span>
+                    </>
+                  );
+                  return <EventPersonRow key={host.userId} username={host.username}>{inner}</EventPersonRow>;
+                })}
+              </div>
+            ) : (
+              <>
+                <div className="evz-x__claim">
+                  <p className="evz-x__claim-t">{hasPendingClaim ? "Claim in review" : claimable ? "Open to claim" : "Host information"}</p>
+                  {hostGroup ? <Link href={`/z/${hostGroup.slug}`} className="evz-x__venuelink">{hostGroup.name}</Link> : <p className="evz-x__claim-s">No public event host is listed.</p>}
+                  {hasPendingClaim ? <p className="evz-x__claim-s">A claim is pending admin review.</p> : null}
+                </div>
+                {claimable && !hasPendingClaim ? (
+                  <button type="button" className="evz-x__act" onClick={() => { if (user) setLocation(`/submit/claim/${event.id}`); else setShowAuth(true); }}>
+                    <span className="evz-x__act-main">
+                      <span className="evz-x__act-t">Claim this event</span>
+                      <span className="evz-x__act-s">Are you the host? Claim it to manage this listing.</span>
+                    </span>
+                    <span className="evz-x__act-ar" aria-hidden="true">›</span>
+                  </button>
+                ) : null}
+              </>
+            )}
+            {talent.length > 0 ? (
+              <>
+                <div className="evz-x__sech"><span>Talent · this edition</span></div>
+                <div className="evz-x__people">
+                  {talent.map((row) => (
+                    <EventPersonRow key={row.id} username={row.username}>
+                      <UserAvatar photoUrl={row.photoUrl} avatarChoice={row.avatarChoice} avatarRing={row.avatarRing} displayName={row.displayName} username={row.username} size={48} />
+                      <span className="evz-x__person-meta">
+                        <span className="evz-x__person-name">{row.displayName || row.username}</span>
+                        <span className="evz-x__person-role" style={{ color: EVENT_TALENT_ROLE_COLORS[row.role]?.color }}>{EVENT_TALENT_ROLE_LABELS[row.role] || row.role} · {row.addedByUserId == null ? "Source unavailable" : row.addedByUserId === row.userId ? "Self-listed" : "Added by host or staff"}</span>
+                      </span>
+                    </EventPersonRow>
+                  ))}
+                </div>
+              </>
+            ) : null}
+            <div className="evz-x__sech"><span>Venue promoters</span></div>
+            {!detail ? detailStatus : !venue ? <p>No venue is linked.</p> : !Array.isArray(placeData?.promoters) ? <EventReadStatus label="Venue promoters" query={placeQuery} /> : promoters.length > 0 ? (
+              <div className="evz-x__people">
+                {promoters.map((promoter, index) => (
+                  <EventPersonRow key={promoter.username || index} username={promoter.username}>
+                    <span className="evz-x__person-name">{promoter.displayName || promoter.name || promoter.username}</span>
+                  </EventPersonRow>
+                ))}
+              </div>
+            ) : (
+              <p className="evz-x__empty-block">No public promoters listed for this venue.</p>
+            )}
+          </section>
+
+          <section className="evz-x__page" inert={page !== 4} aria-hidden={page !== 4} aria-label="More">
             {venue && !Array.isArray(placeData?.upcomingEvents) && <EventReadStatus label="More at this venue" query={placeQuery} />}
             {venue && stripDays.some((d) => d.events.length > 0) ? (
               <>
@@ -445,6 +526,17 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
                 )}
               </>
             ) : null}
+            <button type="button" className="evz-x__act evz-x__act--dash" aria-expanded={mizzedOpen} onClick={() => setMizzedOpen((open) => !open)}>
+              <span className="evz-x__act-main">
+                <span className="evz-x__act-t">Add a Mizzed Connection</span>
+                <span className="evz-x__act-s">{missedCount > 0 ? `${missedCount} posted for this event` : "Met someone at this event? Post it during or after."}</span>
+              </span>
+              <span className="evz-x__act-ar" aria-hidden="true">+</span>
+            </button>
+            {page === 4 && <EventPlanning section="gigs" eventId={event.id} occurrenceDate={event.dateStart}/>}
+          </section>
+
+          <section className="evz-x__page" inert={page !== 5} aria-hidden={page !== 5} aria-label="Nearby">
             <div className="evz-x__sech"><span>Restaurants close by</span></div>
             {!Array.isArray(detail?.nearby?.restaurants) ? detailStatus : restaurants.length === 0 ? (
               <p className="evz-x__empty">No restaurants mapped close by yet.</p>
@@ -488,75 +580,6 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
               </div>
             )}
           </section>
-
-          <section className="evz-x__page" inert={page!==4} aria-hidden={page!==4} aria-label="People">
-            <div className="evz-x__sech"><span>{hosts.length === 1 ? "Host" : "Hosts"}</span></div>
-            {!Array.isArray(detail?.hosts) ? detailStatus : hosts.length > 0 ? (
-              <div className="evz-x__people">
-                {hosts.map((host) => {
-                  const inner = (
-                    <>
-                      <UserAvatar photoUrl={host.photoUrl} avatarChoice={host.avatarChoice} avatarRing={host.avatarRing} displayName={host.displayName} username={host.username ?? undefined} size={48} />
-                      <span className="evz-x__person-meta">
-                        <span className="evz-x__person-name">{host.displayName || host.username}</span>
-                        {host.role === "PRIMARY" ? <span className="evz-x__person-role">Primary host</span> : null}
-                      </span>
-                    </>
-                  );
-                  return host.username
-                    ? <Link key={host.userId} href={`/u/${encodeURIComponent(host.username)}`} className="evz-x__person">{inner}</Link>
-                    : <div key={host.userId} className="evz-x__person">{inner}</div>;
-                })}
-              </div>
-            ) : (
-              <>
-                <div className="evz-x__claim">
-                  <p className="evz-x__claim-t">{hasPendingClaim ? "Claim in review" : claimable ? "Open to claim" : "Host information"}</p>
-                  <p className="evz-x__claim-s">No public event host is listed.</p>
-                  {hasPendingClaim ? <p className="evz-x__claim-s">A claim is pending admin review.</p> : null}
-                </div>
-                {claimable && !hasPendingClaim ? (
-                  <button type="button" className="evz-x__act" onClick={() => { if (user) setLocation(`/submit/claim/${event.id}`); else setShowAuth(true); }}>
-                    <span className="evz-x__act-main">
-                      <span className="evz-x__act-t">Claim this event</span>
-                      <span className="evz-x__act-s">Are you the host? Claim it to manage this listing.</span>
-                    </span>
-                    <span className="evz-x__act-ar" aria-hidden="true">›</span>
-                  </button>
-                ) : null}
-              </>
-            )}
-            {talent.length > 0 ? (
-              <>
-                <div className="evz-x__sech"><span>Talent · this edition</span></div>
-                <div className="evz-x__people">
-                  {talent.map((row) => (
-                    <div key={row.id} className="evz-x__person">
-                      <UserAvatar photoUrl={row.photoUrl} avatarChoice={row.avatarChoice} avatarRing={row.avatarRing} displayName={row.displayName} username={row.username} size={48} />
-                      <span className="evz-x__person-meta">
-                        <span className="evz-x__person-name">{row.displayName || row.username}</span>
-                        <span className="evz-x__person-role" style={{ color: EVENT_TALENT_ROLE_COLORS[row.role]?.color }}>{EVENT_TALENT_ROLE_LABELS[row.role] || row.role} · {row.addedByUserId == null ? "Source unavailable" : row.addedByUserId === row.userId ? "Self-listed" : "Added by host or staff"}</span>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : null}
-            <div className="evz-x__sech"><span>Venue promoters</span></div>
-            {!detail ? detailStatus : !venue ? <p>No venue is linked.</p> : !Array.isArray(placeData?.promoters) ? <EventReadStatus label="Venue promoters" query={placeQuery} /> : promoters.length > 0 ? (
-              <div className="evz-x__people">
-                {promoters.map((promoter, index) => (
-                  <div key={index} className="evz-x__person">
-                    <span className="evz-x__person-meta">
-                      <span className="evz-x__person-name">{promoter.displayName || promoter.name || promoter.username}</span>
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="evz-x__empty-block">No public promoters listed for this venue.</p>
-            )}
-          </section>
         </div>
 
         {mizzedOpen ? (
@@ -574,17 +597,10 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
 
       <footer className="evz-x__foot">
         <div className="evz-x__pager">
-          <button type="button" className="evz-x__arw" onClick={() => goTo(page - 1)} disabled={page === 0} aria-label="Previous page"><ChevronLeft size={17} aria-hidden="true" /></button>
-          <div className="evz-x__dots">
-            {PAGES.map((label, index) => (
-              <i key={label} aria-hidden="true" className={index === page ? "on" : ""} />
-            ))}
-            <span className="evz-x__pg">Page {page + 1} · {PAGES[page]}</span>
-          </div>
-          <button type="button" className="evz-x__arw" onClick={() => goTo(page + 1)} disabled={page === PAGES.length - 1} aria-label="Next page"><ChevronRight size={17} aria-hidden="true" /></button>
-        </div>
-        <div className="evz-x__save">
-          <EventPrivateSaveButton eventId={event.id} />
+          <button type="button" className="evz-x__arw" onClick={() => goTo(page - 1)} aria-label="Previous page"><ChevronLeft size={17} aria-hidden="true" /></button>
+          <button type="button" className="evz-x__arw" onClick={() => goTo(page + 1)} aria-label="Next page"><ChevronRight size={17} aria-hidden="true" /></button>
+          {canSharePublicEvent(event) && <EventShare eventId={event.id} title={event.title} accent={accent} href={eventPath(event.id, event.title, event.dayOfWeek, pacificCalendarDate(event.dateStart))}/>}
+          <EventGoingButton eventId={event.id} past={isPastEvent}/>
           <EventInterestedHeart
             eventId={event.id}
             variant="expanded"
@@ -601,5 +617,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </div>
+    </div>
+    </CardStage>
   );
 }

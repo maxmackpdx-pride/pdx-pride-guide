@@ -186,6 +186,7 @@ function AppLayout() {
         <RouteBoundary>
           <Suspense fallback={routePath === "/" ? <div dangerouslySetInnerHTML={{ __html: homeBootLogoHtml }} /> : livingMap ? <MapBootLoader map="mapz" /> : routePath === "/outzide" ? <MapBootLoader map="outz" /> : <SpectrumLoader variant="full" label="Loading page" />}>
             <Switch>
+            {CardFrontPreview && <Route path="/dev/card-fronts" component={CardFrontPreview}/>}
             {/* Z/ is Communities only. Old product addresses remain redirects. */}
             <Route path="/z" component={ZIndex} />
             {Object.entries(LEGACY_Z_PRODUCT_REDIRECTS).map(([from, to]) => (
@@ -325,7 +326,13 @@ function AppLayout() {
   );
 }
 
+const CardFrontPreview = import.meta.env.DEV ? lazyWithReload(() => import("./pages/CardFrontPreview")) : null;
+const CardSystemPreview = import.meta.env.DEV ? lazyWithReload(() => import("./pages/CardSystemPreview")) : null;
+
 export default function App() {
+  if (CardSystemPreview && window.location.pathname === "/dev/card-system") {
+    return <Suspense fallback={<SpectrumLoader label="Opening preview"/>}><CardSystemPreview/></Suspense>;
+  }
   // The Design Guide embeds this route as a production component specimen.
   // Keep the component inside the real product theme/router/query contexts, but
   // do not mount product chrome, account gates, analytics, prompts, or nudges in

@@ -43,6 +43,7 @@ export function CardStage({ children, front = false, onClose, className = '' }: 
   return createPortal(
     <div ref={frame} className={`zay-card-stage ${front ? 'zay-card-stage--front' : 'zay-card-stage--expanded'} ${className}`}
       onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
+      <div className="zay-card-stage__scrim" data-glass-piece="scrim" aria-hidden="true" />
       <BoardCardInline.Provider value={false}>{children}</BoardCardInline.Provider>
     </div>, document.body);
 }

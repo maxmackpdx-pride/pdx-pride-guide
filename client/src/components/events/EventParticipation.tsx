@@ -1,3 +1,6 @@
+import type { EventListing } from "@shared/multiDayEvents";
+import { eventPath } from "@shared/eventSlug";
+import { CardHeartButton } from "../CardHeartButton";
 import { useState } from "react";
 import { Heart } from "lucide-react";
 import AuthModal from "@/components/AuthModal";
@@ -54,19 +57,47 @@ export function EventInterestedHeart({ eventId, snapshot, variant }: { eventId: 
   </>;
 }
 
+/** All closed event sizes use the same interest record as the expanded footer. */
+export function EventFrontHeart({ listing, className }: { listing: EventListing; className: string }) {
+  const [auth, setAuth] = useState(false);
+  const heart = useHeart("event", String(listing.id), {
+    title: listing.title, subtitle: listing.venueName, image: listing.posterImageUrl,
+    href: eventPath(listing.id, listing.title, listing.dayOfWeek), accent: listing.accentColor,
+  });
+  return <>
+    <CardHeartButton className={className} active={heart.hearted} disabled={heart.pending || heart.loading}
+      aria-label={heart.hearted ? `Remove interest in ${listing.title}` : `Mark interest in ${listing.title}`}
+      onClick={e => { e.stopPropagation(); if (heart.signedIn) heart.toggle(); else setAuth(true); }}/>
+    {auth && <AuthModal onClose={() => setAuth(false)}/>}
+  </>;
+}
+
 export function EventGoingButton({ eventId, past, poster = false }: { eventId: number; past: boolean; poster?: boolean }) {
   const rsvp = useEventRsvp();
+  const [options, setOptions] = useState(false);
   const going = rsvp.myEventIds.has(eventId);
   const pending = rsvp.isRsvpPending(eventId);
   if (eventId <= 0) return null;
   return <>
-    <button type="button" className={poster ? "ointerested" : "evz-x__act"} aria-pressed={going}
-      disabled={pending || rsvp.loading} onClick={() => rsvp.error ? void rsvp.retry() : rsvp.toggleRsvp(eventId)}>
-      <span className="evz-x__act-main">
-        <strong className="evz-x__act-t">{pending ? "Updating…" : rsvp.error ? "Retry attendance" : going ? "Remove my attendance" : past ? "I went · Public" : "Going · Public"}</strong>
-        <small className="evz-x__act-s">{going ? "Removing attendance keeps your event follow." : "Shows your name and follows event updates."}</small>
-      </span>
+    <button type="button" className={poster ? "ointerested" : "evz-going"} aria-pressed={going}
+      aria-expanded={going ? options : undefined} disabled={pending || rsvp.loading}
+      onClick={() => rsvp.error ? void rsvp.retry() : going ? setOptions(!options) : rsvp.toggleRsvp(eventId)}>
+      {rsvp.error ? "Retry attendance" : past ? "I WENT" : "I'M GOING"}
     </button>
+    {going && options && <div className="evz-rsvp-options" role="group" aria-label="Remove my attendance">
+      <p>Remove your RSVP and heart?</p>
+      <button type="button" disabled={pending} onClick={() => { rsvp.toggleRsvp(eventId, "un-rsvp"); setOptions(false); }}>Un-RSVP</button>
+      <button type="button" disabled={pending} onClick={() => { rsvp.toggleRsvp(eventId, "cannot-go"); setOptions(false); }}>Just can’t go</button>
+      <button type="button" onClick={() => setOptions(false)}>Keep my spot</button>
+    </div>}
     {rsvp.showAuth && <AuthModal onClose={() => rsvp.setShowAuth(false)} />}
   </>;
+}
+
+/** The same attendance removal is available from Info and the footer. */
+export function EventRemoveAttendance({ eventId }: { eventId: number }) {
+  const rsvp = useEventRsvp();
+  if (!rsvp.myEventIds.has(eventId)) return null;
+  return <button type="button" className="evz-x__managebtn" disabled={rsvp.isRsvpPending(eventId)}
+    onClick={() => rsvp.toggleRsvp(eventId)}>Remove my attendance</button>;
 }

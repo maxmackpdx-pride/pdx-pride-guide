@@ -1,6 +1,8 @@
+import { publicEventAccent } from "../shared/eventAccents";
 import {registerOutdoorHosting} from "./outdoorHosting";
 import { housingConversationLocked, HOUSING_CONVERSATION_LOCKED } from "./housing/store";
 import {registerDevicePushCheck} from "./devicePushCheck";
+import { registerPlacezEventsDrawer } from "./placezEventsDrawer";
 import {registerAfterzInvites} from "./afterzInvites";
 import { pickupPending, reservePickup } from "./pickupReservation";
 import {registerMemberInbox} from "./memberInbox";
@@ -21,7 +23,7 @@ import { registerBoardArchiveRoutes } from "./boardArchiveRoutes";
 import { readBoardMotif, saveBoardMotif, validateBoardMotif } from "./boardMotifs";
 import { registerBoardPlacement } from "./boardMapPlacement";
 import { homeCatalogCounts } from "./homeStats";
-import { hasPublicEventFlags } from "@shared/publicEventVisibility";
+import { canSharePublicEvent, hasPublicEventFlags, isPublicEventVisibleUnderPrideCap } from "@shared/publicEventVisibility";
 import { linkAnniversaryOpenCall } from "./seedYesCoachOpenCall";
 import { registerEventPlanning, validateAdminGigEventLink } from "./eventPlanning";
 import { registerHostWorkspace } from "./hostWorkspace";
@@ -363,6 +365,8 @@ function publicEvent(
     || null;
   return {
     ...safe,
+    isClaimed: Boolean(claimedBy),
+    accentColor: publicEventAccent(safe.accentColor),
     posterImageUrl: resolveEventPosterUrl(evt.id, evt.posterImageUrl, evt.dayOfWeek),
     hasPendingClaim: pendingClaimIds.has(evt.id),
     venueWebsite,
@@ -503,14 +507,6 @@ function validateEventDates(
     }
   }
   return null;
-}
-
-/** Public board: hide events whose start day is after Pride week while the cap is active. */
-function isPublicEventVisibleUnderPrideCap(evt: { dateStart?: string | null }): boolean {
-  if (!isPostEventWeekListingCapActive()) return true;
-  const startDay = pacificCalendarDate(evt.dateStart || "");
-  if (startDay && startDay > EVENT_WEEK_END_DATE) return false;
-  return true;
 }
 
 /**
@@ -1158,12 +1154,11 @@ function sessionIsAdmin(req: any): boolean {
   return markAdminSessionForUser(req, user);
 }
 
-// Dated public links and the native public read must never surface a private listing.
+// A shared URL must respect visibility with or without its optional occurrence date.
 function mayReadEventDetail(req: express.Request, event: Event): boolean {
   const publicOnly = req.query.visibility === "public";
   const staff = !publicOnly && sessionIsAdmin(req);
   if (!staff && (event.status !== "LIVE" || !isPublicEventVisibleUnderPrideCap(event))) return false;
-  if (!publicOnly && req.query.date === undefined) return true;
   if (hasPublicEventFlags(event)) return true;
   return !publicOnly && (staff || (!!req.session?.userId && storage.isUserEventHost(event.id, req.session.userId)));
 }
@@ -1362,6 +1357,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     event:id=>{const e=storage.getEvent(id);return e && isPublicEventVisibleUnderPrideCap(e) ? e : undefined;},
     notify:(recipientIds,senderId,title,id)=>schedulePushForActivity({recipientIds,senderId,category:"my_events",title:"Your Afterz reminder",body:title,navigate:"/events?gathering="+encodeURIComponent(id),tag:"afterz-"+id}),
   });
+  registerPlacezEventsDrawer(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, publicEvent, afterzInvites.listVisibleNights);
   httpServer.once("close",afterzInvites.dispose);
   const memberInbox=registerMemberInbox(app,sqlite,requireAuth,requireAdmin,requirePrimaryInboxOwner,()=>storage.resolveGuideAdminUser()?.id);
   function guideInboxUnread(reviewerId: number) {
@@ -1811,17 +1807,14 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // 1200×630 branded social cards (replace raw flyer/logo in og:image)
   app.get("/api/og/event/:id", async (req, res) => {
+    res.set("Cache-Control", "no-store");
     try {
       const id = Number(req.params.id);
       if (!Number.isFinite(id)) return res.status(400).json({ error: "Invalid id" });
       const { renderEventOgCard } = await import("./ogCards");
       const buf = await renderEventOgCard(id);
       if (!buf) return res.status(404).json({ error: "Event not found" });
-      res.set({
-        "Content-Type": "image/png",
-        "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
-      });
-      return res.send(buf);
+      return res.type("png").send(buf);
     } catch (err) {
       console.error("GET /api/og/event failed:", err);
       return res.status(500).json({ error: "Could not render card" });
@@ -3068,10 +3061,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
         req.body.isAnonymous === true ? true : req.body.isAnonymous === false ? false : undefined,
       );
       const eventId = Number(req.params.id);
-      const att = storage.upsertAttendance(eventId, user, message, visibility);
-      // Going to an event hearts it, so it is pinned and its updates follow.
-      const evt = storage.getEvent(eventId);
-      if (evt) addHeart(user.id, "event", String(eventId), { title: evt.title, subtitle: evt.dateStart, image: evt.posterImageUrl ?? null, href: `/events/${eventId}` });
+      const att = sqlite.transaction(() => {
+        const attendance = storage.upsertAttendance(eventId, user, message, visibility);
+        const evt = storage.getEvent(eventId);
+        if (evt) addHeart(user.id, "event", String(eventId), { title: evt.title, subtitle: evt.dateStart, image: evt.posterImageUrl ?? null, href: `/events/${eventId}` });
+        return attendance;
+      })();
       notifyAttendanceUpdate(eventId);
       res.json(att);
     } catch (e: any) {
@@ -3081,7 +3076,11 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   app.delete("/api/events/:id/attendance", requireAuth, (req, res) => {
     const eventId = Number(req.params.id);
-    storage.removeAttendance(eventId, req.session.userId!);
+    const userId = req.session.userId!;
+    sqlite.transaction(() => {
+      storage.removeAttendance(eventId, userId);
+      removeHeart(userId, "event", String(eventId));
+    })();
     notifyAttendanceUpdate(eventId);
     res.json({ ok: true });
   });
@@ -5001,13 +5000,26 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const target = storage.getUserByUsername(String(req.params.username || "").trim().replace(/^@/, ""));
     if (!target || target.status !== "active") return res.status(404).json({ error: "Not found" });
     if (target.id === req.session.userId) return res.status(400).json({ error: "Cannot message yourself" });
-    const body = String(req.body?.body || "").trim();
-    if (!body) return res.status(400).json({ error: "body required" });
     const sender = storage.getUserById(req.session.userId!);
     if (!sender) return res.status(401).json({ error: "Not authenticated" });
-    const subject = String(req.body?.subject || "").trim().slice(0, 120) || `Message from @${sender.username}`;
+    if (storage.isMemberInteractionBlocked(sender.id, target.id)) return res.status(403).json({ error: "This conversation is unavailable." });
+    const eventId = req.body?.eventId;
+    let body = String(req.body?.body || "").trim();
+    let subject = String(req.body?.subject || "").trim().slice(0, 120) || `Message from @${sender.username}`;
+    let context: { contextType: string; contextId?: number; contextLabel?: string } = { contextType: "THREAD" };
+    if (eventId !== undefined) {
+      if (!Number.isSafeInteger(eventId) || eventId <= 0) return res.status(400).json({ error: "Choose an event to share." });
+      if (!storage.isFollowing(sender.id, target.id)) return res.status(403).json({ error: "Choose someone you follow to invite." });
+      const event = storage.getEvent(eventId);
+      if (!event || !canSharePublicEvent(event))
+        return res.status(404).json({ error: "This event is unavailable to share." });
+      subject = event.title.slice(0, 120);
+      body = `Come with me to ${event.title}.`;
+      context = { contextType: "EVENT_SHARE", contextId: event.id, contextLabel: event.title };
+    }
+    if (!body) return res.status(400).json({ error: "body required" });
     if (moderationGate(res, "Direct message", { subject, body })) return;
-    storage.sendMessage(sender.id, target.id, subject, body, { contextType: "THREAD" });
+    storage.sendMessage(sender.id, target.id, subject, body, context);
     res.json({ ok: true });
   });
 

@@ -60,7 +60,7 @@ function originalPayload(day?: string) {
   const businesses = storage.getBusinesses();
   return JSON.parse(JSON.stringify(events.map(event => {
     const { adminNotes,submittedBy,claimedBy,...safe } = enrichEventForMap(event,businesses);
-    return { ...safe, posterImageUrl: resolveEventPosterUrl(event.id,event.posterImageUrl,event.dayOfWeek),hasPendingClaim:claims.has(event.id),venueWebsite:(event as any).venueWebsite || resolveVenueWebsite(event.venueName,websites) || null,searchTalent:talent.get(event.id) ?? [] };
+    return { ...safe, isClaimed: Boolean(claimedBy), posterImageUrl: resolveEventPosterUrl(event.id,event.posterImageUrl,event.dayOfWeek),hasPendingClaim:claims.has(event.id),venueWebsite:(event as any).venueWebsite || resolveVenueWebsite(event.venueName,websites) || null,searchTalent:talent.get(event.id) ?? [] };
   })));
 }
 async function get(query = '', headers: Record<string,string> = {}) { return fetch(`${base}/api/events${query}`, { headers }); }
@@ -192,7 +192,7 @@ test('bounded same-dataset legacy/cached HTTP timings', { skip: process.env.EVEN
     const businesses=storage.getBusinesses(); const payload=[];
     for(const event of events) {
       const {adminNotes,submittedBy,claimedBy,...safe}=enrichEventForMap(event,businesses);
-      payload.push({...safe,posterImageUrl:resolveEventPosterUrl(event.id,event.posterImageUrl,event.dayOfWeek),hasPendingClaim:claims.has(event.id),venueWebsite:(event as any).venueWebsite||resolveVenueWebsite(event.venueName,websites)||null,searchTalent:talent.get(event.id)??[]});
+      payload.push({...safe,isClaimed:Boolean(claimedBy),posterImageUrl:resolveEventPosterUrl(event.id,event.posterImageUrl,event.dayOfWeek),hasPendingClaim:claims.has(event.id),venueWebsite:(event as any).venueWebsite||resolveVenueWebsite(event.venueName,websites)||null,searchTalent:talent.get(event.id)??[]});
       if(payload.length%8===0) await new Promise<void>(resolve=>setImmediate(resolve));
     }
     res.json(payload);

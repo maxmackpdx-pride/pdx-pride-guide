@@ -103,11 +103,16 @@
 }
 
 @media (max-width:959px) {
-  /* Mapz keeps the shared baseline, with only a 3px rise at its top edge. */
-  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock .hub-mobile-tab.znav-control[href="/placez/map"] {
-    top:-3px; height:47px; min-height:47px;
+  nav.hub-mobile-bar.site-hub-mobile-bar.z-mobile-dock[data-glass-piece="dock"] {
+    box-sizing: border-box; left: max(8px,env(safe-area-inset-left)); right: max(8px,env(safe-area-inset-right));
+    width: auto; height: 56px; bottom: calc(8px + env(safe-area-inset-bottom));
+    padding: 6px; border: 1px solid var(--piece); border-radius: 28px;
+    transition: transform .25s ease-out, opacity .25s ease-out;
   }
-  .hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock:has([href="/placez/map"][data-dock-selected="true"]) .z-mobile-dock__indicator {
-    top:3px;
+  nav.z-mobile-dock[data-glass-piece="dock"] .hub-mobile-bar__dock { height: 44px; padding: 0; }
+  nav.hub-mobile-bar.site-hub-mobile-bar.site-mobile-nav--glass.z-mobile-dock[data-glass-piece="dock"] .hub-mobile-tab.znav-control[data-dock-index] {
+    top: 0; box-sizing: border-box; height: 44px; min-height: 44px; max-height: 44px;
   }
+  nav.z-mobile-dock[data-glass-piece="dock"] [data-dock-index] .znav-icon-row svg { width: 22px; height: 22px; }
+  nav.z-mobile-dock[data-glass-piece="dock"] [data-dock-index="2"] .znav-icon-row :is(img,svg) { width: 28px; height: 32px; }
 }
