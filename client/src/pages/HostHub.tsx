@@ -10,6 +10,12 @@ import { PlanningOwnerDesk } from "@/components/zaylist/OrganizerPlanning";
 import GuestSpots from "@/components/zaylist/GuestSpots";
 import HostCard, { type HostEvent } from "@/components/zaylist/HostCard";
 import { Connections } from "@/components/zaylist/HostOperations";
+import HubRolePreviewBar from "@/components/zaylist/HubRolePreviewBar";
+import {
+  hubLayersFor,
+  previewEventsForRole,
+  type HubRole,
+} from "@/lib/hubRolePreview";
 import "@/components/zaylist/zaylist.css";
 
 const VenueSection = lazy(() => import("@/components/dashboard/DashboardVenueSection"));
@@ -29,6 +35,20 @@ export default function HostHub() {
   const data=workspace.data, events=data?.events||[];
   const admin=!!(user?.isAdmin||user?.isSuperAdmin);
   const owner=!!user?.isPrimaryOwner;
+  // "See it as…" role preview (owner only): a view-only simulation that
+  // re-derives the Hub's layers and per-event flags from the previewed
+  // role (§02 tree / §03 matrix, see lib/hubRolePreview). It never
+  // touches the session or any real permission; for non-owners the
+  // control does not render and the preview state is inert.
+  const [previewRole,setPreviewRole]=useState<HubRole|null>(null);
+  const preview=owner?previewRole:null;
+  const layers=preview?hubLayersFor(preview):null;
+  const viewEvents=preview?previewEventsForRole(events,preview):events;
+  const showComposer=!layers||layers.pushComposer;
+  const showHosting=!layers||layers.hosting;
+  const showVenues=!layers||layers.venues;
+  const showAdmin=layers?layers.administration:admin;
+  const showOwnerDesk=layers?layers.ownerDesk:owner;
   if(loading) return <div className="zl-root"><div className="zl-wrap"><header className="zl-hub-head"><h1>Your Zay’list</h1><p role="status">Loading your hub…</p></header></div></div>;
   if(!user) return <div className="zl-root"><div className="zl-wrap"><header className="zl-hub-head"><h1>Your Zay’list</h1>
     <p>Guest spots, passes and the nights you host.</p>
@@ -38,14 +58,15 @@ export default function HostHub() {
   return <div className="zl-root"><div className="zl-wrap zl-workspace">
     <header className="zl-hub-head"><div><p>{user.displayName||user.username}</p><h1>Your Zay’list</h1></div>
       <button type="button" className="zl-btn" onClick={e=>openSheet({account:"personal",view:"inbox"},e.currentTarget)}>Inbox</button></header>
-    <PushComposer events={events.filter(e=>e.canEditEvent||e.canManageTeam)}/>
+    {owner&&<HubRolePreviewBar previewRole={preview} onPreview={setPreviewRole}/>}
+    {showComposer&&<PushComposer events={viewEvents.filter(e=>e.canEditEvent||e.canManageTeam)}/>}
     {workspace.isError&&<p role="alert">Your workspace could not load. <button className="zl-btn" onClick={()=>workspace.refetch()}>Try again</button></p>}
     <section className="zl-section zl-personal" aria-labelledby="zl-pass-title"><h2 id="zl-pass-title">Guest spots &amp; passes</h2>
       <GuestSpots key={user.id}/></section>
-    {events.length>0&&<section className="zl-section zl-work-rail"><h2>Working the night</h2>
-      <div className="zl-rail">{events.map(e=><HostCard key={e.id} event={e} otherEvents={events}/>)}</div>
+    {showHosting&&viewEvents.length>0&&<section className="zl-section zl-work-rail"><h2>Working the night</h2>
+      <div className="zl-rail">{viewEvents.map(e=><HostCard key={e.id} event={e} otherEvents={viewEvents} previewRole={preview}/>)}</div>
     </section>}
-    {!!data?.venues.length&&<section className="zl-section"><h2>Your venues</h2>
+    {showVenues&&!!data?.venues.length&&<section className="zl-section"><h2>Your venues</h2>
       <Suspense fallback={<p>Loading venues…</p>}><VenueSection open={venuesOpen} onToggle={()=>setVenuesOpen(!venuesOpen)}/></Suspense>
       {data.venues.map(v=><details className="zl-tool" key={v.id}><summary>{v.name}</summary><a href={`/directory?place=${v.id}`} className="zl-btn">View venue</a><Connections kind="places" id={v.id}/><RosterChat kind="places" id={v.id}/></details>)}
     </section>}
@@ -54,10 +75,10 @@ export default function HostHub() {
       <div><dt>Interested</dt><dd>{data.personal.interested}</dd></div><div><dt>Going</dt><dd>{data.personal.going}</dd></div>
       <div><dt>Door entries</dt><dd>{data.personal.admitted}</dd></div></dl>
       <div className="zl-row"><button className="zl-btn" onClick={e=>openSheet({account:"personal",view:"stats"},e.currentTarget)}>My stats</button><button className="zl-btn" onClick={e=>openSheet({account:"personal",view:"chats"},e.currentTarget)}>Chats</button><a className="zl-btn" href="/schedule">My schedule</a><a className="zl-btn" href="/settings/notifications">Notifications</a></div></section>}
-    {admin&&<section className="zl-section"><h2>Administration</h2><div className="zl-row">
+    {showAdmin&&<section className="zl-section"><h2>Administration</h2><div className="zl-row">
       <a className="zl-btn" href="/admin">Open admin</a><button className="zl-btn" onClick={e=>openSheet({account:"admin",queueFolder:"active"},e.currentTarget)}>Review approvals</button>
     </div></section>}
-    {owner&&<section className="zl-section"><h2>Owner desk</h2><button className="zl-btn" onClick={e=>openSheet({account:"owner",view:"inbox"},e.currentTarget)}>Open owner inbox</button><PushMemberships/><PlanningOwnerDesk/></section>}
+    {showOwnerDesk&&<section className="zl-section"><h2>Owner desk</h2><button className="zl-btn" onClick={e=>openSheet({account:"owner",view:"inbox"},e.currentTarget)}>Open owner inbox</button><PushMemberships/><PlanningOwnerDesk/></section>}
     <a className="zl-btn" href="/hub/help">How to use your Zay’list</a>
   </div></div>;
 }

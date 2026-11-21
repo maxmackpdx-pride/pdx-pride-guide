@@ -340,6 +340,19 @@
 
 .zl-stage-picks { display: flex; flex-wrap: wrap; gap: .35rem; margin-block: .7rem; }
 .zl-stage-picks button[aria-pressed=true] { color: var(--zg-1); background: var(--zg-12); }
+
+/* "See it as…" role preview (owner only) */
+.zl-preview-roles { margin-top: 10px; }
+.zl-preview-roles > .zl-btn { flex: 1 1 100px; }
+.zl-preview-roles .zl-btn[aria-pressed="true"] { background: var(--zg-12); color: var(--zg-1); border-color: var(--zg-12); }
+.zl-preview-banner {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  margin-top: 14px; padding: 12px 14px;
+  border: 1px solid var(--zg-12); border-radius: 12px;
+  background: var(--zg-3);
+}
+.zl-preview-banner p { margin: 0; flex: 1 1 240px; font-size: 0.92rem; }
+.zl-preview-banner .zl-btn { flex: 0 0 auto; }
 .zl-listing-facts { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
 .zl-listing-facts dt { color: var(--zg-11); font-size: .8rem; }
 .zl-listing-facts dd { margin: 0; }
