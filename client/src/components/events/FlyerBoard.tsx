@@ -1083,7 +1083,8 @@ export default function FlyerBoard({
           aria-label={openListing.title}
         >
           <button type="button" className="ox" aria-label="Close event" onClick={()=>closeCard()}>✕</button>
-          <div className="ohead">
+          {/* Poster layer (Tucker, t277): natural aspect from the card top, behind
+              the locked head AND the scroller, fading out at its own bottom edge. */}
           <div className="ohero">
               {openPoster ? (
                 <img src={openPoster} alt="" onError={() => setFailedOpenPoster(openPoster)} />
@@ -1099,6 +1100,7 @@ export default function FlyerBoard({
                 </div>
               )}
             </div>
+          <div className="ohead">
             <div className="oid">
               <h2>{openListing.title}</h2>
               <p className="ometa">

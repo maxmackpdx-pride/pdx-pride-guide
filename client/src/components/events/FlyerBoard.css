@@ -849,44 +849,51 @@
 .fbx .opageswrap, .fbx .ofoot { position: relative; z-index: 2; }
 .zay-card-stage.fbx .ocard { container-type: size; }
 .fbx .ohead {
-  position: relative; flex: none; z-index: 1; isolation: isolate;
+  position: relative; flex: none; z-index: 1;
   padding-top: clamp(96px, 14cqh, 140px);
-  background: var(--fbx-card);
+  background: transparent;
 }
-.fbx .ohead > .ohero {
-  position: absolute; inset: 0; z-index: -1;
-  height: auto; overflow: hidden; background: transparent;
+/* Poster (Tucker, t277): one continuous layer at natural aspect from the card
+   top. It runs behind the locked head and the transparent scroller, as far
+   as its own height goes, then fades into the card surface at its own bottom
+   edge. No clip at the tab baseline: the scroller's box only clips the
+   scrolled content, never the poster. */
+.fbx .ocard > .ohero {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 0;
+  height: auto; overflow: visible; background: transparent;
 }
-.fbx .ohead > .ohero img {
-  height: 100%;
-  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 34%, rgba(0, 0, 0, .7) 66%, rgba(0, 0, 0, .42) 100%);
-  mask-image: linear-gradient(to bottom, var(--z-oled) 34%, rgba(0, 0, 0, .7) 66%, rgba(0, 0, 0, .42) 100%);
+.fbx .ocard > .ohero img {
+  position: relative; display: block;
+  width: 100%; height: auto; object-fit: contain;
+  -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 0, var(--z-oled) calc(100% - 180px), transparent 100%);
+  mask-image: linear-gradient(to bottom, var(--z-oled) 0, var(--z-oled) calc(100% - 180px), transparent 100%);
   transform-origin: 50% 0;
 }
-/* Fade foot: the poster darkens toward the tab row and picks up the same
-   day-accent bloom the card edge carries. */
-.fbx .ohead > .ohero::after {
+/* Soft readability scrim over the poster (no solid fill), plus the accent
+   bloom at the poster's own foot. */
+.fbx .ocard > .ohero::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background:
-    radial-gradient(120% 46% at 50% 100%, color-mix(in srgb, var(--a) 24%, transparent), transparent 70%),
-    linear-gradient(to bottom, transparent 40%, rgba(5, 5, 6, .55) 100%);
+    radial-gradient(120% 22% at 50% 100%, color-mix(in srgb, var(--a) 22%, transparent), transparent 70%),
+    linear-gradient(to bottom, rgba(5, 5, 6, .05) 0, rgba(5, 5, 6, .3) 30%, rgba(5, 5, 6, .55) 55%, rgba(5, 5, 6, .62) 100%);
 }
-/* Parallax: the locked poster drifts slower than the page scroller. */
+/* Parallax: the poster drifts slower than the page scroller. */
 .fbx .ocard { timeline-scope: --osheet; }
 .fbx .oscrollarea { scroll-timeline: --osheet y; }
-@keyframes oposterDrift { from { transform: scale(1.08) translateY(0); } to { transform: scale(1.08) translateY(-5%); } }
+@keyframes oposterDrift { from { transform: scale(1.04) translateY(0); } to { transform: scale(1.04) translateY(-6%); } }
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
-    .fbx .ohead > .ohero img { animation: oposterDrift linear both; animation-timeline: --osheet; }
-    :is(html.calm-mode, :root[data-calm="true"]) .fbx .ohead > .ohero img { animation: none; }
+    .fbx .ocard > .ohero img { animation: oposterDrift linear both; animation-timeline: --osheet; }
+    :is(html.calm-mode, :root[data-calm="true"]) .fbx .ocard > .ohero img { animation: none; }
   }
 }
-.fbx .ohead > .ohero .ohero-typo {
+.fbx .ocard > .ohero:has(.ohero-typo) { height: 62cqh; }
+.fbx .ocard > .ohero .ohero-typo {
   -webkit-mask-image: linear-gradient(to bottom, var(--z-oled) 50%, transparent 100%);
   mask-image: linear-gradient(to bottom, var(--z-oled) 50%, transparent 100%);
 }
 /* Posterless fallback: .oid already carries title and venue on the fade. */
-.fbx .ohead > .ohero :is(.typo-t, .typo-v) { display: none; }
+.fbx .ocard > .ohero :is(.typo-t, .typo-v) { display: none; }
 .fbx .ohead > .oid { margin-top: 0; text-shadow: 0 1px 2px var(--z-black), 0 2px 10px rgba(0, 0, 0, .9), 0 6px 24px rgba(0, 0, 0, .7); }
 .fbx .ohead .ochip { box-shadow: 0 4px 12px -4px rgba(0, 0, 0, .9); }
 /* Tags sit directly under the venue line (Tucker, t269u). */
@@ -902,9 +909,12 @@
   margin: 12px 0 0; padding: 0 12px;
   background: transparent; border-bottom: 0;
 }
-.fbx .ohead > .otabs::after {
-  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
-  background: color-mix(in srgb, var(--a) 40%, transparent);
+/* No baseline rule under the tabs (Tucker, t277): nothing may read as an edge
+   across the poster. Scrolled content fades out over the first 14px of the
+   scroller instead of cutting on a hard line. */
+.fbx .oscrollarea {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, var(--z-oled) 14px);
+  mask-image: linear-gradient(to bottom, transparent 0, var(--z-oled) 14px);
 }
 .fbx .ohead > .otabs button {
   position: relative; flex: 1 1 0; min-width: 0;
@@ -922,7 +932,8 @@
   box-shadow: 0 0 10px color-mix(in srgb, var(--a) 60%, transparent), 0 0 18px -4px color-mix(in srgb, var(--a) 45%, transparent);
 }
 .fbx .oscrollarea {
-  position: relative; flex: 1 1 auto; min-height: 0;
+  position: relative; z-index: 1; flex: 1 1 auto; min-height: 0; background: transparent;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .85), 0 2px 10px rgba(0, 0, 0, .6);
   overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
