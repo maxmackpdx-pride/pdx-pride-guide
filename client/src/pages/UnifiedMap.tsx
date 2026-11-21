@@ -67,6 +67,7 @@ export default function UnifiedMap(){
  },[attempt,user?.id,placezRenderer]);
  return <section className="zaylist-unified-map" aria-label="Zaylist five-mode map" data-map-release={release.tag} data-map-commit={release.commit} style={{position:'fixed',inset:0,zIndex:45,background:'var(--z-black,#050506)'}}>
   <div ref={node} style={{width:'100%',height:'100%',position:'relative'}}/>
+  {initialMode()==='zaydark'&&<div role="status" style={{position:'absolute',inset:0,zIndex:10,display:'grid',placeItems:'center',padding:24,background:'var(--z-black,#050506)',color:'var(--room-zaydark)',fontFamily:'var(--font-display)',fontWeight:800,textTransform:'uppercase',letterSpacing:'.14em',lineHeight:.86,textAlign:'center',fontSize:'clamp(2.5rem,10vw,5.5rem)',textShadow:'0 0 34px color-mix(in srgb, var(--room-zaydark) 45%, transparent)'}}>CUMING SOON</div>}
   {placezPortals}
   {initialMode()==="afterz" && <Suspense fallback={null}><AfterzInvitations signIn={()=>setAuthOpen(true)} signingIn={authOpen && !user}/></Suspense>}
   {error&&<div role="alert" style={{position:'absolute',inset:0,display:'grid',placeContent:'center',padding:24,background:'var(--z-black,#050506)',color:'white',gap:16}}><h1>Map unavailable</h1><p>{error}</p><button type="button" onClick={()=>setAttempt(v=>v+1)}>Retry map</button><a href="/events">Browse events without the map</a><a href="/">Back to Zaylist</a></div>}
