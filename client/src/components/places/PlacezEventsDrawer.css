@@ -55,8 +55,11 @@
   color: var(--text-hi);
   cursor: pointer;
 }
-.pz-events-rail-arrow--left { left: 0; }
-.pz-events-rail-arrow--right { right: 0; }
+.pz-events-rail-wrap.has-overflow .pz-events-rail { padding-left: 48px; padding-right: 48px; }
+.pz-events-rail-arrow--left { left: 2px; }
+.pz-events-rail-arrow--right { right: 2px; }
+.pz-events-rail-arrow { display: none; }
+.pz-events-rail-wrap.has-overflow .pz-events-rail-arrow { display: inline-flex; }
 .pz-events-rail-arrow:focus-visible { outline: 2px solid var(--c, var(--room-placez)); outline-offset: 2px; }
 
 .pz-plan-ext {
@@ -79,7 +82,7 @@
 .pz-plan-ext__toggle:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
 .pz-plan-ext__body {
   display: none;
-  min-width: 116px;
+  min-width: 132px;
   padding: 10px 12px;
   border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
   background: color-mix(in srgb, var(--z-black) 82%, var(--c));

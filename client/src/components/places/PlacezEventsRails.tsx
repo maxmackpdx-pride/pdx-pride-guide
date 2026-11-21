@@ -1,4 +1,4 @@
-import { useCallback, useRef, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { EventCard } from "@/components/cards";
 import EventPlanExtension from "./EventPlanExtension";
@@ -21,6 +21,20 @@ function Rail({
 }) {
   "use memo";
   const ref = useRef<HTMLDivElement>(null);
+  const [overflow, setOverflow] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setOverflow(el.scrollWidth > el.clientWidth + 4);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    el.addEventListener("scroll", check, { passive: true });
+    return () => {
+      ro.disconnect();
+      el.removeEventListener("scroll", check);
+    };
+  }, [children]);
   const page = useCallback((dir: 1 | -1) => {
     const el = ref.current;
     if (!el) return;
@@ -31,7 +45,7 @@ function Rail({
     el.scrollBy({ left: dir * step, behavior: quiet ? "auto" : "smooth" });
   }, []);
   return (
-    <div className="pz-events-rail-wrap">
+    <div className={`pz-events-rail-wrap${overflow ? " has-overflow" : ""}`}>
       <div ref={ref} className="pz-events-rail" role="list" aria-label={label} data-testid={testId}>
         {children}
       </div>
