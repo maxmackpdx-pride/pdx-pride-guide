@@ -27,7 +27,7 @@ import StatsView from "@/components/inbox/panel/StatsView";
 import InboxGroupChat, { type InboxGroupChatTarget } from "@/components/inbox/InboxGroupChat";
 import { MessageBubbleWithReactions } from "@/components/inbox/MessageReactions";
 import { eventIdFromInboxContext } from "@/lib/inboxContext";
-import EventModal from "@/components/EventModal";
+import EventzExpanded from "@/components/events/EventzExpanded";
 import AuthModal from "@/components/AuthModal";
 import type { EventListing } from "@shared/multiDayEvents";
 import type { MessageReactionCode } from "@shared/messageReactions";
@@ -561,13 +561,12 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
                 if (!adminMailActive) resolveLineup(activeThread.id, decision);
               }}
               onOpenEvent={async (eventId) => {
+                const scope = activeThread.contextType === "EVENT_SHARE" ? "?visibility=public" : "";
                 try {
-                  const r = await fetch(`/api/events/${eventId}`, { credentials: "include" });
-                  if (!r.ok) return;
-                  const evt = await r.json();
-                  setOpenEvent(evt as EventListing);
+                  const response = await apiRequest("GET", `/api/events/${eventId}${scope}`);
+                  setOpenEvent(await response.json());
                 } catch {
-                  /* ignore */
+                  toast({ title: "This event is unavailable.", variant: "destructive" });
                 }
               }}
             />
@@ -676,7 +675,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
       </HeaderDropdown>
 
       {openEvent && (
-        <EventModal
+        <EventzExpanded
           event={openEvent}
           onClose={() => setOpenEvent(null)}
           onEventUpdated={(updated) => setOpenEvent(updated as EventListing)}

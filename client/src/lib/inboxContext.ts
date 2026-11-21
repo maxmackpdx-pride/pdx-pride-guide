@@ -8,7 +8,7 @@ export function contextTypeOf(
 export function inboxContextBadge(contextType?: string | null): string | null {
   const ctx = String(contextType || "").toUpperCase();
   if (ctx === "EVENT_TALENT_REQUEST") return "LINEUP REQUEST";
-  if (ctx === "EVENT_INVITE") return "EVENT INVITE";
+  if (ctx === "EVENT_INVITE" || ctx === "EVENT_SHARE") return "EVENT INVITE";
   if (ctx === "HOST_UPDATE" || ctx === "HOST_MESSAGE") return "HOST UPDATE";
   if (ctx === "RIVER_BRATS_CHECKIN" || ctx === "BEACH_CARPOOL") return "RIVER BRATS";
   const room = notifyContextTag(ctx);
@@ -45,7 +45,7 @@ export function eventIdFromInboxContext(
   const id = Number(contextId);
   if (!Number.isInteger(id) || id <= 0) return null;
   const ctx = String(contextType || "").toUpperCase();
-  if (ctx === "EVENT_INVITE" || ctx === "HOST_UPDATE" || ctx === "HOST_MESSAGE" || ctx === "EVENT_HOST") {
+  if (ctx === "EVENT_SHARE" || ctx === "EVENT_INVITE" || ctx === "HOST_UPDATE" || ctx === "HOST_MESSAGE" || ctx === "EVENT_HOST") {
     return id;
   }
   return null;
