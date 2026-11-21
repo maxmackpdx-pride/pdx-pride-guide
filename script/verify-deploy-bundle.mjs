@@ -19,7 +19,25 @@ const js = jsFiles.map((f) => readFileSync(join(assetsDir, f), "utf8")).join("\n
 const css = readFileSync(join(assetsDir, cssFile), "utf8");
 const sourceCss = readFileSync("client/src/index.css", "utf8");
 const eventsJs = jsFiles.filter(f => /^Events-.*\.js$/.test(f)).map(f => readFileSync(join(assetsDir, f), "utf8")).join("\n");
-const eventsCss = assets.filter(f => /^Events-.*\.css$/.test(f)).map(f => readFileSync(join(assetsDir, f), "utf8")).join("\n");
+// Board CSS may be hoisted into a shared chunk (EventModal also renders the
+// open card), so collect every stylesheet Vite loads with the Events route:
+// its own CSS plus the CSS of its static imports, per the build manifest.
+function routeCssFiles(entryPattern) {
+  const manifestPath = "dist/public/.vite/manifest.json";
+  if (!existsSync(manifestPath)) return assets.filter(f => /^Events-.*\.css$/.test(f)).map(f => join(assetsDir, f));
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const start = Object.keys(manifest).find(key => entryPattern.test(key));
+  const seen = new Set(), files = new Set();
+  const walk = key => {
+    if (!key || seen.has(key) || !manifest[key]) return;
+    seen.add(key);
+    for (const file of manifest[key].css ?? []) files.add(join("dist/public", file));
+    for (const dep of manifest[key].imports ?? []) if (dep !== "index.html") walk(dep);
+  };
+  walk(start);
+  return [...files];
+}
+const eventsCss = routeCssFiles(/(^|\/)pages\/Events\.tsx$/).map(f => readFileSync(f, "utf8")).join("\n");
 
 // A cached map document must keep every relative import and logo in its version directory.
 const flightBase = JSON.parse(readFileSync("dist/public/home-flight-manifest.json", "utf8")).base;
