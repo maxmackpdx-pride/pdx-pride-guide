@@ -24,6 +24,7 @@ import { homeCatalogCounts } from "./homeStats";
 import { hasPublicEventFlags } from "@shared/publicEventVisibility";
 import { linkAnniversaryOpenCall } from "./seedYesCoachOpenCall";
 import { registerEventPlanning, validateAdminGigEventLink } from "./eventPlanning";
+import { registerPlacezEventsDrawer } from "./placezEventsDrawer";
 import { registerHostWorkspace } from "./hostWorkspace";
 import { registerHostPush } from "./hostPush";
 import { registerZaylist } from "./zaylist";
@@ -1383,6 +1384,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
   const eventSaves = createEventSaves(sqlite);
   const eventPlanning = registerEventPlanning(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate,
     (recipientIds,senderId,title,body,navigate,tag)=>schedulePushForActivity({recipientIds,senderId,title,body,navigate,tag,category:"my_events"}));
+  registerPlacezEventsDrawer(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap);
   linkAnniversaryOpenCall(sqlite, (eventId, userId) => storage.setPrimaryEventHost(eventId, userId, null));
   const zaylist = registerZaylist(app, sqlite, storage, requireAuth, isPublicEventVisibleUnderPrideCap, moderationGate);
   const hostWorkspace = registerHostWorkspace(app, sqlite, storage, requireAuth, zaylist.store, zaylist.accessFor, isPublicEventVisibleUnderPrideCap);

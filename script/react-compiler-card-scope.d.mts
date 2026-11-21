@@ -6,4 +6,5 @@ export declare const cardSourcePatterns: RegExp[];
 export declare const cardCompilerExcludedPatterns: RegExp[];
 
 export declare const placezCompilerModules: string[];
+export declare const drawerCompilerModules: string[];
 export declare function cardCompilerFunction(module: string): string;

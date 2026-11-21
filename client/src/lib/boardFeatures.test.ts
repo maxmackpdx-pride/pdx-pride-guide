@@ -62,7 +62,7 @@ test("View all chronology orders every category newest first, including clearly 
 test("category deep links ignore another room's hidden controls and invalid options", async()=>{
  const {readBoardFeatureFilters,boardIntentForSelection}=await import('./boardFeatures');
  const p=new URLSearchParams('category=Furniture&condition=Good&price=under25&remote=1&source=events&tags=pets&sort=price-low&neighborhood= SE ');
- assert.deepEqual(readBoardFeatureFilters(p,'gigz'),{itemCategory:'',condition:'',price:'',remote:true,source:'',neighborhood:'SE',sort:'newest',tags:[]});
+ assert.deepEqual(readBoardFeatureFilters(p,'gigz'),{itemCategory:'',condition:'',price:'',remote:true,source:'',eventId:null,neighborhood:'SE',sort:'newest',tags:[]});
  assert.equal(boardIntentForSelection('available','giftz'),'all');
  assert.equal(boardIntentForSelection('iso','giftz'),'iso');
  assert.equal(boardIntentForSelection('not-a-type','all'),'all');
@@ -75,4 +75,17 @@ test("the selected room retains its own real filters and My Hoüz tags deduplica
  assert.equal(sell.itemCategory,'Furniture');assert.equal(sell.condition,'Good');assert.equal(sell.price,'25to100');assert.equal(sell.sort,'price-high');
  assert.deepEqual(readBoardFeatureFilters(new URLSearchParams('tags=pets,pets, verified'),'housing').tags,['pets','verified']);
  assert.equal(readBoardFeatureFilters(new URLSearchParams('source=outzide'),'mizzed').source,'outzide');
+});
+
+
+test("mizzed board can filter connections to one event", async () => {
+  const {readBoardFeatureFilters, filterBoardFeatures} = await import("./boardFeatures");
+  const params = new URLSearchParams("event=44&source=events");
+  assert.deepEqual(readBoardFeatureFilters(params, "mizzed").eventId, 44);
+  assert.equal(readBoardFeatureFilters(params, "gigz").eventId, null);
+  const posts = [
+    {eventId: 44, source: "events", id: 1, key: "mizzed:1", category: "mizzed", intent: "connection", title: "A", description: "", area: "", value: "", detail: "", createdAt: "2026-11-20T00:00:00.000Z"},
+    {eventId: 12, source: "events", id: 2, key: "mizzed:2", category: "mizzed", intent: "connection", title: "B", description: "", area: "", value: "", detail: "", createdAt: "2026-11-20T00:00:00.000Z"},
+  ];
+  assert.deepEqual(filterBoardFeatures(posts, {eventId: 44}).map(p => p.id), [1]);
 });

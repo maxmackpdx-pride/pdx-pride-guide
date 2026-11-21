@@ -1,5 +1,6 @@
 import { MapPlacePreview } from '@/components/MapCardPresentation';
 import {useMapPlacezRenderer} from '@/components/placez/MapPlacezBridge';
+import PlacezMapDrawer from '@/components/places/PlacezMapDrawer';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import type {Event} from '@shared/schema';
 import type {Business} from '@/pages/Directory';
@@ -21,12 +22,26 @@ function initialMode():Mode {
  const layer=new URLSearchParams(window.location.search).get('layer');
  return ['gigz','giftz','sellz','mizzed','houz','housing'].includes(layer??'')?'boardz':window.location.pathname.startsWith('/outzide')?'outzide':'mapz';
 }
+function isPlacezMapMode(){
+ const path=window.location.pathname.replace(/\/+$/, '') || '/';
+ const mode=new URLSearchParams(window.location.search).get('mode');
+ if(path==='/placez/map') return !mode || mode==='mapz';
+ if(path==='/mapz') return !mode || mode==='mapz';
+ return path==='/map' || path==='/map-demo' ? mode==='mapz' : false;
+}
+
 /** One native engine loaded from a checksum-verified, pinned release artifact.
  * The component owns its styles/root and tears both down when leaving maps. */
 export default function UnifiedMap(){
  const node=useRef<HTMLDivElement>(null);
  const {renderer:placezRenderer,portals:placezPortals}=useMapPlacezRenderer();
  const {user}=useAuth();const search=useSearch();
+ const placezMode=isPlacezMapMode();
+ useEffect(()=>{
+  const root=document.querySelector('.zaylist-unified-map');
+  if(root instanceof HTMLElement) root.dataset.placezHostDrawer=placezMode?'on':'off';
+  return()=>{if(root instanceof HTMLElement) delete root.dataset.placezHostDrawer;};
+ },[placezMode,search]);
  const [attempt,setAttempt]=useState(0),[error,setError]=useState('');
  const [legacyDetail,setLegacyDetail]=useState<{kind:'event';record:Event}|{kind:'place';record:Business}|null>(null);
  const [expandedPlace,setExpandedPlace]=useState(false);
@@ -68,6 +83,7 @@ export default function UnifiedMap(){
  return <section className="zaylist-unified-map" aria-label="Zaylist five-mode map" data-map-release={release.tag} data-map-commit={release.commit} style={{position:'fixed',inset:0,zIndex:45,background:'var(--z-black,#050506)'}}>
   <div ref={node} style={{width:'100%',height:'100%',position:'relative'}}/>
   {placezPortals}
+  {placezMode&&<PlacezMapDrawer/>}
   {initialMode()==="afterz" && <Suspense fallback={null}><AfterzInvitations signIn={()=>setAuthOpen(true)} signingIn={authOpen && !user}/></Suspense>}
   {error&&<div role="alert" style={{position:'absolute',inset:0,display:'grid',placeContent:'center',padding:24,background:'var(--z-black,#050506)',color:'white',gap:16}}><h1>Map unavailable</h1><p>{error}</p><button type="button" onClick={()=>setAttempt(v=>v+1)}>Retry map</button><a href="/events">Browse events without the map</a><a href="/">Back to Zaylist</a></div>}
   {legacyError&&<div role="alert" style={{position:'absolute',top:80,left:16,right:16,padding:16,background:'var(--z-black)',color:'white',zIndex:300}}>{legacyError} <button onClick={closeLegacy}>Dismiss</button></div>}

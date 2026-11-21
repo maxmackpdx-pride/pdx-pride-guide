@@ -21,6 +21,13 @@ export const cardFaceModules = [
 // Exact Placez presentation scope only. Legacy PlaceDiscoveryCard and
 // TodayLocationCard remain excluded, as do shared API, query adapters and
 // PlaceModal mutation controls. Inclusion is a candidate, not proof of speedup.
+export const drawerCompilerModules = [
+  'places/PlacezDrawer',
+  'places/PlacezMapDrawer',
+  'places/PlacezEventsRails',
+  'places/EventPlanExtension',
+];
+
 export const placezCompilerModules = [
   'cards/PlaceCard',
   'placez/NativePlacezFace',
@@ -42,6 +49,7 @@ export const cardSourcePatterns = [
   /[\\/]client[\\/]src[\\/]components[\\/]outz[\\/]native[\\/]NativeOutzideFace\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/]PlaceCard\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]placez[\\/](?:NativePlacezFace|PlacezQuickCard|NativePlacezExpanded|ExpandedPager)\.tsx$/,
+  /[\\/]client[\\/]src[\\/]components[\\/]places[\\/](?:PlacezDrawer|PlacezMapDrawer|PlacezEventsRails|EventPlanExtension)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]cards[\\/](?:EventCard|BoardCard)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/](?:FlyerBoard|EventFlyerFront)\.tsx$/,
   /[\\/]client[\\/]src[\\/]components[\\/]events[\\/]EventRailCard\.tsx$/,

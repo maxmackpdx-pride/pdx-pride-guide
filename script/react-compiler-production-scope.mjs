@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import {assertCompiledFunction} from './react-compiler-function-proof.mjs';
 import path from 'node:path';
 import {createServer} from 'vite';
-import {cardCompilerFunction,cardFaceModules,cardSourcePatterns,placezCompilerModules} from './react-compiler-card-scope.mjs';
+import {cardCompilerFunction,cardFaceModules,cardSourcePatterns,placezCompilerModules,drawerCompilerModules} from './react-compiler-card-scope.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
 const compilerMarker=/react(?:\/|_)compiler-runtime|useMemoCache|memo_cache_sentinel/;
@@ -16,6 +16,7 @@ const inScope=[
  'components/cards/EventCard.tsx',
  'components/cards/BoardCard.tsx',
  ...placezCompilerModules.map(module=>'components/'+module+'.tsx'),
+ ...drawerCompilerModules.map(module=>'components/'+module+'.tsx'),
  ...cardFaceModules.map(face=>'components/'+face+(face.startsWith('board/punk/')?'.jsx':'.tsx')),
 ];
 const pageFunctions=['Events','PlacezBrowse','Scenez','OutzidePlacesPage','HostHub'];
@@ -72,7 +73,7 @@ try{
    assert.ok(transformed?.code,`Vite did not transform ${url}`);
    const compiled=compilerMarker.test(transformed.code);
    assert.equal(compiled,expected,`Incorrect real-app React Compiler scope: ${url}`);
-   const target=placezCompilerModules.find(module=>file===`components/${module}.tsx`);
+   const target=[...placezCompilerModules,...drawerCompilerModules].find(module=>file===`components/${module}.tsx`);
    const functionProof=target?assertCompiledFunction(transformed.code,cardCompilerFunction(target),expected):null;
    if(file==='components/events/FlyerBoard.tsx'||file==='components/events/EventFlyerFront.tsx'){
     for(const name of (file.endsWith('/FlyerBoard.tsx')?['FlyerBoard','PastCell']:['PosterCell'])){

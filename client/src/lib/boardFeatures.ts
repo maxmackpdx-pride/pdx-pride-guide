@@ -9,15 +9,16 @@ export function boardFeaturePosts(category: BoardCategory, payload: BoardPayload
    isMine: Boolean(p.isMine || (userId && (p.userId === userId || p.author?.userId === userId))),
    itemCategory: typeof p.category === "string" ? p.category : undefined, condition: p.condition,
    priceCents: p.priceCents, isRemote: Boolean(p.isRemote),
-   source: category === "outz" ? post.source : p.eventId ? "events" : p.placeId ? "placez" : p.beachId ? "outzide" : "spot"};
+   eventId: typeof p.eventId === "number" ? p.eventId : undefined, source: category === "outz" ? post.source : p.eventId ? "events" : p.placeId ? "placez" : p.beachId ? "outzide" : "spot"};
  }).filter(post => !mine || post.isMine);
 }
 
-export function filterBoardFeatures(posts: BoardPost[], filters: {itemCategory?: string; condition?: string; price?: string; remote?: boolean; source?: string; neighborhood?: string; sort?: string; tags?: string[]}): BoardPost[] {
+export function filterBoardFeatures(posts: BoardPost[], filters: {itemCategory?: string; condition?: string; price?: string; remote?: boolean; source?: string; neighborhood?: string; sort?: string; tags?: string[]; eventId?: number | null}): BoardPost[] {
  return posts.filter(p => (!filters.itemCategory || p.itemCategory === filters.itemCategory)
   && (!filters.condition || p.condition === filters.condition)
   && (!filters.tags?.length || filters.tags.every(tag=>p.tags?.includes(tag)))
   && (!filters.remote || p.isRemote)
+  && (!filters.eventId || p.eventId === filters.eventId)
   && (!filters.source || p.source === filters.source)
   && (!filters.neighborhood || p.area.toLowerCase().includes(filters.neighborhood.toLowerCase()))
   && (!filters.price || (p.priceCents !== undefined && (filters.price === "under25" ? p.priceCents < 2500 : filters.price === "25to100" ? p.priceCents >= 2500 && p.priceCents <= 10000 : p.priceCents > 10000))))
@@ -39,6 +40,7 @@ export function readBoardFeatureFilters(params: URLSearchParams, selection: Boar
   price:selection==="sellz"&&["under25","25to100","over100"].includes(price)?price:"",
   remote:selection==="gigz"&&params.get("remote")==="1",
   source:selection==="mizzed"&&["events","placez","outzide","spot"].includes(source)?source:"",
+  eventId:selection==="mizzed"&&/^[1-9]\d*$/.test(read("event"))?Number(read("event")):null,
   neighborhood:read("neighborhood"),
   sort:["newest","oldest"].includes(sort)||selection==="sellz"&&["price-low","price-high"].includes(sort)?sort:"newest",
   tags:selection==="housing"?[...new Set(read("tags").split(",").map(tag=>tag.trim()).filter(Boolean))]:[]};

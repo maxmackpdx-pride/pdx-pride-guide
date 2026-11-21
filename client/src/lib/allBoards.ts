@@ -145,6 +145,7 @@ export type BoardPost = {
   priceCents?: number;
   isRemote?: boolean;
   source?: string;
+  eventId?: number;
   saved?: boolean;
   tags?: string[];
 };
