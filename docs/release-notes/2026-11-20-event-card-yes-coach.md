@@ -1,0 +1,56 @@
+# Release notes: Eventz open card (PR #115, Yes Coach pass), Nov 20, 2026
+
+## What ships
+
+- **One open event card** for every event tap (board, rails, EventModal callers). The front
+  preview step is gone; the card opens directly.
+- **Front board cards:** no share button (sharing lives on the open card).
+- **Locked head:** a darker scrim band behind the three tiles and the tabs, so poster type never
+  collides with the tab labels. The poster stays natural size, fades only at its own foot, never cut.
+- **Tiles:** RIDEZ (`--neon-orange`), AFTERZ (`--yellow`), DIRECTIONS (`--green-acid`) in three
+  equal columns across the full width.
+- **ExpandingActionPanel** (replaces the tile sheets): the divider under the tiles splits into two
+  accent lines and the panel opens inline (countdown-box surface, two drifting accent bloom orbs,
+  small ✕). Lit active tile / dimmed others, cross-fade between tiles, close on same tile / ✕ /
+  swipe up, static orbs for reduced motion and Calm Mode, no inner scroll, last-opened dot, light
+  haptic, Directions distance + travel time when location is already permitted.
+- **Ridez panel:** wide-short carpool cards (avatar, neighborhood, origin, departure time, seats
+  left, ARRIVING / DEPARTING label). The dashed `+` is gone; the leading rail area opens a clearly
+  marked "Expanded carpool card · design coming" stub (with POST ARRIVING / POST DEPARTING). Lyft,
+  Uber and TriMet tiles open their websites in a new tab.
+- **Directions panel:** venue + address with COPY, distance/time chips, and large tiles: Zaylist
+  Mapz (first, in-app), Google Maps, Apple Maps, Waze, Citymapper (new tab).
+- **Countdown box:** fixed size, dead center; venue mark directly left, collective/host mark
+  directly right on one center line. Yes Coach uses its saved collective logo.
+- **Info:** GOING / REMOVE MY ATTENDANCE shows once, at the foot of Info (no longer on every tab).
+- **Feed (THE PREGAME):** whole bubbles only (max three), CTA first; taps open the inbox group chat.
+- **Nearby:** restaurant cards are the standard Placez small card (artwork, logo, or place mark).
+- **Backdrop:** one shared blur behind every expanded card, except the bottom dock.
+
+## API
+
+- `GET /api/events/:id/occurrences/:date/planning`: each ride now includes `driverPhotoUrl`
+  (members-only payload, same as before). No new endpoints.
+
+## Fixes behind CI
+
+- Card stage releases the page's both-edge scrollbar gutter while open (mobile 10px gutter).
+- Motion fixture loads the Tailwind 4 Vite plugin (AuthModal's fixed scrim).
+- Open card poster uses the responsive DPR variants (srcset), retrying the original on error.
+- The at-event dialog leaves the modal layer when its exit animation starts, so one Escape closes
+  the card underneath.
+
+## Design notes: future (NOT in this version)
+
+- **Afterz.** Afterz is not host-only. (1) "Host an Afterz" (e.g. while at the party) opens an
+  expanded form to create/host one. (2) The Afterz list displays like the Ridez carpool rail:
+  wide-short cards with avatar, neighborhood, and "You" or "Ask for invite"; any user can tap a
+  card to open that Afterz's event card. "Ask for invite" is for people leaving the event, reaches
+  everyone within the normal event radius, and will use `POST /api/afterz/gatherings/:id/request`
+  (PR #117).
+- **Expanded carpool card:** design pending (stub ships).
+
+## Future: iPhone integration
+
+iPhone integration that can be done in-browser within the app is planned but is **not included in
+this version**. Documentation only: no code, stub or flag for it ships here.

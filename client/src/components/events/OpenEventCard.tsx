@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { NEW_TAB, directionsLinks, rideWebsiteLinks } from "@/lib/travelLinks";
 import { useLocation } from "wouter";
 import { useResponsivePoster } from "@/lib/useResponsivePoster";
 import { restoreOriginalPoster, POSTER_DETAIL_SIZES } from "@/lib/responsivePoster";
@@ -30,10 +31,11 @@ import { useEventRsvp } from "@/hooks/useEventRsvp";
 import { EventHostNotice } from "./EventHostNotice";
 import { weekdayCode, dayColorVar, startMs, dateStrOf, countdownParts } from "./EventFlyerFront";
 import { Car, MapPin, Moon } from "lucide-react";
-import { EventNearbyPlaceCard, EventRailCard, gigBoardPost, mizzBoardPosts, rideBoardPost, rideDirection, useBoardRailSaves, type PlanRide } from "./EventRailCards";
-import { RIDE_BRAND_COLOR, RideBrandMark } from "@/components/cards/rideBrands";
+import { CarpoolRailCard, EventNearbyPlaceCard, EventRailCard, gigBoardPost, mizzBoardPosts, rideBoardPost, rideDirection, useBoardRailSaves, type PlanRide } from "./EventRailCards";
+import { MAP_BRAND_COLOR, MapBrandMark, RIDE_BRAND_COLOR, RideBrandMark, type MapBrand, type RideBrand } from "@/components/cards/rideBrands";
 import { memberProfileHref } from "@/lib/avatarLinks";
 import { ActionSheetCard } from "@/components/cards/ActionSheetCard";
+import { ExpandingActionPanel, usePermittedTravel } from "@/components/cards/ExpandingActionPanel";
 import { FAMILY_LOGOS } from "@/components/cards/cardLogo";
 import { EventFormCard, type EventFormKind } from "./EventFormCards";
 import { getAfterzWindow } from "@shared/afterzWindow";
@@ -139,11 +141,6 @@ function dragStyle(card: HTMLElement | null, dy: number, animate: boolean) {
   card.style.translate = dy ? `0 ${dy}px` : "";
 }
 
-function isAppleDevice(): boolean {
-  if (typeof navigator === "undefined") return false;
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-}
-
 function FlyerViewer({ src, title, onClose }: { src: string; title: string; onClose: () => void }) {
   const [zoom, setZoom] = useState(false);
   const ref = useModalA11y({ open: true, onClose });
@@ -243,12 +240,14 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   const [sharePop, setSharePop] = useState(false);
   const gate = useShareJoinGate();
   const [form, setForm] = useState<null | { kind: EventFormKind; gigTitle?: string }>(null);
-  const [sheet, setSheet] = useState<null | { kind: "maps" | "rides" | "afterz"; el?: HTMLElement; origin: OriginRect | null; iconOrigin: OriginRect | null }>(null);
+  /* Tile panel (t345u): Ridez / Afterz / Directions open in-card, not as sheets. */
+  const [panel, setPanel] = useState<null | { kind: "maps" | "rides" | "afterz"; el?: HTMLElement; closing?: boolean }>(null);
+  /* Expanded carpool card: design pending, so a marked stub (owner, Nov 20). */
+  const [carpoolStub, setCarpoolStub] = useState<null | { origin: OriginRect | null; el?: HTMLElement }>(null);
   const [item, setItem] = useState<null | { kind: "gig" | "mizz"; id: number; title: string; body?: string | null; origin: OriginRect | null }>(null);
   const [popOrigin, setPopOrigin] = useState<OriginRect | null>(null);
   const [night, setNight] = useState<undefined | "rides" | "afterz">(undefined);
   const [rideKind, setRideKind] = useState<undefined | "carpool" | "home">(undefined);
-  const [ridePick, setRidePick] = useState(false);
   const pagesRef = useRef<HTMLDivElement | null>(null);
   const heroRef = useRef<HTMLDivElement | null>(null);
   const cardEl = useModalA11y({ open: !flyerOpen, onClose: () => requestClose() });
@@ -315,9 +314,6 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   const openLng = detailVenue?.lng ?? openListing?.lng ?? null;
   const pinX = openLng != null ? Math.min(92, Math.max(8, ((openLng + 122.85) / 0.4) * 100)) : 50;
   const pinY = openLat != null ? Math.min(88, Math.max(10, ((45.65 - openLat) / 0.2) * 100)) : 50;
-  const dirDest = encodeURIComponent(
-    `${openAddr ? `${openAddr}, ` : ""}${openListing?.venueName ?? ""}, Portland, OR`,
-  );
   /* More-at-venue strip: the open event's venue, day by day, for the 7
    * days starting on the event's own day (same shape as the expanded
    * card's strip on the event page). */
@@ -341,23 +337,22 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   /* Countdown marks (Tucker, t286u/t287u): venue and hosting collective,
      both from the reviewed white SVG store, matched by name. */
   const logos = (() => {
-    const out: { src: string; alt: string; href: string }[] = [];
+    const out: { src: string; alt: string; href: string; side: "venue" | "host" }[] = [];
     const v = whiteMark(openListing.venueName);
-    if (v) out.push({ src: v, alt: openListing.venueName, href: detailVenue?.id ? placePath(detailVenue.id, openListing.venueName) : "" });
+    if (v) out.push({ side: "venue", src: v, alt: openListing.venueName, href: detailVenue?.id ? placePath(detailVenue.id, openListing.venueName) : "" });
     const hostName = openHostGroup?.name || null;
     /* A party collective's own saved logo (SceneZ collective art) wins over the
        name-matched directory trace (t331u: Yes Coach). */
     const h = sceneCollectiveLogo(openHostGroup?.slug) ?? whiteMark(hostName);
-    if (h && h.split("?")[0] !== v?.split("?")[0]) out.push({ src: h, alt: hostName!, href: openHostGroup?.slug ? `/z/${openHostGroup.slug}` : "" });
+    if (h && h.split("?")[0] !== v?.split("?")[0]) out.push({ side: "host", src: h, alt: hostName!, href: openHostGroup?.slug ? `/z/${openHostGroup.slug}` : "" });
     return out;
   })();
   /* One-tap directions and rides, from venue coords or the address. */
   const geo = openLat != null && openLng != null ? `${openLat},${openLng}` : "";
   const nick = encodeURIComponent(openListing.venueName);
-  const uberHref = geo
-    ? `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${openLat}&dropoff[longitude]=${openLng}&dropoff[nickname]=${nick}${openAddr ? `&dropoff[formatted_address]=${encodeURIComponent(openAddr)}` : ""}`
-    : `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${dirDest}&dropoff[nickname]=${nick}`;
-  const lyftHref = geo ? `https://lyft.com/ride?id=lyft&destination[latitude]=${openLat}&destination[longitude]=${openLng}` : "";
+  /* Ride and map links come from one shared helper (lib/travelLinks): websites / universal URLs
+     in a new tab, the venue as destination where the URL supports it. */
+  const travelPlace = { name: openListing.venueName, address: openAddr || null, lat: openLat, lng: openLng };
 
   const mizzWin = getMissedConnectionWindow(openListing.dateStart, openListing.dateEnd, tick);
   const mizzPosts = (detailQuery.data?.missedConnections ?? []) as MissedConnectionPost[];
@@ -410,24 +405,19 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
     setNightOrigin(o => ({ rect: rectOf(el?.querySelector(".otile-face") ?? null), seq: o.seq + 1 }));
     setOpage(4); goOpage(4);
   };
-  const zaylistMap = openLat != null && openLng != null
-    ? `/placez/map?layer=events&lat=${openLat}&lng=${openLng}&zoom=15`
-    : `/placez/map?layer=events&q=${encodeURIComponent(openListing.title)}`;
-  const mapOptions = [
-    { label: "APPLE MAPS", href: `https://maps.apple.com/?daddr=${geo || dirDest}&dirflg=d`, external: true },
-    { label: "GOOGLE MAPS", href: `https://www.google.com/maps/dir/?api=1&destination=${geo ? encodeURIComponent(geo) : dirDest}`, external: true },
-    { label: "ZAYLIST MAPZ", href: zaylistMap, external: false },
-  ];
-  if (!isAppleDevice()) mapOptions.unshift(mapOptions.splice(1, 1)[0]);
-  const trimetHref = openLat != null && openLng != null
-    ? `https://trimet.org/home/planner?toPlace=${encodeURIComponent(`${openListing.venueName}::${openLat},${openLng}`)}`
-    : `https://trimet.org/home/planner?toPlace=${encodeURIComponent(openAddr || openListing.venueName)}`;
-  /* Ride app buttons (t327u): brand mark + brand color (third-party brand exception). */
-  const rideOptions = [
-    ...(lyftHref ? [{ brand: "lyft", name: "LYFT", label: "Get a Lyft", href: lyftHref, icon: <RideBrandMark brand="lyft" />, color: RIDE_BRAND_COLOR.lyft }] : []),
-    { brand: "uber", name: "UBER", label: "Get an Uber", href: uberHref, icon: <RideBrandMark brand="uber" />, color: RIDE_BRAND_COLOR.uber },
-    { brand: "trimet", name: "TRIMET", label: "Plan a TriMet trip", href: trimetHref, icon: <RideBrandMark brand="trimet" glyph />, color: RIDE_BRAND_COLOR.trimet },
-  ];
+  const mapLinks = directionsLinks(travelPlace);
+  const [addrCopied, setAddrCopied] = useState(false);
+  const copyAddress = () => {
+    const text = [openListing.venueName, openAddr].filter(Boolean).join(", ");
+    void navigator.clipboard?.writeText(text).then(() => { setAddrCopied(true); window.setTimeout(() => setAddrCopied(false), 1600); }, () => {});
+  };
+  /* Ride website tiles (t327u): brand mark + brand color (third-party brand exception). */
+  const rideOptions = rideWebsiteLinks(travelPlace).map(l => ({
+    brand: l.key, name: l.name, label: l.label, href: l.href,
+    icon: <RideBrandMark brand={l.key as RideBrand} glyph={l.key === "trimet"} />, color: RIDE_BRAND_COLOR[l.key as RideBrand],
+  }));
+  /* Directions header (t345u): distance + travel time, only when location is already permitted. */
+  const travel = usePermittedTravel(openLat != null && openLng != null ? { lat: openLat, lng: openLng } : null, panel?.kind === "maps");
   type Tile = { key: string; label: string; color: string; icon: React.ReactNode; href?: string; popup?: boolean; badge?: string; dot?: boolean };
   /* Host slot above the tiles (Tucker, t308u). One wide slot, three cases:
      claimable -> CLAIM THIS EVENT; a promoter (person) hosts -> face stack +
@@ -436,8 +426,15 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   const normName = (v?: string | null) => (v || "").toLowerCase().replace(/[^a-z0-9]/g, "");
   const promoters = openHostGroup?.slug ? [] : hosts.filter(h => h.username && normName(h.displayName || h.username) !== normName(openListing.venueName));
   const hostSlot: null | "claim" | "promoter" = openClaimable && !openPending ? "claim" : promoters.length ? "promoter" : null;
-  const openSheet = (kind: "maps" | "rides" | "afterz") => (el: HTMLElement) =>
-    setSheet({ kind, el, origin: rectOf(el.querySelector(".otile-face")), iconOrigin: rectOf(el.querySelector(".otile-face svg")) });
+  const lastTileKey = `zaylist:last-tile:${openListing.id}`;
+  const [lastTile, setLastTile] = useState<string | null>(() => { try { return localStorage.getItem(lastTileKey); } catch { return null; } });
+  const closePanel = () => setPanel(p => (p ? { ...p, closing: true } : p));
+  const togglePanel = (kind: "maps" | "rides" | "afterz", el: HTMLElement) => {
+    if (panel && panel.kind === kind && !panel.closing) { closePanel(); return; }
+    setPanel({ kind, el });
+    setLastTile(kind);
+    try { localStorage.setItem(lastTileKey, kind); } catch { /* private mode */ }
+  };
   const tiles: Tile[] = [
     ...(hasPlace || live ? [{ key: "rides", label: "RIDEZ", color: "var(--neon-orange)", icon: <Car />, popup: true, dot: live && hasNew("carpool") }] : []),
     ...(live ? [{ key: "afterz", label: "AFTERZ", color: "var(--yellow)", icon: <Moon />, popup: true,
@@ -449,7 +446,7 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   const onTile = (key: string, el: HTMLElement) => {
     if (key === "rides") markSeen("carpool");
     if (key === "afterz") markSeen("afterz");
-    if (key === "afterz" || key === "maps" || key === "rides") openSheet(key)(el);
+    if (key === "afterz" || key === "maps" || key === "rides") togglePanel(key, el);
   };
 
   /* Swipe down to dismiss (mobile): drag from the locked title / tab area
@@ -497,7 +494,7 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
   return (
       <CardStage className="fbx oevent" onClose={() => requestClose()}>
         <div
-          className="ocard on" ref={cardEl}
+          className={`ocard on${panel ? " ocard--panel" : ""}`} ref={cardEl}
           onClickCapture={e => { if (!gate.gated || gate.prompt || (e.target as HTMLElement).closest(".ox, .zas-scrim")) return; e.preventDefault(); e.stopPropagation(); gate.setPrompt(true); }}
           style={{ "--a": openAccent } as CSSProperties}
           role="dialog"
@@ -571,14 +568,14 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
               </a>
             ) : null}
             {tiles.length ? (
-              <nav className="otiles" aria-label="Event actions">
+              <nav className="otiles" aria-label="Event actions" data-panel={panel && !panel.closing ? panel.kind : undefined}>
                 {tiles.map(t => t.href ? (
                   <a key={t.key} data-action={t.key} className="otile" href={t.href} style={{ "--tile": t.color } as CSSProperties}>
                     <span className="otile-face" aria-hidden="true">{t.icon}</span>
                     <span className="otile-l">{t.label}</span>
                   </a>
                 ) : (
-                  <button key={t.key} type="button" data-action={t.key} className="otile" aria-haspopup={t.popup ? "dialog" : undefined}
+                  <button key={t.key} type="button" data-action={t.key} className={`otile${panel && !panel.closing && panel.kind === t.key ? " is-active" : ""}`} aria-expanded={t.popup ? Boolean(panel && !panel.closing && panel.kind === t.key) : undefined} aria-controls={t.popup ? "ocard-tile-panel" : undefined}
                     aria-label={`${t.label}${t.badge ? `, ${t.badge.toLowerCase()}` : ""}${t.dot ? ", new activity" : ""}`}
                     onClick={e => {
                       /* Press feedback (t314u): the face dips and glows for 90ms, then the sheet grows from it. */
@@ -590,9 +587,95 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
                     <span className="otile-face" aria-hidden="true">{t.icon}{t.dot ? <i className="otile-dot" /> : null}</span>
                     {t.badge ? <span className="otile-badge" aria-hidden="true">{t.badge}</span> : null}
                     <span className="otile-l">{t.label}</span>
+                    {/* Last opened tile (t345u): a small dot, never an auto-open. */}
+                    {lastTile === t.key ? <i className="otile-last" aria-hidden="true" /> : null}
                   </button>
                 ))}
               </nav>
+            ) : null}
+            {panel ? (
+              <div id="ocard-tile-panel">
+                {panel.kind === "afterz" ? (
+                  <ExpandingActionPanel panelKey="afterz" open={!panel.closing} onRequestClose={closePanel} onClosed={() => setPanel(null)}
+                    label="Afterz" accent="var(--yellow)" logo={FAMILY_LOGOS.afterz} kicker="AFTERZ" title={openListing.title.toUpperCase()}
+                    actions={[
+                      { label: "INVITE FRIENDS", primary: true, onClick: () => { setPanel(null); setForm({ kind: "afterz-invite" }); } },
+                      afterzWin?.state === "open"
+                        ? { label: "INVITE PEOPLE NEARBY", onClick: () => { const el = panel.el; setPanel(null); openNight("afterz", el); } }
+                        : { label: afterzWin?.state === "before" ? `NEARBY OPENS IN ${countdownLabel(afterzWin.opensAt - tick)}` : "NEARBY INVITES CLOSED", disabled: true },
+                    ]}>
+                    <p className="zas-note">
+                      {afterzWin?.state === "before"
+                        ? "Invite friends now. When Afterz opens (72 hours before doors), you can also invite people in the area to request to join you at the event."
+                        : afterzWin?.state === "open"
+                          ? "Afterz is open: you can also invite people in the area to request to join you at the event."
+                          : "Afterz has closed for this event. You can still message friends."}
+                      {" "}Area invites never show on the map.
+                    </p>
+                  </ExpandingActionPanel>
+                ) : panel.kind === "maps" ? (
+                  <ExpandingActionPanel panelKey="maps" open={!panel.closing} onRequestClose={closePanel} onClosed={() => setPanel(null)}
+                    label="Directions" accent="var(--green-acid)" kicker="DIRECTIONS">
+                    <div className="zdir-where">
+                      <div className="zdir-where-t">
+                        <b>{openListing.venueName}</b>
+                        {openAddr ? <span>{openAddr}</span> : null}
+                      </div>
+                      <button type="button" className="obtn zdir-copy" data-action="copy-address" onClick={copyAddress} aria-label={`Copy the address of ${openListing.venueName}`}>
+                        {addrCopied ? "COPIED" : "COPY"}
+                      </button>
+                    </div>
+                    {travel ? (
+                      <div className="zdir-chips" aria-label="Distance and travel time">
+                        {travel.split(" · ").map(c => <span key={c} className="zdir-chip">{c}</span>)}
+                      </div>
+                    ) : null}
+                    <div className="zdir-grid">
+                      {mapLinks.map(l => (
+                        <a key={l.key} className={`zdir-tile${l.external ? "" : " zdir-tile--primary"}`} data-action={`directions-${l.key}`} href={l.href}
+                          {...(l.external ? NEW_TAB : {})} aria-label={l.label}
+                          style={{ "--obtn-c": l.key === "zaylist" ? "var(--green-acid)" : MAP_BRAND_COLOR[l.key as MapBrand] } as CSSProperties}>
+                          <span className="zride-tile-icon" aria-hidden="true"><MapBrandMark brand={l.key as MapBrand | "zaylist"} /></span>
+                          <span className="zride-tile-label">{l.name}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </ExpandingActionPanel>
+                ) : (
+                  /* Ridez (t327u/t329u): carpools (wide-short cards) above the ride websites. */
+                  <ExpandingActionPanel panelKey="rides" open={!panel.closing} onRequestClose={closePanel} onClosed={() => setPanel(null)}
+                    label="Ridez" accent="var(--neon-orange)" title={`TO ${openListing.venueName.toUpperCase()}`} logo="ridez-pending" centered>
+                    {live ? (
+                      <>
+                        <p className="zas-sec">CARPOOLS <span>{planning.data?.rides == null ? "SIGN IN TO SEE RIDES" : rideCards.length ? "" : "BE THE FIRST"}</span></p>
+                        <div className="zas-rail orail--cards orail--carpool" data-rail="carpool">
+                          <button type="button" data-action="open-carpool" className="ocarpool-lead"
+                            aria-label="Open the expanded carpool card (post an arriving or departing ride)"
+                            onClick={e => setCarpoolStub({ origin: rectOf(e.currentTarget), el: e.currentTarget })} />
+                          {(planning.data?.rides ?? []).map(r => (
+                            <CarpoolRailCard key={r.id} ride={r} onOpen={el => { setCarpoolStub(null); setPanel(null); openNight("rides", el); }} />
+                          ))}
+                        </div>
+                      </>
+                    ) : null}
+                    {hasPlace ? (
+                      <>
+                        <p className="zas-sec">RIDE APPS <span>OPENS THE WEBSITE</span></p>
+                        {/* Brand-color icon tiles (third-party brand exception); websites in a new tab. */}
+                        <div className="zride-tiles">
+                          {rideOptions.map(o => (
+                            <a key={o.brand} className="zride-tile" data-action={`ride-${o.brand}`} href={o.href} {...NEW_TAB}
+                              style={{ "--obtn-c": o.color } as CSSProperties} aria-label={o.label}>
+                              <span className="zride-tile-icon" aria-hidden="true">{o.icon}</span>
+                              <span className="zride-tile-label">{o.name}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </>
+                    ) : null}
+                  </ExpandingActionPanel>
+                )}
+              </div>
             ) : null}
             <div className="otabs" role="tablist" aria-label="Event card pages">
               {OPAGE_NAMES.map((n, i) => (
@@ -622,11 +705,17 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
               <section className="opage" inert={opage!==0} aria-hidden={opage!==0} aria-label="Info">
                 <p className="osec">EVENT DETAILS</p>
                 <div className={`ostarts ologos-${logos.length}${cd.state === "now" ? " is-live" : ""}`} data-state={cd.state}>
-                  {logos.length ? (
-                    <span className="ologos">
-                      {logos.map(l => l.href ? <a key={l.src} href={l.href} aria-label={`Open ${l.alt}`}><img src={l.src} alt={l.alt} title={l.alt} /></a> : <img key={l.src} src={l.src} alt={l.alt} title={l.alt} />)}
-                    </span>
-                  ) : null}
+                  {/* Countdown (t345u): fixed size, dead center; venue mark directly left,
+                      collective/host mark directly right, on one center line. Never stacked. */}
+                  {(["venue", "host"] as const).map(side => {
+                    const l = logos.find(x => x.side === side);
+                    const img = l ? <img src={l.src} alt={l.alt} title={l.alt} /> : null;
+                    return (
+                      <span key={side} className={`ologo-slot ologo-slot--${side}`} aria-hidden={l ? undefined : true}>
+                        {l && l.href ? <a href={l.href} aria-label={`Open ${l.alt}`}>{img}</a> : img}
+                      </span>
+                    );
+                  })}
                   <span className="ostarts-count">
                     <i>{cd.label}</i>
                     <b>{cd.big}</b>
@@ -946,69 +1035,16 @@ export default function OpenEventCard({ listing, onClose, related = [], initialP
               }}
             />
           </div>
-        {sheet?.kind === "afterz" ? (
-          <ActionSheetCard label="Afterz" accent="var(--yellow)" kicker="AFTERZ" title={openListing.title.toUpperCase()} logo={FAMILY_LOGOS.afterz}
-            icon={<Moon />} motion="grow" origin={sheet.origin} iconOrigin={sheet.iconOrigin} placement="sheet" onDismiss={() => setSheet(null)}
+        {carpoolStub ? (
+          /* Expanded carpool card: the design does not exist yet (owner, Nov 20). A clearly marked
+             stub over the blurred backdrop with flip-and-grow; posting Arriving / Departing stays here. */
+          <ActionSheetCard label="Expanded carpool card (design coming)" accent="var(--neon-orange)" kicker="CARPOOL" title="EXPANDED CARPOOL CARD · DESIGN COMING"
+            logo="ridez-pending" origin={carpoolStub.origin} onDismiss={() => setCarpoolStub(null)}
             actions={[
-              { label: "INVITE FRIENDS", primary: true, onClick: () => { setSheet(null); setForm({ kind: "afterz-invite" }); } },
-              afterzWin?.state === "open"
-                ? { label: "INVITE PEOPLE NEARBY", onClick: () => { const el = sheet.el; setSheet(null); openNight("afterz", el); } }
-                : { label: afterzWin?.state === "before" ? `NEARBY OPENS IN ${countdownLabel(afterzWin.opensAt - tick)}` : "NEARBY INVITES CLOSED", disabled: true },
+              { label: "POST ARRIVING", primary: true, onClick: () => { const el = carpoolStub.el; setCarpoolStub(null); setPanel(null); openNight("rides", el, "carpool"); } },
+              { label: "POST DEPARTING", onClick: () => { const el = carpoolStub.el; setCarpoolStub(null); setPanel(null); openNight("rides", el, "home"); } },
             ]}>
-            <p className="zas-note">
-              {afterzWin?.state === "before"
-                ? "Invite friends now. When Afterz opens (72 hours before doors), you can also invite people in the area to request to join you at the event."
-                : afterzWin?.state === "open"
-                  ? "Afterz is open: you can also invite people in the area to request to join you at the event."
-                  : "Afterz has closed for this event. You can still message friends."}
-              {" "}Area invites never show on the map.
-            </p>
-          </ActionSheetCard>
-        ) : sheet?.kind === "maps" ? (
-          <ActionSheetCard label="Directions" accent="var(--green-acid)" kicker="DIRECTIONS" title={`TO ${openListing.venueName.toUpperCase()}`}
-            icon={<MapPin />} motion="grow" origin={sheet.origin} iconOrigin={sheet.iconOrigin} placement="sheet"
-            actions={mapOptions} onDismiss={() => setSheet(null)} />
-        ) : sheet ? (
-          /* Ridez (t327u/t329u): one orange sheet. The carpool rail (event-night rides, the
-             existing planning API and the existing carpool card) sits above the ride app buttons. */
-          <ActionSheetCard label="Ridez" accent="var(--neon-orange)" kicker="" title={`TO ${openListing.venueName.toUpperCase()}`} logo="ridez-pending" centered
-            motion="grow" origin={sheet.origin} placement="sheet" onDismiss={() => { setRidePick(false); setSheet(null); }}>
-            {live ? (
-              <>
-                <p className="zas-sec">CARPOOLS <span>{planning.data?.rides == null ? "SIGN IN TO SEE RIDES" : rideCards.length ? "" : "BE THE FIRST"}</span></p>
-                <div className="zas-rail orail--cards" data-rail="carpool">
-                  {ridePick ? (
-                    <div className="oslot oslot--ride oslot--pick" role="group" aria-label="Post a carpool">
-                      {([["carpool", "ARRIVING"], ["home", "DEPARTING"]] as const).map(([k, l]) => (
-                        <button key={k} type="button" data-action={`post-carpool-${k === "home" ? "departing" : "arriving"}`}
-                          onClick={() => { const el = sheet.el; setRidePick(false); setSheet(null); openNight("rides", el, k); }}>{l}</button>
-                      ))}
-                    </div>
-                  ) : (
-                    <button type="button" data-action="post-carpool" className="oslot oslot--ride" aria-label="Post an arriving or departing carpool"
-                      onClick={() => setRidePick(true)}><span aria-hidden="true">+</span></button>
-                  )}
-                  {rideCards.map(r => (
-                    <EventRailCard key={r.post.key} post={r.post} tag={r.tag} onOpen={() => { const el = sheet.el; setSheet(null); openNight("rides", el); }} />
-                  ))}
-                </div>
-              </>
-            ) : null}
-            {hasPlace ? (
-              <>
-                <p className="zas-sec">RIDE APPS</p>
-                {/* App-icon tiles in each brand's color (third-party brand exception). */}
-                <div className="zride-tiles">
-                  {rideOptions.map(o => (
-                    <a key={o.brand} className="zride-tile" data-action={`ride-${o.brand}`} href={o.href} target="_blank" rel="noreferrer"
-                      style={{ "--obtn-c": o.color } as CSSProperties} aria-label={o.label}>
-                      <span className="zride-tile-icon" aria-hidden="true">{o.icon}</span>
-                      <span className="zride-tile-label">{o.name}</span>
-                    </a>
-                  ))}
-                </div>
-              </>
-            ) : null}
+            <p className="zas-note" data-stub="expanded-carpool">Placeholder: the expanded carpool card is being designed. You can still post a ride to or from the event.</p>
           </ActionSheetCard>
         ) : null}
         {railAuth ? <AuthModal onClose={() => setRailAuth(false)} /> : null}

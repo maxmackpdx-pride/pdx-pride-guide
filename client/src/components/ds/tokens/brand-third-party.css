@@ -1,9 +1,14 @@
 /* Third-party brand colors (Tucker, t327u). This is an allowed exception to the Zaylist token palette.
    A ride app button uses its own brand's primary color as its accent, so people recognise it at a glance.
-   Only the Ridez ride-app buttons use these, and nothing else may reference them.
+   Only the Ridez ride-app tiles and the Directions map-app tiles use these, and nothing else may reference them.
    Uber's primary is black, which disappears on a black card, so Uber uses its white reverse. */
 :root {
   --brand-uber: #FFFFFF;
   --brand-lyft: #FF00BF;
   --brand-trimet: #0E68B0;
+  /* Directions map apps (owner, Nov 20). Apple Maps uses a white reverse, like Uber. */
+  --brand-google-maps: #4285F4;
+  --brand-apple-maps: #FFFFFF;
+  --brand-waze: #33CCFF;
+  --brand-citymapper: #3FCB4E;
 }

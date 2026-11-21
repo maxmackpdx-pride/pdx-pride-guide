@@ -135,8 +135,31 @@ test('production cards preserve source geometry across viewport and in-flow pres
    if(family==='event'){
     const details=await openEventDetails(page,first);
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'mobile event has no horizontal overflow');
-    // RIDEZ tile -> Ridez sheet -> "+" -> ARRIVING opens the existing at-event carpool flow.
-    const launch=async()=>{await details.locator('[data-action=rides]').click();const ridez=page.locator('.zas[aria-label=Ridez]');await ridez.waitFor();await ridez.locator('[data-action=post-carpool]').click();await ridez.locator('[data-action=post-carpool-arriving]').click();};
+    // RIDEZ tile -> in-card Ridez panel (t345u). The leading rail area opens the expanded carpool
+    // card stub (design pending); its POST ARRIVING opens the existing at-event carpool flow.
+    const ridezTile=details.locator('[data-action=rides]');
+    const openRidez=async()=>{if(await ridezTile.getAttribute('aria-expanded')!=='true')await ridezTile.click();const ridez=details.locator('.zxp[aria-label=Ridez].is-open');await ridez.waitFor();return ridez;};
+    {
+     const ridez=await openRidez();
+     assert.equal(await ridezTile.getAttribute('aria-expanded'),'true','Ridez tile reports its open panel');
+     assert.equal(await page.locator('.zas-scrim').count(),0,'tile panels open in the card, not as a sheet');
+     // Ride websites (Lyft, Uber, TriMet) render only for events with a place; every one opens in a
+     // new tab (hrefs are covered by client/src/lib/travelLinks.test.ts).
+     const links=ridez.locator('a.zride-tile');
+     for(let i=0;i<await links.count();i++){
+      const a=links.nth(i);
+      assert.equal(await a.getAttribute('target'),'_blank','ride websites open in a new tab');
+      const rel=(await a.getAttribute('rel')||'').split(/\s+/);
+      assert.ok(rel.includes('noopener')&&rel.includes('noreferrer'),'ride links are rel=noopener noreferrer');
+      assert.match(await a.getAttribute('href'),/^https:\/\/(ride\.lyft\.com|m\.uber\.com\/go\/|trimet\.org\/home\/planner)/,'ride links are websites, not app hand-offs');
+     }
+     const lead=ridez.locator('button[data-action=open-carpool]');
+     assert.match(await lead.getAttribute('aria-label'),/expanded carpool card/i,'leading carpool area is a labelled button');
+     assert.equal(await ridez.locator('[data-action=post-carpool]').count(),0,'no dashed plus slot');
+     await ridezTile.click();await details.locator('.zxp').waitFor({state:'detached'});
+     assert.equal(await ridezTile.getAttribute('aria-expanded'),'false','tapping the same tile closes the panel');
+    }
+    const launch=async()=>{const ridez=await openRidez();await ridez.locator('[data-action=open-carpool]').click();const stub=page.locator('.zas[aria-label^="Expanded carpool card"]');await stub.waitFor();await stub.locator('[data-stub=expanded-carpool]').waitFor();await stub.locator('[data-action=post-arriving]').click();};
     await launch();
     const atEvent=page.locator('dialog.at-event-dialog[open]');
     await atEvent.getByRole('button',{name:'Carpools & rides home'}).click();

@@ -17,7 +17,7 @@ import type { MissedConnectionPost } from "@/components/MissedConnectionsPanel";
    Saving uses the Boardz save API (PUT/DELETE /api/boards/:category/posts/:id/save). */
 
 export type PlanGig = { id: number; title: string; description?: string | null };
-export type PlanRide = { id: number; area?: string; driver?: string; plan?: { kind?: string; meeting?: string | null; oneWay?: boolean } | null };
+export type PlanRide = { id: number; area?: string; driver?: string; driverPhotoUrl?: string | null; remaining?: number; mine?: boolean; plan?: { kind?: string; meeting?: string | null; leaveBy?: number | null; oneWay?: boolean; departed?: boolean } | null };
 
 export function mizzBoardPosts(rows: MissedConnectionPost[]): BoardPost[] {
   return toBoardPosts("mizzed", rows as never, true);
@@ -69,6 +69,46 @@ export function EventNearbyPlaceCard({ place, onOpen }: { place: Pick<Business, 
   return (
     <div className="orailcard orailcard--place" data-card-category="placez">
       <PlaceDiscoveryCard place={place} size="small" onOpen={() => onOpen()} />
+    </div>
+  );
+}
+
+/** Pacific clock time for a departure timestamp, e.g. "9:15 PM". */
+function rideClock(ms: number): string {
+  return new Date(ms).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Los_Angeles" });
+}
+
+/**
+ * Carpool rail card (owner, Nov 20): wide and short, the standard small-card chrome with the
+ * Boardz torn edge, in --neon-orange. Real planning-API fields only:
+ *  - avatar: the offerer's profile photo (driverPhotoUrl), else their initial
+ *  - neighborhood: `area`, the required "where you're coming from" field on every offer
+ *  - origin: plan.meeting (the public meeting place)
+ *  - departure: plan.leaveBy (omitted when the offer has none)
+ *  - seats left: `remaining` (functional, not an attendee count)
+ * ARRIVING / DEPARTING sits at the top. Tapping opens the full carpool flow (flip-and-grow).
+ */
+export function CarpoolRailCard({ ride, onOpen }: { ride: PlanRide; onOpen: (el: HTMLElement) => void }) {
+  const tag = rideDirection(ride);
+  const who = ride.driver || "member";
+  const seats = typeof ride.remaining === "number" ? ride.remaining : null;
+  const leave = typeof ride.plan?.leaveBy === "number" ? rideClock(ride.plan.leaveBy) : null;
+  return (
+    <div className="orailcard orailcard--carpool" data-card-category="carpool" data-tag={tag}>
+      <span className="orailcard-tag">{tag}</span>
+      <button type="button" className="ocarpool" data-card-size="wide-short" data-ride-id={ride.id}
+        aria-label={`${tag === "ARRIVING" ? "Carpool to the event" : "Ride from the event"} with @${who}${ride.area ? ` from ${ride.area}` : ""}${leave ? `, leaves ${leave}` : ""}${seats != null ? `, ${seats} seat${seats === 1 ? "" : "s"} left` : ""}`}
+        onClick={e => onOpen(e.currentTarget)}>
+        <span className="ocarpool-av" aria-hidden="true">{ride.driverPhotoUrl ? <img src={ride.driverPhotoUrl} alt="" loading="lazy" /> : who.slice(0, 1).toUpperCase()}</span>
+        <span className="ocarpool-t">
+          {ride.area ? <b className="ocarpool-hood">{ride.area}</b> : null}
+          {ride.plan?.meeting ? <span className="ocarpool-from">From {ride.plan.meeting}</span> : null}
+          <span className="ocarpool-meta">
+            {leave ? <span>Leaves {leave}</span> : null}
+            {seats != null ? <span className="ocarpool-seats">{seats} SEAT{seats === 1 ? "" : "S"} LEFT</span> : null}
+          </span>
+        </span>
+      </button>
     </div>
   );
 }

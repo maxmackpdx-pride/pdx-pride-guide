@@ -311,6 +311,8 @@ export function registerEventPlanning(
           return [
             {
               ...ride,
+              /* The offerer's avatar on the carpool card (members-only payload, like faces). */
+              driverPhotoUrl: storage.getUserByUsername?.(ride.driver)?.photoUrl ?? null,
               plan: meta
                 ? {
                     kind: meta.kind,

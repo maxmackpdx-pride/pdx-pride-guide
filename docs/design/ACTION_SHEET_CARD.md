@@ -186,7 +186,8 @@ Users' own agents act with the user's session (same cookie auth), on the same en
 | Going / join chat | `POST` / `DELETE /api/events/:id/attendance` | Joining the chat = Going |
 | Chat read / post | `GET` / `POST /api/events/:id/chat {body}` | Members only; 403 otherwise. **Confirm before posting.** |
 | Planning (rides, gigs, window) | `GET /api/events/:id/occurrences/:date/planning` | |
-| Carpool / Afterz ride | `POST …/planning/rides`; `POST`/`DELETE …/rides/:ride/requests` | Existing NightRideTools flows |
+| Carpool / Afterz ride | `POST …/planning/rides`; `POST`/`DELETE …/rides/:ride/requests` | Existing NightRideTools flows. Each ride in `planning.rides` now carries `driverPhotoUrl` (members-only payload). |
+| Get a ride (Uber / Lyft / TriMet) | `a[data-action=ride-uber|ride-lyft|ride-trimet]` in the Ridez panel | Plain website links in a new tab (see the RIDEZ panel table). No API, no app hand-off. |
 | Post Mizzed | `POST /api/missed-connections {title, body, eventId}` | Anonymous. **Confirm.** |
 | Post Gigz (hosts) | `POST /api/gigs {postType:"POSTING_GIG", title, description, name, contactEmail, eventId, occurrenceDate, acceptRules:true}` | 403 unless host. **Confirm.** |
 | Message host | `POST /api/events/:id/message-host {body}` | `NO_CONTACT` means no host account, so invite instead. **Confirm.** |
@@ -202,7 +203,7 @@ Errors are `{error: string}` with HTTP 400/401/403/404/409. No new endpoints wer
 - Every action carries a stable `data-action` attribute:
   - tiles: `carpool`, `afterz`, `maps`, `rides`
   - card buttons: `share`, `heart`, `claim`, `report`, `post-gig`, `post-mizzed`, `join-chat`, `close`
-  - sheet actions: the slugified label
+  - panel and sheet actions: the slugified label; Ridez panel: `open-carpool`, `ride-lyft`, `ride-uber`, `ride-trimet`; the carpool stub: `post-arriving`, `post-departing`
   - forms: `data-form` on the form and `data-action="submit"` on the submit button
 - The card root has `data-zay-card="event" data-event-id data-occurrence`.
 - Every swipe has a button (✕ / Close), and no action is hover-only.
@@ -228,32 +229,79 @@ Errors are `{error: string}` with HTTP 400/401/403/404/409. No new endpoints wer
 
 Not yet worked out. Theory only: ActionSheetCard maps to a native sheet and FormCard to a pushed modal, but this is undecided and unbuilt.
 
-## Event card tiles (t327u): RIDEZ · AFTERZ · DIRECTIONS
+## Event card tiles (t327u, t345u): RIDEZ · AFTERZ · DIRECTIONS
 
-Three tiles under the countdown box, nothing else:
+Three tiles under the host slot, in three equal columns across the full card width:
 
-| Tile | Token | Sheet |
+| Tile | Token | Panel |
 |---|---|---|
-| RIDEZ | `--neon-orange` (Ridez logo slot `ridez-pending`) | Carpool rail + ride-app buttons |
+| RIDEZ | `--neon-orange` (Ridez logo slot `ridez-pending`) | Carpool rail + ride websites |
 | AFTERZ | `--yellow` | Afterz window + invites |
-| DIRECTIONS | `--green-acid` (was MAPS) | Apple/Google Maps directions |
+| DIRECTIONS | `--green-acid` (was MAPS) | Apple/Google Maps / Zaylist Mapz, distance + time |
 
-**RIDEZ sheet.** One deep-glass ActionSheetCard, single column:
-1. `CARPOOLS` rail of standard small cards (136×170). First slot is the black dashed `+` square
-   (`data-action="post-carpool"`), which opens the existing carpool flow (`AtEventDialog` /
-   `EventPlanning`, `POST /api/events/:id/occurrences/:date/planning/rides`). Ride cards come from
-   the planning payload's `rides` (members only; signed out shows SIGN IN TO SEE RIDES) and render
-   through `outzWallToBoardPost` (`CARPOOL_OFFER`, carpool sticker) → `BoardBrowseCard size="small"`.
-   Ride cards have no save API, so the heart is disabled.
-2. `RIDE APPS`: a row of three square app-icon tiles (Lyft, Uber, TriMet), same anatomy as the
-   card's locked tiles, brand color as rim + glyph, label under.
+A darker scrim band sits behind the tile row and the tabs, so poster type never collides with the
+tab labels. It only darkens; the poster keeps running behind it and is never cut.
 
-Header: the Ridez logo placeholder and `TO <VENUE>` centered (`centered` prop), no icon/kicker.
-Every carpool small card is labeled `ARRIVING` (carpool to the venue) or `DEPARTING` (ride home /
-on to Afterz) at its top; both kinds show anytime. The `+` slot first asks ARRIVING or DEPARTING and
-opens the existing offer form preselected. Departing (ride home) keeps the server safety rule: the
-poster must be Going and verified present at the venue (foreground checks + missed-check
-escalation), so it can't be posted before check-in yet (product decision pending).
+# ExpandingActionPanel: the in-card tile panel (t345u)
+
+`client/src/components/cards/ExpandingActionPanel.tsx`. The tiles no longer open sheets. Tapping a
+tile splits the divider under the tiles into two accent lines (the panel's top and bottom edges)
+and opens the content inline between them; the tabs and page below slide down with it.
+
+- **Surface:** the countdown box's (`--fbx-chip-bg`). Two large bloom orbs in the tile accent
+  drift off the top-left and top-right corners, deliberately unequal in size and offset.
+- **Close:** the site's small ✕ (`.zas-x`) in the corner, tapping the same tile again, a swipe up,
+  or Escape inside the panel.
+- **The 8 rules:**
+  1. The pressed tile stays lit (`.otile.is-active`); the others dim slightly.
+  2. Another tile cross-fades content, orbs and lines without closing (`panelKey`).
+  3. The same tile, the ✕ or a swipe up closes it.
+  4. The orbs drift slowly; static under `prefers-reduced-motion` and Calm Mode.
+  5. The panel fits its content with no inner scroll. While it is open, the locked head and page
+     scroll together and the footer stays pinned. The height animates (`grid-template-rows`).
+  6. A small dot marks the last opened tile (`localStorage zaylist:last-tile:<eventId>`). It never
+     auto-opens.
+  7. A light haptic on open and close (`haptic()`, off in Calm Mode / reduced motion).
+  8. Directions shows distance and travel time in its header, only when location is already
+     permitted (`usePermittedTravel`: Permissions API `granted` only, never prompts). Walking under
+     about 1.2 mi, otherwise a rough drive estimate.
+- **Props:** `panelKey`, `accent`, `label`, `kicker?`, `title?`, `meta?`, `logo?`, `centered?`,
+  `actions?` (same `ActionSheetAction` shape), `open`, `onRequestClose`, `onClosed`, children.
+- **A11y:** a labelled `section`; each tile carries `aria-expanded` and `aria-controls="ocard-tile-panel"`.
+- Dialogs opened from cards (Gigz, Mizzed, carpool card, share / invite / message popups) remain
+  ActionSheetCard over the blurred backdrop.
+
+**RIDEZ panel.** Single column, the Ridez logo placeholder and `TO <VENUE>` centered:
+1. `CARPOOLS` rail. The first, leading area is a real button
+   (`data-action="open-carpool"`, aria-label "Open the expanded carpool card…"). There is no dashed
+   `+`. It opens the **expanded carpool card**, which is not designed yet: a clearly marked stub
+   ("EXPANDED CARPOOL CARD · DESIGN COMING", `data-stub="expanded-carpool"`) over the blurred
+   backdrop with flip-and-grow and the site ✕. The stub keeps POST ARRIVING / POST DEPARTING, which
+   open the existing offer form (`AtEventDialog` / `EventPlanning`,
+   `POST /api/events/:id/occurrences/:date/planning/rides`) preselected.
+2. Carpool cards are **wide and short** (248×124, 2:1, Afterz-style proportions): the standard
+   small-card chrome with the Boardz torn edge (`torn-card-wide.svg`) in `--neon-orange`. Each card
+   shows only real planning-API fields:
+   - the offerer's avatar (`driverPhotoUrl`, else their initial)
+   - their neighborhood (`area`: required on every offer, "where you're coming from")
+   - the origin (`plan.meeting`, the public meeting place)
+   - the departure time (`plan.leaveBy`; omitted when the offer has none)
+   - seats left (`remaining`: functional, not an attendee count)
+   `ARRIVING` / `DEPARTING` stays at the top of each card. Both kinds show anytime. Tapping a card
+   opens the full carpool flow with flip-and-grow. The rail follows the Mizzed/Gigz rail rules.
+   Departing (ride home) keeps the server safety rule: the poster must be Going and verified
+   present at the venue, so it can't be posted before check-in yet (product decision pending).
+3. `RIDE APPS`: three square brand-color icon tiles (Lyft, Uber, TriMet). They open each
+   **website in a new tab** (`target="_blank" rel="noopener noreferrer"`), never an app deep link,
+   a universal-link hand-off, an in-app webview, an iframe or a sheet:
+
+   | Brand | URL | Venue passed? |
+   |---|---|---|
+   | Uber | `https://m.uber.com/go/product-selection?drop[0]=<Location JSON>` (`latitude`, `longitude`, `addressLine1` = venue, `addressLine2` = address) | Yes, with coordinates. This is the m.uber.com web ride flow's `drop[0]` Location object (Uber deep-link docs). Without coordinates: `https://m.uber.com/go/home` (no destination). |
+   | Lyft | `https://ride.lyft.com/u?destination[latitude]=…&destination[longitude]=…` (the Lyft SDK's web mode) | Coordinates only. Lyft has no name or address parameter, so without coordinates it opens `https://ride.lyft.com/`. |
+   | TriMet | `https://trimet.org/home/planner?toPlace=<Venue>::<lat>,<lng>` (or `toPlace=<address>`) | Yes (TriMet trip planner `toPlace`). |
+
+**AFTERZ panel.** The Afterz window, INVITE FRIENDS, and INVITE PEOPLE NEARBY while open.
 
 **Third-party brand exception.** Lyft/Uber/TriMet colors are the one allowed non-system color,
 only on those buttons, from `ds/tokens/brand-third-party.css` (`--brand-lyft #FF00BF`,
@@ -261,14 +309,37 @@ only on those buttons, from `ds/tokens/brand-third-party.css` (`--brand-lyft #FF
 #0E68B0`). Marks are simplified wordmarks in `cards/rideBrands.tsx` until the official logo files
 are dropped in.
 
+## Design notes: future Afterz cards (NOT in this version)
+
+Notes only. Nothing below is built, stubbed or flagged in this version.
+
+1. **Host an Afterz.** Tapping "Host an Afterz" (for example while at the party) opens an expanded
+   form to create and host an Afterz.
+2. **Afterz list.** Afterz is not host-only. The list displays like the Ridez carpool rail: wide,
+   short cards with the host's avatar, the Afterz's neighborhood, and either "You" (the user's own
+   Afterz) or an "Ask for invite" action. Any user can tap a card; it opens that Afterz's own event
+   card (the event card, for the Afterz).
+3. **Ask for invite** is for people leaving the event and reaches everyone within the normal event
+   radius. It will be wired to the existing invite-request plumbing
+   (`POST /api/afterz/gatherings/:id/request`, PR #117).
+
+## Countdown box (t345u)
+
+The countdown never changes size (fixed 132px column, tabular numerals) and stays centered both
+ways. The venue mark sits directly left and the collective/host mark directly right, each centered
+in an equal side column on the same center line, so the padding is even on both sides. With one mark
+the countdown stays centered. Never stacked above or below.
+
 ## Standard small card (t327u/t329u)
 
-Every small card in an event rail (Mizzed, Gigz, Ridez carpools) is the site's existing standard
+Every small card in an event rail (Mizzed, Gigz) and Nearby restaurants is the site's existing standard
 small card: the Boardz zine small card (`BoardBrowseCard size="small"` → `PunkBoardCard` →
 `ZineSmallCard`) at `--card-small-width/height` (136×170), with its existing torn rim in the
 category accent. Do not build a new card; convert the data to a `BoardPost`
 (`client/src/components/events/EventRailCards.tsx`). Empty/new slots are a black square, dashed
-accent border, `+`. Tapping a card flips/grows it open over a blurred background.
+accent border, `+`. Tapping a card flips/grows it open over a blurred background. Nearby restaurants
+use the standard Placez small card (`PlaceDiscoveryCard size="small"`): artwork, else the directory
+logo, else the place-mark fallback. Ridez carpools use the wide-short card above.
 
 ## Feed = JOIN THE PREGAME (t327u)
 

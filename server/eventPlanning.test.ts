@@ -47,6 +47,8 @@ test("planning is occurrence-, owner-, participant- and host-scoped", async (t) 
     getEvent: (id: number) => (id === 10 ? dbEvent : null),
     getUserById: (id: number) =>
       db.prepare("SELECT * FROM users WHERE id=?").get(id),
+    getUserByUsername: (username: string) =>
+      username === "driver" ? { photoUrl: "/uploads/profile/driver.webp" } : undefined,
     getMemberBlockStatus: (a: number, b: number) => ({
       interactionBlocked: !!db
         .prepare(
@@ -149,6 +151,9 @@ test("planning is occurrence-, owner-, participant- and host-scoped", async (t) 
   const riderView = await (await request(second, 2)).json();
   assert.equal(riderView.rides[0].myRequest, 1);
   assert.equal(riderView.rides[0].remaining, 0);
+  // Carpool card fields (owner, Nov 20): avatar, neighborhood (area), seats left. No attendee list.
+  assert.equal(riderView.rides[0].driverPhotoUrl, "/uploads/profile/driver.webp");
+  assert.equal(riderView.rides[0].area, "North");
   assert.deepEqual(riderView.rides[0].requests, []);
   assert.equal((await request(ride, 2, "DELETE")).status, 403);
   assert.equal((await request(ride + "/requests/me", 2, "DELETE")).status, 200);

@@ -32,3 +32,21 @@ export function RideBrandMark({ brand, glyph = false }: { brand: RideBrand; glyp
     </svg>
   );
 }
+
+/** Directions map-app tiles (owner, Nov 20): brand color (third-party exception) and a simple
+ *  in-house glyph until official marks are added. Zaylist Mapz uses the day accent, not a brand color. */
+export type MapBrand = "google" | "apple" | "waze" | "citymapper";
+export const MAP_BRAND_COLOR: Record<MapBrand, string> = {
+  google: "var(--brand-google-maps)",
+  apple: "var(--brand-apple-maps)",
+  waze: "var(--brand-waze)",
+  citymapper: "var(--brand-citymapper)",
+};
+export function MapBrandMark({ brand }: { brand: MapBrand | "zaylist" }) {
+  const common = { className: "zride-mark zride-mark--glyph", viewBox: "0 0 24 24", "aria-hidden": true as const, fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  if (brand === "google") return <svg {...common}><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11Z" /><circle cx="12" cy="10" r="2.4" /></svg>;
+  if (brand === "apple") return <svg {...common}><path d="m4 11 16-7-7 16-2-7-7-2Z" /></svg>;
+  if (brand === "waze") return <svg {...common}><path d="M5 15.5a7.5 7.5 0 1 1 14 0c0 1.9-2 3-4 3H9c-2.2 0-4-1.1-4-3Z" /><circle cx="9.5" cy="11" r=".6" fill="currentColor" /><circle cx="14.5" cy="11" r=".6" fill="currentColor" /><path d="M9.5 14c1.3 1 3.7 1 5 0" /><circle cx="8" cy="20" r="1.3" /><circle cx="16" cy="20" r="1.3" /></svg>;
+  if (brand === "citymapper") return <svg {...common}><path d="M4 12h12" /><path d="m12 7 5 5-5 5" /><circle cx="19.5" cy="12" r="1" fill="currentColor" /></svg>;
+  return <svg {...common}><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4Z" /><path d="M9 4v14M15 6v14" /></svg>;
+}
