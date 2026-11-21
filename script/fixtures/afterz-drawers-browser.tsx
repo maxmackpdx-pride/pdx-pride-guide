@@ -68,7 +68,7 @@ const leadItems: InViewItem[] = [
 ];
 
 const nights = [
-  { id: "g1", title: "Snacks and quiet music", eventTitle: "Yes Coach", hostName: "Jordan Host", vibe: "chill", poster: "/posters/tucker-archive/yes-coach-apr-2026.jpg", role: "guest" },
+  { id: "g1", title: "Snacks and quiet music", eventTitle: "Yes Coach", eventId: 10, hostName: "Jordan Host", vibe: "chill", poster: "/posters/tucker-archive/yes-coach-apr-2026.jpg", role: "guest" },
   { id: "g2", title: "The party continues", eventTitle: "Late show", hostName: "Riley Host", vibe: "party", poster: null, role: "guest" },
 ];
 
@@ -77,6 +77,12 @@ const nights = [
 };
 
 const scene = new URLSearchParams(location.search).get("scene") || "outzide";
+
+const needRides = [
+  { id: "need-1", name: "Alex Rider", eventId: 10, eventTitle: "Yes Coach", neighborhood: "Alberta", direction: "arriving" as const, lat: 45.559, lng: -122.675 },
+  { id: "need-2", name: "Riley Guest", afterzId: "g1", afterzTitle: "Snacks and quiet music", neighborhood: "Division", direction: "arriving" as const, lat: 45.504, lng: -122.63 },
+  { id: "need-3", name: "Sam Nearby", neighborhood: "Pearl", direction: "departing" as const, lat: 45.53, lng: -122.68 },
+];
 
 function MapField() {
   return (
@@ -108,7 +114,7 @@ function Fixture() {
         <OutzideDrawer now={afternoon} leadItems={leadItems} events={events} featured={featured} startOpen />
       )}
       {scene === "afterz-open" && (
-        <AfterzDrawer now={inWindow} windowState={afterzWindowState(inWindow)} nights={nights} events={events} startOpen />
+        <AfterzDrawer now={inWindow} windowState={afterzWindowState(inWindow)} nights={nights} events={events} needRides={needRides} needLat={45.5231} needLng={-122.6765} startOpen />
       )}
       {scene === "afterz-off" && (
         <AfterzDrawer now={offHours} windowState={afterzWindowState(offHours)} nights={[]} events={events} startOpen startHostForm={false} />

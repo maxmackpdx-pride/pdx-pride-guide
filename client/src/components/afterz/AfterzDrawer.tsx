@@ -11,7 +11,10 @@ import { rsvpAfterzNo, rsvpAfterzYes } from "@/lib/afterzDrawerApi";
 import { AFTERZ_OFF_HOURS_COPY, afterzWindowState, type AfterzWindowState } from "@shared/afterzWindow";
 import { EMPTY_DRAWER_FILTERS, type DrawerFilterState } from "@shared/drawerFilters";
 import type { DrawerTopEvent } from "@shared/drawerTop";
+import type { RidezNeed } from "@shared/ridezNeeds";
 import "./AfterzDrawer.css";
+import "@/components/ridez/ridez.css";
+import RidezNeedList from "@/components/ridez/RidezNeedList";
 
 /**
  * Afterz map drawer. Shared DrawerTop stays in place. A wide Host an Afterz
@@ -26,6 +29,9 @@ export default function AfterzDrawer({
   events,
   startOpen,
   startHostForm,
+  needRides,
+  needLat,
+  needLng,
 }: {
   now?: number;
   nights?: AfterzNightView[];
@@ -33,6 +39,9 @@ export default function AfterzDrawer({
   events?: DrawerTopEvent[];
   startOpen?: boolean;
   startHostForm?: boolean;
+  needRides?: RidezNeed[];
+  needLat?: number | null;
+  needLng?: number | null;
 } = {}) {
   "use memo";
   const { user } = useAuth();
@@ -113,29 +122,30 @@ export default function AfterzDrawer({
             filters={filters}
             onFiltersChange={setFilters}
             now={at}
-          />
-          {!hostOpen && (
-            <button
-              type="button"
-              className="afterz-host-btn"
-              aria-expanded={false}
-              data-testid="afterz-host-button"
-              onClick={() => {
-                if (!user) { setAuth(true); return; }
-                setHostOpen(true);
-              }}
-            >
-              {open ? "Host an Afterz" : "Host an Afterz in advance"}
-            </button>
-          )}
-          {hostOpen && (
-            <AfterzHostForm
-              inAdvance={!open}
-              signedIn={!!user}
-              onRequireAuth={() => setAuth(true)}
-              onCancel={() => setHostOpen(false)}
-            />
-          )}
+            actions={!hostOpen ? (
+              <button
+                type="button"
+                className="obtn"
+                aria-expanded={false}
+                data-testid="afterz-host-button"
+                onClick={() => {
+                  if (!user) { setAuth(true); return; }
+                  setHostOpen(true);
+                }}
+              >
+                {open ? "Host an Afterz" : "Host an Afterz in advance"}
+              </button>
+            ) : null}
+            after={
+              <>
+                {hostOpen && (
+                  <AfterzHostForm
+                    inAdvance={!open}
+                    signedIn={!!user}
+                    onRequireAuth={() => setAuth(true)}
+                    onCancel={() => setHostOpen(false)}
+                  />
+                )}
           {nightsQuery.isError && nights == null && (
             <p className="afterz-drawer-status" role="alert">
               Afterz could not load.{" "}
@@ -162,6 +172,16 @@ export default function AfterzDrawer({
               onNo={id => void rsvp(id, false)}
             />
           ))}
+                <RidezNeedList
+                  needs={needRides}
+                  eventId={list[0]?.eventId}
+                  afterzId={list[0]?.id}
+                  lat={needLat}
+                  lng={needLng}
+                />
+              </>
+            }
+          />
         </div>
       </DockDrawer>
       {auth && !user && <AuthModal onClose={() => setAuth(false)} />}

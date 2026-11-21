@@ -1,20 +1,19 @@
-import { type CSSProperties } from "react";
-import { CardHeartButton } from "@/components/CardHeartButton";
-import RailShareButton from "@/components/home/RailShareButton";
 import DrawerMiniCard from "@/components/drawers/DrawerMiniCard";
-import EventFlyerArt from "@/components/events/EventFlyerArt";
-import { openOutzideCountdownItem } from "@/lib/outzideDrawerApi";
-import { outzPlaceHref } from "@shared/outz";
+import { centerThenOpenFromDrawer } from "@/lib/placezEventsDrawerApi";
 import { outzidePlaceArtUrl } from "@shared/outzideDrawer";
 import type { InViewItem } from "@shared/drawerFilters";
 import type { DrawerTopEvent } from "@shared/drawerTop";
 import "./OutzideDrawer.css";
 import "@/components/drawers/DrawerTop.css";
 
+type LocatedEvent = DrawerTopEvent & { lat?: number | null; lng?: number | null };
+
 /**
- * Full-bleed mini cards for whatever is in view on the Outzide map:
- * events use DrawerMiniCard, places use the same geometry. Places without
- * a photo use a known destination image or the standard DayMotif art.
+ * Full-bleed mini cards for whatever is in view on the Outzide map.
+ * Uses the shared DrawerMiniCard (148x96, beveled, share top-right, heart
+ * bottom-right). Tap centers the map, then opens the existing expanded card.
+ * Places without a photo use a known destination image or the motif fallback
+ * inside DrawerMiniCard.
  */
 export default function OutzideInViewRail({
   items,
@@ -22,12 +21,14 @@ export default function OutzideInViewRail({
   onToggleSave,
   onOpenEvent,
   onOpenPlace,
+  onRequireAuth,
 }: {
   items: InViewItem[];
   savedIds?: Set<number>;
   onToggleSave?: (kind: "event" | "place", id: number) => void;
   onOpenEvent?: (event: DrawerTopEvent) => void;
   onOpenPlace?: (id: number, name: string) => void;
+  onRequireAuth?: () => void;
 }) {
   "use memo";
   if (!items.length) {
@@ -42,66 +43,39 @@ export default function OutzideInViewRail({
               event={item.event as DrawerTopEvent}
               saved={savedIds?.has(item.event.id)}
               onToggleSave={onToggleSave ? id => onToggleSave("event", id) : undefined}
-              onOpen={event => onOpenEvent ? onOpenEvent(event) : openOutzideCountdownItem(event)}
+              onOpen={event => {
+                if (onOpenEvent) {
+                  onOpenEvent(event);
+                  return;
+                }
+                const located = event as LocatedEvent;
+                void centerThenOpenFromDrawer({ kind: "event", id: event.id, title: event.title, lat: located.lat, lng: located.lng });
+              }}
             />
           ) : (
-            <OutzidePlaceMini
-              id={item.place.id}
-              name={item.place.name || "Destination"}
-              imageUrl={item.place.imageUrl}
-              saved={savedIds?.has(item.place.id)}
-              onToggleSave={onToggleSave ? () => onToggleSave("place", item.place.id) : undefined}
-              onOpen={() => onOpenPlace?.(item.place.id, item.place.name || "Destination")}
+            <DrawerMiniCard
+              place={{
+                id: item.place.id,
+                name: item.place.name || "Destination",
+                type: item.place.type,
+                imageUrl: outzidePlaceArtUrl({ name: item.place.name, imageUrl: item.place.imageUrl }),
+                neighborhood: item.place.neighborhood,
+                isFollowing: item.place.isFollowing,
+                lat: item.place.lat,
+                lng: item.place.lng,
+              }}
+              onRequireAuth={onRequireAuth}
+              onOpenPlace={place => {
+                if (onOpenPlace) {
+                  onOpenPlace(place.id, place.name);
+                  return;
+                }
+                void centerThenOpenFromDrawer({ kind: "place", id: place.id, title: place.name, lat: place.lat, lng: place.lng });
+              }}
             />
           )}
         </div>
       ))}
     </div>
-  );
-}
-
-function OutzidePlaceMini({
-  id,
-  name,
-  imageUrl,
-  saved,
-  onToggleSave,
-  onOpen,
-}: {
-  id: number;
-  name: string;
-  imageUrl?: string | null;
-  saved?: boolean;
-  onToggleSave?: () => void;
-  onOpen?: () => void;
-}) {
-  "use memo";
-  const href = outzPlaceHref({ id: String(id), name });
-  const art = outzidePlaceArtUrl({ name, imageUrl });
-  return (
-    <article
-      data-card-size="small"
-      data-card-category="outzide"
-      data-testid="outzide-place-mini"
-      className="drawer-mini outz-mini-place pdx-glass-rebind"
-      style={{ "--c": "var(--room-outz, var(--neon-orange))" } as CSSProperties}
-    >
-      <div className="drawer-mini__art" aria-hidden="true">
-        {art ? <img src={art} alt="" /> : <EventFlyerArt src={null} day="SAT" showDay={false} title={name} venueName="" />}
-      </div>
-      <button type="button" className="drawer-mini__open" onClick={onOpen} aria-label={`Open ${name}`}>
-        <span className="drawer-mini__meta">
-          <span className="drawer-mini__title">{name}</span>
-        </span>
-      </button>
-      <RailShareButton href={href} title={name} />
-      {onToggleSave ? (
-        <CardHeartButton
-          active={!!saved}
-          aria-label={`${saved ? "Remove" : "Add"} ${name} ${saved ? "from" : "to"} my saved destinations`}
-          onClick={click => { click.stopPropagation(); onToggleSave(); }}
-        />
-      ) : null}
-    </article>
   );
 }

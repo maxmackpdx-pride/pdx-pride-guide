@@ -2,7 +2,16 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import NightOptions, { defaultOptions, type Options } from "@/components/afterz/NightOptions";
 import { hostAfterz } from "@/lib/afterzDrawerApi";
+import CircleToggle from "@/components/ridez/CircleToggle";
+import {
+  AFTERZ_AUDIENCES,
+  AFTERZ_BLAST_RADIUS_OPTIONS_M,
+  DEFAULT_EVENT_RADIUS_M,
+  formatBlastRadius,
+  type AfterzAudience,
+} from "@shared/afterzAudience";
 import "./AfterzDrawer.css";
+import "@/components/ridez/ridez.css";
 
 /** Host an Afterz in advance. Posts to the existing gatherings endpoint. */
 export default function AfterzHostForm({
@@ -28,6 +37,8 @@ export default function AfterzHostForm({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [audience, setAudience] = useState<AfterzAudience>("request");
+  const [blastRadiusM, setBlastRadiusM] = useState(DEFAULT_EVENT_RADIUS_M);
 
   return (
     <form
@@ -49,6 +60,8 @@ export default function AfterzHostForm({
             title: title.trim(),
             confirmed18: confirmed,
             requestId: key,
+            audience,
+            blastRadiusM,
           });
           void client.invalidateQueries({ queryKey: ["/api/afterz/gatherings"] });
           void client.invalidateQueries({ queryKey: ["/api/afterz/nights"] });
@@ -77,6 +90,31 @@ export default function AfterzHostForm({
         />
       </label>
       <NightOptions options={options} onChange={setOptions} onUploading={setUploading} />
+      <div className="afterz-host-form__audience">
+        <span className="afterz-host-form__audience-label" id="afterz-audience-label">Blast audience</span>
+        <CircleToggle
+          value={audience}
+          onChange={setAudience}
+          options={AFTERZ_AUDIENCES}
+          label="Blast audience"
+          accent="var(--yellow)"
+          testId="afterz-audience-toggle"
+        />
+      </div>
+      <label className="afterz-host-form__radius">
+        Blast radius
+        <select
+          value={blastRadiusM}
+          onChange={event => setBlastRadiusM(Number(event.target.value))}
+          data-testid="afterz-blast-radius"
+        >
+          {AFTERZ_BLAST_RADIUS_OPTIONS_M.map(meters => (
+            <option key={meters} value={meters}>
+              {formatBlastRadius(meters)}{meters === DEFAULT_EVENT_RADIUS_M ? " (event radius)" : ""}
+            </option>
+          ))}
+        </select>
+      </label>
       <p className="afterz-host-form__hint">Guest requests and chat close at 6 AM Pacific.</p>
       <label className="afterz-host-form__check">
         <input
@@ -87,7 +125,7 @@ export default function AfterzHostForm({
         />
         I am 18 or older.
       </label>
-      <button type="submit" disabled={busy || uploading || !confirmed || !title.trim()}>
+      <button type="submit" className="obtn" disabled={busy || uploading || !confirmed || !title.trim()}>
         {busy ? "Creating…" : inAdvance ? "Host an Afterz in advance" : "Host an Afterz"}
       </button>
       {onCancel && (

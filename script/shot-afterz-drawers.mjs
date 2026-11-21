@@ -46,10 +46,11 @@ await context.route("**/api/**", route => {
 });
 
 const shotsToTake = [
-  { scene: "outzide", file: "v2-outzide-drawer.png", wait: "[data-testid='outzide-drawer']" },
-  { scene: "afterz-open", file: "v2-afterz-drawer-in-window.png", wait: "[data-testid='afterz-drawer']" },
-  { scene: "afterz-off", file: "v2-afterz-off-hours-blur.png", wait: "[data-testid='afterz-map-blur']" },
-  { scene: "afterz-host", file: "v2-afterz-host-form.png", wait: "[data-testid='afterz-host-form']", clickHost: true },
+  { scene: "outzide", file: "v3-outzide-drawer.png", wait: "[data-testid='outzide-drawer']" },
+  { scene: "afterz-open", file: "v3-afterz-drawer-in-window.png", wait: "[data-testid='afterz-drawer']" },
+  { scene: "afterz-off", file: "v3-afterz-off-hours-blur.png", wait: "[data-testid='afterz-map-blur']" },
+  { scene: "afterz-host", file: "v3-afterz-host-form.png", wait: "[data-testid='afterz-host-form']", clickHost: true },
+  { scene: "afterz-open", file: "v3-afterz-needs-a-ride.png", wait: "[data-testid='ridez-need-list']", scrollNeeds: true },
 ];
 
 for (const shot of shotsToTake) {
@@ -69,8 +70,14 @@ for (const shot of shotsToTake) {
     const form = page.locator("[data-testid='afterz-host-form']");
     if (await form.count()) await form.evaluate(node => { node.closest(".dock-drawer__body")?.scrollTo(0, 0); });
   }
-  if (shot.scene === "afterz-open") {
+  if (shot.scene === "afterz-open" && !shot.scrollNeeds) {
     await page.locator(".dock-drawer__body").evaluate(node => { node.scrollTop = 0; });
+  }
+  if (shot.scrollNeeds) {
+    const list = page.locator("[data-testid='ridez-need-list']");
+    if (await list.count()) {
+      await list.evaluate(node => { node.scrollIntoView({ block: "start", inline: "nearest" }); });
+    }
   }
   await page.waitForTimeout(400);
   await page.screenshot({ path: path.join(shots, shot.file), fullPage: false });

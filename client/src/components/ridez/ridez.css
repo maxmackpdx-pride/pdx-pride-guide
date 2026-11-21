@@ -1,0 +1,112 @@
+/* Shared circle toggle + Ridez / Afterz action buttons. Tokens only. */
+.zrc {
+  display: inline-flex; flex: none; padding: 2px; gap: 2px; flex-wrap: wrap;
+  border: 1px solid color-mix(in srgb, var(--zrc-c, var(--neon-orange)) 55%, transparent);
+  border-radius: 999px; background: color-mix(in srgb, var(--z-oled, var(--z-black)) 55%, transparent);
+}
+.zrc-opt {
+  min-height: 24px; padding: 0 8px; border: 0; border-radius: 999px; background: transparent;
+  font: 700 9px var(--font-mono); letter-spacing: .12em; color: color-mix(in srgb, var(--text-hi) 72%, transparent);
+  cursor: pointer; touch-action: manipulation; transition: background-color .18s ease, color .18s ease;
+}
+.zrc-opt.is-on { background: var(--zrc-c, var(--neon-orange)); color: var(--z-oled, var(--z-black)); }
+.zrc-opt:focus-visible { outline: 2px solid var(--zrc-c, var(--neon-orange)); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .zrc-opt { transition: none; } }
+
+.zrc-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.zrc-head > .zas-sec { flex: 1 1 auto; min-width: 0; }
+
+.zridez-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0 2px; }
+.zridez-acts .obtn { --obtn-c: var(--neon-orange); justify-content: center; }
+.zridez-empty { margin: 2px 0; font: 600 10px var(--font-mono); letter-spacing: .1em; color: color-mix(in srgb, var(--text-hi) 62%, transparent); }
+
+/* Match the expanded event card .obtn recipe (ActionSheetCard) so drawers
+   can use the same pill before #115 lands that stylesheet on this branch. */
+.afterz-drawer .obtn,
+.ridez-drawer .obtn,
+.afterz-host-form .obtn {
+  --obtn-c: var(--yellow);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; min-height: 44px; min-width: 44px; padding: 0 16px; box-sizing: border-box;
+  border: 1.5px solid var(--obtn-c); border-radius: 22px;
+  --button-c: var(--obtn-c);
+  --neon-bloom: 0 0 18px -4px color-mix(in srgb, var(--button-c) var(--bloom-alpha, 8%), transparent);
+  --btn-glow-bg: radial-gradient(130% 140% at 50% -10%, color-mix(in srgb, var(--button-c) 16%, transparent), transparent 60%), var(--z-oled, var(--z-black));
+  --btn-glow-shadow: 0 2px 0 color-mix(in srgb, var(--button-c) 40%, var(--z-oled, var(--z-black))),
+    inset 0 1px 0 color-mix(in srgb, var(--text-hi) 28%, transparent), inset 0 -8px 14px -8px color-mix(in srgb, var(--text-hi) 6%, transparent),
+    inset 0 10px 16px -12px color-mix(in srgb, var(--z-oled, var(--z-black)) 90%, transparent), var(--neon-bloom);
+  background: var(--btn-glow-bg);
+  box-shadow: var(--btn-glow-shadow);
+  color: var(--text-hi); text-decoration: none; cursor: pointer;
+  font: 800 15px/1 var(--font-display); letter-spacing: .05em; text-transform: uppercase; white-space: nowrap;
+}
+.ridez-drawer .obtn { --obtn-c: var(--neon-orange); }
+.afterz-drawer .obtn:disabled,
+.ridez-drawer .obtn:disabled,
+.afterz-host-form .obtn:disabled { opacity: .6; cursor: progress; }
+.afterz-drawer .obtn:hover,
+.ridez-drawer .obtn:hover,
+.afterz-host-form .obtn:hover { filter: brightness(1.12); }
+.afterz-drawer .obtn:focus-visible,
+.ridez-drawer .obtn:focus-visible,
+.afterz-host-form .obtn:focus-visible { outline: 2px solid var(--obtn-c); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .afterz-drawer .obtn:hover, .ridez-drawer .obtn:hover, .afterz-host-form .obtn:hover { filter: none; }
+}
+
+.afterz-host-form__audience {
+  display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px;
+}
+.afterz-host-form__audience-label,
+.afterz-host-form__radius label { font: 600 13px/1.3 var(--font-body); color: var(--text-body); }
+.afterz-host-form__radius select {
+  width: 100%; min-height: 44px; margin-top: 4px; padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--yellow) 40%, transparent);
+  border-radius: 12px; background: var(--z-black); color: var(--text-hi);
+  font: 600 14px/1 var(--font-body);
+}
+
+/* Clear divider between the Ridez buttons / circle toggle and the list. */
+.zridez-rule {
+  height: 0; margin: 10px 0 12px;
+  border: 0; border-top: 1px solid color-mix(in srgb, var(--text-hi) 22%, transparent);
+}
+
+.zridez-needs { margin: 8px 0 4px; }
+.zridez-needs__title {
+  margin: 0; font: 800 13px/1 var(--font-display); letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text-hi);
+}
+.zridez-needs__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.zridez-need {
+  --need-c: var(--neon-orange);
+  position: relative; min-height: 64px; padding: 10px 12px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--need-c) 35%, transparent);
+  background: color-mix(in srgb, var(--z-black) 88%, var(--need-c));
+  box-shadow: 0 0 16px color-mix(in srgb, var(--need-c) 18%, transparent);
+}
+.zridez-need.is-event { --need-c: var(--neon-orange); }
+.zridez-need.is-afterz { --need-c: var(--yellow); }
+.zridez-need.is-event,
+.zridez-need.is-afterz {
+  animation: zridez-need-bloom 1.1s ease-in-out infinite;
+}
+.zridez-need__name { margin: 0; font: 800 16px/1.1 var(--font-display); text-transform: uppercase; color: var(--text-hi); }
+.zridez-need__meta { margin: 4px 0 0; font: 500 12px/1.3 var(--font-body); color: var(--text-body); }
+
+@keyframes zridez-need-bloom {
+  0%, 100% { box-shadow: 0 0 10px color-mix(in srgb, var(--need-c) 22%, transparent); }
+  50% { box-shadow: 0 0 28px color-mix(in srgb, var(--need-c) 48%, transparent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zridez-need.is-event, .zridez-need.is-afterz { animation: none; }
+}
+html.calm-mode .zridez-need.is-event,
+html.calm-mode .zridez-need.is-afterz,
+html[data-calm="true"] .zridez-need.is-event,
+html[data-calm="true"] .zridez-need.is-afterz,
+[data-motion-disabled="true"] .zridez-need.is-event,
+[data-motion-disabled="true"] .zridez-need.is-afterz {
+  animation: none;
+}

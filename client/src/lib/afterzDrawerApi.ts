@@ -15,6 +15,8 @@ export type HostAfterzInput = {
   glow?: boolean;
   sexPositive?: boolean;
   nudityOk?: boolean;
+  audience?: "open" | "request" | "friends" | "fof";
+  blastRadiusM?: number;
 };
 
 /** Agent-callable Afterz drawer actions. These hit the live gathering endpoints. */
@@ -35,8 +37,12 @@ export async function rsvpAfterzNo(id: string): Promise<unknown> {
   return apiRequest("POST", `${gatherings}/${encodeURIComponent(id)}/leave`).then(r => r.json());
 }
 
+export async function blastAfterz(id: string, blastRadiusM?: number): Promise<{ ok: true; audience: string; blastRadiusM: number }> {
+  return apiRequest("POST", `${gatherings}/${encodeURIComponent(id)}/blast`, blastRadiusM != null ? { blastRadiusM } : {}).then(r => r.json());
+}
+
 export function afterzDrawerApi() {
-  return { fetchAfterzWindow, hostAfterz, rsvpAfterzYes, rsvpAfterzNo };
+  return { fetchAfterzWindow, hostAfterz, rsvpAfterzYes, rsvpAfterzNo, blastAfterz };
 }
 
 export { gatherings as AFTERZ_GATHERINGS_PATH };

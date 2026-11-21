@@ -5,6 +5,7 @@ import "./AfterzDrawer.css";
 export type AfterzNightView = {
   id: string;
   title: string;
+  eventId?: number | null;
   eventTitle?: string | null;
   hostName: string;
   vibe: string;

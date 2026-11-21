@@ -3,6 +3,14 @@ import type Database from "better-sqlite3";
 import type { Express, RequestHandler } from "express";
 import { moderateFields, moderationMessage } from "@shared/contentModeration";
 import { afterzClosesAt } from "@shared/afterzWindow";
+import {
+  DEFAULT_EVENT_RADIUS_M,
+  afterzAudienceAllows,
+  afterzRequestAutoAccepts,
+  parseAfterzAudience,
+  parseAfterzRadiusM,
+  type AfterzAudience,
+} from "@shared/afterzAudience";
 
 import { afterzNights, type NightCatalog } from "./afterzNights";
 
@@ -15,9 +23,36 @@ type Gathering = {
   hostName: string;
   title: string;
   closesAt: number;
+  audience: AfterzAudience;
+  blastRadiusM: number | null;
 };
 const requestKey = (value: unknown): value is string =>
   typeof value === "string" && /^[a-zA-Z0-9-]{16,80}$/.test(value);
+
+function neighborIds(db: Database.Database, user: number): Set<number> {
+  const rows = db
+    .prepare(
+      `SELECT following_user_id AS id FROM follows WHERE follower_user_id=?
+       UNION
+       SELECT follower_user_id AS id FROM follows WHERE following_user_id=?`,
+    )
+    .all(user, user) as { id: number }[];
+  return new Set(rows.map(row => row.id));
+}
+
+function relationToHost(db: Database.Database, hostId: number, who: number): "self" | "friend" | "fof" | "everybody" {
+  if (who === hostId) return "self";
+  try {
+    const friends = neighborIds(db, hostId);
+    if (friends.has(who)) return "friend";
+    for (const friend of friends) {
+      if (neighborIds(db, friend).has(who)) return "fof";
+    }
+  } catch {
+    // follows table is absent in some fixtures; treat as everybody.
+  }
+  return "everybody";
+}
 
 export function registerAfterzInvites(
   app: Express,
@@ -49,6 +84,8 @@ export function registerAfterzInvites(
     );
     CREATE INDEX IF NOT EXISTS idx_afterz_chat_history ON afterz_chat(gathering_id,id);
   `);
+  try { db.exec("ALTER TABLE afterz_gatherings ADD COLUMN audience TEXT NOT NULL DEFAULT 'request'"); } catch { /* already present */ }
+  try { db.exec("ALTER TABLE afterz_gatherings ADD COLUMN blast_radius_m INTEGER"); } catch { /* already present */ }
   const nights = afterzNights(app, db, auth, now, catalog);
   // No dependency on the connection's foreign_keys setting for room erasure.
   const erase = db.transaction((id: string) => {
@@ -74,6 +111,7 @@ export function registerAfterzInvites(
   expiry.unref();
   const route = "/api/afterz/gatherings";
   const projection = `SELECT g.id,g.host_id AS hostId,g.title,g.closes_at AS closesAt,
+    COALESCE(g.audience,'request') AS audience,g.blast_radius_m AS blastRadiusM,
     COALESCE(NULLIF(u.display_name,''),u.username) AS hostName FROM afterz_gatherings g JOIN users u ON u.id=g.host_id`;
   const room = (id: string) =>
     db
@@ -183,15 +221,23 @@ export function registerAfterzInvites(
       }
       closesAt = times.closesAt;
     }
+    const audience = parseAfterzAudience(req.body?.audience) ?? "request";
+    const blastRadiusM = parseAfterzRadiusM(req.body?.blastRadiusM);
+    if (req.body?.audience != null && parseAfterzAudience(req.body.audience) == null) {
+      return res.status(400).json({ error: "Choose Everybody (open or request), Friends, or Friends of friends." });
+    }
+    if (req.body?.blastRadiusM != null && blastRadiusM == null) {
+      return res.status(400).json({ error: "Choose a blast radius from the listed event-radius sizes." });
+    }
     const id = randomUUID();
     db.transaction(() => {
       db.prepare(
-        "INSERT INTO afterz_gatherings(id,host_id,title,closes_at,request_key) VALUES(?,?,?,?,?)",
-      ).run(id, userId, title, closesAt, key);
+        "INSERT INTO afterz_gatherings(id,host_id,title,closes_at,request_key,audience,blast_radius_m) VALUES(?,?,?,?,?,?,?)",
+      ).run(id, userId, title, closesAt, key, audience, blastRadiusM ?? DEFAULT_EVENT_RADIUS_M);
       if (eventId != null) nights.save(id, eventId, date, req.body);
       nights.confirm(userId);
     })();
-    res.status(201).json({ id });
+    res.status(201).json({ id, audience, blastRadiusM: blastRadiusM ?? DEFAULT_EVENT_RADIUS_M });
   });
   const find: RequestHandler = (req, res, next) => {
     const g = room(String(req.params.id));
@@ -250,6 +296,8 @@ export function registerAfterzInvites(
       title: g.title,
       hostName: g.hostName,
       closesAt: g.closesAt,
+      audience: g.audience ?? "request",
+      blastRadiusM: g.blastRadiusM ?? null,
       role,
       requests,
       ...(who && nights.adult(who) && nights.get(g.id)
@@ -278,12 +326,30 @@ export function registerAfterzInvites(
       return res
         .status(403)
         .json({ error: "The host has closed this request." });
+    const audience = g.audience ?? "request";
+    if (!afterzAudienceAllows(audience, relationToHost(db, g.hostId, who))) {
+      return res.status(403).json({ error: "This Afterz is only open to the host's circle." });
+    }
     nights.confirm(who);
-    const state = nights.full(g.id) ? "waitlisted" : "pending";
+    const state = nights.full(g.id)
+      ? "waitlisted"
+      : afterzRequestAutoAccepts(audience)
+        ? "accepted"
+        : "pending";
     db.prepare(
       "INSERT OR IGNORE INTO afterz_guests(gathering_id,user_id,status) VALUES(?,?,?)",
     ).run(g.id, who, state);
     res.json({ status: previous ?? state });
+  });
+  app.post(route + "/:id/blast", auth, find, host, (req, res) => {
+    const g = res.locals.room as Gathering;
+    const radius = parseAfterzRadiusM(req.body?.blastRadiusM ?? g.blastRadiusM);
+    if (req.body?.blastRadiusM != null && radius == null) {
+      return res.status(400).json({ error: "Choose a blast radius from the listed event-radius sizes." });
+    }
+    const blastRadiusM = radius ?? DEFAULT_EVENT_RADIUS_M;
+    db.prepare("UPDATE afterz_gatherings SET blast_radius_m=? WHERE id=?").run(blastRadiusM, g.id);
+    res.json({ ok: true, audience: g.audience ?? "request", blastRadiusM });
   });
   app.post(route + "/:id/second", auth, find, (_req, res) => {
     const { room: g, actor } = res.locals;
