@@ -1,4 +1,8 @@
-import { lazy, Suspense, useState } from "react";
+import { useAdultChatAck } from "@/components/AdultContentGate";
+import { useInboxSheet } from "@/context/InboxSheetContext";
+import { useMyGroupChats } from "@/hooks/useMyGroupChats";
+import { useEventChatHistory } from "@/hooks/useEventChatHistory";
+import { lazy, Suspense, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { pacificCalendarDate } from "@shared/missedConnections";
@@ -44,12 +48,16 @@ type Planning = {
   rides: Ride[] | null;
 };
 
+type PlanningSection = "all" | "feed" | "gigs" | "rides";
+
 export default function EventPlanning({
   eventId,
   occurrenceDate,
+  section = "all",
 }: {
   eventId: number;
   occurrenceDate: string;
+  section?: PlanningSection;
 }) {
   const date = /^\d{4}-\d{2}-\d{2}$/.test(occurrenceDate)
     ? occurrenceDate
@@ -60,6 +68,7 @@ export default function EventPlanning({
     <PlanningPanel
       key={JSON.stringify([eventId, date, user?.id])}
       eventId={eventId}
+      section={section}
       date={date}
       userId={user?.id}
     />
@@ -71,14 +80,37 @@ function MemberLink({ username }: { username: string }) {
   return href ? <Link href={href}>{username}</Link> : <span>{username}</span>;
 }
 
+function Pregame({ eventId }: { eventId: number }) {
+  const { user } = useAuth();
+  const { openSheet } = useInboxSheet();
+  const rooms = useMyGroupChats();
+  const room = user && !rooms.isError ? rooms.data?.find(item => item.kind === "EVENT" && Number(item.id) === eventId) : undefined;
+  const preview = useRef<HTMLDivElement>(null);
+  const adult = useAdultChatAck();
+  const showPreview = room?.state === "OPEN" && adult;
+  const history = useEventChatHistory<{ chatOpen: boolean; messages: { id: number; body: string; displayName?: string; username?: string; isAnonymous?: boolean; isMine?: boolean }[] }>(showPreview ? eventId : null, preview);
+  const messages = showPreview && history.data?.chatOpen ? history.data.messages.slice(-3) : [];
+  return <section className="event-pregame" aria-label="The Pregame">
+    <header><h3>The Pregame</h3><small>Group chat · Inbox</small></header>
+    {room ? <button type="button" onClick={event => openSheet({ view: "chats", account: "personal", group: room }, event.currentTarget)}>Open the Pregame</button> :
+      rooms.isError ? <button type="button" onClick={() => void rooms.refetch()}>Reload the Pregame</button> :
+      <p>{user && rooms.isPending ? "Checking your room…" : "The group chat is for people going to this event."}</p>}
+    {messages.length > 0 && <div ref={preview} className="event-pregame__messages" aria-label="Recent messages">
+      {messages.map(message => <p key={message.id} data-mine={message.isMine}><strong>{message.isMine ? "You" : message.isAnonymous ? "Anonymous" : message.displayName || message.username || "Member"}</strong>{message.body}</p>)}
+    </div>}
+  </section>;
+}
+
 function PlanningPanel({
   eventId,
   date,
   userId,
+  section,
 }: {
   eventId: number;
   date: string;
   userId?: number;
+  section: PlanningSection;
 }) {
   const base = `/api/events/${eventId}/occurrences/${date}/planning`;
   const key = [base, userId ?? null];
@@ -97,11 +129,9 @@ function PlanningPanel({
   const [tab, setTab] = useState(() => {
     const action = new URLSearchParams(location.search).get("night");
     if (action === "rides" || action === "safety") return "rides";
-    try {
-      return sessionStorage.getItem(memoryKey) || "checkin";
-    } catch {
-      return "checkin";
-    }
+    let saved: string | null = null;
+    try { saved = sessionStorage.getItem(memoryKey); } catch { /* storage unavailable */ }
+    return saved || "checkin";
   });
   const choose = (value: string) => {
     setTab(value);
@@ -279,6 +309,7 @@ function PlanningPanel({
   );
   return (
     <section className="event-planning" aria-label={`Event plans for ${date}`}>
+      {(section === "all" || section === "gigs") && <>
       <h3>
         Gigz <span>({gigs.length})</span>
       </h3>
@@ -311,6 +342,9 @@ function PlanningPanel({
           />
         </Suspense>
       )}
+      </>}
+      {(section === "all" || section === "feed") && <>
+      <Pregame eventId={eventId}/>
       <button
         type="button"
         className="at-event-launch"
@@ -319,8 +353,9 @@ function PlanningPanel({
         At the event
       </button>
       <BuddyEvent id={eventId} venue={query.data.venue}/>
-      {!atEvent && ridesPanel}
-      {atEvent && (
+      </>}
+      {(section === "all" || section === "rides") && !atEvent && ridesPanel}
+      {(section === "all" || section === "feed") && atEvent && (
         <AtEventDialog
           poster={query.data.poster}
           title={title}

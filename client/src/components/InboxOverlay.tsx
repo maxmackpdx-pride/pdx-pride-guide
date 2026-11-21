@@ -49,6 +49,8 @@ type InboxOverlayProps = {
   initialQueueBucket?: string;
   initialQueueItem?: string;
   initialThreadId?: string | null;
+  initialGroup?: InboxGroupChatTarget;
+  cardPortal?: HTMLElement | null;
 };
 
 function InboxPanelHeader({ onClose, onRefresh, refreshing = false, guest = false }: { onClose: () => void; onRefresh?: () => void; refreshing?: boolean; guest?: boolean }) {
@@ -93,7 +95,7 @@ type HousingThreadGate = {
   canNudge: boolean;
 };
 
-export default function InboxOverlay({ open, trigger, onClose, initialView, initialAccount, initialThreadId, initialQueueFolder, initialQueueBucket, initialQueueItem }: InboxOverlayProps) {
+export default function InboxOverlay({ open, trigger, onClose, initialView, initialAccount, initialThreadId, initialGroup, cardPortal, initialQueueFolder, initialQueueBucket, initialQueueItem }: InboxOverlayProps) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -243,13 +245,21 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
     if (view !== "inbox") setActiveId(null);
   }, [view]);
 
+  const arrivedAtGroup = useRef<InboxGroupChatTarget | null>(null);
+  useEffect(() => {
+    if (!open || !initialGroup) { arrivedAtGroup.current = null; return; }
+    if (view !== "chats" || account !== "personal" || arrivedAtGroup.current === initialGroup) return;
+    arrivedAtGroup.current = initialGroup;
+    setActiveGroup(initialGroup);
+  }, [open, initialGroup, view, account]);
+
   if (!open) return null;
 
   // Local preview shares the same frame and keeps real messages behind sign-in.
   if (!user) {
     if (!isLocalDemo()) return null;
     return <>
-      <HeaderDropdown open={open} onOpenChange={next => { if (!next) onClose(); }} trigger={trigger} triggerSelector="[data-inbox-open-trigger]" id="inbox-panel" title="Inbox" description="Your messages and posts." className="inbox-overlay inbox-dropdown">
+      <HeaderDropdown portalContainer={cardPortal} open={open} onOpenChange={next => { if (!next) onClose(); }} trigger={trigger} triggerSelector="[data-inbox-open-trigger]" id="inbox-panel" title="Inbox" description="Your messages and posts." className="inbox-overlay inbox-dropdown">
         <Tabs.Root value={view} onValueChange={value => setView(value as View)} className="inbox-dropdown__reader">
           <InboxPanelHeader onClose={onClose} guest />
           <Tabs.Content value={view} className="hub-reader__state">
@@ -325,7 +335,7 @@ export default function InboxOverlay({ open, trigger, onClose, initialView, init
 
   return (
     <>
-      <HeaderDropdown open={open} onOpenChange={next => { if (!next) onClose(); }} trigger={trigger} triggerSelector="[data-inbox-open-trigger]" id="inbox-panel" title="Inbox" description={isAdmin ? "Your messages, posts and staff tools." : "Your messages and posts."} className="inbox-overlay inbox-dropdown" actionContext={account === "owner" ? "owner" : account === "admin" ? "admin" : "hub"}>
+      <HeaderDropdown portalContainer={cardPortal} open={open} onOpenChange={next => { if (!next) onClose(); }} trigger={trigger} triggerSelector="[data-inbox-open-trigger]" id="inbox-panel" title="Inbox" description={isAdmin ? "Your messages, posts and staff tools." : "Your messages and posts."} className="inbox-overlay inbox-dropdown" actionContext={account === "owner" ? "owner" : account === "admin" ? "admin" : "hub"}>
         <Tabs.Root value={view} onValueChange={value => setView(value as View)} className="inbox-dropdown__reader">
         <InboxPanelHeader onClose={onClose} refreshing={inboxRefreshing > 0} onRefresh={() => {
           for (const key of ["/api/messages/inbox", "/api/messages/sent", "/api/messages/unread-count", "/api/admin/pending-count"]) void queryClient.invalidateQueries({ queryKey: [key] });

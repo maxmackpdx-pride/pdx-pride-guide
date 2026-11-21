@@ -49,6 +49,7 @@ export function useModalA11y(opts: {
     });
 
     const onKeyDown = (e: KeyboardEvent) => {
+      if (node?.closest("[inert]") || document.activeElement?.closest("dialog[open]")) return;
       if (node && modalStack.at(-1) !== node) return;
       if (e.key === "Escape") {
         e.preventDefault();

@@ -7,7 +7,10 @@ import { isLocalDemo } from "@/lib/localDemo";
 const InboxOverlay = lazy(() => import("@/components/InboxOverlay"));
 const AuthModal = lazy(() => import("@/components/AuthModal"));
 
+import type { InboxGroupChatTarget } from "@/components/inbox/InboxGroupChat";
+
 export type InboxSheetOpenOpts = {
+  group?: InboxGroupChatTarget;
   view?: "inbox" | "chats" | "posts" | "stats";
   account?: "personal" | "admin" | "owner";
   threadId?: string | null;
@@ -63,12 +66,14 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
   const arrivalRef = useRef<InboxSheetOpenOpts | null>(null);
   const trigger = useRef<HTMLElement | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
+  const [cardPortal, setCardPortal] = useState<HTMLElement | null>(null);
   const guestRedirectRef = useRef(false);
   const lastPathRef = useRef<string | null>(null);
 
   const openSheet = useCallback((opts?: InboxSheetOpenOpts, element?: HTMLElement) => {
     const focus = element ?? document.activeElement;
     trigger.current = focus instanceof HTMLElement && focus !== document.body ? focus : null;
+    setCardPortal(focus instanceof HTMLElement ? focus.closest<HTMLElement>(".zay-card-stage") : null);
     dismissMobileNavOverlays("inbox");
     setOverlayActivated(true);
     setOpenOpts(opts ?? null);
@@ -155,6 +160,8 @@ export function InboxSheetProvider({ children }: { children: ReactNode }) {
               initialQueueBucket={openOpts?.queueBucket}
               initialQueueItem={openOpts?.queueItem}
               initialThreadId={openOpts?.threadId}
+              initialGroup={openOpts?.group}
+              cardPortal={cardPortal}
             />
           </Suspense>
         </div>

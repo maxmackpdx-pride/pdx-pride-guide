@@ -1,13 +1,23 @@
-import { useState } from "react";
+import { useSyncExternalStore } from "react";
 import "./AdultContentGate.css";
 
 const ACK_KEY = "pdx-chat-18-ack-v1";
 
+let sessionOnly = false;
+const ackEvent = "zaylist:adult-chat-ack";
+function subscribe(listener: () => void) {
+  window.addEventListener(ackEvent, listener);
+  window.addEventListener("storage", listener);
+  return () => { window.removeEventListener(ackEvent, listener); window.removeEventListener("storage", listener); };
+}
+export function useAdultChatAck() {
+  return useSyncExternalStore(subscribe, hasAdultChatAck, () => false);
+}
 export function hasAdultChatAck(): boolean {
   try {
-    return localStorage.getItem(ACK_KEY) === "1";
+    return sessionOnly || localStorage.getItem(ACK_KEY) === "1";
   } catch {
-    return false;
+    return sessionOnly;
   }
 }
 
@@ -23,7 +33,7 @@ export default function AdultContentGate({
   /** Optional: hides the "Not now" button when absent (inline panels). */
   onDecline?: () => void;
 }) {
-  const [acked, setAcked] = useState(hasAdultChatAck);
+  const acked = useAdultChatAck();
 
   if (acked) return <>{children}</>;
 
@@ -31,9 +41,9 @@ export default function AdultContentGate({
     try {
       localStorage.setItem(ACK_KEY, "1");
     } catch {
-      /* still allow through this session */
+      sessionOnly = true;
     }
-    setAcked(true);
+    window.dispatchEvent(new Event(ackEvent));
   };
 
   return (

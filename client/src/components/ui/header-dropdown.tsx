@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/scrollLock";
 import "@/components/hub/hub-panel.css";
 
 /** The shared header dropdown frame for Hub and Inbox. */
-export default function HeaderDropdown({ open, onOpenChange, trigger, triggerSelector, id, title, description, className = "", actionContext, children }: {
+export default function HeaderDropdown({ open, onOpenChange, trigger, triggerSelector, id, title, description, className = "", actionContext, portalContainer, children }: {
   open: boolean;
+  portalContainer?: HTMLElement | null;
   onOpenChange: (open: boolean) => void;
   trigger: RefObject<HTMLElement | null>;
   triggerSelector: string;
@@ -53,11 +54,18 @@ export default function HeaderDropdown({ open, onOpenChange, trigger, triggerSel
     window.addEventListener("resize", position);
     return () => window.removeEventListener("resize", position);
   }, [open]);
+  useLayoutEffect(() => {
+    if (!open || !portalContainer) return;
+    const behind = trigger.current?.closest<HTMLElement>('[role="dialog"]');
+    if (!behind || behind.inert) return;
+    behind.inert = true;
+    return () => { behind.inert = false; };
+  }, [open, portalContainer, trigger]);
   return <Dialog.Root open={open} onOpenChange={onOpenChange} modal={false}>
-    <Dialog.Portal forceMount>
+    <Dialog.Portal forceMount container={portalContainer}>
       <Dialog.Content id={id} forceMount className={`hub-panel pdx-glass-rebind ${className}`} data-action-context={actionContext} style={{ top, "--hub-top": `${top}px` } as CSSProperties} aria-describedby={`${id}-description`}
         onEscapeKeyDown={event => {
-          if (Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]')).some(dialog => dialog.id !== id && dialog.getClientRects().length)) event.preventDefault();
+          if (Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]')).some(dialog => dialog.id !== id && !dialog.closest("[inert]") && dialog.getClientRects().length)) event.preventDefault();
         }}
         onCloseAutoFocus={event => { event.preventDefault(); if (shouldReturnFocus.current) returnFocus(); }}
         onInteractOutside={event => {

@@ -34,3 +34,13 @@
   padding-inline: 0.65rem;
   text-decoration: underline;
 }
+
+.event-pregame { display: grid; gap: 14px; padding-block: 8px; }
+.event-pregame header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.event-pregame header h3 { font: 800 17px var(--font-display); text-transform: uppercase; color: var(--ac, var(--neon-red)); }
+.event-pregame small { font: 600 10px var(--font-mono); color: var(--text-mid); text-transform: uppercase; }
+.event-planning .event-pregame > button { justify-self: center; border: 1px solid var(--ac, var(--neon-red)); border-radius: 24px; padding-inline: 16px; background: var(--z-black); color: var(--text-hi); font: 800 16px var(--font-display); text-transform: uppercase; text-decoration: none; }
+.event-pregame__messages { display: grid; gap: 6px; }
+.event-pregame__messages p { justify-self: start; max-width: 85%; padding: 7px 10px; border-radius: 9px; background: var(--ink-750); overflow-wrap: anywhere; }
+.event-pregame__messages strong { display: block; font-size: 11px; }
+.event-pregame__messages [data-mine="true"] { justify-self: end; background: var(--ac, var(--neon-red)); color: var(--z-black); }

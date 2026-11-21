@@ -1,7 +1,6 @@
+import { useMyGroupChats, type GroupChatRow } from "@/hooks/useMyGroupChats";
 import {visibleThreads} from "../visibleThreads";
-import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState, type CSSProperties } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   formatClosesIn,
   formatOpensAtWall,
@@ -29,18 +28,7 @@ function tagFor(cat: string) {
   return inboxRoomTag(cat, CAT_TAG[cat] || { label: "MESSAGE", color: C.limeSoft });
 }
 
-export type GroupChatRow = {
-  kind: "EVENT" | "BEACH" | "OUTZ" | "COMMUNITY";
-  id: number | string;
-  title: string;
-  state: "BEFORE" | "OPEN";
-  opensAt: string | null;
-  closesAt: string | null;
-  unreadCount?: number;
-  muted?: boolean;
-  href: string;
-  calendarDate?: string;
-};
+export type { GroupChatRow } from "@/hooks/useMyGroupChats";
 
 function groupSub(row: GroupChatRow, now: number): string {
   if (row.kind === 'COMMUNITY') return `${row.muted ? 'Muted · ' : ''}${row.unreadCount || 0} unread`;
@@ -67,17 +55,10 @@ const openRow = (fn: () => void) => ({
   });
 
 export function GroupChatsView({onOpen}:{onOpen:(row:GroupChatRow)=>void}) {
-  const {user}=useAuth();
-
   const [now, setNow] = useState(() => Date.now());
 
   // Tick while any group chat is waiting to open so the countdown stays fun.
-  const { data: groupChats = [],isPending:groupsLoading,isError:groupsFailed,refetch:retryGroups } = useQuery<GroupChatRow[]>({
-    queryKey: ["/api/chats/mine",user?.id],
-    enabled:!!user,
-    queryFn: () => fetch("/api/chats/mine", { credentials: "include" }).then(r=>{if(!r.ok)throw Error("Could not load group chats");return r.json();}),
-    refetchInterval: 30_000,
-  });
+  const { data: groupChats = [], isPending: groupsLoading, isError: groupsFailed, refetch: retryGroups } = useMyGroupChats();
 
   const hasPreOpen = groupChats.some((g) => g.state === "BEFORE" && g.opensAt);
   useEffect(() => {
