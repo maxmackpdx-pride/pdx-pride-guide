@@ -18,6 +18,9 @@ function consumeOrigin() {
   const origin = pendingOrigin;
   return origin && origin.element.isConnected && Date.now() - origin.at < 2000 ? origin : null;
 }
+export function eventCardOrigin() {
+  return consumeOrigin()?.element.getBoundingClientRect() ?? null;
+}
 /** Reusable visual API: categories provide their own face and native actions. */
 export function CardShell({ size, category, children, className = '', ref, ...props }: HTMLAttributes<HTMLDivElement> & {
   size: CardSize; category: string; children: ReactNode; ref?: Ref<HTMLDivElement>;
@@ -29,7 +32,8 @@ export function CardShell({ size, category, children, className = '', ref, ...pr
 /** Details live in the clicked card's actual layout slot, never on document.body.
  * A direct URL with no source card renders at the caller's ordinary document position. */
 export function CardDetails({ children, onClose, mobileViewport = false, navigationWidth = false }: { children: ReactNode; onClose?: () => void; mobileViewport?: boolean; navigationWidth?: boolean }) {
-  const close = useRef(onClose); close.current=onClose;
+  const close = useRef(onClose);
+  useLayoutEffect(() => { close.current = onClose; }, [onClose]);
   const identity=useRef(Symbol("card"));
   useLayoutEffect(()=>{
     const receive=(event:Event)=>{if((event as CustomEvent).detail!==identity.current)close.current?.();};

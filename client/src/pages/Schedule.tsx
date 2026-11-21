@@ -16,7 +16,7 @@ import ZLineIcon from "@/components/ZLineIcon";
    being loaded globally via client/src/index.css.
    ============================================================ */
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import {
@@ -139,7 +139,7 @@ interface SelRect {
   h: number;
 }
 
-const S = (o: React.CSSProperties) => o; // literal-preserving style helper
+const S = (o: React.CSSProperties & { "--sch-day"?: string }) => o; // literal-preserving style helper
 
 /** minutes-past-midnight "now" in Pacific time, pushed past 24h for the small-hours tail */
 function nowMinutes(): number {
@@ -155,6 +155,91 @@ function nowMinutes(): number {
   let t = hour * 60 + minute;
   if (hour < 4) t += 1440;
   return t;
+}
+
+async function downloadScheduleStory(list: ScheduleEvent[], mineCount: number, weekStart: string) {
+  if (document.fonts && document.fonts.ready) await document.fonts.ready;
+  const W = 1080;
+  const H = 1920;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const x = c.getContext('2d');
+  if (!x) throw new Error('no 2d context');
+  x.fillStyle = '#0a0a0a';
+  x.fillRect(0, 0, W, H);
+  const rb = x.createLinearGradient(0, 0, W, 0);
+  rb.addColorStop(0, '#00FFFF');
+  rb.addColorStop(0.34, '#D4FF00');
+  rb.addColorStop(0.67, '#FF1FA0');
+  rb.addColorStop(1, '#FF7B00');
+  x.fillStyle = rb;
+  x.fillRect(0, 0, W, 16);
+  x.fillRect(0, H - 16, W, 16);
+  x.textBaseline = 'alphabetic';
+  x.fillStyle = '#00FFFF';
+  x.font = '700 34px "Barlow Condensed", sans-serif';
+  const weekEnd = msYmd(ymdMs(weekStart) + 6 * 86400000);
+  const year = weekStart.slice(0, 4) === weekEnd.slice(0, 4)
+    ? weekStart.slice(0, 4) : `${weekStart.slice(0, 4)}–${weekEnd.slice(0, 4)}`;
+  x.fillText(`PORTLAND · ${weekRangeLabel(weekStart).toUpperCase()}, ${year}`, 74, 118);
+  x.fillStyle = '#fff';
+  x.font = '900 150px "Barlow Condensed", sans-serif';
+  x.fillText(mineCount ? 'MY' : 'WEEKLY', 70, 250);
+  x.fillText(mineCount ? 'SCHEDULE' : 'PICKS', 70, 388);
+  x.fillStyle = 'rgba(230,227,218,.7)';
+  x.font = '500 30px Inter, sans-serif';
+  x.fillText(
+    mineCount
+      ? mineCount + (mineCount === 1 ? ' event you’re going to' : ' events you’re going to')
+      : list.length ? 'This week’s headliners' : 'No featured events this week',
+    74,
+    452,
+  );
+  let y = 540;
+  const dayColor: Record<string, string> = {};
+  DAYS.forEach((d) => (dayColor[d.key] = d.color));
+  const rows = list.slice(0, 12);
+  for (const e of rows) {
+    const dc = dayColor[e.day];
+    x.fillStyle = dc;
+    x.fillRect(74, y - 34, 8, 78);
+    x.fillStyle = dc;
+    x.font = '700 27px "Barlow Condensed", sans-serif';
+    const short = DAYS.find((d) => d.key === e.day)!.short;
+    x.fillText(short + '  ' + fmtClock(e.s).toUpperCase(), 104, y - 4);
+    x.fillStyle = '#fff';
+    x.font = '800 40px "Barlow Condensed", sans-serif';
+    let t = e.title.toUpperCase();
+    while (x.measureText(t).width > W - 200 && t.length > 4) t = t.slice(0, -2);
+    if (t !== e.title.toUpperCase()) t += '…';
+    x.fillText(t, 104, y + 38);
+    x.fillStyle = 'rgba(230,227,218,.6)';
+    x.font = '400 26px Inter, sans-serif';
+    x.fillText(e.venue + ' · ' + e.hood, 104, y + 74);
+    y += 108;
+  }
+  if (list.length > rows.length) {
+    x.fillStyle = '#D4FF00';
+    x.font = '700 30px "Barlow Condensed", sans-serif';
+    x.fillText('+ ' + (list.length - rows.length) + ' MORE ON ZAYLIST.COM', 104, y + 6);
+  }
+  x.fillStyle = '#fff';
+  x.font = '900 40px "Barlow Condensed", sans-serif';
+  x.fillText('ZAYLIST', 74, H - 96);
+  x.fillStyle = '#FF1FA0';
+  x.font = '700 27px "Barlow Condensed", sans-serif';
+  x.fillText('PRIDE IS A PROTEST. TAKE CARE OF EACH OTHER.', 74, H - 56);
+  const blob: Blob | null = await new Promise((res) => c.toBlob(res, 'image/png'));
+  if (!blob) throw new Error('toBlob failed');
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'pdx-pride-schedule.png';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
 export default function Schedule({
@@ -365,99 +450,20 @@ export default function Schedule({
 
   const exportStories = useCallback(async () => {
     if (exporting) return;
-    const mine = scheduleEvents.filter((e) => myScheduleIds.has(e.id) || isBeachScheduleEvent(e));
-    const list = mine.length ? mine : scheduleEvents.filter((e) => e.feat);
-    const dayOrder: Record<string, number> = {};
-    DAYS.forEach((d, i) => (dayOrder[d.key] = i));
-    list.sort((a, b) => dayOrder[a.day] - dayOrder[b.day] || a.s - b.s);
+    const dates = new Set(weekColumns.map(day => day.ymd));
+    const weekEvents = scheduleEvents.filter(e => e.calendarDate && dates.has(e.calendarDate));
+    const mine = weekEvents.filter(e => myScheduleIds.has(e.id) || isBeachScheduleEvent(e));
+    const list = mine.length ? mine : weekEvents.filter(e => e.feat);
+    list.sort((a, b) => (a.calendarDate ?? "").localeCompare(b.calendarDate ?? "") || a.s - b.s);
     setExporting(true);
     try {
-      if (document.fonts && document.fonts.ready) await document.fonts.ready;
-      const W = 1080;
-      const H = 1920;
-      const c = document.createElement('canvas');
-      c.width = W;
-      c.height = H;
-      const x = c.getContext('2d');
-      if (!x) throw new Error('no 2d context');
-      x.fillStyle = '#0a0a0a';
-      x.fillRect(0, 0, W, H);
-      const rb = x.createLinearGradient(0, 0, W, 0);
-      rb.addColorStop(0, '#00FFFF');
-      rb.addColorStop(0.34, '#D4FF00');
-      rb.addColorStop(0.67, '#FF1FA0');
-      rb.addColorStop(1, '#FF7B00');
-      x.fillStyle = rb;
-      x.fillRect(0, 0, W, 16);
-      x.fillRect(0, H - 16, W, 16);
-      x.textBaseline = 'alphabetic';
-      x.fillStyle = '#00FFFF';
-      x.font = '700 34px "Barlow Condensed", sans-serif';
-      x.fillText('PORTLAND PRIDE WEEK 2026 · JUL 13–19', 74, 118);
-      x.fillStyle = '#fff';
-      x.font = '900 150px "Barlow Condensed", sans-serif';
-      x.fillText(mine.length ? 'MY PRIDE' : 'PRIDE WEEK', 70, 250);
-      x.fillText(mine.length ? 'WEEK' : 'PICKS', 70, 388);
-      x.fillStyle = 'rgba(230,227,218,.7)';
-      x.font = '500 30px Inter, sans-serif';
-      x.fillText(
-        mine.length
-          ? mine.length + (mine.length === 1 ? ' event you’re going to' : ' events you’re going to')
-          : 'The weekend’s headliners',
-        74,
-        452,
-      );
-      let y = 540;
-      const dayColor: Record<string, string> = {};
-      DAYS.forEach((d) => (dayColor[d.key] = d.color));
-      const rows = list.slice(0, 12);
-      for (const e of rows) {
-        const dc = dayColor[e.day];
-        x.fillStyle = dc;
-        x.fillRect(74, y - 34, 8, 78);
-        x.fillStyle = dc;
-        x.font = '700 27px "Barlow Condensed", sans-serif';
-        const short = DAYS.find((d) => d.key === e.day)!.short;
-        x.fillText(short + '  ' + fmtClock(e.s).toUpperCase(), 104, y - 4);
-        x.fillStyle = '#fff';
-        x.font = '800 40px "Barlow Condensed", sans-serif';
-        let t = e.title.toUpperCase();
-        while (x.measureText(t).width > W - 200 && t.length > 4) t = t.slice(0, -2);
-        if (t !== e.title.toUpperCase()) t += '…';
-        x.fillText(t, 104, y + 38);
-        x.fillStyle = 'rgba(230,227,218,.6)';
-        x.font = '400 26px Inter, sans-serif';
-        x.fillText(e.venue + ' · ' + e.hood, 104, y + 74);
-        y += 108;
-      }
-      if (list.length > rows.length) {
-        x.fillStyle = '#D4FF00';
-        x.font = '700 30px "Barlow Condensed", sans-serif';
-        x.fillText('+ ' + (list.length - rows.length) + ' MORE ON ZAYLIST.COM', 104, y + 6);
-      }
-      x.fillStyle = '#fff';
-      x.font = '900 40px "Barlow Condensed", sans-serif';
-      x.fillText('ZAYLIST', 74, H - 96);
-      x.fillStyle = '#FF1FA0';
-      x.font = '700 27px "Barlow Condensed", sans-serif';
-      x.fillText('PRIDE IS A PROTEST. TAKE CARE OF EACH OTHER.', 74, H - 56);
-      const blob: Blob | null = await new Promise((res) => c.toBlob(res, 'image/png'));
-      if (!blob) throw new Error('toBlob failed');
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'pdx-pride-schedule.png';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      await downloadScheduleStory(list, mine.length, activeWeekStart);
       flashToast('Saved to downloads, ready for Stories');
     } catch {
       flashToast('Export hit a snag. Try again');
-    } finally {
-      setExporting(false);
     }
-  }, [exporting, scheduleEvents, myScheduleIds, flashToast]);
+    setExporting(false);
+  }, [exporting, scheduleEvents, myScheduleIds, flashToast, weekColumns, activeWeekStart]);
 
   /* ---- derived layout constants ----------------------------------- */
 
@@ -570,7 +576,7 @@ export default function Schedule({
         const showVenue = height >= (embed ? 56 : 74) && width >= (embed ? 96 : 116);
         const showQuick = !embed && !isBeach && height >= 56 && width >= 100;
         const style = S({
-          ["--sch-day" as string]: dc,
+          "--sch-day": dc,
           position: 'absolute',
           top: top + 'px',
           left: left + 'px',
@@ -772,6 +778,7 @@ export default function Schedule({
     view,
     openEvent,
     toggleRsvp,
+    isRsvpPending,
   ]);
 
   const todayYmd = pacificTodayDate(Date.now());
@@ -780,9 +787,11 @@ export default function Schedule({
   const weekEventCount = days.reduce((n, d) => n + d.blocks.length, 0);
 
   const daysRef = useRef(days);
-  daysRef.current = days;
   const weekColumnsRef = useRef(weekColumns);
-  weekColumnsRef.current = weekColumns;
+  useLayoutEffect(() => {
+    daysRef.current = days;
+    weekColumnsRef.current = weekColumns;
+  }, [days, weekColumns]);
 
   const scrollDayIntoView = useCallback((idx: number) => {
     const el = scrollElRef.current;
@@ -835,13 +844,12 @@ export default function Schedule({
       if (!date) return;
       const monday = mondayOf(date);
       if (monday !== activeWeekStart) setWeekStart(monday);
-      let tries = 0;
-      const attempt = () => {
+      const attempt = (tries: number) => {
         const idx = weekColumnsRef.current.findIndex(c => c.ymd === date);
         if (idx >= 0) { scrollDayIntoView(idx); return; }
-        if (++tries <= 12) window.setTimeout(attempt, 60);
+        if (tries < 12) window.setTimeout(() => attempt(tries + 1), 60);
       };
-      window.setTimeout(attempt, 60);
+      window.setTimeout(() => attempt(0), 60);
     };
     window.addEventListener("zaylist:schedule-day", onDay);
     return () => window.removeEventListener("zaylist:schedule-day", onDay);
@@ -1418,7 +1426,7 @@ export default function Schedule({
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
           <button
-            title={selected.isBeach?undefined:selected.rsvp?"Removing attendance keeps your event follow.":"Shows your name and follows event updates."}
+            title={selected.isBeach?undefined:selected.rsvp?"Remove your RSVP and heart.":"Shows your name and follows event updates."}
             onClick={(e) => {
               if (!selected.isBeach && !selected.rsvp) spawnRsvpSparks(e.currentTarget);
               toggleRsvp(selected.id);
