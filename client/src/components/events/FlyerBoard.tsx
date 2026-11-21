@@ -1100,17 +1100,21 @@ export default function FlyerBoard({
               )}
             </div>
             <div className="oid">
+              <h2>{openListing.title}</h2>
+              <p className="ometa">
+                {eventDateLabel(openListing.dateStart)} · {eventTimeLabel(openListing.dateStart)}
+                {"\n"}
+                {detailVenue?.id ? (
+                  <a className="ovenue" href={placePath(detailVenue.id, openListing.venueName)} aria-label={`Open ${openListing.venueName} place card`}>
+                    {openListing.venueName}
+                  </a>
+                ) : openListing.venueName}
+              </p>
               <div className="ochips">
                 <span className="ochip">{eventAge(openListing.ageRequirement)==="Not stated"?"Age not stated":eventAge(openListing.ageRequirement)}</span>
                 {openListing.isSexPositive ? <span className="ochip">SEX-POSITIVE</span> : null}
                 <span className="ochip">{openCdText}</span>
               </div>
-              <h2>{openListing.title}</h2>
-              <p className="ometa">
-                {eventDateLabel(openListing.dateStart)} · {eventTimeLabel(openListing.dateStart)}
-                {"\n"}
-                {openListing.venueName}
-              </p>
             </div>
             <div className="otabs" role="tablist" aria-label="Event card pages">
               {OPAGE_NAMES.map((n, i) => (

@@ -840,7 +840,12 @@
    Going plus the active page, so scrolled text is clipped at the tabs and can
    never pass behind or over the title. The title starts just under the
    share/close row so it sits high on tall portrait flyers. */
-.fbx .ovenue { color: var(--a); text-decoration: underline; text-underline-offset: 2px; }
+/* Venue links (Tucker, t270u): no underline in any state; the day accent and
+   a small chevron mark them as links to the venue's place card. */
+.fbx .ovenue, .fbx .ovenue:is(:hover, :focus, :active, :visited) { color: var(--a); text-decoration: none; }
+.fbx .ovenue::after { content: "\203A"; display: inline-block; margin-left: .3em; opacity: .8; }
+.fbx .ovenue:hover { filter: brightness(1.15); }
+.fbx .ovenue:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; border-radius: 3px; }
 .fbx .opageswrap, .fbx .ofoot { position: relative; z-index: 2; }
 .zay-card-stage.fbx .ocard { container-type: size; }
 .fbx .ohead {
@@ -884,6 +889,9 @@
 .fbx .ohead > .ohero :is(.typo-t, .typo-v) { display: none; }
 .fbx .ohead > .oid { margin-top: 0; text-shadow: 0 1px 2px var(--z-black), 0 2px 10px rgba(0, 0, 0, .9), 0 6px 24px rgba(0, 0, 0, .7); }
 .fbx .ohead .ochip { box-shadow: 0 4px 12px -4px rgba(0, 0, 0, .9); }
+/* Tags sit directly under the venue line (Tucker, t269u). */
+.fbx .ohead > .oid h2 { margin-top: 0; }
+.fbx .ohead > .oid .ochips { margin-top: 8px; }
 /* Tabs (Tucker, t265u): no blocks or plates over the poster. Labels sit
    directly on the poster foot with a text shadow; the active tab takes the
    day accent and a thin accent underline with the card's bloom. The thin
@@ -902,10 +910,12 @@
   position: relative; flex: 1 1 0; min-width: 0;
   margin: 0; padding: 8px 2px 9px;
   border: 0; border-radius: 0; background: transparent; box-shadow: none;
-  color: var(--evz-mist-cfd8de); text-transform: uppercase;
+  color: var(--evz-mist-aeb8c3); text-transform: uppercase;
   text-shadow: 0 1px 2px var(--z-black), 0 2px 10px rgba(0, 0, 0, .9);
 }
-.fbx .ohead > .otabs button.on { color: var(--a); }
+/* Label stays white; the poster-matched accent lives only on the underline,
+   so the active tab never disappears into a poster of the same color. */
+.fbx .ohead > .otabs button.on { color: var(--text-hi); }
 .fbx .ohead > .otabs button.on::after {
   content: ""; position: absolute; left: 14%; right: 14%; bottom: 0; height: 2px; z-index: 1;
   border-radius: 2px; background: var(--a);
