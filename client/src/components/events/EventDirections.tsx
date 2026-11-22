@@ -19,6 +19,27 @@ export function EventDirections({ event, google, apple }: { event: EventListing;
       endcoord: target.lat + "," + target.lng, endname: event.venueName, endaddress: address,
     })]] : []),
   ];
+  const lyft = target
+    ? `https://www.lyft.com/ride?id=lyft&destination[latitude]=${target.lat}&destination[longitude]=${target.lng}`
+    : "https://www.lyft.com/ride?id=lyft";
+  const uberParams = new URLSearchParams({
+    action: "setPickup",
+    "dropoff[nickname]": event.venueName,
+    "dropoff[formatted_address]": address,
+  });
+  if (target) {
+    uberParams.set("dropoff[latitude]", String(target.lat));
+    uberParams.set("dropoff[longitude]", String(target.lng));
+  }
+  const rideShareLinks: Array<[string, string]> = [
+    ["Lyft", lyft],
+    ["Uber", `https://m.uber.com/ul/?${uberParams}`],
+  ];
+  const transitLinks: Array<[string, string]> = [
+    ["Plan trip · TriMet", "https://trimet.org/planner"],
+    ["MAX light rail", "https://www.trimet.org/max/index.htm"],
+    ["Bus & transit directions", `${google}&travelmode=transit`],
+  ];
   function locate() {
     if (!target || !navigator.geolocation || locating) return;
     setLocating(true);
@@ -38,6 +59,14 @@ export function EventDirections({ event, google, apple }: { event: EventListing;
     <p role="status">{status} {distance}</p>
     <div className="evz-x__dirrow">{links.map(([label, href]) =>
       <a key={label} className="evz-x__link" href={href} target={href.startsWith("/") ? undefined : "_blank"} rel="noreferrer">{label}</a>
+    )}</div>
+    <h4 className="evz-x__dirlabel">Ride share</h4>
+    <div className="evz-x__dirrow">{rideShareLinks.map(([label, href]) =>
+      <a key={label} className="evz-x__link" href={href} target="_blank" rel="noreferrer">{label}</a>
+    )}</div>
+    <h4 className="evz-x__dirlabel">City transit</h4>
+    <div className="evz-x__dirrow">{transitLinks.map(([label, href]) =>
+      <a key={label} className="evz-x__link" href={href} target="_blank" rel="noreferrer">{label}</a>
     )}</div>
   </>;
 }

@@ -69,6 +69,8 @@
   font: 700 11px/1.2 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; letter-spacing: .05em; }
 .evz-x__dirrow { display: flex; flex-wrap: wrap; gap: 8px; }
 .evz-x__dirrow .evz-x__link { margin-top: 10px; }
+.evz-x__dirlabel { margin: 16px 0 0; font: 700 10px/1.2 var(--font-display, "Barlow Condensed", sans-serif);
+  letter-spacing: .15em; text-transform: uppercase; color: var(--ac); }
 
 /* More at {venue} — the next-7-days strip */
 .evz-x__days { display: flex; gap: 6px; margin-bottom: 10px; }
