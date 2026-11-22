@@ -270,7 +270,7 @@ a.pdxPlace__eventsMore:hover{ text-decoration:underline; text-underline-offset:3
 }
 .pdxPlaceMap--expanded .pdxPlaceMap__well{ min-height:clamp(176px,24vw,230px); }
 .pdxPlaceMap__live{ position:absolute; inset:0; }
-.pdxPlaceMap__live .leaflet-container{ height:100%; width:100%; background:var(--map-surface-bg,#06060a); }
+.pdxPlaceMap__live .maplibregl-map{ height:100%; width:100%; background:var(--map-surface-bg,#06060a); }
 .pdxPlaceMap__tiles{ position:absolute; inset:0; opacity:0; transition:opacity .24s ease; }
 .pdxPlaceMap__tiles--ready{ opacity:.76; }
 .pdxPlaceMap__tiles img{ position:absolute; width:256px; height:256px; max-width:none; user-select:none; }
@@ -290,7 +290,7 @@ a.pdxPlace__eventsMore:hover{ text-decoration:underline; text-underline-offset:3
   animation:pdxPlaceMapPin .38s var(--ease-out,ease) both;
 }
 .pdxPlaceMap__caption{
-  position:absolute; z-index:3; left:14px; right:14px; bottom:12px;
+  position:absolute; z-index:3; left:14px; right:14px; bottom:32px;
   display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
 }
 .pdxPlaceMap__caption strong{

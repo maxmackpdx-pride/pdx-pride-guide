@@ -496,7 +496,7 @@ html.calm-mode .pdxLegend,
   box-shadow: var(--map-frame-shadow);
 }
 
-/* Ensure live Leaflet map shells always pick up the same deboss edge */
+/* Ensure live map shells always pick up the same deboss edge */
 .pdx-map-live.pdx-map-surface,
 .pdx-map-live.pdx-map-surface--neutral {
   box-shadow: var(--map-frame-shadow) !important;

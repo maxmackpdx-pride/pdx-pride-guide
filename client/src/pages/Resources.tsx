@@ -418,7 +418,7 @@ function ResourceLocationMap({ org, color, initiallyOpen = false }: { org: Resou
     {open && <>
       {pins.length > 0 && <div ref={incidentalMap.ref} className="rg-resource-map-canvas" data-vaul-no-drag>
         {incidentalMap.active && <Suspense fallback={<span className="rg-map-loading" role="status">Loading map…</span>}>
-          <ResourceDirectoryMap cameraMemory={incidentalMap.memory} businesses={pins} height="100%" showKey={false} interactive={false} focusBusiness rasterBasemap accent={color} />
+          <ResourceDirectoryMap cameraMemory={incidentalMap.memory} businesses={pins} height="100%" showKey={false} interactive={false} focusBusiness minimap accent={color} />
         </Suspense>}
       </div>}
       {pins.length > 0 && <small className="rg-map-credit">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> · © <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a></small>}

@@ -104,7 +104,7 @@ function Expanded({place,entry,initial,draft,onClose,onMarkRead,followed,onFollo
          <div className="outz-native-sections" tabIndex={0} aria-label={`${tab} details`} data-section={tab}
            onTouchStart={e=>{
              // Maps, forms and horizontal rails handle their own touch gestures.
-             if((e.target as HTMLElement).closest('input,textarea,select,button,a,form,[role="slider"],.maplibregl-map,.leaflet-container'))return;
+             if((e.target as HTMLElement).closest('input,textarea,select,button,a,form,[role="slider"],.maplibregl-map'))return;
              touch.current=[e.touches[0].clientX,e.touches[0].clientY];
            }}
            onTouchCancel={()=>{touch.current=null;}}

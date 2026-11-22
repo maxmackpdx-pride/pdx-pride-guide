@@ -110,9 +110,12 @@ Both scenes use the same authored MapLibre 5.6.2 runtime at
 content-addresses its scene through `script/mapz-build.ts`. No dependency upgrade is
 part of this change. Duplicate Outzide style/provider/bridge copies and redundant
 vendored runtime files were removed after static and dynamic-path inspection.
-Embedded CARTO/Leaflet maps remain active independent consumers; their dependencies
-and attribution must remain. `LivingMap.css` and `livingMapWaypoints.ts` remain
-because active product/homepage consumers still use them.
+The active application now loads its five-mode scene from the immutable release in
+`shared/mapReleaseLock.json`. Embedded directory, Needz, Placez, Outzide and
+beach maps use the same MapLibre GL JS version through `ZaylistMap`. The shared
+component owns the vector style, camera memory, accessible markers, worker,
+attribution and cleanup. Coordinates passed to MapLibre are longitude first.
+The older scene details above describe the earlier consolidation.
 
 ## Verification and troubleshooting
 

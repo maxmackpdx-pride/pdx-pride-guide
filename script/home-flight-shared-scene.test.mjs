@@ -9,7 +9,7 @@ import {vectorStyle} from '../client/public/home-flight/city-map.js';
 import {mapzSurfaceStyle} from '../client/public/mapz-map/natural-surfaces.js';
 import {waterReflectionSegments,createBuildingChrome} from '../client/public/mapz-map/nightlife-materials.js';
 import {createTerrainSampler,approachBaseline} from '../client/public/mapz-map/terrain-elevation.js';
-const require=createRequire(import.meta.url),maplibreRequire=createRequire(require.resolve('maplibre-gl'));
+const require=createRequire(import.meta.url),maplibreRequire=createRequire(import.meta.resolve('maplibre-gl'));
 const {validateStyleMin}=maplibreRequire('@maplibre/maplibre-gl-style-spec');
 const getStyle=()=>structuredClone(vectorStyle);
 const previousWindow=globalThis.window;globalThis.window={};
@@ -40,10 +40,10 @@ test('MapLibre accepts every base-city paint expression',()=>{
 });
 
 test('street inlays stay on major surface roads, below buildings, without recoloring bridges',()=>{
-  const require=createRequire(import.meta.url),mr=createRequire(require.resolve('maplibre-gl'));
+  const require=createRequire(import.meta.url),mr=createRequire(import.meta.resolve('maplibre-gl'));
   const {createExpression}=mr('@maplibre/maplibre-gl-style-spec');
   const style=mapzSurfaceStyle(),inlay=style.layers.find(l=>l.id==='night-street-inlays');
-  const compiled=createExpression(inlay.filter);assert.equal(compiled.result,'success');
+  const compiled=createExpression(inlay.filter, `layers[${style.layers.indexOf(inlay)}].filter`);assert.equal(compiled.result,'success');
   const accepts=properties=>compiled.value.evaluate({zoom:16},{type:2,properties});
   assert.equal(accepts({class:'primary'}),true);assert.equal(accepts({class:'secondary'}),true);
   for(const properties of [{class:'minor'},{class:'path'},{class:'rail'},{class:'primary',brunnel:'bridge'},

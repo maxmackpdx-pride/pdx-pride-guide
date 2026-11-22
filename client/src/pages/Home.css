@@ -1258,7 +1258,7 @@ html.calm-mode .home-hero__constellation {
   box-shadow: var(--map-frame-shadow);
 }
 
-/* Absolute fill so Leaflet gets a real height when the grid row stretches
+/* Absolute fill so the map gets a real height when the grid row stretches
    to match Spots / Nonprofits columns. */
 .home-main-stage #home-map > * {
   position: absolute;
@@ -1271,7 +1271,7 @@ html.calm-mode .home-hero__constellation {
 
 .home-main-stage #home-map .directory-map,
 .home-main-stage #home-map .directory-map--fill,
-.home-main-stage #home-map .leaflet-container {
+.home-main-stage #home-map .maplibregl-map {
   position: absolute !important;
   inset: 0;
   width: 100% !important;

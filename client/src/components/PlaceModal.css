@@ -284,7 +284,7 @@
   box-shadow: none;
 }
 
-.place-modal-panel__map .leaflet-container {
+.place-modal-panel__map .maplibregl-map {
   height: 100%;
 }
 

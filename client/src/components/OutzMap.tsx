@@ -1,44 +1,13 @@
-import IncidentalMapCamera from "./IncidentalMapCamera";
 import type { IncidentalMapMemory } from "@/hooks/useIncidentalMap";
-import { useEffect, useState } from "react";
-import { MapContainer, Marker, Popup, useMap } from "react-leaflet";
-import { divIcon } from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { ZaylistMap, ZaylistMapMarker } from "./ZaylistMap";
 import {
   outzPlaceHref,
   type OutzCatalogPlace,
   type OutzCommunityStay,
   type OutzDestination,
 } from "@shared/outz";
-import { LIVE_MAP_CHROME_CSS, MAP_PIN_SIZE, MAP_SURFACE_BG, mapPinHtml } from "@/components/ds/mapTheme";
-import CartoVectorBasemap from "@/components/CartoVectorBasemap";
+import { LIVE_MAP_CHROME_CSS, MAP_SURFACE_BG, mapPinHtml } from "@/components/ds/mapTheme";
 import { outzPinHex } from "@/lib/outzKinds";
-
-const PIN_HALF = MAP_PIN_SIZE / 2;
-
-function pin(color: string) {
-  return divIcon({
-    className: "",
-    html: mapPinHtml(color),
-    iconSize: [MAP_PIN_SIZE, MAP_PIN_SIZE],
-    iconAnchor: [PIN_HALF, PIN_HALF],
-    popupAnchor: [0, -PIN_HALF - 4],
-  });
-}
-
-function MapResizer() {
-  const map = useMap();
-  useEffect(() => {
-    const refresh = () => map.invalidateSize({ animate: false });
-    const timers = [0, 80, 300, 1000].map(ms => setTimeout(refresh, ms));
-    window.addEventListener("resize", refresh);
-    return () => {
-      timers.forEach(clearTimeout);
-      window.removeEventListener("resize", refresh);
-    };
-  }, [map]);
-  return null;
-}
 
 function PopupCard({ name, detail, href, zHref }: { name: string; detail: string; href?: string | null; zHref: string }) {
   return (
@@ -75,7 +44,11 @@ export default function OutzMap({
   minimal = false,
   accent = null,
 }: OutzMapProps) {
-  const [savedView] = useState(() => cameraMemory?.current);
+  const pins = [
+    ...destinations.map(place => ({ place, detail: place.officialNotice?.summary ?? place.subtitle })),
+    ...catalog.map(place => ({ place, detail: [place.kind, place.status ?? "Check official details"].join(" · ") })),
+    ...stays.map(place => ({ place, detail: place.detail })),
+  ];
   return (
     <div className="directory-map-wrap outz-map">
       <div className="directory-map outz-map__canvas pdx-map-live pdx-map-surface">
@@ -83,26 +56,17 @@ export default function OutzMap({
         <div className="pdx-map-live__vignette" aria-hidden="true" />
         <div className="pdx-map-live__shaft" aria-hidden="true" />
         {minimal ? null : <div className="outz-map__chip pdx-glass-rebind" aria-hidden="true"><span /> Live official sources</div>}
-        <MapContainer center={savedView?.center ?? center ?? [45.2, -122.6]} zoom={savedView?.zoom ?? zoom ?? 7} minZoom={1} zoomControl={!minimal} scrollWheelZoom={false} style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}>
-          <CartoVectorBasemap accent={accent} />
-          <MapResizer />
-          <IncidentalMapCamera memory={cameraMemory} />
-          {destinations.map(place => (
-            <Marker key={place.id} position={[place.lat, place.lng]} icon={pin(outzPinHex(place.name, place.kind))}>
-              <Popup><PopupCard name={place.name} detail={place.officialNotice?.summary ?? place.subtitle} href={place.officialUrl} zHref={outzPlaceHref(place)} /></Popup>
-            </Marker>
-          ))}
-          {catalog.map(place => (
-            <Marker key={place.id} position={[place.lat, place.lng]} icon={pin(outzPinHex(place.name, place.kind))}>
-              <Popup><PopupCard name={place.name} detail={`${place.kind} · ${place.status ?? "Check official details"}`} href={place.officialUrl} zHref={outzPlaceHref(place)} /></Popup>
-            </Marker>
-          ))}
-          {stays.filter(place => place.lat != null && place.lng != null).map(place => (
-            <Marker key={place.id} position={[place.lat!, place.lng!]} icon={pin(outzPinHex(place.name, place.kind))}>
-              <Popup><PopupCard name={place.name} detail={place.detail} href={place.officialUrl} zHref={outzPlaceHref(place)} /></Popup>
-            </Marker>
-          ))}
-        </MapContainer>
+        <ZaylistMap ariaLabel="Outdoor destinations" center={center ? [center[1], center[0]] : [-122.6, 45.2]}
+          zoom={(zoom ?? 7) - 1} minZoom={0} zoomControl={!minimal} memory={cameraMemory} accent={accent}
+          style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}>
+          {pins.map(({place, detail}) => {
+            if(place.lat == null || place.lng == null) return null;
+            return <ZaylistMapMarker key={place.id} label={place.name} position={[place.lng, place.lat]}
+              popup={<PopupCard name={place.name} detail={detail} href={place.officialUrl} zHref={outzPlaceHref(place)} />}>
+              <span aria-hidden="true" dangerouslySetInnerHTML={{__html: mapPinHtml(outzPinHex(place.name, place.kind))}} />
+            </ZaylistMapMarker>;
+          })}
+        </ZaylistMap>
       </div>
     </div>
   );

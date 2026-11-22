@@ -1,4 +1,5 @@
-import maplibregl, { type Map } from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
+import type { Map } from "maplibre-gl";
 import mlcontour from "maplibre-contour";
 
 // Share one DEM worker/cache across OutZide map mounts.

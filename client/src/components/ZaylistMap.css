@@ -1,0 +1,49 @@
+.zaylist-map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  isolation: isolate;
+}
+.zaylist-map__canvas {
+  position: absolute;
+  inset: 0;
+}
+:is(.zaylist-map, .event-location-map) .maplibregl-ctrl.maplibregl-ctrl-attrib {
+  background: var(--ink-850);
+  color: var(--text-hi);
+  font: 500 10px/14px var(--font-body, sans-serif);
+  padding: 1px 5px;
+}
+:is(.zaylist-map, .event-location-map) .maplibregl-ctrl-attrib a {
+  color: inherit;
+}
+.zaylist-map__marker {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+button.zaylist-map__marker {
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.zaylist-map__marker:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
+}
+.zaylist-map__recovery {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  background: var(--ink-850);
+  color: var(--text-hi);
+}
+.zaylist-map__recovery button { min-height: 44px; }

@@ -178,7 +178,7 @@
 .event-modal.eb-detail--place .place-modal-panel__hero-switch button:focus-visible { outline: 2px solid var(--text-hi); outline-offset: 2px; }
 @media(prefers-reduced-motion:reduce) { .event-modal.eb-detail--place .place-modal-panel__hero-rail { scroll-behavior: auto; } }
 :is(html.calm-mode,:root[data-calm="true"]) .event-modal.eb-detail--place .place-modal-panel__hero-rail { scroll-behavior: auto; }
-.event-modal.eb-detail--place .place-modal-panel__hero .leaflet-top { top: 64px; }
+.event-modal.eb-detail--place .place-modal-panel__hero .maplibregl-ctrl-top-left { top: 64px; }
 .event-modal.eb-detail--place .place-modal-past__banner { filter: grayscale(1); }
 
 /* A small pagination indicator replaces labeled artwork/map controls. */
@@ -229,7 +229,7 @@
 .event-modal.eb-detail--place .place-modal-panel__hero-rail { -webkit-overflow-scrolling: touch; }
 .event-modal.eb-detail--place .place-modal-panel__hero img { -webkit-user-drag: none; user-select: none; }
 .event-modal.eb-detail--place :is(.place-modal-panel__read-more,.place-modal-panel__tab) { min-height: 44px; }
-.event-modal.eb-detail--place .place-modal-panel__hero .leaflet-control-zoom a { width: 44px; height: 44px; line-height: 44px; }
+.event-modal.eb-detail--place .place-modal-panel__hero .maplibregl-ctrl-group button { width: 44px; height: 44px; line-height: 44px; }
 
 /* Reuse the current Eventz/Placez glow-plate button recipe in the open card. */
 .event-modal.eb-detail.eb-detail--place :is(.eb-detail__primary-action > button,.place-modal-panel__quick-actions > a,.place-modal-panel__tab) {

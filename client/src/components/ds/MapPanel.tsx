@@ -2,12 +2,7 @@
 import React from "react";
 import { MapLegend } from "./MapLegend";
 
-/* MapPanel = the dark neon map surface used on the Events and Directory pages.
-   The tile layer is a Leaflet map in production; here it is a dark faux-street
-   background so the branded parts read: glowing day-colored pins, the legend,
-   the rainbow seams top and bottom, and the Expand control. Feed it `pins`
-   with { x, y, day } (percentages) or { x, y, multi:true }. */
-/* Deep-glass map surface - SoT §1.6 (overrides prior unframed radial map). */
+/* Schematic pins and legend for the design-system specimen. */
 const CSS = `
 .pdxMap{
   position:relative; overflow:hidden; width:100%;
@@ -138,7 +133,6 @@ export function MapPanel({
             Expand
           </button>
         : legend && <div className="pdxMap__legend"><MapLegend /></div>}
-      <span className="pdxMap__attr">Leaflet | © OpenStreetMap © CARTO</span>
       
     </div>
   );

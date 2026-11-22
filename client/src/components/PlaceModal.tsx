@@ -443,7 +443,7 @@ function PlaceModalInner({
               showKey={false}
               interactive
               focusBusiness={hasMapCoordinates}
-              rasterBasemap
+              minimap
               accent={accent}
             /></Suspense>}
             <div className="place-modal-panel__map-label">

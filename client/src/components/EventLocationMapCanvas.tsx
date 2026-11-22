@@ -1,8 +1,10 @@
 import { useEffect } from "react";
-import maplibregl, { type Map as MapLibreMap } from "maplibre-gl";
+import { maplibre as maplibregl } from "@/lib/maplibre";
+import type { Map as MapLibreMap } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { IncidentalMapMemory } from "@/hooks/useIncidentalMap";
-const CARTO_DARK_STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+import { cartoDarkVectorStyleUrl, cartoTransformRequest } from "@/lib/mapTiles";
+import "./ZaylistMap.css";
 
 function mixHex(a: string, b: string, amount: number) {
   const parse = (value: string) => {
@@ -44,15 +46,20 @@ export default function EventLocationMapCanvas({ node, lat, lng, precise, primar
 }) {
   useEffect(() => {
     let map: MapLibreMap;
+    const options: maplibregl.MapOptions = {
+      container: node,
+      style: cartoDarkVectorStyleUrl(),
+      transformRequest: cartoTransformRequest,
+      center: memory.current ? [memory.current.center[1], memory.current.center[0]] : [lng, lat],
+      zoom: memory.current?.zoom ?? (precise ? 14.2 : 10.5),
+      attributionControl: false,
+      interactive: true,
+      maxPitch: 0,
+      dragRotate: false,
+      touchPitch: false,
+    };
     try {
-      map = new maplibregl.Map({
-        container: node,
-        style: CARTO_DARK_STYLE,
-        center: memory.current ? [memory.current.center[1], memory.current.center[0]] : [lng, lat],
-        zoom: memory.current?.zoom ?? (precise ? 14.2 : 10.5),
-        attributionControl: false,
-        interactive: true,
-      });
+      map = new maplibregl.Map(options);
     } catch {
       onUnavailable(true);
       return;
@@ -60,10 +67,7 @@ export default function EventLocationMapCanvas({ node, lat, lng, precise, primar
     onUnavailable(false);
     const record = () => { const center = map.getCenter(); memory.current = { center: [center.lat, center.lng], zoom: map.getZoom() }; };
     map.on("moveend", record);
-    map.addControl(new maplibregl.AttributionControl({
-      compact: true,
-      customAttribution: '<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> · <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
-    }));
+    map.addControl(new maplibregl.AttributionControl({ compact: false }));
     map.once("load", () => {
       applyEventPalette(map, primary, complementary);
       const marker = document.createElement("span");

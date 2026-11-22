@@ -82,9 +82,6 @@ export default defineConfig(({ command }):UserConfig => {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     manifest: true,
     emptyOutDir: true,
-    // No manualChunks: hand-splitting leaflet created a circular chunk
-    // dependency that crashed Safari with a TDZ error ("Cannot access 'Q'
-    // before initialization") when the leaflet chunk evaluated first.
     // Vite's automatic chunking keeps evaluation order correct.
   },
   // Shared modules may reference process.env on the server; avoid browser TDZ.

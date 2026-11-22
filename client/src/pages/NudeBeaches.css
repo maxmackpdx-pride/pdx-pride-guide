@@ -463,6 +463,8 @@
 
 /* Explicit map height - avoid height:100% chain that collapses on mobile stack layout */
 .nude-beaches-page .nude-beaches-map__canvas {
+  position: relative;
+  width: 100%;
   height: clamp(380px, 48vh, 520px);
   min-height: 320px;
   border: 1px solid #000;
@@ -489,7 +491,7 @@
   background: rgba(5, 5, 7, 0.88);
   border: 1px solid #000;
   box-shadow: 0 0 0 1px #000, inset 0 1px 2px rgba(0, 0, 0, 0.75);
-  outline: 1px solid color-mix(in srgb, var(--nb-accent, #FF7B00) 55%, #000);
+  outline: 1px solid var(--beach-map-accent);
   outline-offset: -2px;
   pointer-events: none;
 }
@@ -529,9 +531,59 @@
   max-width: 22ch;
 }
 
-.nude-beaches-page .nude-beaches-map__canvas .leaflet-container {
-  height: 100% !important;
-  width: 100% !important;
+.nude-beaches-map__pin {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.nude-beaches-map__pin:focus-visible {
+  outline: 2px solid var(--beach-map-accent);
+  outline-offset: -2px;
+  border-radius: 50%;
+}
+
+.nude-beaches-map-popup .maplibregl-popup-content {
+  color: var(--text-hi, white);
+  background: var(--z-black);
+  border: 1px solid var(--beach-map-accent);
+  padding: 4px 26px 4px 4px;
+}
+
+.nude-beaches-map-popup .maplibregl-popup-close-button {
+  width: 28px;
+  height: 28px;
+  color: var(--text-hi, white);
+}
+
+.nude-beaches-map-popup.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: var(--beach-map-accent);
+}
+
+.nude-beaches-map__popup {
+  display: grid;
+  gap: 6px;
+  max-width: 24ch;
+  padding: 8px;
+  border-inline-start: 2px solid var(--beach-map-accent);
+  font-family: var(--font-body);
+}
+
+.nude-beaches-map__popup strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.nude-beaches-map__popup span {
+  font-size: 0.8125rem;
+  line-height: 1.4;
 }
 
 @media (min-width: 900px) {

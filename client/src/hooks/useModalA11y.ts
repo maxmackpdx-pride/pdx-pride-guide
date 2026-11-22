@@ -54,6 +54,8 @@ export function useModalA11y(opts: {
       if (node?.closest("[inert]") || document.activeElement?.closest("dialog[open]")) return;
       if (node && modalStack.at(-1) !== node) return;
       if (e.key === "Escape") {
+        const nested = e.target instanceof Element ? e.target.closest("[data-owns-escape]") : null;
+        if (nested && node?.contains(nested)) return;
         e.preventDefault();
         e.stopPropagation();
         closeRef.current();

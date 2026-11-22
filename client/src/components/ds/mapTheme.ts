@@ -2,7 +2,7 @@
  * Map surface theme - deep-glass / OLED frame.
  * SoT: GROK_MIGRATION_PROMPT.md §1.6 + Card System.html map frames.
  *
- * Live Leaflet tiles still need network; frame, grid, pins, vignette
+ * Live vector tiles still need network; frame, grid, pins, vignette
  * are offline chrome from this module.
  *
  * Frame rule: thin black outline + inward-only (deboss/vignette) effects.
@@ -83,7 +83,7 @@ export function mapPinMultiStyle(extraShadow = ""): string {
   ].join("; ");
 }
 
-/** HTML for Leaflet divIcon - single day / category pin. */
+/** HTML for map marker artwork - single day / category pin. */
 export function mapPinHtml(
   dayColor: string,
   opts?: { rsvpPulse?: boolean; rsvpColor?: string },
@@ -94,7 +94,7 @@ export function mapPinHtml(
   return `<div${cls} style="${mapPinStyle(dayColor)}"></div>`;
 }
 
-/** HTML for Leaflet divIcon - multi-day conic, no white outer bloom. */
+/** HTML for map marker artwork - multi-day conic, no white outer bloom. */
 export function mapPinMultiHtml(opts?: { rsvpPulse?: boolean; rsvpColor?: string }): string {
   const rsvp = opts?.rsvpPulse;
   const cls = rsvp ? ' class="map-pin-rsvp-pulse"' : "";
@@ -113,7 +113,7 @@ export function mapChipStyle(): string {
   ].join("; ");
 }
 
-/** Inline CSS for outer map frame (apply to shell around Leaflet). */
+/** Inline CSS for outer map frame (apply to shell around the map). */
 export function mapFrameStyle(_opts?: { neutralGlow?: boolean }): string {
   // neutralGlow ignored - maps never get outer bloom
   return [
@@ -127,7 +127,7 @@ export function mapFrameStyle(_opts?: { neutralGlow?: boolean }): string {
 }
 
 /**
- * Inject once into live Leaflet map roots.
+ * Inject once into live MapLibre map roots.
  * Uses glass.css vars when present; falls back to §1.6 literals.
  * Frame: pair with class `pdx-map-surface` (+ `pdx-map-surface--neutral` for directory).
  * Neutral no longer adds outer glow - same inward frame as every map.
@@ -143,30 +143,33 @@ export const LIVE_MAP_CHROME_CSS = `
   box-shadow:var(--map-frame-shadow, ${mapFrameShadow});
 }
 /* Over tiles; pointer-events none so pan/zoom/pins still work. UI chrome uses z>500. */
-.pdx-map-live__vignette{
+.pdx-map-live__vignette,
+.pdx-map-live .maplibregl-canvas-container::after{
+  content:"";
   position:absolute; inset:0; z-index:400; pointer-events:none;
   background:var(--map-vignette-bg, ${mapVignetteBackground});
   box-shadow:var(--map-vignette-inset, ${mapVignetteInset});
   border-radius:inherit;
 }
-.pdx-map-live__shaft{
+.pdx-map-live__shaft,
+.pdx-map-live .maplibregl-canvas-container::before{
+  content:"";
   position:absolute; top:-20%; bottom:-20%; left:48%; width:70px; z-index:401;
   pointer-events:none;
   background:${mapLightShaftBackground};
   transform:rotate(14deg); filter:blur(1px); opacity:.85;
 }
-.pdx-map-live .leaflet-container{
+.pdx-map-live .maplibregl-map{
   background:var(--map-surface-bg, ${MAP_SURFACE_BG}) !important;
   font:inherit;
   z-index:0;
 }
-.pdx-map-live .leaflet-control-attribution{
-  background:rgba(0,0,0,.65) !important;
-  color:var(--text-faint, #8a8a8a) !important;
-  font-size:9px !important;
-}
-.pdx-map-live .leaflet-control-attribution a{ color:var(--text-meta, #aaa) !important; }
-.pdx-map-live .leaflet-control-zoom a{
+.pdx-map-live:has(.maplibregl-canvas-container) > :is(.pdx-map-live__vignette,.pdx-map-live__shaft){ display:none; }
+.pdx-map-live .maplibregl-canvas-container::before,
+.pdx-map-live .maplibregl-canvas-container::after{ z-index:1; }
+.pdx-map-live .maplibregl-marker,
+.pdx-map-live .maplibregl-popup{ z-index:2; }
+.pdx-map-live :is(.maplibregl-ctrl-zoom-in,.maplibregl-ctrl-zoom-out){
   width:44px !important;
   height:44px !important;
   line-height:42px !important;
@@ -175,9 +178,10 @@ export const LIVE_MAP_CHROME_CSS = `
   border:1px solid #000 !important;
   box-shadow:inset 0 1px 2px rgba(0,0,0,.7) !important;
 }
-.pdx-map-live .leaflet-control-zoom a:hover{ background:#222 !important; }
-.pdx-map-live .leaflet-control-zoom a:focus-visible{
-  outline:3px solid var(--chrome-focus, rgba(0,255,255,.55)) !important;
+.pdx-map-live :is(.maplibregl-ctrl-zoom-in,.maplibregl-ctrl-zoom-out) .maplibregl-ctrl-icon { filter: invert(1); }
+.pdx-map-live :is(.maplibregl-ctrl-zoom-in,.maplibregl-ctrl-zoom-out):hover{ background:#222 !important; }
+.pdx-map-live :is(.maplibregl-ctrl-zoom-in,.maplibregl-ctrl-zoom-out):focus-visible{
+  outline:3px solid var(--neon-cyan) !important;
   outline-offset:2px;
   position:relative;
   z-index:2;
@@ -204,7 +208,7 @@ export const LIVE_MAP_CHROME_CSS = `
   background:rgba(5,5,7,.88);
   border:1px solid #000;
   box-shadow:0 0 0 1px #000, inset 0 1px 2px rgba(0,0,0,.75);
-  outline:1px solid color-mix(in srgb, var(--lime, #D4FF00) 70%, #000);
+  outline:1px solid var(--lime);
   outline-offset:-2px;
 }
 html.calm-mode .pdx-map-live .pdx-map-live__expand,

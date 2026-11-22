@@ -1,16 +1,10 @@
 import {PORTLAND_MAP_BOUNDS} from "../../public/map-foundation/mode-camera.js";
 import { ArrowRight } from "lucide-react";
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
-import { divIcon } from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { useEffect, useMemo, useState } from "react";
+import { ZaylistMap, ZaylistMapMarker, useZaylistMap } from "./ZaylistMap";
 import { formatGrandOpeningDate, isGrandOpeningActive } from "@shared/grandOpening";
-import IncidentalMapCamera from "./IncidentalMapCamera";
 import type { IncidentalMapMemory } from "@/hooks/useIncidentalMap";
-const CartoVectorBasemap = lazy(() => import("@/components/CartoVectorBasemap"));
-import { cartoDarkTileUrl, CARTO_ATTRIBUTION } from "@/lib/mapTiles";
 import {
-  MAP_PIN_SIZE,
   MAP_SURFACE_BG,
   LIVE_MAP_CHROME_CSS,
   mapPinHtml,
@@ -118,13 +112,12 @@ export const MAP_KEY_TYPES = [
 const TYPE_COLORS = MAP_TYPE_COLORS;
 const TYPE_LABELS = MAP_TYPE_LABELS;
 
-const PIN_HALF = MAP_PIN_SIZE / 2;
 
 /** Keep the directory map framed on the Portland metro (incl. Vancouver WA,
     Aloha, Clackamas multi-loc storefronts). Users can't pan/zoom past this box.
     [SW, NE] corners. */
-const PORTLAND_BOUNDS: [[number, number], [number, number]] = PORTLAND_MAP_BOUNDS.map(([lng,lat])=>[lat,lng]) as [[number, number], [number, number]];
-const PORTLAND_MIN_ZOOM = 11;
+const PORTLAND_BOUNDS: [[number, number], [number, number]] = PORTLAND_MAP_BOUNDS as [[number, number], [number, number]];
+const PORTLAND_MIN_ZOOM = 10;
 
 /** Expand multi-loc businesses into one pin per storefront with coords. */
 function expandBusinessPins(businesses: Business[]): MapPin[] {
@@ -185,69 +178,16 @@ function expandBusinessPins(businesses: Business[]): MapPin[] {
   return pins;
 }
 
-function MapInvalidateSize({ enabled = true }: { enabled?: boolean }) {
-  const map = useMap();
-  useEffect(() => {
-    if (!enabled) return;
-    const refresh = () => {
-      map.invalidateSize({ animate: false });
-    };
-    const timers = [0, 120, 320, 720].map(ms => window.setTimeout(refresh, ms));
-    const container = map.getContainer();
-    const observer =
-      typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(() => refresh())
-        : null;
-    observer?.observe(container);
-    refresh();
-    return () => {
-      timers.forEach(window.clearTimeout);
-      observer?.disconnect();
-    };
-  }, [enabled, map]);
-  return null;
-}
-
 function MapFocus({ pins, enabled }: { pins: MapPin[]; enabled: boolean }) {
-  const map = useMap();
-
+  const map = useZaylistMap();
   useEffect(() => {
-    if (!enabled || pins.length === 0) return;
-    const focus = () => {
-      map.invalidateSize({ animate: false });
-      if (pins.length === 1) {
-        map.setView([pins[0].lat, pins[0].lng], 15, { animate: false });
-        return;
-      }
-      map.fitBounds(
-        pins.map(pin => [pin.lat, pin.lng] as [number, number]),
-        { padding: [28, 28], maxZoom: 14, animate: false },
-      );
-    };
-    const timers = [0, 160, 420].map(ms => window.setTimeout(focus, ms));
-    return () => timers.forEach(window.clearTimeout);
-  }, [enabled, map, pins]);
-
+    if (!map || !enabled || pins.length < 2) return;
+    const lngs = pins.map(pin => pin.lng);
+    const lats = pins.map(pin => pin.lat);
+    map.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+      { padding: 28, maxZoom: 13, duration: 0 });
+  }, [map, enabled, pins]);
   return null;
-}
-
-function buildRainbowPin() {
-  return divIcon({
-    html: mapPinMultiHtml(),
-    iconSize: [MAP_PIN_SIZE, MAP_PIN_SIZE],
-    iconAnchor: [PIN_HALF, PIN_HALF],
-    popupAnchor: [0, -PIN_HALF - 4],
-    className: "",
-  });
-}
-function buildPin(color: string) {
-  return divIcon({
-    className: "",
-    html: mapPinHtml(color),
-    iconSize: [MAP_PIN_SIZE, MAP_PIN_SIZE],
-    iconAnchor: [PIN_HALF, PIN_HALF],
-    popupAnchor: [0, -PIN_HALF - 4],
-  });
 }
 
 function DirectoryPopup({
@@ -412,7 +352,7 @@ function DirectoryPopup({
 }
 
 const PLACE_MINIMAP_STYLES = `
-  .directory-map--place-minimap .leaflet-tile-pane {
+  .directory-map--place-minimap .maplibregl-canvas {
     filter: grayscale(.82) saturate(.35) contrast(1.18) brightness(.68);
   }
   .directory-map--place-minimap .directory-map__accent-wash {
@@ -425,26 +365,26 @@ const PLACE_MINIMAP_STYLES = `
       radial-gradient(circle at 50% 48%, transparent 22%, color-mix(in srgb, var(--map-accent) 15%, transparent) 100%);
     mix-blend-mode: screen;
   }
-  .directory-map--place-minimap .leaflet-control-zoom a {
+  .directory-map--place-minimap .maplibregl-ctrl-group button {
     color: var(--map-accent) !important;
-    border-color: color-mix(in srgb, var(--map-accent) 44%, #1c1c22) !important;
+    border-color: var(--map-accent) !important;
   }
-  .directory-map--place-minimap .leaflet-control-attribution {
+  .directory-map--place-minimap .maplibregl-ctrl-attrib {
     color: color-mix(in srgb, var(--map-accent) 70%, #aaa) !important;
   }
 `;
 
 const POPUP_STYLES = `
-  .pdx-dir-popup .leaflet-popup-content-wrapper {
+  .pdx-dir-popup .maplibregl-popup-content {
     background: transparent !important;
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     padding: 0 !important;
   }
-  .pdx-dir-popup .leaflet-popup-content { margin: 0 !important; width: auto !important; }
-  .pdx-dir-popup .leaflet-popup-tip-container { display: none; }
-  .pdx-dir-popup .leaflet-popup-close-button {
+  .pdx-dir-popup .maplibregl-popup-content { margin: 0 !important; width: auto !important; }
+  .pdx-dir-popup .maplibregl-popup-tip { display: none; }
+  .pdx-dir-popup .maplibregl-popup-close-button {
     color: #888 !important;
     top: 4px !important;
     right: 6px !important;
@@ -453,7 +393,7 @@ const POPUP_STYLES = `
     height: 22px !important;
     z-index: 1;
   }
-  .pdx-dir-popup .leaflet-popup-close-button:hover { color: #fff !important; }
+  .pdx-dir-popup .maplibregl-popup-close-button:hover { color: #fff !important; }
 `;
 
 /** Color key for map pins - sits under the map on Directory. */
@@ -508,7 +448,7 @@ export default function DirectoryMap({
   showMarkers = true,
   backdrop = false,
   focusBusiness = false,
-  rasterBasemap = false,
+  minimap = false,
   accent,
   cameraMemory,
 }: {
@@ -525,8 +465,8 @@ export default function DirectoryMap({
   backdrop?: boolean;
   /** Center tightly on the supplied place, fitting all storefronts when needed. */
   focusBusiness?: boolean;
-  /** Use the lightweight Leaflet raster basemap instead of the vector renderer. */
-  rasterBasemap?: boolean;
+  /** Apply the compact, tinted presentation used inside a place card. */
+  minimap?: boolean;
   /** Optional category color wash for an embedded place minimap. */
   accent?: string;
 }) {
@@ -542,16 +482,16 @@ export default function DirectoryMap({
   const heightStyle = typeof mapHeight === "number" ? `${mapHeight}px` : mapHeight;
   const fillParent = mapHeight === "100%";
   const initialCenter: [number, number] = focusBusiness && mapped[0]
-    ? [mapped[0].lat, mapped[0].lng]
-    : [45.5231, -122.6765];
-  const initialZoom = focusBusiness && mapped.length === 1 ? 15 : 12;
+    ? [mapped[0].lng, mapped[0].lat]
+    : [-122.6765, 45.5231];
+  const initialZoom = focusBusiness && mapped.length === 1 ? 14 : 11;
 
   const mapSurface = (
     <div
       className={[
         fillParent ? "directory-map directory-map--fill" : "directory-map",
         isBackdrop ? "directory-map--backdrop" : "pdx-map-live pdx-map-surface pdx-map-surface--neutral",
-        rasterBasemap ? "directory-map--place-minimap" : "",
+        minimap ? "directory-map--place-minimap" : "",
       ].filter(Boolean).join(" ")}
       style={{
         height: heightStyle,
@@ -569,50 +509,25 @@ export default function DirectoryMap({
           <div className="pdx-map-live__shaft" aria-hidden="true" />
         </>
       )}
-      <MapContainer
-        center={savedView?.center ?? initialCenter}
-        zoom={savedView?.zoom ?? initialZoom}
+      <ZaylistMap ariaLabel="Places map" center={initialCenter} zoom={initialZoom} memory={cameraMemory}
         style={{ height: "100%", width: "100%", background: MAP_SURFACE_BG }}
         maxBounds={isBackdrop || focusBusiness ? undefined : PORTLAND_BOUNDS}
-        maxBoundsViscosity={1.0}
         minZoom={isBackdrop || focusBusiness ? undefined : PORTLAND_MIN_ZOOM}
-        dragging={isInteractive}
-        scrollWheelZoom={isInteractive}
-        doubleClickZoom={isInteractive}
-        boxZoom={isInteractive}
-        keyboard={isInteractive}
-        touchZoom={isInteractive}
-        zoomControl={isInteractive}
-        attributionControl={isInteractive}
-      >
-        {rasterBasemap ? (
-          <TileLayer
-            url={cartoDarkTileUrl()}
-            attribution={CARTO_ATTRIBUTION}
-            subdomains="abcd"
-            maxZoom={20}
-          />
-        ) : <Suspense fallback={null}><CartoVectorBasemap /></Suspense>}
-        <MapInvalidateSize enabled={isBackdrop || focusBusiness} />
+        interactive={isInteractive} scrollZoom={isInteractive} zoomControl={isInteractive}>
         <MapFocus pins={mapped} enabled={focusBusiness && !savedView} />
-        <IncidentalMapCamera memory={cameraMemory} />
         {mapped.map(pin => {
-          const accent = TYPE_COLORS[pin.biz.type] || "#FF1FA0";
-          const rainbow = pin.biz.type === "nonprofit";
+          const color = TYPE_COLORS[pin.biz.type] || TYPE_COLORS.bar;
+          const artwork = pin.biz.type === "nonprofit" ? mapPinMultiHtml() : mapPinHtml(color);
           return (
-            <Marker
-              key={pin.key}
-              position={[pin.lat, pin.lng]}
-              icon={rainbow ? buildRainbowPin() : buildPin(accent)}
-            >
-              <Popup className="pdx-dir-popup" maxWidth={280}>
-                <DirectoryPopup pin={pin} accent={accent} />
-              </Popup>
-            </Marker>
+            <ZaylistMapMarker key={pin.key} position={[pin.lng, pin.lat]}
+              label={[pin.biz.name, pin.locationLabel].filter(Boolean).join(" · ")}
+              popupClassName="pdx-dir-popup" popupMaxWidth="280px" popup={<DirectoryPopup pin={pin} accent={color} />}>
+              <span aria-hidden="true" dangerouslySetInnerHTML={{__html: artwork}} />
+            </ZaylistMapMarker>
           );
         })}
-      </MapContainer>
-      {rasterBasemap && accent && <div className="directory-map__accent-wash" aria-hidden="true" />}
+      </ZaylistMap>
+      {minimap && accent && <div className="directory-map__accent-wash" aria-hidden="true" />}
     </div>
   );
 

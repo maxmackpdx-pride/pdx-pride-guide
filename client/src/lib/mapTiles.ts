@@ -5,11 +5,6 @@ declare global {
 }
 
 const CARTO_DARK_VECTOR = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
-const CARTO_DARK_RASTER = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png";
-
-/** Required by CARTO's free basemap tier. */
-export const CARTO_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
 export function readCartoKey(): string {
   if (typeof window !== "undefined") {
@@ -28,11 +23,6 @@ function withCartoKey(url: string): string {
 /** Dark Matter vector style. Key is attached so the later vector key requirement is a no-op. */
 export function cartoDarkVectorStyleUrl(): string {
   return withCartoKey(CARTO_DARK_VECTOR);
-}
-
-/** Load fallback tiles in the visitor's browser instead of routing them through Zaylist. */
-export function cartoDarkTileUrl(): string {
-  return withCartoKey(CARTO_DARK_RASTER);
 }
 
 /** MapLibre fetches style.json, then tiles/sprites/fonts without the query. Reattach the key. */

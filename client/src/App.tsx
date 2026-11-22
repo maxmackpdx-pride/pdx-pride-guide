@@ -331,7 +331,12 @@ function AppLayout() {
 const CardFrontPreview = import.meta.env.DEV ? lazyWithReload(() => import("./pages/CardFrontPreview")) : null;
 const CardSystemPreview = import.meta.env.DEV ? lazyWithReload(() => import("./pages/CardSystemPreview")) : null;
 
+const OutzideTerrainPreview = import.meta.env.DEV ? lazyWithReload(() => import("./pages/dev/OutzideTerrainPreview")) : null;
+
 export default function App() {
+  if (OutzideTerrainPreview && window.location.pathname === "/dev/outzide-terrain") {
+    return <Suspense fallback={<SpectrumLoader label="Opening Outzide terrain" />}><OutzideTerrainPreview /></Suspense>;
+  }
   if (CardSystemPreview && window.location.pathname === "/dev/card-system") {
     return <Suspense fallback={<SpectrumLoader label="Opening preview"/>}><CardSystemPreview/></Suspense>;
   }

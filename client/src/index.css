@@ -3396,7 +3396,7 @@ button.event-type-filter {
   border-bottom: 1px solid #2f2f2f;
   box-shadow: inset 0 0 60px rgba(0,0,0,0.65);
 }
-.map-container .leaflet-container { height: 100%; width: 100%; }
+.map-container .maplibregl-map { height: 100%; width: 100%; }
 
 .map-exit-button {
   position: absolute;
@@ -6433,8 +6433,6 @@ html.calm-mode .user-avatar[data-ring]:not([data-ring="none"])::before {
 /* Footer link hover */
 footer a { transition: color 0.15s ease; }
 footer a:hover { color: #00FFFF !important; }
-
-/* Leaflet overrides - CartoDB Dark Matter tiles are already dark, NO filter */
 
 .parallax-container {
   background-attachment: fixed;
@@ -12281,8 +12279,6 @@ html.calm-mode .feed-aff__slide,
 html.calm-mode .feed-aff__cover,
 html.calm-mode .feed-aff__logo,
 html.calm-mode .featured-event-ad__slide,
-html.calm-mode .leaflet-tile-pane img,
-html.calm-mode .leaflet-marker-pane img,
 html.calm-mode canvas.maplibregl-canvas,
 html.calm-mode .maplibregl-canvas {
   filter: none !important;
@@ -12394,8 +12390,7 @@ html.calm-mode .user-avatar img,
 html.calm-mode .pdxBoard__img,
 html.calm-mode .event-modal__poster-img,
 html.calm-mode .poster-card img,
-html.calm-mode .hub-feed-card__photo,
-html.calm-mode .leaflet-tile-pane img {
+html.calm-mode .hub-feed-card__photo {
   filter: none !important;
 }
 
@@ -16486,10 +16481,8 @@ html.calm-mode .board-stats-band,
 
 .category-constellation__map-bg .directory-map,
 .category-constellation__map-bg .directory-map--backdrop,
-.category-constellation__map-bg .leaflet-container,
-.category-constellation__map-bg .leaflet-pane,
-.category-constellation__map-bg .leaflet-map-pane,
-.category-constellation__map-bg .leaflet-tile-pane {
+.category-constellation__map-bg .maplibregl-map,
+.category-constellation__map-bg .maplibregl-canvas-container {
   width: 100% !important;
   height: 100% !important;
   pointer-events: none;
