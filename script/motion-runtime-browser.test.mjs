@@ -90,3 +90,80 @@ test('real dock, navigation and auth transitions work with normal and reduced mo
     }
   } finally {await browser?.close();await server.close();await rm(cacheDir,{recursive:true,force:true});}
 });
+
+test('shared mobile dock keeps five centered tappable controls at phone widths', {timeout:90000}, async () => {
+  const cacheDir=await mkdtemp(path.join(tmpdir(),'mobile-dock-geometry-vite-'));
+  const fixture='script/fixtures/mobile-dock-geometry-browser.tsx';
+  let server, browser;
+  try {
+    server=await createServer({
+      configFile:false,root,cacheDir,publicDir:path.join(root,'client/public'),
+      optimizeDeps:{entries:[fixture],include:['react/jsx-runtime','react/jsx-dev-runtime','motion/react']},
+      plugins:[react(),{name:'mobile-dock-geometry-fixture',configureServer(s){
+        s.middlewares.use(async(req,res,next)=>{
+          if(req.url!=='/__mobile-dock-geometry')return next();
+          res.setHeader('Content-Type','text/html');
+          res.end(await s.transformIndexHtml(req.url,`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="root"></div><script type="module" src="/${fixture}"></script></body></html>`));
+        });
+      }}],
+      resolve:{alias:{'@':path.join(root,'client/src'),'@shared':path.join(root,'shared'),'@assets':path.join(root,'attached_assets')}},
+      server:{host:'127.0.0.1',port:0,hmr:false,watch:null}
+    });
+    await server.listen();
+    await server.warmupRequest('/'+fixture);
+    const url=new URL('/__mobile-dock-geometry',server.resolvedUrls.local[0]).href;
+    browser=await chromium.launch({headless:true});
+    for(const width of [320,390,430]){
+      const context=await browser.newContext({viewport:{width,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1,reducedMotion:'reduce'});
+      try {
+        const page=await context.newPage();
+        page.setDefaultTimeout(8000);
+        const errors=[];
+        page.on('pageerror',error=>errors.push(error.message));
+        await page.goto(url);
+        const dock=page.getByRole('navigation',{name:'Site mobile navigation'});
+        const buttons=dock.getByRole('button');
+        await dock.waitFor();
+        assert.equal(await buttons.count(),5,`${width}px: all five controls rendered`);
+        const layout=await dock.evaluate(async nav=>{
+          await document.fonts.ready;
+          await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+          const box=element=>{
+            const {left,right,top,bottom,height,width}=element.getBoundingClientRect();
+            return {left,right,top,bottom,height,width};
+          };
+          return {
+            viewportWidth:document.documentElement.clientWidth,
+            dock:box(nav),
+            row:box(nav.querySelector('.hub-mobile-bar__dock')),
+            tabs:[...nav.querySelectorAll('[data-dock-index]')].map(element=>({...box(element),index:Number(element.dataset.dockIndex)})),
+          };
+        });
+        const {dock:frame,row,tabs,viewportWidth}=layout;
+        const near=(a,b,message)=>assert.ok(Math.abs(a-b)<=1.1,`${width}px: ${message}: ${a} vs ${b} — ${JSON.stringify(layout)}`);
+        near(frame.height,56,'dock height');
+        assert.ok(frame.left>=0&&frame.right<=viewportWidth+1,`${width}px: dock fits the viewport`);
+        near(row.left-frame.left,frame.right-row.right,'dock row centered horizontally');
+        const labels=['Eventz','Placez','Home','Boardz','Account'];
+        assert.equal(await buttons.nth(2).getAttribute('data-dock-selected'),'true');
+        for(const [i,tab] of tabs.entries()){
+          assert.equal(tab.index,i,`${width}px: tab order`);
+          near(tab.height,44,`control ${i} height`);
+          near(tab.top-frame.top,frame.bottom-tab.bottom,`control ${i} vertically centered`);
+          assert.ok(tab.left>=frame.left+1&&tab.right<=frame.right-1&&tab.top>=frame.top+1&&tab.bottom<=frame.bottom-1,`${width}px: control ${i} is not clipped`);
+          assert.ok(tab.width>=44,`${width}px: control ${i} has a 44px touch width`);
+          if(i>0)assert.ok(tab.left>=tabs[i-1].right-1,`${width}px: control ${i} doesn't overlap its neighbor`);
+          const button=dock.getByRole('button',{name:labels[i],exact:true});
+          await button.tap();
+          assert.equal(await button.getAttribute('data-dock-selected'),'true',`${width}px: control ${i} responds to tap`);
+          assert.equal(await dock.locator('[data-dock-selected="true"]').count(),1,`${width}px: exactly one selected control`);
+        }
+        assert.deepEqual(errors,[],`${width}px: no dock runtime errors`);
+      } finally {await context.close();}
+    }
+  } finally {
+    await browser?.close();
+    await server?.close();
+    await rm(cacheDir,{recursive:true,force:true});
+  }
+});
