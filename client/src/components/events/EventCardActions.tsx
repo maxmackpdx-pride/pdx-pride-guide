@@ -1,6 +1,7 @@
 import { EventDirections } from "./EventDirections";
+import { EventMapSurface } from "@/components/EventLocationMap";
 import { useId,useLayoutEffect,useRef,useState,type CSSProperties } from "react";
-import { X } from "lucide-react";
+import { MapPin, X } from "lucide-react";
 import type { EventListing } from "@shared/multiDayEvents";
 import { DiscoveryWordmark } from "../drawers/DiscoveryWordmark";
 import { resolveDirectoryLogo } from "@/lib/directoryLogos";
@@ -16,8 +17,8 @@ const tiles = [
 type Tile = typeof tiles[number];
 
 
-export function EventActionTiles({ event, website, googleDirections, appleDirections }: {
-  event: EventListing; website?: string | null; googleDirections: string; appleDirections: string;
+export function EventActionTiles({ event, flyerAccent, website, googleDirections, appleDirections }: {
+  event: EventListing; flyerAccent?: string | null; website?: string | null; googleDirections: string; appleDirections: string;
 }) {
   const [open, setOpen] = useState<Tile | null>(null);
   const panelId = useId();
@@ -51,7 +52,12 @@ export function EventActionTiles({ event, website, googleDirections, appleDirect
       </div>}
       {open.key === "ridez" && <EventPlanning eventId={event.id} occurrenceDate={event.dateStart} section="rides"/>}
       {open.key === "afterz" && <NightDrawer eventId={event.id} occurrenceDate={event.dateStart}/>}
-      {open.key === "directions" && <EventDirections event={event} google={googleDirections} apple={appleDirections}/>}
+      {open.key === "directions" && <>
+        <EventMapSurface event={event} primary={flyerAccent || "var(--neon-red)"} complementary="var(--text-hi)">
+          {!event.isPrivate && <a className="evz-x__link evz-map-open" href={`/placez/map?mode=mapz&item=event-${event.id}`}>Open on PlaceZ <MapPin size={16}/></a>}
+        </EventMapSurface>
+        <EventDirections event={event} google={googleDirections} apple={appleDirections}/>
+      </>}
       {open.key === "website" && website && <><h3>{event.venueName}</h3><a className="evz-x__link" href={website} target="_blank" rel="noreferrer">Visit website</a></>}
     </section>}
   </>;

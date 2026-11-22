@@ -297,3 +297,45 @@
 .evz-x .evz-action-drawer[data-glass-piece="overlay"] { border-top: 0 !important; }
 .evz-x__heading { padding: 25px 25px 0; }
 .evz-x__foot { padding: 6px 24px 14px; }
+
+/* Card update (Tucker, Nov 21, 2026 — the demo is the spec of record): the
+   header is the centered full-bleed top. The poster is the background of the
+   whole top, dissolving through its fade into the card ground; the title,
+   when line and chips sit centered over the lower fade, higher on the poster
+   than the old thumb-side head; the close X rides top-right over the poster.
+   On scroll the header loses height with the scroll — the poster band and
+   the head padding compress on --pin-progress alongside the ~8% pin scale —
+   then stops at the top with padding, and page content disappears under the
+   pin's bottom edge. The Maps page is gone: its map lives in the Directions
+   tile's panel (see .evz-action-drawer .event-location-map below). */
+.evz-x__heading {
+  position: relative; display: block; text-align: center;
+  padding: calc(104px - 48px * var(--pin-progress)) 20px 0;
+  background: transparent;
+}
+.evz-x__posterbg {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 0; overflow: hidden;
+  height: calc(480px - 160px * var(--pin-progress)); pointer-events: none;
+}
+.evz-x__posterbg > img {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center top; display: block;
+}
+.evz-x__posterbg-fade {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(10,10,10,.16) 0%, rgba(10,10,10,.04) 16%, rgba(10,10,10,.38) 27%, rgba(10,10,10,.78) 35%, rgba(10,10,10,.94) 43%, var(--z-black) 52%, var(--z-black) 100%);
+}
+.evz-x__posterhit { position: absolute; inset: 0; z-index: 1; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
+.evz-x__heading-copy { position: relative; z-index: 2; pointer-events: none; text-align: center; }
+.evz-x__heading-copy a { pointer-events: auto; }
+.evz-x__heading .evz-x__title { font: 800 29px/1.02 var(--font-display, "Barlow Condensed", sans-serif); margin: 0 auto; text-shadow: 0 3px 16px rgba(0,0,0,.85); }
+.evz-x__when { font: 600 13.5px/1.4 var(--font-body, sans-serif); margin: 7px 0 0; text-shadow: 0 2px 10px rgba(0,0,0,.9); }
+.evz-x__chips { justify-content: center; gap: 6px; margin-top: 11px; }
+.evz-x__close--head {
+  position: absolute; top: 10px; right: 10px; z-index: 3;
+  width: 36px; height: 36px; display: grid; place-items: center;
+  color: var(--text-hi); border: 1px solid var(--panel-border); border-radius: 50%;
+  background: rgba(5,5,6,.62);
+}
+.evz-actions { margin-top: calc(20px - 6px * var(--pin-progress)); gap: 12px; }
+.evz-action-drawer .event-location-map { position: relative; min-height: 214px; margin-bottom: 12px; border: 1px solid var(--piece); border-radius: 12px; overflow: hidden; }
