@@ -1,4 +1,3 @@
-import { EventMapSurface } from "@/components/EventLocationMap";
 import EventMizzedBlock from "./EventMizzedBlock";
 import { EventReport } from "./EventReport";
 import { EventShare } from "./EventShare";
@@ -12,7 +11,7 @@ import { EventHostNotice } from "./EventHostNotice";
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { ArrowUpRight, ChevronLeft, ChevronRight, MapPin, X } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { EventListing as Event } from "@shared/multiDayEvents";
 import { EVENT_TALENT_ROLE_COLORS, EVENT_TALENT_ROLE_LABELS, type EventTalentRow } from "@shared/eventTalent";
 import { publicHttpUrl } from "@shared/safeHttpUrl";
@@ -104,7 +103,7 @@ type EventDetail = {
   nearby: { restaurants: SlimPlace[]; events: NearbyEvent[] };
 };
 
-const PAGES = ["Feed", "Info", "Maps", "People", "More", "Nearby"] as const;
+const PAGES = ["Feed", "Info", "People", "More", "Nearby"] as const;
 
 type EventzExpandedProps = {
   openPlanning?: boolean;
@@ -196,7 +195,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
   const [visited, setVisited] = useState<number[]>([]);
   function selectPage(index: number) {
     setPage(index);
-    if (index >= 3) setVisited(previous => previous.includes(index) ? previous : [...previous, index]);
+    if (index >= 2) setVisited(previous => previous.includes(index) ? previous : [...previous, index]);
   }
   const [mizzedOpen, setMizzedOpen] = useState(false);
   const [venueDay, setVenueDay] = useState<string | null>(null);
@@ -215,7 +214,7 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
       const height = measureHeight ? pin!.offsetHeight : 0;
       const progress = Math.min(1, Math.max(0, (active as HTMLElement).scrollTop / 140));
       if (measureHeight) card.style.setProperty("--pin-height", height + "px");
-      const scale = 1 - progress * .3;
+      const scale = 1 - progress * .08;
       card.style.setProperty("--pin-scale", String(scale));
       card.style.setProperty("--pin-progress", String(progress));
       if (progress === 1 && !pinned && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -275,14 +274,14 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
   const placeQuery = useQuery<{ upcomingEvents?: PlaceUpcomingEvent[]; promoters?: PlacePromoter[] }>({
     queryKey: ["/api/placez", venue?.id, "card-extras", user?.id],
     queryFn: () => apiRequest("GET", `/api/placez/${venue!.id}`).then((r) => r.json()),
-    enabled: Boolean(venue?.id) && (visited.includes(3) || visited.includes(4)),
+    enabled: Boolean(venue?.id) && (visited.includes(2) || visited.includes(3)),
     staleTime: 300_000,
   });
   const placeData = placeQuery.data;
   const venueUpcoming: PlaceUpcomingEvent[] = Array.isArray(placeData?.upcomingEvents) ? placeData.upcomingEvents : [];
   const promoters: PlacePromoter[] = Array.isArray(placeData?.promoters) ? placeData.promoters : [];
   const eventDayKey = pacificDayKey(event.dateStart);
-  const stripDays = eventDayKey && visited.includes(4)
+  const stripDays = eventDayKey && visited.includes(3)
     ? Array.from({ length: 7 }, (_, i) => {
         const key = shiftDayKey(eventDayKey, i);
         const dayEvents = venueUpcoming.filter((e) => e.id !== event.id && pacificDayKey(e.dateStart) === key);
@@ -345,6 +344,13 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
     <div className="evz-sheet-layout">
       <div className="evz-pin" ref={pinRef}>
       <header className="evz-x__heading">
+        <div className="evz-x__posterbg" aria-hidden="true">
+          {poster
+            ? <img {...posterAttributes} alt="" onError={e => { if (!restoreOriginalPoster(e.currentTarget, poster)) setFailedPoster(poster); }}/>
+            : <PosterlessFlyer placeImageUrl={isFetLife ? null : venue?.imageUrl || event.fallbackPlaceImage} logoUrl={fallbackLogo} wordmark={fallbackWordmark}/>}
+          <span className="evz-x__posterbg-fade" />
+        </div>
+        {poster ? <button type="button" className="evz-x__posterhit" onClick={() => setPosterOpen(true)} aria-label={`Open full poster for ${event.title}`} /> : null}
         <div className="evz-x__heading-copy">
           <h2 className="evz-x__title">{event.title}</h2>
           <p className="evz-x__when">{shortWhen} · {venue
@@ -355,14 +361,9 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
             {chips.map(chip => <span className="evz-x__chip" key={chip}>{chip}</span>)}
           </div>
         </div>
-        <div className="evz-x__thumb">
-          {poster ? <button type="button" onClick={() => setPosterOpen(true)} aria-label={`Open full poster for ${event.title}`}>
-            <img {...posterAttributes} alt="" onError={e => { if (!restoreOriginalPoster(e.currentTarget, poster)) setFailedPoster(poster); }}/>
-          </button> : <PosterlessFlyer placeImageUrl={isFetLife ? null : venue?.imageUrl || event.fallbackPlaceImage} logoUrl={fallbackLogo} wordmark={fallbackWordmark}/>}
-          <button type="button" className="evz-x__close" onClick={requestClose} aria-label={`Close ${event.title}`}><X size={18}/></button>
-        </div>
+        <button type="button" className="evz-x__close evz-x__close--head" onClick={requestClose} aria-label={`Close ${event.title}`}><X size={18}/></button>
       </header>
-      <EventActionTiles event={event} website={publicHttpUrl((event as Event & {venueWebsite?: string}).venueWebsite) ?? publicHttpUrl(resolveVenueWebsite(event.venueName))} googleDirections={googleDirections} appleDirections={appleDirections}/>
+      <EventActionTiles event={event} flyerAccent={flyerAccent} website={publicHttpUrl((event as Event & {venueWebsite?: string}).venueWebsite) ?? publicHttpUrl(resolveVenueWebsite(event.venueName))} googleDirections={googleDirections} appleDirections={appleDirections}/>
       {posterOpen && poster && <EventPosterDialog src={poster} title={event.title} onClose={() => setPosterOpen(false)}/>}
       <nav className="evz-x__tabs" aria-label="Event pages">
         {PAGES.map((label, index) => (
@@ -425,15 +426,8 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
             <EventHostNotice className="evz-x__note" />
           </section>
 
-          <section className="evz-x__page" inert={page !== 2} aria-hidden={page !== 2} aria-label="Maps">
-            <div className="evz-x__sech"><span>Map &amp; directions</span><span className="evz-x__sech-r">Location overview</span></div>
-            {page === 2 && <EventMapSurface event={event} primary={flyerAccent || "var(--neon-red)"} complementary="var(--text-hi)">
-              {!event.isPrivate && <a className="evz-x__link evz-map-open" href={`/placez/map?mode=mapz&item=event-${event.id}`}>Open on PlaceZ <MapPin size={16}/></a>}
-            </EventMapSurface>}
-          </section>
-
-          <section className="evz-x__page" inert={page !== 3} aria-hidden={page !== 3} aria-label="People">
-            {visited.includes(3) && <>
+          <section className="evz-x__page" inert={page !== 2} aria-hidden={page !== 2} aria-label="People">
+            {visited.includes(2) && <>
             <div className="evz-x__sech"><span>{hosts.length === 1 ? "Host" : "Hosts"}</span></div>
             {!Array.isArray(detail?.hosts) ? detailStatus : hosts.length > 0 ? (
               <div className="evz-x__people">
@@ -499,8 +493,8 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
             </>}
           </section>
 
-          <section className="evz-x__page" inert={page !== 4} aria-hidden={page !== 4} aria-label="More">
-            {visited.includes(4) && <>
+          <section className="evz-x__page" inert={page !== 3} aria-hidden={page !== 3} aria-label="More">
+            {visited.includes(3) && <>
             {venue && !Array.isArray(placeData?.upcomingEvents) && <EventReadStatus label="More at this venue" query={placeQuery} />}
             {venue && stripDays.some((d) => d.events.length > 0) ? (
               <>
@@ -536,12 +530,12 @@ function EventzExpandedInner({ event, onClose, onManage, onOpenEvent, openPlanni
               </>
             ) : null}
             <EventMizzedBlock event={event} hasNotes={missedCount > 0} onOpen={() => setMizzedOpen(true)}/>
-            {page === 4 && <EventPlanning section="gigs" eventId={event.id} occurrenceDate={event.dateStart}/>}
+            {page === 3 && <EventPlanning section="gigs" eventId={event.id} occurrenceDate={event.dateStart}/>}
             </>}
           </section>
 
-          <section className="evz-x__page" inert={page !== 5} aria-hidden={page !== 5} aria-label="Nearby">
-            {visited.includes(5) && <>
+          <section className="evz-x__page" inert={page !== 4} aria-hidden={page !== 4} aria-label="Nearby">
+            {visited.includes(4) && <>
             <div className="evz-x__sech"><span>Restaurants close by</span></div>
             {!Array.isArray(detail?.nearby?.restaurants) ? detailStatus : restaurants.length === 0 ? (
               <p className="evz-x__empty">No restaurants mapped close by yet.</p>
