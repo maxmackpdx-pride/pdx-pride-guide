@@ -1,11 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-// Leaflet only needs a browser-shaped global to load; waypointHtml itself is pure.
-const el=()=>new Proxy(function(){},{get:(t,k)=>k==='style'?{}:k==='childNodes'?[]:el(),apply:()=>el(),set:()=>true});
-globalThis.window??=globalThis;globalThis.document??=el();globalThis.screen??={};
-try{globalThis.navigator??={userAgent:'node',platform:'node'};}catch{}
-const {waypointHtml}=await import('../client/src/lib/livingMapWaypoints.ts');
+import {waypointHtml} from '../client/src/lib/livingMapWaypointMarkup.ts';
 
 // The glow color is an inline style (some WebKit builds ignore var() in presentation attributes).
 const glow=html=>html.match(/<path class="wp-glow-ring"[^>]*style="stroke:([^";]*)"/)[1];

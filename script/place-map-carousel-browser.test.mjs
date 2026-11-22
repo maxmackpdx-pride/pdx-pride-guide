@@ -3,7 +3,7 @@ import {test} from 'node:test';
 import {mapFixture} from './map-browser-helpers.mjs';
 const near=(a,b,label)=>assert.ok(Math.abs(a-b)<=1.1,`${label}: ${a} vs ${b}`);
 test('real PlaceModal carousel preserves camera, pinned phone, anchors and viewport geometry',{timeout:150000},async()=>{
- const f=await mapFixture('script/fixtures/place-map-carousel-browser.tsx',{mobile:true,prefix:'/directory'});const {page,context}=f;
+ const f=await mapFixture('script/fixtures/place-map-carousel-browser.tsx',{mobile:true,webgl:true,prefix:'/directory'});const {page,context}=f;
  try{
   const business={id:100,name:'QA Carousel Cafe',type:'cafe',description:Array(35).fill('Community events, accessible seating, coffee and neighborhood resources.').join(' '),address:'123 Main St',neighborhood:'Portland',website:null,instagram:null,donateUrl:null,hours:'Daily 7am–9pm',phone:'503-555-0123',queerOwned:true,queerFriendly:true,imageUrl:'/directory-logos/coffeebeer-white.svg',lat:45.52,lng:-122.67,isNew:false};
   const businesses=Array.from({length:6},(_,i)=>({...business,id:100+i,name:`QA Carousel Cafe ${i+1}`}));
@@ -17,7 +17,7 @@ test('real PlaceModal carousel preserves camera, pinned phone, anchors and viewp
   for(let cycle=0;cycle<2;cycle++){
    await card.locator('button[aria-label^="View details for "]').click();await page.locator('.pz-page-panel[aria-hidden=false]').waitFor();await settle();await active(0);
    const before=await snapshot(),top=await box(page.locator('.site-header')),bottom=await box(page.locator('.z-mobile-dock'));near(before.panel.x,390-before.panel.right,'centered viewport');assert.ok(before.panel.x>=-1&&before.panel.right<=391&&before.panel.y>=top.bottom-1&&before.panel.bottom<=bottom.y+1,'all corners clear chrome');
-   await page.getByRole('tab',{name:'Maps',exact:true}).click();await active(1);await settle();same(before,await snapshot(),'map dot');assert.equal(await page.getByRole('tab',{name:'Maps',exact:true}).getAttribute('aria-selected'),'true');await page.evaluate(()=>{[...window.mapStats.active][0].setView([45.61,-122.71],16,{animate:false});});
+   await page.getByRole('tab',{name:'Maps',exact:true}).click();await active(1);await settle();same(before,await snapshot(),'map dot');assert.equal(await page.getByRole('tab',{name:'Maps',exact:true}).getAttribute('aria-selected'),'true');await page.evaluate(()=>{[...window.mapStats.active][0].jumpTo({center:[-122.71,45.61],zoom:16});});
    await page.getByRole('tab',{name:'Info',exact:true}).click();await active(0);await settle();same(before,await snapshot(),'art dot');
    const r=await page.locator('.pz-page-viewport').boundingBox(),session=await context.newCDPSession(page),x=r.x+r.width*.82,y=r.y+r.height*.35;await session.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});for(let i=1;i<=6;i++){await session.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x-r.width*.65*i/6,y}]});await page.waitForTimeout(25);}await session.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await session.detach();await active(1);await settle();same(before,await snapshot(),'native swipe');
    const restored=await page.evaluate(()=>{const m=[...window.mapStats.active][0];return {lat:m.getCenter().lat,zoom:m.getZoom()};});assert.ok(Math.abs(restored.lat-45.61)<.0001);assert.equal(restored.zoom,16);
