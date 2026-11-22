@@ -11,6 +11,8 @@
   --room-sellz: var(--green-acid, #2BFF00);
   --room-outz: var(--neon-orange, #FF7B00);
   --room-mizzed: var(--board-spotted, #FF1FA0);
+  /* ZayDark scarlet; no palette token carries this hue, so it is defined here. */
+  --room-zaydark: #FF2400;
   /* Gigz purple is too dark for label ink; text lifts to a tint of it. */
   --room-gigz-ink: #b06bff;
 }
