@@ -113,7 +113,7 @@ export default function RiverBratsCheckIn({
   const beachShortLabel = beachId === "rooster-rock" ? "Rooster Rock" : "Collins Beach";
   const posterUrl = resolveBeachPosterUrl(beachId);
 
-  const queryKey = ["/api/river-brats/checkins", beachId, selectedDate] as const;
+  const queryKey = ["/api/river-brats/checkins", beachId, selectedDate, user?.id] as const;
 
   const { data: checkinData, isLoading } = useQuery<CheckinRow[]>({
     queryKey,
@@ -168,7 +168,7 @@ export default function RiverBratsCheckIn({
   const { data: myPlans = [] } = useQuery<
     Array<{ beachId: string; calendarDate: string; isAnonymous?: boolean }>
   >({
-    queryKey: ["/api/river-brats/checkins/mine"],
+    queryKey: ["/api/river-brats/checkins/mine", user?.id],
     queryFn: () =>
       apiRequest("GET", "/api/river-brats/checkins/mine").then(r => r.json()).catch(() => []),
     enabled: Boolean(user),
@@ -223,7 +223,7 @@ export default function RiverBratsCheckIn({
     if (departHour == null || departHour <= hour) {
       setDepartHour(defaultDepartHour(hour));
     }
-  }, [hour]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [hour, departHour]);
 
   const calendarPayload = useMemo(() => {
     if (hour == null || departHour == null) return null;
@@ -259,7 +259,7 @@ export default function RiverBratsCheckIn({
         return data;
       });
     },
-    onSuccess: (row) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
       queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins/mine"] });
       queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins/chat", beachId] });
@@ -271,9 +271,6 @@ export default function RiverBratsCheckIn({
             ? `You're on the ${dayLabel} list anonymously (counted, not in chat).`
             : `You're on the ${dayLabel} list  -  group chat is open now. Multi-day plans keep you in longer.`,
       });
-      if (row?.id) {
-        // Keep local calendar payload id for ICS UID stability after first save.
-      }
     },
     onError: (err: Error) =>
       toast({ title: "Could not check in", description: err.message, variant: "destructive" }),
@@ -293,33 +290,35 @@ export default function RiverBratsCheckIn({
     setVerifying(true);
     navigator.geolocation.getCurrentPosition(
       async position => {
-        try {
-          const r = await fetch("/api/river-brats/checkins/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-              beachId,
-              date: selectedDate,
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            }),
-          });
-          const data = await r.json().catch(() => ({}));
-          if (r.ok && data.ok) {
-            queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
-            toast({ title: "You're here", description: "Verified on the beach - say hi in chat." });
-          } else if (data.error === "TOO_FAR") {
-            toast({
-              title: "Not quite there yet",
-              description: `You look about ${data.distanceM >= 1000 ? `${(data.distanceM / 1000).toFixed(1)}km` : `${data.distanceM}m`} from the beach. Try again when you arrive.`,
-              variant: "destructive",
-            });
-          } else {
-            toast({ title: "Couldn't verify", description: data.error || "Try again in a minute.", variant: "destructive" });
-          }
-        } finally {
+        const r = await fetch("/api/river-brats/checkins/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            beachId,
+            date: selectedDate,
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          }),
+        }).catch(() => null);
+        if (!r) {
           setVerifying(false);
+          toast({ title: "Couldn't verify", description: "Check your connection and try again.", variant: "destructive" });
+          return;
+        }
+        const data = await r.json().catch(() => ({}));
+        setVerifying(false);
+        if (r.ok && data.ok) {
+          queryClient.invalidateQueries({ queryKey: ["/api/river-brats/checkins"] });
+          toast({ title: "You're here", description: "Verified on the beach - say hi in chat." });
+        } else if (data.error === "TOO_FAR") {
+          toast({
+            title: "Not quite there yet",
+            description: `You look about ${data.distanceM >= 1000 ? `${(data.distanceM / 1000).toFixed(1)}km` : `${data.distanceM}m`} from the beach. Try again when you arrive.`,
+            variant: "destructive",
+          });
+        } else {
+          toast({ title: "Couldn't verify", description: data.error || "Try again in a minute.", variant: "destructive" });
         }
       },
       () => {
@@ -650,6 +649,8 @@ export default function RiverBratsCheckIn({
         </section>
 
         <RiverBratsGroupChat
+          key={user?.id ?? "guest"}
+          viewerId={user?.id}
           beachId={beachId}
           date={selectedDate}
           beachShortLabel={beachShortLabel}

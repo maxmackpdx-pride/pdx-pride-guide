@@ -1,0 +1,4 @@
+/* The selected destination sheet owns touches where it covers the map controls. */
+.zaylist-unified-map .app.mode-outzide.drawer-expanded.outdoor-detail-open > aside.discovery {
+  z-index: 23;
+}

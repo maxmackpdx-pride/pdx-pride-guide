@@ -1496,3 +1496,74 @@ html.calm-mode .nude-map-btn--primary {
 .nude-outz-link > p { color: var(--c); font-size: 11px; font-weight: 800; letter-spacing: .12em; margin: 0; }
 .nude-outz-link > h2 { color: #fff; font-family: var(--font-display, sans-serif); font-size: clamp(1.5rem, 3vw, 2.4rem); line-height: .94; margin: 0; max-width: 26rem; text-transform: uppercase; }
 .nude-outz-link .pdx-glass-btn { min-height: 44px; }
+
+/* The expanded destination card owns the scroll, including on desktop. */
+.nude-beaches-page.beach-card-section {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  overflow-wrap: anywhere;
+}
+
+.beach-card-section .nude-refresh-bar,
+.beach-card-section .nude-beaches-map-row__actions {
+  padding: 0 0 12px;
+}
+
+.nude-beaches-page.beach-card-section .nude-beaches-map-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  height: auto;
+  min-height: 0;
+}
+
+.nude-beaches-page.beach-card-section .nude-beaches-map-row .events-map-row__panel,
+.nude-beaches-page.beach-card-section .nude-beaches-map-row .events-map-row__map,
+.nude-beaches-page.beach-card-section .nude-beaches-map-row .events-map-row__panel .nb-hub {
+  order: initial;
+  min-width: 0;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+}
+
+.nude-beaches-page.beach-card-section .nude-beaches-map-row .events-map-row__panel .nb-hub {
+  overflow: visible;
+  padding: 0;
+}
+
+.nude-beaches-page.beach-card-section .nude-beaches-map-row .events-map-row__map .nude-beaches-map__canvas {
+  height: 220px;
+  min-height: 0;
+}
+
+.beach-card-section .river-brats.pdx-glass-rebind {
+  margin: 0;
+  padding: 0;
+}
+
+.beach-card-section .river-brats__tabs {
+  flex-wrap: wrap;
+  padding-top: 0;
+}
+
+.beach-card-section .nb-log__grid,
+.beach-card-section .rb-checkin__grid,
+.beach-card-section .rb-checkin__visibility {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.beach-card-section .rb-checkin__cal-wrap:has(.event-link-choice-menu) {
+  flex-basis: 100%;
+}
+
+.beach-card-section .rb-checkin__cal-wrap .event-link-choice-menu {
+  position: static;
+  min-width: 0;
+  margin-top: 8px;
+}

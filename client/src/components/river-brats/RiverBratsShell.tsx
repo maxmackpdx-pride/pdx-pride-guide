@@ -5,33 +5,30 @@ import { RIVER_BRATS_SHORE_TABS, readRiverBratsShore, type RiverBratsShoreTab } 
 import RiverBratsCheckIn from "./RiverBratsCheckIn";
 import RiverBratsCarpool from "./RiverBratsCarpool";
 import RiverBratsSpotted from "./RiverBratsSpotted";
-import { openRiverBratsIntro } from "./RiverBratsIntroPopup";
+import RiverBratsIntroPopup, { openRiverBratsIntro } from "./RiverBratsIntroPopup";
 import "./RiverBrats.css";
 
 type Props = {
   beachId: NudeBeachTab;
+  embedded?: boolean;
+  initialShore?: RiverBratsShoreTab;
 };
 
-export default function RiverBratsShell({ beachId }: Props) {
+export default function RiverBratsShell({ beachId, embedded = false, initialShore }: Props) {
   const [, setLocation] = useLocation();
   const accent = beachId === "rooster-rock" ? "orange" : "green";
+  const [initialParams] = useState(() => new URLSearchParams(
+    !embedded && typeof window !== "undefined" ? window.location.search : "",
+  ));
   const [shore, setShoreState] = useState<RiverBratsShoreTab>(() =>
-    readRiverBratsShore(typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("shore") : null),
+    initialShore ?? readRiverBratsShore(initialParams.get("shore")),
   );
-  // Carpool day deep-link from plan-ahead check-in CTA (?date=YYYY-MM-DD).
   const [carpoolDate, setCarpoolDate] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    const d = new URLSearchParams(window.location.search).get("date");
-    return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : null;
+    const date = initialParams.get("date");
+    return date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null;
   });
-  // Deep links: ?verify=1 (arrival push → GPS confirm) and ?chat=1 (Inbox
-  // GROUP row → open beach chat). Captured once, then stripped from the URL.
-  const [autoVerify] = useState(
-    () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("verify") === "1",
-  );
-  const [autoOpenChat] = useState(
-    () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("chat") === "1",
-  );
+  const autoVerify = initialParams.get("verify") === "1";
+  const autoOpenChat = initialParams.get("chat") === "1";
 
   useEffect(() => {
     if (!autoVerify && !autoOpenChat) return;
@@ -41,13 +38,13 @@ export default function RiverBratsShell({ beachId }: Props) {
     const qs = params.toString();
     const pagePath = Z_OUT_BEACH_PATHS[beachId];
     window.history.replaceState(null, "", qs ? `${pagePath}?${qs}` : pagePath);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [beachId, autoOpenChat, autoVerify]);
 
   const setShore = useCallback(
     (tab: RiverBratsShoreTab, opts?: { date?: string | null }) => {
       setShoreState(tab);
       if (opts?.date) setCarpoolDate(opts.date);
+      if (embedded) return;
       const params = new URLSearchParams(window.location.search);
       params.delete("tab");
       if (tab === "checkin") {
@@ -62,22 +59,23 @@ export default function RiverBratsShell({ beachId }: Props) {
       const pagePath = Z_OUT_BEACH_PATHS[beachId];
       setLocation(qs ? `${pagePath}?${qs}` : pagePath);
     },
-    [beachId, setLocation],
+    [beachId, embedded, setLocation],
   );
 
   useEffect(() => {
+    if (embedded) return;
     const onPopState = () => {
       setShoreState(readRiverBratsShore(new URLSearchParams(window.location.search).get("shore")));
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, []);
+  }, [embedded]);
 
   const beachName = beachId === "rooster-rock" ? "Rooster Rock" : "Sauvie Island";
-  const beachChatName = beachId === "rooster-rock" ? "Rooster Rock" : "Collins Beach";
 
   return (
     <section className={`river-brats river-brats--${accent} pdx-glass-rebind`}>
+      {embedded && <RiverBratsIntroPopup openOnFirstVisit={false} />}
       <div className="river-brats__head">
         <div className={`river-brats__kicker river-brats__kicker--${accent}`}>
           River Brats · {beachName}
@@ -109,6 +107,7 @@ export default function RiverBratsShell({ beachId }: Props) {
             key={tab.key}
             type="button"
             className={`events-tab${shore === tab.key ? " active" : ""}`}
+            aria-pressed={shore === tab.key}
             onClick={() => setShore(tab.key)}
           >
             {tab.label}

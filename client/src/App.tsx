@@ -1,3 +1,4 @@
+import { DestinationCardRenderer } from "./components/outz/MapDestinationCommunity";
 import { boardBrowseHref } from "@/lib/boardBrowseHref";
 import type { BoardCategory } from "@/lib/allBoards";
 import MapWorldRedirect from "@/components/MapWorldRedirect";
@@ -27,6 +28,7 @@ import { lazyWithReload } from "./lib/lazyWithReload";
 // idle (DeferredMount), so they never compete with first paint or the
 // route's own data fetch. Gates and the toaster load immediately, just
 // asynchronously. Core chrome (Nav, MobileBottomNav, providers) stays static.
+const MappedDestinationCard = lazyWithReload(() => import("./pages/OutzidePlacesPage").then(module => ({ default: module.DestinationCardById })));
 const PullToRefresh = lazyWithReload(() => import("./components/PullToRefresh"));
 const Footer = lazyWithReload(() => import("./components/Footer"));
 const SiteWallpaper = lazyWithReload(() => import("./components/wallpaper/SiteWallpaper"));
@@ -344,7 +346,9 @@ export default function App() {
           <Router>
             <ErrorBoundary>
               <Suspense fallback={<SpectrumLoader variant="full" label="Loading component" />}>
-                <DesignComponentSpecimen />
+                <DestinationCardRenderer.Provider value={MappedDestinationCard}>
+                  <DesignComponentSpecimen />
+                </DestinationCardRenderer.Provider>
               </Suspense>
             </ErrorBoundary>
           </Router>
@@ -379,7 +383,9 @@ export default function App() {
                 </Suspense>
               </DeferredMount>
               <RiverBratsIntroOnBeaches />
-              <AppLayout />
+              <DestinationCardRenderer.Provider value={MappedDestinationCard}>
+                <AppLayout />
+              </DestinationCardRenderer.Provider>
               <Suspense fallback={null}>
                 <Toaster />
               </Suspense>

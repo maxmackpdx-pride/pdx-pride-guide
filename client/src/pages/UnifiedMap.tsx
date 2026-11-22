@@ -1,3 +1,5 @@
+import MapDestinationCommunity from '@/components/outz/MapDestinationCommunity';
+import { isValidBeachId } from '@shared/riverBrats';
 import { MapPlacePreview } from '@/components/MapCardPresentation';
 import {useMapPlacezRenderer} from '@/components/placez/MapPlacezBridge';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
@@ -16,6 +18,7 @@ import {usePageSeo} from '@/hooks/usePageSeo';
 import release from '@shared/mapReleaseLock.json';
 import {acquirePinnedMapModule} from '@/lib/pinnedMapModule';
 import "@/components/ui/mobile-dock-shell.css";
+import "./UnifiedMap.css";
 
 type Mode='mapz'|'outzide'|'boardz'|'afterz'|'zaydark';
 function initialMode():Mode {
@@ -38,9 +41,11 @@ export default function UnifiedMap(){
  usePageSeo(`${({mapz:'PlaceZ',outzide:'OutZide',boardz:'Boardz',afterz:'Afterz',zaydark:'ZayDark'})[initialMode()]} · Zaylist`,'Events, places, outdoor destinations, community boards, Afterz and adult-gated ZayDark.');
  useEffect(()=>{if(new URLSearchParams(search).get('auth')==='login')setAuthOpen(true);},[search]);
  const params=new URLSearchParams(search);
- const mode=mapBookmark(params,initialMode()).mode;
+ const selectedBookmark=mapBookmark(params,initialMode());
+ const mode=selectedBookmark.mode;
  const nativeDetail=params.has('item') || (mode==='outzide' && (params.has('place') || params.has('guestPlace'))) || window.location.pathname.startsWith('/outzide/share/');
- const bookmark=mapBookmark(params,initialMode()).native;
+ const destinationId=mode==='outzide'&&!params.has('guestPlace')&&!window.location.pathname.startsWith('/outzide/share/')?selectedBookmark.selectedId:undefined;
+ const bookmark=selectedBookmark.native;
  const bookmarkKind=bookmark?.kind,bookmarkId=bookmark?.id;
  useEffect(()=>{
   const request=bookmarkKind&&bookmarkId?{kind:bookmarkKind,id:bookmarkId}:undefined;
@@ -90,6 +95,8 @@ export default function UnifiedMap(){
  return <section className="zaylist-unified-map" aria-label="Zaylist five-mode map" data-host-discovery={!nativeDetail && ['mapz','outzide','afterz'].includes(mode) ? mode : undefined} data-map-release={release.tag} data-map-commit={release.commit} style={{position:'fixed',inset:0,zIndex:45,background:'var(--z-black,#050506)'}}>
   <div ref={node} style={{width:'100%',height:'100%',position:'relative',isolation:'isolate'}}/>
   {placezPortals}
+  {destinationId && <MapDestinationCommunity key={destinationId} root={node} placeId={destinationId}
+    initial={params.get('wall')==='1'?'Wall':params.get('tab')==='community'?(isValidBeachId(destinationId)?'Beach community':'Wall'):undefined}/>}
   {!error && !legacyDetail && !nativeDetail && <Suspense fallback={null}>
     {mode === "afterz" && <AfterzMapDrawer/>}
     {mode === "outzide" && <OutzideDrawer mapRoot={node}/>}

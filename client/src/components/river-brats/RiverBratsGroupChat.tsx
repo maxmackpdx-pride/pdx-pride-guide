@@ -4,7 +4,7 @@ import { Lock, MapPin, MessageCircle } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import UserAvatar from "@/components/UserAvatar";
 import { memberProfileHref } from "@/lib/avatarLinks";
-import AdultContentGate from "@/components/AdultContentGate";
+import AdultContentGate, { useAdultChatAck } from "@/components/AdultContentGate";
 import type { NudeBeachTab } from "@shared/nudeBeaches";
 import { RIVER_BRATS_CHAT_CLOSES_AT, RIVER_BRATS_CHAT_OPENS_COPY } from "@shared/riverBrats";
 import RiverBratsReportButton from "./RiverBratsReportButton";
@@ -83,6 +83,7 @@ function DayChips({ chips, className = "" }: { chips?: GoingChip[]; className?: 
 }
 
 type Props = {
+  viewerId?: number;
   beachId: NudeBeachTab;
   date: string;
   beachShortLabel: string;
@@ -106,6 +107,7 @@ type Props = {
 };
 
 export default function RiverBratsGroupChat({
+  viewerId,
   beachId,
   date,
   beachShortLabel,
@@ -119,22 +121,25 @@ export default function RiverBratsGroupChat({
 }: Props) {
   const [body, setBody] = useState("");
   const [tick, setTick] = useState(0);
+  const adultChatAcknowledged = useAdultChatAck();
+  const canReadRoom = checkedIn && !locked && adultChatAcknowledged;
   const listRef = useRef<HTMLDivElement>(null);
   // Unified beach room  -  date only stamps messages; access is multi-day.
-  const chatKey = ["/api/river-brats/checkins/chat", beachId, "room"] as const;
+  const chatKey = ["/api/river-brats/checkins/chat", beachId, "room", viewerId] as const;
 
   const { data, isLoading } = useQuery<ChatPayload>({
     queryKey: chatKey,
     queryFn: () =>
       apiRequest("GET", `/api/river-brats/checkins/chat?beach=${beachId}&date=${date}`).then(r => r.json()),
-    refetchInterval: checkedIn ? 8_000 : false,
-    enabled: !locked || checkedIn,
+    refetchInterval: canReadRoom ? 8_000 : false,
+    enabled: canReadRoom,
   });
 
-  const messages = data?.messages ?? [];
-  const expiresAt = data?.expiresAt ?? null;
-  const chatOpen = data?.chatOpen ?? false;
-  const members = data?.members ?? [];
+  const room = canReadRoom ? data : undefined;
+  const messages = room?.messages ?? [];
+  const expiresAt = room?.expiresAt ?? null;
+  const chatOpen = room?.chatOpen ?? false;
+  const members = room?.members ?? [];
   const countdown = useMemo(() => formatCountdown(expiresAt), [expiresAt, tick]);
 
   useEffect(() => {

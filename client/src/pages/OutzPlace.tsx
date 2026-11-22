@@ -85,7 +85,7 @@ function formatChatClose(expiresAt: string | null) {
   return hours > 0 ? `Open for ${hours}h more` : "Open for less than an hour";
 }
 
-export default function OutzPlace({placeSlug, embedded = false, boardIntent = null}: {placeSlug?: string; embedded?: boolean; boardIntent?: 'ride'|'missed'|'buddy'|null} = {}) {
+export default function OutzPlace({placeSlug, embedded = false, boardIntent = null, initialPostBody}: {initialPostBody?: string; placeSlug?: string; embedded?: boolean; boardIntent?: 'ride'|'missed'|'buddy'|null} = {}) {
   const [, params] = useRoute("/outzide/:placeSlug");
   const slug = placeSlug ?? params?.placeSlug;
   const { ref: mapHostRef, active: mapActive, memory: mapCameraMemory } = useIncidentalMap(true, slug ?? "outz");
@@ -100,8 +100,8 @@ export default function OutzPlace({placeSlug, embedded = false, boardIntent = nu
   const [note, setNote] = useState("");
   const [anonymous, setAnonymous] = useState(false);
   const [message, setMessage] = useState("");
-  const [postKind, setPostKind] = useState<WallPost["postKind"]>("LOOKING_FOR_COMPANY");
-  const [postBody, setPostBody] = useState("");
+  const [postKind, setPostKind] = useState<WallPost["postKind"]>(initialPostBody ? "TRIP_NOTE" : "LOOKING_FOR_COMPANY");
+  const [postBody, setPostBody] = useState(initialPostBody ?? "");
   useEffect(()=>{if(boardIntent)setPostKind(boardIntent==='ride'?'CARPOOL_REQUEST':boardIntent==='missed'?'MISSED_CONNECTION':'LOOKING_FOR_COMPANY');},[boardIntent]);
   const [editingWallPost, setEditingWallPost] = useState<number | null>(null);
   const [editWallBody, setEditWallBody] = useState("");
@@ -326,7 +326,7 @@ export default function OutzPlace({placeSlug, embedded = false, boardIntent = nu
           {destination ? (
             <dl className="outz-place__readings">
               <div><dt>Temp</dt><dd>{outzTempLabel(destination.airTempF)}</dd></div>
-              <div><dt>Forecast</dt><dd>{destination.forecast || "—"}</dd></div>
+              <div className="outz-place__forecast"><dt>Forecast</dt><dd>{destination.forecast || "—"}</dd></div>
               <div><dt>Wind</dt><dd>{destination.wind || "—"}</dd></div>
             </dl>
           ) : null}
@@ -489,7 +489,7 @@ export default function OutzPlace({placeSlug, embedded = false, boardIntent = nu
           </aside>
         </div>
       </section>
-      {showAuth ? <AuthModal portalTargetSelector={embedded ? ".outz-native-dialog[open]" : undefined} onClose={() => setShowAuth(false)} /> : null}
+      {showAuth ? <AuthModal portalTargetSelector={embedded ? ".outz-native-dialog" : undefined} onClose={() => setShowAuth(false)} /> : null}
     </div>
   );
 }

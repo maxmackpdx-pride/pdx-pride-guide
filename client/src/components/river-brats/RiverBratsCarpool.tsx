@@ -69,18 +69,16 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
   });
 
   useEffect(() => {
-    if (initialDate && dateOptions.includes(initialDate) && initialDate !== selectedDate) {
+    if (initialDate && dateOptions.includes(initialDate)) {
       setSelectedDate(initialDate);
       setComposeOpen(false);
     }
-    // Only react when parent hands off a new date (plan-ahead CTA).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialDate]);
+  }, [initialDate, dateOptions]);
 
   const isToday = selectedDate === today;
   const dayLabel = formatBeachCheckinDateLabel(selectedDate);
 
-  const queryKey = ["/api/river-brats/carpool", beachId, selectedDate] as const;
+  const queryKey = ["/api/river-brats/carpool", beachId, selectedDate, user?.id] as const;
 
   const { data: carpoolData, isLoading } = useQuery<CarpoolRow[]>({
     queryKey,
@@ -103,7 +101,7 @@ export default function RiverBratsCarpool({ beachId, accent, initialDate }: Prop
   const rows: CarpoolRow[] = Array.isArray(carpoolData) ? carpoolData : [];
 
   const { data: requestData } = useQuery<any[]>({
-    queryKey: ["/api/river-brats/carpool", activePostId, "requests"],
+    queryKey: ["/api/river-brats/carpool", activePostId, "requests", user?.id],
     queryFn: async () => {
       const r = await fetch(`/api/river-brats/carpool/${activePostId}/requests`, { credentials: "include" });
       const body = await r.json().catch(() => null);

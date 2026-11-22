@@ -38,26 +38,26 @@ export default function RiverBratsReportButton({ targetType, targetId }: Props) 
 
   if (!open) {
     return (
-      <button type="button" className="rb-report-link" onClick={() => (user ? setOpen(true) : setShowAuth(true))}>
-        Report
-      </button>
+      <>
+        <button type="button" className="rb-report-link" onClick={() => (user ? setOpen(true) : setShowAuth(true))}>
+          Report
+        </button>
+        {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+      </>
     );
   }
 
   return (
-    <>
-      <div className="rb-report-pop">
-        <select className="rb-report-select" value={reason} onChange={e => setReason(e.target.value)}>
-          {RIVER_BRATS_REPORT_REASONS.map(r => (
-            <option key={r} value={r}>{r}</option>
-          ))}
-        </select>
-        <button type="button" className="rb-report-submit" onClick={() => reportMutation.mutate()} disabled={reportMutation.isPending}>
-          Send
-        </button>
-        <button type="button" className="rb-report-cancel" onClick={() => setOpen(false)}>Cancel</button>
-      </div>
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
-    </>
+    <div className="rb-report-pop">
+      <select className="rb-report-select" value={reason} onChange={e => setReason(e.target.value)}>
+        {RIVER_BRATS_REPORT_REASONS.map(r => (
+          <option key={r} value={r}>{r}</option>
+        ))}
+      </select>
+      <button type="button" className="rb-report-submit" onClick={() => reportMutation.mutate()} disabled={reportMutation.isPending}>
+        Send
+      </button>
+      <button type="button" className="rb-report-cancel" onClick={() => setOpen(false)}>Cancel</button>
+    </div>
   );
 }

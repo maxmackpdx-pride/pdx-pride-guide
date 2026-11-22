@@ -1,3 +1,4 @@
+import MapDestinationCommunity from '@/components/outz/MapDestinationCommunity';
 import {preserveMapDocument} from '@/lib/preserveMapDocument';
 import {useEffect,useRef,useState} from 'react';
 import {CardDetails} from "@/components/cards/CardAPI";
@@ -45,5 +46,5 @@ function OutzCardDetails({location,onClose,onRequireAuth}:{location:TodayLocatio
   }).catch(error=>{if(!disposed)setFailed(error instanceof Error?error.message:'Destination could not load.');});
   return()=>{disposed=true;unmount?.();release?.();restoreDocument();};
  },[id]);
- return (<div className="home-outz-overlay" onClick={requestClose}><div ref={dialogRef} className="home-outz-modal" role="dialog" aria-modal="false" aria-label={location.name} onClick={e=>e.stopPropagation()}><div ref={node} className="home-outz-native" style={{height:'100%',overflow:'auto'}}/>{failed&&<div className="home-outz-loading" role="alert">{failed} <a href={location.href}>Open destination details</a></div>}<button type="button" className="home-outz-close" aria-label="Close destination" onClick={requestClose}><X size={20} aria-hidden="true" /></button></div></div>);
+ return (<><MapDestinationCommunity key={id} root={node} placeId={id}/><div className="home-outz-overlay" onClick={requestClose}><div ref={dialogRef} className="home-outz-modal" role="dialog" aria-modal="false" aria-label={location.name} onClick={e=>e.stopPropagation()}><div ref={node} className="home-outz-native" style={{height:'100%',overflow:'auto'}}/>{failed&&<div className="home-outz-loading" role="alert">{failed} <a href={location.href}>Open destination details</a></div>}<button type="button" className="home-outz-close" aria-label="Close destination" onClick={requestClose}><X size={20} aria-hidden="true" /></button></div></div></>);
 }

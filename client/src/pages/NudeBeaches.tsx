@@ -12,6 +12,7 @@ import NudeBeachesHero from "@/components/NudeBeachesHero";
 import NudeBeachesHubPanel from "@/components/NudeBeachesHubPanel";
 import NudeBeachesMap from "@/components/NudeBeachesMap";
 import RiverBratsShell from "@/components/river-brats/RiverBratsShell";
+import type { RiverBratsShoreTab } from "@shared/riverBrats";
 import ScrollReveal from "@/components/ScrollReveal";
 import { Button } from "@/components/ds";
 import {
@@ -179,24 +180,9 @@ function SauvieIslandPanel() {
   );
 }
 
-export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: NudeBeachTab }) {
-  const isRooster = beachId === "rooster-rock";
-  const {data: photoCatalog}=useQuery<{places:{id:string;photo?:OutzPhotoData}[]}>({queryKey:['/outzide-map/places.json'],queryFn:()=>apiRequest('GET','/outzide-map/places.json?v=20261017-sculpted-v3').then(r=>r.json()),staleTime:3600_000});
-  const photo=photoCatalog?.places.find(row=>row.id===beachId)?.photo;
-  usePageSeo(
-    `${isRooster ? "Rooster Rock" : "Sauvie Island"} · OUTZ | Zaylist`,
-    `${isRooster ? "Rooster Rock" : "Sauvie Island and Collins Beach"} live conditions, trip logistics, check-ins, carpools, and River Brats chat on OUTZ.`,
-    {
-      image: shareCardUrl("outzide"),
-      imageAlt:
-        "Outzide by Zaylist — Northwest mountain, river, rainbow trails and outdoor waypoints",
-    },
-  );
-
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const { data } = useQuery<ApiPayload>({
+function useBeachSnapshot(enabled = true) {
+  return useQuery<ApiPayload>({
+    enabled,
     queryKey: ["/api/nude-beaches"],
     queryFn: () => apiRequest("GET", "/api/nude-beaches").then(r => r.json()),
     staleTime: 5 * 60_000,
@@ -206,6 +192,13 @@ export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: Nu
     refetchInterval: query => (query.state.data?.stale ? 20_000 : false),
     refetchOnWindowFocus: true,
   });
+}
+
+function BeachConditions({ beachId, data, failed }: { beachId: NudeBeachTab; data?: ApiPayload; failed: boolean }) {
+  const isRooster = beachId === "rooster-rock";
+  const snapshot = data?.data;
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const refreshMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/nude-beaches/refresh", {}).then(r => r.json() as Promise<ApiPayload>),
@@ -227,21 +220,8 @@ export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: Nu
     },
   });
 
-  const snapshot = data?.data;
   return (
-    <div
-      className={`zine-page nude-beaches-page pdx-glass-rebind board-page board-page--makeover events-page${isRooster ? "" : " nude-beaches-page--sauvie"}`}
-    >
-      <header className="nude-beaches-header">
-        <NudeBeachesHero
-          key={beachId}
-          activeTab={beachId}
-          snapshot={snapshot}
-          statsKey={`${beachId}-${snapshot?.fetchedAt ?? "pending"}`}
-        />
-        {photo&&<><OutzPhoto key={beachId} photo={photo} className="outz-hero__photo" /><p className="outz-hero__photo-credit">Photo: <a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">{photo.author}</a> · <a href={photo.licenseUrl} target="_blank" rel="noopener noreferrer">{photo.license}</a> · Color & graphic treatment</p></>}
-      </header>
-
+    <>
       <div className="nude-refresh-bar">
         <p className="nude-refresh-bar__meta">
           {isRooster ? "Rooster Rock" : "Sauvie Island"} · updated{" "}
@@ -267,19 +247,89 @@ export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: Nu
 
       <div key={beachId} className="events-map-row nude-beaches-map-row nude-beaches-map-row--enter">
         <div className="events-map-row__panel">
-          <NudeBeachesHubPanel tab={beachId} snapshot={snapshot} />
+          {failed && !snapshot
+            ? <p role="alert">Conditions could not load. Use Refresh to try again.</p>
+            : <NudeBeachesHubPanel tab={beachId} snapshot={snapshot} />}
         </div>
         <div className="events-map-row__map">
           <NudeBeachesMap tab={beachId} />
         </div>
       </div>
-      <div key={`${beachId}-actions`} className="nude-beaches-map-row__actions nude-beaches-map-row__actions--enter">
-        {(isRooster ? ROOSTER_ROCK_MAPS : SAUVIE_ISLAND_MAPS).map(map => (
-          <a key={map.href} className="nude-map-btn pdx-glass-rebind" href={map.href} target="_blank" rel="noopener noreferrer">
-            {map.label}
-          </a>
-        ))}
-      </div>
+    </>
+  );
+}
+
+function BeachMapLinks({ beachId }: { beachId: NudeBeachTab }) {
+  const isRooster = beachId === "rooster-rock";
+  return (
+    <div key={`${beachId}-actions`} className="nude-beaches-map-row__actions nude-beaches-map-row__actions--enter">
+      {(isRooster ? ROOSTER_ROCK_MAPS : SAUVIE_ISLAND_MAPS).map(map => (
+        <a key={map.href} className="nude-map-btn pdx-glass-rebind" href={map.href} target="_blank" rel="noopener noreferrer">
+          {map.label}
+        </a>
+      ))}
+    </div>
+  );
+}
+
+function BeachLogistics({ beachId }: { beachId: NudeBeachTab }) {
+  return beachId === "rooster-rock" ? <RoosterRockPanel /> : <SauvieIslandPanel />;
+}
+
+type BeachCardProps = {
+  beachId: NudeBeachTab;
+  section: "conditions" | "trip" | "community";
+  initialShore?: RiverBratsShoreTab;
+};
+
+export function BeachCardSection({ beachId, section, initialShore }: BeachCardProps) {
+  const { data, isError } = useBeachSnapshot(section === "conditions");
+  const name = beachId === "rooster-rock" ? "Rooster Rock" : "Collins Beach";
+  return (
+    <section className={`nude-beaches-page beach-card-section${beachId === "sauvie-island" ? " nude-beaches-page--sauvie" : ""}`}
+      aria-label={`${name} ${section}`}>
+      {section === "conditions" && <BeachConditions beachId={beachId} data={data} failed={isError} />}
+      {section === "trip" && <>
+        <BeachMapLinks beachId={beachId} />
+        <BeachLogistics beachId={beachId} />
+      </>}
+      {section === "community" && <RiverBratsShell beachId={beachId} embedded initialShore={initialShore} />}
+    </section>
+  );
+}
+
+export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: NudeBeachTab }) {
+  const isRooster = beachId === "rooster-rock";
+  const {data: photoCatalog}=useQuery<{places:{id:string;photo?:OutzPhotoData}[]}>({queryKey:['/outzide-map/places.json'],queryFn:()=>apiRequest('GET','/outzide-map/places.json?v=20261017-sculpted-v3').then(r=>r.json()),staleTime:3600_000});
+  const photo=photoCatalog?.places.find(row=>row.id===beachId)?.photo;
+  usePageSeo(
+    `${isRooster ? "Rooster Rock" : "Sauvie Island"} · OUTZ | Zaylist`,
+    `${isRooster ? "Rooster Rock" : "Sauvie Island and Collins Beach"} live conditions, trip logistics, check-ins, carpools, and River Brats chat on OUTZ.`,
+    {
+      image: shareCardUrl("outzide"),
+      imageAlt:
+        "Outzide by Zaylist — Northwest mountain, river, rainbow trails and outdoor waypoints",
+    },
+  );
+
+  const { data, isError } = useBeachSnapshot();
+  const snapshot = data?.data;
+  return (
+    <div
+      className={`zine-page nude-beaches-page pdx-glass-rebind board-page board-page--makeover events-page${isRooster ? "" : " nude-beaches-page--sauvie"}`}
+    >
+      <header className="nude-beaches-header">
+        <NudeBeachesHero
+          key={beachId}
+          activeTab={beachId}
+          snapshot={snapshot}
+          statsKey={`${beachId}-${snapshot?.fetchedAt ?? "pending"}`}
+        />
+        {photo&&<><OutzPhoto key={beachId} photo={photo} className="outz-hero__photo" /><p className="outz-hero__photo-credit">Photo: <a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">{photo.author}</a> · <a href={photo.licenseUrl} target="_blank" rel="noopener noreferrer">{photo.license}</a> · Color & graphic treatment</p></>}
+      </header>
+
+      <BeachConditions beachId={beachId} data={data} failed={isError} />
+      <BeachMapLinks beachId={beachId} />
 
       <RiverBratsShell beachId={beachId} />
 
@@ -294,7 +344,7 @@ export default function NudeBeaches({ beachId = "rooster-rock" }: { beachId?: Nu
       <section className="events-board-feed nude-beach-logistics diag">
         <div className="board-active-feed__inner">
           <ScrollReveal delay={30}>
-            {isRooster ? <RoosterRockPanel /> : <SauvieIslandPanel />}
+            <BeachLogistics beachId={beachId} />
           </ScrollReveal>
         </div>
       </section>
