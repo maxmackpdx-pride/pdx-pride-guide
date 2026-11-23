@@ -37,8 +37,12 @@ type Ride = {
 };
 type RideDirection = "arriving" | "departing";
 type RideNeed = { username: string; direction: RideDirection; area: string; mine: number };
+type RideNeedCardT = { id: number; user: string; photoUrl: string | null; area: string; direction: "arriving" | "departing" | "now"; mine: boolean; sameEvent: boolean; sameAfterz: boolean; circle: string; distanceMi: number | null };
+type WhosComingDriver = { user: string; photoUrl: string | null; ridesGiven: number; distanceMi: number | null; locatedAt: number | null; since: number; arrived: boolean };
+type WhosComingNeed = { needId: number; area: string; eventId: number | null; direction: string; drivers: WhosComingDriver[] };
 type Planning = {
   needs: RideNeed[] | null;
+  rideNeeds: RideNeedCardT[] | null;
   attending: boolean;
   homeArea: string | null;
 
@@ -79,6 +83,19 @@ export default function EventPlanning({
       userId={user?.id}
     />
   );
+}
+
+/** I'M COMING: tell the rider, then share a location for their ETA only if already permitted (never prompts). */
+async function sayComing(needId: number) {
+  const r = await fetch(`/api/ridez/needs/${needId}/coming`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: "{}" });
+  if (!r.ok) throw new Error("Could not send");
+  try {
+    const perm = await navigator.permissions?.query({ name: "geolocation" as PermissionName });
+    if (perm?.state !== "granted") return;
+    navigator.geolocation.getCurrentPosition(p => {
+      void fetch(`/api/ridez/needs/${needId}/coming/location`, { method: "PUT", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lat: p.coords.latitude, lng: p.coords.longitude }) });
+    }, () => {}, { maximumAge: 60_000, timeout: 8000 });
+  } catch { /* location is optional */ }
 }
 
 function MemberLink({ username }: { username: string }) {
@@ -126,6 +143,8 @@ function PlanningPanel({
     queryFn: () => apiRequest("GET", base).then((r) => r.json()),
     refetchInterval: userId ? 30_000 : false,
   });
+  const [coming, setComing] = useState<ReadonlySet<number>>(() => new Set());
+  const [whoOpen, setWhoOpen] = useState(false);
   const [intent, setIntent] = useState<"offer" | "need">("offer");
   const [direction, setDirection] = useState<RideDirection>("arriving");
   const [suggestedArea, setSuggestedArea] = useState("");
@@ -169,6 +188,12 @@ function PlanningPanel({
   });
   const act = (method: string, path: string, data?: unknown) =>
     mutation.mutate({ method, path, data });
+  const myLaneNeeds = (query.data?.rideNeeds || []).filter(n => n.mine);
+  const whoQuery = useQuery<{ needs: WhosComingNeed[] }>({
+    queryKey: ["/api/ridez/needs/mine/coming", userId ?? null],
+    queryFn: () => apiRequest("GET", "/api/ridez/needs/mine/coming").then((r) => r.json()),
+    enabled: !!userId && whoOpen && myLaneNeeds.length > 0,
+  });
   if (query.isLoading) return <p role="status">Loading event plans…</p>;
   if (!query.data || query.isError)
     return (
@@ -182,6 +207,7 @@ function PlanningPanel({
   const { gigs, rides, open, canPostGig, title } = query.data;
   const matches = (rides || []).filter(ride => (ride.plan && ride.plan.kind !== "carpool" ? "departing" : "arriving") === direction);
   const needs = (query.data.needs || []).filter(need => need.direction === direction);
+  const laneNeeds = (query.data.rideNeeds || []).filter(n => n.direction === "now" || n.direction === direction);
   const mine = needs.find(need => need.mine);
   const mayMatch = direction === "arriving" || (!!query.data.checked && query.data.attending && (intent === "offer" || !!query.data.homeArea));
   const ridesPanel = (
@@ -215,6 +241,41 @@ function PlanningPanel({
             <p><MemberLink username={need.username}/> needs a ride · {need.area}</p>
             {open && mayMatch && !rides.some(r => r.mine) && <button type="button" onClick={() => { setSuggestedArea(need.area); requestAnimationFrame(() => document.getElementById(`ride-offer-${eventId}-${date}`)?.querySelector<HTMLInputElement>('input[name="area"]')?.focus()); }}>Offer a ride {direction === "arriving" ? "from" : "to"} {need.area}</button>}
           </div>)}
+          {laneNeeds.length > 0 && (
+            <div className="ridez-need-rail" aria-label="Needs a ride">
+              {laneNeeds.map((n) => (
+                <div key={n.id} className="ridez-need-card" data-bloom={n.sameAfterz ? "afterz" : n.sameEvent ? "event" : undefined}>
+                  <span className="ridez-need-card__tag">NEEDS A RIDE</span>
+                  <span className="ridez-need-card__av" aria-hidden="true">{n.photoUrl ? <img src={n.photoUrl} alt="" loading="lazy" /> : n.user.slice(0, 1).toUpperCase()}</span>
+                  <span className="ridez-need-card__body">
+                    <b>{n.area}</b>
+                    <span>{n.mine ? "You" : `@${n.user}`}{n.direction === "departing" ? " · Leaving after" : n.direction === "arriving" ? " · Getting there" : ""}</span>
+                    <span className="ridez-need-card__meta">{n.sameEvent ? "GOING TO THIS EVENT" : typeof n.distanceMi === "number" ? `${n.distanceMi < 0.1 ? "<0.1" : n.distanceMi} MI AWAY · RIGHT NOW` : "NEARBY · RIGHT NOW"}</span>
+                  </span>
+                  {n.mine ? (
+                    <button type="button" onClick={() => setWhoOpen(v => !v)} aria-expanded={whoOpen}>WHO'S COMING</button>
+                  ) : (
+                    <button type="button" disabled={coming.has(n.id)} aria-pressed={coming.has(n.id)} onClick={() => { setComing(s => new Set(s).add(n.id)); void sayComing(n.id).catch(() => setComing(s => { const next = new Set(s); next.delete(n.id); return next; })); }}>{coming.has(n.id) ? "COMING ✓" : "I'M COMING"}</button>
+                  )}
+                </div>
+              ))}
+              {whoOpen && myLaneNeeds.length > 0 && (
+                <div className="ridez-whos" aria-label="Who's coming for your ride needs">
+                  {whoQuery.isLoading ? <p role="status">Checking who's coming…</p> : (whoQuery.data?.needs || []).map(w => (
+                    <div key={w.needId} className="ridez-whos__need">
+                      <p><b>{w.area}</b> · {w.drivers.length ? `${w.drivers.length} coming` : "No one yet"}</p>
+                      {w.drivers.map(d => (
+                        <p key={d.user} className="ridez-whos__driver">
+                          <span className="ridez-need-card__av" aria-hidden="true">{d.photoUrl ? <img src={d.photoUrl} alt="" loading="lazy" /> : d.user.slice(0, 1).toUpperCase()}</span>
+                          @{d.user} · {d.ridesGiven} {d.ridesGiven === 1 ? "ride" : "rides"} given{d.distanceMi != null ? ` · ${d.distanceMi} mi away` : ""}{d.arrived ? " · ARRIVED" : ""}
+                        </p>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           {!matches.length && <p>No {direction === "arriving" ? "arriving" : "departing"} ride offers yet.</p>}
           <ul>
             {matches.map((ride) => (

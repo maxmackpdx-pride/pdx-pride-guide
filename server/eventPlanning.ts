@@ -9,6 +9,7 @@ import {
   parsePacificDateTime,
 } from "@shared/missedConnections";
 import { registerNightRides, type RideNotice } from "./nightRides";
+import { createRideNeeds, registerRideNeedRoutes, NEED_EXPIRY_AFTER_END_MS } from "./rideNeeds";
 import type { IStorage } from "./storage";
 
 export const RIDE_DRIVER_VISIBLE_TO_VIEWER = `u.status='active' AND NOT EXISTS (SELECT 1 FROM member_blocks b WHERE
@@ -238,6 +239,13 @@ export function registerEventPlanning(
     path,
     notifyRiders,
   );
+  const rideNeedStore = createRideNeeds(db, storage);
+  /** Public venue coordinates only (house parties / registration-only stay unlocated). */
+  const venueAt = (event: Event) =>
+    !event.isHouseParty && !hasRegistrationOnlyLocation(event) && event.lat != null && event.lng != null
+      ? { lat: Number(event.lat), lng: Number(event.lng) }
+      : null;
+  registerRideNeedRoutes(app, rideNeedStore, storage, requireAuth, moderate, { notify: notifyRiders });
   app.get("/api/night/ride-waypoints", requireAuth, (req, res) => {
     res.set("Cache-Control", "private, no-store");
     res.vary("Cookie");
@@ -353,6 +361,7 @@ export function registerEventPlanning(
       attending,
       homeArea,
       needs,
+      rideNeeds: viewer ? rideNeedStore.list(viewer, { eventId: event.id, occurrence: date, at: venueAt(event) }) : null,
       checked: viewer && allowGps ? !!night.present(event.id, date, viewer) : false,
       onSiteWindow:
         allowGps && (parsePacificDateTime(event.dateStart) ?? Infinity) - 30 * 60000 <=
@@ -363,6 +372,23 @@ export function registerEventPlanning(
       gigs: store.gigs(event.id, date),
       rides,
     });
+  });
+  app.post(path + "/needs", requireAuth, scope, (req, res) => {
+    const { event, date, open } = res.locals;
+    if (!open) return res.status(409).json({ error: "This occurrence has passed" });
+    const area = typeof req.body?.area === "string" ? req.body.area.trim() : "";
+    const direction = req.body?.direction === "departing" ? "departing" : req.body?.direction === "arriving" ? "arriving" : null;
+    if (!direction || area.length < 2 || area.length > 80)
+      return res.status(400).json({ error: "Choose arriving or departing and a neighborhood (2-80 characters)." });
+    if (moderate(res, "Ride need", { area })) return;
+    const at = venueAt(event);
+    const end = parsePacificDateTime(event.dateEnd || event.dateStart) ?? Date.now();
+    rideNeedStore.post(req.session.userId!, { eventId: event.id, occurrence: date, direction, area, lat: at?.lat ?? null, lng: at?.lng ?? null, expiresAt: Math.max(end, Date.now()) + NEED_EXPIRY_AFTER_END_MS });
+    res.status(201).json({ ok: true });
+  });
+  app.delete(path + "/needs/me", requireAuth, scope, (req, res) => {
+    rideNeedStore.remove(req.session.userId!, res.locals.event.id, res.locals.date);
+    res.json({ ok: true });
   });
   app.put(path + "/needs/:direction", requireAuth, scope, (req, res) => {
     const { event, date, open } = res.locals;
