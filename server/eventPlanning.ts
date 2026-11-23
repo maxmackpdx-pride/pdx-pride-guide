@@ -245,7 +245,7 @@ export function registerEventPlanning(
     !event.isHouseParty && !hasRegistrationOnlyLocation(event) && event.lat != null && event.lng != null
       ? { lat: Number(event.lat), lng: Number(event.lng) }
       : null;
-  registerRideNeedRoutes(app, rideNeedStore, storage, requireAuth, moderate, { notify: notifyRiders });
+  registerRideNeedRoutes(app, rideNeedStore, storage, requireAuth, moderate, { notify: notifyRiders, startWatch: night.startWatch });
   app.get("/api/night/ride-waypoints", requireAuth, (req, res) => {
     res.set("Cache-Control", "private, no-store");
     res.vary("Cookie");

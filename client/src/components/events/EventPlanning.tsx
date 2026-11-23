@@ -145,6 +145,9 @@ function PlanningPanel({
   });
   const [coming, setComing] = useState<ReadonlySet<number>>(() => new Set());
   const [whoOpen, setWhoOpen] = useState(false);
+  const [checkFor, setCheckFor] = useState<number | null>(null);
+  const [checkSent, setCheckSent] = useState<Record<number, string>>({});
+  const [checkErr, setCheckErr] = useState<string | null>(null);
   const [intent, setIntent] = useState<"offer" | "need">("offer");
   const [direction, setDirection] = useState<RideDirection>("arriving");
   const [suggestedArea, setSuggestedArea] = useState("");
@@ -264,6 +267,25 @@ function PlanningPanel({
                   {whoQuery.isLoading ? <p role="status">Checking who's coming…</p> : (whoQuery.data?.needs || []).map(w => (
                     <div key={w.needId} className="ridez-whos__need">
                       <p><b>{w.area}</b> · {w.drivers.length ? `${w.drivers.length} coming` : "No one yet"}</p>
+                      {w.drivers.length > 0 && (
+                        <div className="ridez-whos__check">
+                          {checkSent[w.needId] ? <p role="status">Safety check-in set. We'll ask you to confirm by {checkSent[w.needId]}; your trusted contacts hear if you don't.</p> : checkFor === w.needId ? (
+                            <form onSubmit={e => { e.preventDefault(); const f = new FormData(e.currentTarget); setCheckErr(null);
+                              void fetch(`/api/ridez/needs/${w.needId}/watch`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contact: String(f.get("contact") || ""), minutes: Number(f.get("minutes")), consent: f.get("consent") === "on" }) })
+                                .then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw new Error((data as { error?: string }).error || "Something went wrong. Try again."); return data as { dueAt: number }; })
+                                .then(r => { setCheckSent(s => ({ ...s, [w.needId]: new Date(r.dueAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Los_Angeles" }) })); setCheckFor(null); })
+                                .catch((x: Error) => setCheckErr(x.message)); }}>
+                              <label>Trusted members (1–3 you mutually follow)<input name="contact" required placeholder="@friend, @other" /></label>
+                              <label>Check in within<select name="minutes" defaultValue="45">{[15, 30, 45, 60, 90, 120].map(m => <option key={m} value={m}>{m} min</option>)}</select></label>
+                              <label><input type="checkbox" name="consent" required /> If I miss the check-in, message these members with my last shared location.</label>
+                              {checkErr ? <p role="alert">{checkErr}</p> : null}
+                              <button type="submit">START CHECK-IN</button>
+                            </form>
+                          ) : (
+                            <button type="button" onClick={() => { setCheckErr(null); setCheckFor(w.needId); }}>SAFETY CHECK-IN</button>
+                          )}
+                        </div>
+                      )}
                       {w.drivers.map(d => (
                         <p key={d.user} className="ridez-whos__driver">
                           <span className="ridez-need-card__av" aria-hidden="true">{d.photoUrl ? <img src={d.photoUrl} alt="" loading="lazy" /> : d.user.slice(0, 1).toUpperCase()}</span>
