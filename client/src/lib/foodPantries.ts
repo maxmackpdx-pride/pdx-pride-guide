@@ -9,7 +9,7 @@ export const FOOD_PANTRIES = [
     hours:
       "SE: Mon–Fri 9am–noon & 1–4pm. NW: Tue/Wed/Fri 9am–noon & 1–4pm; Thu 11am–3pm & 4–7pm; Sat 9am–2pm.",
     address: "12436 SE Stark St · 2121 NW Front Ave",
-    note: "Appointment required for every visit; check eligibility before booking.",
+    note: "Appointment required for every visit; check eligibility before booking. Households may visit up to 16 times per year, and the count refreshes in January. The NW Front Ave market tends to be less busy than the SE Stark market.",
     url: "https://sunshinedivision.org/appointments/",
   },
   {

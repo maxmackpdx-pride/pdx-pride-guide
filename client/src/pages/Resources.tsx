@@ -74,6 +74,7 @@ const CATEGORIES = RESOURCE_CATEGORIES;
 const LABELS = [
   "Health & care",
   "Safety & basic needs",
+  "Food & groceries",
   "Rights & advocacy",
   "Youth support",
   "Find Your People",
@@ -84,7 +85,7 @@ const LABELS = [
   "Harm reduction",
 ];
 const ROWS = CATEGORIES.flatMap((category) =>
-  (category.id === "safety"
+  (category.id === "food"
     ? [...category.orgs, FOOD_RESOURCE]
     : category.orgs
   ).map((org) => ({ org, category })),

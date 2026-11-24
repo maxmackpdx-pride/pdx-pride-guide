@@ -13,7 +13,7 @@ export type ResourceMapEntry = {
 export const RESOURCE_MAP_ENTRIES: ResourceMapEntry[] = (() => {
   const byName = new Map<string, { org: ResourceOrg; categories: ResourceCategory[] }>();
   for (const category of RESOURCE_CATEGORIES) {
-    for (const org of [...category.orgs, ...(category.id === 'safety' ? [FOOD_RESOURCE] : [])]) {
+    for (const org of [...category.orgs, ...(category.id === 'food' ? [FOOD_RESOURCE] : [])]) {
       const current = byName.get(org.name);
       if (current) current.categories.push(category);
       else byName.set(org.name, { org, categories: [category] });

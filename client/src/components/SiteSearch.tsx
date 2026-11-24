@@ -19,7 +19,7 @@ const GROUP_LABELS: Record<string, string> = {
 };
 const GROUP_ORDER = ["NEEDZ", "EVENTZ", "PLACEZ", "Z/LISTS", "SELLZ", "GIGZ", "GUIDES", "PEOPLE", "ORGANIZATIONS", "PAGES"];
 const RESOURCE_ROWS = RESOURCE_CATEGORIES.flatMap((category) =>
-  (category.id === "safety" ? [...category.orgs, FOOD_RESOURCE] : category.orgs).map((org) => ({ org, category })),
+  (category.id === "food" ? [...category.orgs, FOOD_RESOURCE] : category.orgs).map((org) => ({ org, category })),
 );
 const PAGE_LINKS = PRIMARY_NAV.flatMap((entry) => entry.type === "link" ? [{ label: entry.label, href: entry.href }] : entry.items);
 

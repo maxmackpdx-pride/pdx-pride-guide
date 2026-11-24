@@ -1415,77 +1415,88 @@ const RESOURCE_CATEGORY_SOURCE: ResourceCategory[] = [
         "howToStart": "Start an intake through WERQ Together’s website, or email the peer team to ask about support and next steps.",
         "contactChecked": "September 30, 2026"
       },
-      {
-        "name": "Rahab's Sisters",
-        "logoSurface": "light",
-        "logo": "/resources-logos/rahab-s-sisters.png",
-        "scope": "Portland",
-        "desc": "Housing support, health care, and community services for marginalized people.",
-        "url": "https://rahabs-sisters.org",
-        "categoryIds": ["community"],
-        "serviceTags": [
-          "Meals"
-        ],
-        "categorySourceUrl": "https://rahabs-sisters.org",
-        "phone": "tel:+19712083176",
-        "phoneLabel": "Contact Rahab’s Sisters",
-        "email": "info@rahabs-sisters.org",
-        "mailingAddress": "PO Box 90234, Portland, OR 97290",
-        "hours": "Office: by phone, email or appointment only",
-        "contactSourceUrl": "https://rahabs-sisters.org/contact-1",
-        "contactChecked": "September 30, 2026"
-      },
-      {
-        "name": "Hand Up Project",
-        "scope": "Oregon",
-        "desc": "Emergency food assistance focused on BIPOC and LGBTQ+ communities.",
-        "url": "https://handupproject.org",
-        "phone": "tel:+15034510715",
-        "phoneLabel": "Office: 503-451-0715",
-        "mailingAddress": "PO Box 12426, Portland, OR 97212",
-        "contactSourceUrl": "https://handupproject.org/resources",
-        "howToStart": "Check the People’s Pantry schedule on the official website, or call the office to confirm the current distribution location and hours. The P.O. box is for mail only.",
-        "contactChecked": "September 30, 2026",
-        "logo": "/resources-logos/hand-up-project-transparent.png",
-      },
-      {
-        "name": "Sunshine Division",
-        "sub": "Free grocery-style food markets",
-        "scope": "Portland · NW Front Ave & SE Stark",
-        "desc": "Free grocery-style food markets where you shop the shelves and pick your own groceries: pantry staples plus rotating fresh, frozen and shelf-stable foods. Appointment required for every visit. Households may visit up to 16 times per year, and the count refreshes in January. The downtown Front Ave market tends to be less busy than the east side SE Stark market.",
-        "url": "https://sunshinedivision.org/appointments/",
-        "cta": "Schedule a visit",
-        "serviceTags": [
-          "Groceries"
-        ],
-        "howToStart": "Book an appointment online before you go; an appointment is required for every visit. Bring a photo ID if you have one; you will not be turned away without one.",
-        "lat": 45.5379,
-        "lng": -122.68944,
-        "locations": [
-          {
-            "name": "Front Ave Market",
-            "address": "2121 NW Front Ave, Portland, OR 97209",
-            "phone": "tel:+19713796083",
-            "sourceUrl": "https://sunshinedivision.org/appointments/",
-            "hours": "Tuesday, Wednesday & Friday, 9 am–12 pm & 1–4 pm; Thursday, 11 am–3 pm & 4–7 pm; Saturday, 9 am–2 pm. Appointment required.",
-            "lat": 45.5379,
-            "lng": -122.68944
-          },
-          {
-            "name": "SE Stark Market",
-            "address": "12436 SE Stark St, Portland, OR 97233",
-            "phone": "tel:+19713258810",
-            "sourceUrl": "https://sunshinedivision.org/appointments/",
-            "hours": "Monday–Friday, 9 am–12 pm & 1–4 pm. Appointment required.",
-            "lat": 45.51874,
-            "lng": -122.53502
-          }
-        ],
-        "sourceUrl": "https://sunshinedivision.org/appointments/",
-        "sourceChecked": "November 24, 2026",
-        "logo": "/resources-logos/sunshine-division-white.png",
-      }
    ]
+  },
+  {
+    "id": "food",
+    "name": "Food",
+    "color": "var(--neon-orange)",
+    "what": "Free groceries, food pantries, and meals across Portland, including Oregon Food Bank's network.",
+    "help": "Food you can count on, close to home, with the visit rules up front so there are no surprises at the door.",
+    "forr": "Grocery-style markets, food pantries, free meals, and SNAP options.",
+    "use": "Check hours and visit rules before you go; some markets and pantries ask for an appointment.",
+    "orgs": [
+      {
+              "name": "Sunshine Division",
+              "sub": "Free grocery-style food markets",
+              "scope": "Portland · NW Front Ave & SE Stark",
+              "desc": "Free grocery-style food markets where you shop the shelves and pick your own groceries: pantry staples plus rotating fresh, frozen and shelf-stable foods. Appointment required for every visit. Households may visit up to 16 times per year, and the count refreshes in January. The downtown Front Ave market tends to be less busy than the east side SE Stark market.",
+              "url": "https://sunshinedivision.org/appointments/",
+              "cta": "Schedule a visit",
+              "serviceTags": [
+                "Groceries"
+              ],
+              "howToStart": "Book an appointment online before you go; an appointment is required for every visit. Bring a photo ID if you have one; you will not be turned away without one.",
+              "lat": 45.5379,
+              "lng": -122.68944,
+              "locations": [
+                {
+                  "name": "Front Ave Market",
+                  "address": "2121 NW Front Ave, Portland, OR 97209",
+                  "phone": "tel:+19713796083",
+                  "sourceUrl": "https://sunshinedivision.org/appointments/",
+                  "hours": "Tuesday, Wednesday & Friday, 9 am–12 pm & 1–4 pm; Thursday, 11 am–3 pm & 4–7 pm; Saturday, 9 am–2 pm. Appointment required.",
+                  "lat": 45.5379,
+                  "lng": -122.68944
+                },
+                {
+                  "name": "SE Stark Market",
+                  "address": "12436 SE Stark St, Portland, OR 97233",
+                  "phone": "tel:+19713258810",
+                  "sourceUrl": "https://sunshinedivision.org/appointments/",
+                  "hours": "Monday–Friday, 9 am–12 pm & 1–4 pm. Appointment required.",
+                  "lat": 45.51874,
+                  "lng": -122.53502
+                }
+              ],
+              "sourceUrl": "https://sunshinedivision.org/appointments/",
+              "sourceChecked": "November 24, 2026",
+              "logo": "/resources-logos/sunshine-division-white.png",
+            },
+      {
+              "name": "Hand Up Project",
+              "scope": "Oregon",
+              "desc": "Emergency food assistance focused on BIPOC and LGBTQ+ communities.",
+              "url": "https://handupproject.org",
+              "phone": "tel:+15034510715",
+              "phoneLabel": "Office: 503-451-0715",
+              "mailingAddress": "PO Box 12426, Portland, OR 97212",
+              "contactSourceUrl": "https://handupproject.org/resources",
+              "howToStart": "Check the People’s Pantry schedule on the official website, or call the office to confirm the current distribution location and hours. The P.O. box is for mail only.",
+              "contactChecked": "September 30, 2026",
+              "logo": "/resources-logos/hand-up-project-transparent.png",
+            },
+      {
+              "name": "Rahab's Sisters",
+              "logoSurface": "light",
+              "logo": "/resources-logos/rahab-s-sisters.png",
+              "scope": "Portland",
+              "desc": "Housing support, health care, and community services for marginalized people.",
+              "url": "https://rahabs-sisters.org",
+              "categoryIds": ["community"],
+              "serviceTags": [
+                "Meals"
+              ],
+              "categorySourceUrl": "https://rahabs-sisters.org",
+              "phone": "tel:+19712083176",
+              "phoneLabel": "Contact Rahab’s Sisters",
+              "email": "info@rahabs-sisters.org",
+              "mailingAddress": "PO Box 90234, Portland, OR 97290",
+              "hours": "Office: by phone, email or appointment only",
+              "contactSourceUrl": "https://rahabs-sisters.org/contact-1",
+              "contactChecked": "September 30, 2026"
+            }
+    ]
   },
   {
     "id": "legal",
