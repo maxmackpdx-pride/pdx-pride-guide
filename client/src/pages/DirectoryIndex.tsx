@@ -7,6 +7,7 @@ import { placePath } from "@shared/placeSlug";
 import type { Business } from "./Directory";
 import AzIndexList, { groupAzEntries, type AzEntry } from "@/components/AzIndexList";
 import { parseCommunityRegistry, registryNameKey } from "@/lib/communityRegistry";
+import { RESOURCE_CATEGORIES } from "@/lib/resourcesData";
 import registryText from "../../../qsearch/community-registry.md?raw";
 
 /**
@@ -14,10 +15,12 @@ import registryText from "../../../qsearch/community-registry.md?raw";
  * Zaylist on one A–Z page, small print, no cards. Generated at runtime from
  * GET /api/directory + GET /api/communities, merged with the QSearch
  * community registry (imported from qsearch/community-registry.md, the
- * single source of record) — registry entries with no page yet render as
- * plain text, and registry residency nods earn the (hosts our community)
- * tag. Residency-nod venues are community-friendly hosts, never labeled
- * as LGBTQ venues.
+ * single source of record) and the Needz resources directory
+ * (client/src/lib/resourcesData.ts, the same dataset the Needz page reads) —
+ * so a place added on any of those surfaces appears here automatically.
+ * Entries with no page yet render as plain text, and registry residency
+ * nods earn the (hosts our community) tag. Residency-nod venues are
+ * community-friendly hosts, never labeled as LGBTQ venues.
  */
 
 type CommunitySummary = { slug: string; name: string; sourcePlaceId: number | null };
@@ -46,6 +49,7 @@ const REGISTRY_TAGS: Record<string, string> = {
 };
 
 const HOSTS_TAG = "hosts our community";
+const NEEDZ_TAG = "resources";
 
 export default function DirectoryIndex() {
   usePageSeo(
@@ -101,6 +105,18 @@ export default function DirectoryIndex() {
         tags: isResidency ? [HOSTS_TAG] : [REGISTRY_TAGS[reg.type] ?? reg.type],
       });
     }
+
+    // Needz resources: every org in the Needz dataset, across all of its
+    // categories. Orgs already listed above keep their linked entry; the
+    // rest are Needz-only and render as plain text (no per-org page exists).
+    for (const category of RESOURCE_CATEGORIES) {
+      for (const org of category.orgs) {
+        const key = registryNameKey(org.name);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push({ name: org.name, href: null, tags: [NEEDZ_TAG] });
+      }
+    }
     return out;
   }, [directory.data, communities.data]);
 
@@ -108,7 +124,7 @@ export default function DirectoryIndex() {
     <main className="az-page">
       <h1>Every place, A–Z</h1>
       <p className="az-lede">
-        Every venue, place, club, group and service on Zaylist — one list, smallest print we have.
+        Every venue, place, club, group, service and Needz resource on Zaylist — one list, smallest print we have.
         {directory.data ? ` ${entries.length} listings.` : ""} Names with no page yet are plain text.
         Looking for the outdoors? <Link href="/outzide/a-z">OutZide locations A–Z</Link>.
       </p>
