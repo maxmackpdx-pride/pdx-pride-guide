@@ -466,6 +466,26 @@ Never store passwords, cookies, or tokens.
   hide 823, create Lost Boys.
 - Lesson: verify weekday-ordinal recurrences against the rule (4th
   Friday ≠ last Friday in five-Friday months).
+- Plumbing run (Nov 24, 2026, Tucker: "Make sure plumbing is correct"):
+  January 2027 edition created — id 2393, Fri Jan 22, 2027, 21:00–02:00,
+  LIVE, with the series' undated text-free art (Eagle Sanity image, also
+  on id 824) and its Coral #FF5F6D accent held in
+  tools/accent-backfill.json. Id 824 (Nov 27) shipped with an EMPTY
+  dateEnd, and dateEnd is in its lockedFields — the API refuses the fix
+  (409, same as Naked Pool); the end-time fix (→ Nov 28, 02:00) must go
+  through the signed-in Admin UI and is still owed.
+- Eagle detail-page trap (learned Nov 24, 2026): the structured When on
+  an Eagle detail page can stamp a DOORS-window end, not the event end —
+  the Locker Room Nov 27 page reads 21:00→00:00 with "Doors 9PM Until
+  12AM," while its own About says the strip contest kicks off AT
+  midnight and "9PM–close" (venue hours run to 02:00; the September
+  edition ran 21:00–02:00). Read the About text before trusting the
+  structured end on Eagle pages.
+- Eagle's index projects a Dec 25, 2026 Locker Room instance from the
+  series template (observed Nov 24, 2026) — NOT materialized; the
+  founder Christmas exception governs. The venue's series copy also
+  says "Last Fridays"; Tucker's rule is 4th Friday (Oct 29 lesson
+  above) and governs.
 
 ### Full run (Nov 1, 2026) — window Nov 1–15: 20 creates LIVE, ids 1874–1893
 - Run 25141df2; log: run-2026-11-01/PUBLISH-LOG.md. Lanes ran as 4 parallel

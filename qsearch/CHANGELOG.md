@@ -6,6 +6,53 @@ source-memory.md, host-watch-list.md, community-registry.md,
 AGENTS-ROSTER.md) are mirrored to GitHub (maxmackpdx-pride/pdx-pride-guide,
 qsearch/ folder) whenever they change.
 
+## 2026-11-24
+- **Three helpers added** (Tucker: "Add three helpers"): series keeper
+  (weekly, 90-day series horizon — after The Locker Room lapsed),
+  blocked-fix tracker (weekly, keeps blocked-fixes.md until verified
+  landed — after 824/2022 sat stuck), drift checker (weekly, mirror
+  drift + gate conditions untraceable to Tucker's words — after the
+  widened gate and stale mirror sat unnoticed). Roster updated.
+- **Roster gate wording corrected:** AGENTS-ROSTER.md still carried the
+  widened "clearly-LGBTQ-and-public" contributor condition in two
+  places; now matches the corrected gate (public events through the
+  founder gate). The full local process package was re-pushed to the
+  GitHub mirror the same day — the Nov 24 gate correction had been
+  local-only.
+- **THE INTAKE GATE + completeness checker** (Tucker): the intake
+  treatment is now a blocking gate, written into the protocol's
+  Governance section and into CONTRIBUTING.md — an entry missing any
+  element (verification, complete entry, verified real logo, front
+  shot, search recipe, change log) is INCOMPLETE, not done, and the
+  run that creates it either completes the treatment or reports it as
+  a named incomplete. New standing step: whoever sources or produces
+  a logo for a new entry returns the finished logo itself to Tucker
+  when the work is done. New tool: `intake-completeness-check.mjs`
+  scans the registry (recipe + change log), Needz resources (logo per
+  org, asset resolving), and the directory + communities (logo slot,
+  asset resolving) — wired into every normal run as step 6c, reported
+  alongside the posterless list. First run (Nov 24, 2026): registry
+  71/71 complete; Needz 93/94 (Sunshine Division's logo asset not yet
+  resolving live); directory 120 of 161 records with an empty logo
+  slot; communities 40 of 44. Written the same day the Sunshine
+  Division Needz entry shipped without a logo because the job brief
+  never carried the checklist — the gate now travels with the work.
+- **Contributor gate correction** (Tucker, Nov 24, 2026): the contributor
+  publishing permission no longer carries a "clearly LGBTQ" condition —
+  that wording had been widened by mistake into a general contributor
+  gate. Contributors publish public events through the founder gate;
+  the clearly-LGBTQ condition is FetLife-source-only (FetLife events
+  stay off unless their own listing clearly states LGBTQ and public)
+  and that rule is unchanged.
+- **Intake gate clarification — no approval for user/Tucker entries**
+  (Tucker, Nov 24, 2026, from his Nov 23, 2026 design message):
+  entries added by a user or by Tucker need no approval — they are
+  in, and the intake treatment is applied behind the scenes;
+  "Muse verification" in the gate means verifying the facts and
+  completing the entry, never approving whether it may exist. The
+  clarification is written into the protocol's intake gate and
+  mirrored in CONTRIBUTING.md's intake gate section.
+
 ## 2026-11-23
 - **Recipe backfill completed** (venue hunter, Nov 23, 2026): all 71
   community-registry entries now carry their own search recipe and a

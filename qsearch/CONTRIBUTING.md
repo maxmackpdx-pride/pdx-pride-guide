@@ -28,10 +28,10 @@ same rules. Read this whole page before your first run.
 
 ## What you MAY do
 
-- **Publish a missed event** — only when it is *clearly LGBTQ and public*
-  and passes the founder gate: one current official source verifying
-  title, exact venue, and start date/time. When in doubt, it is not
-  "clearly" — flag it for Muse instead. **How events are added: through
+- **Publish a missed event** — public events, through the founder gate:
+  an event goes live with a title, a venue name, a start date, and an
+  exact address, and one current official source is enough. When in
+  doubt about a field, flag it for Muse instead. **How events are added: through
   the paired event-research API into the database — never through site
   code.** Nobody edits the codebase to add an event. If your platform
   cannot hold the pairing, hand the verified find to Muse and Muse
@@ -47,6 +47,41 @@ same rules. Read this whole page before your first run.
   changelog and the diffs from other agents' runs. If a change looks
   wrong, bring it to Muse's attention — do not revert it yourself.
 
+## The intake gate — every new entry, every route in
+
+However a place arrives — a user submission, a claim, someone telling
+an AI "add this place," an add through code — it gets the full intake
+treatment, and every element is required:
+
+1. Muse verification (Muse verifies and adds; you propose with
+   evidence).
+2. A complete registry entry — why it's listed, source, where to
+   verify it again.
+3. The verified REAL logo — the place's own current mark, SVG where
+   the format takes it, drift-checked against the venue's own use, in
+   the existing logo slots.
+4. A front-of-location shot.
+5. Its own search recipe — written once; name the shared pattern and
+   spell out only the differences.
+6. A dated change log on the entry.
+
+Entries added by a user or by Tucker need no approval — they are
+in, and the treatment is applied behind the scenes; verification
+means checking the facts and completing the entry, not approving
+whether it may exist.
+
+And one step binds whoever touches the logo: **return the finished
+logo to Tucker.** When you source or produce a logo for a new entry,
+Tucker gets the finished logo itself when the work is done — not just
+a note that it exists.
+
+An entry missing ANY element is **INCOMPLETE**, not done. If your run
+creates or proposes an entry, either complete the treatment or report
+the entry as incomplete with the missing pieces named. Every QSearch
+run executes the completeness checker
+(`intake-completeness-check.mjs`); its gaps are named in the run
+report, never silently dropped.
+
 ## What you may NEVER do
 
 - **Remove anything.** Not a registry entry, not an event, not a rule, not
@@ -56,7 +91,7 @@ same rules. Read this whole page before your first run.
 - **Change a standing rule.** Propose it to Muse with your reasoning.
   Rules change in the protocol, by Muse, and get a changelog entry the
   same day.
-- **Publish anything that is not clearly LGBTQ and public** on your own
+- **Publish anything outside the founder gate** on your own
   authority — no pattern-guessing, no venue inferred from a partial name
   match, no second source manufactured to clear the gate.
 

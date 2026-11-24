@@ -27,8 +27,10 @@ Source material reconciled Oct 24:
 - **Contributor agents** (agents from other AI platforms who copy this
   process to help) work under CONTRIBUTING.md: they check each other's
   changes, they bring problems and candidates to Muse's attention, and
-  they may publish a missed event ONLY when it is clearly LGBTQ and public
-  and passes the founder gate. Everything else routes to Muse.
+  they may publish a missed event ONLY when it is public and passes the
+  founder gate (a title, a venue name, a start date, and an exact
+  address; one official source is enough). Everything else routes to
+  Muse.
 - **Intake — every route in gets the full treatment (Tucker, Nov 23,
   2026):** a place that arrives by user submission, by claim, by someone
   telling an AI "add this place," or through code still ends with Muse
@@ -37,6 +39,32 @@ Source material reconciled Oct 24:
   logo slots), front-of-location shot, and a per-entry change log. The
   venue hunter diffs the site directory/catalog against the registry
   every run; a place with no entry is a gap to close, however it got in.
+- **THE INTAKE GATE (Tucker, Nov 24, 2026) — blocking, no exceptions.**
+  The intake treatment is a checklist, and every element is required:
+  (1) Muse verification; (2) a complete registry entry (why, source,
+  verify-at); (3) the verified REAL logo — SVG where the format takes
+  it, drift-checked against the venue's own use, in the existing logo
+  slots; (4) a front-of-location shot; (5) its own search recipe,
+  written once — name the shared pattern, spell out only the
+  differences; (6) a dated change log. Two clarifications bind the
+  gate: an entry added by a user or by Tucker needs no approval — it
+  is in, and the treatment is applied behind the scenes, never
+  holding their entry for anyone's permission; and "Muse
+  verification" in this checklist means verifying the facts and
+  completing the entry, never approving whether it may exist. One
+  more step binds whoever touches the logo: **return the finished logo to Tucker** — when any
+  agent, contributor AIs included, sources or produces the logo for a
+  new entry, Tucker gets the finished logo itself when the work is
+  done, not just a note that it exists. An entry missing ANY element
+  is **INCOMPLETE**, not done — "published" is not "complete." The run
+  that creates an entry either completes the treatment in that run or
+  reports the entry as incomplete with the missing pieces named. The
+  completeness checker (`intake-completeness-check.mjs`, run step 6c)
+  scans the registry, Needz resources, and the directory/communities
+  on every run; its gaps are closed or carried as named incompletes,
+  never silently dropped. (Written Nov 24, 2026, after the Sunshine
+  Division Needz entry shipped without a logo because the job brief
+  never carried the checklist — the gate now travels with the work.)
 - **The system improves itself, by design (Tucker, Nov 23, 2026):**
   everything here — from Muse down to the newest contributor — is built
   to constantly improve itself, not just run. Every run leaves the
@@ -333,11 +361,21 @@ names the sign-in as the blocker.
    once the field is live, set it in the same publish/change call as
    the poster. Known soft cases: tan/brown majorities snap to Coral;
    very dark flyers can land Blue over Violet.
+6c. Intake completeness check (added Nov 24, 2026 — the Intake Gate):
+   run `node ~/workspace/qsearch-new/intake-completeness-check.mjs`.
+   It scans the registry (search recipe + change log on every entry),
+   Needz resources (a logo on every org, and the asset resolving), and
+   the directory + communities (logo slot filled, asset resolving).
+   Every gap it names is an INCOMPLETE entry under the Intake Gate:
+   close it in this run when it is yours to close, or carry it in the
+   report as a named incomplete with the missing pieces listed —
+   reported alongside the posterless list, never instead of it.
 7. Report in plain language: coverage — INCLUDING the lane-coverage
    statement required by the Red Hanky rule (lanes + watch-list hosts
    actually swept; anything skipped/broken named as such) — FB/IG
    status, sources checked, new events found with evidence URLs,
-   poster gains, conflicts, uncertain items. Founder-gated finds
+   poster gains, incomplete entries from the 6c check (each name +
+   what it is missing), conflicts, uncertain items. Founder-gated finds
    publish immediately under the Oct 30 rule; the report comes after.
 8. Sign-up count (every run — Tucker, Nov 21, 2026): read
    `GET https://www.zaylist.com/api/home/stats` and append the
