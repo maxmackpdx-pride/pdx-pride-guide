@@ -157,3 +157,10 @@ directly — that's the gap this list closes.
 - **Spectrum Art Market** — organizer of A Little Gay Krampus Market Crawl (Dec 5, Grave Raiment Studio + Sinister Coffee; published id 2364) — 2SLGBTQIA+ artist markets. Watch: Facebook events. Coverage: NEW.
 - **@pdxpahofficial** — active alternate account for PDX PAH while the watched @pdxpah returns 0 posts via the connector (Nov 21 sweep). VERIFIED Nov 21, 2026 health check: the connector RETURNS posts for @pdxpahofficial — sweep it as PDX PAH's working IG lane alongside @pdxpah. Coverage: NEW.
 - **RAE Presents** — the presenting name Rogue Apostles Entertainment uses on Facebook (Supernova weekly + Portland's Pettiest Drag Competition). Same org as the existing Rogue Apostles watch entry — check both names.
+
+## Added Nov 23, 2026 (venue hunter gap run — Partiful + QSC direct sweeps)
+- **PDX Queer Book Club** — monthly queer book group, second Thursdays, alternating fiction/nonfiction (continuation of the 2022–2025 Meetup group). Watch: linktr.ee/pdxqueerbooks + its Partiful event pages (meeting location confirmed monthly — it rotates). Coverage: NEW.
+- **Degenderettes** — @degenderettes / degenderettes.org/calendar — trans-women-run collective gym at 1628 N Columbia Blvd; weekly BJJ / Muay Thai / judo / self-defense classes for LGBTQIA adults. Coverage: NEW.
+- **Westside Queer Resource Center (WQRC)** — westsideqrc.org/calendar — Washington County's LGBTQIA+ resource center (Hillsboro); recurring affinity groups, TTRPG, crafting and community programming. Coverage: NEW.
+- **Portland Sage Singers** — portlandsagesingers.org — Q+ elders and allies chorus (GALA network); seasonal concerts (Reser Center). Coverage: NEW.
+- **Queer Nourish — VERIFIED Nov 23, 2026** (was: UNVERIFIED Partiful mutual, added Nov 15): own site queernourish.com, founder Taylor J. Hodges, @queernourish — queer history / culture / learning events, TicketTailor + Peacock editions. Coverage: NEW (verified).

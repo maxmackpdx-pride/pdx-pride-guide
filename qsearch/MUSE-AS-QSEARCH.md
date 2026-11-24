@@ -12,6 +12,43 @@ Source material reconciled Oct 24:
 - Tucker's founder rule (2026-09-25, revised Oct 4) from the QSearch rules chat
 - Live checks run Oct 24, 2026 (below)
 
+## Governance (Tucker, Nov 23, 2026)
+
+- **Tucker is the founder.** His word overrides everything in this system,
+  including this document.
+- **Muse is the CEO of QSearch.** Muse owns the process end to end: the
+  protocol, the sources, the registry, and every agent in AGENTS-ROSTER.md.
+- **Muse is the ONLY one who can remove** — a registry entry, an event, a
+  rule, a source. Nobody else removes anything, ever; they bring it to
+  Muse's attention and Muse decides (Tucker can always override).
+- **Muse is the ONLY one who verifies and adds new venues and service
+  providers** to the registry. Contributor agents and hunters surface
+  candidates with their evidence; verification and the add are Muse's.
+- **Contributor agents** (agents from other AI platforms who copy this
+  process to help) work under CONTRIBUTING.md: they check each other's
+  changes, they bring problems and candidates to Muse's attention, and
+  they may publish a missed event ONLY when it is clearly LGBTQ and public
+  and passes the founder gate. Everything else routes to Muse.
+- **Intake — every route in gets the full treatment (Tucker, Nov 23,
+  2026):** a place that arrives by user submission, by claim, by someone
+  telling an AI "add this place," or through code still ends with Muse
+  verifying it and a complete registry entry — why, source, verify-at,
+  search recipe, verified real logo (SVG, drift-checked, in the existing
+  logo slots), front-of-location shot, and a per-entry change log. The
+  venue hunter diffs the site directory/catalog against the registry
+  every run; a place with no entry is a gap to close, however it got in.
+- **The system improves itself, by design (Tucker, Nov 23, 2026):**
+  everything here — from Muse down to the newest contributor — is built
+  to constantly improve itself, not just run. Every run leaves the
+  process better than it found it: a fix is written into the repair the
+  same run, a lesson lands in source-memory, contributors check each
+  other's changes and surface improvements upward, the health check
+  identifies updates, tests them, and verifies the system is actually
+  better, and the keeper keeps the record honest so improvement
+  compounds instead of drifting. Improvement proposals flow up to Muse;
+  Muse ratifies them into the protocol and the changelog. Nobody waits
+  to be told to make it better.
+
 ## Rules that do NOT change
 
 - **Publication threshold (founder rule):** publish a current, non-canceled
@@ -225,6 +262,20 @@ names the sign-in as the blocker.
    (Badlands API, Sanctuary ICS, Eagle Wix, Darcelle Tribe, Hawks
    Squarespace, Stag + Living Room Wines Eventbrite organizers, Camp Bar,
    CC Slaughters, Camp TRC, Peacock generic).
+2b. Registry places lane (Tucker, Nov 23, 2026): the community registry
+   is a standing sweep input. Every registry entry that hosts or lists
+   events — venues, residency-nod venues, organizations, shops — gets
+   its own update surfaces read in every normal run: its official site
+   and calendar, its event detail pages (per the detail-page rule), and
+   its official socials. Whatever place they update, the sweep looks
+   there too. New events and changes found this way go through the
+   founder gate like any other lane. The lane grows on its own: when
+   Muse verifies and adds a registry entry, its update surfaces join
+   this lane from the next run. (Service providers are read for
+   registry-relevant changes and any community events they host.)
+   Each registry entry carries its own SEARCH RECIPE — how that
+   individual location or person is searched — and the sweep follows
+   the recipe on the entry.
 3. Facebook lane: Discover across the keyword set for the window,
    connected events, and posts in the known queer PDX groups.
 4. Instagram lane: recent posts for every confirmed venue/organizer handle

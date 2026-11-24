@@ -7,6 +7,46 @@ AGENTS-ROSTER.md) are mirrored to GitHub (maxmackpdx-pride/pdx-pride-guide,
 qsearch/ folder) whenever they change.
 
 ## 2026-11-23
+- **Per-entry change logs + intake rule** (Tucker): every registry entry
+  now carries a dated change log (added, changes, new additions), and
+  recipes are written once — identical recipes name the shared pattern
+  instead of being rewritten. Intake rule added to the protocol and the
+  registry: every route in (site submission, claim, told-to-an-AI, code)
+  gets the full treatment — Muse verification, complete entry, verified
+  real logo (SVG conversion, drift/accuracy check, existing logo slots),
+  and the front-of-location shot process. Open item: the GPT-written
+  front-shot process (effects + storage) is not yet in Muse's files.
+- **Search recipes ride on the registry entries** (Tucker): the list with
+  everybody on it now carries, for each individual location and person,
+  how that entry is searched — update surfaces in order, detail-page
+  route, handles, traps. An entry without a recipe is incomplete; the
+  venue hunter backfills missing recipes every run, and sweeps follow
+  the recipe recorded on the entry.
+- **Self-improvement named as a design principle** (Tucker): the whole
+  chain — Muse to contributor — is designed to constantly improve
+  itself. Written into the protocol's Governance section and into
+  CONTRIBUTING.md: fixes into the repair same-run, lessons into
+  source-memory, mutual review, health-check test-and-verify, keeper
+  honesty; proposals flow up to Muse, who ratifies them in.
+- **Registry places lane added to every normal sweep** (Tucker): the
+  community registry is a standing sweep input — every registry place
+  that hosts or lists events gets its own update surfaces (site,
+  calendar, detail pages, official socials) read each run. "Whatever
+  place they update," the sweep looks there too. New registry adds join
+  the lane automatically.
+- **Muse named CEO of QSearch** (Tucker). Governance section added to the
+  protocol: Tucker is founder; Muse owns the process, is the ONLY one who
+  can remove anything, and the ONLY one who verifies and adds new venues
+  and service providers.
+- **Contributor framework + orientation added** (CONTRIBUTING.md): agents
+  from other AI platforms may copy this process to contribute — they check
+  each other's changes, bring candidates and problems to Muse's
+  attention, and may publish missed events only when clearly LGBTQ and
+  public through the founder gate. Removals and venue/provider adds are
+  Muse's alone.
+- **GitHub keeper added** (weekly): keeps the GitHub mirror in sync with
+  the local process files, verifies read-back, checks changelog coverage,
+  flags unaccounted changes to Muse.
 - **Venue & community hunter added** (weekly) and **reverification hunter
   added** (monthly) at Tucker's direction, with the community registry as
   their master document: every entry records why it's on Zaylist, how we
