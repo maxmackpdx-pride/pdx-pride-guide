@@ -1,0 +1,114 @@
+/* A–Z index pages (/directory/a-z, /outzide/a-z): plain-text directory
+   energy — small print, multiple columns, no cards, no furniture.
+   Tokens only; the token guard owns this file's hygiene. */
+
+.az-page {
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 4rem;
+  color: var(--text-body);
+}
+
+.az-page h1 {
+  font-size: 1.35rem;
+  line-height: 1.2;
+  margin: 0 0 0.25rem;
+  color: var(--text-heading);
+}
+
+.az-lede {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-lo);
+}
+
+.az-lede a {
+  color: var(--neon-cyan);
+}
+
+.az-status {
+  font-size: 0.875rem;
+  color: var(--text-lo);
+  padding: 1rem 0;
+}
+
+.az-status button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--neon-cyan);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.az-jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.55rem;
+  padding: 0.6rem 0 0.9rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-lo) 30%, transparent);
+  font-size: 0.8125rem;
+}
+
+.az-jump a {
+  color: var(--neon-cyan);
+  text-decoration: none;
+  padding: 0.1rem 0.05rem;
+}
+
+.az-jump a:hover,
+.az-jump a:focus-visible {
+  text-decoration: underline;
+}
+
+.az-jump-off {
+  color: color-mix(in srgb, var(--text-lo) 45%, transparent);
+  padding: 0.1rem 0.05rem;
+}
+
+.az-section {
+  padding-top: 1.1rem;
+}
+
+.az-letter {
+  font-size: 1rem;
+  margin: 0 0 0.45rem;
+  color: var(--text-heading);
+  scroll-margin-top: calc(var(--site-header-height, 120px) + 12px);
+}
+
+.az-cols {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  columns: 3;
+  column-width: 15.5rem;
+  column-gap: 2.25rem;
+}
+
+.az-entry {
+  break-inside: avoid;
+  margin: 0 0 0.32rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.az-entry a {
+  color: var(--text-body);
+  text-decoration: none;
+}
+
+.az-entry a:hover,
+.az-entry a:focus-visible {
+  color: var(--neon-cyan);
+  text-decoration: underline;
+}
+
+.az-tag {
+  color: var(--text-lo);
+  font-size: 0.6875rem;
+  margin-left: 0.35rem;
+}

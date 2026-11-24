@@ -98,6 +98,7 @@ const PlacezBrowse = lazyWithReload(() => import("./pages/PlacezBrowse"));
 const Scenez = lazyWithReload(() => import("./pages/Scenez"));
 const OutzidePlacesPage = lazyWithReload(() => import("./pages/OutzidePlacesPage"));
 const Directory = lazyWithReload(() => import("./pages/Directory"));
+const DirectoryIndex = lazyWithReload(() => import("./pages/DirectoryIndex"));
 const RoosterRock = lazyWithReload(() => import("./pages/RoosterRock"));
 const SauvieIsland = lazyWithReload(() => import("./pages/SauvieIsland"));
 const UnifiedMap = lazyWithReload(() => import("./pages/UnifiedMap"));
@@ -285,6 +286,7 @@ function AppLayout() {
             <Route path="/mizzed/new">{() => <BoardComposeEntrance board="mizzed" />}</Route>
             <Route path="/mizzed">{() => <BoardEntrance board="mizzed" />}</Route>
             <Route path="/directory/new">{() => <MapWorldRedirect world="places" />}</Route>
+            <Route path="/directory/a-z" component={DirectoryIndex} />
             <Route path="/directory/:id/:slug?" component={Directory} />
 
             <Route path="/directory" component={PlacezBrowse} />
