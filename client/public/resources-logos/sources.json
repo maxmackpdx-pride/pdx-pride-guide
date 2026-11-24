@@ -537,5 +537,13 @@
     "sourcePage": "https://www.fpcwc.org/services",
     "sourceAsset": "https://images.squarespace-cdn.com/content/v1/6888186f959ab0384a074d6f/1753749640516-Z2Q3JV5MDV6899GD53FJ/fjcwc-logo-no-text.png?format=1500w",
     "checked": "2026-09-30"
+  },
+  {
+    "name": "Sunshine Division",
+    "logo": "/resources-logos/sunshine-division-white.png",
+    "sourcePage": "https://sunshinedivision.org/",
+    "sourceAsset": "https://sunshinedivision.org/wp-content/uploads/2025/07/SD-White-Logo-Outline-for-Web.png",
+    "checked": "2026-11-24",
+    "treatment": "Official white outline logo published by Sunshine Division for web use; stored unaltered."
   }
 ]

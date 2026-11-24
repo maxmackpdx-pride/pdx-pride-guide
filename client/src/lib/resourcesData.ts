@@ -1482,7 +1482,8 @@ const RESOURCE_CATEGORY_SOURCE: ResourceCategory[] = [
           }
         ],
         "sourceUrl": "https://sunshinedivision.org/appointments/",
-        "sourceChecked": "November 24, 2026"
+        "sourceChecked": "November 24, 2026",
+        "logo": "/resources-logos/sunshine-division-white.png",
       }
    ]
   },
