@@ -29,6 +29,14 @@ Source material reconciled Oct 24:
   changes, they bring problems and candidates to Muse's attention, and
   they may publish a missed event ONLY when it is clearly LGBTQ and public
   and passes the founder gate. Everything else routes to Muse.
+- **Intake — every route in gets the full treatment (Tucker, Nov 23,
+  2026):** a place that arrives by user submission, by claim, by someone
+  telling an AI "add this place," or through code still ends with Muse
+  verifying it and a complete registry entry — why, source, verify-at,
+  search recipe, verified real logo (SVG, drift-checked, in the existing
+  logo slots), front-of-location shot, and a per-entry change log. The
+  venue hunter diffs the site directory/catalog against the registry
+  every run; a place with no entry is a gap to close, however it got in.
 - **The system improves itself, by design (Tucker, Nov 23, 2026):**
   everything here — from Muse down to the newest contributor — is built
   to constantly improve itself, not just run. Every run leaves the

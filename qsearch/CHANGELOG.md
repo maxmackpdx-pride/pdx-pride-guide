@@ -7,6 +7,15 @@ AGENTS-ROSTER.md) are mirrored to GitHub (maxmackpdx-pride/pdx-pride-guide,
 qsearch/ folder) whenever they change.
 
 ## 2026-11-23
+- **Per-entry change logs + intake rule** (Tucker): every registry entry
+  now carries a dated change log (added, changes, new additions), and
+  recipes are written once — identical recipes name the shared pattern
+  instead of being rewritten. Intake rule added to the protocol and the
+  registry: every route in (site submission, claim, told-to-an-AI, code)
+  gets the full treatment — Muse verification, complete entry, verified
+  real logo (SVG conversion, drift/accuracy check, existing logo slots),
+  and the front-of-location shot process. Open item: the GPT-written
+  front-shot process (effects + storage) is not yet in Muse's files.
 - **Search recipes ride on the registry entries** (Tucker): the list with
   everybody on it now carries, for each individual location and person,
   how that entry is searched — update surfaces in order, detail-page

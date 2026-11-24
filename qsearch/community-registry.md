@@ -27,7 +27,33 @@ at Tucker's direction. Mirrored to GitHub with the rest of the QSearch process.
   surfaces in order, the detail-page route, official handles, and traps.
   The registry is the one list with everybody on it, and the recipe rides
   on the entry itself, so anyone running the process searches each place
-  the right way. An entry without a recipe is incomplete.
+  the right way. An entry without a recipe is incomplete. **Recipes are
+  written once:** when a place searches the same way as an existing
+  pattern, the entry names that pattern and spells out only its
+  differences — the same recipe is never rewritten entry after entry.
+- **Every entry carries a change log** (Tucker, Nov 23, 2026): dated
+  lines for when it was added and everything that changed after — new
+  additions, corrections, verification flips. The entry's history lives
+  on the entry.
+- **Intake — every route in gets the full treatment** (Tucker, Nov 23,
+  2026): however a place arrives — a user submission on the site, a
+  claim, someone telling an AI "add this place," or an add through code —
+  it ends in the same place: Muse verifies it, and it gets a complete
+  registry entry (why, source, verify-at, recipe, logo, front shot,
+  change log). The venue hunter diffs the site directory/catalog against
+  the registry every run; a place with no registry entry is a gap to
+  close, however it got there.
+- **Adding a place includes its assets:** grab and verify the REAL logo
+  (the venue's own current mark, never a lookalike), convert it to SVG,
+  check it for drift and accuracy against the venue's own use, and store
+  it in the slots that already exist — `client/public/directory-logos/`
+  for venues, `client/public/community-logos/` for collectives and
+  hosts. And the front-of-location shot: gather multiple online images
+  of the verified entrance and make the perfect front shot with the
+  house effects, stored where those live. (Open item, Nov 23, 2026: the
+  front-shot process written with GPT — the effects and where the shots
+  are stored — is not in Muse's files yet; get it from Tucker/Brodi
+  and write it here verbatim rather than inventing it.)
 - **Only Muse verifies and adds** new venues and service providers
   (Tucker, Nov 23, 2026). Hunters and contributing agents propose entries
   with their evidence; the verification and the add are Muse's. Only
@@ -48,6 +74,7 @@ at Tucker's direction. Mirrored to GitHub with the rest of the QSearch process.
   order, detail-page route, official handles, traps>
 - Last verified: <date> · Status: verified / needs verification
 - Notes: <residency details, who holds the residency, anything a re-check needs>
+- Change log: <dated lines — added, what changed, new additions>
 
 ## Entries
 
@@ -619,3 +646,75 @@ at Tucker's direction. Mirrored to GitHub with the rest of the QSearch process.
 - Verify at: https://queersocialclub.com — QSC's /events-portland/<slug> detail page is the detail route for T4T Social editions
 - Last verified: 2026-11-23 · Status: verified
 - Notes: Never labeled LGBTQ — residency nod only. QSC listed no December dates for T4T Social at the Nov 19 sweep — pattern-only holds are not published.
+
+### Westside Queer Resource Center (WQRC)
+- Type: organization
+- Why on Zaylist: 501(c)(3) nonprofit serving the LGBTQIA+ community in and around Washington County (Hillsboro / westside Portland metro) — drop-in hours, affinity groups, TTRPG and crafting programming, trans needle exchange. Founded 2019; its physical home, The Hive, is at 233 SE Washington St, Hillsboro.
+- How we know: Queer Social Club Portland listings (accessed 2026-11-23) — Tabletop RPG Drop-In Night, Community Crafting Night and Queer Affinity Group all link to westsideqrc.org/calendar; corroborated by the City of Hillsboro's own profile ("a 501(c)(3) nonprofit... serve the needs of queer and trans people in Washington County") and KBOO's org description ("serving the LGBTQIA+ community in and around Washington County, Oregon")
+- Found: 2026-11-23 · Found by: weekly hunter (gap run — QSC direct sweep)
+- Verify at: https://www.westsideqrc.org/ and https://www.westsideqrc.org/calendar
+- Last verified: 2026-11-23 · Status: verified
+- Notes: Metro-area (Washington County), not Portland proper — in scope as the westside's queer resource center, the counterpart to Q Center. Detail-page route: its own calendar at westsideqrc.org/calendar (monthly programming pages) — recorded in source-memory this run.
+
+### Portland Sage Singers
+- Type: club / organization
+- Why on Zaylist: Chorus for Q+ elders and allies (ages 55+), incorporated Oct 1, 2024 — one of only two queer and allied elder choruses in the country per its QSC listing. Part of the GALA Choruses network, the North American LGBTQIA+ choral movement.
+- How we know: Queer Social Club listing "Making Spirits Bright" (accessed 2026-11-23) naming it "an LGBTQ+ elders and allies chorus"; its own About page (https://portlandsagesingers.org/about/) — "We will be part of the GALA Choruses network (leader in the North American LGBTQIA+ choral movement)", inspired by Sage Singers Denver, "the first GALA chorus for queer and allied elder singers"
+- Found: 2026-11-23 · Found by: weekly hunter (gap run — QSC direct sweep)
+- Verify at: https://portlandsagesingers.org/about/ and https://portlandsagesingers.org/
+- Last verified: 2026-11-23 · Status: verified
+- Notes: Artistic Director Dr. Tim Seelig. Rehearsals Sundays at Grant Park Church; concerts at the Reser Center, Beaverton. Recurring host — added to host-watch-list.md this run.
+
+### Degenderettes
+- Type: club / organization
+- Why on Zaylist: Collective gym / martial-arts clubhouse run by trans women — a 501(c)(3) nonprofit whose programming is for LGBTQIA adults only: BJJ, Muay Thai kickboxing, judo, self-defense, squad-building and a motorcycle self-repair hangout, at its own clubhouse, 1628 N Columbia Blvd, Portland.
+- How we know: Queer Social Club Portland feed (accessed 2026-11-23) — 16 upcoming listings at 1628 N Columbia Blvd, with its own copy: "Degenderettes is a collective gym run by trans women. It is a 501(c)(3) nonprofit" and "All programming at Degenderettes is for LGBTQIA adults only"; its own site (https://degenderettes.org/) — "The Degenderettes Clubhouse (Portland, OR) is a training facility for trans & queer adults", address 1628 N Columbia Blvd F, Portland OR 97211
+- Found: 2026-11-23 · Found by: weekly hunter (gap run — QSC direct sweep)
+- Verify at: https://degenderettes.org/ and its calendar https://degenderettes.org/calendar ; Instagram @degenderettes
+- Last verified: 2026-11-23 · Status: verified
+- Notes: Black and Indigenous trans-fems train free; Friday self-defense classes always free. Recurring host — added to host-watch-list.md this run. Detail-page route: degenderettes.org/calendar — recorded in source-memory this run.
+
+### Our Dance Studio PDX
+- Type: service provider
+- Why on Zaylist: Dance instruction studio whose own homepage states "proudly queer owned" and "a queer + disabled-run small business with the goal of creating inclusive, trauma-aware, safer dance spaces here in Portland" — openly out in its own professional presence, per the registry's provider rule. Runs Queer Salsa Tuesdays and Dominican Bachata Fridays (classes at 232 SE Oak St).
+- How we know: Its own site, https://www.ourdancestudiopdx.com/ (read 2026-11-23) — "proudly queer owned" / "queer + disabled-run small business"; Queer Social Club listing "Queer Salsa Tuesdays" (accessed 2026-11-23) — "Our Dance Studio was started to create a safer, more accessible dance space specifically for queer and neurodivergent folks", teacher a.b., they/them
+- Found: 2026-11-23 · Found by: weekly hunter (gap run — QSC direct sweep)
+- Verify at: https://www.ourdancestudiopdx.com/ and Instagram @ourdancestudio_pdx
+- Last verified: 2026-11-23 · Status: verified
+- Notes: Classes are held at Portland Dance Studio, 232 SE Oak St — that building is a class location, not a venue identity claim for the studio.
+
+### PDX Queer Book Club
+- Type: club / organization
+- Why on Zaylist: Recurring monthly queer book group — meets the second Thursday of each month, alternating fiction and nonfiction; a continuation of the group that previously met on Meetup (2022–2025).
+- How we know: Partiful event "The Safekeep - PDX Queer Book Club", Thu Jan 14, 2027, 7pm, Lucky Labrador Brew Pub SE, 915 SE Hawthorne Blvd (https://partiful.com/e/m92BP9vvLseWO9UZ1mLC, read in the live signed-in browser 2026-11-23; host is a Partiful Community profile with 3 upcoming events); verified against the group's own presence, its Linktree https://linktr.ee/pdxqueerbooks — "a safe place for members of the queer community to gather and discuss books relevant to our diverse experiences. We meet the second Thursday of each month"
+- Found: 2026-11-23 · Found by: weekly hunter (gap run — Partiful live signed-in sweep)
+- Verify at: https://linktr.ee/pdxqueerbooks and its Partiful host / event pages
+- Last verified: 2026-11-23 · Status: verified
+- Notes: Meeting location is confirmed month by month per its Linktree — Lucky Lab SE is the Jan 14 location, NOT a confirmed fixed residency, so Lucky Lab gets no residency nod from this. A QSC listing "Moby Dyke: PDX Queer Book Club" also appears in the QSC feed. Recurring host — added to host-watch-list.md this run.
+
+### Queer Nourish
+- Type: organization
+- Why on Zaylist: Portland queer history, culture and learning events — founder Taylor J. Hodges (they/them). Events have been held at Peacock PDX (already in this registry) and via TicketTailor.
+- How we know: Partiful mutual (2 shared events with Tucker, ~Sep 2026), checked in the live signed-in browser 2026-11-23; verified against its own presence, https://www.queernourish.com/ — "QUEER HISTORY CULTURE & LEARNING EVENTS", founder Taylor J. Hodges, Instagram @queernourish; Oregon Pride in Business Certified Spotlight (May 12, 2025)
+- Found: 2026-11-23 · Found by: weekly hunter (gap run — Partiful live signed-in sweep)
+- Verify at: https://www.queernourish.com/ and Instagram @queernourish
+- Last verified: 2026-11-23 · Status: verified
+- Notes: Previously carried on host-watch-list.md (added Nov 15, 2026) as an UNVERIFIED Partiful mutual — this run verifies it against its own site; watch-list entry updated. No fixed venue or residency found.
+
+### Puddletown
+- Type: residency nod
+- Why on Zaylist: Community-friendly — they've hosted our community and are worth reaching out to if you're looking to host. Regular residency: Queer Board Game Night, every Monday, at Puddletown, 4100 NE Fremont St (free game rental library, no alcohol).
+- How we know: Queer Social Club Portland feed (accessed 2026-11-23) — "Join us each Monday for a fun night of games at Puddletown", with two upcoming Monday editions in the current feed; RSVP via Partiful
+- Found: 2026-11-23 · Found by: weekly hunter (gap run — QSC direct sweep)
+- Verify at: https://queersocialclub.com/events-portland — QSC's /events-portland/<slug> detail page for Queer Board Game Night is the detail route for each edition
+- Last verified: 2026-11-23 · Status: verified
+- Notes: Never labeled LGBTQ — residency nod only.
+
+### Bhakti Yoga Movement Center
+- Type: residency nod
+- Why on Zaylist: Community-friendly — they've hosted our community and are worth reaching out to if you're looking to host. Regular residency: Queer + Trans Yoga, a weekly all-levels donation class (in-person + livestream), at 2500 SE 26th Ave.
+- How we know: Queer Social Club Portland feed (accessed 2026-11-23) — six upcoming Queer + Trans Yoga listings at 2500 Southeast 26th Avenue, described as "A Weekly all levels donation class... for people with shared identities, to build community"
+- Found: 2026-11-23 · Found by: weekly hunter (gap run — QSC direct sweep)
+- Verify at: https://queersocialclub.com/events-portland — QSC's /events-portland/<slug> detail page for Queer + Trans Yoga is the detail route; Bhakti's own schedule on re-check
+- Last verified: 2026-11-23 · Status: verified
+- Notes: Never labeled LGBTQ — residency nod only. Distinct from Lighthouse Community Yoga PDX's Queer + Trans Community Yoga series, already in this registry.
