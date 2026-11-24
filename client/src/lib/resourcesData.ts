@@ -1448,6 +1448,42 @@ const RESOURCE_CATEGORY_SOURCE: ResourceCategory[] = [
         "contactChecked": "September 30, 2026",
         "logo": "/resources-logos/hand-up-project-transparent.png",
       },
+      {
+        "name": "Sunshine Division",
+        "sub": "Free grocery-style food markets",
+        "scope": "Portland · NW Front Ave & SE Stark",
+        "desc": "Free grocery-style food markets where you shop the shelves and pick your own groceries: pantry staples plus rotating fresh, frozen and shelf-stable foods. Appointment required for every visit. Households may visit up to 16 times per year, and the count refreshes in January. The downtown Front Ave market tends to be less busy than the east side SE Stark market.",
+        "url": "https://sunshinedivision.org/appointments/",
+        "cta": "Schedule a visit",
+        "serviceTags": [
+          "Groceries"
+        ],
+        "howToStart": "Book an appointment online before you go; an appointment is required for every visit. Bring a photo ID if you have one; you will not be turned away without one.",
+        "lat": 45.5379,
+        "lng": -122.68944,
+        "locations": [
+          {
+            "name": "Front Ave Market",
+            "address": "2121 NW Front Ave, Portland, OR 97209",
+            "phone": "tel:+19713796083",
+            "sourceUrl": "https://sunshinedivision.org/appointments/",
+            "hours": "Tuesday, Wednesday & Friday, 9 am–12 pm & 1–4 pm; Thursday, 11 am–3 pm & 4–7 pm; Saturday, 9 am–2 pm. Appointment required.",
+            "lat": 45.5379,
+            "lng": -122.68944
+          },
+          {
+            "name": "SE Stark Market",
+            "address": "12436 SE Stark St, Portland, OR 97233",
+            "phone": "tel:+19713258810",
+            "sourceUrl": "https://sunshinedivision.org/appointments/",
+            "hours": "Monday–Friday, 9 am–12 pm & 1–4 pm. Appointment required.",
+            "lat": 45.51874,
+            "lng": -122.53502
+          }
+        ],
+        "sourceUrl": "https://sunshinedivision.org/appointments/",
+        "sourceChecked": "November 24, 2026"
+      }
    ]
   },
   {
