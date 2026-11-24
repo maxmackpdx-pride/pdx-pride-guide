@@ -449,8 +449,10 @@ Never store passwords, cookies, or tokens.
 
 ### The Locker Room (Eagle Portland) — recurrence rule (Tucker, Oct 29, 2026)
 - **Hosted by the Yes Coach party collective** at Eagle Portland;
-  **Tucker owns the collective** (confirmed Nov 24, 2026 — the collective
-  hosts, Tucker is its owner, the DJs are talent); DJ Bro Hoe often DJs it — and also
+  **Tucker owns the collective and promotes its nights** (confirmed
+  Nov 24, 2026 — the collective hosts, Tucker is owner and promoter,
+  the DJs are talent; roles are not exclusive, a person can hold more
+  than one); DJ Bro Hoe often DJs it — and also
   DJs Yes Coach. Same host, different events: Yes Coach's anniversary
   is a one-time event at Sanctuary Club; The Locker Room is monthly
   here. Never merge the two.

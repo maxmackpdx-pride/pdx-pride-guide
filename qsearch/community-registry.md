@@ -31,6 +31,9 @@ at Tucker's direction. Mirrored to GitHub with the rest of the QSearch process.
   written once:** when a place searches the same way as an existing
   pattern, the entry names that pattern and spells out only its
   differences — the same recipe is never rewritten entry after entry.
+- **Roles are not exclusive** (Tucker, Nov 24, 2026): a person can be
+  owner and promoter and talent at once. Record every role a person
+  actually holds on an entry — never flatten anyone to a single label.
 - **Every entry carries a change log** (Tucker, Nov 23, 2026): dated
   lines for when it was added and everything that changed after — new
   additions, corrections, verification flips. The entry's history lives
@@ -362,10 +365,10 @@ at Tucker's direction. Mirrored to GitHub with the rest of the QSearch process.
 - Found: 2026-11-23 · Found by: weekly hunter (first-run seed)
 - Verify at: https://yescoachparty.com ; Instagram @Tucker_PDmaX
 - Search recipe: yescoachparty.com first, then Instagram @Tucker_PDmaX, then the host venue's detail page for the event. The 3-Year Anniversary (Sanctuary Club, Nov 29, 2026) is a ONE-TIME event — no recurrence, no series to extend. Host relationship: The Locker Room at Eagle Portland is HOSTED BY the Yes Coach party collective — same host, different event. The anniversary is one-time at Sanctuary; The Locker Room is monthly at the Eagle under its own recurrence rule in source-memory.md. Never extend the anniversary as a series, and never move Locker Room editions off their own rule (Tucker, Nov 24, 2026). DJ Bro Hoe often DJs both.
-- Change log: 2026-11-23 — added in the first weekly hunter run (see Found line); 2026-11-23 — search recipe backfilled in the recipe backfill pass, drawn from source-memory.md and the Nov 23, 2026 detail-page audit. 2026-11-24 — corrected by Tucker: the anniversary is a one-time event, distinct from The Locker Room; the Locker Room recurrence rule the backfill had folded into this recipe was removed. 2026-11-24 — Tucker clarified: both events are his, DJ Bro Hoe often DJs both; different venues (Sanctuary vs Eagle Portland), different events; The Locker Room is monthly. 2026-11-24 — Tucker: The Locker Room is hosted by the Yes Coach party collective at the Eagle — same host, different events; recipe note rewritten to say so. 2026-11-24 — Tucker: "I'm the promoter" — roles recorded on this entry (collective hosts, Tucker promotes, DJs are talent). 2026-11-24 — Tucker corrected it himself: "I'm the owner" — his role is OWNER; the ROLES note rewritten.
+- Change log: 2026-11-23 — added in the first weekly hunter run (see Found line); 2026-11-23 — search recipe backfilled in the recipe backfill pass, drawn from source-memory.md and the Nov 23, 2026 detail-page audit. 2026-11-24 — corrected by Tucker: the anniversary is a one-time event, distinct from The Locker Room; the Locker Room recurrence rule the backfill had folded into this recipe was removed. 2026-11-24 — Tucker clarified: both events are his, DJ Bro Hoe often DJs both; different venues (Sanctuary vs Eagle Portland), different events; The Locker Room is monthly. 2026-11-24 — Tucker: The Locker Room is hosted by the Yes Coach party collective at the Eagle — same host, different events; recipe note rewritten to say so. 2026-11-24 — Tucker: "I'm the promoter" — roles recorded on this entry (collective hosts, Tucker promotes, DJs are talent). 2026-11-24 — Tucker corrected it himself: "I'm the owner" — his role is OWNER; the ROLES note rewritten. 2026-11-24 — Tucker: "People can be more than one" — roles are not exclusive; Tucker is owner AND promoter; the ROLES note and the registry rules now say so.
 - Last verified: 2026-11-23 · Status: verified
 - Notes: Seeded from the directory's group records in the first hunter run, per Tucker's Nov 23, 2026 seeding instruction.
-  ROLES (Tucker, Nov 24, 2026): Tucker is the OWNER of the collective — the directory record's ownerId is his account. The collective HOSTS its events; the DJs are TALENT. (He first said promoter, then corrected it himself: owner is the word.)
+  ROLES (Tucker, Nov 24, 2026): people can hold more than one role — Tucker is BOTH the OWNER of the collective (the directory record's ownerId is his account) AND its PROMOTER. The collective HOSTS its events; the DJs are TALENT. Record every role a person actually holds; never flatten anyone to one label.
 
 ### Fertile Ground Festival
 - Type: club / organization
