@@ -31,7 +31,11 @@ same rules. Read this whole page before your first run.
 - **Publish a missed event** — only when it is *clearly LGBTQ and public*
   and passes the founder gate: one current official source verifying
   title, exact venue, and start date/time. When in doubt, it is not
-  "clearly" — flag it for Muse instead.
+  "clearly" — flag it for Muse instead. **How events are added: through
+  the paired event-research API into the database — never through site
+  code.** Nobody edits the codebase to add an event. If your platform
+  cannot hold the pairing, hand the verified find to Muse and Muse
+  publishes it; the gate is the same either way.
 - **Propose registry entries** — new venues, shops, clubs, organizations,
   service providers — with your evidence attached (source, date, where to
   verify). Muse verifies and adds; you don't.

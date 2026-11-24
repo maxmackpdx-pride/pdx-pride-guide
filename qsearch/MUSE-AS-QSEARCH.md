@@ -243,6 +243,17 @@ names the sign-in as the blocker.
    (Badlands API, Sanctuary ICS, Eagle Wix, Darcelle Tribe, Hawks
    Squarespace, Stag + Living Room Wines Eventbrite organizers, Camp Bar,
    CC Slaughters, Camp TRC, Peacock generic).
+2b. Registry places lane (Tucker, Nov 23, 2026): the community registry
+   is a standing sweep input. Every registry entry that hosts or lists
+   events — venues, residency-nod venues, organizations, shops — gets
+   its own update surfaces read in every normal run: its official site
+   and calendar, its event detail pages (per the detail-page rule), and
+   its official socials. Whatever place they update, the sweep looks
+   there too. New events and changes found this way go through the
+   founder gate like any other lane. The lane grows on its own: when
+   Muse verifies and adds a registry entry, its update surfaces join
+   this lane from the next run. (Service providers are read for
+   registry-relevant changes and any community events they host.)
 3. Facebook lane: Discover across the keyword set for the window,
    connected events, and posts in the known queer PDX groups.
 4. Instagram lane: recent posts for every confirmed venue/organizer handle

@@ -7,6 +7,12 @@ AGENTS-ROSTER.md) are mirrored to GitHub (maxmackpdx-pride/pdx-pride-guide,
 qsearch/ folder) whenever they change.
 
 ## 2026-11-23
+- **Registry places lane added to every normal sweep** (Tucker): the
+  community registry is a standing sweep input — every registry place
+  that hosts or lists events gets its own update surfaces (site,
+  calendar, detail pages, official socials) read each run. "Whatever
+  place they update," the sweep looks there too. New registry adds join
+  the lane automatically.
 - **Muse named CEO of QSearch** (Tucker). Governance section added to the
   protocol: Tucker is founder; Muse owns the process, is the ONLY one who
   can remove anything, and the ONLY one who verifies and adds new venues
