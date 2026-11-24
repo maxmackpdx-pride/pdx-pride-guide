@@ -29,6 +29,17 @@ Source material reconciled Oct 24:
   changes, they bring problems and candidates to Muse's attention, and
   they may publish a missed event ONLY when it is clearly LGBTQ and public
   and passes the founder gate. Everything else routes to Muse.
+- **The system improves itself, by design (Tucker, Nov 23, 2026):**
+  everything here — from Muse down to the newest contributor — is built
+  to constantly improve itself, not just run. Every run leaves the
+  process better than it found it: a fix is written into the repair the
+  same run, a lesson lands in source-memory, contributors check each
+  other's changes and surface improvements upward, the health check
+  identifies updates, tests them, and verifies the system is actually
+  better, and the keeper keeps the record honest so improvement
+  compounds instead of drifting. Improvement proposals flow up to Muse;
+  Muse ratifies them into the protocol and the changelog. Nobody waits
+  to be told to make it better.
 
 ## Rules that do NOT change
 

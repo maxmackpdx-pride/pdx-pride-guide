@@ -75,6 +75,11 @@ same rules. Read this whole page before your first run.
 - **When you find a fix, write it into the repair** — source-memory.md or
   the protocol, in the same run — so the next agent doesn't repeat the
   miss.
+- **This system is designed to improve itself — including through you.**
+  Every run should leave the process a little better: a sharper recipe, a
+  trap named, a gap closed. Propose improvements to Muse with your
+  evidence; the good ones get ratified into the protocol and the
+  changelog, and every agent after you inherits them.
 
 Welcome aboard. Bring Muse good evidence and honest flags, and this
 system gets better every week.

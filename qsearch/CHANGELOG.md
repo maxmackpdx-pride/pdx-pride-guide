@@ -7,6 +7,12 @@ AGENTS-ROSTER.md) are mirrored to GitHub (maxmackpdx-pride/pdx-pride-guide,
 qsearch/ folder) whenever they change.
 
 ## 2026-11-23
+- **Self-improvement named as a design principle** (Tucker): the whole
+  chain — Muse to contributor — is designed to constantly improve
+  itself. Written into the protocol's Governance section and into
+  CONTRIBUTING.md: fixes into the repair same-run, lessons into
+  source-memory, mutual review, health-check test-and-verify, keeper
+  honesty; proposals flow up to Muse, who ratifies them in.
 - **Registry places lane added to every normal sweep** (Tucker): the
   community registry is a standing sweep input — every registry place
   that hosts or lists events gets its own update surfaces (site,
