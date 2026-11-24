@@ -33,6 +33,12 @@ import { useTheme } from "@/context/ThemeContext";
 import { useInboxSheet, type InboxSheetOpenOpts } from "@/context/InboxSheetContext";
 import { isMissingEventFlyer, eventPosterSrc } from "@/lib/eventPoster";
 import { ADMISSION_OPTIONS } from "@shared/admission";
+import {
+  EVENT_TYPE_PICKER_LABELS,
+  jsonTagToSubmitLabel,
+  jsonTagsToSubmitLabels,
+  submitLabelsToJsonTags,
+} from "@shared/eventTypeTags";
 import { Button, Badge } from "@/components/ds";
 import "@/components/dashboard/dashboard.css";
 import "@/components/admin/admin-panel.css";
@@ -77,6 +83,7 @@ interface AdminEvent {
   ticketUrl: string | null;
   posterImageUrl: string | null;
   accentColor: string | null;
+  eventTypes: string;
   isClaimable: boolean;
   isHouseParty: boolean;
   isPrivate: boolean;
@@ -210,6 +217,27 @@ interface SiteAdminMember extends AdminUserProfile {
 const SITE_ADMIN_GIG_TITLE = "Site Admins Needed: Zaylist";
 const SITE_ADMIN_GIG_OWNER = "tucker_pdmax";
 const adminFieldClass = "w-full px-3 py-2 text-white text-sm border border-white/20 bg-black focus:outline-none focus:border-yellow-400";
+
+/** Stored eventTypes is a JSON string of canonical tags (e.g. '["KINK"]'). */
+function parseStoredEventTypes(raw: string | null | undefined): string[] {
+  try {
+    const parsed = JSON.parse(raw || "[]");
+    return Array.isArray(parsed) ? parsed.filter((t): t is string => typeof t === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Toggle one picker label in a stored eventTypes JSON string, keeping tags the picker does not know. */
+function toggleStoredEventType(raw: string | null | undefined, label: string): string {
+  const stored = parseStoredEventTypes(raw);
+  const knownLabels = jsonTagsToSubmitLabels(stored);
+  const unknownTags = stored.filter(t => jsonTagToSubmitLabel(t) === null);
+  const nextLabels = knownLabels.includes(label)
+    ? knownLabels.filter(l => l !== label)
+    : [...knownLabels, label];
+  return JSON.stringify([...submitLabelsToJsonTags(nextLabels), ...unknownTags]);
+}
 
 function adminTabFromQuery(
   search: string,
@@ -1251,6 +1279,10 @@ export default function Admin() {
     if (!editingId) return;
     editEventMutation.mutate({ id: editingId, data: editForm });
   };
+
+  const editTypeLabels = jsonTagsToSubmitLabels(parseStoredEventTypes(editForm.eventTypes));
+  const editUnknownTypeTags = parseStoredEventTypes(editForm.eventTypes)
+    .filter(t => jsonTagToSubmitLabel(t) === null);
 
   const startGigEdit = (gig: AdminGig) => {
     setEditingGigId(gig.id);
@@ -2436,6 +2468,24 @@ export default function Admin() {
                               <input type="checkbox" checked={!!editForm.nudityOk} onChange={e => setEditForm(f => ({ ...f, nudityOk: e.target.checked }))} />
                               NUDITY OK
                             </label>
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="display text-xs text-white/40 block mb-1">EVENT TYPES</label>
+                            <div className="flex flex-wrap gap-2">
+                              {EVENT_TYPE_PICKER_LABELS.map(t => {
+                                const active = editTypeLabels.includes(t);
+                                return (
+                                  <button key={t} type="button"
+                                    onClick={() => setEditForm(f => ({ ...f, eventTypes: toggleStoredEventType(f.eventTypes, t) }))}
+                                    className={`display uppercase text-[10px] px-2 py-1 border ${active ? "border-yellow-400 text-yellow-400" : "border-white/25 text-white/60 hover:border-yellow-400 hover:text-yellow-400"}`}>
+                                    {t}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {editUnknownTypeTags.length > 0 && (
+                              <p className="text-white/35 text-xs mt-2">Also tagged: {editUnknownTypeTags.join(", ")} (kept as-is)</p>
+                            )}
                           </div>
                           <div className="md:col-span-2">
                             <label className="display text-xs text-white/40 block mb-1">DESCRIPTION</label>
