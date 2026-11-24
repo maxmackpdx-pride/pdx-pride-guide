@@ -824,9 +824,11 @@
   }
 }
 
-/* Let the board's end scroll clear of the mobile dock. */
+/* Let the board's end scroll clear of the mobile dock. The board root only:
+ * the empty .fbx-overlay portal wrapper must not stack a second 84px of
+ * dead space at the very bottom of the page. */
 @media (max-width: 1099px) {
-  .fbx { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+  .fbx:not(.fbx-overlay) { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* Open card: everything below the hero rides above the poster's fade tail.

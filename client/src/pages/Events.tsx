@@ -34,9 +34,7 @@ import BoardFollowButton from "@/components/BoardFollowButton";
 import EventTypeTag from "../components/EventTypeTag";
 import EventzExpanded from "../components/events/EventzExpanded";
 import FlyerBoard from "../components/events/FlyerBoard";
-import EventsFilterDrawer, { type EventsFilterDay } from "../components/events/EventsFilterDrawer";
 import type { EventModalOriginRect } from "../components/EventModal";
-import Schedule from "@/pages/Schedule";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { canSharePublicEvent, hasPublicEventFlags } from "@shared/publicEventVisibility";
@@ -422,69 +420,9 @@ export default function Events() {
     refetchOnMount: "always",
   });
 
-  /* ---- bottom filter drawer (filters + day picker, locked to the dock) ---- */
-  /* The /schedule deep link (and its legacy ?tab=schedule form) arrives
-     with the drawer already open at the full-screen Your Schedule stage.
-     Captured once at mount: the /schedule redirect unmounts this page
-     before landing here, and the browse-param sync below rewrites the
-     visible URL without the flag. */
-  const [startAtSchedule] = useState(() => readSearchParam("schedule") === "1" || readSearchParam("tab") === "schedule");
-  const [drawerH, setDrawerH] = useState(0);
   const [boardCount, setBoardCount] = useState(0);
   const [pickedDay, setPickedDay] = useState<string | null>(null);
   const onBoardCount = useCallback((n: number) => setBoardCount(n), []);
-  const onDrawerHeight = useCallback((h: number) => setDrawerH(h), []);
-  const drawerPast = pastView;
-  const drawerDays = useMemo<EventsFilterDay[]>(() => {
-    const todayStr = pacificTodayDate(now);
-    const todayNoon = parsePacificDateTime(`${todayStr}T12:00:00`) ?? now;
-    const offsets = drawerPast ? [-6, -5, -4, -3, -2, -1, 0] : [0, 1, 2, 3, 4, 5, 6];
-    return offsets.map(off => {
-      const ms = todayNoon + off * 86400000;
-      const date = pacDate(ms);
-      return {
-        date,
-        dowCode: WEEKDAY_CODES[pacWeekday(ms)],
-        dom: Number(date.slice(8, 10)),
-        count: filterBoardEvents(events, `D:${date}`, activeFilters, searchQuery, drawerPast, now).length,
-        isToday: date === todayStr,
-        selected: pickedDay === date,
-      };
-    });
-  }, [events, activeFilters, searchQuery, drawerPast, now, pickedDay]);
-  const toggleDrawerTag = useCallback((token: string) => {
-    setPickedDay(null);
-    setBoardTags(prev => {
-      const next = new Set(prev);
-      if (next.has(token)) next.delete(token);
-      else next.add(token);
-      return next;
-    });
-  }, []);
-  const pickDrawerDay = useCallback((date: string) => {
-    setPickedDay(date);
-    /* A day jump always lands on the full board: clear the other filters,
-       then let the board scroll Plan Ahead to that date's cards. (The
-       drawer's full-screen schedule layer hears the same day through the
-       schedule's own listener and follows along.) */
-    setActiveDay(DEFAULT_WINDOW);
-    setActiveFilters([]);
-    setBoardWindow("all");
-    setBoardTags(new Set());
-    setSearchQuery("");
-    window.dispatchEvent(new CustomEvent("zaylist:schedule-day", { detail: { date } }));
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      window.dispatchEvent(new CustomEvent("zaylist:board-day", { detail: { date } }));
-    }));
-  }, []);
-  const toggleDrawerPast = useCallback(() => {
-    setPickedDay(null);
-    setPastView(prev => !prev);
-  }, []);
-  const pickDrawerWindow = useCallback((key: string) => {
-    setPickedDay(null);
-    setActiveDay(key);
-  }, []);
 
   const { data: routeEvent, error: routeError, refetch: refetchRouteEvent } = useQuery<Event>({
     queryKey: ["/api/events", routeEventId, routeDay, routeDate, user?.id ?? null],
@@ -834,10 +772,7 @@ export default function Events() {
   }
 
   return (
-    <div
-      className="zine-page events-page board-page board-page--makeover room-shader-page"
-      style={{ "--edrawer-h": `${drawerH}px` } as React.CSSProperties}
-    >
+    <div className="zine-page events-page board-page board-page--makeover room-shader-page">
       <RoomBackground room="eventz" />
 
       {/* Family header (Tucker, Nov 19 2026 late): "Events just needs its
@@ -923,32 +858,8 @@ export default function Events() {
         </div>
       </section>
 
-      {/* My Schedule no longer lives on this page: it is the drawer's
-          full-screen second layer (Your Schedule). */}
-      <EventsFilterDrawer
-        window={boardWindow}
-        onWindow={(value) => { setPickedDay(null); setBoardWindow(value); }}
-        tags={boardTags}
-        onToggleTag={toggleDrawerTag}
-        query={searchQuery}
-        onQuery={(value) => { setPickedDay(null); setSearchQuery(value); }}
-        count={boardCount > 0 ? boardCount : boardEvents.length}
-        days={drawerDays}
-        pastView={drawerPast}
-        onPickDay={pickDrawerDay}
-        onHeightChange={onDrawerHeight}
-        scheduleContent={<Schedule embed mineOnly />}
-        activeTypes={activeFilters}
-        onToggleType={toggleFilter}
-        onTogglePast={toggleDrawerPast}
-        windowChips={dayChips}
-        activeWindow={activeDay}
-        onPickWindow={pickDrawerWindow}
-        startAtSchedule={startAtSchedule}
-        upcomingEvents={boardEvents}
-        selectedDate={pickedDay}
-        onSelectDate={(date) => { if (date) pickDrawerDay(date); else setPickedDay(null); }}
-      />
+      {/* Drawers belong to the maps only (Tucker, Nov 24, 2026): the events
+          page has no filter drawer. The board carries browsing as-is. */}
 
       {showSaveAuth && <AuthModal onClose={() => setShowSaveAuth(false)} />}
       {selectedEvent && (

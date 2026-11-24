@@ -192,8 +192,10 @@
   /* The heart sits 6cqw in from the bottom and right edges (Tucker,
    * Nov 19, 2026); the rest of the band keeps the 4cqw face margin. */
   padding: 4cqw 6cqw 6cqw 4cqw;
-  /* Finish the fade within the top padding so the actions row has a solid backing. */
-  background: linear-gradient(to bottom, transparent, var(--z-black) 4cqw);
+  /* Gradual scrim, the approved demo's treatment: the flyer stays visible
+   * through the band and its own bottom text stays legible — never a solid
+   * block that cuts the flyer off above the card's bottom edge. */
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--z-black) 66%, transparent) 30%, color-mix(in srgb, var(--z-black) 93%, transparent) 68%);
 }
 .fbx .pcdtop {
   position: absolute;

@@ -207,6 +207,10 @@
   position: absolute; inset: 0 0 auto; z-index: 3; isolation: isolate;
   transform: scaleY(var(--pin-scale)); transform-origin: top center;
   background: var(--z-black);
+  /* The heading's 480px poster backdrop must stop at the pin's own bottom
+   * edge (the tab row). Unclipped, its faded-to-solid tail paints a black
+   * bar over the top of every tab page and hides the first content. */
+  overflow: hidden;
 }
 .evz-pin::before {
   content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
