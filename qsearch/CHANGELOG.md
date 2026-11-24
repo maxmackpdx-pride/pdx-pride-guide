@@ -7,6 +7,13 @@ AGENTS-ROSTER.md) are mirrored to GitHub (maxmackpdx-pride/pdx-pride-guide,
 qsearch/ folder) whenever they change.
 
 ## 2026-11-23
+- **Recipe backfill completed** (venue hunter, Nov 23, 2026): all 71
+  community-registry entries now carry their own search recipe and a
+  per-entry change log — the 63 seeded/found entries were backfilled
+  from source-memory and the detail-page audit, joining the 8 gap-run
+  entries that already had theirs. Two shared patterns are named on
+  the entries instead of being rewritten: IG-ORG for directory groups
+  and RESIDENCY-HOST-DETAIL for residency nods.
 - **Per-entry change logs + intake rule** (Tucker): every registry entry
   now carries a dated change log (added, changes, new additions), and
   recipes are written once — identical recipes name the shared pattern
