@@ -500,9 +500,14 @@ function validateEventDates(
   }
 
   if (start && end) {
-    const startMs = new Date(start).getTime();
-    const endMs = new Date(end).getTime();
-    if (Number.isFinite(startMs) && Number.isFinite(endMs) && endMs <= startMs) {
+    // Compare Pacific wall time, not new Date(): edit forms submit naive
+    // local datetimes while stored values may carry an offset, and new
+    // Date() reads a naive string in the server's timezone (UTC on
+    // Railway). That mix made a 2:00 AM end look earlier than a 9:00 PM
+    // Pacific start and rejected legitimate saves (event 824, Nov 2026).
+    const startMs = parsePacificDateTime(start);
+    const endMs = parsePacificDateTime(end);
+    if (startMs != null && endMs != null && endMs <= startMs) {
       return "End date must be after start date";
     }
   }
