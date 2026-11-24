@@ -448,6 +448,10 @@ Never store passwords, cookies, or tokens.
   "Red Hanky 101", "Locktober", "Assets") before materializing.
 
 ### The Locker Room (Eagle Portland) — recurrence rule (Tucker, Oct 29, 2026)
+- **Tucker's own event** (confirmed Nov 24, 2026); DJ Bro Hoe often DJs
+  it — and also DJs Yes Coach. Shared people, different events: Yes
+  Coach's anniversary is a one-time event at Sanctuary Club; The Locker
+  Room is monthly at Eagle Portland. Never merge the two.
 - **Always the 4th Friday of the month, 21:00, Eagle Portland — except
   Christmas Eve** (the December edition doesn't run on the regular rule;
   Dec 2026's 4th Friday is Dec 25 — watch for announcements instead of
