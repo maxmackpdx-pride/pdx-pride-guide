@@ -7,6 +7,12 @@ AGENTS-ROSTER.md) are mirrored to GitHub (maxmackpdx-pride/pdx-pride-guide,
 qsearch/ folder) whenever they change.
 
 ## 2026-11-23
+- **Search recipes ride on the registry entries** (Tucker): the list with
+  everybody on it now carries, for each individual location and person,
+  how that entry is searched — update surfaces in order, detail-page
+  route, handles, traps. An entry without a recipe is incomplete; the
+  venue hunter backfills missing recipes every run, and sweeps follow
+  the recipe recorded on the entry.
 - **Self-improvement named as a design principle** (Tucker): the whole
   chain — Muse to contributor — is designed to constantly improve
   itself. Written into the protocol's Governance section and into

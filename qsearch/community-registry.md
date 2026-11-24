@@ -22,6 +22,12 @@ at Tucker's direction. Mirrored to GitHub with the rest of the QSearch process.
   page, booking page, or official socials say so themselves.
 - Every entry carries: why it's here, how we got that info (source + date),
   and where to verify it in the future.
+- **Every entry carries its own search recipe** (Tucker, Nov 23, 2026):
+  how that individual location or person is searched — their update
+  surfaces in order, the detail-page route, official handles, and traps.
+  The registry is the one list with everybody on it, and the recipe rides
+  on the entry itself, so anyone running the process searches each place
+  the right way. An entry without a recipe is incomplete.
 - **Only Muse verifies and adds** new venues and service providers
   (Tucker, Nov 23, 2026). Hunters and contributing agents propose entries
   with their evidence; the verification and the add are Muse's. Only
@@ -38,6 +44,8 @@ at Tucker's direction. Mirrored to GitHub with the rest of the QSearch process.
 - How we know: <source — write-up, About page, QSC, Partiful, official socials — with URL>
 - Found: <date> · Found by: <weekly hunter / sweep / Tucker / other>
 - Verify at: <the URL or source to re-check>
+- Search recipe: <how this place/person is searched — update surfaces in
+  order, detail-page route, official handles, traps>
 - Last verified: <date> · Status: verified / needs verification
 - Notes: <residency details, who holds the residency, anything a re-check needs>
 

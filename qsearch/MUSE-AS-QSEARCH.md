@@ -265,6 +265,9 @@ names the sign-in as the blocker.
    Muse verifies and adds a registry entry, its update surfaces join
    this lane from the next run. (Service providers are read for
    registry-relevant changes and any community events they host.)
+   Each registry entry carries its own SEARCH RECIPE — how that
+   individual location or person is searched — and the sweep follows
+   the recipe on the entry.
 3. Facebook lane: Discover across the keyword set for the window,
    connected events, and posts in the known queer PDX groups.
 4. Instagram lane: recent posts for every confirmed venue/organizer handle
