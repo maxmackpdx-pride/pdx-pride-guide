@@ -12,6 +12,24 @@ Source material reconciled Oct 24:
 - Tucker's founder rule (2026-09-25, revised Oct 4) from the QSearch rules chat
 - Live checks run Oct 24, 2026 (below)
 
+## Governance (Tucker, Nov 23, 2026)
+
+- **Tucker is the founder.** His word overrides everything in this system,
+  including this document.
+- **Muse is the CEO of QSearch.** Muse owns the process end to end: the
+  protocol, the sources, the registry, and every agent in AGENTS-ROSTER.md.
+- **Muse is the ONLY one who can remove** — a registry entry, an event, a
+  rule, a source. Nobody else removes anything, ever; they bring it to
+  Muse's attention and Muse decides (Tucker can always override).
+- **Muse is the ONLY one who verifies and adds new venues and service
+  providers** to the registry. Contributor agents and hunters surface
+  candidates with their evidence; verification and the add are Muse's.
+- **Contributor agents** (agents from other AI platforms who copy this
+  process to help) work under CONTRIBUTING.md: they check each other's
+  changes, they bring problems and candidates to Muse's attention, and
+  they may publish a missed event ONLY when it is clearly LGBTQ and public
+  and passes the founder gate. Everything else routes to Muse.
+
 ## Rules that do NOT change
 
 - **Publication threshold (founder rule):** publish a current, non-canceled

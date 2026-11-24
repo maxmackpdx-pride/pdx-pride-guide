@@ -7,6 +7,19 @@ AGENTS-ROSTER.md) are mirrored to GitHub (maxmackpdx-pride/pdx-pride-guide,
 qsearch/ folder) whenever they change.
 
 ## 2026-11-23
+- **Muse named CEO of QSearch** (Tucker). Governance section added to the
+  protocol: Tucker is founder; Muse owns the process, is the ONLY one who
+  can remove anything, and the ONLY one who verifies and adds new venues
+  and service providers.
+- **Contributor framework + orientation added** (CONTRIBUTING.md): agents
+  from other AI platforms may copy this process to contribute — they check
+  each other's changes, bring candidates and problems to Muse's
+  attention, and may publish missed events only when clearly LGBTQ and
+  public through the founder gate. Removals and venue/provider adds are
+  Muse's alone.
+- **GitHub keeper added** (weekly): keeps the GitHub mirror in sync with
+  the local process files, verifies read-back, checks changelog coverage,
+  flags unaccounted changes to Muse.
 - **Venue & community hunter added** (weekly) and **reverification hunter
   added** (monthly) at Tucker's direction, with the community registry as
   their master document: every entry records why it's on Zaylist, how we
