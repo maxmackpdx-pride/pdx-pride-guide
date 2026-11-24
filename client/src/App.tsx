@@ -97,6 +97,7 @@ const NotificationSettings = lazyWithReload(() => import("./pages/NotificationSe
 const PlacezBrowse = lazyWithReload(() => import("./pages/PlacezBrowse"));
 const Scenez = lazyWithReload(() => import("./pages/Scenez"));
 const OutzidePlacesPage = lazyWithReload(() => import("./pages/OutzidePlacesPage"));
+const OutzideIndex = lazyWithReload(() => import("./pages/OutzideIndex"));
 const Directory = lazyWithReload(() => import("./pages/Directory"));
 const DirectoryIndex = lazyWithReload(() => import("./pages/DirectoryIndex"));
 const RoosterRock = lazyWithReload(() => import("./pages/RoosterRock"));
@@ -303,6 +304,7 @@ function AppLayout() {
             <Route path="/outzide/rooster-rock" component={RoosterRock} />
             <Route path="/outzide/sauvie-island" component={SauvieIsland} />
             <Route path="/outzide/places" component={OutzidePlacesPage} />
+            <Route path="/outzide/a-z" component={OutzideIndex} />
             <Route path="/outzide/:placeSlug">{() => <OutzPlace />}</Route>
             <Route path="/next">
               {() => <Redirect to="/about" />}
