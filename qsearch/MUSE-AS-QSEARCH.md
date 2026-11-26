@@ -370,6 +370,20 @@ names the sign-in as the blocker.
    close it in this run when it is yours to close, or carry it in the
    report as a named incomplete with the missing pieces listed —
    reported alongside the posterless list, never instead of it.
+6d. Flyer text check (added Nov 26, 2026, at Tucker's direction): every
+   poster QSearch attaches — at publish or in a poster-hunter fill —
+   gets an OCR pass with ~/workspace/ocr-check/check_text.py (download
+   the image with curl first; urllib breaks through the proxy). Two
+   verdicts: (1) does the art carry ANY text, (2) does its text carry
+   the event's TITLE. Record both in the run's publish/poster log and
+   in ~/workspace/qsearch-new/poster-text-flags.json (keyed by event
+   id). Why: many official posters are text-free stock images
+   (Sanctuary detail-page photos, The Locker Room's series art) — the
+   flag is what lets the card add the title exactly when the art
+   doesn't carry it, and never duplicate it when it does. Proven
+   Nov 26, 2026: Locker Room art = 0 words; Yes Coach and MELT flyers
+   = title found. OCR is evidence, not a gate: a low-confidence read
+   on stylized lettering gets a human look, never an auto-reject.
 7. Report in plain language: coverage — INCLUDING the lane-coverage
    statement required by the Red Hanky rule (lanes + watch-list hosts
    actually swept; anything skipped/broken named as such) — FB/IG

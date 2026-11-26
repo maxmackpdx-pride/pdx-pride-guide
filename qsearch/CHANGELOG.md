@@ -6,6 +6,16 @@ source-memory.md, host-watch-list.md, community-registry.md,
 AGENTS-ROSTER.md) are mirrored to GitHub (maxmackpdx-pride/pdx-pride-guide,
 qsearch/ folder) whenever they change.
 
+## 2026-11-26
+- **Flyer text check** (Tucker): every poster QSearch attaches now gets
+  an OCR pass (~/workspace/ocr-check/check_text.py) recording whether
+  the art carries any text and whether it carries the event's title,
+  in poster-text-flags.json — so cards can add the title exactly when
+  the art lacks it (Sanctuary stock photos, Locker Room series art)
+  and never duplicate it. Protocol step 6d. A backfill over all
+  upcoming posters ran the same day; the card-side rule and an event
+  field for the flag went to the main chat as a build item.
+
 ## 2026-11-24
 - **Three helpers added** (Tucker: "Add three helpers"): series keeper
   (weekly, 90-day series horizon — after The Locker Room lapsed),
