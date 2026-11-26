@@ -381,10 +381,19 @@ names the sign-in as the blocker.
    posterText {"hasText": ..., "carriesTitle": ...} in the SAME
    create/change call as the poster attach (the accentColor pattern
    from 6b) — the card reads carriesTitle to decide whether to print
-   its own title. The flags file is also the backfill source for
-   posters attached before the field shipped: work it down with
-   posterText-only change calls (receipt = the poster URL) until
-   every upcoming event's verdict is on its record. Why: many
+   its own title. The flags file was also the backfill source for
+   posters attached before the field shipped: that drain completed
+   Nov 26, 2026 (551 of 552 upcoming posters written through the
+   paired connection; event 2022 is a claimed record the agent path
+   cannot write — its verdict waits in the flags file for an admin
+   write, and carriesTitle is false so its card is unaffected).
+   STANDING PART OF EVERY NORMAL RUN (Tucker, Nov 26, 2026, added
+   once the drained output passed rendered verification): every run
+   confirms each upcoming event with a poster has posterText on its
+   record, and checks + writes any that are missing (new posters,
+   missed ones) in the same run — posterText-only change calls,
+   receipt = the poster URL. The flags file remains the audit trail.
+   Why: many
    official posters are text-free stock images
    (Sanctuary detail-page photos, The Locker Room's series art) — the
    flag is what lets the card add the title exactly when the art
