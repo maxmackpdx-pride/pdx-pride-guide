@@ -4,7 +4,7 @@
 .event-square-card__open { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; }
 .event-square-card__art { position: absolute; inset: 0; display: block; }
 .event-square-card__art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
-.event-square-card__shade { position: absolute; left: 0; right: 0; bottom: 0; display: block; padding: 30px 88px 11px 12px; background: linear-gradient(180deg, transparent, rgba(3, 5, 7, .88) 55%); text-align: left; }
+.event-square-card__shade { position: absolute; left: 0; right: 0; bottom: 0; display: block; padding: 30px 88px 11px 12px; background: linear-gradient(180deg, transparent, rgba(3, 5, 7, .78) 55%); text-align: left; }
 .event-square-card__art .evz-plx__img { height: calc(100% + 20px); }
 /* Compact countdown, bottom-right above the heart (v12 Square). */
 .event-square-card__count { position: absolute; right: 12px; bottom: 64px; z-index: 5; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-shadow: 0 1px 4px var(--z-black); pointer-events: none; }

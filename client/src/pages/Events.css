@@ -320,7 +320,7 @@ html body .events-page.board-page--makeover .events-card-feed :is(.pdxBoard,.pdx
 .event-rail-card__art .tonight-card__live-label { font-size: 11px; }
 .event-rail-card__art .tonight-card__live--count b { font-size: 14px; }
 /* Title sits on the flyer's bottom edge over a short clear-to-dark fade. */
-.event-rail-card__shade { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; padding: 34px 52px 10px 10px; background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--z-black) 88%, transparent) 62%); pointer-events: none; }
+.event-rail-card__shade { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; padding: 34px 52px 10px 10px; background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--z-black) 78%, transparent) 62%); pointer-events: none; }
 .event-rail-card--s .event-rail-card__shade { padding: 20px 44px 8px 8px; }
 .event-rail-card__title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--text-hi); font: var(--event-card-compact-title-font); font-size: 16px; text-transform: uppercase; text-shadow: 0 1px 3px var(--z-black); }
 .event-rail-card--s .event-rail-card__title { font-size: 13px; }

@@ -43,7 +43,7 @@
 /* Scrim under the identity block: the poster fades into the card ink behind
    the title, meta and countdown (v12 tallscrim). */
 .evz-tall__art::after { content: ""; position: absolute; left: 0; right: 0; top: 150px; height: 152px; z-index: 2; pointer-events: none;
-  background: linear-gradient(to top, rgba(3, 5, 7, .88) 30%, transparent); }
+  background: linear-gradient(to top, rgba(3, 5, 7, .78) 30%, transparent); }
 .evz-tall__art .day-motif-code { position: absolute; top: 12px; left: 12px; z-index: 2; font-size: 16px; }
 .evz-tall__art:has(.tonight-card__live) .day-motif-code { top: 48px; }
 
@@ -80,7 +80,7 @@
 .evz-face .evz-wide__art > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; mask-image: none; -webkit-mask-image: none; }
 .evz-wide__art .day-motif-code { position: absolute; top: 12px; left: 12px; z-index: 2; font-size: 15px; }
 .evz-wide__scrim { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: flex; align-items: flex-end; gap: 10px;
-  padding: 34px 12px 11px; background: linear-gradient(180deg, transparent, rgba(3, 5, 7, .88) 55%); text-align: left; }
+  padding: 34px 12px 11px; background: linear-gradient(180deg, transparent, rgba(3, 5, 7, .78) 55%); text-align: left; }
 .evz-wide__id { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .evz-wide__id h3.evz-wide__title { margin: 0; font: 800 21px/1.04 var(--font-display, "Barlow Condensed", sans-serif); text-transform: uppercase; color: var(--text-hi);
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }

@@ -195,7 +195,7 @@
   /* Gradual scrim, the approved demo's treatment: the flyer stays visible
    * through the band and its own bottom text stays legible — never a solid
    * block that cuts the flyer off above the card's bottom edge. */
-  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--z-black) 66%, transparent) 30%, color-mix(in srgb, var(--z-black) 93%, transparent) 68%);
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--z-black) 55%, transparent) 30%, color-mix(in srgb, var(--z-black) 83%, transparent) 68%);
 }
 .fbx .pcdtop {
   position: absolute;
