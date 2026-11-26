@@ -1,0 +1,16 @@
+/* Preserve the map camera and drawer geometry underneath the host card.
+   Only the standalone package detail is visually removed from the hosted route. */
+.zaylist-unified-map[data-outz-destination] .outdoor-detail-open #discovery-drawer {
+  visibility: hidden;
+}
+.unified-outz-card-loading {
+  position: absolute;
+  inset: auto 1rem 20dvh;
+  z-index: 20;
+  padding: 1rem;
+  border: 1px solid var(--neon-orange);
+  border-radius: .75rem;
+  background: var(--z-black);
+  color: var(--text-hi);
+  text-align: center;
+}

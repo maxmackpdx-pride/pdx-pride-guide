@@ -74,7 +74,7 @@ type DiscoveryAnchors = {
 /** The pinned map owns the area, activity, search, result list and pins.
  * Attach the room sign and public plans to its existing drawer, preserving its
  * gestures and filter state across every step. */
-export default function OutzideDrawer({ mapRoot }: { mapRoot: RefObject<HTMLDivElement | null> }) {
+export default function OutzideDrawer({ mapRoot, onOpenDestination }: { mapRoot: RefObject<HTMLDivElement | null>; onOpenDestination: (id: string) => void }) {
   const [anchors, setAnchors] = useState<DiscoveryAnchors | null>(null);
   useEffect(() => {
     const root = mapRoot.current;
@@ -107,6 +107,6 @@ export default function OutzideDrawer({ mapRoot }: { mapRoot: RefObject<HTMLDivE
   return <>
     {anchors.heading && createPortal(<DiscoveryWordmark rooms={["outz"]}/>, anchors.heading)}
     {createPortal(<span className="native-outz-lip-brand" aria-hidden="true"><DiscoveryWordmark rooms={["outz"]}/></span>, anchors.grip)}
-    {anchors.scroll && createPortal(<OutzideDrawerContent showDestinations={anchors.onAreaStep}/>, anchors.scroll)}
+    {anchors.scroll && createPortal(<OutzideDrawerContent showDestinations={anchors.onAreaStep} onOpen={place=>onOpenDestination(place.id)}/>, anchors.scroll)}
   </>;
 }

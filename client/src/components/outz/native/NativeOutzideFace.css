@@ -188,3 +188,36 @@
 .oz-counter small{color:var(--oz-orange)}
 /* Tall: dark gradient over the bottom 25% of the image (founder ruling, Nov 16 2026). */
 .oz-card.oz-tall .oz-hero::before{content:'';position:absolute;left:0;right:0;bottom:0;height:25%;background:linear-gradient(180deg,rgba(3,5,7,0),rgba(3,5,7,.92));z-index:1;pointer-events:none}
+
+/* Astra's OutZide face: image first, text scrim, and one heart. */
+.oz-family-front.oz-card .oz-family-hero {
+  position: absolute; inset: 0; width: 100%; height: 100%; clip-path: none;
+  background: var(--z-black);
+}
+.oz-family-hero .oz-family-photo {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+}
+.oz-family-hero .oz-family-ink { mix-blend-mode: screen; pointer-events: none; }
+.oz-family-hero .oz-family-contours {
+  width: 100%; height: 100%; fill: none;
+  stroke: color-mix(in srgb, var(--oz-category) 55%, transparent);
+  stroke-width: 1.4;
+  background: radial-gradient(ellipse at 50% 48%, color-mix(in srgb,var(--oz-category) 22%,var(--z-black)),var(--z-black));
+}
+.oz-family-front.oz-card .oz-family-hero:after {
+  background: linear-gradient(to top,var(--z-black),color-mix(in srgb,var(--z-black) 78%,transparent) 17%,transparent 60%);
+  box-shadow: none;
+}
+.oz-family-front .oz-family-title {
+  position: absolute; z-index: 4; inset: auto 10px 12px; margin: 0;
+  pointer-events: none; color: var(--text-hi);
+  font: 850 clamp(1rem,4vw,1.45rem)/.98 var(--font-display);
+  text-transform: uppercase; overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
+}
+.oz-family-front.oz-small .oz-family-title { font-size: 1rem; }
+.oz-family-front:is(.oz-square,.oz-tall) .oz-family-title { right: 62px; }
+.oz-family-front:is(.oz-small,.oz-wide-map) .pz-heart[data-corner-control=heart] { inset: 4px 4px auto auto; }
+.oz-family-front .pz-heart button { color: var(--text-hi); }
+.oz-family-front .pz-heart button:before { background: color-mix(in srgb,var(--z-black) 75%,transparent); }

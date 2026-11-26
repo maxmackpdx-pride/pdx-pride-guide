@@ -151,3 +151,65 @@ html:has(.outz-native-dialog[open]){scrollbar-gutter:auto;overflow:hidden}.outz-
 .outz-expanded-footer .outz-native-credit{flex:1;padding-right:12px}
 .outz-expanded-save{display:flex;align-items:center;gap:9px;flex:none;min-height:44px;margin:6px 18px 0 0;padding:0;background:none;border:0;color:var(--oz-accent);font:700 13px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;cursor:pointer}
 .outz-expanded-save__heart{width:44px;height:44px;flex:none;display:grid;place-items:center;border:1px solid var(--oz-accent);border-radius:50%;background:var(--places-art-ink-080b0d);color:var(--oz-accent)}
+
+/* Family demo composition. Actual conditions, community and trip APIs stay in
+   the canonical destination card; no demo counts, travel times, or posts. */
+.outz-native-dialog[data-card-family="outzide"] .outz-native-expanded-hero {
+  height: clamp(150px,29dvh,285px);
+  isolation: isolate;
+}
+.outz-native-dialog[data-card-family="outzide"] .oz-family-hero { background: var(--z-black); }
+.outz-native-dialog[data-card-family="outzide"] .oz-family-hero:after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to top,var(--z-black),color-mix(in srgb,var(--z-black) 65%,transparent) 35%,transparent 77%);
+}
+.outz-native-dialog[data-card-family="outzide"] .outz-expanded-identity {
+  position: absolute; inset: auto 0 0; z-index: 4;
+  padding: 12px 52px 12px 16px;
+}
+.outz-native-dialog[data-card-family="outzide"] .outz-expanded-identity h1 {
+  position: static; margin: 0 0 4px;
+  font-size: clamp(25px,6vw,43px);
+  overflow-wrap: anywhere;
+}
+.outz-native-dialog[data-card-family="outzide"] .outz-expanded-identity small { display: block; }
+.outz-native-dialog[data-card-family="outzide"] .outz-expanded-identity p { margin: 5px 0 0; }
+.outz-family-actions {
+  display: flex; align-items: stretch; gap: 4px; padding: 12px 10px;
+}
+.outz-family-actions > :is(button,a) {
+  display: grid; flex: 1 1 0; min-width: 0; min-height: 48px; place-items: center; gap: 4px;
+  border: 0; background: transparent; text-align: center; text-decoration: none;
+  color: var(--text-hi); font: 750 clamp(12px,3.5vw,16px)/1 var(--font-display);
+  text-transform: uppercase;
+}
+.outz-family-actions span {
+  display: grid; place-items: center; width: 44px; height: 44px;
+  border: 1px solid var(--oz-accent); border-radius: 12px; color: var(--oz-accent);
+  background: color-mix(in srgb,var(--oz-accent) 10%,var(--z-black));
+}
+.outz-access-source {
+  margin: 12px 16px; padding: 12px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb,var(--oz-accent) 35%,transparent);
+  background: color-mix(in srgb,var(--oz-accent) 7%,var(--z-black));
+}
+.outz-access-source p { margin: 4px 0; }
+.outz-access-source > div { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.outz-access-source button { min-height: 44px; }
+.outz-family-share {
+  position: absolute; z-index: 20; top: calc(12px + env(safe-area-inset-top,0px)); right: calc(62px + env(safe-area-inset-right,0px));
+  width: 44px; height: 44px; display: grid; place-items: center;
+  border: 1px solid var(--oz-accent); border-radius: 50%;
+  background: color-mix(in srgb,var(--z-black) 85%,transparent); color: var(--text-hi);
+}
+.zay-card-stage.outz-family-stage { padding: min(10px,2dvh) min(8px,2vw); }
+.outz-family-toolbar {
+  display: flex; flex: none; align-items: center; gap: 6px;
+  padding: 3px 8px 3px 16px; border-bottom: 1px solid color-mix(in srgb,var(--oz-accent) 35%,transparent);
+  background: var(--z-black); color: var(--text-hi);
+}
+.outz-family-toolbar > span {
+  margin-right: auto; color: var(--oz-accent);
+  font: 800 15px/1 var(--font-display); text-transform: uppercase; letter-spacing: .12em;
+}
+.outz-native-dialog .outz-family-toolbar > button { position: static; flex: none; }

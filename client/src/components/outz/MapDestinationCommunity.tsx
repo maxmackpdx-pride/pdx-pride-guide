@@ -1,7 +1,7 @@
 import { createContext, Suspense, useContext, useEffect, useState, type ComponentType, type RefObject } from "react";
 import { isValidBeachId } from "@shared/riverBrats";
 
-type Section = "Wall" | "Your Trip" | "Buddy Finder" | "Beach community";
+type Section = "Conditions" | "Wall" | "Your Trip" | "Buddy Finder" | "Beach community";
 type Intent = { initial: Section; draft?: string };
 export type DestinationCardProps = Intent & { placeId: string; onClose: () => void };
 

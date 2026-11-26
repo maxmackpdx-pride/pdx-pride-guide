@@ -1,11 +1,13 @@
-import MapDestinationCommunity from '@/components/outz/MapDestinationCommunity';
+import { DestinationCardRenderer } from '@/components/outz/MapDestinationCommunity';
+import { useContext } from 'react';
+import './UnifiedOutzideCard.css';
 import { isValidBeachId } from '@shared/riverBrats';
 import { MapPlacePreview } from '@/components/MapCardPresentation';
 import {useMapPlacezRenderer} from '@/components/placez/MapPlacezBridge';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import type {Event} from '@shared/schema';
 import type {Business} from '@/pages/Directory';
-import {canonicalBoardBookmark,mapBookmark} from '@/lib/mapBookmarks';
+import {canonicalBoardBookmark,mapBookmark,outzDestinationSelection,outzDestinationClosedUrl} from '@/lib/mapBookmarks';
 const AfterzMapDrawer = lazy(() => import("@/components/afterz/NightDrawer").then(module => ({default: module.AfterzMapDrawer})));
 const OutzideDrawer = lazy(() => import("@/components/outz/OutzideDrawer"));
 const PlacezMapDrawer = lazy(() => import("@/components/places/PlacezMapDrawer"));
@@ -44,7 +46,19 @@ export default function UnifiedMap(){
  const selectedBookmark=mapBookmark(params,initialMode());
  const mode=selectedBookmark.mode;
  const nativeDetail=params.has('item') || (mode==='outzide' && (params.has('place') || params.has('guestPlace'))) || window.location.pathname.startsWith('/outzide/share/');
- const destinationId=mode==='outzide'&&!params.has('guestPlace')&&!window.location.pathname.startsWith('/outzide/share/')?selectedBookmark.selectedId:undefined;
+ const DestinationCard=useContext(DestinationCardRenderer);
+ const destinationId=outzDestinationSelection(window.location.pathname,params,mode);
+ const closeDestination=()=>{
+   window.history.replaceState(window.history.state,'',outzDestinationClosedUrl(new URL(window.location.href)));
+   // Synchronize the pinned runtime's selection without remounting its map.
+   window.dispatchEvent(new PopStateEvent('popstate',{state:window.history.state}));
+ };
+ const openDestination=(id:string)=>{
+   const url=new URL(window.location.href);
+   url.searchParams.set('mode','outzide');
+   url.searchParams.set('item',id);
+   window.history.pushState(window.history.state,'',url.pathname+url.search+url.hash);
+ };
  const bookmark=selectedBookmark.native;
  const bookmarkKind=bookmark?.kind,bookmarkId=bookmark?.id;
  useEffect(()=>{
@@ -79,28 +93,29 @@ export default function UnifiedMap(){
    if(disposed||!node.current){releaseStyles();return;}
    const module=acquired.module;
    const params=new URLSearchParams(window.location.search);
-   const shared=window.location.pathname.match(/^\/outzide\/share\/([^/]+)$/)?.[1];
    const bookmark=mapBookmark(params,initialMode());
    if(bookmark.mode==='boardz' && bookmark.selectedId && !params.has('item')){
     const url=new URL(window.location.href);url.search=canonicalBoardBookmark(params,bookmark.selectedId).toString();
     window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);
    }else if(bookmark.mode!==initialMode()){const url=new URL(window.location.href);url.searchParams.set('mode',bookmark.mode);window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);}
-   const result=module.mount(node.current,{initialMode:bookmark.mode,selectedId:shared?decodeURIComponent(shared):bookmark.selectedId,loginHref:'/map?mode=zaydark&auth=login',placezRenderer});
+   const result=module.mount(node.current,{initialMode:bookmark.mode,selectedId:bookmark.mode==='outzide'?outzDestinationSelection(window.location.pathname,params,bookmark.mode):bookmark.selectedId,loginHref:'/map?mode=zaydark&auth=login',placezRenderer});
    cleanup=()=>result.unmount();
    window.dispatchEvent(new CustomEvent('zaylist:map-ready',{detail:{map:'unified',release:release.tag}}));
   };
   void load().catch(reason=>{if(!disposed)setError(reason instanceof Error?reason.message:'Map could not load.');});
   return()=>{disposed=true;cleanup?.();releaseStyles?.();};
  },[attempt,user?.id,placezRenderer]);
- return <section className="zaylist-unified-map" aria-label="Zaylist five-mode map" data-host-discovery={!nativeDetail && ['mapz','outzide','afterz'].includes(mode) ? mode : undefined} data-map-release={release.tag} data-map-commit={release.commit} style={{position:'fixed',inset:0,zIndex:45,background:'var(--z-black,#050506)'}}>
+ return <section className="zaylist-unified-map" aria-label="Zaylist five-mode map" data-host-discovery={!nativeDetail && ['mapz','outzide','afterz'].includes(mode) ? mode : undefined} data-outz-destination={DestinationCard ? destinationId : undefined} data-map-release={release.tag} data-map-commit={release.commit} style={{position:'fixed',inset:0,zIndex:45,background:'var(--z-black,#050506)'}}>
   <div ref={node} style={{width:'100%',height:'100%',position:'relative',isolation:'isolate'}}/>
   {mode==='zaydark'&&<div role="status" style={{position:'absolute',inset:0,zIndex:10,display:'grid',placeItems:'center',padding:24,background:'var(--z-black,#050506)',color:'var(--room-zaydark)',fontFamily:'var(--font-display)',fontWeight:800,textTransform:'uppercase',letterSpacing:'.14em',lineHeight:.86,textAlign:'center',fontSize:'clamp(2.5rem,10vw,5.5rem)',textShadow:'0 0 34px color-mix(in srgb, var(--room-zaydark) 45%, transparent)'}}>CUMING SOON</div>}
   {placezPortals}
-  {destinationId && <MapDestinationCommunity key={destinationId} root={node} placeId={destinationId}
-    initial={params.get('wall')==='1'?'Wall':params.get('tab')==='community'?(isValidBeachId(destinationId)?'Beach community':'Wall'):undefined}/>}
+  {destinationId && DestinationCard && <Suspense fallback={<p className="unified-outz-card-loading" role="status">Opening destination…</p>}>
+    <DestinationCard key={destinationId} placeId={destinationId} onClose={closeDestination}
+      initial={params.get('wall')==='1'?'Wall':params.get('tab')==='community'?(isValidBeachId(destinationId)?'Beach community':'Wall'):'Conditions'}/>
+  </Suspense>}
   {!error && !legacyDetail && !nativeDetail && <Suspense fallback={null}>
     {mode === "afterz" && <AfterzMapDrawer/>}
-    {mode === "outzide" && <OutzideDrawer mapRoot={node}/>}
+    {mode === "outzide" && <OutzideDrawer mapRoot={node} onOpenDestination={openDestination}/>}
     {mode === "mapz" && <PlacezMapDrawer/>}
   </Suspense>}
   {error&&<div role="alert" style={{position:'absolute',inset:0,display:'grid',placeContent:'center',padding:24,background:'var(--z-black,#050506)',color:'white',gap:16}}><h1>Map unavailable</h1><p>{error}</p><button type="button" onClick={()=>setAttempt(v=>v+1)}>Retry map</button><a href="/events">Browse events without the map</a><a href="/">Back to Zaylist</a></div>}

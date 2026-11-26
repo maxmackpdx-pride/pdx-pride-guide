@@ -20,3 +20,21 @@ export function canonicalBoardBookmark(params:URLSearchParams,selectedId:string)
  for(const key of [...Object.keys(boards),'board','post','layer'])next.delete(key);
  return next;
 }
+
+
+// Shared map selections may arrive through a pin, an older bookmark, or a share link.
+export function outzDestinationSelection(pathname:string, params:URLSearchParams, mode:MapMode) {
+ if(mode!=='outzide')return undefined;
+ const shared=pathname.match(/^\/outzide\/share\/([^/]+)\/?$/)?.[1];
+ let candidate=params.get('item')??params.get('place')??params.get('guestPlace')??shared;
+ if(candidate && shared===candidate) {
+  try { candidate=decodeURIComponent(candidate); } catch { return undefined; }
+ }
+ return candidate && /^[a-z0-9][a-z0-9_.-]{0,159}$/i.test(candidate)?candidate:undefined;
+}
+export function outzDestinationClosedUrl(url:URL) {
+ const next=new URL(url);
+ if(next.pathname.startsWith('/outzide/share/'))next.pathname='/outzide';
+ for(const key of ['item','place','guestPlace','wall','tab'])next.searchParams.delete(key);
+ return next.pathname+next.search+next.hash;
+}
