@@ -9,7 +9,7 @@ import { resolveDirectoryLogo } from '@shared/directoryLogos';
 import { useHeart } from '@/hooks/useHearts';
 import { eventDateLabel, eventTimeLabel } from '@/lib/eventDisplay';
 import { eventAge, eventPrice } from '@/lib/eventFacts';
-import { listingPosterUrl } from '@/lib/dsEvent';
+import { listingPosterUrl, posterCarriesTitle } from '@/lib/dsEvent';
 import AuthModal from '@/components/AuthModal';
 import BoardPushPin from '@/components/board/BoardPushPin';
 import { isPosterActivation } from './flyerBoardBehavior';
@@ -307,6 +307,11 @@ export function PosterCell({
    * bottom edge; tall posters keep the info laid over the poster with a
    * gradient. (Tucker's ruling, Nov 18, 2026.) */
   const wideChunk = !!poster && aspect >= 1.15;
+  /* When the flyer art itself carries the title (the QSearch OCR flag,
+   * step 6d), the card leaves its own title off — printing it again
+   * would duplicate it. Text-free art (carriesTitle false) and
+   * unchecked art (no flag) keep the card-added title as today. */
+  const carriesTitle = !!poster && posterCarriesTitle(listing);
 
 
   return (
@@ -384,7 +389,7 @@ export function PosterCell({
           {!wideChunk && (
             <>
               <div className="pshade">
-                <h4>{listing.title}</h4>
+                {!carriesTitle && <h4>{listing.title}</h4>}
                 <p>{meta}</p>
               </div>
               <div className="pfoot">
@@ -410,7 +415,7 @@ export function PosterCell({
         </div>
         {wideChunk && (
           <div className="pchunk">
-            <h4>{listing.title}</h4>
+            {!carriesTitle && <h4>{listing.title}</h4>}
             <p className="pchunk-meta">
               {listing.venueName} · {weekdayCode(dateStr)} {eventTimeLabel(listing.dateStart)}
             </p>

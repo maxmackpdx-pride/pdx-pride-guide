@@ -26,6 +26,7 @@ export const events = sqliteTable("events", {
   nudityOk: integer("nudity_ok", { mode: "boolean" }).notNull().default(false),
   posterImageUrl: text("poster_image_url"),
   accentColor: text("accent_color"), // hex from the fixed neon allowlist — the flyer majority color snapped to a token, set by QSearch; null = default accent
+  posterText: text("poster_text"), // JSON {"hasText":bool,"carriesTitle":bool} — QSearch OCR verdict on the flyer (protocol step 6d), set in the same call as the poster; null = not checked. See shared/posterText.ts
   /** Default HIDDEN so a forgotten status never silently publishes (ingest/admin set LIVE explicitly). */
   status: text("status").notNull().default("HIDDEN"),
   source: text("source").notNull().default("admin_seeded"),

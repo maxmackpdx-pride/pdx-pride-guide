@@ -7,7 +7,7 @@ import { ArrowUpRight } from "lucide-react";
 import { dayAccentToken, dayComplementToken } from "@/lib/dsColors";
 import type { ScheduleEvent } from "@/lib/scheduleEvents";
 import type { EventListing } from "@shared/multiDayEvents";
-import { formatCardTime, formatGridCardWhen, listingDay, listingPosterUrl } from "@/lib/dsEvent";
+import { formatCardTime, formatGridCardWhen, listingDay, listingPosterUrl, posterCarriesTitle } from "@/lib/dsEvent";
 import { formatCardCountdown, formatPacificDateTime } from "@/lib/countdown";
 import { parsePacificDateTime } from "@shared/missedConnections";
 import { useQuery } from "@tanstack/react-query";
@@ -106,6 +106,8 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
   const changedAt = listing.lastChangeAt ? Date.parse(listing.lastChangeAt) : NaN;
   const changeLabel = rsvped && listing.lastChangeLabel && Number.isFinite(changedAt) && Date.now() - changedAt < CHANGE_WINDOW_MS ? listing.lastChangeLabel : null;
   const poster = listingPosterUrl(listing);
+  /* Flyer already carries the title (OCR flag) → the card does not repeat it. */
+  const carriesTitle = !!poster && posterCarriesTitle(listing);
   // Flyer accent (QSearch flyer-accent system) drives the card's color when set; the day accent is the fallback.
   const flyerAccent = (listing as { accentColor?: string | null }).accentColor || null;
   const accent = flyerAccent ?? dayAccentToken(listingDay(listing));
@@ -122,7 +124,7 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
           <EventFrontSheen/>
         <span className="tonight-card__body evz-wide__id">
             {changeLabel ? <ChangeBadge label={changeLabel} className="evz-wide__change" /> : null}
-            <h3 className="evz-wide__title">{listing.title}</h3>
+            {!carriesTitle && <h3 className="evz-wide__title">{listing.title}</h3>}
             <span className="evz-wide__meta">{event ? `${clock.format(event.startMs)} to ${clock.format(event.endMs)}` : formatGridCardWhen(listing)} · {listing.venueName}</span>
           </span>
           <GigzCounter eventId={listing.id} />
@@ -141,7 +143,7 @@ export default function TonightEventCard({ event, listing, rsvped, onToggleRsvp,
         <EventFrontSheen/>
         <span className="tonight-card__body evz-tall__body">
           {changeLabel ? <ChangeBadge label={changeLabel} className="evz-tall__change" /> : null}
-          <h3 title={listing.title}>{listing.title}</h3>
+          {!carriesTitle && <h3 title={listing.title}>{listing.title}</h3>}
           <span className="evz-tall__meta">{listing.venueName} · {age}</span>
           {liveState ? null : <EventStartsIn listing={listing} />}
         </span>

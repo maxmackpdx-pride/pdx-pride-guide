@@ -1,4 +1,5 @@
 import { publicEventAccent } from "../shared/eventAccents";
+import { parsePosterText, serializePosterText } from "../shared/posterText";
 import {registerOutdoorHosting} from "./outdoorHosting";
 import { housingConversationLocked, HOUSING_CONVERSATION_LOCKED } from "./housing/store";
 import {registerDevicePushCheck} from "./devicePushCheck";
@@ -367,6 +368,7 @@ function publicEvent(
     ...safe,
     isClaimed: Boolean(claimedBy),
     accentColor: publicEventAccent(safe.accentColor),
+    posterText: parsePosterText(safe.posterText),
     posterImageUrl: resolveEventPosterUrl(evt.id, evt.posterImageUrl, evt.dayOfWeek),
     hasPendingClaim: pendingClaimIds.has(evt.id),
     venueWebsite,
@@ -8188,7 +8190,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const allowed = [
       "title", "description", "venueName", "address", "neighborhood", "lat", "lng",
       "dateStart", "dateEnd", "dayOfWeek", "ageRequirement", "admission",
-      "ticketUrl", "posterImageUrl", "accentColor", "eventTypes", "status",
+      "ticketUrl", "posterImageUrl", "accentColor", "posterText", "eventTypes", "status",
       "isPublic", "isHouseParty", "isSexPositive", "nudityOk", "isClaimable",
       "claimedBy", "source",
     ];
@@ -8198,6 +8200,10 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
     if (patch.eventTypes && Array.isArray(patch.eventTypes)) {
       patch.eventTypes = JSON.stringify(patch.eventTypes);
+    }
+    if (patch.posterText !== undefined && patch.posterText !== null && typeof patch.posterText === "object") {
+      const parsedPosterText = parsePosterText(patch.posterText);
+      patch.posterText = parsedPosterText ? serializePosterText(parsedPosterText) : null;
     }
     const dateErr = validateEventDates(
       patch.dateStart as string | undefined,

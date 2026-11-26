@@ -1,4 +1,5 @@
 import { EVENT_ACCENT_TOKENS } from "../shared/eventAccents";
+import { parsePosterText, serializePosterText } from "../shared/posterText";
 import { publicationDefaults, publicationAddressIssue, republishesEvent } from "./qsearch/publication";
 import { hasRegistrationOnlyLocation, REGISTRATION_ADDRESS } from "@shared/registrationOnlyVenue";
 import { winterPrideWatches, winterEventScope, explicitWinterPrideEvent } from '../shared/outzWinterEvents';
@@ -90,6 +91,7 @@ const EVENT_RESEARCH_MUTABLE_FIELDS = new Set([
   "ticketUrl",
   "posterImageUrl",
   "accentColor",
+  "posterText",
   "eventTypes",
   "status",
   "isPublic",
@@ -267,6 +269,20 @@ function sanitizeEventResearchPatch(raw: unknown) {
         return eventResearchError(400, "accentColor must be a Zaylist token color");
       }
       patch[field] = value === "" ? null : value;
+      continue;
+    }
+    if (field === "posterText") {
+      // The step 6d OCR verdict, sent in the same call as the poster:
+      // { hasText, carriesTitle } or null to clear. Stored as JSON text.
+      if (value == null || value === "") {
+        patch[field] = null;
+        continue;
+      }
+      const parsed = parsePosterText(value);
+      if (!parsed) {
+        return eventResearchError(400, "posterText must be an object with boolean hasText and carriesTitle");
+      }
+      patch[field] = serializePosterText(parsed);
       continue;
     }
     if (["ticketUrl", "posterImageUrl"].includes(field)) {
@@ -486,6 +502,7 @@ export function eventForResearchAgent(event: Record<string, any>) {
     isSexPositive: event.isSexPositive,
     nudityOk: event.nudityOk,
     posterImageUrl: event.posterImageUrl,
+    posterText: parsePosterText(event.posterText),
     status: event.status,
     source: event.source,
     isClaimable: event.isClaimable,

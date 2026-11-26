@@ -2,7 +2,7 @@ import { EventFrontSheen } from "@/components/events/EventFrontSheen";
 import { rememberCardOrigin } from "@/components/cards/CardAPI";
 import type { CSSProperties } from "react";
 import { dayAccentToken, dayComplementToken } from "@/lib/dsColors";
-import { listingDay, listingPosterUrl } from "@/lib/dsEvent";
+import { listingDay, listingPosterUrl, posterCarriesTitle } from "@/lib/dsEvent";
 import { eventTimeLabel } from "@/lib/eventDisplay";
 import { EventFrontHeart } from "@/components/events/EventParticipation";
 import EventFlyerArt from "./EventFlyerArt";
@@ -30,6 +30,8 @@ export default function EventRailCard({
   onOpen: (listing: EventListing) => void;
 }) {
   const poster = listingPosterUrl(listing);
+  /* Flyer already carries the title (OCR flag) → the card does not repeat it. */
+  const carriesTitle = !!poster && posterCarriesTitle(listing);
   const flyerAccent = (listing as { accentColor?: string | null }).accentColor || null;
   return (
     <article data-card-size="small" data-card-category={"eventz"} onClickCapture={rememberCardOrigin} className={`event-rail-card event-rail-card--${size} pdx-glass-rebind`} style={{ "--c": flyerAccent ?? dayAccentToken(listingDay(listing)), "--card-secondary-override": dayComplementToken(listingDay(listing)) } as CSSProperties}>
@@ -38,7 +40,7 @@ export default function EventRailCard({
           <EventFlyerArt src={poster} day={listingDay(listing)} showDay={size === "m"} title={listing.title} venueName={listing.venueName} />
           <EventFrontSheen/>
           {liveState && size === "m" ? <LiveBadge live={liveState} /> : null}
-          <span className="event-rail-card__shade"><span className="event-rail-card__title">{listing.title}</span><span className="event-rail-card__meta">{eventTimeLabel(listing.dateStart)} · {listing.venueName}</span></span>
+          <span className="event-rail-card__shade">{!carriesTitle && <span className="event-rail-card__title">{listing.title}</span>}<span className="event-rail-card__meta">{eventTimeLabel(listing.dateStart)} · {listing.venueName}</span></span>
         </span>
       </button>
       <EventFrontHeart listing={listing} className="event-rail-card__save"/>

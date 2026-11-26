@@ -377,7 +377,15 @@ names the sign-in as the blocker.
    verdicts: (1) does the art carry ANY text, (2) does its text carry
    the event's TITLE. Record both in the run's publish/poster log and
    in ~/workspace/qsearch-new/poster-text-flags.json (keyed by event
-   id). Why: many official posters are text-free stock images
+   id). The site field is live (shipped Nov 26, 2026): include
+   posterText {"hasText": ..., "carriesTitle": ...} in the SAME
+   create/change call as the poster attach (the accentColor pattern
+   from 6b) — the card reads carriesTitle to decide whether to print
+   its own title. The flags file is also the backfill source for
+   posters attached before the field shipped: work it down with
+   posterText-only change calls (receipt = the poster URL) until
+   every upcoming event's verdict is on its record. Why: many
+   official posters are text-free stock images
    (Sanctuary detail-page photos, The Locker Room's series art) — the
    flag is what lets the card add the title exactly when the art
    doesn't carry it, and never duplicate it when it does. Proven

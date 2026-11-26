@@ -1,6 +1,7 @@
 import type { Event } from "@shared/schema";
 import { getEventTypeTagsForEvent } from "@shared/eventTypeTags";
 import { resolveEventPosterUrl } from "@shared/eventPoster";
+import { parsePosterText, type PosterText } from "@shared/posterText";
 import { formatPacificDateTime } from "@/lib/countdown";
 
 export function formatListingWhen(event: Event): string {
@@ -49,6 +50,18 @@ export function listingTypeTags(event: Event, max = 2): string[] {
 export function listingPosterUrl(event: Event): string | undefined {
   const url = resolveEventPosterUrl(event.id, event.posterImageUrl, event.dayOfWeek);
   return url || undefined;
+}
+
+/** The QSearch OCR verdict on the flyer (step 6d), or null when unchecked.
+ * The API returns it parsed; the raw stored JSON string is also accepted. */
+export function listingPosterText(event: Event): PosterText | null {
+  return parsePosterText((event as { posterText?: unknown }).posterText);
+}
+
+/** True when the flyer art itself carries the event's title — card fronts
+ * then leave their own title off instead of duplicating it. */
+export function posterCarriesTitle(event: Event): boolean {
+  return listingPosterText(event)?.carriesTitle === true;
 }
 
 export function listingDay(event: Event): string {
