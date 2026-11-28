@@ -6,6 +6,7 @@ import { apiRequest } from "@/lib/queryClient";
 import "./invitations.css";
 
 import NightOptions, { defaultOptions, useEligibleAfterzEvents, type EligibleAfterzEvent } from "./NightOptions";
+import AroundInvitePopup from "@/components/invites/AroundInvitePopup";
 
 export type Role =
   | "passed"
@@ -61,7 +62,7 @@ export function privateRead<T>(url: string, signal: AbortSignal): Promise<T> {
     return response.json();
   });
 }
-function GatheringReport({ id }: { id: string }) {
+export function GatheringReport({ id }: { id: string }) {
   const client = useQueryClient();
   const [open, setOpen] = useState(false);
   const [body, setBody] = useState("");
@@ -169,7 +170,8 @@ export function GatheringRoom({
   const [working, setWorking] = useState(false),
     [failure, setFailure] = useState(""),
     [notice, setNotice] = useState(""),
-    [confirmClose, setConfirmClose] = useState(false);
+    [confirmClose, setConfirmClose] = useState(false),
+    [around, setAround] = useState(false);
   useEffect(() => {
     if (!inside) client.removeQueries({ queryKey: chatKey, exact: true });
   }, [inside, id, user?.id, client]);
@@ -309,6 +311,11 @@ export function GatheringRoom({
           <button type="button" onClick={() => void share()}>
             Share invite link
           </button>
+          {details.night && (
+            <button type="button" onClick={() => setAround(true)}>
+              Invite people around you
+            </button>
+          )}
           {shareLink && (
             <label>
               Invite link
@@ -467,6 +474,14 @@ export function GatheringRoom({
       {user && <GatheringReport id={id} />}
       {failure && <p role="alert">{failure.replace(/^\d+:\s*/, "")}</p>}
       {notice && <p role="status">{notice}</p>}
+      {around && details.night && (
+        <AroundInvitePopup
+          gatheringId={id}
+          eventId={details.night.eventId}
+          title={details.title}
+          onClose={() => setAround(false)}
+        />
+      )}
     </section>
   );
 }

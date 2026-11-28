@@ -1,0 +1,173 @@
+/* "You've been invited" pop-up family.
+   One face for every invite kind: a vertical glass card, a hook line, the
+   face actions, and a fixed tab/slab across the bottom in the invite's
+   token color (--inv-accent, set per variant from the DS tokens).
+   Token colors only — no raw hex (token guard). */
+
+.inv-host {
+  position: fixed;
+  inset-inline: 0;
+  bottom: calc(var(--dock-clearance, 84px) + env(safe-area-inset-bottom, 0px));
+  z-index: 1200;
+  display: flex;
+  justify-content: center;
+  padding: 0 12px;
+  pointer-events: none;
+}
+.inv-host > * { pointer-events: auto; }
+.inv-host-stack { display: flex; flex-direction: column; align-items: center; gap: 8px; width: min(360px, 100%); }
+.inv-host-count {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+
+.inv-pop {
+  position: relative;
+  width: min(360px, 100%);
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--ink-900);
+  border: 1px solid var(--inv-accent, var(--ink-border));
+  box-shadow: 0 24px 60px color-mix(in srgb, var(--z-black) 72%, transparent);
+  color: var(--text-hi);
+  font-family: var(--font-body);
+}
+.inv-pop-art { display: block; width: 100%; height: 148px; object-fit: cover; }
+.inv-pop-body { padding: 16px 18px 14px; display: flex; flex-direction: column; gap: 7px; }
+.inv-pop-kicker {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--inv-accent, var(--neon-yellow));
+  margin: 0;
+}
+.inv-pop-title {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.inv-pop-from { margin: 0; font-size: 14px; color: var(--text-mid); }
+.inv-pop-from strong { color: var(--text-hi); font-weight: 600; }
+.inv-pop-hook { margin: 0; font-size: 15px; line-height: 1.35; color: var(--text-hi); }
+.inv-pop-note { margin: 0; font-size: 13px; color: var(--text-mid); }
+.inv-pop-error { margin: 0; font-size: 13px; color: var(--neon-red, var(--text-hi)); }
+.inv-pop-confirm {
+  display: flex; gap: 8px; align-items: flex-start;
+  font-size: 13px; line-height: 1.35; color: var(--text-mid);
+  padding: 10px 12px; border: 1px solid var(--ink-border); border-radius: 12px;
+}
+.inv-pop-confirm input { margin-top: 2px; accent-color: var(--inv-accent, var(--neon-yellow)); }
+.inv-pop-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.inv-pop-btn {
+  appearance: none;
+  border: 1px solid var(--ink-border);
+  background: var(--ink-800);
+  color: var(--text-hi);
+  border-radius: 999px;
+  padding: 11px 16px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: center;
+}
+.inv-pop-btn:disabled { opacity: 0.55; cursor: default; }
+.inv-pop-btn-primary {
+  background: var(--inv-accent, var(--neon-yellow));
+  border-color: transparent;
+  color: var(--z-black);
+}
+.inv-pop-btn-ghost { background: transparent; }
+.inv-pop-close {
+  position: absolute; top: 10px; right: 10px;
+  width: 32px; height: 32px; border-radius: 999px;
+  border: 1px solid var(--ink-border);
+  background: color-mix(in srgb, var(--z-black) 55%, transparent);
+  color: var(--text-hi);
+  font-size: 15px; line-height: 1; cursor: pointer;
+}
+.inv-pop-tab {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--inv-accent, var(--neon-yellow));
+  color: var(--z-black);
+  padding: 10px 18px 12px;
+  font-family: var(--font-display);
+  font-size: 15px; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+}
+.inv-pop-tab small { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; opacity: 0.75; }
+.inv-pop-footer { padding: 0 18px 12px; font-size: 12px; color: var(--text-lo); }
+.inv-pop-footer button {
+  appearance: none; background: none; border: 0; padding: 0;
+  color: var(--text-mid); font: inherit; text-decoration: underline; cursor: pointer;
+}
+
+/* Sender-side "around me" pop-up (same family, same tab). */
+.inv-around-backdrop {
+  position: fixed; inset: 0; z-index: 1300;
+  background: color-mix(in srgb, var(--z-black) 66%, transparent);
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: 12px;
+}
+@media (min-width: 640px) { .inv-around-backdrop { align-items: center; } }
+.inv-around {
+  width: min(400px, 100%);
+  max-height: min(82vh, 640px);
+  overflow: auto;
+  border-radius: 22px;
+  background: var(--ink-900);
+  border: 1px solid var(--inv-accent, var(--ink-border));
+  color: var(--text-hi);
+  font-family: var(--font-body);
+  box-shadow: 0 24px 60px color-mix(in srgb, var(--z-black) 72%, transparent);
+}
+.inv-around-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.inv-around-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.inv-around-modes button {
+  appearance: none; cursor: pointer;
+  border: 1px solid var(--ink-border); border-radius: 12px;
+  background: var(--ink-800); color: var(--text-mid);
+  padding: 10px 8px;
+  font-family: var(--font-display); font-size: 14px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.inv-around-modes button[aria-pressed="true"] {
+  background: var(--inv-accent, var(--neon-yellow));
+  border-color: transparent; color: var(--z-black);
+}
+.inv-around h4 {
+  margin: 6px 0 0; font-family: var(--font-display); font-size: 13px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-mid);
+}
+.inv-around-people { display: flex; flex-direction: column; gap: 4px; }
+.inv-around-person {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border: 1px solid var(--ink-border); border-radius: 12px;
+  font-size: 14px; cursor: pointer;
+}
+.inv-around-person input { accent-color: var(--inv-accent, var(--neon-yellow)); }
+.inv-around-person small { color: var(--text-mid); }
+.inv-around-share {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 12px; border: 1px dashed var(--ink-border); border-radius: 12px;
+  font-size: 13px; color: var(--text-mid);
+}
+.inv-around-share button {
+  appearance: none; cursor: pointer; white-space: nowrap;
+  border: 1px solid var(--ink-border); border-radius: 999px;
+  background: var(--ink-800); color: var(--text-hi);
+  padding: 7px 12px; font-family: var(--font-display); font-size: 13px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}

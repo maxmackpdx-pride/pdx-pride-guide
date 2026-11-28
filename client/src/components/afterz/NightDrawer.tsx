@@ -7,7 +7,8 @@ import DockDrawer, { type DockStop } from "@/components/dock/DockDrawer";
 import { apiRequest } from "@/lib/queryClient";
 import { pacificCalendarDate } from "@shared/missedConnections";
 import { afterzWindowState } from "@shared/afterzWindow";
-import { base, GatheringRoom, HostForm, privateRead, type Gathering } from "./AfterzInvitations";
+import { base, GatheringReport, GatheringRoom, HostForm, privateRead, type Gathering } from "./AfterzInvitations";
+import AfterzInviteFace from "@/components/invites/AfterzInviteFace";
 import AfterzWordmark from "./AfterzWordmark";
 import AfterzNightCard, { type AfterzListing } from "./AfterzNightCard";
 
@@ -53,8 +54,10 @@ export default function NightDrawer({ roomId, onRoomChange, eventId, occurrenceD
     queryFn: ({ signal }) => privateRead(discoveryPath, signal), enabled: !!user, retry: false, gcTime: 0 });
   const [showAuth, setShowAuth] = useState(false);
   const [hostForm, setHostForm] = useState(false);
+  const [roomOpen, setRoomOpen] = useState(false);
   const [localId, setLocalId] = useState<string | null>(null);
   const id = onRoomChange ? roomId : localId;
+  useEffect(() => { setRoomOpen(false); }, [id]);
   const select = onRoomChange ?? setLocalId;
   const [busy, setBusy] = useState<string | null>(null);
   const [problem, setProblem] = useState("");
@@ -95,7 +98,10 @@ export default function NightDrawer({ roomId, onRoomChange, eventId, occurrenceD
     {id ? <div className="afterz-invite-sheet">
       <button type="button" onClick={() => pick(null)}>Back to Afterz</button>
       <h3 ref={roomTitle} tabIndex={-1}>Afterz invitation</h3>
-      <GatheringRoom key={id + ":" + user?.id} id={id} sharePath={sharePath} signIn={() => setShowAuth(true)} done={() => pick(null)}/>
+      {user && !roomOpen && list.get(id) && list.get(id)!.role !== "host" ? <>
+        <AfterzInviteFace key={id + ":face:" + user.id} id={id} onOpenRoom={() => setRoomOpen(true)} onChanged={() => void refresh()}/>
+        <GatheringReport id={id}/>
+      </> : <GatheringRoom key={id + ":" + user?.id} id={id} sharePath={sharePath} signIn={() => setShowAuth(true)} done={() => pick(null)}/>}
     </div> : <>
       {user ? <button type="button" className="afterz-host-button" aria-expanded={hostForm} aria-controls={formId}
         onClick={() => setHostForm(!hostForm)}>Host an Afterz</button> :

@@ -13,6 +13,7 @@ import { InboxSheetProvider } from "./context/InboxSheetContext";
 import { HubPanelProvider } from "./context/HubPanelContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import CalmAccountSync from "./components/CalmAccountSync";
+import InvitePopupHost from "./components/invites/InvitePopupHost";
 import Nav from "./components/Nav";
 import MobileBottomNav from "./components/MobileBottomNav";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -398,6 +399,7 @@ export default function App() {
               <Suspense fallback={null}>
                 <Toaster />
               </Suspense>
+              <InvitePopupHost />
               </HubPanelProvider>
             </InboxSheetProvider>
           </Router>
